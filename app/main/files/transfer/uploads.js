@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('web')
-  .controller('transferUploadsCtrl', ['$scope', '$timeout','$translate', '$interval','jobUtil', 'DelayDone', 'ossUploadManager', 'Toast','Dialog',
-    function ($scope, $timeout, $translate, $interval, jobUtil, DelayDone, ossUploadManager, Toast, Dialog) {
+  .controller('transferUploadsCtrl', ['$scope', '$timeout','$translate', '$interval','jobUtil', 'DelayDone', 'osUploadManager', 'Toast','Dialog',
+    function ($scope, $timeout, $translate, $interval, jobUtil, DelayDone, osUploadManager, Toast, Dialog) {
        var T = $translate.instant;
       angular.extend($scope, {
         showRemoveItem: showRemoveItem,
@@ -31,7 +31,7 @@ angular.module('web')
 
       function checkStartJob(item) {
         item.wait();
-        ossUploadManager.checkStart();
+        osUploadManager.checkStart();
       }
 
       function showRemoveItem(item) {
@@ -56,7 +56,7 @@ angular.module('web')
             break;
           }
         }
-        ossUploadManager.saveProg();
+        osUploadManager.saveProg();
         $scope.calcTotalProg();
       }
 
@@ -88,7 +88,7 @@ angular.module('web')
               i--;
             }
             $scope.calcTotalProg();
-            ossUploadManager.saveProg();
+            osUploadManager.saveProg();
           }
         }, 1);
       }
@@ -100,7 +100,7 @@ angular.module('web')
         if(arr && arr.length>0){
           stopFlag = true;
 
-          ossUploadManager.stopCreatingJobs();
+          osUploadManager.stopCreatingJobs();
 
           Toast.info(T('pause.on')); //'正在暂停...'
           $scope.allActionBtnDisabled=true;
@@ -111,7 +111,7 @@ angular.module('web')
           Toast.info(T('pause.success'));
 
           $timeout(function () {
-            ossUploadManager.saveProg();
+            osUploadManager.saveProg();
             $scope.allActionBtnDisabled=false;
           }, 100);
         }
@@ -132,7 +132,7 @@ angular.module('web')
               n.wait();
             }
 
-            ossUploadManager.checkStart();
+            osUploadManager.checkStart();
 
             fn();
           }, function doneFn(){

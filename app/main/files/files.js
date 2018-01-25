@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('filesCtrl', ['$scope', '$rootScope', '$uibModal', '$timeout','$translate', 'AuthInfo', 'ossSvs2', 'settingsSvs', 'fileSvs', 'safeApply', 'Toast', 'Dialog',
-    function ($scope, $rootScope, $modal, $timeout, $translate, AuthInfo, ossSvs2, settingsSvs, fileSvs, safeApply, Toast, Dialog) {
+  .controller('filesCtrl', ['$scope', '$rootScope', '$uibModal', '$timeout','$translate', 'AuthInfo', 'osClient', 'settingsSvs', 'fileSvs', 'safeApply', 'Toast', 'Dialog',
+    function ($scope, $rootScope, $modal, $timeout, $translate, AuthInfo, osClient, settingsSvs, fileSvs, safeApply, Toast, Dialog) {
       var T = $translate.instant;
       angular.extend($scope, {
         showTab: 1,
@@ -309,7 +309,7 @@ angular.module('web')
           $scope.ref.isBucketList = false;
           //bucketMap
           $rootScope.bucketMap = {};
-          var bucket = ossSvs2.parseOSSPath(authInfo.osspath).bucket;
+          var bucket = osClient.parseOSSPath(authInfo.osspath).bucket;
           $rootScope.bucketMap[bucket] = {
             region: authInfo.region
           };
@@ -348,7 +348,7 @@ angular.module('web')
         $scope.$on('ossAddressChange', function (e, addr, forceRefresh) {
           console.log('on:ossAddressChange:',addr, 'forceRefresh:',forceRefresh);
 
-          var info = ossSvs2.parseOSSPath(addr);
+          var info = osClient.parseOSSPath(addr);
 
           if (info.key) {
             var lastGan = info.key.lastIndexOf('/');
@@ -424,7 +424,7 @@ angular.module('web')
 
       function doListFiles(info, marker, fn) {
 
-        ossSvs2.listFiles(info.region, info.bucket, info.key, marker || '').then(function (result) {
+        osClient.listFiles(info.region, info.bucket, info.key, marker || '').then(function (result) {
 
           var arr = result.data;
           settingsSvs.showImageSnapshot.get() == 1 ? signPicURL(info, arr) : null
@@ -461,7 +461,7 @@ angular.module('web')
         var authInfo = AuthInfo.get();
         if(authInfo.id.indexOf('STS.')==0){
           angular.forEach(result, function (n) {
-            ossSvs2.getImageBase64Url(info.region, info.bucket, n.path).then(function(data){
+            osClient.getImageBase64Url(info.region, info.bucket, n.path).then(function(data){
               if(data.ContentType.indexOf('image/')==0){
                 var base64str = new Buffer(data.Body).toString('base64');
                 n.pic_url = 'data:'+data.ContentType+';base64,'+base64str;
@@ -472,7 +472,7 @@ angular.module('web')
         else{
           angular.forEach(result, function (n) {
             if (!n.isFolder && fileSvs.getFileType(n).type == 'picture') {
-              n.pic_url = ossSvs2.signatureUrl2(info.region, info.bucket, n.path, 3600, 'image/resize,w_48');
+              n.pic_url = osClient.signatureUrl2(info.region, info.bucket, n.path, 3600, 'image/resize,w_48');
             }
           });
         }
@@ -481,7 +481,7 @@ angular.module('web')
 
       function listBuckets(fn) {
         $scope.isLoading = true;
-        ossSvs2.listAllBuckets().then(function (buckets) {
+        osClient.listAllBuckets().then(function (buckets) {
           $scope.isLoading = false;
           $scope.buckets = buckets;
 
@@ -515,7 +515,7 @@ angular.module('web')
         var message = T('bucket.delete.message',{name: item.name, region: item.region});
         Dialog.confirm(title, message, function (b) {
           if (b) {
-            ossSvs2.deleteBucket(item.region, item.name).then(function () {
+            osClient.deleteBucket(item.region, item.name).then(function () {
               Toast.success(T('bucket.delete.success')); //删除Bucket成功
               //删除Bucket不是实时的，等待1秒后刷新
               $timeout(function () {
@@ -683,7 +683,7 @@ angular.module('web')
                   if(reloadStorageStatus){
                     $timeout(function () {
                       //listFiles();
-                      ossSvs2.loadStorageStatus($scope.currentInfo.region, $scope.currentInfo.bucket, [item])
+                      osClient.loadStorageStatus($scope.currentInfo.region, $scope.currentInfo.bucket, [item])
                     },300);
                   }
                 },
@@ -1102,7 +1102,7 @@ angular.module('web')
               return function () {
                 $timeout(function () {
                   //listFiles();
-                  ossSvs2.loadStorageStatus($scope.currentInfo.region, $scope.currentInfo.bucket, [item]);
+                  osClient.loadStorageStatus($scope.currentInfo.region, $scope.currentInfo.bucket, [item]);
                 },300);
               };
             }

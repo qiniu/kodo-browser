@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('web')
-  .controller('transferDownloadsCtrl', ['$scope', '$timeout','$translate', '$interval', 'jobUtil', 'ossDownloadManager', 'DelayDone', 'Toast', 'Dialog', 'safeApply',
-    function ($scope, $timeout, $translate, $interval, jobUtil, ossDownloadManager, DelayDone, Toast, Dialog, safeApply) {
+  .controller('transferDownloadsCtrl', ['$scope', '$timeout','$translate', '$interval', 'jobUtil', 'osDownloadManager', 'DelayDone', 'Toast', 'Dialog', 'safeApply',
+    function ($scope, $timeout, $translate, $interval, jobUtil, osDownloadManager, DelayDone, Toast, Dialog, safeApply) {
       var T = $translate.instant;
       angular.extend($scope, {
         showRemoveItem: showRemoveItem,
@@ -31,7 +31,7 @@ angular.module('web')
 
       function checkStartJob(item) {
         item.wait();
-        ossDownloadManager.checkStart();
+        osDownloadManager.checkStart();
       }
 
       function showRemoveItem(item) {
@@ -57,7 +57,7 @@ angular.module('web')
             break;
           }
         }
-        ossDownloadManager.saveProg();
+        osDownloadManager.saveProg();
         $scope.calcTotalProg();
         safeApply($scope);
       }
@@ -90,7 +90,7 @@ angular.module('web')
               i--;
             }
             $scope.calcTotalProg();
-            ossDownloadManager.saveProg();
+            osDownloadManager.saveProg();
           }
         }, 1);
       }
@@ -102,7 +102,7 @@ angular.module('web')
         if (arr && arr.length > 0) {
           stopFlag = true;
 
-          ossDownloadManager.stopCreatingJobs();
+          osDownloadManager.stopCreatingJobs();
 
           Toast.info(T('pause.on')); //'正在暂停...'
           $scope.allActionBtnDisabled = true;
@@ -113,7 +113,7 @@ angular.module('web')
           Toast.success(T('pause.success')); //'暂停成功'
 
           $timeout(function () {
-            ossDownloadManager.saveProg();
+            osDownloadManager.saveProg();
             $scope.allActionBtnDisabled = false;
           }, 100);
         }
@@ -132,7 +132,7 @@ angular.module('web')
             if (n && (n.status == 'stopped' || n.status == 'failed')) {
               n.wait();
             }
-            ossDownloadManager.checkStart();
+            osDownloadManager.checkStart();
             fn();
           }, function doneFy() {
             $scope.allActionBtnDisabled = false;

@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('moveModalCtrl', ['$scope','$uibModalInstance','$timeout','items','isCopy','renamePath','fromInfo','moveTo', 'callback','ossSvs2','Toast','AuthInfo','safeApply',
-    function ($scope, $modalInstance, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, ossSvs2, Toast,AuthInfo, safeApply) {
+  .controller('moveModalCtrl', ['$scope','$uibModalInstance','$timeout','items','isCopy','renamePath','fromInfo','moveTo', 'callback','osClient','Toast','AuthInfo','safeApply',
+    function ($scope, $modalInstance, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, osClient, Toast,AuthInfo, safeApply) {
 
       var authInfo = AuthInfo.get();
 
@@ -41,7 +41,7 @@ angular.module('web')
       function stop() {
         //$modalInstance.dismiss('cancel');
         $scope.isStop=true;
-        ossSvs2.stopCopyFiles();
+        osClient.stopCopyFiles();
       }
 
       function cancel(){
@@ -64,7 +64,7 @@ angular.module('web')
         //console.log(fromInfo.region, items, target, renamePath);
 
         //复制 or 移动
-        ossSvs2.copyFiles(fromInfo.region, items, target, function progress(prog){
+        osClient.copyFiles(fromInfo.region, items, target, function progress(prog){
           //进度
           $scope.progress = angular.copy(prog);
           safeApply($scope);

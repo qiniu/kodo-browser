@@ -19,7 +19,7 @@ angular.extend($scope, {
 */
 
 angular.module('web')
-.directive('ossFileSelector', ['$timeout', 'ossSvs2',function($timeout, ossSvs2){
+.directive('ossFileSelector', ['$timeout', 'osClient',function($timeout, osClient){
 
    return {
      restrict: 'EA',
@@ -54,7 +54,7 @@ angular.module('web')
          $scope.selectedItem.ossPath = 'kodo://';
          $scope.selectedItem.region = '';
          $scope.isLoading=true;
-         ossSvs2.listAllBuckets().then(function(arr){
+         osClient.listAllBuckets().then(function(arr){
             $scope.items = arr;
             $scope.isLoading=false;
          });
@@ -68,7 +68,7 @@ angular.module('web')
          if(v.key.lastIndexOf('/')==v.key.length-1){
            //isFolder
            $scope.isLoading=true;
-           ossSvs2.listAllFiles(v.region, v.bucket, v.key,  $scope.folderOnly).then(function(arr){
+           osClient.listAllFiles(v.region, v.bucket, v.key,  $scope.folderOnly).then(function(arr){
              $scope.items = arr;
              $scope.isLoading=false;
            });
@@ -115,7 +115,7 @@ angular.module('web')
         if(v=='kodo://'){
           return;
         }
-        var info = ossSvs2.parseOSSPath(v);
+        var info = osClient.parseOSSPath(v);
 
         if(info.key==''){
           if(!$scope.showBuckets){

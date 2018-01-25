@@ -1,6 +1,6 @@
 angular.module('web')
-  .factory('Auth', ['$q', '$location','$translate', 'ossSvs2', 'AuthInfo', 'Const', 'Cipher',
-    function($q, $location, $translate, ossSvs2, AuthInfo, Const, Cipher) {
+  .factory('Auth', ['$q', '$location','$translate', 'osClient', 'AuthInfo', 'Const', 'Cipher',
+    function($q, $location, $translate, osClient, AuthInfo, Const, Cipher) {
       var T = $translate.instant;
       return {
         login: login,
@@ -15,12 +15,12 @@ angular.module('web')
 
         if (data.osspath) {
 
-          var info = ossSvs2.parseOSSPath(data.osspath);
+          var info = osClient.parseOSSPath(data.osspath);
           data.bucket = info.bucket;
 
           console.log(data)
 
-          ossSvs2.getClient(data).listObjects({Bucket: info.bucket, Prefix: info.key, Marker:'',MaxKeys:1}, function(err, result){
+          osClient.getClient(data).listObjects({Bucket: info.bucket, Prefix: info.key, Marker:'',MaxKeys:1}, function(err, result){
 
             if(err){
               df.reject(err);
@@ -36,7 +36,7 @@ angular.module('web')
           });
 
         } else {
-          ossSvs2.getClient(data).listBuckets( function(err, result) {
+          osClient.getClient(data).listBuckets( function(err, result) {
 
             if(err){
               if (err.code == 'AccessDeniedError') {

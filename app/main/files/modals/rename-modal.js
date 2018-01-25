@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('renameModalCtrl', ['$scope','$uibModalInstance', '$translate','$uibModal','item', 'isCopy','currentInfo','moveTo', 'callback','ossSvs2','Dialog','Toast',
-    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, callback, ossSvs2, Dialog, Toast) {
+  .controller('renameModalCtrl', ['$scope','$uibModalInstance', '$translate','$uibModal','item', 'isCopy','currentInfo','moveTo', 'callback','osClient','Dialog','Toast',
+    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, callback, osClient, Dialog, Toast) {
       var T = $translate.instant;
       //console.log(item)
       angular.extend($scope, {
@@ -39,7 +39,7 @@ angular.module('web')
 
 
           $scope.isLoading=true;
-          ossSvs2.checkFolderExists(moveTo.region,moveTo.bucket, newPath).then(function(has){
+          osClient.checkFolderExists(moveTo.region,moveTo.bucket, newPath).then(function(has){
             if(has){
               Dialog.confirm(title, msg1, function(b){
                 if(b){
@@ -68,7 +68,7 @@ angular.module('web')
 
           $scope.isLoading=true;
 
-          ossSvs2.checkFileExists(moveTo.region, moveTo.bucket,newPath).then(function(data){
+          osClient.checkFileExists(moveTo.region, moveTo.bucket,newPath).then(function(data){
             Dialog.confirm(title,msg2, function(b){
               if(b){
                 renameFile(newPath);
@@ -87,7 +87,7 @@ angular.module('web')
         var successMsg = T('rename.success'); //重命名成功
 
         Toast.info(onMsg);
-        ossSvs2.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy).then(function(){
+        osClient.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy).then(function(){
           Toast.success(successMsg);
           $scope.isLoading=false;
           callback();

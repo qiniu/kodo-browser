@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('crcModalCtrl', ['$scope', '$q', '$uibModalInstance', 'item', 'currentInfo', 'ossSvs2', 'safeApply',
-    function ($scope, $q, $modalInstance, item, currentInfo, ossSvs2, safeApply) {
+  .controller('crcModalCtrl', ['$scope', '$q', '$uibModalInstance', 'item', 'currentInfo', 'osClient', 'safeApply',
+    function ($scope, $q, $modalInstance, item, currentInfo, osClient, safeApply) {
 
       angular.extend($scope, {
         item: item,
@@ -21,7 +21,7 @@ angular.module('web')
       init();
 
       function init() {
-        ossSvs2.getFileInfo(
+        osClient.getFileInfo(
           currentInfo.region,
           currentInfo.bucket,
           item.path

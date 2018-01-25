@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('updateHttpHeadersModalCtrl', ['$scope', '$q','$translate', '$uibModalInstance', 'item', 'currentInfo', 'ossSvs2', 'Toast','safeApply',
-    function ($scope, $q, $translate, $modalInstance, item, currentInfo, ossSvs2, Toast ,safeApply) {
+  .controller('updateHttpHeadersModalCtrl', ['$scope', '$q','$translate', '$uibModalInstance', 'item', 'currentInfo', 'osClient', 'Toast','safeApply',
+    function ($scope, $q, $translate, $modalInstance, item, currentInfo, osClient, Toast ,safeApply) {
 
       var T = $translate.instant;
       angular.extend($scope, {
@@ -23,7 +23,7 @@ angular.module('web')
         $scope.step=2;
         var ignoreError = true;
 
-        ossSvs2.getMeta(currentInfo.region, currentInfo.bucket, item.path).then(function(result){
+        osClient.getMeta(currentInfo.region, currentInfo.bucket, item.path).then(function(result){
 
           $scope.headers = {
             'ContentLanguage': result.ContentLanguage,
@@ -64,7 +64,7 @@ angular.module('web')
         //console.log(headers, metas)
         Toast.info(T('setting.on')); //'正在设置..'
 
-        ossSvs2.setMeta(currentInfo.region, currentInfo.bucket, item.path, headers, metas).then(function(result){
+        osClient.setMeta(currentInfo.region, currentInfo.bucket, item.path, headers, metas).then(function(result){
           Toast.success(T('setting.success')); //'设置成功'
           cancel();
 

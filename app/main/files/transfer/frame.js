@@ -1,7 +1,7 @@
 
 angular.module('web')
-.controller('transferFrameCtrl', ['$scope', '$translate','ossUploadManager','ossDownloadManager','Toast','safeApply',
-function($scope ,$translate,ossUploadManager,ossDownloadManager, Toast, safeApply){
+.controller('transferFrameCtrl', ['$scope', '$translate','osUploadManager','osDownloadManager','Toast','safeApply',
+function($scope ,$translate,osUploadManager,osDownloadManager, Toast, safeApply){
    var T = $translate.instant;
    angular.extend($scope, {
      lists: {
@@ -25,13 +25,13 @@ function($scope ,$translate,ossUploadManager,ossDownloadManager, Toast, safeAppl
 
    $scope.handlers.downloadFilesHandler = downloadFilesHandler;
 
-   ossUploadManager.init($scope);
-   ossDownloadManager.init($scope);
+   osUploadManager.init($scope);
+   osDownloadManager.init($scope);
 
   //  $scope.netInit().then(function(){
   //    //确认是否可以使用内部网络，再初始化
-  //    ossUploadManager.init($scope);
-  //    ossDownloadManager.init($scope);
+  //    osUploadManager.init($scope);
+  //    osDownloadManager.init($scope);
   //  });
 
 
@@ -42,7 +42,7 @@ function($scope ,$translate,ossUploadManager,ossDownloadManager, Toast, safeAppl
     */
    function downloadFilesHandler(fromOssPath, toLocalPath) {
      Toast.info(T('download.addtolist.on')); //'正在添加到下载队列'
-     ossDownloadManager.createDownloadJobs(fromOssPath, toLocalPath, function(isCancelled){
+     osDownloadManager.createDownloadJobs(fromOssPath, toLocalPath, function(isCancelled){
        Toast.info(T('download.addtolist.success')); //'已全部添加到下载队列'
        $scope.toggleTransVisible(true);
        $scope.transTab = 2;
@@ -55,7 +55,7 @@ function($scope ,$translate,ossUploadManager,ossDownloadManager, Toast, safeAppl
     */
    function uploadFilesHandler(filePaths, bucketInfo) {
       Toast.info(T('upload.addtolist.on')); //'正在添加到上传队列'
-      ossUploadManager.createUploadJobs(filePaths, bucketInfo, function(isCancelled){
+      osUploadManager.createUploadJobs(filePaths, bucketInfo, function(isCancelled){
         Toast.info(T('upload.addtolist.success')); //'已全部添加到上传队列'
         $scope.toggleTransVisible(true);
         $scope.transTab = 1;

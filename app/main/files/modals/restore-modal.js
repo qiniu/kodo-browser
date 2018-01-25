@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('restoreModalCtrl', ['$scope','$uibModalInstance', '$translate','ossSvs2','item','currentInfo', 'callback','Toast','safeApply',
-    function ($scope, $modalInstance, $translate, ossSvs2,  item, currentInfo, callback, Toast, safeApply) {
+  .controller('restoreModalCtrl', ['$scope','$uibModalInstance', '$translate','osClient','item','currentInfo', 'callback','Toast','safeApply',
+    function ($scope, $modalInstance, $translate, osClient,  item, currentInfo, callback, Toast, safeApply) {
       var T = $translate.instant;
       angular.extend($scope, {
         currentInfo: currentInfo,
@@ -16,7 +16,7 @@ angular.module('web')
       init();
       function init(){
         $scope.isLoading =true;
-        ossSvs2.getFileInfo(currentInfo.region, currentInfo.bucket, item.path).then(function(data){
+        osClient.getFileInfo(currentInfo.region, currentInfo.bucket, item.path).then(function(data){
           if(data.Restore){
             var info = parseRestoreInfo(data.Restore);
             if(info['ongoing-request']=='true'){
@@ -59,7 +59,7 @@ angular.module('web')
         var days = $scope.info.days;
 
         Toast.info(T('restore.on'));//'提交中...'
-        ossSvs2.restoreFile(currentInfo.region, currentInfo.bucket, item.path, days).then(function(){
+        osClient.restoreFile(currentInfo.region, currentInfo.bucket, item.path, days).then(function(){
           Toast.success(T('restore.success')); //'恢复请求已经提交'
           callback();
           cancel();

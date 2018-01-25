@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('deleteFilesModalCtrl', ['$scope','$q','$uibModalInstance','$timeout','items','currentInfo','callback','ossSvs2','safeApply',
-    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, ossSvs2,safeApply) {
+  .controller('deleteFilesModalCtrl', ['$scope','$q','$uibModalInstance','$timeout','items','currentInfo','callback','osClient','safeApply',
+    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, osClient,safeApply) {
 
       angular.extend($scope, {
         items: items,
@@ -15,7 +15,7 @@ angular.module('web')
       function stop() {
         //$modalInstance.dismiss('cancel');
         $scope.isStop=true;
-        ossSvs2.stopDeleteFiles();
+        osClient.stopDeleteFiles();
       }
       function close(){
         $modalInstance.dismiss('cancel');
@@ -24,7 +24,7 @@ angular.module('web')
       function start(){
         $scope.isStop=false;
         $scope.step = 2;
-        ossSvs2.deleteFiles(currentInfo.region, currentInfo.bucket, items, function(prog){
+        osClient.deleteFiles(currentInfo.region, currentInfo.bucket, items, function(prog){
           //进度
           $scope.progress = angular.copy(prog);
           safeApply($scope);

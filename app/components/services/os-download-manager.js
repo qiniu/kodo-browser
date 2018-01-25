@@ -1,6 +1,6 @@
 angular.module('web')
-  .factory('ossDownloadManager', ['$q', '$state', '$timeout', 'AuthInfo', 'ossSvs2', 'Toast', 'Const', 'DelayDone', 'safeApply', 'settingsSvs',
-   function ($q, $state, $timeout, AuthInfo, ossSvs2, Toast, Const, DelayDone, safeApply, settingsSvs) {
+  .factory('osDownloadManager', ['$q', '$state', '$timeout', 'AuthInfo', 'osClient', 'Toast', 'Const', 'DelayDone', 'safeApply', 'settingsSvs',
+   function ($q, $state, $timeout, AuthInfo, osClient, Toast, Const, DelayDone, safeApply, settingsSvs) {
 
     var OssStore = require('./node/ossstore');
     var fs = require('fs');
@@ -185,7 +185,7 @@ angular.module('web')
             }
             //遍历 oss 目录
             function progDig(marker){
-              ossSvs2.listFiles(ossInfo.region, ossInfo.bucket, ossInfo.path, marker).then(function (result) {
+              osClient.listFiles(ossInfo.region, ossInfo.bucket, ossInfo.path, marker).then(function (result) {
 
                 var arr2 = result.data;
                 arr2.forEach(function (n) {
@@ -255,7 +255,7 @@ angular.module('web')
               SecurityToken: auth.stoken
             }
           },
-          endpoint: ossSvs2.getOssEndpoint(opt.region, opt.to.bucket, auth.eptpl)
+          endpoint: osClient.getOssEndpoint(opt.region, opt.to.bucket, auth.eptpl)
         });
       }
       else{
@@ -264,7 +264,7 @@ angular.module('web')
             accessKeyId: auth.id,
             secretAccessKey: auth.secret
           },
-          endpoint: ossSvs2.getOssEndpoint(opt.region, opt.from.bucket, auth.eptpl)
+          endpoint: osClient.getOssEndpoint(opt.region, opt.from.bucket, auth.eptpl)
         });
       }
       return store.createDownloadJob(opt);

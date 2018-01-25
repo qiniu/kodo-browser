@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'ossSvs2', 'Const',
-    function ($scope, $modalInstance, $translate, callback, ossSvs2, Const) {
+  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'osClient', 'Const',
+    function ($scope, $modalInstance, $translate, callback, osClient, Const) {
       var T = $translate.instant;
 
       var bucketACL = angular.copy(Const.bucketACL);
@@ -76,7 +76,7 @@ angular.module('web')
         if (!form.$valid) return;
         var item = angular.copy($scope.item);
 
-        ossSvs2.createBucket(item.region, item.name, item.acl, item.storageClass).then(function (result) {
+        osClient.createBucket(item.region, item.name, item.acl, item.storageClass).then(function (result) {
 
           callback();
           cancel();

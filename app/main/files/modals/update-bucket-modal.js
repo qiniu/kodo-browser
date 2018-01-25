@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('updateBucketModalCtrl', ['$scope','$uibModalInstance','$translate', 'item','callback','ossSvs2','safeApply','Const',
-    function ($scope, $modalInstance, $translate, item, callback, ossSvs2, safeApply, Const) {
+  .controller('updateBucketModalCtrl', ['$scope','$uibModalInstance','$translate', 'item','callback','osClient','safeApply','Const',
+    function ($scope, $modalInstance, $translate, item, callback, osClient, safeApply, Const) {
       var T = $translate.instant;
       var bucketACL= angular.copy(Const.bucketACL);
       var regions= angular.copy(Const.regions);
@@ -23,7 +23,7 @@ angular.module('web')
         $scope.bucketACL = arr;
       }
 
-      ossSvs2.getBucketACL(item.region, item.name).then(function(result){
+      osClient.getBucketACL(item.region, item.name).then(function(result){
         $scope.item.acl = result.acl;
         safeApply($scope);
       });
@@ -36,7 +36,7 @@ angular.module('web')
         if (!form.$valid) return;
         var item = angular.copy($scope.item);
 
-        ossSvs2.updateBucketACL(item.region, item.name, item.acl).then(function(result){
+        osClient.updateBucketACL(item.region, item.name, item.acl).then(function(result){
            callback();
            cancel();
         });

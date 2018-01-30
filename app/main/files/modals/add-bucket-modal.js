@@ -23,7 +23,7 @@ angular.module('web')
         },
         reg: /^[a-z0-9][a-z0-9\-]{1,61}[a-z0-9]$/i,
         onRegionChanged: onRegionChanged,
-        openURL: function(v){
+        openURL: function (v) {
           openExternal(v)
         }
       });
@@ -34,7 +34,6 @@ angular.module('web')
 
       function i18nRegion() {
         var arr = angular.copy(Const.regions);
-        //console.log(arr);
         angular.forEach(arr, function (n) {
           n.label = T('region.' + n.id);
         });
@@ -58,13 +57,7 @@ angular.module('web')
       }
 
       function onRegionChanged() {
-        //console.log(storageClassesMap, $scope.item.region)
         i18nStorageClassesType();
-        // if(['oss-cn-beijing','oss-cn-hangzhou'].indexOf($scope.item.region)==-1){
-        //   $scope.storageClasses=[{value:'Standard',name:'标准类型'},{value:'IA',name:'低频访问类型'}];
-        // }else{
-        //   $scope.storageClasses=[{value:'Standard',name:'标准类型'},{value:'IA',name:'低频访问类型'},{value:'Archive',name:'归档类型'}];
-        // }
         $scope.item.storageClass = 'Standard';
       }
 
@@ -74,10 +67,10 @@ angular.module('web')
 
       function onSubmit(form) {
         if (!form.$valid) return;
+
         var item = angular.copy($scope.item);
 
         osClient.createBucket(item.region, item.name, item.acl, item.storageClass).then(function (result) {
-
           callback();
           cancel();
         });

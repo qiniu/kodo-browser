@@ -4,7 +4,7 @@ var ALYD = require('aliyun-sdk');
 require('events').EventEmitter.prototype._maxListeners = 1000;
 var TIMEOUT = 60000; //60秒
 //fix
-ALYD.util.isBrowser = function(){
+ALYD.util.isBrowser = function () {
   return false;
 };
 
@@ -79,7 +79,7 @@ function OssStore(config) {
   };
 }
 
-OssStore.prototype.setStsToken = function(stsToken){
+OssStore.prototype.setStsToken = function (stsToken) {
   this._config.stsToken = stsToken;
 
   this.oss = new ALYD.OSS({

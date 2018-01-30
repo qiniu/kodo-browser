@@ -1,5 +1,5 @@
 angular.module('web')
-  .controller('filesCtrl', ['$scope', '$rootScope', '$uibModal', '$timeout','$translate', 'AuthInfo', 'osClient', 'settingsSvs', 'fileSvs', 'safeApply', 'Toast', 'Dialog',
+  .controller('filesCtrl', ['$scope', '$rootScope', '$uibModal', '$timeout', '$translate', 'AuthInfo', 'osClient', 'settingsSvs', 'fileSvs', 'safeApply', 'Toast', 'Dialog',
     function ($scope, $rootScope, $modal, $timeout, $translate, AuthInfo, osClient, settingsSvs, fileSvs, safeApply, Toast, Dialog) {
       var T = $translate.instant;
       angular.extend($scope, {
@@ -96,134 +96,134 @@ angular.module('web')
 
       });
       $scope.fileSpacerMenuOptions = [
-        [function(){
+        [function () {
           return '<i class="glyphicon glyphicon-cloud-upload text-info"></i> ' + T('upload')
         }, function ($itemScope, $event) {
           showUploadDialog()
-        }, function(){
-          return $scope.currentAuthInfo.privilege!='readOnly'
+        }, function () {
+          return $scope.currentAuthInfo.privilege != 'readOnly'
         }],
-        [function(){
+        [function () {
           return '<i class="glyphicon glyphicon-plus text-success"></i> ' + T('folder.create')
         }, function ($itemScope, $event) {
           showAddFolder()
-        }, function(){
-          return $scope.currentAuthInfo.privilege!='readOnly'
+        }, function () {
+          return $scope.currentAuthInfo.privilege != 'readOnly'
         }],
 
-        [function(){
-          return '<i class="fa fa-paste text-primary"></i> ' + T('paste') + ($scope.keepMoveOptions?'('+$scope.keepMoveOptions.items.length+')':'')
+        [function () {
+          return '<i class="fa fa-paste text-primary"></i> ' + T('paste') + ($scope.keepMoveOptions ? '(' + $scope.keepMoveOptions.items.length + ')' : '')
         }, function ($itemScope, $event) {
           showPaste()
-        }, function(){
+        }, function () {
           return $scope.keepMoveOptions
         }]
       ];
 
-      $scope.fileMenuOptions = function(item, $index){
-        if($scope.sel.x['i_'+$index]){
+      $scope.fileMenuOptions = function (item, $index) {
+        if ($scope.sel.x['i_' + $index]) {
           //pass
         }
-        else{
-          $scope.objects.forEach(function(n,i){
-              $scope.sel.x['i_'+i]=false;
+        else {
+          $scope.objects.forEach(function (n, i) {
+            $scope.sel.x['i_' + i] = false;
           });
-          $scope.sel.x['i_'+$index] = true;
+          $scope.sel.x['i_' + $index] = true;
           selectChanged();
         }
 
 
         return [
-          [function(){
+          [function () {
             //download
             return '<i class="glyphicon glyphicon-cloud-download text-primary"></i> ' + T('download')
           }, function ($itemScope, $event) {
             showDownloadDialog()
-          }, function(){
+          }, function () {
             return $scope.sel.has
           }],
-          [function(){
+          [function () {
             //copy
             return '<i class="fa fa-clone text-primary"></i> ' + T('copy')
           }, function ($itemScope, $event) {
             showMove($scope.sel.has, true)
-          }, function(){
-            return $scope.sel.has && $scope.currentAuthInfo.privilege!='readOnly'
+          }, function () {
+            return $scope.sel.has && $scope.currentAuthInfo.privilege != 'readOnly'
           }],
 
-          [function(){
+          [function () {
             //move
             return '<i class="fa fa-cut text-primary"></i> ' + T('move')
           }, function ($itemScope, $event) {
             showMove($scope.sel.has)
-          }, function(){
-            return $scope.sel.has && $scope.currentAuthInfo.privilege!='readOnly'
+          }, function () {
+            return $scope.sel.has && $scope.currentAuthInfo.privilege != 'readOnly'
           }],
 
 
-          [function(){
+          [function () {
             return '<i class="fa fa-edit text-info"></i> ' + T('rename')
           }, function ($itemScope, $event) {
             showRename($scope.sel.has[0])
-          }, function(){
-            return $scope.sel.has && ($scope.sel.has.length==1) && $scope.currentAuthInfo.privilege!='readOnly' && $scope.sel.has[0].storageClass!='Archive';
+          }, function () {
+            return $scope.sel.has && ($scope.sel.has.length == 1) && $scope.currentAuthInfo.privilege != 'readOnly' && $scope.sel.has[0].storageClass != 'Archive';
           }],
 
-          [function(){
+          [function () {
             return '<i class="fa fa-shield text-success"></i> ' + T('acl')
           }, function ($itemScope, $event) {
             showACL($scope.sel.has[0])
-          }, function(){
-            return $scope.sel.has && $scope.sel.has.length==1 && !$scope.sel.has[0].isFolder && $scope.currentAuthInfo.privilege!='readOnly';
+          }, function () {
+            return $scope.sel.has && $scope.sel.has.length == 1 && !$scope.sel.has[0].isFolder && $scope.currentAuthInfo.privilege != 'readOnly';
           }],
 
 
-          [function(){
+          [function () {
             return '<i class="fa fa-shield text-warning"></i> ' + T('simplePolicy')
           }, function ($itemScope, $event) {
             showGrant($scope.sel.has)
-          }, function(){
-            return $scope.sel.has && $scope.currentAuthInfo.id.indexOf('STS.')!=0;
+          }, function () {
+            return $scope.sel.has && $scope.currentAuthInfo.id.indexOf('STS.') != 0;
           }],
 
-          [function(){
+          [function () {
             //生成授权码
             return '<i class="fa fa-shield text-success"></i> ' + T('genAuthToken')
           }, function ($itemScope, $event) {
             showGrantToken($scope.sel.has[0])
-          }, function(){
-            return $scope.sel.has && $scope.sel.has.length==1 && $scope.sel.has[0].isFolder && $scope.currentAuthInfo.id.indexOf('STS.')!=0;
+          }, function () {
+            return $scope.sel.has && $scope.sel.has.length == 1 && $scope.sel.has[0].isFolder && $scope.currentAuthInfo.id.indexOf('STS.') != 0;
           }],
 
-          [function(){
+          [function () {
             //获取地址
             return '<i class="fa fa-download"></i> ' + T('getAddress')
           }, function ($itemScope, $event) {
-             showAddress($scope.sel.has[0])
-          }, function(){
-            return $scope.sel.has && $scope.sel.has.length==1 && !$scope.sel.has[0].isFolder && $scope.currentAuthInfo.id.indexOf('STS.')!=0;
+            showAddress($scope.sel.has[0])
+          }, function () {
+            return $scope.sel.has && $scope.sel.has.length == 1 && !$scope.sel.has[0].isFolder && $scope.currentAuthInfo.id.indexOf('STS.') != 0;
           }],
 
-          [function(){
+          [function () {
             //Http头
             return '<i class="fa fa-cog"></i> ' + T('http.headers')
           }, function ($itemScope, $event) {
             showHttpHeaders($scope.sel.has[0])
-          }, function(){
-            return $scope.sel.has && $scope.sel.has.length==1 && !$scope.sel.has[0].isFolder;
+          }, function () {
+            return $scope.sel.has && $scope.sel.has.length == 1 && !$scope.sel.has[0].isFolder;
           }],
 
-          [function(){
+          [function () {
             return '<i class="fa fa-remove text-danger"></i> ' + T('delete')
           }, function ($itemScope, $event) {
             showDeleteFilesSelected();
-          }, function(){
-            return $scope.sel.has && $scope.currentAuthInfo.privilege!='readOnly'
+          }, function () {
+            return $scope.sel.has && $scope.currentAuthInfo.privilege != 'readOnly'
           }]
         ];
       };
       $scope.bucketSpacerMenuOptions = [
-        [function(){
+        [function () {
           return '<i class="glyphicon glyphicon-plus text-success"></i> ' + T('bucket.add')
         }, function ($itemScope, $event) {
           showAddBucket()
@@ -233,34 +233,34 @@ angular.module('web')
       $scope.bucketMenuOptions = [
         [function ($itemScope, $event, modelValue, text, $li) {
           $scope.bucket_sel.item = $itemScope.item
-          return '<i class="fa fa-copy"></i> '+T('bucket.multipart');
+          return '<i class="fa fa-copy"></i> ' + T('bucket.multipart');
           // <!-- 碎片 -->
         }, function ($itemScope, $event) {
-            // Action
+          // Action
           showBucketMultipart($scope.bucket_sel.item);
         }],
 
         [function ($itemScope, $event, modelValue, text, $li) {
           $scope.bucket_sel.item = $itemScope.item
-          return '<i class="fa fa-shield text-success"></i> '+T('acl');
+          return '<i class="fa fa-shield text-success"></i> ' + T('acl');
         }, function ($itemScope, $event) {
-            // Action
+          // Action
           showUpdateBucket($scope.bucket_sel.item);
         }],
 
         [function ($itemScope, $event, modelValue, text, $li) {
           $scope.bucket_sel.item = $itemScope.item
-          return '<i class="fa fa-shield text-warning"></i> '+T('simplePolicy');
+          return '<i class="fa fa-shield text-warning"></i> ' + T('simplePolicy');
         }, function ($itemScope, $event) {
-            // Action
+          // Action
           showGrant([$scope.bucket_sel.item]);
         }],
 
         [function ($itemScope, $event, modelValue, text, $li) {
           $scope.bucket_sel.item = $itemScope.item
-          return '<i class="fa fa-remove text-danger"></i> '+T('delete');
+          return '<i class="fa fa-remove text-danger"></i> ' + T('delete');
         }, function ($itemScope, $event) {
-            // Action
+          // Action
           showDeleteBucket($scope.bucket_sel.item);
         }]
       ];
@@ -268,23 +268,23 @@ angular.module('web')
       /////////////////////////////////
 
       var tid_uploads;
-      function uploadsChange(){
+      function uploadsChange() {
         $timeout.cancel(tid_uploads);
-        tid_uploads = $timeout(function(){
-          if($scope.mock.uploads){
+        tid_uploads = $timeout(function () {
+          if ($scope.mock.uploads) {
             var arr = $scope.mock.uploads.split(',');
             $scope.handlers.uploadFilesHandler(arr, $scope.currentInfo);
           }
-        },600);
+        }, 600);
       }
       var tid_downloads;
-      function downloadsChange(){
+      function downloadsChange() {
         $timeout.cancel(tid_downloads);
-        tid_downloads = $timeout(function(){
-          if($scope.mock.downloads){
+        tid_downloads = $timeout(function () {
+          if ($scope.mock.downloads) {
             _downloadMulti($scope.mock.downloads);
           }
-        },600);
+        }, 600);
       }
 
 
@@ -346,7 +346,7 @@ angular.module('web')
 
       function addEvents() {
         $scope.$on('ossAddressChange', function (e, addr, forceRefresh) {
-          console.log('on:ossAddressChange:',addr, 'forceRefresh:',forceRefresh);
+          console.log('on:ossAddressChange:', addr, 'forceRefresh:', forceRefresh);
 
           var info = osClient.parseOSSPath(addr);
 
@@ -384,9 +384,9 @@ angular.module('web')
 
             } else {
               //fix ubuntu
-              $timeout(function(){
+              $timeout(function () {
                 listFiles();
-              },100);
+              }, 100);
             }
 
           } else {
@@ -451,7 +451,7 @@ angular.module('web')
         }
       }
 
-      function clearObjectsList(){
+      function clearObjectsList() {
         initSelect();
         $scope.objects = [];
         $scope.nextObjectsMarker = null;
@@ -459,17 +459,17 @@ angular.module('web')
 
       function signPicURL(info, result) {
         var authInfo = AuthInfo.get();
-        if(authInfo.id.indexOf('STS.')==0){
+        if (authInfo.id.indexOf('STS.') == 0) {
           angular.forEach(result, function (n) {
-            osClient.getImageBase64Url(info.region, info.bucket, n.path).then(function(data){
-              if(data.ContentType.indexOf('image/')==0){
+            osClient.getImageBase64Url(info.region, info.bucket, n.path).then(function (data) {
+              if (data.ContentType.indexOf('image/') == 0) {
                 var base64str = new Buffer(data.Body).toString('base64');
-                n.pic_url = 'data:'+data.ContentType+';base64,'+base64str;
+                n.pic_url = 'data:' + data.ContentType + ';base64,' + base64str;
               }
             })
           });
         }
-        else{
+        else {
           angular.forEach(result, function (n) {
             if (!n.isFolder && fileSvs.getFileType(n).type == 'picture') {
               n.pic_url = osClient.signatureUrl2(info.region, info.bucket, n.path, 3600, 'image/resize,w_48');
@@ -512,7 +512,7 @@ angular.module('web')
 
       function showDeleteBucket(item) {
         var title = T('bucket.delete.title');
-        var message = T('bucket.delete.message',{name: item.name, region: item.region});
+        var message = T('bucket.delete.message', { name: item.name, region: item.region });
         Dialog.confirm(title, message, function (b) {
           if (b) {
             osClient.deleteBucket(item.region, item.name).then(function () {
@@ -546,7 +546,7 @@ angular.module('web')
               return function () {
                 $timeout(function () {
                   listFiles();
-                },300);
+                }, 300);
               };
             }
           }
@@ -587,7 +587,7 @@ angular.module('web')
                 Toast.success(T('folder.create.success'));//'创建目录成功'
                 $timeout(function () {
                   listFiles();
-                },300);
+                }, 300);
               };
             }
           }
@@ -607,7 +607,7 @@ angular.module('web')
                 Toast.success(T('bucketACL.update.success'));//'修改Bucket权限成功'
                 $timeout(function () {
                   listBuckets();
-                },300);
+                }, 300);
               };
             }
           }
@@ -680,11 +680,11 @@ angular.module('web')
             showFn: function () {
               return {
                 callback: function (reloadStorageStatus) {
-                  if(reloadStorageStatus){
+                  if (reloadStorageStatus) {
                     $timeout(function () {
                       //listFiles();
                       osClient.loadStorageStatus($scope.currentInfo.region, $scope.currentInfo.bucket, [item])
-                    },300);
+                    }, 300);
                   }
                 },
                 preview: showPreview,
@@ -709,7 +709,7 @@ angular.module('web')
                 acl: function () {
                   showACL(item);
                 },
-                httpHeaders: function(){
+                httpHeaders: function () {
                   showHttpHeaders(item);
                 },
                 crc: function () {
@@ -842,7 +842,7 @@ angular.module('web')
         });
       }
 
-      function _downloadMulti(to){
+      function _downloadMulti(to) {
         to = to.replace(/(\/*$)/g, '');
 
         var fromArr = angular.copy($scope.sel.has);
@@ -934,98 +934,98 @@ angular.module('web')
               return function () {
                 $timeout(function () {
                   listFiles();
-                },300);
+                }, 300);
               };
             }
           }
         });
       }
 
-      function getCurrentOssPath(){
-        return 'kodo://'+$scope.currentInfo.bucket+'/'+$scope.currentInfo.key
+      function getCurrentOssPath() {
+        return 'kodo://' + $scope.currentInfo.bucket + '/' + $scope.currentInfo.key
       }
-      function cancelPaste(){
-        $scope.keepMoveOptions=null;
+      function cancelPaste() {
+        $scope.keepMoveOptions = null;
         safeApply($scope);
       }
-      function showPaste(){
+      function showPaste() {
         // if($scope.keepMoveOptions.originPath==getCurrentOssPath()){
         //   $scope.keepMoveOptions = null;
         //   return;
         // }
-        var keyword = $scope.keepMoveOptions.isCopy ? T('copy'): T('move');
+        var keyword = $scope.keepMoveOptions.isCopy ? T('copy') : T('move');
 
-        if($scope.keepMoveOptions.items.length==1 && $scope.currentInfo.bucket==$scope.keepMoveOptions.currentInfo.bucket){
-           //1个支持重命名
-           $modal.open({
-             templateUrl: 'main/files/modals/rename-modal.html',
-             controller: 'renameModalCtrl',
-             backdrop: 'static',
-             resolve: {
-               item: function () {
-                 return angular.copy($scope.keepMoveOptions.items[0]);
-               },
-               moveTo: function () {
-                 return angular.copy($scope.currentInfo);
-               },
-               currentInfo: function () {
-                 return angular.copy($scope.keepMoveOptions.currentInfo);
-               },
-               isCopy: function () {
-                 return $scope.keepMoveOptions.isCopy;
-               },
-               callback: function () {
-                 return function () {
-                   $scope.keepMoveOptions = null;
-                   $timeout(function(){
-                     listFiles();
-                   },100);
-                 };
-               }
-             }
-           });
-           return;
+        if ($scope.keepMoveOptions.items.length == 1 && $scope.currentInfo.bucket == $scope.keepMoveOptions.currentInfo.bucket) {
+          //1个支持重命名
+          $modal.open({
+            templateUrl: 'main/files/modals/rename-modal.html',
+            controller: 'renameModalCtrl',
+            backdrop: 'static',
+            resolve: {
+              item: function () {
+                return angular.copy($scope.keepMoveOptions.items[0]);
+              },
+              moveTo: function () {
+                return angular.copy($scope.currentInfo);
+              },
+              currentInfo: function () {
+                return angular.copy($scope.keepMoveOptions.currentInfo);
+              },
+              isCopy: function () {
+                return $scope.keepMoveOptions.isCopy;
+              },
+              callback: function () {
+                return function () {
+                  $scope.keepMoveOptions = null;
+                  $timeout(function () {
+                    listFiles();
+                  }, 100);
+                };
+              }
+            }
+          });
+          return;
 
         }
 
-        var msg = T('paste.message1', {name: $scope.keepMoveOptions.items[0].name, action: keyword});
+        var msg = T('paste.message1', { name: $scope.keepMoveOptions.items[0].name, action: keyword });
 
         //  '将 <span class="text-info">'+
         //     + '等</span> ' + keyword+' 到这个目录下面（如有相同的文件或目录则覆盖）？';
 
-        Dialog.confirm(keyword, msg, function(b){
-          if(b){
-             $modal.open({
-               templateUrl: 'main/files/modals/move-modal.html',
-               controller: 'moveModalCtrl',
-               backdrop: 'static',
-               resolve: {
-                 items: function () {
-                   return angular.copy($scope.keepMoveOptions.items);
-                 },
-                 moveTo: function(){
-                   return angular.copy($scope.currentInfo);
-                 },
-                 isCopy: function () {
-                   return $scope.keepMoveOptions.isCopy;
-                 },
-                 renamePath: function(){
-                   return ''
-                 },
-                 fromInfo: function () {
-                   return angular.copy($scope.keepMoveOptions.currentInfo);
-                 },
-                 callback: function () {
-                   return function () {
-                     $scope.keepMoveOptions = null;
-                     $timeout(function(){
-                       listFiles();
-                     },100);
-                   };
-                 }
-               }
-             });
-           }
+        Dialog.confirm(keyword, msg, function (b) {
+          if (b) {
+            $modal.open({
+              templateUrl: 'main/files/modals/move-modal.html',
+              controller: 'moveModalCtrl',
+              backdrop: 'static',
+              resolve: {
+                items: function () {
+                  return angular.copy($scope.keepMoveOptions.items);
+                },
+                moveTo: function () {
+                  return angular.copy($scope.currentInfo);
+                },
+                isCopy: function () {
+                  return $scope.keepMoveOptions.isCopy;
+                },
+                renamePath: function () {
+                  return ''
+                },
+                fromInfo: function () {
+                  return angular.copy($scope.keepMoveOptions.currentInfo);
+                },
+                callback: function () {
+                  return function () {
+                    $scope.keepMoveOptions = null;
+                    $timeout(function () {
+                      listFiles();
+                    }, 100);
+                  };
+                }
+              }
+            });
+          }
         });
       }
 
@@ -1036,7 +1036,7 @@ angular.module('web')
           items: items,
           isCopy: isCopy,
           currentInfo: angular.copy($scope.currentInfo),
-          originPath : getCurrentOssPath()
+          originPath: getCurrentOssPath()
         };
 
       }
@@ -1103,14 +1103,14 @@ angular.module('web')
                 $timeout(function () {
                   //listFiles();
                   osClient.loadStorageStatus($scope.currentInfo.region, $scope.currentInfo.bucket, [item]);
-                },300);
+                }, 300);
               };
             }
           }
         });
       }
 
-      function showUserList(){
+      function showUserList() {
         $modal.open({
           templateUrl: 'main/modals/users.html',
           controller: 'usersCtrl',

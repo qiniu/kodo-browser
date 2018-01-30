@@ -6,22 +6,9 @@ module.exports = {
   'customize': 'Customize',
   'public.cloud': 'Public Cloud',
 
-  'region.oss-cn-hangzhou': 'East China 1(Hangzhou)',
-  'region.oss-cn-shanghai': 'East China 2(Shanghai)',
-  'region.oss-cn-qingdao': 'North China 1(Qingdao)',
-  'region.oss-cn-beijing': 'North China 2(Beijing)',
-  'region.oss-cn-zhangjiakou': 'North China 3(Zhangjiakou)',
-  'region.oss-cn-shenzhen': 'South China 1(Shenzhen)',
-  'region.oss-cn-hongkong': 'Hongkong',
-
-  'region.oss-ap-southeast-1': 'Asia Pacific Southeast 1(Singapore)',
-  'region.oss-ap-southeast-2': 'Asia Pacific Southeast 2(Sydney)',
-  'region.oss-ap-northeast-1': 'Asia Pacific Northeast 1(Tokyo)',
-
-  'region.oss-us-west-1': 'Western US 1(Silicon Valley)',
-  'region.oss-us-east-1': 'Eastern US 1(Virginia)',
-  'region.oss-eu-central-1': 'Central Europe 1(Frankfurt)',
-  'region.oss-me-east-1': 'Middle East East 1(Dubai)',
+  'region.cn-east-1': 'East China 1(Hangzhou)',
+  'region.cn-south-1': 'South China 1(Guangzhou)',
+  'region.cn-north-1': 'North China 1(Beijing)',
 
   'optional': 'Optional',
   'default': 'Default',

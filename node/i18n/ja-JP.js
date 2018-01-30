@@ -6,22 +6,9 @@ module.exports = {
   'customize': 'カスタマイズ',
   'public.cloud': 'パブリッククラウド',
 
-  'region.oss-cn-hangzhou': '中国東部 1(杭州)',
-  'region.oss-cn-shanghai': '中国東部 2(上海)',
-  'region.oss-cn-qingdao': '中国北部　1(青島)',
-  'region.oss-cn-beijing': '中国北部 2(北京)',
-  'region.oss-cn-zhangjiakou': '中国北部 3(張家口)',
-  'region.oss-cn-shenzhen': '中国南部 1(深セン)',
-  'region.oss-cn-hongkong': '香港',
-
-  'region.oss-ap-southeast-1': 'アジア東南 1 (シンガポール)',
-  'region.oss-ap-southeast-2': 'アジア東南 2 (シドニー)',
-  'region.oss-ap-northeast-1': 'アジア東北 1 (東京)',
-
-  'region.oss-us-west-1': '米国西部 1(シリコンバレー)',
-  'region.oss-us-east-1': '米国東部 1(バージニア)',
-  'region.oss-eu-central-1': '中央ヨーロッパ1（フランクフルト）',
-  'region.oss-me-east-1': '中東 1 (ドバイ)',
+  'region.cn-east-1': '中国東部 1(杭州)',
+  'region.cn-north-1': '中国北部 1(北京)',
+  'region.cn-south-1': '中国南部 1(深セン)',
 
   'optional': 'オプション',
   'default': 'デフォルト',

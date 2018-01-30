@@ -835,27 +835,18 @@ angular.module('web')
             region: region,
             bucket: bucket
           });
+
           client.createBucket({
             Bucket: bucket,
             CreateBucketConfiguration: {
-              StorageClass: storageClass
+              LocationConstraint: region
             }
           }, function (err, data) {
             if (err) {
               handleError(err);
               b(err);
             } else {
-              client.putBucketAcl({
-                Bucket: bucket,
-                ACL: acl
-              }, function (err, data) {
-                if (err) {
-                  handleError(err);
-                  b(err);
-                } else {
-                  a(data);
-                }
-              });
+              a(data);
             }
           });
         });

@@ -1,8 +1,6 @@
 <div ng-if="!isLoading && (!buckets || buckets.length==0)" no-data></div>
 
-<div ng-if="!isLoading && buckets.length>0"
-  context-menu="bucketSpacerMenuOptions"
-    style="height:100%" ng-click="toggleTransVisible(false);">
+<div ng-if="!isLoading && buckets.length>0" context-menu="bucketSpacerMenuOptions" style="height:100%" ng-click="toggleTransVisible(false);">
   <table class="table table-condensed table-hover table-striped" ng-if="ref.isListView">
     <tr>
       <th>-</th>
@@ -15,20 +13,13 @@
         <!-- 区域 -->
       </th>
       <th>
-        {{'creationTime'|translate}}
-        <!-- 创建时间 -->
-      </th>
-      <th>
         {{'actions'|translate}}
         <!-- 操作 -->
       </th>
     </tr>
 
-    <tr ng-repeat="item in buckets|filter:sch.bucketName"
-    context-menu="bucketMenuOptions"
-    ng-dblclick="goIn(item.name)"
-    ng-click="selectBucket(item);"
-    ng-class="{'info':bucket_sel.item.name==item.name}">
+    <tr ng-repeat="item in buckets|filter:sch.bucketName" context-menu="bucketMenuOptions" ng-dblclick="goIn(item.name)" ng-click="selectBucket(item);"
+      ng-class="{'info':bucket_sel.item.name==item.name}">
       <td class="text-muted">&nbsp;{{$index+1}}.</td>
       <td>
         <div class="text-overflow">
@@ -39,7 +30,6 @@
         </div>
       </td>
       <td>{{item.region}}</td>
-      <td>{{item.creationDate|timeFormat}}</td>
       <td>
         <a href="" ng-click="showDeleteBucket(item)" class="text-danger">
           {{'delete'|translate}}
@@ -51,20 +41,15 @@
   </table>
 
 
+  <div ng-if="!ref.isListView" class="pd10" style="height:100%" ng-click="bucket_sel.item=null;">
 
-  <div ng-if="!ref.isListView" class="pd10" style="height:100%"
-     ng-click="bucket_sel.item=null;">
+    <div ng-repeat="item in buckets|filter:sch.bucketName" ng-dblclick="goIn(item.name);$event.stopPropagation()" ng-click="selectBucket(item);$event.stopPropagation()"
+      context-menu="bucketMenuOptions" class="item-block" ng-class={ 'active':bucket_sel.item.name==item.name}>
+      <i class="fa fa-database" ng-class="{'text-warning':item.storageClass!='Archive'}"></i>
+      <div class="item-block-name" uib-tooltip-html="'<div class=\'break\'>'+item.name+'</div>'" tooltip-append-to-body="true">{{item.name}}</div>
+      <div class="item-block-desc">{{item.region}}</div>
+    </div>
 
-     <div ng-repeat="item in buckets|filter:sch.bucketName"
-     ng-dblclick="goIn(item.name);$event.stopPropagation()"
-     ng-click="selectBucket(item);$event.stopPropagation()"
-     context-menu="bucketMenuOptions"
-      class="item-block" ng-class={'active':bucket_sel.item.name==item.name}>
-        <i class="fa fa-database" ng-class="{'text-warning':item.storageClass!='Archive'}"></i>
-        <div class="item-block-name" uib-tooltip-html="'<div class=\'break\'>'+item.name+'</div>'"  tooltip-append-to-body="true">{{item.name}}</div>
-        <div class="item-block-desc">{{item.region}}</div>
-     </div>
-
-   <div class="clearfix">&nbsp;</div>
+    <div class="clearfix">&nbsp;</div>
   </div>
 </div>

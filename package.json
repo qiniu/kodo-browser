@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "aliyun-sdk": "^1.10.19",
+    "aws-sdk": "^2.188.0",
     "clipboard": "^1.7.1",
     "koa": "^2.3.0",
     "koa-convert": "^1.2.0",

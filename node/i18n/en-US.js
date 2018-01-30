@@ -1,5 +1,5 @@
 module.exports = {
-  'app.name': 'OSS Browser',
+  'app.name': 'S3 Browser',
   'language': 'Language',
   'name': 'Name',
   'type': 'Type',
@@ -32,7 +32,7 @@ module.exports = {
   'auth.id.placeholder': 'AccessKeyId',
   'auth.secret.placeholder': 'AccessKeySecret',
   'auth.eptpl': 'Endpoint Template',
-  'auth.eptpl.placeholder': 'Default: http://{region}.qiniu.com',
+  'auth.eptpl.placeholder': 'Default: http://{region}-s3.qiniu.com',
 
   'auth.eptpl.popup.msg1': 'For Public Cloud, you can directly use the default settings',
   'auth.eptpl.popup.msg2': 'For Private Cloud, Please enter a custom Endpoint, such as:',

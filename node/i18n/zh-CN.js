@@ -1,5 +1,5 @@
 module.exports = {
-  'app.name': 'OSS浏览器',
+  'app.name': 'S3 浏览器',
   'language': '语言',
   'name': "名称",
   'type': '类型',
@@ -25,17 +25,17 @@ module.exports = {
 
   'optional': '可选',
   'default': '默认',
-  'auth.accessLogin': 'AK登录',
+  'auth.accessLogin': 'Access Key 登录',
   'auth.tokenLogin': '授权码登录',
   'auth.presetPrefixPath': '名称前缀',
   'auth.presetPrefixPath.placeholder': '可选,格式如: kodo://bucket/key/',
-  'auth.id.placeholder': '请输入AccessKeyId',
-  'auth.secret.placeholder': '请输入AccessKeySecret',
-  'auth.eptpl': 'Endpoint模板',
-  'auth.eptpl.placeholder': '默认: http://{region}.qiniu.com',
+  'auth.id.placeholder': '请输入 AccessKeyId',
+  'auth.secret.placeholder': '请输入 SecretAccessKey',
+  'auth.eptpl': 'Endpoint 模板',
+  'auth.eptpl.placeholder': '默认: http://{region}-s3.qiniu.com',
 
   'auth.eptpl.popup.msg1': '公有云直接使用默认即可',
-  'auth.eptpl.popup.msg2': '专有云请输入自定义Endpoint,如:',
+  'auth.eptpl.popup.msg2': '专有云请输入自定义 Endpoint, 如: ',
 
   'auth.presetPrefixPath.popup.msg1': '大权限子账号登录: 当前使用的AK已拥有所有Bucket的权限，不需要设置"预设OSS路径"',
   'auth.presetPrefixPath.popup.msg2': '小权限子账号登录: 当前使用的AK只有某个Bucket或者Bucket下某个路径的权限，需要设置"预设OSS路径"',

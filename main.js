@@ -52,7 +52,7 @@ function createWindow() {
     height: 700,
     minWidth: 1020,
     minHeight: 660,
-    title: custom.title || "KODO Browser",
+    title: custom.title || "S3 Browser",
     icon: custom.logo_ico || path.join(__dirname, 'icons', 'icon.ico')
   };
 
@@ -62,7 +62,7 @@ function createWindow() {
   // Create the browser window.   http://electron.atom.io/docs/api/browser-window/
   win = new BrowserWindow(opt);
 
-  win.setTitle(custom.title || "KODO Browser");
+  win.setTitle(custom.title || "S3 Browser");
 
   // and load the index.html of the app.
   win.loadURL(`file://${__dirname}/index.html`);

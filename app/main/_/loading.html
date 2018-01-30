@@ -1,7 +1,6 @@
 <style>
- 
     .spinner {
-        position:absolute;
+        position: absolute;
         top: 120px;
         left: 50%;
         z-index: 50;
@@ -10,7 +9,7 @@
         margin-left: -75px;
     }
 
-    .spinner > div {
+    .spinner>div {
         width: 30px;
         height: 30px;
         background-color: #67CF22;
@@ -35,18 +34,27 @@
     }
 
     @-webkit-keyframes bouncedelay {
-        0%, 80%, 100% { -webkit-transform: scale(0.0) }
-        40% { -webkit-transform: scale(1.0) }
+        0%,
+        80%,
+        100% {
+            -webkit-transform: scale(0.0)
+        }
+        40% {
+            -webkit-transform: scale(1.0)
+        }
     }
 
     @keyframes bouncedelay {
-        0%, 80%, 100% {
+        0%,
+        80%,
+        100% {
             transform: scale(0.0);
             -webkit-transform: scale(0.0);
-        } 40% {
-              transform: scale(1.0);
-              -webkit-transform: scale(1.0);
-          }
+        }
+        40% {
+            transform: scale(1.0);
+            -webkit-transform: scale(1.0);
+        }
     }
 </style>
 

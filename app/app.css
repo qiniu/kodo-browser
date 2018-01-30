@@ -56,21 +56,8 @@ button.btn.btn-sm {
     padding: 5px 10px;
     font-size: 12px;
     line-height: 1.5;
-    border-radius: 3px;
   }
 
-
-
-/*@media (min-width: 768px){
-  body .modal-dialog {
-      margin-top: 10px auto;
-  }
-}
-@media (min-width: 992px){
-  body .modal-lg {
-      width: 98%;
-  }
-}*/
 
 
 .modal-header, .modal-footer {

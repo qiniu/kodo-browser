@@ -1,44 +1,20 @@
 <header class="pd4 bucket-toolbar">
 
   <div class="col-sm-6 pd0">
-    <div class="btn-group" role="group">
-      <button ng-disabled="currentAuthInfo.id.indexOf('STS.')==0" type="button" class="btn btn-default btn-sm" ng-click="showAddBucket()">
+
+    <div class="btn-group" role="group" ng-if="ref.isBucketList">
+
+      <button ng-disabled="currentAuthInfo.id.indexOf('STS.')==0" type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()">
         <i class="glyphicon glyphicon-plus text-success"></i>
         <!-- 新建 Bucket -->
         {{'bucket.add'|translate}}
       </button>
-    </div>
 
-
-    <div class="btn-group" role="group"  ng-if="ref.isBucketList" >
-      <!-- <button type="button" class="btn btn-default btn-sm" ng-disabled="!bucket_sel.item"
-      ng-click="goIn(bucket_sel.item.name)">
-          <i class="fa fa-arrow-right"></i> 进入
+      <!-- 简化Policy授权 -->
+      <!-- <button type="button" class="btn btn-default btn-sm" ng-disabled="!bucket_sel.item" ng-click="showGrant([bucket_sel.item])">
+        <i class="fa fa-shield text-warning"></i>
+        {{'simplePolicy'|translate}}
       </button> -->
-
-
-        <button type="button" class="btn btn-default btn-sm" ng-disabled="!bucket_sel.item"
-        ng-click="showBucketMultipart(bucket_sel.item)">
-            <i class="fa fa-copy"></i>
-            {{'bucket.multipart'|translate}}
-            <!-- 碎片 -->
-        </button>
-
-        <button type="button" class="btn btn-default btn-sm" ng-disabled="!bucket_sel.item"
-                ng-click="showUpdateBucket(bucket_sel.item)">
-            <i class="fa fa-shield text-success"></i>
-            {{'acl'|translate}}
-            <!-- ACL权限 -->
-        </button>
-
-        <button type="button" class="btn btn-default btn-sm" ng-disabled="!bucket_sel.item"
-
-          ng-click="showGrant([bucket_sel.item])">
-            <i class="fa fa-shield text-warning"></i>
-            {{'simplePolicy'|translate}}
-            <!-- 简化Policy授权 -->
-        </button>
-
 
     </div>
 
@@ -49,20 +25,11 @@
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" role="menu">
-        <!-- <li>
-          <a href=""
-             ng-disabled="!bucket_sel.item"
-             ng-click="showGrantToken(bucket_sel.item)">
-              <i class="fa fa-shield text-warning"></i> 生成授权码
-          </a>
-        </li> -->
         <li>
-          <a href=""
-             ng-disabled="!bucket_sel.item"
-          ng-click="showDeleteBucket(bucket_sel.item)">
-              <i class="fa fa-remove text-danger"></i>
-              {{'delete'|translate}}
-              <!-- 删除 -->
+          <a href="" ng-disabled="!bucket_sel.item" ng-click="showDeleteBucket(bucket_sel.item)">
+            <i class="fa fa-remove text-danger"></i>
+            {{'delete'|translate}}
+            <!-- 删除 -->
           </a>
         </li>
       </ul>

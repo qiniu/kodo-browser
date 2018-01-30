@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports= {
   //窗体title
-  title: 'KODO Browser',
+  title: 'S3 Browser',
 
   //app id，打包名称前缀
   appId: 'kodo-browser',
@@ -10,7 +10,7 @@ module.exports= {
   //app名称，需要提供各个语言版本
   appName: {
     'zh-CN':'七牛云存储浏览器',
-    'en-US': 'KODO Browser',
+    'en-US': 'S3 Browser',
   },
 
   //logo png 格式, 主要用于mac和linux系统

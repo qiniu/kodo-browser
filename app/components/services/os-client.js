@@ -1,3 +1,5 @@
+const AWS = require('aws-sdk');
+
 angular.module('web')
   .factory('osClient', ['$q', '$rootScope', '$timeout', '$state', 'Toast', 'Const', 'AuthInfo',
     function ($q, $rootScope, $timeout, $state, Toast, Const, AuthInfo) {
@@ -62,9 +64,9 @@ angular.module('web')
         getClient2: getClient2,
         signatureUrl2: signatureUrl2
       };
- 
 
-      function getClient2(opt){
+
+      function getClient2(opt) {
         var options = prepaireOptions(opt)
         // console.log(options)
         var client = new OSS.Wrapper({
@@ -76,9 +78,9 @@ angular.module('web')
         return client;
       }
 
-      function signatureUrl2(region ,bucket, key, expires, xprocess){
-        var client = getClient2({region:region, bucket: bucket});
-        return client.signatureUrl(key, {expires: 3600, process: xprocess});
+      function signatureUrl2(region, bucket, key, expires, xprocess) {
+        var client = getClient2({ region: region, bucket: bucket });
+        return client.signatureUrl(key, { expires: 3600, process: xprocess });
       }
 
 
@@ -102,18 +104,18 @@ angular.module('web')
         });
       }
 
-      function checkFolderExists(region, bucket, prefix){
+      function checkFolderExists(region, bucket, prefix) {
         var df = $q.defer();
-        var client = getClient({region:region, bucket:bucket});
-        client.listObjects({Bucket:bucket, Prefix:prefix, MaxKeys: 1}, function(err, data){
-          if(err){
+        var client = getClient({ region: region, bucket: bucket });
+        client.listObjects({ Bucket: bucket, Prefix: prefix, MaxKeys: 1 }, function (err, data) {
+          if (err) {
             handleError(err);
             df.reject(err);
           }
-          else{
-            if(data.Contents.length>0 && data.Contents[0].Key.indexOf(prefix)==0){
+          else {
+            if (data.Contents.length > 0 && data.Contents[0].Key.indexOf(prefix) == 0) {
               df.resolve(true);
-            }else{
+            } else {
               df.resolve(false);
             }
           }
@@ -122,8 +124,8 @@ angular.module('web')
       }
 
 
-      var stopDeleteFilesFlag=false;
-      function stopDeleteFiles(){
+      var stopDeleteFilesFlag = false;
+      function stopDeleteFiles() {
         stopDeleteFilesFlag = true;
       }
 
@@ -134,21 +136,21 @@ angular.module('web')
       * @param items   {array}  item={path,isFolder}
       * @param progCb  {function} 可选， 进度回调  (current,total)
       */
-      function deleteFiles(region, bucket, items, progCb){
+      function deleteFiles(region, bucket, items, progCb) {
 
         stopDeleteFilesFlag = false;
 
         var df = $q.defer();
 
-        var client = getClient({region:region, bucket:bucket});
-        var progress={current:0,total:0, errorCount:0};
+        var client = getClient({ region: region, bucket: bucket });
+        var progress = { current: 0, total: 0, errorCount: 0 };
 
         progress.total += items.length;
 
-        delArr(items, function(terr){
-          if(terr && terr.length>0){
+        delArr(items, function (terr) {
+          if (terr && terr.length > 0) {
             df.resolve(terr);
-          }else{
+          } else {
             df.resolve();
           }
         });
@@ -156,60 +158,60 @@ angular.module('web')
 
 
 
-        function delArr(arr, fn){
+        function delArr(arr, fn) {
           var c = 0;
           var len = arr.length;
           var terr = [];
           dig();
-          function dig(){
+          function dig() {
 
-            if(c>=len){
-              if(progCb) progCb(progress);
-              $timeout(function(){
+            if (c >= len) {
+              if (progCb) progCb(progress);
+              $timeout(function () {
                 fn(terr);
-              },NEXT_TICK);
+              }, NEXT_TICK);
               return;
             }
 
-            if(stopDeleteFilesFlag){
-              df.resolve([ {item:{}, error: new Error('User cancelled')} ]);
+            if (stopDeleteFilesFlag) {
+              df.resolve([{ item: {}, error: new Error('User cancelled') }]);
               return;
             }
 
 
-            if(progCb) progCb(progress);
+            if (progCb) progCb(progress);
 
             var item = arr[c];
 
-            if(item.isFolder){
-              listAllFiles(region, bucket, item.path).then(function(arr2){
+            if (item.isFolder) {
+              listAllFiles(region, bucket, item.path).then(function (arr2) {
 
                 progress.total += arr2.length;
                 //删除所有文件
-                delArr(arr2, function(terr2){
+                delArr(arr2, function (terr2) {
 
-                  if(stopDeleteFilesFlag){
-                    df.resolve([ {item:{}, error: new Error('User cancelled')} ]);
+                  if (stopDeleteFilesFlag) {
+                    df.resolve([{ item: {}, error: new Error('User cancelled') }]);
                     return;
                   }
 
-                  if(terr2) terr = terr.concat(terr2);
+                  if (terr2) terr = terr.concat(terr2);
                   //删除目录本身
                   delFile(item);
                 });
-              }, function(err){
+              }, function (err) {
                 //删除目录本身
                 delFile(item);
               });
             }
-            else{
+            else {
               //删除文件
               delFile(item);
             }
 
-            function delFile(item){
-              if(stopDeleteFilesFlag){
-                df.resolve([{item:{}, error: new Error('User cancelled')}]);
+            function delFile(item) {
+              if (stopDeleteFilesFlag) {
+                df.resolve([{ item: {}, error: new Error('User cancelled') }]);
                 return;
               }
 
@@ -219,17 +221,17 @@ angular.module('web')
               //   dig();
               // },1000)
 
-              client.deleteObject({Bucket:bucket, Key: item.path}, function(err){
-                if(err){
-                  terr.push({item:item, error:err});
+              client.deleteObject({ Bucket: bucket, Key: item.path }, function (err) {
+                if (err) {
+                  terr.push({ item: item, error: err });
                   progress.errorCount++;
                   c++;
-                  $timeout(dig,NEXT_TICK);
+                  $timeout(dig, NEXT_TICK);
                 }
-                else{
+                else {
                   c++;
                   progress.current++;
-                  $timeout(dig,NEXT_TICK);
+                  $timeout(dig, NEXT_TICK);
                 }
               });
             }
@@ -239,8 +241,8 @@ angular.module('web')
       }
 
 
-      var stopCopyFilesFlag=false;
-      function stopCopyFiles(){
+      var stopCopyFilesFlag = false;
+      function stopCopyFiles() {
         stopCopyFilesFlag = true;
       }
       /**
@@ -252,7 +254,7 @@ angular.module('web')
       * @param removeAfterCopy {boolean} 移动flag，复制后删除。 默认false
       * @param renameKey {string} 重命名目录的 key。
       */
-      function copyFiles(region, items, target, progFn, removeAfterCopy, renameKey){
+      function copyFiles(region, items, target, progFn, removeAfterCopy, renameKey) {
 
         var progress = {
           total: 0,
@@ -263,75 +265,75 @@ angular.module('web')
 
         //入口
         var df = $q.defer();
-        digArr(items, target, renameKey, function(terr){
+        digArr(items, target, renameKey, function (terr) {
           df.resolve(terr);
         });
         return df.promise;
 
         //copy oss file
-        function copyOssFile(client, from, to, fn){
+        function copyOssFile(client, from, to, fn) {
 
           var toKey = to.key;
-          var fromKey = '/'+from.bucket+'/'+encodeURIComponent(from.key);
-          console.info(removeAfterCopy?'move':'copy', '::', from.bucket+'/'+(from.key), '==>',to.bucket+'/'+toKey);
+          var fromKey = '/' + from.bucket + '/' + encodeURIComponent(from.key);
+          console.info(removeAfterCopy ? 'move' : 'copy', '::', from.bucket + '/' + (from.key), '==>', to.bucket + '/' + toKey);
 
-          client.copyObject({Bucket: to.bucket, Key:toKey, CopySource: fromKey},function(err){
+          client.copyObject({ Bucket: to.bucket, Key: toKey, CopySource: fromKey }, function (err) {
 
-            if(err){
+            if (err) {
               fn(err);
               return;
             }
 
-            if(removeAfterCopy){
-              var client2 = getClient({region: region, bucket: from.bucket});
-              client2.deleteObject({Bucket: from.bucket, Key: from.key}, function(err){
-                if(err) fn(err);
+            if (removeAfterCopy) {
+              var client2 = getClient({ region: region, bucket: from.bucket });
+              client2.deleteObject({ Bucket: from.bucket, Key: from.key }, function (err) {
+                if (err) fn(err);
                 else fn();
               });
             }
-            else{
+            else {
               fn();
             }
           });
         }
 
         //打平，一条一条 copy
-        function doCopyOssFiles(bucket, pkey, arr, target, fn){
+        function doCopyOssFiles(bucket, pkey, arr, target, fn) {
           var len = arr.length;
-          var c= 0;
-          var t=[];
+          var c = 0;
+          var t = [];
 
-          progress.total+=len;
+          progress.total += len;
 
-          var client = getClient({region: region, bucket: target.bucket});
+          var client = getClient({ region: region, bucket: target.bucket });
 
-          function _dig(){
-            if(c>=len){
-              $timeout(function(){
+          function _dig() {
+            if (c >= len) {
+              $timeout(function () {
                 fn(t);
-              },NEXT_TICK);
+              }, NEXT_TICK);
               return;
             }
 
 
-            if(stopCopyFilesFlag){
-              df.resolve([ {item:{}, error: new Error('User cancelled')} ]);
+            if (stopCopyFilesFlag) {
+              df.resolve([{ item: {}, error: new Error('User cancelled') }]);
               return;
             }
 
 
             var item = arr[c];
-            var toKey = target.key.replace(/\/$/,'');
-            toKey = (toKey?toKey+'/': '')+ (item.path.substring(pkey.length));
+            var toKey = target.key.replace(/\/$/, '');
+            toKey = (toKey ? toKey + '/' : '') + (item.path.substring(pkey.length));
 
-            copyOssFile(client, {bucket:bucket,key: item.path},{bucket: target.bucket, key: toKey}, function(err){
-              if(err){
+            copyOssFile(client, { bucket: bucket, key: item.path }, { bucket: target.bucket, key: toKey }, function (err) {
+              if (err) {
                 progress.errorCount++;
-                if(progFn) try{ progFn(progress); }catch(e){}
-                t.push({item:item, error:err});
+                if (progFn) try { progFn(progress); } catch (e) { }
+                t.push({ item: item, error: err });
               }
               progress.current++;
-              if(progFn) try{ progFn(progress); }catch(e){}
+              if (progFn) try { progFn(progress); } catch (e) { }
               c++;
 
 
@@ -342,23 +344,23 @@ angular.module('web')
           _dig();
         }
 
-        function doCopyFolder(source, target, fn){
-          var t=[];
-          var client = getClient({region: region, bucket: source.bucket});
+        function doCopyFolder(source, target, fn) {
+          var t = [];
+          var client = getClient({ region: region, bucket: source.bucket });
 
           nextList();
 
-          function nextList(marker){
-            var opt = {Bucket: source.bucket, Prefix: source.path};
-            if(marker) opt.Marker=marker;
+          function nextList(marker) {
+            var opt = { Bucket: source.bucket, Prefix: source.path };
+            if (marker) opt.Marker = marker;
 
-            client.listObjects(opt, function(err, result){
+            client.listObjects(opt, function (err, result) {
 
-              if(err){
-                t.push({item: source, error:err});
-                $timeout(function(){
+              if (err) {
+                t.push({ item: source, error: err });
+                $timeout(function () {
                   fn(t);
-                },NEXT_TICK);
+                }, NEXT_TICK);
                 return;
               }
               var newTarget = {
@@ -377,47 +379,47 @@ angular.module('web')
                 n.Prefix = n.Prefix || '';
 
                 //if (!opt.Prefix.endsWith('/') || n.Key != opt.Prefix) {
-                  n.isFile = true;
-                  n.itemType = 'file';
-                  n.path = n.Key;
-                  n.name = n.Key.substring(prefix.length);
-                  n.size = n.Size;
-                  n.storageClass = n.StorageClass;
-                  n.type = n.Type;
-                  n.lastModified = n.LastModified;
-                  n.url = getOssUrl(region, opt.Bucket, n.Key);
+                n.isFile = true;
+                n.itemType = 'file';
+                n.path = n.Key;
+                n.name = n.Key.substring(prefix.length);
+                n.size = n.Size;
+                n.storageClass = n.StorageClass;
+                n.type = n.Type;
+                n.lastModified = n.LastModified;
+                n.url = getOssUrl(region, opt.Bucket, n.Key);
 
-                  objs.push(n);
+                objs.push(n);
                 //}
               });
 
-              doCopyOssFiles(source.bucket, source.path, objs, newTarget, function(terr){
+              doCopyOssFiles(source.bucket, source.path, objs, newTarget, function (terr) {
 
 
-                if(stopCopyFilesFlag){
-                  df.resolve([ {item:{}, error: new Error('User cancelled')} ]);
+                if (stopCopyFilesFlag) {
+                  df.resolve([{ item: {}, error: new Error('User cancelled') }]);
                   return;
                 }
 
-                if(terr)t=t.concat(terr);
-                if(result.NextMarker){
-                  $timeout(function(){
+                if (terr) t = t.concat(terr);
+                if (result.NextMarker) {
+                  $timeout(function () {
                     nextList(result.NextMarker);
-                  },NEXT_TICK);
+                  }, NEXT_TICK);
                 }
-                else{
-                  if(removeAfterCopy && terr.length==0){
+                else {
+                  if (removeAfterCopy && terr.length == 0) {
                     //移动全部成功， 删除目录
-                    client.deleteObject({Bucket: source.bucket, Key: source.path}, function(err){
-                      $timeout(function(){
+                    client.deleteObject({ Bucket: source.bucket, Key: source.path }, function (err) {
+                      $timeout(function () {
                         fn(t);
-                      },NEXT_TICK);
+                      }, NEXT_TICK);
                     });
                   }
                   else {
-                    $timeout(function(){
+                    $timeout(function () {
                       fn(t);
-                    },NEXT_TICK);
+                    }, NEXT_TICK);
                   }
                 }
               });
@@ -427,44 +429,44 @@ angular.module('web')
           }
         }
 
-        function doCopyFile(source, target, fn){
-          var client = getClient({region: region, bucket: target.bucket});
-          copyOssFile(client, {bucket: source.bucket, key: source.path}, {bucket: target.bucket, key:target.key}, function(err){
-            if(err){
+        function doCopyFile(source, target, fn) {
+          var client = getClient({ region: region, bucket: target.bucket });
+          copyOssFile(client, { bucket: source.bucket, key: source.path }, { bucket: target.bucket, key: target.key }, function (err) {
+            if (err) {
               fn(err);
             }
-            else{
+            else {
               fn();
             }
           });
         }
 
-        function digArr(items, target, renameKey, fn){
+        function digArr(items, target, renameKey, fn) {
           var len = items.length;
-          var c=0;
-          var terr=[];
+          var c = 0;
+          var terr = [];
 
-          progress.total+=len;
-          if(progFn)try{progFn(progress);}catch(e){}
+          progress.total += len;
+          if (progFn) try { progFn(progress); } catch (e) { }
 
-          function _(){
+          function _() {
 
-            if(c>=len){
+            if (c >= len) {
               fn(terr);
               return;
             }
 
-            if(stopCopyFilesFlag){
-              df.resolve([ {item:{}, error: new Error('User cancelled')} ]);
+            if (stopCopyFilesFlag) {
+              df.resolve([{ item: {}, error: new Error('User cancelled') }]);
               return;
             }
 
             var item = items[c];
             var toKey = renameKey;
 
-            if(!renameKey){
-              toKey = target.key.replace(/\/$/,'');
-              toKey = (toKey?toKey+'/': '')+(items[c].name);
+            if (!renameKey) {
+              toKey = target.key.replace(/\/$/, '');
+              toKey = (toKey ? toKey + '/' : '') + (items[c].name);
             }
 
 
@@ -474,26 +476,26 @@ angular.module('web')
             };
             c++;
 
-            if(item.isFile){
-              doCopyFile(item, newTarget, function(err){
-                if(err){
+            if (item.isFile) {
+              doCopyFile(item, newTarget, function (err) {
+                if (err) {
                   progress.errorCount++;
-                  if(progFn)try{progFn(progress);}catch(e){}
-                  terr.push({item: items[c], error:err});
+                  if (progFn) try { progFn(progress); } catch (e) { }
+                  terr.push({ item: items[c], error: err });
                 }
                 progress.current++;
-                if(progFn)try{progFn(progress);}catch(e){}
-                $timeout(_,NEXT_TICK);
+                if (progFn) try { progFn(progress); } catch (e) { }
+                $timeout(_, NEXT_TICK);
               });
             }
-            else{
-              doCopyFolder(item, newTarget, function(errs){
-                if(errs){
+            else {
+              doCopyFolder(item, newTarget, function (errs) {
+                if (errs) {
                   terr = terr.concat(errs);
                 }
                 progress.current++;
-                if(progFn)try{progFn(progress);}catch(e){}
-                $timeout(_,NEXT_TICK);
+                if (progFn) try { progFn(progress); } catch (e) { }
+                $timeout(_, NEXT_TICK);
               });
             }
           }
@@ -502,28 +504,28 @@ angular.module('web')
       }
 
       //移动文件，重命名文件
-      function moveFile(region, bucket, oldKey, newKey, isCopy){
+      function moveFile(region, bucket, oldKey, newKey, isCopy) {
         var df = $q.defer();
-        var client = getClient({region:region, bucket:bucket});
+        var client = getClient({ region: region, bucket: bucket });
         client.copyObject({
           Bucket: bucket,
           Key: newKey,
-          CopySource: '/'+bucket+'/'+encodeURIComponent(oldKey),
+          CopySource: '/' + bucket + '/' + encodeURIComponent(oldKey),
           MetadataDirective: 'REPLACE'     // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
-        }, function(err){
-          if(err){
+        }, function (err) {
+          if (err) {
             df.reject(err);
             handleError(err);
           }
-          else{
-            if(isCopy){
+          else {
+            if (isCopy) {
               df.resolve();
-            }else{
-              client.deleteObject({Bucket: bucket, Key: oldKey}, function(err){
-                if(err){
+            } else {
+              client.deleteObject({ Bucket: bucket, Key: oldKey }, function (err) {
+                if (err) {
                   df.reject(err);
                   handleError(err);
-                }else  df.resolve();
+                } else df.resolve();
               });
             }
           }
@@ -534,20 +536,20 @@ angular.module('web')
       /**************************************/
 
 
-      function listAllUploads(region, bucket){
+      function listAllUploads(region, bucket) {
         var maxUploads = 100;
-        var client = getClient({region:region, bucket:bucket});
-        var t=[];
+        var client = getClient({ region: region, bucket: bucket });
+        var t = [];
         var df = $q.defer();
-        function dig(opt){
-          opt = angular.extend({Bucket: bucket, Prefix: '', 'MaxUploads':maxUploads}, opt);
-          client.listMultipartUploads(opt, function(err, result){
-            if(err){
+        function dig(opt) {
+          opt = angular.extend({ Bucket: bucket, Prefix: '', 'MaxUploads': maxUploads }, opt);
+          client.listMultipartUploads(opt, function (err, result) {
+            if (err) {
               df.reject(err);
               return;
             }
 
-            angular.forEach(result.Uploads, function(n){
+            angular.forEach(result.Uploads, function (n) {
               n.initiated = n.Initiated;
               n.name = n.Key;
               n.storageClass = n.StorageClass;
@@ -556,13 +558,13 @@ angular.module('web')
 
             t = t.concat(result.Uploads);
 
-            if(result.Uploads.length==maxUploads){
-              $timeout(function(){
-                dig({'KeyMarker':result.NextKeyMarker, 'UploadIdMarker':result.NextUploadIdMarker});
-              },NEXT_TICK);
+            if (result.Uploads.length == maxUploads) {
+              $timeout(function () {
+                dig({ 'KeyMarker': result.NextKeyMarker, 'UploadIdMarker': result.NextUploadIdMarker });
+              }, NEXT_TICK);
 
             }
-            else{
+            else {
               df.resolve(t);
             }
           });
@@ -570,13 +572,13 @@ angular.module('web')
         dig({});
         return df.promise;
       }
-      function abortAllUploads(region, bucket, uploads){
-        var df=$q.defer();
-        var client = getClient({region:region, bucket:bucket});
+      function abortAllUploads(region, bucket, uploads) {
+        var df = $q.defer();
+        var client = getClient({ region: region, bucket: bucket });
         var len = uploads.length;
-        var c=0;
-        function dig(){
-          if(c>=len){
+        var c = 0;
+        function dig() {
+          if (c >= len) {
             df.resolve();
             return;
           }
@@ -584,11 +586,11 @@ angular.module('web')
             Bucket: bucket,
             Key: uploads[c].name,
             UploadId: uploads[c].uploadId
-          }, function(err, result){
-            if(err) df.reject(err);
-            else{
+          }, function (err, result) {
+            if (err) df.reject(err);
+            else {
               c++;
-              $timeout(dig,NEXT_TICK);
+              $timeout(dig, NEXT_TICK);
             }
           });
         }
@@ -596,7 +598,7 @@ angular.module('web')
         return df.promise;
       }
 
-      function createFolder(region, bucket, prefix){
+      function createFolder(region, bucket, prefix) {
         return new Promise(function (a, b) {
           var client = getClient({
             region: region,
@@ -618,7 +620,7 @@ angular.module('web')
 
       }
 
-      function deleteBucket(region, bucket){
+      function deleteBucket(region, bucket) {
         return new Promise(function (a, b) {
           var client = getClient({
             region: region,
@@ -636,13 +638,13 @@ angular.module('web')
           });
         });
       }
-      function signatureUrl(region, bucket, key, expiresSec){
+      function signatureUrl(region, bucket, key, expiresSec) {
         var client = getClient({
           region: region,
           bucket: bucket
         });
 
-        var url= client.getSignedUrl('getObject',{
+        var url = client.getSignedUrl('getObject', {
           Bucket: bucket,
           Key: key,
           Expires: expiresSec || 60
@@ -650,23 +652,23 @@ angular.module('web')
         return url;
       }
 
-      function getBucketACL(region, bucket){
+      function getBucketACL(region, bucket) {
         var df = $q.defer();
-        var client = getClient({region:region, bucket:bucket});
+        var client = getClient({ region: region, bucket: bucket });
         client.getBucketAcl({
           Bucket: bucket
-        }, function(err, data){
-          if(err){
+        }, function (err, data) {
+          if (err) {
             handleError(err);
             df.reject(err);
-          }else{
-            if(data.Grants && data.Grants.length==1){
-              var t=[];
-              for(var k in data.Grants[0]){
+          } else {
+            if (data.Grants && data.Grants.length == 1) {
+              var t = [];
+              for (var k in data.Grants[0]) {
                 t.push(data.Grants[0][k]);
               }
               data.acl = t.join('');
-            }else{
+            } else {
               data.acl = 'default';
             }
             df.resolve(data);
@@ -674,17 +676,17 @@ angular.module('web')
         });
         return df.promise;
       }
-      function updateBucketACL(region, bucket, acl){
+      function updateBucketACL(region, bucket, acl) {
         var df = $q.defer();
-        var client = getClient({region:region, bucket:bucket});
+        var client = getClient({ region: region, bucket: bucket });
         client.putBucketAcl({
           Bucket: bucket,
           ACL: acl
-        }, function(err, data){
-          if(err){
+        }, function (err, data) {
+          if (err) {
             handleError(err);
             df.reject(err);
-          }else{
+          } else {
             df.resolve(data);
           }
         });
@@ -704,13 +706,13 @@ angular.module('web')
               handleError(err);
               b(err);
             } else {
-              if(data.Grants && data.Grants.length==1){
-                var t=[];
-                for(var k in data.Grants[0]){
+              if (data.Grants && data.Grants.length == 1) {
+                var t = [];
+                for (var k in data.Grants[0]) {
                   t.push(data.Grants[0][k]);
                 }
                 data.acl = t.join('');
-              }else{
+              } else {
                 data.acl = 'default';
               }
               a(data);
@@ -889,7 +891,7 @@ angular.module('web')
           var opt = {
             Bucket: bucket,
             Key: key,
-            CopySource: '/'+bucket+'/'+encodeURIComponent(key),
+            CopySource: '/' + bucket + '/' + encodeURIComponent(key),
             MetadataDirective: 'REPLACE', //覆盖meta
 
             Metadata: metas || {},
@@ -898,7 +900,7 @@ angular.module('web')
             CacheControl: headers['CacheControl'],
             ContentDisposition: headers['ContentDisposition'],
             ContentEncoding: '',//headers['ContentEncoding'],
-            ContentLanguage:headers['ContentLanguage'],
+            ContentLanguage: headers['ContentLanguage'],
             Expires: headers['Expires'],
           };
           client.copyObject(opt, function (err, data) {
@@ -940,59 +942,59 @@ angular.module('web')
       }
 
       function listFiles(region, bucket, key, marker) {
-        return new Promise(function(a,b){
-          _listFilesOrigion(region, bucket, key, marker).then(function(result){
-              var arr = result.data;
-              if (arr && arr.length) {
-                $timeout( ()=> {
-                  loadStorageStatus(region, bucket, arr);
-                },NEXT_TICK);
-              }
-              a(result);
-          }, function(err){
+        return new Promise(function (a, b) {
+          _listFilesOrigion(region, bucket, key, marker).then(function (result) {
+            var arr = result.data;
+            if (arr && arr.length) {
+              $timeout(() => {
+                loadStorageStatus(region, bucket, arr);
+              }, NEXT_TICK);
+            }
+            a(result);
+          }, function (err) {
             b(err);
           });
         });
       }
 
-      function loadStorageStatus(region, bucket, arr){
-         return new Promise(function(a,b){
-            var len = arr.length;
-            var c = 0;
-            _dig();
+      function loadStorageStatus(region, bucket, arr) {
+        return new Promise(function (a, b) {
+          var len = arr.length;
+          var c = 0;
+          _dig();
 
-            function _dig(){
-               if(c >= len){
-                  a();
-                  return;
-               }
-               var item = arr[c];
-               c++
-
-               if (!item.isFile || item.storageClass != 'Archive'){
-                 $timeout(_dig, NEXT_TICK);
-                 return;
-               }
-
-               getMeta(region, bucket, item.path).then(function(data){
-                  if (data.Restore) {
-                    var info = parseRestoreInfo(data.Restore);
-                    if (info['ongoing-request'] == 'true') {
-                      item.storageStatus = 2; // '归档文件正在恢复中，请耐心等待...';
-                    } else {
-                      item.expired_time = info['expiry-date'];
-                      item.storageStatus = 3; // '归档文件，已恢复，可读截止时间
-                    }
-                  }else{
-                    item.storageStatus = 1;
-                  }
-                  $timeout(_dig, NEXT_TICK);
-               }, function(err){
-                 b(err);
-                 $timeout(_dig, NEXT_TICK);
-               });
+          function _dig() {
+            if (c >= len) {
+              a();
+              return;
             }
-         });
+            var item = arr[c];
+            c++
+
+            if (!item.isFile || item.storageClass != 'Archive') {
+              $timeout(_dig, NEXT_TICK);
+              return;
+            }
+
+            getMeta(region, bucket, item.path).then(function (data) {
+              if (data.Restore) {
+                var info = parseRestoreInfo(data.Restore);
+                if (info['ongoing-request'] == 'true') {
+                  item.storageStatus = 2; // '归档文件正在恢复中，请耐心等待...';
+                } else {
+                  item.expired_time = info['expiry-date'];
+                  item.storageStatus = 3; // '归档文件，已恢复，可读截止时间
+                }
+              } else {
+                item.storageStatus = 1;
+              }
+              $timeout(_dig, NEXT_TICK);
+            }, function (err) {
+              b(err);
+              $timeout(_dig, NEXT_TICK);
+            });
+          }
+        });
       }
 
       function _listFilesOrigion(region, bucket, key, marker) {
@@ -1054,7 +1056,7 @@ angular.module('web')
                   n.storageClass = n.StorageClass;
                   n.type = n.Type;
                   n.lastModified = n.LastModified;
-                  n.url =  getOssUrl(region, opt.Bucket, n.Key);
+                  n.url = getOssUrl(region, opt.Bucket, n.Key);
 
                   t.push(n);
                 }
@@ -1216,7 +1218,7 @@ angular.module('web')
 
               if (result.NextMarker) {
                 opt.Marker = result.NextMarker;
-                $timeout(_dig,NEXT_TICK);
+                $timeout(_dig, NEXT_TICK);
               } else {
                 resolve(t);
               }
@@ -1253,7 +1255,7 @@ angular.module('web')
               message: err.message
             };
           }
-          if(err.code=='NetworkingError' && err.message.indexOf('ENOTFOUND')!=-1){
+          if (err.code == 'NetworkingError' && err.message.indexOf('ENOTFOUND') != -1) {
             console.error(err);
           }
           else Toast.error(err.code + ': ' + err.message);
@@ -1265,16 +1267,29 @@ angular.module('web')
        *    object = {id, secret, region, bucket}
        */
       function getClient(opt) {
-
         var options = prepaireOptions(opt)
-        // console.log(options)
-        var client = new ALY.OSS(options);
+
+        var client = new AWS.S3({
+          apiVersion: '2006-03-01',
+          endpoint: options.endpoint,
+          region: options.region,
+          accessKeyId: options.accessKeyId,
+          secretAccessKey: options.secretAccessKey,
+          maxRetries: options.maxRetries,
+          s3ForcePathStyle: true,
+          signatureVersion: 'v4',
+          httpOptions: {
+            connectTimeout: 3000, // 3s
+            timeout: 3600000 // 1h
+          }
+        })
+
         return client;
       }
 
 
 
-      function prepaireOptions(opt){
+      function prepaireOptions(opt) {
         var authInfo = AuthInfo.get();
 
         var bucket;
@@ -1285,45 +1300,42 @@ angular.module('web')
           }
         }
 
-        var endpoint = getOssEndpoint(authInfo.region || 'oss-cn-beijing', bucket, authInfo.eptpl);
+        var endpoint = getOssEndpoint(authInfo.region || 'cn-east-1', bucket, authInfo.eptpl);
 
         var options = {
           //region: authInfo.region,
-          accessKeyId: authInfo.id || 'a',
-          secretAccessKey: authInfo.secret || 'a',
+          accessKeyId: authInfo.id || 'ak',
+          secretAccessKey: authInfo.secret || 'sk',
           endpoint: endpoint,
           apiVersion: '2013-10-15',
           httpOptions: {
             timeout: authInfo.httpOptions ? authInfo.httpOptions.timeout : 0
           },
-          maxRetries: 50
+          maxRetries: 10
         };
 
-        if(authInfo.id && authInfo.id.indexOf('STS.')==0){
-            options.securityToken= authInfo.stoken || null;
-        }
         return options;
       }
 
       function parseOSSPath(ossPath) {
-         if(!ossPath || ossPath.indexOf(DEF_ADDR)==-1 || ossPath==DEF_ADDR){
-           return {};
-         }
+        if (!ossPath || ossPath.indexOf(DEF_ADDR) == -1 || ossPath == DEF_ADDR) {
+          return {};
+        }
 
-         var str = ossPath.substring(DEF_ADDR.length);
-         var ind = str.indexOf('/');
-         if(ind==-1){
-           var bucket = str;
-           var key = '';
-         }else{
-           var bucket = str.substring(0, ind);
-           var key = str.substring(ind+1);
-         }
-         return {bucket:bucket, key:key};
+        var str = ossPath.substring(DEF_ADDR.length);
+        var ind = str.indexOf('/');
+        if (ind == -1) {
+          var bucket = str;
+          var key = '';
+        } else {
+          var bucket = str.substring(0, ind);
+          var key = str.substring(ind + 1);
+        }
+        return { bucket: bucket, key: key };
       }
 
 
-      function getOssUrl(region, bucket, key){
+      function getOssUrl(region, bucket, key) {
         //eptpl = eptpl || AuthInfo.get().eptpl || 'http://{region}.qiniu.com';
 
         var isHttps = Global.ossEndpointProtocol == 'https:';
@@ -1331,15 +1343,15 @@ angular.module('web')
 
         if (bucket && $rootScope.bucketMap && $rootScope.bucketMap[bucket]) {
           var endpoint = $rootScope.bucketMap[bucket].extranetEndpoint;
-          if (endpoint){
-            return isHttps ? ('https://'+ bucket+'.'+ endpoint + ':443' +'/' + key) : ('http://'+ bucket+'.' + endpoint + '/' + key);
+          if (endpoint) {
+            return isHttps ? ('https://' + bucket + '.' + endpoint + ':443' + '/' + key) : ('http://' + bucket + '.' + endpoint + '/' + key);
           }
         }
 
         //region是domain
         if (region && region.indexOf('.') != -1) {
           if (region.indexOf('http') != 0) {
-            region = Global.ossEndpointProtocol == 'https:' ? ('https://'+ bucket+'.' + region + ':443'+'/' + key) : ('http://' + bucket+'.'+ region+'/' + key);
+            region = Global.ossEndpointProtocol == 'https:' ? ('https://' + bucket + '.' + region + ':443' + '/' + key) : ('http://' + bucket + '.' + region + '/' + key);
           }
           return region;
         }
@@ -1347,45 +1359,17 @@ angular.module('web')
 
         //region
         if (Global.ossEndpointProtocol == 'https:') {
-          return 'https://' + bucket+'.'+ region + '.qiniu.com:443'+'/' + key;
+          return 'https://' + bucket + '.' + region + '.qiniu.com:443' + '/' + key;
         }
-        return 'http://' + bucket+'.'+ region + '.qiniu.com'+'/' + key;
+        return 'http://' + bucket + '.' + region + '.qiniu.com' + '/' + key;
 
       }
 
       function getOssEndpoint(region, bucket, eptpl) {
-        eptpl = eptpl || AuthInfo.get().eptpl || 'http://{region}.qiniu.com';
+        eptpl = eptpl || AuthInfo.get().eptpl || 'http://{region}-s3.qiniu.com';
+        eptpl = eptpl.replace('{region}', region);
 
-        eptpl = eptpl.replace('{region}',region);
-        //console.log('-->',eptpl)
         return eptpl;
-
-        //-------------------------
-
-        // var isHttps = Global.ossEndpointProtocol == 'https:';
-        // //通过bucket获取endpoint
-        // if (bucket && $rootScope.bucketMap && $rootScope.bucketMap[bucket]) {
-        //   var endpoint = $rootScope.bucketMap[bucket][$rootScope.internalSupported?'intranetEndpoint':'extranetEndpoint'];
-        //   if (endpoint) return isHttps ? ('https://' + endpoint + ':443') : ('http://' + endpoint);
-        // }
-        //
-        // //region是domain
-        // if (region && region.indexOf('.') != -1) {
-        //   if (region.indexOf('http') != 0) {
-        //     region = Global.ossEndpointProtocol == 'https:' ? ('https://' + region + ':443') : ('http://' + region);
-        //   }
-        //   return region;
-        // }
-        //
-        // //region
-        // if (Global.ossEndpointProtocol == 'https:') {
-        //   return $rootScope.internalSupported
-        //       ?'https://' + region + '-internal.qiniu.com:443'
-        //       :'https://' + region + '.qiniu.com:443';
-        // }
-        // return $rootScope.internalSupported
-        //       ? 'http://' + region + '-internal.qiniu.com'
-        //       : 'http://' + region + '.qiniu.com';
       }
 
     }

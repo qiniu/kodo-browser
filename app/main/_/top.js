@@ -1,8 +1,8 @@
 
 
 angular.module('web')
-  .controller('topCtrl', ['$scope', '$rootScope','$uibModal', '$location', '$translate', '$timeout','Dialog','Auth','Const', 'AuthInfo','settingsSvs','autoUpgradeSvs','safeApply',
-    function ($scope, $rootScope, $modal, $location, $translate, $timeout,Dialog,Auth, Const, AuthInfo, settingsSvs, autoUpgradeSvs, safeApply) {
+  .controller('topCtrl', ['$scope', '$rootScope', '$uibModal', '$location', '$translate', '$timeout', 'Dialog', 'Auth', 'Const', 'AuthInfo', 'settingsSvs', 'autoUpgradeSvs', 'safeApply',
+    function ($scope, $rootScope, $modal, $location, $translate, $timeout, Dialog, Auth, Const, AuthInfo, settingsSvs, autoUpgradeSvs, safeApply) {
 
       var fs = require('fs');
       var path = require('path');
@@ -18,16 +18,15 @@ angular.module('web')
 
       var ctime = 0;
       var tid;
-      function click10(){
+      function click10() {
         ctime++;
-        if(ctime > 10){
-          console.log('---open dev tool---');
+        if (ctime > 10) {
           openDevTools();
         }
         $timeout.cancel(tid);
-        tid=$timeout(function(){
+        tid = $timeout(function () {
           ctime = 0;
-        },600);
+        }, 600);
       }
 
       $rootScope.app = {};
@@ -39,26 +38,26 @@ angular.module('web')
       $scope.authInfo.expirationStr = moment(new Date($scope.authInfo.expiration)).format('YYYY-MM-DD HH:mm:ss');
 
 
-      $scope.$watch('upgradeInfo.isLastVersion', function(v){
-        if(false===v){
-          if(1==settingsSvs.autoUpgrade.get()) autoUpgradeSvs.start()
+      $scope.$watch('upgradeInfo.isLastVersion', function (v) {
+        if (false === v) {
+          if (1 == settingsSvs.autoUpgrade.get()) autoUpgradeSvs.start()
           else $scope.showAbout();
 
         }
       });
-      $scope.$watch('upgradeInfo.upgradeJob.status', function(s){
-        if('failed'==s || 'finished'==s){
-           $scope.showAbout();
+      $scope.$watch('upgradeInfo.upgradeJob.status', function (s) {
+        if ('failed' == s || 'finished' == s) {
+          $scope.showAbout();
         }
       });
 
 
-      $rootScope.showSettings = function(fn){
+      $rootScope.showSettings = function (fn) {
         $modal.open({
           templateUrl: 'main/modals/settings.html',
           controller: 'settingsCtrl',
           resolve: {
-            callback: function(){
+            callback: function () {
               return fn;
             }
           }
@@ -69,30 +68,30 @@ angular.module('web')
       function logout() {
         var title = T('logout');
         var message = T('logout.message');
-        Dialog.confirm(title, message, function(b){
-          if(b){
+        Dialog.confirm(title, message, function (b) {
+          if (b) {
             Auth.logout().then(function () {
               $location.url('/login');
             });
           }
-        },1);
+        }, 1);
       }
 
-      function showReleaseNote(){
+      function showReleaseNote() {
         var converter = new showdown.Converter();
-        fs.readFile(path.join(__dirname, 'release-notes', Global.app.version+'.md'), function(err, text){
-            if(err){
-              console.error(err);
-              return;
-            }
-            text = text + '';
-            var html = converter.makeHtml(text);
-            var message = T('main.upgration');//'主要更新'
-            Dialog.alert(message, html, function(){}, {size:'lg'});
+        fs.readFile(path.join(__dirname, 'release-notes', Global.app.version + '.md'), function (err, text) {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          text = text + '';
+          var html = converter.makeHtml(text);
+          var message = T('main.upgration');//'主要更新'
+          Dialog.alert(message, html, function () { }, { size: 'lg' });
         });
       }
 
-      function showFavList(){
+      function showFavList() {
         $modal.open({
           templateUrl: 'main/modals/fav-list.html',
           controller: 'favListCtrl',
@@ -100,13 +99,13 @@ angular.module('web')
         });
       }
 
-      function showAbout(){
+      function showAbout() {
         $modal.open({
           templateUrl: 'main/modals/about.html',
           controller: 'aboutCtrl',
           size: 'md',
           resolve: {
-            pscope: function(){
+            pscope: function () {
               return $scope
             }
           }
@@ -115,4 +114,4 @@ angular.module('web')
 
 
     }])
-;
+  ;

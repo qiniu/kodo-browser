@@ -56,7 +56,7 @@ angular.module('web')
 
 
         getClient: getClient,
-        parseOSSPath: parseOSSPath,
+        parseS3Path: parseS3Path,
         getS3Endpoint: getS3Endpoint,
         parseRestoreInfo: parseRestoreInfo,
         signatureUrl: signatureUrl,
@@ -1306,7 +1306,7 @@ angular.module('web')
         return options;
       }
 
-      function parseOSSPath(ossPath) {
+      function parseS3Path(ossPath) {
         if (!ossPath || ossPath.indexOf(DEF_ADDR) == -1 || ossPath == DEF_ADDR) {
           return {};
         }

@@ -4,6 +4,8 @@ angular.module("web").controller("filesCtrl", [
   "$uibModal",
   "$timeout",
   "$translate",
+  "$location",
+  "Auth",
   "AuthInfo",
   "osClient",
   "settingsSvs",
@@ -17,6 +19,8 @@ angular.module("web").controller("filesCtrl", [
     $modal,
     $timeout,
     $translate,
+    $location,
+    Auth,
     AuthInfo,
     osClient,
     settingsSvs,
@@ -26,6 +30,7 @@ angular.module("web").controller("filesCtrl", [
     Dialog
   ) {
     var T = $translate.instant;
+
     angular.extend($scope, {
       showTab: 1,
       ref: {
@@ -49,18 +54,18 @@ angular.module("web").controller("filesCtrl", [
         localStorage.setItem("transVisible", f);
       },
 
-      //object 相关
+      //bucket ops
+      showDeleteBucket: showDeleteBucket,
+      showAddBucket: showAddBucket,
+      showUpdateBucket: showUpdateBucket,
+      showBucketMultipart: showBucketMultipart,
+
+      //object ops
       showAddFolder: showAddFolder,
       showDeleteFiles: showDeleteFiles,
       showDeleteFilesSelected: showDeleteFilesSelected,
       showRename: showRename,
       showMove: showMove,
-
-      //bucket相关
-      showDeleteBucket: showDeleteBucket,
-      showAddBucket: showAddBucket,
-      showUpdateBucket: showUpdateBucket,
-      showBucketMultipart: showBucketMultipart,
 
       //全选相关
       sel: {
@@ -92,17 +97,11 @@ angular.module("web").controller("filesCtrl", [
       //item 下载
       showDownload: showDownload,
 
-      //授权
-      showGrant: showGrant,
-      showGrantToken: showGrantToken,
-      showUserList: showUserList,
       //地址
       showAddress: showAddress,
       showACL: showACL,
 
       showHttpHeaders: showHttpHeaders,
-
-      showRestore: showRestore,
 
       loadNext: loadNext,
 
@@ -117,6 +116,7 @@ angular.module("web").controller("filesCtrl", [
         downloadsChange: downloadsChange
       }
     });
+
     $scope.fileSpacerMenuOptions = [
       [
         function() {
@@ -165,7 +165,6 @@ angular.module("web").controller("filesCtrl", [
         }
       ]
     ];
-
     $scope.fileMenuOptions = function(item, $index) {
       if ($scope.sel.x["i_" + $index]) {
         //pass
@@ -290,6 +289,7 @@ angular.module("web").controller("filesCtrl", [
         ]
       ];
     };
+
     $scope.bucketSpacerMenuOptions = [
       [
         function() {
@@ -303,7 +303,6 @@ angular.module("web").controller("filesCtrl", [
         }
       ]
     ];
-
     $scope.bucketMenuOptions = [
       [
         function($itemScope, $event, modelValue, text, $li) {
@@ -342,6 +341,7 @@ angular.module("web").controller("filesCtrl", [
         }
       }, 600);
     }
+
     var tid_downloads;
     function downloadsChange() {
       $timeout.cancel(tid_downloads);
@@ -354,7 +354,6 @@ angular.module("web").controller("filesCtrl", [
 
     var ttid;
     $scope.$on("needrefreshfilelists", function(e) {
-      console.log("on:needrefreshfilelists");
       $timeout.cancel(ttid);
       ttid = $timeout(function() {
         goIn($scope.currentInfo.bucket, $scope.currentInfo.key);
@@ -365,21 +364,27 @@ angular.module("web").controller("filesCtrl", [
 
     function init() {
       var authInfo = AuthInfo.get();
+      if (!authInfo.isAuthed) {
+        Auth.logout().then(function() {
+          $location.url("/login");
+        });
+        return
+      }
 
       $rootScope.currentAuthInfo = authInfo;
 
-      if (authInfo.osspath) {
+      if (authInfo.s3path) {
         $scope.ref.isBucketList = false;
         //bucketMap
         $rootScope.bucketMap = {};
-        var bucket = osClient.parseOSSPath(authInfo.osspath).bucket;
+        var bucket = osClient.parseS3Path(authInfo.s3path).bucket;
         $rootScope.bucketMap[bucket] = {
           region: authInfo.region
         };
 
         $timeout(function() {
           addEvents();
-          //$rootScope.$broadcast('osAddressChange', authInfo.osspath);
+          //$rootScope.$broadcast('osAddressChange', authInfo.s3path);
           $scope.$broadcast("filesViewReady");
         });
       } else {
@@ -407,7 +412,7 @@ angular.module("web").controller("filesCtrl", [
       $scope.$on("osAddressChange", function(e, addr, forceRefresh) {
         console.log("on:osAddressChange:", addr, "forceRefresh:", forceRefresh);
 
-        var info = osClient.parseOSSPath(addr);
+        var info = osClient.parseS3Path(addr);
 
         if (info.key) {
           var lastGan = info.key.lastIndexOf("/");
@@ -466,7 +471,7 @@ angular.module("web").controller("filesCtrl", [
       if (bucket) {
         ossPath = "kodo://" + bucket + "/" + (prefix || "");
       }
-      
+
       $rootScope.$broadcast("gotoOsAddress", ossPath);
     }
 

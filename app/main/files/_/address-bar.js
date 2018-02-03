@@ -6,7 +6,7 @@ angular.module('web')
     var T = $translate.instant;
 
     angular.extend($scope, {
-      address: AuthInfo.get().osspath || DEF_ADDR,
+      address: AuthInfo.get().s3path || DEF_ADDR,
       goUp: goUp,
       go: go,
       goHome: goHome,
@@ -141,7 +141,7 @@ angular.module('web')
     }
     function getDefaultAddress(){
       var info = AuthInfo.get();
-      return info['osspath'] || info['address'] || DEF_ADDR;
+      return info['s3path'] || info['address'] || DEF_ADDR;
     }
 
     //修正 address

@@ -112,7 +112,7 @@ OssStore.prototype.createUploadJob = function createUploadJob(options) {
 
  *
  * @param options
- *    options.from    {string} path string, under oss prefix, example: '/pic/b.jpg', it will be append to presetting osspath
+ *    options.from    {string} path string, under oss prefix, example: '/pic/b.jpg', it will be append to presetting s3path
  *                       as: 'kodo://bucket/users/test_user/pic/b.jpg'
  *    options.to  {string} local path string,  example: '/home/admin/a.jpg'
  *

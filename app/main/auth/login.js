@@ -4,30 +4,24 @@ angular.module("web").controller("loginCtrl", [
   "$translate",
   "Auth",
   "AuthInfo",
-  "$timeout",
   "$location",
   "Const",
   "Dialog",
   "Toast",
-  "Cipher",
   function(
     $scope,
     $rootScope,
     $translate,
     Auth,
     AuthInfo,
-    $timeout,
     $location,
     Const,
     Dialog,
-    Toast,
-    Cipher
+    Toast
   ) {
-    var DEF_EP_TPL = "https://{region}-s3.qiniu.com";
-
+    var DEF_EPTPL = "https://{region}-s3.qiniu.com";
     var KEY_REMEMBER = Const.KEY_REMEMBER;
     var SHOW_HIS = Const.SHOW_HIS;
-    var KEY_AUTHTOKEN = "key-authtoken";
     var regions = angular.copy(Const.regions);
 
     var T = $translate.instant;
@@ -39,13 +33,15 @@ angular.module("web").controller("loginCtrl", [
         showHis: "NO"
       },
       item: {
-        eptpl: DEF_EP_TPL
+        eptpl: DEF_EPTPL
       },
       eptplType: "default",
 
       hideTopNav: 1,
-      reg_osspath: /^kodo\:\/\//,
+      reg_s3path: /^kodo\:\/\//,
       regions: regions,
+      defaultRegion: "",
+
       onSubmit: onSubmit,
       showCleanHistories: showCleanHistories,
       useHis: useHis,
@@ -56,7 +52,7 @@ angular.module("web").controller("loginCtrl", [
     });
 
     $scope.$watch("item.eptpl", function(v) {
-      $scope.eptplType = v == DEF_EP_TPL ? "default" : "customize";
+      $scope.eptplType = v == DEF_EPTPL ? "default" : "customize";
     });
     $scope.$watch("gtab", function(v) {
       localStorage.setItem("gtag", v);
@@ -64,9 +60,9 @@ angular.module("web").controller("loginCtrl", [
 
     function eptplChange(t) {
       $scope.eptplType = t;
-      console.log(t);
+
       if (t == "default") {
-        $scope.item.eptpl = DEF_EP_TPL;
+        $scope.item.eptpl = DEF_EPTPL;
       } else {
         $scope.item.eptpl = "";
       }
@@ -78,9 +74,6 @@ angular.module("web").controller("loginCtrl", [
 
     function useHis(h) {
       angular.extend($scope.item, h);
-      // $scope.item.id=h.id;
-      // $scope.item.secret = h.secret;
-      // $scope.item.desc = h.desc;
     }
 
     function showRemoveHis(h) {
@@ -127,8 +120,11 @@ angular.module("web").controller("loginCtrl", [
       localStorage.setItem(KEY_REMEMBER, $scope.flags.remember);
 
       var data = angular.copy($scope.item);
+
       //trim password
-      if (data.secret) data.secret = data.secret.trim();
+      if (data.secret) {
+        data.secret = data.secret.trim();
+      }
 
       delete data.authToken;
       delete data.securityToken;

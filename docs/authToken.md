@@ -47,7 +47,7 @@ var opt = {
   stoken: '',
   privilege: '',
   expiration: '',
-  osspath: '',
+  s3path: '',
   region: ''
 };
 
@@ -70,7 +70,7 @@ var opt = {
   secret: '',
   desc: '', //可选
   region: 'oss-cn-shenzhen',
-  osspath: 'kodo://your-bucket/test/',  
+  s3path: 'kodo://your-bucket/test/',  
   eptpl: 'http://{region}.qiniu.com'
 };
 

@@ -134,16 +134,16 @@ function parseLocalPath(p) {
   return { name: path.basename(p), path: p };
 }
 
-function parseOssPath(osspath) {
-  if (typeof osspath != "string") {
-    return osspath;
+function parseOssPath(s3path) {
+  if (typeof s3path != "string") {
+    return s3path;
   }
 
-  if (!osspath.startsWith("kodo://")) {
+  if (!s3path.startsWith("kodo://")) {
     throw Error("Invalid oss path");
   }
 
-  var a = osspath.substring("kodo://".length);
+  var a = s3path.substring("kodo://".length);
   var bucket = a.split("/", 1)[0];
   var key = a.substring(bucket.length + 1);
   return {

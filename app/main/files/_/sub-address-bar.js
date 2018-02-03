@@ -2,7 +2,7 @@ angular.module('web')
   .controller('subAddressBarCtrl', ['$scope','$translate','Fav', 'AuthInfo','Toast','settingsSvs',
   function ($scope, $translate,Fav, AuthInfo,  Toast,settingsSvs) {
 
-    var DEF_ADDR = AuthInfo.get().osspath;
+    var DEF_ADDR = AuthInfo.get().s3path;
       var T = $translate.instant;
 
     angular.extend($scope, {
@@ -146,7 +146,7 @@ angular.module('web')
     }
     function getDefaultAddress(){
       var info = AuthInfo.get();
-      return info['osspath'] || info['address'] || DEF_ADDR;
+      return info['s3path'] || info['address'] || DEF_ADDR;
     }
 
     //修正 address

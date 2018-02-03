@@ -115,7 +115,7 @@ angular.module('web')
         if(v=='kodo://'){
           return;
         }
-        var info = osClient.parseOSSPath(v);
+        var info = osClient.parseS3Path(v);
 
         if(info.key==''){
           if(!$scope.showBuckets){

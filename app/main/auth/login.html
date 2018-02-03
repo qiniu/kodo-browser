@@ -24,16 +24,14 @@
  </div>
 </script>
 
-
 <div style="overflow:auto;height:100%">
 
   <div class="clearfix" style="height:40px;"></div>
 
   <div class="col-sm-8 col-sm-offset-2">
     <div class="panel panel-default shadow10">
-    
-      <div class="panel-heading pd0" style="border:0">
 
+      <div class="panel-heading pd0" style="border:0">
         <ul class="nav nav-tabs">
           <li role="presentation" ng-class="{active:gtab==1}">
             <a href="" ng-click="gtab=1">
@@ -42,8 +40,8 @@
             </a>
           </li>
         </ul>
-
       </div>
+
       <div class="panel-body">
 
         <form ng-if="gtab==1" class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
@@ -66,7 +64,6 @@
                 <input type="text" required ng-model="item.eptpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="endpoint" name="endpoint"
                   placeholder="https://">
               </div>
-
             </div>
 
           </div>
@@ -87,22 +84,8 @@
           </div>
 
 
-          <div class="form-group" ng-class="{'has-error': !form1.osspath.$valid }">
-            <label for="input3" class="col-sm-4 control-label">
-              {{'auth.presetPrefixPath'|translate}}:
-              <span uib-popover-template="'auth-preosspath-popup.html'" popover-trigger="'mouseenter'" popover-append-to-body="true">
-                <i class="fa fa-question-circle"></i>
-              </span>
-            </label>
-            <div class="col-sm-8">
-              <input type="text" name="osspath" ng-pattern="reg_osspath" ng-model="item.osspath" class="form-control" id="input3" placeholder="{{'auth.presetPrefixPath.placeholder'|translate}}">
-            </div>
-          </div>
-
-
           <div class="form-group" ng-if="item.osspath && item.eptpl.indexOf('{region}')!=-1">
             <label for="input4" class="col-sm-4 control-label">
-              <!-- <span class="red">*</span> -->
               {{'region'|translate}}:
               <!-- 区域: -->
             </label>

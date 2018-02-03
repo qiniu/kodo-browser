@@ -19,7 +19,7 @@ angular.module('web')
     }
 
     function goTo(url){
-      $rootScope.$broadcast('goToOssAddress', url);
+      $rootScope.$broadcast('gotoOsAddress', url);
       cancel();
     }
 

@@ -106,13 +106,13 @@ angular.module('web')
        var addr = His.goBack();
        //console.log('-->',addr);
        $scope.address = addr.url;
-       $scope.$emit('ossAddressChange', addr.url);
+       $scope.$emit('osAddressChange', addr.url);
     }
     function goAhead(){
        var addr = His.goAhead();
        //console.log('-->',addr);
        $scope.address = addr.url;
-       $scope.$emit('ossAddressChange', addr.url);
+       $scope.$emit('osAddressChange', addr.url);
     }
     /************ 历史记录前进后退 end **************/
 
@@ -121,8 +121,8 @@ angular.module('web')
 
       goHome();
 
-      $scope.$on('goToOssAddress', function(e, addr){
-        console.log('on:goToOssAddress', addr);
+      $scope.$on('gotoOsAddress', function(e, addr){
+        console.log('on:gotoOsAddress', addr);
         $scope.address = addr;
         go();
       });
@@ -170,7 +170,7 @@ angular.module('web')
     function go(force) {
       var addr = getAddress();
       His.add(addr); //历史记录
-      $scope.$emit('ossAddressChange', addr, force);
+      $scope.$emit('osAddressChange', addr, force);
     }
     //向上
     function goUp() {

@@ -76,7 +76,7 @@ angular.module('web')
 
     //下载进度保存路径
     function getFavFilePath() {
-      var folder = path.join(os.homedir(), '.oss-browser');
+      var folder = path.join(os.homedir(), '.s3-browser');
       if(!fs.existsSync(folder)){
           fs.mkdirSync(folder);
       }

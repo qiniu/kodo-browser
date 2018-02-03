@@ -255,7 +255,7 @@ angular.module('web')
               SecurityToken: auth.stoken
             }
           },
-          endpoint: osClient.getOssEndpoint(opt.region, opt.to.bucket, auth.eptpl)
+          endpoint: osClient.getS3Endpoint(opt.region, opt.to.bucket, auth.eptpl)
         });
       }
       else{
@@ -264,7 +264,7 @@ angular.module('web')
             accessKeyId: auth.id,
             secretAccessKey: auth.secret
           },
-          endpoint: osClient.getOssEndpoint(opt.region, opt.from.bucket, auth.eptpl)
+          endpoint: osClient.getS3Endpoint(opt.region, opt.from.bucket, auth.eptpl)
         });
       }
       return store.createDownloadJob(opt);
@@ -312,7 +312,7 @@ angular.module('web')
 
     //下载进度保存路径
     function getDownProgFilePath() {
-      var folder = path.join(os.homedir(), '.oss-browser');
+      var folder = path.join(os.homedir(), '.s3-browser');
       if(!fs.existsSync(folder)){
           fs.mkdirSync(folder);
       }

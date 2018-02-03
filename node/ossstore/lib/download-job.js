@@ -9,7 +9,7 @@ class DownloadJob extends Base {
 
   /**
    *
-   * @param ossClient
+   * @param osClient
    * @param config
    *    config.from {object|string}  {bucket, key} or kodo://bucket/test/a.jpg
    *    config.to   {object|string}  {name, path} or /home/admin/a.jpg
@@ -18,10 +18,10 @@ class DownloadJob extends Base {
    *    config.chunkSize
    *    config.enableCrc64
    */
-  constructor(ossClient, config) {
+  constructor(osClient, config) {
     super();
     this.id= 'dj-'+new Date().getTime()+'-'+ ((''+Math.random()).substring(2));
-    this.oss = ossClient;
+    this.oss = osClient;
     this._config = {};
     Object.assign(this._config, config);
 

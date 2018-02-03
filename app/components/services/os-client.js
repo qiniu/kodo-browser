@@ -57,7 +57,7 @@ angular.module('web')
 
         getClient: getClient,
         parseOSSPath: parseOSSPath,
-        getOssEndpoint: getOssEndpoint,
+        getS3Endpoint: getS3Endpoint,
         parseRestoreInfo: parseRestoreInfo,
         signatureUrl: signatureUrl,
 
@@ -1274,11 +1274,9 @@ angular.module('web')
             timeout: 3600000 // 1h
           }
         })
-
+        
         return client;
       }
-
-
 
       function prepaireOptions(opt) {
         var authInfo = AuthInfo.get();
@@ -1291,7 +1289,7 @@ angular.module('web')
           }
         }
 
-        var endpoint = getOssEndpoint(authInfo.region || 'cn-east-1', bucket, authInfo.eptpl);
+        var endpoint = getS3Endpoint(authInfo.region || 'cn-east-1', bucket, authInfo.eptpl);
 
         var options = {
           //region: authInfo.region,
@@ -1327,8 +1325,6 @@ angular.module('web')
 
 
       function getOssUrl(region, bucket, key) {
-        //eptpl = eptpl || AuthInfo.get().eptpl || 'http://{region}.qiniu.com';
-
         var isHttps = Global.ossEndpointProtocol == 'https:';
 
 
@@ -1356,7 +1352,11 @@ angular.module('web')
 
       }
 
-      function getOssEndpoint(region, bucket, eptpl) {
+      function getS3Endpoint(region, bucket, eptpl) {
+        if (!region) {
+          region = 'cn-east-1'
+        }
+
         eptpl = eptpl || AuthInfo.get().eptpl || 'http://{region}-s3.qiniu.com';
         eptpl = eptpl.replace('{region}', region);
 

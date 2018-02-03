@@ -9,11 +9,11 @@
  </div>
 </script>
 
-<script type="text/ng-template" id="auth-pres3path-popup.html">
+<script type="text/ng-template" id="auth-region-popup.html">
   <div>
    <ol style="padding-left:10px;">
-     <li>{{'auth.presetPrefixPath.popup.msg1'|translate}}</li>
-     <li>{{'auth.presetPrefixPath.popup.msg2'|translate}}</li>
+     <li>{{'auth.region.popup.msg1'|translate}}</li>
+     <li>{{'auth.region.popup.msg2'|translate}}</li>
    </ol>
  </div>
 </script>
@@ -36,7 +36,6 @@
           <li role="presentation" ng-class="{active:gtab==1}">
             <a href="" ng-click="gtab=1">
               {{'auth.accessLogin'|translate}}
-              <!-- AK登录 -->
             </a>
           </li>
         </ul>
@@ -83,25 +82,19 @@
             </div>
           </div>
 
-
-          <div class="form-group" ng-if="eptplType!='customize'">
+          <div class="form-group" ng-class="{'has-error': !form1.acrg.$valid && eptplType=='customize', 'has-feedback': eptplType=='customize'}">
             <label for="input4" class="col-sm-4 control-label">
               {{'region'|translate}}:
-              <!-- 区域: -->
+              <span uib-popover-template="'auth-region-popup.html'" popover-trigger="'mouseenter'" popover-append-to-body="true">
+                <i class="fa fa-question-circle"></i>
+              </span>
             </label>
-            <div class="col-sm-8">
+            <div class="col-sm-8" ng-if="eptplType!='customize'">
               <select required ng-model="item.region" class="form-control" id="arg" placeholder="{{'auth.region.placeholder'|translate}}"
                 ng-options="rg.id as ('region.'+rg.id|translate) for rg in regions">
               </select>
             </div>
-          </div>
-
-          <div class="form-group has-feedback" ng-if="eptplType=='customize'" ng-class="{'has-error': !form1.acrg.$valid }">
-            <label for="input4" class="col-sm-4 control-label">
-              {{'region'|translate}}:
-              <!-- 区域: -->
-            </label>
-            <div class="col-sm-8">
+            <div class="col-sm-8" ng-if="eptplType=='customize'">
               <input type="text" required ng-model="item.region" class="form-control" id="acrg" name="acrg" placeholder="{{'auth.region.placeholder'|translate}}">
             </div>
           </div>

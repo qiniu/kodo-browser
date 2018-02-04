@@ -275,11 +275,7 @@ angular.module("web").factory("osUploadManager", [
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
         },
-        endpoint: osClient.getS3Endpoint(
-          opt.region,
-          opt.to.bucket,
-          auth.eptpl
-        ),
+        endpoint: osClient.getS3Endpoint(opt.region, opt.to.bucket, auth.eptpl),
         httpOptions: {
           connectTimeout: 3000, // 3s
           timeout: 3600000 // 1h

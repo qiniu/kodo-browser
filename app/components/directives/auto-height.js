@@ -1,31 +1,30 @@
-angular.module('web')
-  .directive('autoHeight', ['$timeout', function ($timeout) {
-
+angular.module("web").directive("autoHeight", [
+  "$timeout",
+  function($timeout) {
     return {
       link: linkFn,
-      restrict: 'EA',
+      restrict: "EA",
       transclude: false,
       scope: {
-        autoHeight: '=',
+        autoHeight: "="
         //bottomLoader: '&'
       }
     };
 
     function linkFn(scope, ele, attr) {
-
       var h = parseInt(scope.autoHeight);
 
       ele.css({
         //'border-bottom': '1px solid #ccc',
-        'overflow': 'auto',
-        'position': 'relative'
+        overflow: "auto",
+        position: "relative"
       });
 
       var tid;
 
       function resize() {
         $timeout.cancel(tid);
-        tid = $timeout(function () {
+        tid = $timeout(function() {
           var v = $(window).height() + h;
           $(ele).height(v);
         }, 300);
@@ -52,7 +51,6 @@ angular.module('web')
       //   $(window).resize(onScroll);
       //   $(ele).scroll(onScroll);
       // }
-
     }
-
-  }]);
+  }
+]);

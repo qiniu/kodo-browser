@@ -1,11 +1,9 @@
-
 <div class="input-group">
-  <input type="text" readonly ng-model="selectedItem.ossPath" class="form-control"/>
+  <input type="text" readonly ng-model="selectedItem.ossPath" class="form-control" />
   <span class="input-group-btn">
-     <button type="button" class="btn btn-default" ng-click="goUp()"
-     ng-disabled="(!showBuckets && keepConfig.bucket!='' &&  keepConfig.key=='') || (showBuckets && keepConfig.bucket=='')">
-       <i class="fa fa-arrow-up text-info"></i>
-     </button>
+    <button type="button" class="btn btn-default" ng-click="goUp()" ng-disabled="(!showBuckets && keepConfig.bucket!='' &&  keepConfig.key=='') || (showBuckets && keepConfig.bucket=='')">
+      <i class="fa fa-arrow-up text-info"></i>
+    </button>
   </span>
 </div>
 <div style="width:100%;overflow:auto;border:1px solid #ccc;" ng-style="{height:height+'px'}">
@@ -14,9 +12,7 @@
 
   <table ng-if='!isLoading' class="table table-condensed table-striped" style="margin:0">
 
-    <tr ng-repeat="item in items"
-    ng-click="goIn(item);$event.stopPropagation()"
-    ng-class="{info:item.path==keepConfig.key}">
+    <tr ng-repeat="item in items" ng-click="goIn(item);$event.stopPropagation()" ng-class="{info:item.path==keepConfig.key}">
       <td>
         <div class="text-overflow" style="cursor:pointer;">
 

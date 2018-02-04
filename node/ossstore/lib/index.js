@@ -1,16 +1,17 @@
 "use strict";
-const AWS = require("aws-sdk");
 
 require("events").EventEmitter.prototype._maxListeners = 1000;
+
+const AWS = require("aws-sdk");
 
 var TIMEOUT = 60000; //60秒
 var UploadJob = require("./upload-job");
 var DownloadJob = require("./download-job");
 
 /**
- * OssStore
+ * S3Store
  *
- * @constructor OssStore
+ * @constructor S3Store
  *
  * @param config
  *    config.aliyunCredential
@@ -18,9 +19,9 @@ var DownloadJob = require("./download-job");
  *    config.endpoint
  */
 
-function OssStore(config) {
+function S3Store(config) {
   if (!config) {
-    console.log("需要 config");
+    console.log("config is required");
     return;
   }
 
@@ -28,13 +29,13 @@ function OssStore(config) {
   Object.assign(this._config, config);
 
   if (!this._config.endpoint) {
-    console.log("需要 endpoint");
+    console.log("config.endpoint is required");
     return;
   }
 
   var arr = this._config.endpoint.split("://");
   if (arr.length < 2) {
-    console.log("endpoint 格式错误");
+    console.log("config.endpoint format is error");
     return;
   }
   this._config.endpoint = {
@@ -42,7 +43,7 @@ function OssStore(config) {
     host: arr[1]
   };
 
-  this.oss = new AWS.S3({
+  this.client = new AWS.S3({
     apiVersion: "2006-03-01",
     endpoint:
       this._config.endpoint.protocol + "://" + this._config.endpoint.host,
@@ -63,7 +64,7 @@ function OssStore(config) {
  *
  * Usage:
  *
- *  new OssStore(cfg)
+ *  new S3Store(cfg)
  *     .createUploadJob({from:'/home/a.jpg', to:'kodo://a/b.jpg'})
  *
  * UploadJob class:
@@ -84,12 +85,12 @@ function OssStore(config) {
  *    options.checkPoints {object} saveCpt
  *    options.enableCrc64 {boolean}
  */
-OssStore.prototype.createUploadJob = function createUploadJob(options) {
+S3Store.prototype.createUploadJob = function createUploadJob(options) {
   var self = this;
 
-  var job = new UploadJob(self.oss, options);
-
   //默认是 waiting 状态
+  var job = new UploadJob(self.client, options);
+
   return job;
 };
 
@@ -97,7 +98,7 @@ OssStore.prototype.createUploadJob = function createUploadJob(options) {
  *
  * Usage:
  *
- *  new OssStore(cfg)
+ *  new S3Store(cfg)
  *     .createDownloadJob({from:'/home/a.jpg', to:'kodo://a/b.jpg'})
  *
  * DownloadJob class:
@@ -119,14 +120,13 @@ OssStore.prototype.createUploadJob = function createUploadJob(options) {
  *    options.checkpoint {object} saveCpt
  *    options.enableCrc64 {boolean}
  */
-OssStore.prototype.createDownloadJob = function createDownloadJob(options) {
+S3Store.prototype.createDownloadJob = function createDownloadJob(options) {
   var self = this;
 
-  var job = new DownloadJob(self.oss, options);
-
   //默认是 waiting 状态
+  var job = new DownloadJob(self.client, options);
 
   return job;
 };
 
-module.exports = OssStore;
+module.exports = S3Store;

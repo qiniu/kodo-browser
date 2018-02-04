@@ -67,7 +67,7 @@ angular.module("web").factory("autoUpgradeSvs", [
       this.check = function(crc, md5, fn) {
         //crc
         console.log("crc64 check");
-        return util.checkFileHash(to + ".download", crc, md5, fn);
+        return util.checksumFile(to + ".download", crc, md5, fn);
       };
 
       this.precheck = function() {

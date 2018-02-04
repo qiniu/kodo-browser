@@ -14,9 +14,9 @@ angular.module("web").factory("Auth", [
 
     function login(data) {
       var df = $q.defer();
-      
+
       data.httpOptions = { timeout: 5000 };
-      debugger;
+
       if (data.s3path) {
         var info = osClient.parseS3Path(data.s3path);
 

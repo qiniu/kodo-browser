@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
 function Base() {
   this._eventStack = {};
 }
 
-Base.prototype.on = function (evt, fn) {
+Base.prototype.on = function(evt, fn) {
   if (!this._eventStack[evt]) {
     this._eventStack[evt] = [];
   }
@@ -12,7 +12,7 @@ Base.prototype.on = function (evt, fn) {
   return this;
 };
 
-Base.prototype.off = function (evt, fn) {
+Base.prototype.off = function(evt, fn) {
   if (this._eventStack[evt]) {
     var arr = this._eventStack[evt];
     for (var i = 0; i < arr.length; i++) {
@@ -25,7 +25,7 @@ Base.prototype.off = function (evt, fn) {
   return this;
 };
 
-Base.prototype.emit = function (evt, ...argv) {
+Base.prototype.emit = function(evt, ...argv) {
   if (this._eventStack[evt]) {
     for (let fn of this._eventStack[evt]) {
       if (false === fn.apply(this, argv)) break;
@@ -33,6 +33,5 @@ Base.prototype.emit = function (evt, ...argv) {
   }
   return this;
 };
-
 
 module.exports = Base;

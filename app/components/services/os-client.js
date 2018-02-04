@@ -9,11 +9,10 @@ angular.module("web").factory("osClient", [
   "Const",
   "AuthInfo",
   function($q, $rootScope, $timeout, $state, Toast, Const, AuthInfo) {
-    var NEXT_TICK = 1;
-
-    var DEF_ADDR = "kodo://";
-    //var ALY = require('aliyun-sdk');
     var path = require("path");
+
+    var NEXT_TICK = 1;
+    var DEF_ADDR = "kodo://";
 
     return {
       createFolder: createFolder,

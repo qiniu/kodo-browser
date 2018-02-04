@@ -5,7 +5,6 @@ angular.module("web").factory("stsSvs", [
   "Toast",
   "Const",
   function($q, $state, AuthInfo, Toast, Const) {
-    var ALYD = require("aliyun-sdk");
     return {
       assumeRole: assumeRole
     };
@@ -65,13 +64,8 @@ angular.module("web").factory("stsSvs", [
 
     function getClient() {
       var authInfo = AuthInfo.get();
-      var ram = new ALYD.STS({
-        accessKeyId: authInfo.id,
-        secretAccessKey: authInfo.secret,
-        endpoint: "https://sts.qiniu.com",
-        apiVersion: "2015-04-01"
-      });
-      return ram;
+
+      return null;
     }
   }
 ]);

@@ -368,7 +368,8 @@ angular.module("web").controller("filesCtrl", [
         Auth.logout().then(function() {
           $location.url("/login");
         });
-        return
+
+        return;
       }
 
       $rootScope.currentAuthInfo = authInfo;
@@ -713,9 +714,6 @@ angular.module("web").controller("filesCtrl", [
     function showPreview(item, type) {
       var fileType = fileSvs.getFileType(item);
       fileType.type = type || fileType.type;
-      //console.log(fileType);
-
-      //type: [picture|code|others|doc]
 
       var templateUrl = "main/files/modals/preview/others-modal.html";
       var controller = "othersModalCtrl";

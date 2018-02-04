@@ -219,6 +219,14 @@ UploadJob.prototype.startUpload = function() {
       }
 
       self._changeStatus("finished");
+      self.emit("complete");
+
+      console.log(
+        "Uploaded: " + self.from.path + " %celapse",
+        "background:green;color:white",
+        self.endTime - self.startTime,
+        "ms"
+      );
     });
   });
 };

@@ -1,5 +1,5 @@
 {
-  "name": "ossstore",
+  "name": "s3store",
   "version": "1.0.0",
   "scripts": {
     "test": "NODE_ENV=test mocha test",

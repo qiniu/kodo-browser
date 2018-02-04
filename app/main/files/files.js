@@ -539,7 +539,7 @@ angular.module("web").controller("filesCtrl", [
       } else {
         angular.forEach(result, function(n) {
           if (!n.isFolder && fileSvs.getFileType(n).type == "picture") {
-            n.pic_url = osClient.signatureUrl2(
+            n.pic_url = osClient.signaturePicUrl(
               info.region,
               info.bucket,
               n.path,
@@ -549,7 +549,6 @@ angular.module("web").controller("filesCtrl", [
           }
         });
       }
-      //return result;
     }
 
     function listBuckets(fn) {

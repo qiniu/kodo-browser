@@ -38,10 +38,10 @@ class DownloadJob extends Base {
     this.id =
       "dj-" + new Date().getTime() + "-" + ("" + Math.random()).substring(2);
 
-    this.oss = osClient;
+    this.client = osClient;
     this.region = this._config.region;
 
-    this.from = util.parseS3Path(this._config.from); //oss path
+    this.from = util.parseS3Path(this._config.from); //s3 path
     this.to = util.parseLocalPath(this._config.to); //local path
 
     this.prog = this._config.prog || {
@@ -52,7 +52,6 @@ class DownloadJob extends Base {
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
     this.stopFlag = this.status != "running";
-    this.checkPoints = this._config.checkPoints;
     this.maxConcurrency = 10;
   }
 }
@@ -61,26 +60,12 @@ DownloadJob.prototype.start = function() {
   var self = this;
   if (self.status == "running") return;
 
-  // re-download from scratch
-  if (self._lastStatusFailed) {
-    self.checkPoints = {};
-  }
-
   self.message = "";
   self.startTime = new Date().getTime();
   self.endTime = null;
 
   self.stopFlag = false;
   self._changeStatus("running");
-
-  self.checkPoints =
-    self.checkPoints && self.checkPoints.Parts
-      ? self.checkPoints
-      : {
-          from: self.from,
-          to: self.to,
-          Parts: {}
-        };
 
   self.startDownload(self.checkPoints);
   self.startSpeedCounter();
@@ -164,7 +149,7 @@ DownloadJob.prototype.startDownload = function(checkPoints) {
 
   var params = { Bucket: self.from.bucket, Key: self.from.key };
 
-  self.oss.headObject(params, function(err, metadata) {
+  self.client.headObject(params, function(err, metadata) {
     if (err) {
       if (
         err.message.indexOf("Network Failure") != -1 ||
@@ -192,7 +177,7 @@ DownloadJob.prototype.startDownload = function(checkPoints) {
 
     var tmpfile = self.to.path + ".download";
     var stream = fs.createWriteStream(tmpfile);
-    var downloader = new S3Download(self.oss);
+    var downloader = new S3Download(self.client);
 
     var s3io = downloader.download(params, {
       maxPartSize: 8 << 20, // 8M

@@ -61,26 +61,32 @@ angular.module("web").factory("osClient", [
       getS3Endpoint: getS3Endpoint,
       parseRestoreInfo: parseRestoreInfo,
       signatureUrl: signatureUrl,
-
-      getClient2: getClient2,
-      signatureUrl2: signatureUrl2
+      signaturePicUrl: signaturePicUrl
     };
 
-    function getClient2(opt) {
-      var options = prepaireOptions(opt);
-      // console.log(options)
-      var client = new OSS.Wrapper({
-        accessKeyId: options.accessKeyId,
-        accessKeySecret: options.secretAccessKey,
-        endpoint: options.endpoint,
-        bucket: opt.bucket
-      });
-      return client;
-    }
+    function signaturePicUrl(region, bucket, key, expires, formatter) {
+      return new Promise(function(a, b) {
+        var client = getClient({
+          region: region,
+          bucket: bucket
+        });
 
-    function signatureUrl2(region, bucket, key, expires, xprocess) {
-      var client = getClient2({ region: region, bucket: bucket });
-      return client.signatureUrl(key, { expires: 3600, process: xprocess });
+        client.getSignedUrl(
+          "getObject",
+          {
+            Bucket: bucket,
+            Key: key,
+            Expires: expires
+          },
+          function(err, url) {
+            if (err) {
+              b(err);
+            } else {
+              a(url);
+            }
+          }
+        );
+      });
     }
 
     function checkFileExists(region, bucket, key) {
@@ -89,10 +95,12 @@ angular.module("web").factory("osClient", [
           region: region,
           bucket: bucket
         });
+
         var opt = {
           Bucket: bucket,
           Key: key
         };
+
         client.headObject(opt, function(err, data) {
           if (err) {
             b(err);
@@ -692,7 +700,7 @@ angular.module("web").factory("osClient", [
         );
       });
     }
-    function signatureUrl(region, bucket, key, expiresSec) {
+    function signatureUrl(region, bucket, key, expires) {
       var client = getClient({
         region: region,
         bucket: bucket
@@ -701,8 +709,9 @@ angular.module("web").factory("osClient", [
       var url = client.getSignedUrl("getObject", {
         Bucket: bucket,
         Key: key,
-        Expires: expiresSec || 60
+        Expires: expires || 60
       });
+
       return url;
     }
 

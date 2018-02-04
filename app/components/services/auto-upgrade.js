@@ -1,7 +1,7 @@
 angular.module("web").factory("autoUpgradeSvs", [
   function() {
-    var util = require("./node/ossstore/lib/util");
-    var NAME = "oss-browser";
+    var NAME = "s3-browser";
+    var util = require("./node/s3store/lib/util");
 
     var release_notes_url = Global.release_notes_url;
     var upgrade_url = Global.upgrade_url;

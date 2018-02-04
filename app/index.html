@@ -96,7 +96,6 @@
       ipcRenderer.send('asynchronous', { key: 'installRestart', version: version });
     }
 
-
     var pkg = require('./package');
 
     var Global = {
@@ -110,10 +109,10 @@
       config_path: path.join(os.homedir(), '.s3-browser'),
 
       //release notes目录后缀，里面有 ${version}.md, 如 1.0.0.md
-      release_notes_url: `https://raw.githubusercontent.com/aliyun.s3-browser/${isDev ? 'dev' : 'master'}/release-notes/`,
+      release_notes_url: `https://raw.githubusercontent.com/s3-browser/s3-browser/${isDev ? 'develop' : 'master'}/release-notes/`,
 
       // //升级检测链接
-      upgrade_url: `https://raw.githubusercontent.com/aliyun.s3-browser/${isDev ? 'dev' : 'master'}/upgrade.json`,
+      upgrade_url: `https://raw.githubusercontent.com/s3-browser/s3-browser/${isDev ? 'develop' : 'master'}/upgrade.json`,
 
       about_html: custom.about_html
     };

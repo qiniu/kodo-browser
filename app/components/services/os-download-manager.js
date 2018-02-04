@@ -24,7 +24,7 @@ angular.module("web").factory("osDownloadManager", [
     var fs = require("fs");
     var path = require("path");
     var os = require("os");
-    var S3Store = require("./node/ossstore");
+    var S3Store = require("./node/s3store");
 
     var stopCreatingFlag = false;
     var concurrency = 0;

@@ -48,7 +48,7 @@ var opt = {
   stoken: '',
   privilege: '',
   expiration: '',
-  osspath: ''
+  s3path: ''
 };
 
 //toString
@@ -72,7 +72,7 @@ var opt = {
   secret: '',
   desc: '',
   region: 'oss-cn-shenzhen',
-  osspath: 'kodo://your-bucket/test/',  
+  s3path: 'kodo://your-bucket/test/',  
   eptpl: 'http://{region}.qiniu.com'
 };
 

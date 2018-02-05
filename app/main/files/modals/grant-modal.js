@@ -265,7 +265,7 @@ angular.module('web')
           secret: secret,
           desc: userName,
           region:  region,
-          osspath: comments[0],
+          s3path: comments[0],
           eptpl: AuthInfo.get().eptpl || 'http://{region}.qiniu.com'
         };
 
@@ -286,7 +286,7 @@ angular.module('web')
 AccessKeyId: ${id}<br/>
 AccessKeySecret: ${secret}<br/>
 区域(Region): ${region}<br/>
-授权路径(osspath): ${comments.join(',<br/>')}<br/>
+授权路径(s3path): ${comments.join(',<br/>')}<br/>
 授予权限(permission): ${privType}<br/>
 <br/>
 
@@ -303,7 +303,7 @@ AccessKeySecret: ${secret}<br/>
                    // + 'AccessKeySecret: '+ result.AccessKey.AccessKeySecret+ '<br/>'
                    // + '区域(Region): '+ currentInfo.region  + '<br/>'
                    // + '授予权限(permission): '+$scope.grant.privType + '<br/>'
-                   // + '授权路径(osspath): ' + comments.join(',<br/>')
+                   // + '授权路径(s3path): ' + comments.join(',<br/>')
                    // + '<hr/>'
                    // + '您可以使用 <a href="https://github.com/aliyun/oss-browser" target="_blank">OSS Browser</a> 浏览或管理这些文件。'
          };

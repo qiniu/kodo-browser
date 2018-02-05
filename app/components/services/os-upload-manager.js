@@ -24,7 +24,7 @@ angular.module("web").factory("osUploadManager", [
     var fs = require("fs");
     var path = require("path");
     var os = require("os");
-    var OssStore = require("./node/ossstore");
+    var S3Store = require("./node/s3store");
 
     var stopCreatingFlag = false;
     var concurrency = 0;
@@ -35,6 +35,7 @@ angular.module("web").factory("osUploadManager", [
       createUploadJobs: createUploadJobs,
       checkStart: checkStart,
       saveProg: saveProg,
+
       stopCreatingJobs: function() {
         stopCreatingFlag = true;
       }
@@ -270,16 +271,12 @@ angular.module("web").factory("osUploadManager", [
               job.events: statuschange, progress
       */
     function createJob(auth, opt) {
-      var store = new OssStore({
+      var store = new S3Store({
         credential: {
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
         },
-        endpoint: osClient.getS3Endpoint(
-          opt.region,
-          opt.to.bucket,
-          auth.eptpl
-        ),
+        endpoint: osClient.getS3Endpoint(opt.region, opt.to.bucket, auth.eptpl),
         httpOptions: {
           connectTimeout: 3000, // 3s
           timeout: 3600000 // 1h

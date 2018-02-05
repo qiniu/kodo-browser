@@ -1,64 +1,74 @@
-angular.module('web')
-  .factory('Auth', ['$q', '$location', '$translate', 'osClient', 'AuthInfo', 'Const', 'Cipher',
-    function ($q, $location, $translate, osClient, AuthInfo, Const, Cipher) {
-      var T = $translate.instant;
+angular.module("web").factory("Auth", [
+  "$q",
+  "$location",
+  "$translate",
+  "osClient",
+  "AuthInfo",
+  function($q, $location, $translate, osClient, AuthInfo) {
+    return {
+      login: login,
+      logout: logout
+    };
 
-      return {
-        login: login,
-        logout: logout
-      };
+    var T = $translate.instant;
 
-      function login(data) {
-        if (!data.osspath) delete data.region;
+    function login(data) {
+      var df = $q.defer();
 
-        var df = $q.defer();
-        data.httpOptions = { timeout: 5000 };
+      data.httpOptions = { timeout: 5000 };
 
-        if (data.osspath) {
+      if (data.s3path) {
+        var info = osClient.parseS3Path(data.s3path);
 
-          var info = osClient.parseOSSPath(data.osspath);
-          data.bucket = info.bucket;
+        data.bucket = info.bucket;
 
-          osClient.getClient(data).listObjects({ Bucket: info.bucket, Prefix: info.key, Marker: '', MaxKeys: 1 }, function (err, result) {
-            if (err) {
-              df.reject(err);
+        osClient
+          .getClient(data)
+          .listObjects(
+            { Bucket: info.bucket, Prefix: info.key, Marker: "", MaxKeys: 1 },
+            function(err, result) {
+              if (err) {
+                df.reject(err);
+              } else if (result.RequestId && result.CommonPrefixes) {
+                //login success
+                data.isAuthed = true;
+
+                AuthInfo.save(data);
+
+                df.resolve();
+              } else {
+                df.reject({
+                  code: "Error",
+                  message: T("login.endpoint.error")
+                });
+              }
             }
-            else if (result.RequestId && result.CommonPrefixes) {
-              //登录成功
-              AuthInfo.save(data);
-              df.resolve();
-            }
-            else {
-              df.reject({ code: 'Error', message: T('login.endpoint.error') }); //'请确定Endpoint是否正确'
-            }
-          });
+          );
+      } else {
+        osClient.getClient(data).listBuckets(function(err, result) {
+          if (err) {
+            df.reject({ code: err.code, message: err.message });
+          } else if (result.Buckets) {
+            //login success
+            data.isAuthed = true;
 
-        } else {
-          osClient.getClient(data).listBuckets(function (err, result) {
+            AuthInfo.save(data);
 
-            if (err) {
-              //失败
-              df.reject({ code: err.code, message: err.message });
-            }
-            else if (result.Buckets) {
-              //登录成功
-              AuthInfo.save(data);
-              df.resolve();
-            } else {
-              df.reject({ code: 'Error', message: T('login.endpoint.error') });
-            }
-          });
-        }
-
-        return df.promise;
+            df.resolve();
+          } else {
+            df.reject({ code: "Error", message: T("login.endpoint.error") });
+          }
+        });
       }
 
-      function logout() {
-        var df = $q.defer();
-        AuthInfo.remove();
-        df.resolve();
-        return df.promise;
-      }
-
+      return df.promise;
     }
-  ]);
+
+    function logout() {
+      var df = $q.defer();
+      AuthInfo.remove();
+      df.resolve();
+      return df.promise;
+    }
+  }
+]);

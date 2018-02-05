@@ -1,5 +1,6 @@
 {
-  "version": "1.5.0",
-  "package_url": "http://luogc.oss-cn-hangzhou.qiniu.com/oss-browser-publish/",
+  "version": "1.0.0",
+  "package_url":
+    "https://raw.githubusercontent.com/s3-browser/s3-browser/upgrade.json",
   "files": ["app.asar"]
 }

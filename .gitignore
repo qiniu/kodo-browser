@@ -11,3 +11,4 @@ releases
 _up.sh
 package-lock.json
 *.download
+*.asar

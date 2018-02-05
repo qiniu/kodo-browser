@@ -7,8 +7,7 @@
     "dev": "./node_modules/.bin/npm-run-all --parallel build watch dev:run",
     "dev:run": "./node_modules/.bin/cross-env NODE_ENV=development electron .",
     "postbuild": "node gen",
-    "prod":
-      "./node_modules/.bin/cross-env NODE_ENV=production cd dist && electron .",
+    "prod": "./node_modules/.bin/cross-env NODE_ENV=production cd dist && electron .",
     "watch": "./node_modules/.bin/gulp watch --custom=$custom",
     "build": "./node_modules/.bin/gulp build --custom=$custom"
   },

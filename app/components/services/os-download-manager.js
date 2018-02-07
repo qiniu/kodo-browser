@@ -9,7 +9,7 @@ angular.module("web").factory("osDownloadManager", [
   "DelayDone",
   "safeApply",
   "settingsSvs",
-  function(
+  function (
     $q,
     $state,
     $timeout,
@@ -36,7 +36,7 @@ angular.module("web").factory("osDownloadManager", [
       checkStart: checkStart,
       saveProg: saveProg,
 
-      stopCreatingJobs: function() {
+      stopCreatingJobs: function () {
         stopCreatingFlag = true;
       }
     };
@@ -49,7 +49,7 @@ angular.module("web").factory("osDownloadManager", [
       var arr = loadProg();
       var authInfo = AuthInfo.get();
 
-      angular.forEach(arr, function(n) {
+      angular.forEach(arr, function (n) {
         var job = createJob(authInfo, n);
         if (job.status == "waiting" || job.status == "running") {
           job.stop();
@@ -68,12 +68,11 @@ angular.module("web").factory("osDownloadManager", [
       //save
       saveProg();
 
-      job.on("partcomplete", function(prog) {
+      job.on("partcomplete", function (prog) {
         safeApply($scope);
         saveProg($scope);
       });
-
-      job.on("statuschange", function(status) {
+      job.on("statuschange", function (status) {
         if (status == "stopped") {
           concurrency--;
           checkStart();
@@ -82,16 +81,14 @@ angular.module("web").factory("osDownloadManager", [
         safeApply($scope);
         saveProg();
       });
-      job.on("speedChange", function() {
+      job.on("speedChange", function () {
         safeApply($scope);
       });
-
-      job.on("complete", function() {
+      job.on("complete", function () {
         concurrency--;
         checkStart();
       });
-
-      job.on("error", function(err) {
+      job.on("error", function (err) {
         console.error(err);
         concurrency--;
         checkStart();
@@ -131,8 +128,8 @@ angular.module("web").factory("osDownloadManager", [
 
       loop(
         bucketInfos,
-        function(jobs) {},
-        function() {
+        function (jobs) {},
+        function () {
           if (jobsAddedFn) {
             jobsAddedFn();
           }
@@ -152,12 +149,13 @@ angular.module("web").factory("osDownloadManager", [
         }
 
         _kdig();
+
         function _kdig() {
           dig(
             arr[c],
             t,
-            function() {},
-            function() {
+            function () {},
+            function () {
               c2++;
               if (c2 >= len) {
                 callFn2(t);
@@ -190,7 +188,7 @@ angular.module("web").factory("osDownloadManager", [
 
         if (ossInfo.isFolder) {
           //目录
-          fs.mkdir(filePath, function(err) {
+          fs.mkdir(filePath, function (err) {
             if (err && err.code != "EEXIST") {
               Toast.error("mkdir [" + filePath + "] failed:" + err.message);
               return;
@@ -200,18 +198,18 @@ angular.module("web").factory("osDownloadManager", [
             function progDig(marker) {
               osClient
                 .listFiles(ossInfo.region, ossInfo.bucket, ossInfo.path, marker)
-                .then(function(result) {
+                .then(function (result) {
                   var arr2 = result.data;
-                  arr2.forEach(function(n) {
+                  arr2.forEach(function (n) {
                     n.region = ossInfo.region;
                     n.bucket = ossInfo.bucket;
                   });
                   loop(
                     arr2,
-                    function(jobs) {
+                    function (jobs) {
                       t = t.concat(jobs);
                       if (result.marker) {
-                        $timeout(function() {
+                        $timeout(function () {
                           progDig(result.marker);
                         }, 10);
                       } else {
@@ -244,7 +242,7 @@ angular.module("web").factory("osDownloadManager", [
             },
             to: {
               name: fileName,
-              path: filePath
+              path: path.normalize(filePath)
             }
           });
 
@@ -288,9 +286,9 @@ angular.module("web").factory("osDownloadManager", [
       DelayDone.delayRun(
         "save_download_prog",
         1000,
-        function() {
+        function () {
           var t = [];
-          angular.forEach($scope.lists.downloadJobList, function(n) {
+          angular.forEach($scope.lists.downloadJobList, function (n) {
             if (n.status == "finished") return;
 
             t.push({

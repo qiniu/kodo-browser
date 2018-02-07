@@ -9,7 +9,7 @@ angular.module("web").factory("osUploadManager", [
   "DelayDone",
   "safeApply",
   "settingsSvs",
-  function(
+  function (
     $q,
     $state,
     $timeout,
@@ -36,7 +36,7 @@ angular.module("web").factory("osUploadManager", [
       checkStart: checkStart,
       saveProg: saveProg,
 
-      stopCreatingJobs: function() {
+      stopCreatingJobs: function () {
         stopCreatingFlag = true;
       }
     };
@@ -46,10 +46,10 @@ angular.module("web").factory("osUploadManager", [
       concurrency = 0;
       $scope.lists.uploadJobList = [];
 
-      var arr = loadProg();
       var authInfo = AuthInfo.get();
+      var progs = loadProg();
 
-      angular.forEach(arr, function(n) {
+      angular.forEach(progs, function (n) {
         var job = createJob(authInfo, n);
         if (job.status == "waiting" || job.status == "running") {
           job.stop();
@@ -67,11 +67,11 @@ angular.module("web").factory("osUploadManager", [
       //save
       saveProg();
 
-      job.on("partcomplete", function(prog) {
+      job.on("partcomplete", function (prog) {
         safeApply($scope);
         saveProg();
       });
-      job.on("statuschange", function(status) {
+      job.on("statuschange", function (status) {
         if (status == "stopped") {
           concurrency--;
           $timeout(checkStart, 100);
@@ -80,15 +80,15 @@ angular.module("web").factory("osUploadManager", [
         safeApply($scope);
         saveProg();
       });
-      job.on("speedChange", function() {
+      job.on("speedChange", function () {
         safeApply($scope);
       });
-      job.on("complete", function() {
+      job.on("complete", function () {
         concurrency--;
         checkStart();
         checkNeedRefreshFileList(job.to.bucket, job.to.key);
       });
-      job.on("error", function(err) {
+      job.on("error", function (err) {
         console.error(err);
         concurrency--;
         checkStart();
@@ -139,12 +139,11 @@ angular.module("web").factory("osUploadManager", [
 
       var authInfo = AuthInfo.get();
 
-      digArr(filePaths, function() {
+      digArr(filePaths, function () {
         if (jobsAddingFn) {
           jobsAddingFn();
         }
       });
-
       return;
 
       function digArr(filePaths, fn) {
@@ -153,12 +152,14 @@ angular.module("web").factory("osUploadManager", [
         var c = 0;
 
         function _dig() {
+          if (stopCreatingFlag) {
+            return;
+          }
+
           var n = filePaths[c];
           var dirPath = path.dirname(n);
 
-          if (stopCreatingFlag) return;
-
-          dig(filePaths[c], dirPath, function(jobs) {
+          dig(filePaths[c], dirPath, function (jobs) {
             t = t.concat(jobs);
             c++;
 
@@ -184,7 +185,7 @@ angular.module("web").factory("osUploadManager", [
 
         //串行
         function inDig() {
-          dig(path.join(parentPath, arr[c]), dirPath, function(jobs) {
+          dig(path.join(parentPath, arr[c]), dirPath, function (jobs) {
             t = t.concat(jobs);
 
             c++;
@@ -220,18 +221,18 @@ angular.module("web").factory("osUploadManager", [
           //创建目录
           osClient
             .createFolder(bucketInfo.region, bucketInfo.bucket, filePath + "/")
-            .then(function() {
+            .then(function () {
               //判断是否刷新文件列表
               checkNeedRefreshFileList(bucketInfo.bucket, filePath + "/");
             });
 
           //递归遍历目录
-          fs.readdir(absPath, function(err, arr) {
+          fs.readdir(absPath, function (err, arr) {
             if (err) {
               console.log(err.stack);
             } else {
-              loop(absPath, dirPath, arr, function(jobs) {
-                $timeout(function() {
+              loop(absPath, dirPath, arr, function (jobs) {
+                $timeout(function () {
                   callFn(jobs);
                 }, 1);
               });
@@ -247,13 +248,13 @@ angular.module("web").factory("osUploadManager", [
             },
             to: {
               bucket: bucketInfo.bucket,
-              key: filePath
+              key: path.normalize(filePath)
             }
           });
 
           addEvents(job);
 
-          $timeout(function() {
+          $timeout(function () {
             callFn([job]);
           }, 1);
         }
@@ -293,9 +294,9 @@ angular.module("web").factory("osUploadManager", [
       DelayDone.delayRun(
         "save_upload_prog",
         1000,
-        function() {
+        function () {
           var t = [];
-          angular.forEach($scope.lists.uploadJobList, function(n) {
+          angular.forEach($scope.lists.uploadJobList, function (n) {
             if (n.status == "finished") return;
 
             if (n.checkPoints && n.checkPoints.chunks) {
@@ -315,9 +316,6 @@ angular.module("web").factory("osUploadManager", [
             });
           });
 
-          //console.log('request save upload:', t);
-
-          //console.log('-save')
           fs.writeFileSync(getUpProgFilePath(), JSON.stringify(t));
           $scope.calcTotalProg();
         },

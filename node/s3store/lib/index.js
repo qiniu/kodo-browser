@@ -45,8 +45,7 @@ function S3Store(config) {
 
   this.client = new AWS.S3({
     apiVersion: "2006-03-01",
-    endpoint:
-      this._config.endpoint.protocol + "://" + this._config.endpoint.host,
+    endpoint: this._config.endpoint.protocol + "://" + this._config.endpoint.host,
     region: this._config.region,
     accessKeyId: this._config.credential.accessKeyId,
     secretAccessKey: this._config.credential.secretAccessKey,

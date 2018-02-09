@@ -1298,16 +1298,19 @@ angular.module("web").factory("osClient", [
         }
       }
 
+      var region = authInfo.region || "cn-east-1";
+
       var endpoint = getS3Endpoint(
-        authInfo.region || "cn-east-1",
+        region,
         bucket,
-        authInfo.eptpl
+        authInfo.s3apitpl || authInfo.eptpl
       );
 
       var options = {
         accessKeyId: authInfo.id || "ak",
         secretAccessKey: authInfo.secret || "sk",
         endpoint: endpoint,
+        region: region,
         apiVersion: "2013-10-15",
         httpOptions: {
           timeout: authInfo.httpOptions ? authInfo.httpOptions.timeout : 0
@@ -1340,14 +1343,26 @@ angular.module("web").factory("osClient", [
     }
 
     function getS3Url(region, bucket, key) {
+      key = encodeURIComponent(key);
+
+      var authInfo = AuthInfo.get();
+      if (authInfo.s3apitpl) {
+        var endpoint = authInfo.s3apitpl;
+        if (endpoint[endpoint.length - 1] !== "/") {
+          endpoint += "/";
+        }
+
+        return endpoint + bucket + "/" + key;
+      }
+
       var isHttps = Global.s3EndpointProtocol == "https:";
 
       if (bucket && $rootScope.bucketMap && $rootScope.bucketMap[bucket]) {
         var endpoint = $rootScope.bucketMap[bucket].extranetEndpoint;
         if (endpoint) {
           return isHttps ?
-            "https://" + bucket + "." + endpoint + "/" + key :
-            "http://" + bucket + "." + endpoint + "/" + key;
+            "https://" + endpoint + "/" + bucket + "/" + key :
+            "http://" + endpoint + "/" + bucket + "/" + key;
         }
       }
 
@@ -1356,26 +1371,28 @@ angular.module("web").factory("osClient", [
         if (region.indexOf("http") != 0) {
           region =
             isHttps ?
-            "https://" + bucket + "." + region + "/" + key :
-            "http://" + bucket + "." + region + "/" + key;
+            "https://" + region + "/" + bucket + "/" + key :
+            "http://" + region + "/" + bucket + "/" + key;
         }
         return region;
       }
 
       //region
       if (isHttps) {
-        return "https://" + bucket + "." + region + ".qiniu.com" + "/" + key;
+        return "https://" + region + ".qiniu.com" + "/" + bucket + "/" + key;
       }
 
-      return "http://" + bucket + "." + region + ".qiniu.com" + "/" + key;
+      return "http://" + region + ".qiniu.com" + "/" + bucket + "/" + key;
     }
 
     function getS3Endpoint(region, bucket, eptpl) {
+      var authInfo = AuthInfo.get();
+
       if (!region) {
-        region = "cn-east-1";
+        region = authInfo.region || "cn-east-1";
       }
 
-      eptpl = eptpl || AuthInfo.get().eptpl || "http://{region}-s3.qiniu.com";
+      eptpl = eptpl || authInfo.s3apitpl || authInfo.eptpl || "http://{region}-s3.qiniu.com";
       eptpl = eptpl.replace("{region}", region);
 
       return eptpl;

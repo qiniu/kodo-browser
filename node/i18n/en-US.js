@@ -12,10 +12,14 @@ module.exports = {
 
   optional: "Optional",
   default: "Default",
-  "auth.accessLogin": "AK Login",
-  "auth.tokenLogin": "Token Login",
+  "auth.accessLogin": "Access Key Login",
   "auth.id.placeholder": "AccessKeyId",
   "auth.secret.placeholder": "AccessKeySecret",
+  "auth.passLogin": "Account Login",
+  "auth.username": "Username",
+  "auth.password": "Password",
+  "auth.username.placeholder": "Username",
+  "auth.password.placeholder": "Password",
 
   "auth.eptpl": "Endpoint Template",
   "auth.eptpl.placeholder": "Default: http://{region}-s3.qiniu.com",

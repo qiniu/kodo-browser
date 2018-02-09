@@ -272,12 +272,15 @@ angular.module("web").factory("osUploadManager", [
               job.events: statuschange, progress
       */
     function createJob(auth, opt) {
+      var region = opt.region || auth.region || "cn-east-1";
+
       var store = new S3Store({
         credential: {
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
         },
-        endpoint: osClient.getS3Endpoint(opt.region, opt.to.bucket, auth.eptpl),
+        endpoint: osClient.getS3Endpoint(region, opt.to.bucket, auth.s3apitpl || auth.eptpl),
+        region: region,
         httpOptions: {
           connectTimeout: 3000, // 3s
           timeout: 3600000 // 1h

@@ -12,10 +12,14 @@ module.exports = {
 
   optional: "オプション",
   default: "デフォルト",
-  "auth.accessLogin": "AK ログイン",
-  "auth.tokenLogin": "Token ログイン",
+  "auth.accessLogin": "Access Key ログイン",
   "auth.id.placeholder": "AccessKeyId",
   "auth.secret.placeholder": "AccessKeySecret",
+  "auth.passLogin": "アカウントのログイン",
+  "auth.username": "ユーザー名",
+  "auth.password": "パスワード",
+  "auth.username.placeholder": "ユーザー名",
+  "auth.password.placeholder": "パスワード",
 
   "auth.eptpl": "エンドポイントテンプレート",
   "auth.eptpl.placeholder": "デフォルト: http://{region}.qiniu.com",

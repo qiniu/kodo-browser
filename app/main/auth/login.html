@@ -2,26 +2,26 @@
 
 <script type="text/ng-template" id="auth-endpoint-popup.html">
   <div>
-   <ol style="padding-left:10px;">
-     <li>{{'auth.eptpl.popup.msg1'|translate}}</li>
-     <li>{{'auth.eptpl.popup.msg2'|translate}}<code>http://cn-east-1-s3.qiniu.com</code></li>
-   </ol>
- </div>
+    <ol style="padding-left:10px;">
+      <li>{{'auth.eptpl.popup.msg1'|translate}}</li>
+      <li>{{'auth.eptpl.popup.msg2'|translate}}<code>http://cn-east-1-s3.qiniu.com</code></li>
+    </ol>
+  </div>
 </script>
 
 <script type="text/ng-template" id="auth-region-popup.html">
   <div>
-   <ol style="padding-left:10px;">
-     <li>{{'auth.region.popup.msg1'|translate}}</li>
-     <li>{{'auth.region.popup.msg2'|translate}}</li>
-   </ol>
- </div>
+    <ol style="padding-left:10px;">
+      <li>{{'auth.region.popup.msg1'|translate}}</li>
+      <li>{{'auth.region.popup.msg2'|translate}}</li>
+    </ol>
+  </div>
 </script>
 
 <script type="text/ng-template" id="auth-remember-popup.html">
   <div>
-   {{'auth.remember.popup.msg1'|translate}}
- </div>
+    {{'auth.remember.popup.msg1'|translate}}
+  </div>
 </script>
 
 <div style="overflow:auto;height:100%">
@@ -33,9 +33,14 @@
 
       <div class="panel-heading pd0" style="border:0">
         <ul class="nav nav-tabs">
-          <li role="presentation" ng-class="{active:gtab==1}">
+          <li role="presentation" ng-class="{active:gtab==1}" ng-if="!hideCloud">
             <a href="" ng-click="gtab=1">
               {{'auth.accessLogin'|translate}}
+            </a>
+          </li>
+          <li role="presentation" ng-class="{active:gtab==2}">
+            <a href="" ng-click="gtab=2">
+              {{'auth.passLogin'|translate}}
             </a>
           </li>
         </ul>
@@ -43,7 +48,7 @@
 
       <div class="panel-body">
 
-        <form ng-if="gtab==1" class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
+        <form ng-if="gtab==1 && !hideCloud" class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
           <div class="form-group">
             <label for="endpoint" class="col-sm-4 control-label">
               <span class="red">*</span> Endpoint:
@@ -60,11 +65,9 @@
                 </select>
               </div>
               <div class="col-sm-8" style="padding-left:0" ng-if="eptplType=='customize'" ng-class="{'has-error':!form1.endpoint.$valid}">
-                <input type="text" required ng-model="item.eptpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="endpoint" name="endpoint"
-                  placeholder="https://">
+                <input type="text" required ng-model="item.eptpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="endpoint" name="endpoint" placeholder="https://">
               </div>
             </div>
-
           </div>
 
           <div class="form-group has-feedback" ng-class="{'has-error': !form1.aid.$valid }">
@@ -90,8 +93,7 @@
               </span>
             </label>
             <div class="col-sm-8" ng-if="eptplType!='customize'">
-              <select required ng-model="item.region" class="form-control" id="arg" placeholder="{{'auth.region.placeholder'|translate}}"
-                ng-options="rg.id as ('region.'+rg.id|translate) for rg in regions">
+              <select required ng-model="item.region" class="form-control" id="arg" placeholder="{{'auth.region.placeholder'|translate}}" ng-options="rg.id as ('region.'+rg.id|translate) for rg in regions">
               </select>
             </div>
             <div class="col-sm-8" ng-if="eptplType=='customize'">
@@ -141,12 +143,56 @@
           </div>
         </form>
 
+        <form ng-if="gtab==2 && hideCloud" class="form-horizontal" name="form2" ng-submit="onSubmitPass(form2)">
+          <div class="form-group has-feedback" ng-class="{'has-error':!form2.ecloudtpl.$valid}">
+            <label for="ecloudtpl" class="col-sm-4 control-label">
+              <span class="red">*</span> ECLOUD:
+            </label>
+
+            <div class="col-sm-8">
+              <input type="text" required ng-model="item.ecloudtpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="ecloudtpl" name="ecloudtpl" placeholder="https://">
+            </div>
+          </div>
+
+          <div class="form-group has-feedback" ng-class="{'has-error':!form2.s3apitpl.$valid}">
+            <label for="s3apitpl" class="col-sm-4 control-label">
+              <span class="red">*</span> S3API:
+            </label>
+
+            <div class="col-sm-8">
+              <input type="text" required ng-model="item.s3apitpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="s3apitpl" name="s3apitpl" placeholder="https://">
+            </div>
+          </div>
+
+          <div class="form-group has-feedback" ng-class="{'has-error': !form2.auser.$valid }">
+            <label for="auser" class="col-sm-4 control-label">
+              <span class="red">*</span> {{'auth.username'|translate}}:</label>
+            <div class="col-sm-8">
+              <input type="text" required ng-model="item.username" class="form-control" id="auser" name="auser" placeholder="{{'auth.username.placeholder'|translate}}">
+            </div>
+          </div>
+          <div class="form-group has-feedback" ng-class="{'has-error': !form2.apass.$valid }">
+            <label for="apass" class="col-sm-4 control-label">
+              <span class="red">*</span> {{'auth.password'|translate}}:</label>
+            <div class="col-sm-8">
+              <input type="password" required ng-model="item.password" class="form-control" id="apass" name="apass" placeholder="{{'auth.password.placeholder'|translate}}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-9">
+              <button type="submit" class="btn btn-primary">
+                {{'auth.login'|translate}}
+              </button>
+            </div>
+          </div>
+        </form>
+
       </div>
     </div>
   </div>
 
   <div class="clearfix"></div>
-
 
   <div ng-if="gtab==1" class="col-xs-12" ng-show="flags.showHis=='YES'">
     <header>

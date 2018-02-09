@@ -8,7 +8,7 @@ angular.module("web").controller("loginCtrl", [
   "Const",
   "Dialog",
   "Toast",
-  function(
+  function (
     $scope,
     $rootScope,
     $translate,
@@ -33,12 +33,14 @@ angular.module("web").controller("loginCtrl", [
         showHis: "NO"
       },
       item: {
-        eptpl: DEF_EPTPL
+        eptpl: DEF_EPTPL,
+        ecloudtpl: "",
+        s3apitpl: ""
       },
       eptplType: "default",
 
       hideTopNav: 1,
-      reg_s3path: /^kodo\:\/\//,
+      hideCloud: true,
       regions: regions,
       defaultRegion: "",
 
@@ -47,14 +49,16 @@ angular.module("web").controller("loginCtrl", [
       useHis: useHis,
       showRemoveHis: showRemoveHis,
 
+      onSubmitPass: onSubmitPass,
+
       open: open,
       eptplChange: eptplChange
     });
 
-    $scope.$watch("item.eptpl", function(v) {
+    $scope.$watch("item.eptpl", function (v) {
       $scope.eptplType = v == DEF_EPTPL ? "default" : "customize";
     });
-    $scope.$watch("gtab", function(v) {
+    $scope.$watch("gtab", function (v) {
       localStorage.setItem("gtag", v);
     });
 
@@ -78,11 +82,13 @@ angular.module("web").controller("loginCtrl", [
 
     function showRemoveHis(h) {
       var title = T("auth.removeAK.title"); //删除AK
-      var message = T("auth.removeAK.message", { id: h.id }); //'ID：'+h.id+', 确定删除?'
+      var message = T("auth.removeAK.message", {
+        id: h.id
+      }); //'ID：'+h.id+', 确定删除?'
       Dialog.confirm(
         title,
         message,
-        function(b) {
+        function (b) {
           if (b) {
             AuthInfo.removeFromHistories(h.id);
             listHistories();
@@ -103,7 +109,7 @@ angular.module("web").controller("loginCtrl", [
       Dialog.confirm(
         title,
         message,
-        function(b) {
+        function (b) {
           if (b) {
             AuthInfo.cleanHistories();
             listHistories();
@@ -126,8 +132,8 @@ angular.module("web").controller("loginCtrl", [
         data.secret = data.secret.trim();
       }
 
-      delete data.authToken;
-      delete data.securityToken;
+      delete data.username;
+      delete data.password;
 
       if ($scope.flags.remember == "YES") {
         AuthInfo.remember(data);
@@ -136,7 +142,7 @@ angular.module("web").controller("loginCtrl", [
       Toast.info(T("logining"), 1000);
 
       Auth.login(data).then(
-        function() {
+        function () {
           if ($scope.flags.remember == "YES") {
             AuthInfo.addToHistories(data);
           }
@@ -145,7 +151,46 @@ angular.module("web").controller("loginCtrl", [
 
           $location.url("/");
         },
-        function(err) {
+        function (err) {
+          Toast.error(err.code + ":" + err.message);
+        }
+      );
+
+      return false;
+    }
+
+    function onSubmitPass(form2) {
+      if (!form2.$valid) return;
+
+      localStorage.setItem(KEY_REMEMBER, $scope.flags.remember);
+
+      var data = angular.copy($scope.item);
+
+      //trim password
+      if (data.password) {
+        data.password = data.password.trim();
+      }
+
+      delete data.id;
+      delete data.secret;
+
+      if ($scope.flags.remember == "YES") {
+        AuthInfo.remember(data);
+      }
+
+      Toast.info(T("logining"), 1000);
+
+      Auth.loginPass(data).then(
+        function () {
+          if ($scope.flags.remember == "YES") {
+            AuthInfo.addToHistories(data);
+          }
+
+          Toast.success(T("login.successfully"), 1000);
+
+          $location.url("/");
+        },
+        function (err) {
           Toast.error(err.code + ":" + err.message);
         }
       );

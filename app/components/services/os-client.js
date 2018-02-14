@@ -1009,7 +1009,8 @@ angular.module("web").factory("osClient", [
           Bucket: bucket,
           Prefix: key,
           Delimiter: "/",
-          Marker: marker || ""
+          Marker: marker || "",
+          MaxKeys: 1000
         };
 
         client.listObjects(opt, function (err, result) {
@@ -1058,8 +1059,14 @@ angular.module("web").factory("osClient", [
             });
           }
 
+          var data = t_pre.concat(t);
+          if (data.length < result.MaxKeys) {
+            result.IsTruncated = false;
+            result.NextMarker = null;
+          }
+
           resolve({
-            data: t_pre.concat(t),
+            data: data,
             marker: result.NextMarker
           });
         });

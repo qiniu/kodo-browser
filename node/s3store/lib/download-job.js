@@ -192,15 +192,15 @@ DownloadJob.prototype.startDownload = function(checkPoints) {
     s3io.on("downloaded", function(data) {
       self._changeStatus("verifying");
 
-      util.checksumFile(tmpfile, metadata.ETag, function(err) {
-        if (err) {
-          self.message = err.message || err;
-          console.error(self.message, self.to.path);
+      //util.checksumFile(tmpfile, metadata.ETag, function(err) {
+      //  if (err) {
+      //    self.message = err.message || err;
+      //    console.error(self.message, self.to.path);
 
-          self._changeStatus("failed");
-          self.emit("error", err);
-          return;
-        }
+      //    self._changeStatus("failed");
+      //    self.emit("error", err);
+      //    return;
+      //  }
 
         // 临时文件重命名为正式文件
         fs.rename(tmpfile, self.to.path, function(err) {
@@ -208,6 +208,7 @@ DownloadJob.prototype.startDownload = function(checkPoints) {
             console.error("rename to ", self.to.path, err);
           } else {
             self._changeStatus("finished");
+
             self.emit("partcomplete", {
               total: metadata.ContentLength,
               done: metadata.ContentLength
@@ -222,7 +223,7 @@ DownloadJob.prototype.startDownload = function(checkPoints) {
             );
           }
         });
-      });
+      //});
     });
     s3io.on("error", function(err) {
       self._changeStatus("failed");

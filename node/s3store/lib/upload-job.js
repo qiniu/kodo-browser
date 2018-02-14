@@ -60,7 +60,7 @@ class UploadJob extends Base {
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
     this.stopFlag = this.status != "running";
-    this.maxConcurrency = 10;
+    this.maxConcurrency = 20;
   }
 }
 
@@ -185,7 +185,7 @@ UploadJob.prototype.startUpload = function() {
     var uploader = new AWS.S3.ManagedUpload({
       service: self.client,
       params: params,
-      partSize: 8 << 20, // 8M
+      partSize: 32 << 20, // 8M
       queueSize: self.maxConcurrency,
       leavePartsOnError: true,
       computeChecksums: true

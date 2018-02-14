@@ -385,7 +385,7 @@ angular.module("web").controller("filesCtrl", [
 
         $timeout(function () {
           addEvents();
-          //$rootScope.$broadcast('osAddressChange', authInfo.s3path);
+          //$rootScope.$broadcast('s3AddressChange', authInfo.s3path);
           $scope.$broadcast("filesViewReady");
         });
       } else {
@@ -410,39 +410,41 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function addEvents() {
-      $scope.$on("osAddressChange", function (e, addr, forceRefresh) {
-        console.log("on:osAddressChange:", addr, "forceRefresh:", forceRefresh);
+      $scope.$on("s3AddressChange", function (e, addr, forceRefresh) {
+        console.log("on:s3AddressChange:", addr, "forceRefresh:", forceRefresh);
 
         var info = osClient.parseS3Path(addr);
+
+        $scope.currentInfo = info;
 
         if (info.key) {
           var lastGan = info.key.lastIndexOf("/");
 
+          //if not endswith /
           if (info.key && lastGan != info.key.length - 1) {
-            //if not endswith /
             var fileKey = info.key;
             var fileName = info.key.substring(lastGan + 1);
+
             info.key = info.key.substring(0, lastGan + 1);
           }
         }
 
-        $scope.currentInfo = info;
-
+        //has bucket , list objects
         if (info.bucket) {
-          //has bucket , list objects
           $scope.currentBucket = info.bucket;
+
           if (!$rootScope.bucketMap[info.bucket]) {
             Toast.error("No permission");
 
             clearObjectsList();
-
             return;
           }
+
           info.region = $rootScope.bucketMap[info.bucket].region;
           $scope.ref.isBucketList = false;
 
+          //search
           if (fileName) {
-            //search
             $scope.sch.objectName = fileName;
             searchObjectName();
           } else {
@@ -467,21 +469,26 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function goIn(bucket, prefix) {
-      var ossPath = "kodo://";
+      var s3path = "kodo://";
 
       if (bucket) {
-        ossPath = "kodo://" + bucket + "/" + (prefix || "");
+        s3path = "kodo://" + bucket + "/" + (prefix || "");
       }
 
-      $rootScope.$broadcast("gotoOsAddress", ossPath);
+      $rootScope.$broadcast("gotoS3Address", s3path);
     }
 
     function listFiles(info, marker, fn) {
       clearObjectsList();
+
       info = info || $scope.currentInfo;
       $scope.isLoading = true;
 
       doListFiles(info, marker, function (err) {
+        if (err) {
+          Toast.error(JSON.stringify(err));
+        }
+
         $scope.isLoading = false;
         safeApply($scope);
       });
@@ -491,6 +498,7 @@ angular.module("web").controller("filesCtrl", [
       osClient.listFiles(info.region, info.bucket, info.key, marker || "").then(
         function (result) {
           var arr = result.data;
+
           settingsSvs.showImageSnapshot.get() == 1
             ? signPicURL(info, arr)
             : null;
@@ -502,7 +510,8 @@ angular.module("web").controller("filesCtrl", [
           if (fn) fn(null);
         },
         function (err) {
-          console.log(err);
+          console.log("list files, info:", info, ", marker:", maker, ", error:", err);
+
           clearObjectsList();
 
           if (fn) fn(err);
@@ -512,7 +521,8 @@ angular.module("web").controller("filesCtrl", [
 
     function loadNext() {
       if ($scope.nextObjectsMarker) {
-        console.log("loadNext");
+        console.log("loadNext with marker: " + $scope.nextObjectsMarker);
+
         doListFiles($scope.currentInfo, $scope.nextObjectsMarker);
       }
     }

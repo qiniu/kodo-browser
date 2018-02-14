@@ -25,7 +25,7 @@ angular.module("web").controller("favListCtrl", [
     }
 
     function goTo(url) {
-      $rootScope.$broadcast("gotoOsAddress", url);
+      $rootScope.$broadcast("gotoS3Address", url);
       cancel();
     }
 

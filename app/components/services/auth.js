@@ -103,6 +103,10 @@ angular.module("web").factory("Auth", [
           delete data.username;
           delete data.password;
 
+          if (body.code == "NoSuchAccount") {
+            df.reject("NoSuchAccount")
+            return
+          }
           data.isAuthed = true;
           data.id = body.access_key_id;
           data.secret = body.access_key_secret;

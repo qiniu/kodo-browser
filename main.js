@@ -5,6 +5,8 @@ const os = require("os");
 const path = require("path");
 const nativeImage = require("electron").nativeImage;
 
+app.commandLine.appendSwitch("ignore-connections-limit", "poc.com,s3-qos.poc.com"); 
+
 ///*****************************************
 //静态服务
 const PORTS = [7123, 7124, 7125, 7126];

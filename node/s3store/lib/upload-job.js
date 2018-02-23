@@ -1,12 +1,11 @@
 "use strict";
 
-const AWS = require("aws-sdk");
-
-var fs = require("fs");
-var path = require("path");
-var mime = require("mime");
-var util = require("./util");
-var Base = require("./base");
+var fs = require("fs"),
+  path = require("path"),
+  mime = require("mime"),
+  util = require("./util"),
+  ioutil = require("./ioutil"),
+  Base = require("./base");
 var isDebug = process.env.NODE_ENV == "development";
 
 class UploadJob extends Base {
@@ -16,7 +15,6 @@ class UploadJob extends Base {
    * @param config
    *    config.from {object|string}  {name, path} or /home/admin/a.jpg
    *    config.to   {object|string}  {bucket, key} or kodo://bucket/test/a.jpg
-   *
    *    config.prog   {object}  {loaded, total}
    *    config.status     {string} default 'waiting'
    *
@@ -25,8 +23,7 @@ class UploadJob extends Base {
    *    stopped
    *    error  (err)
    *    complete
-   *    progress ({loaded:0, total: 1200})
-   *    partcomplete  ({done: c, total: total}, checkPoint)
+   *    progress ({loaded:100, total: 1200})
    */
   constructor(osClient, config) {
     super();
@@ -64,7 +61,7 @@ class UploadJob extends Base {
   }
 }
 
-UploadJob.prototype.start = function() {
+UploadJob.prototype.start = function () {
   if (self.status == "running") return;
 
   if (isDebug) {
@@ -85,7 +82,7 @@ UploadJob.prototype.start = function() {
   return this;
 };
 
-UploadJob.prototype.stop = function() {
+UploadJob.prototype.stop = function () {
   if (this.status == "stopped") return;
 
   if (isDebug) {
@@ -102,7 +99,7 @@ UploadJob.prototype.stop = function() {
   return this;
 };
 
-UploadJob.prototype.wait = function() {
+UploadJob.prototype.wait = function () {
   if (this.status == "waiting") return;
 
   if (isDebug) {
@@ -116,12 +113,15 @@ UploadJob.prototype.wait = function() {
   return this;
 };
 
-UploadJob.prototype.deleteFile = function() {
+UploadJob.prototype.deleteFile = function () {
   var self = this;
 
-  var params = { Bucket: self.to.bucket, Key: self.to.key };
+  var params = {
+    Bucket: self.to.bucket,
+    Key: self.to.key
+  };
 
-  self.oss.deleteObject(params, function(err) {
+  self.oss.deleteObject(params, function (err) {
     if (err) {
       console.error(
         "Delete [kodo://" + self.to.bucket + "/" + self.to.key + "]",
@@ -135,7 +135,7 @@ UploadJob.prototype.deleteFile = function() {
   });
 };
 
-UploadJob.prototype._changeStatus = function(status) {
+UploadJob.prototype._changeStatus = function (status) {
   var self = this;
 
   self.status = status;
@@ -153,92 +153,65 @@ UploadJob.prototype._changeStatus = function(status) {
 /**
  * 开始上传
  */
-UploadJob.prototype.startUpload = function() {
+UploadJob.prototype.startUpload = function () {
   var self = this;
 
   if (isDebug) {
     console.log("Starting upload ", self.from.path);
   }
 
-  fs.stat(self.from.path, function(err, state) {
-    if (err) {
-      self.message = err.message;
-      self._changeStatus("failed");
-      self.emit("error", err);
-      return;
-    }
+  self.prog = {
+    loaded: 0,
+    total: 0
+  };
 
-    self.prog = {
-      loaded: 0,
-      total: state.size
-    };
+  var client = ioutil.createClient({
+    s3Client: self.client,
+    s3MaxAsync: self.maxConcurrency,
+    multipartUploadThreshold: 50 << 20, // 50M
+    multipartUploadSize: 16 << 20 // 16M
+  });
 
-    var stream = fs.createReadStream(self.from.path);
-
-    var params = {
+  var params = {
+    s3Params: {
       Bucket: self.to.bucket,
-      Key: self.to.key,
-      Body: stream,
-      ContentType: mime.lookup(self.from.path)
-    };
+      Key: self.to.key
+    },
+    localFile: self.from.path,
+    isDebug: isDebug
+  };
 
-    var uploader = new AWS.S3.ManagedUpload({
-      service: self.client,
-      params: params,
-      partSize: 32 << 20, // 8M
-      queueSize: self.maxConcurrency,
-      leavePartsOnError: true,
-      computeChecksums: true
-    });
+  var uploader = client.uploadFile(params);
+  uploader.on('fileStat', function (e2) {
+    self.prog.total = e2.progressTotal;
+    self.emit('progress', self.prog);
+  });
+  uploader.on('progress', function (e2) {
+    self.prog.total = e2.progressTotal;
+    self.prog.loaded = e2.progressAmount;
+    self.emit('progress', self.prog);
+  });
+  uploader.on('fileUploaded', function (data) {
+    self._changeStatus("finished");
+    self.emit("complete");
+  });
+  uploader.on('error', function (err) {
+    console.warn("put object error:", err);
 
-    uploader.on("httpUploadProgress", function(prog) {
-      if (self.stopFlag) {
-        try {
-          uploader.abort();
-        } catch (e) {}
-
-        return;
-      }
-
-      self.prog.loaded = prog.loaded;
-      self.emit("progress", JSON.parse(JSON.stringify(self.prog)));
-    });
-
-    uploader.send(function(err, data) {
-      // always close opened stream
-      stream.close();
-
-      if (err) {
-        console.warn("put object error:", err);
-
-        self.message = err.message;
-        self._changeStatus("failed");
-        self.emit("error", err);
-
-        return;
-      }
-
-      self._changeStatus("finished");
-      self.emit("complete");
-
-      console.log(
-        "Uploaded: " + self.from.path + " %celapse",
-        "background:green;color:white",
-        self.endTime - self.startTime,
-        "ms"
-      );
-    });
+    self.message = err.message;
+    self._changeStatus("failed");
+    self.emit("error", err);
   });
 };
 
-UploadJob.prototype.startSpeedCounter = function() {
+UploadJob.prototype.startSpeedCounter = function () {
   var self = this;
 
   self.lastLoaded = self.prog.loaded || 0;
   self.lastSpeed = 0;
 
   clearInterval(self.speedTid);
-  self.speedTid = setInterval(function() {
+  self.speedTid = setInterval(function () {
     if (self.stopFlag) {
       self.speed = 0;
       self.predictLeftTime = 0;
@@ -246,6 +219,10 @@ UploadJob.prototype.startSpeedCounter = function() {
     }
 
     self.speed = self.prog.loaded - self.lastLoaded;
+    if (self.speed === 0) {
+      self.speed = self.lastSpeed * 0.8;
+    }
+
     if (self.lastSpeed != self.speed) {
       self.emit("speedChange", self.speed);
     }
@@ -255,9 +232,9 @@ UploadJob.prototype.startSpeedCounter = function() {
 
     //推测耗时
     self.predictLeftTime =
-      self.speed == 0
-        ? 0
-        : Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
+      self.speed == 0 ?
+      0 :
+      Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
   }, 1000);
 };
 

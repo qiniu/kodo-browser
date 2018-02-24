@@ -1,11 +1,16 @@
 const electron = require("electron");
-const { app, Menu, ipcMain, BrowserWindow } = electron;
+const {
+  app,
+  Menu,
+  ipcMain,
+  BrowserWindow
+} = electron;
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const nativeImage = require("electron").nativeImage;
 
-app.commandLine.appendSwitch("ignore-connections-limit", "poc.com,s3-qos.poc.com"); 
+app.commandLine.appendSwitch("ignore-connections-limit", "poc.com,s3-qos.poc.com,wasuqiniu.cn,s3api.wasuqiniu.cn");
 
 ///*****************************************
 //静态服务
@@ -92,33 +97,36 @@ function createWindow() {
 //监听web page里发出的message
 ipcMain.on("asynchronous", (event, data) => {
   switch (data.key) {
-    case "getStaticServerPort":
-      //在main process里向web page发出message
-      event.sender.send("asynchronous-reply", { key: data.key, port: port });
-      break;
-    case "openDevTools":
-      win.webContents.openDevTools();
-      break;
-    case "installRestart":
-      var version = data.version;
-      var from = path.join(path.dirname(__dirname), version + "-app.asar");
-      var to = path.join(path.dirname(__dirname), "app.asar");
+  case "getStaticServerPort":
+    //在main process里向web page发出message
+    event.sender.send("asynchronous-reply", {
+      key: data.key,
+      port: port
+    });
+    break;
+  case "openDevTools":
+    win.webContents.openDevTools();
+    break;
+  case "installRestart":
+    var version = data.version;
+    var from = path.join(path.dirname(__dirname), version + "-app.asar");
+    var to = path.join(path.dirname(__dirname), "app.asar");
 
-      setTimeout(function() {
-        fs.rename(from, to, function(e) {
-          if (e) {
-            fs.writeFileSync(
-              path.join(os.homedir(), ".s3-browser", "upgrade-error.txt"),
-              JSON.stringify(e)
-            );
-          } else {
-            app.relaunch();
-            app.exit(0);
-          }
-        });
-      }, 1000);
+    setTimeout(function () {
+      fs.rename(from, to, function (e) {
+        if (e) {
+          fs.writeFileSync(
+            path.join(os.homedir(), ".s3-browser", "upgrade-error.txt"),
+            JSON.stringify(e)
+          );
+        } else {
+          app.relaunch();
+          app.exit(0);
+        }
+      });
+    }, 1000);
 
-      break;
+    break;
   }
 });
 
@@ -164,11 +172,9 @@ app.on("activate", () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 function getMenuTemplate() {
-  return [
-    {
+  return [{
       label: "Application",
-      submenu: [
-        {
+      submenu: [{
           label: "About Application",
           selector: "orderFrontStandardAboutPanel:"
         },
@@ -178,7 +184,7 @@ function getMenuTemplate() {
         {
           label: "Quit",
           accelerator: "Command+Q",
-          click: function() {
+          click: function () {
             app.quit();
           }
         }
@@ -186,8 +192,7 @@ function getMenuTemplate() {
     },
     {
       label: "Edit",
-      submenu: [
-        {
+      submenu: [{
           label: "Undo",
           accelerator: "CmdOrCtrl+Z",
           selector: "undo:"
@@ -224,18 +229,17 @@ function getMenuTemplate() {
     },
     {
       label: "Window",
-      submenu: [
-        {
+      submenu: [{
           label: "Minimize",
           accelerator: "CmdOrCtrl+M",
-          click: function() {
+          click: function () {
             win.minimize();
           }
         },
         {
           label: "Close",
           accelerator: "CmdOrCtrl+W",
-          click: function() {
+          click: function () {
             win.close();
           }
         }

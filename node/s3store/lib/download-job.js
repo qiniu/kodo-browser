@@ -36,13 +36,14 @@ class DownloadJob extends Base {
 
     this.client = osClient;
     this.region = this._config.region;
+    this.resumePoints = this._config.resumePoints;
 
     this.from = util.parseS3Path(this._config.from); //s3 path
     this.to = util.parseLocalPath(this._config.to); //local path
 
     this.prog = this._config.prog || {
-      loaded: 0,
-      total: 0
+      total: 0,
+      loaded: 0
     };
 
     this.message = this._config.message;
@@ -53,104 +54,76 @@ class DownloadJob extends Base {
 }
 
 DownloadJob.prototype.start = function () {
-  var self = this;
-  if (self.status == "running") return;
+  if (this.status == "running") return;
 
-  self.message = "";
-  self.startTime = new Date().getTime();
-  self.endTime = null;
+  this.message = "";
+  this.startTime = new Date().getTime();
+  this.endTime = null;
 
-  self.stopFlag = false;
-  self._changeStatus("running");
+  this.stopFlag = false;
+  this._changeStatus("running");
 
-  self.startDownload(self.checkPoints);
-  self.startSpeedCounter();
+  // start
+  this.startDownload(this.resumePoints);
+  this.startSpeedCounter();
 
-  return self;
+  return this;
 };
 
 DownloadJob.prototype.stop = function () {
-  var self = this;
-  if (self.status == "stopped") return;
+  if (this.status == "stopped") return;
 
-  self.stopFlag = true;
-  self._changeStatus("stopped");
-  self.speed = 0;
-  self.predictLeftTime = 0;
+  if (isDebug) {
+    console.log(`Pausing s3://${this.from.bucket}/${this.from.key}`);
+  }
 
-  return self;
+  clearInterval(this.speedTid);
+
+  this._changeStatus("stopped");
+  this.stopFlag = true;
+
+  this.speed = 0;
+  this.predictLeftTime = 0;
+
+  return this;
 };
 
 DownloadJob.prototype.wait = function () {
-  var self = this;
   if (this.status == "waiting") return;
 
-  this._lastStatusFailed = this.status == "failed";
-  self.stopFlag = true;
-  self._changeStatus("waiting");
+  if (isDebug) {
+    console.log(`Pendding s3://${this.from.bucket}/${this.from.key}`);
+  }
 
-  return self;
+  this._lastStatusFailed = this.status == "failed";
+  this._changeStatus("waiting");
+  this.stopFlag = true;
+
+  return this;
 };
 
 DownloadJob.prototype._changeStatus = function (status) {
-  var self = this;
-  self.status = status;
-  self.emit("statuschange", self.status);
+  this.status = status;
+  this.emit("statuschange", this.status);
 
   if (status == "failed" || status == "stopped" || status == "finished") {
-    self.endTime = new Date().getTime();
+    clearInterval(this.speedTid);
 
-    clearInterval(self.speedTid);
-
-    self.speed = 0;
-    self.predictLeftTime = 0;
+    this.endTime = new Date().getTime();
+    this.speed = 0;
+    this.predictLeftTime = 0;
   }
 };
 
-DownloadJob.prototype.startSpeedCounter = function () {
-  var self = this;
-
-  self.lastLoaded = self.prog.loaded || 0;
-  self.lastSpeed = 0;
-
-  clearInterval(self.speedTid);
-  self.speedTid = setInterval(function () {
-    if (self.stopFlag) {
-      self.speed = 0;
-      self.predictLeftTime = 0;
-      return;
-    }
-
-    self.speed = self.prog.loaded - self.lastLoaded;
-    if (self.lastSpeed != self.speed) {
-      self.emit("speedChange", self.speed);
-    }
-
-    self.lastSpeed = self.speed;
-    self.lastLoaded = self.prog.loaded;
-
-    //推测耗时
-    self.predictLeftTime =
-      self.speed == 0 ?
-      0 :
-      Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
-  }, 1000);
-};
-
 /**
- * 开始download
+ * downloading
  */
 DownloadJob.prototype.startDownload = function (checkPoints) {
   var self = this;
 
   if (isDebug) {
-    console.log(`Starting download s3://${self.from.bucket}/${self.from.key}`);
+    console.log(`Start downloading s3://${self.from.bucket}/${self.from.key}`);
   }
-
-  self.prog = {
-    loaded: 0,
-    total: 0
-  };
 
   var client = ioutil.createClient({
     s3Client: self.client,
@@ -158,7 +131,6 @@ DownloadJob.prototype.startDownload = function (checkPoints) {
     multipartDownloadThreshold: 100 << 20, // 100M
     multipartDownloadSize: 16 << 20 // 16M
   });
-
 
   var tmpfile = self.to.path + ".download";
 
@@ -187,6 +159,7 @@ DownloadJob.prototype.startDownload = function (checkPoints) {
     fs.rename(tmpfile, self.to.path, function (err) {
       if (err) {
         console.error("rename file error:", err);
+
         self._changeStatus("failed");
         self.emit("error", err);
       } else {
@@ -196,12 +169,44 @@ DownloadJob.prototype.startDownload = function (checkPoints) {
     });
   });
   downloader.on('error', function (err) {
-    console.warn("get object error:", err);
+    console.warn("download object error:", err);
 
     self.message = err.message;
     self._changeStatus("failed");
     self.emit("error", err);
   });
+};
+
+DownloadJob.prototype.startSpeedCounter = function () {
+  var self = this;
+
+  self.lastLoaded = self.prog.loaded || 0;
+  self.lastSpeed = 0;
+
+  clearInterval(self.speedTid);
+  self.speedTid = setInterval(function () {
+    if (self.stopFlag) {
+      self.speed = 0;
+      self.predictLeftTime = 0;
+      return;
+    }
+
+    self.speed = self.prog.loaded - self.lastLoaded;
+    if (self.speed === 0) {
+      self.speed = self.lastSpeed * 0.8;
+    }
+    if (self.lastSpeed != self.speed) {
+      self.emit("speedChange", self.speed);
+    }
+
+    self.lastSpeed = self.speed;
+    self.lastLoaded = self.prog.loaded;
+
+    self.predictLeftTime =
+      self.speed == 0 ?
+      0 :
+      Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
+  }, 1000);
 };
 
 module.exports = DownloadJob;

@@ -1,5 +1,7 @@
 var gulp = require("gulp");
-var plugins = require("gulp-load-plugins")({ lazy: false });
+var plugins = require("gulp-load-plugins")({
+  lazy: false
+});
 var fs = require("fs");
 var path = require("path");
 var os = require("os");
@@ -15,7 +17,9 @@ function getCustomPath() {
 
   var knownOptions = {
     string: "custom",
-    default: { custom: "./custom" }
+    default: {
+      custom: "./custom"
+    }
   };
 
   var options = minimist(process.argv.slice(2), knownOptions);
@@ -34,7 +38,7 @@ function getCustomPath() {
 
 //var VERSION = pkg.version;
 var taskFns = {
-  appJS: function() {
+  appJS: function () {
     console.log("--rebuilding app.js...");
     //combine all js files of the app
     gulp
@@ -48,28 +52,30 @@ var taskFns = {
       )
       .pipe(plugins.concat("app.js"))
       .pipe(gulp.dest(DIST))
-      .on("end", function() {
+      .on("end", function () {
         console.log("--done");
       });
   },
-  templates: function() {
+  templates: function () {
     console.log("--rebuilding templates.js...");
     //combine all template files of the app into a js file
     gulp
       .src(["!./app/index.html", "./app/**/*.html"])
-      .pipe(plugins.angularTemplatecache("templates.js", { standalone: true }))
+      .pipe(plugins.angularTemplatecache("templates.js", {
+        standalone: true
+      }))
       .pipe(gulp.dest(DIST))
-      .on("end", function() {
+      .on("end", function () {
         console.log("--done");
       });
   },
-  appCSS: function() {
+  appCSS: function () {
     console.log("--rebuilding lib.css...");
     gulp
       .src("./app/**/*.css")
       .pipe(plugins.concat("app.css"))
       .pipe(gulp.dest(DIST))
-      .on("end", function() {
+      .on("end", function () {
         console.log("--done");
       });
   }
@@ -81,13 +87,12 @@ gulp.task("templates", taskFns.templates);
 
 gulp.task("css", taskFns.appCSS);
 
-gulp.task("libJS", function() {
+gulp.task("libJS", function () {
   //concatenate vendor JS files
 
   var arr = [
     "./node_modules/jquery/dist/jquery.js",
     "./node_modules/jquery.qrcode/jquery.qrcode.min.js",
-
     "./node_modules/moment/min/moment-with-locales.js",
     "./node_modules/bootstrap/dist/js/bootstrap.js",
     "./node_modules/angular/angular.js",
@@ -107,14 +112,13 @@ gulp.task("libJS", function() {
     "./node_modules/codemirror/mode/meta.js",
 
     "./node_modules/angular-translate/dist/angular-translate.min.js",
-
     "./node_modules/angular-bootstrap-contextmenu/contextMenu.js"
   ];
 
   // code mirror modes
   var modePath = "./node_modules/codemirror/mode/";
   var modes = fs.readdirSync(modePath);
-  modes.forEach(function(n) {
+  modes.forEach(function (n) {
     arr.push(modePath + n + "/*.js");
   });
 
@@ -124,7 +128,7 @@ gulp.task("libJS", function() {
     .pipe(gulp.dest(DIST));
 });
 
-gulp.task("libCSS", function() {
+gulp.task("libCSS", function () {
   //concatenate vendor CSS files
   gulp
     .src([
@@ -137,7 +141,7 @@ gulp.task("libCSS", function() {
     .pipe(gulp.dest(DIST + "/css"));
 });
 
-gulp.task("copy-fonts", function() {
+gulp.task("copy-fonts", function () {
   gulp
     .src([
       "./node_modules/bootstrap/fonts/*",
@@ -146,21 +150,21 @@ gulp.task("copy-fonts", function() {
     .pipe(gulp.dest(DIST + "/fonts"));
 });
 
-gulp.task("copy-icons", function() {
+gulp.task("copy-icons", function () {
   gulp.src("./app/icons/**").pipe(gulp.dest(DIST + "/icons"));
 });
-gulp.task("copy-node", function() {
+gulp.task("copy-node", function () {
   gulp.src(["./node/**/*"]).pipe(gulp.dest(DIST + "/node"));
 });
 
-gulp.task("copy-docs", function() {
+gulp.task("copy-docs", function () {
   gulp.src(["./release-notes/**/*"]).pipe(gulp.dest(DIST + "/release-notes"));
 });
-gulp.task("copy-static", function() {
+gulp.task("copy-static", function () {
   gulp.src(["./static/**/*"]).pipe(gulp.dest(DIST + "/static"));
 });
 
-gulp.task("copy-index", function() {
+gulp.task("copy-index", function () {
   gulp
     .src([
       "./app/index.html",
@@ -172,8 +176,8 @@ gulp.task("copy-index", function() {
     .pipe(gulp.dest(DIST));
 });
 
-gulp.task("gen-package", function() {
-  gulp.src(["./package.json"]).on("end", function() {
+gulp.task("gen-package", function () {
+  gulp.src(["./package.json"]).on("end", function () {
     var info = require("./package");
 
     delete info.devDependencies;
@@ -192,7 +196,7 @@ gulp.task("gen-package", function() {
   });
 });
 
-gulp.task("watch", function() {
+gulp.task("watch", function () {
   gulp.watch(
     [
       "!" + DIST + "/**/node_modules/**",
@@ -200,12 +204,12 @@ gulp.task("watch", function() {
       DIST + "/**/*.js",
       DIST + "/**/*.css"
     ],
-    function(event) {
+    function (event) {
       return gulp.src(event.path).pipe(plugins.connect.reload());
     }
   );
 
-  gulp.watch(["app/**/*"], function(event) {
+  gulp.watch(["app/**/*"], function (event) {
     console.log(Math.random(), event);
 
     if (event.path.endsWith(".js") && !event.path.endsWith("_test.js")) {
@@ -228,7 +232,7 @@ gulp.task("watch", function() {
 
   gulp.watch(["./static/**"], ["copy-static"]);
 
-  gulp.watch(["./node/**"], ["copy-node"]);
+  gulp.watch(["./node/**/*"], ["copy-node"]);
 });
 
 gulp.task("build", [

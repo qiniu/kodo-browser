@@ -1,6 +1,6 @@
-var path = require("path");
-var fs = require("fs");
-var crypto = require("crypto");
+var path = require("path"),
+  fs = require("fs"),
+  crypto = require("crypto");
 
 module.exports = {
   parseLocalPath: parseLocalPath,
@@ -15,7 +15,10 @@ function parseLocalPath(p) {
     return p;
   }
 
-  return { name: path.basename(p), path: p };
+  return {
+    name: path.basename(p),
+    path: p
+  };
 }
 
 function parseS3Path(s3path) {
@@ -72,16 +75,16 @@ function printPartTimeLine(opt) {
 function checksumFile(filePath, fileMD5, fn) {
   if (fileMD5) {
     //检验MD5
-    md5sumFile(filePath, function(err, md5str) {
+    md5sumFile(filePath, function (err, md5str) {
       if (err) {
         fn(new Error("Checking md5 failed: " + err.message));
       } else if ('"' + md5str + '"' != fileMD5) {
         fn(
           new Error(
             "ContentMD5 mismatch, file md5 should be:" +
-              fileMD5 +
-              ", but we got:" +
-              md5str
+            fileMD5 +
+            ", but we got:" +
+            md5str
           )
         );
       } else {
@@ -104,16 +107,16 @@ function md5sumFile(filename, fn) {
   var stream = fs.createReadStream(filename);
 
   console.time("gen md5 hash for [" + filename + "]");
-  stream.on("data", function(chunk) {
+  stream.on("data", function (chunk) {
     md5sum.update(chunk);
   });
-  stream.on("end", function() {
+  stream.on("end", function () {
     str = md5sum.digest("hex");
     console.timeEnd("gen md5 hash for [" + filename + "]");
 
     fn(null, str);
   });
-  stream.on("error", function(err) {
+  stream.on("error", function (err) {
     fn(err);
   });
 }

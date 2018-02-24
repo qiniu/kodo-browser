@@ -70,7 +70,7 @@ var opt = {
   secret: '',
   desc: '', //可选
   region: 'oss-cn-shenzhen',
-  s3path: 'kodo://your-bucket/test/',  
+  s3path: 's3://your-bucket/test/',  
   eptpl: 'http://{region}.qiniu.com'
 };
 

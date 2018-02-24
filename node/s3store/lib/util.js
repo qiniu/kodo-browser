@@ -26,11 +26,11 @@ function parseS3Path(s3path) {
     return s3path;
   }
 
-  if (!s3path.startsWith("kodo://")) {
+  if (!s3path.startsWith("s3://")) {
     throw Error("Invalid oss path");
   }
 
-  var a = s3path.substring("kodo://".length);
+  var a = s3path.substring("s3://".length);
   var bucket = a.split("/", 1)[0];
   var key = a.substring(bucket.length + 1);
   return {

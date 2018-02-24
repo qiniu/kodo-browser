@@ -23,7 +23,7 @@
 
 2. Logon using a subaccount with low-level privilege
 
-Assume that a subaccount is assigned the read or write permission on the `kodo://aabbcc4/dd/` directory. The subaccount is considered to have low-level privilege. Logon using this subaccount is as follows:
+Assume that a subaccount is assigned the read or write permission on the `s3://aabbcc4/dd/` directory. The subaccount is considered to have low-level privilege. Logon using this subaccount is as follows:
 
 ![](../preview/login-subak1.png)
 

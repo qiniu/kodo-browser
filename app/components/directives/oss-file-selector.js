@@ -51,7 +51,7 @@ angular.module("web").directive("ossFileSelector", [
         var v = $scope.keepConfig;
         if (!v.bucket) {
           //if(!$scope.ngModel)$scope.ngModel={};
-          $scope.selectedItem.ossPath = "kodo://";
+          $scope.selectedItem.ossPath = "s3://";
           $scope.selectedItem.region = "";
           $scope.isLoading = true;
           osClient.listAllBuckets().then(function(arr) {
@@ -59,8 +59,8 @@ angular.module("web").directive("ossFileSelector", [
             $scope.isLoading = false;
           });
         } else {
-          if (!v.key) $scope.selectedItem.ossPath = "kodo://" + v.bucket + "/";
-          else $scope.selectedItem.ossPath = "kodo://" + v.bucket + "/" + v.key;
+          if (!v.key) $scope.selectedItem.ossPath = "s3://" + v.bucket + "/";
+          else $scope.selectedItem.ossPath = "s3://" + v.bucket + "/" + v.key;
 
           $scope.selectedItem.region = v.region;
 
@@ -83,17 +83,17 @@ angular.module("web").directive("ossFileSelector", [
 
       $scope.select = function(item) {
         if (item.isBucket) {
-          $scope.selectedItem.ossPath = "kodo://" + item.name;
+          $scope.selectedItem.ossPath = "s3://" + item.name;
         } else if (item.isFolder) {
           $scope.selectedItem.ossPath =
-            "kodo://" +
+            "s3://" +
             $scope.keepConfig.bucket +
             "/" +
             item.path.replace(/\/$/, "") +
             "/";
         } else {
           $scope.selectedItem.ossPath =
-            "kodo://" +
+            "s3://" +
             $scope.keepConfig.bucket +
             "/" +
             item.path.replace(/\/$/, "");
@@ -117,7 +117,7 @@ angular.module("web").directive("ossFileSelector", [
 
       $scope.goUp = function() {
         var v = $scope.selectedItem.ossPath;
-        if (v == "kodo://") {
+        if (v == "s3://") {
           return;
         }
         var info = osClient.parseS3Path(v);

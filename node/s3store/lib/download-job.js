@@ -12,7 +12,7 @@ class DownloadJob extends Base {
    *
    * @param osClient
    * @param config
-   *    config.from {object|string}  {bucket, key} or kodo://bucket/test/a.jpg
+   *    config.from {object|string}  {bucket, key} or s3://bucket/test/a.jpg
    *    config.to   {object|string}  {name, path} or /home/admin/a.jpg
    *
    */

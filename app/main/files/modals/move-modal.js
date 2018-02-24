@@ -35,7 +35,7 @@ angular.module('web')
         canMove: false
       });
 
-      //$scope.originPath = 'kodo://'+currentInfo.bucket+'/'+currentInfo.key;
+      //$scope.originPath = 's3://'+currentInfo.bucket+'/'+currentInfo.key;
       start();
 
       function stop() {

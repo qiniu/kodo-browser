@@ -12,7 +12,7 @@ angular.module('web')
           txt: '',
           limitTo: 20
         },
-        loadNext: loadNext,
+        tryLoadMore: tryLoadMore,
 
         //全选相关
         sel: {
@@ -24,7 +24,7 @@ angular.module('web')
         selectChanged: selectChanged,
       });
 
-      function loadNext(){
+      function tryLoadMore(){
         $scope.sch.limitTo+= 20;
       }
 

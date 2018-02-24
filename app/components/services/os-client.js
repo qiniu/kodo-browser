@@ -12,7 +12,7 @@ angular.module("web").factory("osClient", [
     var path = require("path");
 
     var NEXT_TICK = 1;
-    var DEF_ADDR = "kodo://";
+    var DEF_ADDR = "s3://";
 
     return {
       listAllBuckets: listAllBuckets,

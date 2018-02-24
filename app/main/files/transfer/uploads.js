@@ -10,7 +10,7 @@ angular.module("web").controller("transferUploadsCtrl", [
   "osUploadManager",
   "Toast",
   "Dialog",
-  function(
+  function (
     $scope,
     $timeout,
     $translate,
@@ -34,7 +34,7 @@ angular.module("web").controller("transferUploadsCtrl", [
       sch: {
         upname: null
       },
-      schKeyFn: function(item) {
+      schKeyFn: function (item) {
         return (
           item.from.name +
           " " +
@@ -68,7 +68,7 @@ angular.module("web").controller("transferUploadsCtrl", [
         Dialog.confirm(
           title,
           message,
-          function(btn) {
+          function (btn) {
             if (btn) {
               doRemove(item);
             }
@@ -102,19 +102,18 @@ angular.module("web").controller("transferUploadsCtrl", [
     }
 
     function clearAll() {
-      if (
-        !$scope.lists.uploadJobList ||
+      if (!$scope.lists.uploadJobList ||
         $scope.lists.uploadJobList.length == 0
       ) {
         return;
       }
-      
+
       var title = T("clear.all.title"); //清空所有
       var message = T("clear.all.upload.message"); //确定清空所有上传任务?
       Dialog.confirm(
         title,
         message,
-        function(btn) {
+        function (btn) {
           if (btn) {
             var arr = $scope.lists.uploadJobList;
             for (var i = 0; i < arr.length; i++) {
@@ -137,6 +136,7 @@ angular.module("web").controller("transferUploadsCtrl", [
     }
 
     var stopFlag = false;
+
     function stopAll() {
       var arr = $scope.lists.uploadJobList;
       if (arr && arr.length > 0) {
@@ -147,7 +147,7 @@ angular.module("web").controller("transferUploadsCtrl", [
         Toast.info(T("pause.on")); //'正在暂停...'
         $scope.allActionBtnDisabled = true;
 
-        angular.forEach(arr, function(n) {
+        angular.forEach(arr, function (n) {
           if (
             n.status == "running" ||
             n.status == "waiting" ||
@@ -157,7 +157,7 @@ angular.module("web").controller("transferUploadsCtrl", [
         });
         Toast.info(T("pause.success"));
 
-        $timeout(function() {
+        $timeout(function () {
           osUploadManager.saveProg();
           $scope.allActionBtnDisabled = false;
         }, 100);
@@ -172,7 +172,7 @@ angular.module("web").controller("transferUploadsCtrl", [
         $scope.allActionBtnDisabled = true;
         DelayDone.seriesRun(
           arr,
-          function(n, fn) {
+          function (n, fn) {
             if (stopFlag) {
               return;
             }

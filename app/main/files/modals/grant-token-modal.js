@@ -150,7 +150,7 @@ angular.module('web')
             stoken: credentials.SecurityToken,
             expiration: credentials.Expiration,
             region: region,
-            s3path: 'kodo://' + bucket + '/'+ key,
+            s3path: 's3://' + bucket + '/'+ key,
             privilege: info.privType,
           }
 

@@ -11,7 +11,6 @@
     <div ng-include="'main/files/_/file-toolbar.html'"></div>
   </div>
 
-
   <div auto-height="-130" class="file-list-box">
     <div ng-show="isLoading" is-loading></div>
 
@@ -20,7 +19,7 @@
     </section>
 
     <section ng-hide="isLoading" ng-if="!ref.isBucketList" drop-zone="handlerDrop" style="height:100%">
-      <div ng-include="'main/files/_/file-list.html'" style="height:100%" id="file-list" bottom-loader="loadNext()"></div>
+      <div ng-include="'main/files/_/file-list.html'" style="height:100%" id="file-list" bottom-loader="tryLoadMore()"></div>
     </section>
 
   </div>

@@ -7,9 +7,9 @@ const FOLDER = 'folder123'
 function getAppPath(){
   var key = process.platform+'-'+process.arch;
   switch(key){
-    case 'darwin-x64': return 'build/oss-browser-darwin-x64/oss-browser.app/Contents/MacOS/oss-browser';
-    case 'linux-x64': return 'build/oss-browser-linux-x64/oss-browser';
-    case 'win32-x64': return 'build/oss-browser-win32-x64/oss-browser.exe';
+    case 'darwin-x64': return 'build/s3-browser-darwin-x64/s3-browser.app/Contents/MacOS/s3-browser';
+    case 'linux-x64': return 'build/s3-browser-linux-x64/s3-browser';
+    case 'win32-x64': return 'build/s3-browser-win32-x64/s3-browser.exe';
   }
 }
 
@@ -53,7 +53,7 @@ test(async t => {
 
 
   var text = await browser.getText('.navbar-brand');
-  t.true(text=='OSS浏览器')
+  t.true(text=='S3浏览器')
 
 
   //如果没退出，先退出

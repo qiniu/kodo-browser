@@ -239,7 +239,7 @@ module.exports = {
 
   "genAuthToken.message4": "生成的授权码",
   "genAuthToken.message5":
-    "使用上面生成的授权码登录OSS浏览器，可以达到只拥有[{{object}}]这个{{type}}的{{privilege}}权限的效果,有效期至{{expiration}}。",
+    "使用上面生成的授权码登录S3浏览器，可以达到只拥有[{{object}}]这个{{type}}的{{privilege}}权限的效果,有效期至{{expiration}}。",
   "genAuthToken.message6.1": "确定生成",
   "genAuthToken.message6.2": "重新生成",
 
@@ -422,7 +422,7 @@ module.exports = {
 
   "Insufficient disk space": "磁盘空间不足",
 
-  "grant.email.title": "OSS Browser 授权",
+  "grant.email.title": "S3 Browser 授权",
   "grant.email.body.title":
-    "OSS Browser 目前支持2种方式登录, 您可以选择任意一种:"
+    "S3 Browser 目前支持2种方式登录, 您可以选择任意一种:"
 };

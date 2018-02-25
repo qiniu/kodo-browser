@@ -1,5 +1,5 @@
 module.exports = {
-  "app.name": "OSSブラウザ",
+  "app.name": "S3ブラウザ",
   language: "言語",
   name: "名前",
   type: "タイプ",
@@ -244,7 +244,7 @@ module.exports = {
 
   "genAuthToken.message4": "認証トークン",
   "genAuthToken.message5":
-    "記の生成された認証コードを使用してOSSブラウザにログインすると、この{{type}} [{{object}}]にアクセスする権限を得ることができます。{{expiration}}まで有効です。",
+    "記の生成された認証コードを使用してS3ブラウザにログインすると、この{{type}} [{{object}}]にアクセスする権限を得ることができます。{{expiration}}まで有効です。",
   "genAuthToken.message6.1": "生成する",
   "genAuthToken.message6.2": "再生成する",
 
@@ -436,7 +436,7 @@ module.exports = {
 
   "Insufficient disk space": "ディスク容量不足",
 
-  "grant.email.title": "OSSブラウザ認証",
+  "grant.email.title": "S3ブラウザ認証",
   "grant.email.body.title":
-    "OSSブラウザは現在2つのログイン方法をサポートしていますが、いずれかを選択できます:"
+    "S3ブラウザは現在2つのログイン方法をサポートしていますが、いずれかを選択できます:"
 };

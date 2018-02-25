@@ -175,18 +175,18 @@ angular.module("web").factory("osDownloadManager", [
         }
       }
 
-      function dig(ossInfo, t, callFn, callFn2) {
+      function dig(s3Info, t, callFn, callFn2) {
         if (stopCreatingFlag) {
           return;
         }
 
-        var fileName = path.basename(ossInfo.path);
+        var fileName = path.basename(s3Info.path);
         var filePath = path.join(
           toLocalPath,
-          path.relative(dirPath, ossInfo.path)
+          path.relative(dirPath, s3Info.path)
         );
 
-        if (ossInfo.isFolder) {
+        if (s3Info.isFolder) {
           //目录
           fs.mkdir(filePath, function (err) {
             if (err && err.code != "EEXIST") {
@@ -194,15 +194,15 @@ angular.module("web").factory("osDownloadManager", [
               return;
             }
 
-            //遍历 oss 目录
+            //遍历 s3 目录
             function progDig(marker) {
               osClient
-                .listFiles(ossInfo.region, ossInfo.bucket, ossInfo.path, marker)
+                .listFiles(s3Info.region, s3Info.bucket, s3Info.path, marker)
                 .then(function (result) {
                   var arr2 = result.data;
                   arr2.forEach(function (n) {
-                    n.region = ossInfo.region;
-                    n.bucket = ossInfo.bucket;
+                    n.region = s3Info.region;
+                    n.bucket = s3Info.bucket;
                   });
                   loop(
                     arr2,
@@ -235,10 +235,10 @@ angular.module("web").factory("osDownloadManager", [
             }
           }
           var job = createJob(authInfo, {
-            region: ossInfo.region,
+            region: s3Info.region,
             from: {
-              bucket: ossInfo.bucket,
-              key: ossInfo.path
+              bucket: s3Info.bucket,
+              key: s3Info.path
             },
             to: {
               name: fileName,

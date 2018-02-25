@@ -1,6 +1,6 @@
 angular.module("web").factory("upgradeSvs", [
-  function() {
-    var NAME = Global.app.id || "oss-browser";
+  function () {
+    var NAME = Global.app.id || "s3-browser";
 
     var release_notes_url = Global.release_notes_url;
     var upgrade_url = Global.upgrade_url;
@@ -20,9 +20,9 @@ angular.module("web").factory("upgradeSvs", [
 
     //获取最新releaseNote
     function getLastestReleaseNote(version, fn) {
-      // var ind = upgrade_url.lastIndexOf('aliyun/oss-browser');
+      // var ind = upgrade_url.lastIndexOf('aliyun/s3-browser');
       // if(ind>0){
-      //   var pre = upgrade_url.substring(0, 'aliyun/oss-browser'.length+ind);
+      //   var pre = upgrade_url.substring(0, 'aliyun/s3-browser'.length+ind);
       //   $.get(pre + '/master/release-notes/'+version+'.md', fn);
       // }
       if (!release_notes_url) {
@@ -44,7 +44,7 @@ angular.module("web").factory("upgradeSvs", [
         return;
       }
 
-      $.getJSON(upgrade_url, function(data) {
+      $.getJSON(upgrade_url, function (data) {
         var isLastVersion = compareVersion(gVersion, data.version) >= 0;
         var lastVersion = data.version;
 
@@ -93,15 +93,6 @@ angular.module("web").factory("upgradeSvs", [
       } else {
         return NAME + "-" + process.platform + "-" + process.arch + ".zip";
       }
-
-      // if ((navigator.platform == "Win32") || (navigator.platform == "Windows")) {
-      //   return NAME + '-'+process.platform+'-'+process.arch+'.zip';
-      // } else if ((navigator.platform == "Mac68K") || (navigator.platform == "MacPPC") || (navigator.platform == "Macintosh") || (navigator.platform == "MacIntel")) {
-      //   return NAME + '.dmg';
-      //   //return NAME + '-darwin-x64.zip';
-      // } else {
-      //   return NAME + '-linux-x64.zip';
-      // }
     }
   }
 ]);

@@ -30,7 +30,7 @@ angular.module("web").factory("stsSvs", [
           Policy: policyStr, //'{"Version":"1","Statement":[{"Effect":"Allow", "Action":"*", "Resource":"*"}]}',
           //设置Token有效期，可选参数，默认3600秒；
           DurationSeconds: seconds || 3600,
-          RoleSessionName: "oss-browser" // RoleSessionName是一个用来标示临时凭证的名称，一般来说建议使用不同的应用程序用户来区分。usr001
+          RoleSessionName: "s3-browser" // RoleSessionName是一个用来标示临时凭证的名称，一般来说建议使用不同的应用程序用户来区分。usr001
         },
         function(err, result) {
           if (err) {

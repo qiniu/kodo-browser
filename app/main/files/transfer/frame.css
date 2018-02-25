@@ -18,6 +18,7 @@
   text-overflow: ellipsis;
   cursor: pointer;
 }
+
 .trans-frame {
   position: fixed;
   bottom: 0px;
@@ -30,13 +31,16 @@
   border: 1px solid #ccc;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
+
 .trans-frame .nav-tabs {
-    padding: 5px 5px 0 5px;
+  padding: 5px 5px 0 5px;
 }
+
 .trans-nav.nav {
   background: #f5f5f5;
 }
-.trans-nav.nav > li > a {
+
+.trans-nav.nav>li>a {
   padding: 6px 10px;
 }
 

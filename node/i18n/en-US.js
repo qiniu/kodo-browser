@@ -246,7 +246,7 @@ module.exports = {
 
   "genAuthToken.message4": "Authorization Token",
   "genAuthToken.message5":
-    "Log in to the OSS browser using the generated authorization code above, You can get {{privilege}} permission to access this {{type}} [{{object}}], Valid until {{expiration}}.",
+    "Log in to the S3 browser using the generated authorization code above, You can get {{privilege}} permission to access this {{type}} [{{object}}], Valid until {{expiration}}.",
   "genAuthToken.message6.1": "Generate",
   "genAuthToken.message6.2": "Re-Generate",
 
@@ -440,7 +440,7 @@ module.exports = {
 
   "Insufficient disk space": "Insufficient disk space",
 
-  "grant.email.title": "OSS Browser Authorization",
+  "grant.email.title": "S3 Browser Authorization",
   "grant.email.body.title":
-    "OSS Browser currently supports 2 ways to login, you can choose any one:"
+    "S3 Browser currently supports 2 ways to login, you can choose any one:"
 };

@@ -944,20 +944,17 @@ angular.module("web").factory("osClient", [
 
     function listFiles(region, bucket, key, marker) {
       return new Promise(function (resolve, reject) {
-        _listFilesOrigion(region, bucket, key, marker).then(
-          function (result) {
-            var arr = result.data;
-            if (arr && arr.length) {
-              $timeout(() => {
-                loadStorageStatus(region, bucket, arr);
-              }, NEXT_TICK);
-            }
-            resolve(result);
-          },
-          function (err) {
-            reject(err);
+        _listFilesOrigion(region, bucket, key, marker).then(function (result) {
+          var arr = result.data;
+          if (arr && arr.length) {
+            $timeout(() => {
+              loadStorageStatus(region, bucket, arr);
+            }, NEXT_TICK);
           }
-        );
+          resolve(result);
+        }, function (err) {
+          reject(err);
+        });
       });
     }
 
@@ -1328,12 +1325,12 @@ angular.module("web").factory("osClient", [
       return options;
     }
 
-    function parseS3Path(ossPath) {
-      if (!ossPath || ossPath.indexOf(DEF_ADDR) == -1 || ossPath == DEF_ADDR) {
+    function parseS3Path(s3Path) {
+      if (!s3Path || s3Path.indexOf(DEF_ADDR) == -1 || s3Path == DEF_ADDR) {
         return {};
       }
 
-      var str = ossPath.substring(DEF_ADDR.length);
+      var str = s3Path.substring(DEF_ADDR.length);
       var ind = str.indexOf("/");
       if (ind == -1) {
         var bucket = str;

@@ -20,7 +20,7 @@ angular.module('web')
         // reg: {
         //   folderName: /^[^\/]+$/
         // },
-        // ossFsConfig: {
+        // s3FileConfig: {
         //   id: authInfo.id,
         //   secret: authInfo.secret,
         //   region: currentInfo.region,

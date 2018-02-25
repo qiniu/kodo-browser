@@ -79,7 +79,7 @@ function S3Store(config) {
  *
  * @param options
  *    options.from  {object|string} local path, as object: {name:'a.jpg', path:'/home/admin/a.jpg'},  as string: '/home/admin/a.jpg'
- *    options.to    {object|string} oss path, as object: {bucket:'bucket',key:'pic/b.jpg'} as string: 's3://bucket/pic/b.jpg'
+ *    options.to    {object|string} s3 path, as object: {bucket:'bucket',key:'pic/b.jpg'} as string: 's3://bucket/pic/b.jpg'
  *
  *    options.checkPoints {object} saveCpt
  *    options.enableCrc64 {boolean}
@@ -112,7 +112,7 @@ S3Store.prototype.createUploadJob = function createUploadJob(options) {
 
  *
  * @param options
- *    options.from    {string} path string, under oss prefix, example: '/pic/b.jpg', it will be append to presetting s3path
+ *    options.from    {string} path string, under s3 prefix, example: '/pic/b.jpg', it will be append to presetting s3path
  *                       as: 's3://bucket/users/test_user/pic/b.jpg'
  *    options.to  {string} local path string,  example: '/home/admin/a.jpg'
  *

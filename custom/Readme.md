@@ -1,16 +1,16 @@
-# 定制 OSS Browser
+# 定制 S3 Browser
 
 通过修改此目录下的配置，目前可以较容易的自定义logo，app名称，版本号，更新地址等。
 
-如果需要修改更多内容，请直接修改oss browser代码。
+如果需要修改更多内容，请直接修改s3 browser代码。
 
 下面介绍如何修改配置，如何重新build，如何发布。
 
-* build oss browser 推荐使用 Mac，其次 ubuntu，再其次 windows。
+* build s3 browser 推荐使用 Mac，其次 ubuntu，再其次 windows。
 
 ## 1. 安装环境
 
-本工具使用 [Electron](https://electron.atom.io/) 编写，依赖 [Node.js](https://nodejs.org) >= 7.9.0.
+本工具使用 [Electron](https://electron.atom.io/) 编写，依赖 [Node.js](https://nodejs.org) >= 8.2.1.
 
 所以先要安装 Node.js
 
@@ -24,13 +24,13 @@ Node.js 从官网下载最新版本安装即可。
 sudo npm install -g cnpm --registry=https://registry.npm.taobao.org
 ```
 
-### (3) 获取 oss-browser 源码
+### (3) 获取 s3-browser 源码
 
-先到 https://github.com/aliyun/oss-browser ，Fork 一份到你自己的仓库，然后clone：
+先到 https://gitlab.qiniu.io/solutions/s3-browser，克隆一份到你自己的仓库，然后执行以下操作:
 
 ```
 git clone {git地址}
-cd oss-browser
+cd s3-browser
 ```
 
 ### (4) 使用mac平台来build。
@@ -55,9 +55,9 @@ cnpm i -g windows-build-tools
 
 * 还需要下载make.exe，放到 `C:\windows\` 目录下
 
-[make.exe(64位版本)](http://luogc.oss-cn-hangzhou.qiniu.com/oss-browser-publish/windows-tools/64/make.exe)
+[make.exe(64位版本)](http://luogc.oss-cn-hangzhou.qiniu.com/s3-browser-publish/windows-tools/64/make.exe)
 
-[make.exe(32位版本)](http://luogc.oss-cn-hangzhou.qiniu.com/oss-browser-publish/windows-tools/32/make.exe)
+[make.exe(32位版本)](http://luogc.oss-cn-hangzhou.qiniu.com/s3-browser-publish/windows-tools/32/make.exe)
 
 * 可以还会遇到其他问题，请自行解决。
 
@@ -79,7 +79,7 @@ make run # 开发模式启动
 ## 3. 自定义 custom 配置
 
 ```
-oss-browser/
+s3-browser/
   |-- custom
 ```
 
@@ -88,24 +88,24 @@ oss-browser/
 
 Makefile有3个变量，可以替换,分别为：NAME,CUSTOM,VERSION.
 
-* 假设你的应用名为: my-oss-browser
+* 假设你的应用名为: my-s3-browser
 * 假设你的custom目录为: ~/Desktop/custom/
 
 然后指定custom路径 build:
 ```
-make build NAME=my-oss-browser CUSTOM=~/Desktop/custom
+make build NAME=my-s3-browser CUSTOM=~/Desktop/custom
 ```
 
 开发模式启动：
 ```
-make run NAME=my-oss-browser CUSTOM=~/Desktop/custom
+make run NAME=my-s3-browser CUSTOM=~/Desktop/custom
 ```
 
 
 ## 4. build
 
 ```
-make all NAME=my-oss-browser CUSTOM=~/Desktop/custom
+make all NAME=my-s3-browser CUSTOM=~/Desktop/custom
 ```
 
 * Makefile中的 VERSION 和 NAME 变量，VERSION 需要和 custom/index.js 中的version相同，NAME需要和appId相同。
@@ -117,7 +117,7 @@ make all NAME=my-oss-browser CUSTOM=~/Desktop/custom
 ### (可选) mac平台相关的安装文件
 
 ```
-make dmg NAME=my-oss-browser # 只能在mac系统下build，生成 releases/${VERSION}/my-oss-browser.dmg 文件
+make dmg NAME=my-s3-browser # 只能在mac系统下build，生成 releases/${VERSION}/my-s3-browser.dmg 文件
 ```
 * 此命令需要在 make mac 或者 make all 命令后执行。
 * 可以指定 NAME, CUSTOM 和 VERSION 变量。

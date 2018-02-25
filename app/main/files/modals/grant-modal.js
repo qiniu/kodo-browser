@@ -75,16 +75,16 @@ angular.module('web')
 
         var actions = [];
         if(privType=='readOnly'){
-          actions = ['oss:GetObject',
-            'oss:HeadObject',
-            "oss:GetObjectMeta",
-            "oss:GetObjectACL",
-            'oss:ListObjects',
-            'oss:GetSymlink'
+          actions = ['s3:GetObject',
+            's3:HeadObject',
+            "s3:GetObjectMeta",
+            "s3:GetObjectACL",
+            's3:ListObjects',
+            's3:GetSymlink'
           ];
         }
         else{
-          actions = ['oss:*'];
+          actions = ['s3:*'];
         }
 
         angular.forEach($scope.items, function (item) {
@@ -96,7 +96,7 @@ angular.module('web')
               "Effect": "Allow",
               "Action": actions,
               "Resource": [
-                "acs:oss:*:*:" + bucket + "/" + key + "*"
+                "acs:s3:*:*:" + bucket + "/" + key + "*"
               ]
             });
 
@@ -104,14 +104,14 @@ angular.module('web')
             t.push({
               "Effect": "Allow",
               "Action": [
-                "oss:ListObjects"
+                "s3:ListObjects"
               ],
               "Resource": [
-                "acs:oss:*:*:" + bucket
+                "acs:s3:*:*:" + bucket
               ],
               "Condition": {
                 "StringLike": {
-                  "oss:Prefix": key + "*"
+                  "s3:Prefix": key + "*"
                 }
               }
             });
@@ -122,7 +122,7 @@ angular.module('web')
               "Effect": "Allow",
               "Action": actions,
               "Resource": [
-                "acs:oss:*:*:" + currentInfo.bucket + "/" + item.path
+                "acs:s3:*:*:" + currentInfo.bucket + "/" + item.path
               ]
             });
           }
@@ -275,7 +275,7 @@ angular.module('web')
           //  AccessKeyId: result.AccessKey.AccessKeyId,
           //  AccessKeySecret: result.AccessKey.AccessKeySecret,
           //  UserName: userName,
-           subject:  T('grant.email.title'),// 'OSS Browser 授权',
+           subject:  T('grant.email.title'),// 'S3 Browser 授权',
            to: toEmail,
            html:
 `${T('grant.email.body.title')}<br/>
@@ -296,7 +296,7 @@ AccessKeySecret: ${secret}<br/>
 
 <br/>
 <hr/>
-您可以使用 <a href="https://github.com/aliyun/oss-browser" target="_blank">OSS Browser</a> 浏览或管理这些文件。
+您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">S3 Browser</a> 浏览或管理这些文件。
 `
                    //   '子用户名(Sub User): '+userName+ '<br/>'
                    // + 'AccessKeyId: '+result.AccessKey.AccessKeyId+ '<br/>'
@@ -305,7 +305,7 @@ AccessKeySecret: ${secret}<br/>
                    // + '授予权限(permission): '+$scope.grant.privType + '<br/>'
                    // + '授权路径(s3path): ' + comments.join(',<br/>')
                    // + '<hr/>'
-                   // + '您可以使用 <a href="https://github.com/aliyun/oss-browser" target="_blank">OSS Browser</a> 浏览或管理这些文件。'
+                   // + '您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">S3 Browser</a> 浏览或管理这些文件。'
          };
          return sendInfo;
       }

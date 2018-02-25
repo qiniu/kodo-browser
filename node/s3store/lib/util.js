@@ -27,7 +27,7 @@ function parseS3Path(s3path) {
   }
 
   if (!s3path.startsWith("s3://")) {
-    throw Error("Invalid oss path");
+    throw Error("Invalid s3 path");
   }
 
   var a = s3path.substring("s3://".length);

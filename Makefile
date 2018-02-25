@@ -1,6 +1,6 @@
 
 VERSION=1.5.0
-NAME=oss-browser
+NAME=s3-browser
 CUSTOM=./custom
 
 GULP=node ./node_modules/gulp/bin/gulp.js
@@ -15,7 +15,7 @@ BUILD=ELECTRON_MIRROR=$(ELECTRON_MIRROR) $(PKGER) ./dist $(NAME) --asar --overwr
 i:
 	cnpm i
 clean:
-	rm -rf dist node_modules build releases node/crc64/cpp-addon/node_modules node/ossstore/node_modules
+	rm -rf dist node_modules build releases node/s3store/node_modules
 dev:
 	NODE_ENV=development electron .
 

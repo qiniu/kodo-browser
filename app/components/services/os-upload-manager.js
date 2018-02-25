@@ -43,11 +43,12 @@ angular.module("web").factory("osUploadManager", [
 
     function init(scope) {
       $scope = scope;
-      concurrency = 0;
       $scope.lists.uploadJobList = [];
 
+      concurrency = 0;
+
       var authInfo = AuthInfo.get();
-      var progs = loadProg();
+      var progs = tryLoadProg();
 
       angular.forEach(progs, function (n) {
         var job = createJob(authInfo, n);
@@ -90,13 +91,13 @@ angular.module("web").factory("osUploadManager", [
       });
       job.on("error", function (err) {
         console.error(err);
+
         concurrency--;
         checkStart();
       });
     }
 
     function checkStart() {
-      //流控, 同时只能有 n 个上传任务.
       var maxConcurrency = settingsSvs.maxUploadJobCount.get();
 
       concurrency = Math.max(0, concurrency);
@@ -329,7 +330,7 @@ angular.module("web").factory("osUploadManager", [
     /**
      * 获取保存的进度
      */
-    function loadProg() {
+    function tryLoadProg() {
       try {
         var data = fs.readFileSync(getUpProgFilePath());
 
@@ -339,7 +340,6 @@ angular.module("web").factory("osUploadManager", [
       return [];
     }
 
-    //上传进度保存路径
     function getUpProgFilePath() {
       var folder = path.join(os.homedir(), ".s3-browser");
       if (!fs.existsSync(folder)) {

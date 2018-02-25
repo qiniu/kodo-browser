@@ -10,26 +10,20 @@ step 2: use Toast factory
 
 angular
   .module("web")
-  .directive("toastList", function() {
+  .directive("toastList", function () {
     return {
-      //link: linkFn,
       restrict: "EA",
-      template:
-        '<div class="toast-list" style="position: fixed; bottom: 0px;left: 10px;right: 70%;z-index:10000;">' +
+      template: '<div class="toast-list" style="position: fixed; bottom: 0px;left: 10px;right: 70%;z-index:10000;">' +
         '<div ng-repeat="alert in alerts" style="padding:4px;margin-bottom:10px;" class="break alert alert-{{alert.type}}">{{alert.msg}}</div>' +
         "</div>",
       controller: [
         "$scope",
         "$timeout",
         "$location",
-        function($scope, $timeout, $location) {
+        function ($scope, $timeout, $location) {
           $scope.alerts = [];
 
-          // $scope.closeAlert = function(index){
-          //   $scope.alerts.splice(index, 1);
-          // };
-
-          $scope.$on("message", function(evt, data) {
+          $scope.$on("message", function (evt, data) {
             showMessage(data.message, data.type || "danger", data.ttl || 3000);
           });
 
@@ -41,9 +35,9 @@ angular
             };
 
             //next tick
-            $timeout(function() {
+            $timeout(function () {
               $scope.alerts.push(obj);
-              $timeout(function() {
+              $timeout(function () {
                 for (var i = 0; i < $scope.alerts.length; i++) {
                   if ($scope.alerts[i] == obj) {
                     $scope.alerts.splice(i, 1);
@@ -62,21 +56,21 @@ angular
 
   .factory("Toast", [
     "$rootScope",
-    function($rootScope) {
+    function ($rootScope) {
       return {
-        success: function(msg, ttl) {
+        success: function (msg, ttl) {
           sendMessage(msg, "success", ttl);
         },
-        info: function(msg, ttl) {
+        info: function (msg, ttl) {
           sendMessage(msg, "info", ttl);
         },
-        warn: function(msg, ttl) {
+        warn: function (msg, ttl) {
           sendMessage(msg, "warning", ttl);
         },
-        warning: function(msg, ttl) {
+        warning: function (msg, ttl) {
           sendMessage(msg, "warning", ttl);
         },
-        error: function(msg, ttl) {
+        error: function (msg, ttl) {
           sendMessage(msg, "danger", ttl);
         }
       };

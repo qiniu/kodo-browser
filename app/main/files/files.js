@@ -74,7 +74,7 @@ angular.module("web").controller("filesCtrl", [
       sel: {
         hasArchive: false,
         all: false, //boolean
-        has: false, //[] item: ossObject={name,path,...}
+        has: false, //[] item: s3Object={name,path,...}
         x: {} //{} {'i_'+$index, true|false}
       },
       selectAll: selectAll,
@@ -503,7 +503,7 @@ angular.module("web").controller("filesCtrl", [
 
         if (fn) fn();
 
-      }).catch(function (err) {
+      }, function (err) {
         console.log(`list buckets error: ${err.message}`);
         $scope.isLoading = false;
 
@@ -550,7 +550,7 @@ angular.module("web").controller("filesCtrl", [
 
         if (fn) fn(null);
 
-      }).catch(function (err) {
+      }, function (err) {
         console.log(`list files: s3://${info.bucket}/${info.key}?marker=${maker}, error: ${err.message}`);
 
         clearFilesList();

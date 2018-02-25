@@ -17,7 +17,7 @@ angular.module('web')
         //全选相关
         sel: {
           all: false, //boolean
-          has: false, //[] item: ossObject={name,path,...}
+          has: false, //[] item: s3Object={name,path,...}
           x: {}       //{} {'i_'+$index, true|false}
         },
         selectAll: selectAll,

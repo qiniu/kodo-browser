@@ -12,7 +12,7 @@ angular.module("web").controller("settingsCtrl", [
   "Toast",
   "Dialog",
   "Const",
-  function(
+  function (
     $scope,
     $state,
     $timeout,
@@ -26,10 +26,14 @@ angular.module("web").controller("settingsCtrl", [
     Const
   ) {
     var T = $translate.instant;
+
     angular.extend($scope, {
-      showTab: 3,
       set: {
         autoUpgrade: settingsSvs.autoUpgrade.get(),
+        resumeUpload: settingsSvs.resumeUpload.get(),
+        resumeUploadThreshold: settingsSvs.resumeUploadThreshold.get(),
+        resumeDownload: settingsSvs.resumeDownload.get(),
+        resumeDownloadThreshold: settingsSvs.resumeDownloadThreshold.get(),
         maxUploadJobCount: settingsSvs.maxUploadJobCount.get(),
         maxDownloadJobCount: settingsSvs.maxDownloadJobCount.get(),
         showImageSnapshot: settingsSvs.showImageSnapshot.get(),
@@ -46,9 +50,10 @@ angular.module("web").controller("settingsCtrl", [
     });
 
     var tid;
+
     function setChange(form1, key, ttl) {
       $timeout.cancel(tid);
-      tid = $timeout(function() {
+      tid = $timeout(function () {
         if (!form1.$valid) return;
         settingsSvs[key].set($scope.set[key]);
         Toast.success(T("settings.success")); //已经保存设置
@@ -62,9 +67,11 @@ angular.module("web").controller("settingsCtrl", [
 
     function testMail() {
       var title = T("mail.test.title"); //测试邮件
-      var message = T("mail.test.message", { from: $scope.set.mailSmtp.from }); //将发送测试邮件到
+      var message = T("mail.test.message", {
+        from: $scope.set.mailSmtp.from
+      }); //将发送测试邮件到
 
-      Dialog.confirm(title, message, function(b) {
+      Dialog.confirm(title, message, function (b) {
         if (!b) return;
         Toast.info(T("mail.send.on"));
         Mailer.send({
@@ -72,10 +79,10 @@ angular.module("web").controller("settingsCtrl", [
           to: $scope.set.mailSmtp.from,
           html: "<h3>Testing mail content</h3>"
         }).then(
-          function(result) {
+          function (result) {
             Toast.success(T("mail.test.success")); // 邮件发送成功');
           },
-          function(err) {
+          function (err) {
             Toast.error(err);
           }
         );

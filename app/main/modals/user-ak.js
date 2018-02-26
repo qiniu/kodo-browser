@@ -12,7 +12,7 @@ angular.module("web").controller("userAKCtrl", [
   "Toast",
   "Dialog",
   "Const",
-  function(
+  function (
     $scope,
     $rootScope,
     $translate,
@@ -28,50 +28,54 @@ angular.module("web").controller("userAKCtrl", [
     var T = $translate.instant;
 
     angular.extend($scope, {
+      isLoading: false,
       user: user || {},
       items: [],
-      isLoading: false,
-      cancel: cancel,
       refresh: refresh,
+      showAdd: showAdd,
       updateStatus: updateStatus,
       showRemove: showRemove,
-      showAdd: showAdd
+      cancel: cancel
     });
+
     refresh();
 
     function refresh() {
       $scope.isLoading = true;
-      subUserAKSvs.list().then(function(arr) {
+      subUserAKSvs.list().then(function (arr) {
         var akMap = {};
-        angular.forEach(arr, function(n) {
+        angular.forEach(arr, function (n) {
           akMap[n.AccessKeyId] = n.AccessKeySecret;
         });
 
         ramSvs.listAccessKeys(user.UserName).then(
-          function(result) {
+          function (result) {
             $scope.isLoading = false;
             var items = result.AccessKeys.AccessKey;
-            angular.forEach(items, function(n) {
+            angular.forEach(items, function (n) {
               n.AccessKeySecret = akMap[n.AccessKeyId] || "";
             });
-            items.sort(function(a, b) {
+            items.sort(function (a, b) {
               return a.UpdateDate < b.UpdateDate ? 1 : -1;
             });
             $scope.items = items;
           },
-          function() {
+          function () {
             $scope.isLoading = false;
           }
         );
       });
     }
 
-    function showRemove(item) {
-      Dialog.confirm(title, message, function(b) {
-        if (!b) return;
-        ramSvs
-          .deleteAccessKey(user.UserName, item.AccessKeyId)
-          .then(function() {
+    function showAdd() {
+      ramSvs.createAccessKey(user.UserName).then(function (result) {
+        subUserAKSvs
+          .save({
+            AccessKeyId: result.AccessKey.AccessKeyId,
+            AccessKeySecret: result.AccessKey.AccessKeySecret,
+            UserName: user.UserName
+          })
+          .then(function () {
             refresh();
           });
       });
@@ -86,11 +90,11 @@ angular.module("web").controller("userAKCtrl", [
       Dialog.confirm(
         title,
         message,
-        function(b) {
+        function (b) {
           if (!b) return;
           ramSvs
             .updateAccessKey(user.UserName, item.AccessKeyId, status)
-            .then(function() {
+            .then(function () {
               refresh();
             });
         },
@@ -105,30 +109,16 @@ angular.module("web").controller("userAKCtrl", [
       Dialog.confirm(
         title,
         message,
-        function(b) {
+        function (b) {
           if (!b) return;
           ramSvs
             .deleteAccessKey(user.UserName, item.AccessKeyId)
-            .then(function() {
+            .then(function () {
               refresh();
             });
         },
         1
       );
-    }
-
-    function showAdd() {
-      ramSvs.createAccessKey(user.UserName).then(function(result) {
-        subUserAKSvs
-          .save({
-            AccessKeyId: result.AccessKey.AccessKeyId,
-            AccessKeySecret: result.AccessKey.AccessKeySecret,
-            UserName: user.UserName
-          })
-          .then(function() {
-            refresh();
-          });
-      });
     }
 
     function cancel() {

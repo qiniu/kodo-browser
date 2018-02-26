@@ -23,19 +23,14 @@ module.exports = {
 
   "auth.eptpl": "Endpoint Template",
   "auth.eptpl.placeholder": "Default: http://{region}-s3.qiniu.com",
-  "auth.eptpl.popup.msg1":
-    "For Public Cloud, you can directly use the default settings",
-  "auth.eptpl.popup.msg2":
-    "For Private Cloud, Please enter a custom Endpoint, such as:",
+  "auth.eptpl.popup.msg1": "For Public Cloud, you can directly use the default settings",
+  "auth.eptpl.popup.msg2": "For Private Cloud, Please enter a custom Endpoint, such as:",
 
   "auth.region.placeholder": "Please enter available region",
-  "auth.region.popup.msg1":
-    "For Public Cloud, you can select available region from the list",
-  "auth.region.popup.msg2":
-    "For Private Cloud, Please enter a custom Region, such as:",
+  "auth.region.popup.msg1": "For Public Cloud, you can select available region from the list",
+  "auth.region.popup.msg2": "For Private Cloud, Please enter a custom Region, such as:",
 
-  "auth.remember.popup.msg1":
-    'Check "Remember" to save the AK. When you login again, click AK History to select the key to log in. You do not need to enter AK manually. Please do not check it on a temporary computer!',
+  "auth.remember.popup.msg1": 'Check "Remember" to save the AK. When you login again, click AK History to select the key to log in. You do not need to enter AK manually. Please do not check it on a temporary computer!',
 
   region: "Region",
   "auth.description": "Description",
@@ -112,10 +107,8 @@ module.exports = {
   creationTime: "Creation Time",
 
   "multipart.management": "Multipart",
-  "multipart.description":
-    "Manage events and fragments that are generated during the multipipart (upload) process.",
-  "multipart.description.tooltip":
-    "That is, the Multipart Upload that has been initialized but not the Complete or Abort's Multipart Upload event",
+  "multipart.description": "Manage events and fragments that are generated during the multipipart (upload) process.",
+  "multipart.description.tooltip": "That is, the Multipart Upload that has been initialized but not the Complete or Abort's Multipart Upload event",
 
   "select.all": "Select All",
   "delete.selected": "Delete selected",
@@ -127,8 +120,7 @@ module.exports = {
   nodata: "No data",
 
   "delete.multiparts.title": "Delete multiparts",
-  "delete.multiparts.message":
-    "Are you sure you want to delete {{num}} multiparts？",
+  "delete.multiparts.message": "Are you sure you want to delete {{num}} multiparts？",
   "delete.multiparts.on": "Deleting...",
   "delete.multiparts.success": "Deleted multiparts successfully",
 
@@ -138,8 +130,7 @@ module.exports = {
   "bucket.add.success": "Created successfully",
 
   "bucket.delete.title": "Delete Bucket",
-  "bucket.delete.message":
-    "Bucket Name:<code>{{name}}</code>, Region:<code>{{region}}</code>, Are you sure you want to delete this bucket?",
+  "bucket.delete.message": "Bucket Name:<code>{{name}}</code>, Region:<code>{{region}}</code>, Are you sure you want to delete this bucket?",
   "bucket.delete.success": "Deleted Bucket Successfully",
 
   "simplePolicy.title": "Simplify policy authorization",
@@ -164,17 +155,21 @@ module.exports = {
 
   "simplePolicy.ok": "OK",
   "simplePolicy.noauth.message1": "You are not authorized to get user list",
-  "simplePolicy.noauth.message2":
-    "You are not authorized to get use group list",
+  "simplePolicy.noauth.message2": "You are not authorized to get use group list",
   "simplePolicy.noauth.message3": "You are not authorized to get role list",
   "simplePolicy.success": "Apply policy successfully",
 
   //settings
-  "settings.maxUploadNum": "Upload tasks concurrent number",
-  "settings.maxDownloadNum": "Download tasks concurrent number",
+  "settings.WhetherResumeUpload": "Whether to use resume upload",
+  "settings.WhetherResumeUpload.msg": "Use resume upload when file size is bigger than config",
+  "settings.ResumeUploadThreshold": "Resume upload threshold",
+  "settings.WhetherResumeDownload": "Whether to use resume download",
+  "settings.WhetherResumeDownload.msg": "Use resume download when file size is bigger than config",
+  "settings.ResumeDownloadThreshold": "Resume download threshould",
+  "settings.maxUploadConcurrency": "Upload tasks concurrent number",
+  "settings.maxDownloadConcurrency": "Download tasks concurrent number",
   "settings.WhetherShowThumbnail": "Whether to show the image thumbnail",
-  "settings.WhetherShowThumbnail.msg":
-    "Displaying thumbnails in the list of files will consume a certain amount of traffic",
+  "settings.WhetherShowThumbnail.msg": "Displaying thumbnails in the list of files will consume a certain amount of traffic",
   "settings.success": "Saved successfully",
   "settings.autoUpgrade": "Auto update",
   "settings.autoUpgrade.msg": "Download update package automatically",
@@ -241,12 +236,10 @@ module.exports = {
   "unit.second": "s",
 
   "genAuthToken.message3.1": "You also need to specify a role",
-  "genAuthToken.message3.2":
-    "This role requires at least {{privilege}} permission to access this {{type}}",
+  "genAuthToken.message3.2": "This role requires at least {{privilege}} permission to access this {{type}}",
 
   "genAuthToken.message4": "Authorization Token",
-  "genAuthToken.message5":
-    "Log in to the S3 browser using the generated authorization code above, You can get {{privilege}} permission to access this {{type}} [{{object}}], Valid until {{expiration}}.",
+  "genAuthToken.message5": "Log in to the S3 browser using the generated authorization code above, You can get {{privilege}} permission to access this {{type}} [{{object}}], Valid until {{expiration}}.",
   "genAuthToken.message6.1": "Generate",
   "genAuthToken.message6.2": "Re-Generate",
 
@@ -257,17 +250,13 @@ module.exports = {
   "deleteModal.message2": "Has been cancelled",
   "deleteModal.message3": "Some directories or files can not be deleted",
 
-  "paste.message1":
-    '<span class="text-info">{{action}}</span> <span class="text-info">{{name}}...</span> to this directory (The same file or directory will be covered)？',
+  "paste.message1": '<span class="text-info">{{action}}</span> <span class="text-info">{{name}}...</span> to this directory (The same file or directory will be covered)？',
 
   "acl.update.title": "Update ACL",
   "acl.update.success": "ACL Updated successfully",
-  "aclType.private.message":
-    "Private: All access to object needs to be authenticated",
-  "aclType.public-read.message":
-    "Public read: need to write for the operation of the object authentication; object can be anonymous read",
-  "aclType.public-read-write.message":
-    "Public read and write: Everyone can read and write objects",
+  "aclType.private.message": "Private: All access to object needs to be authenticated",
+  "aclType.public-read.message": "Public read: need to write for the operation of the object authentication; object can be anonymous read",
+  "aclType.public-read-write.message": "Public read and write: Everyone can read and write objects",
 
   "getAddress.title": "Get Address",
   address: "Address",
@@ -275,11 +264,9 @@ module.exports = {
   generate: "Generate",
   "qrcode.download": "Sweep code to download",
 
-  "restore.checker.message1":
-    "Archive need to be restored in order to preview or download.",
+  "restore.checker.message1": "Archive need to be restored in order to preview or download.",
   "restore.immediately": "Restore immediately",
-  "restore.checker.message2":
-    "The archive has been restored, the expiration time",
+  "restore.checker.message2": "The archive has been restored, the expiration time",
   "restore.onprogress": "Archive file is recovering, please be patient ...",
   "restore.on": "Sending...",
   "restore.success": "Restore request has been send successfully",
@@ -296,8 +283,7 @@ module.exports = {
   save: "Save",
   size: "Size",
   filesize: "File size",
-  "codepreview.notsupport":
-    "This file can not be opening directly, please download to the local and then open.",
+  "codepreview.notsupport": "This file can not be opening directly, please download to the local and then open.",
   "download.file": "Download File",
 
   lastModifyTime: "Last Modified",
@@ -317,10 +303,8 @@ module.exports = {
   "clear.all": "Clear All",
 
   "clear.all.title": "Clear All",
-  "clear.all.download.message":
-    "Are you sure you want to clear all download tasks?",
-  "clear.all.upload.message":
-    "Are you sure you want to clear all upload tasks?",
+  "clear.all.download.message": "Are you sure you want to clear all download tasks?",
+  "clear.all.upload.message": "Are you sure you want to clear all upload tasks?",
 
   "pause.on": "Stopping...",
   "pause.success": "Stopped successfully",
@@ -361,18 +345,13 @@ module.exports = {
 
   "ak.status.update.title.Active": "Disable AccessKey",
   "ak.status.update.title.Inactive": "Enable AccessKey",
-  "ak.status.update.message.Active":
-    "Are you sure you want to <code>Disable</code> this AccessKey？",
-  "ak.status.update.message.Inactive":
-    'Are you sure you want to <code class="text-success">Enable</code> this AccessKey？',
+  "ak.status.update.message.Active": "Are you sure you want to <code>Disable</code> this AccessKey？",
+  "ak.status.update.message.Inactive": 'Are you sure you want to <code class="text-success">Enable</code> this AccessKey？',
   "ak.delete.title": "Delete AccessKey",
-  "ak.delete.message":
-    "Are you sure you want to <code>Delete</code> this AccessKey",
+  "ak.delete.message": "Are you sure you want to <code>Delete</code> this AccessKey",
 
-  "user.update.message.tip":
-    "Please make sure you have got AliyunRAMFullAccess permissions",
-  "user.list.message.tip":
-    "Here we only provide the necessary user management functions, for further enhancements, please go to the RAM Console to operate:",
+  "user.update.message.tip": "Please make sure you have got AliyunRAMFullAccess permissions",
+  "user.list.message.tip": "Here we only provide the necessary user management functions, for further enhancements, please go to the RAM Console to operate:",
 
   "status.Active": "Active",
   "status.Inactive": "Inactive",
@@ -393,8 +372,7 @@ module.exports = {
   test: "Test",
 
   "mail.test.title": "Test mail",
-  "mail.test.message":
-    'It will send the test message to: <span class="text-primary">{{from}}</span>',
+  "mail.test.message": 'It will send the test message to: <span class="text-primary">{{from}}</span>',
   "mail.test.success": "Sending successfully",
   "mail.send.on": "Sending...",
 
@@ -434,13 +412,11 @@ module.exports = {
 
   "upgrade.start": "Upgrade",
   "upgrade.downloading": "Start download...",
-  "upgrade.download.field":
-    "Automatic update failed, please manually download the installation package.",
+  "upgrade.download.field": "Automatic update failed, please manually download the installation package.",
   "upgrade.download.success": "Download successfully, install and restart",
 
   "Insufficient disk space": "Insufficient disk space",
 
   "grant.email.title": "S3 Browser Authorization",
-  "grant.email.body.title":
-    "S3 Browser currently supports 2 ways to login, you can choose any one:"
+  "grant.email.body.title": "S3 Browser currently supports 2 ways to login, you can choose any one:"
 };

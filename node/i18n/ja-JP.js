@@ -23,17 +23,14 @@ module.exports = {
 
   "auth.eptpl": "エンドポイントテンプレート",
   "auth.eptpl.placeholder": "デフォルト: http://{region}.qiniu.com",
-  "auth.eptpl.popup.msg1":
-    "パブリッククラウドの場合は、デフォルト設定をそのまま使用できます",
-  "auth.eptpl.popup.msg2":
-    "プライベートクラウドの場合は、次のようなカスタムエンドポイントを入力してください。:",
+  "auth.eptpl.popup.msg1": "パブリッククラウドの場合は、デフォルト設定をそのまま使用できます",
+  "auth.eptpl.popup.msg2": "プライベートクラウドの場合は、次のようなカスタムエンドポイントを入力してください。:",
 
   "auth.region.placeholder": "利用可能な地域を入力してください",
   "auth.region.popup.msg1": "パブリッククラウドは利用可能なエリアを直接選択します",
   "auth.region.popup.msg2": "プライベートクラウド指定されたエリアを入力してください：cn-east-1",
 
-  "auth.remember.popup.msg1":
-    "AKキーを保存するには、 「覚えている」ボタンをチェックします。ログインするときは、AK Historyをクリックしてログインするキーを選択します.AKを手動で入力する必要はありません。 一時的な使用のためにコンピュータをチェックしないでください！",
+  "auth.remember.popup.msg1": "AKキーを保存するには、 「覚えている」ボタンをチェックします。ログインするときは、AK Historyをクリックしてログインするキーを選択します.AKを手動で入力する必要はありません。 一時的な使用のためにコンピュータをチェックしないでください！",
 
   region: "リージョン",
   "auth.description": "説明",
@@ -110,10 +107,8 @@ module.exports = {
   creationTime: "作成時間",
 
   "multipart.management": "マルチパート",
-  "multipart.description":
-    "マルチパート（アップロード）プロセス中に生成されたイベントやフラグメントを管理する",
-  "multipart.description.tooltip":
-    "つまり、初期化されたマルチパートアップロードではなく、完全またはアボートのマルチパートアップロードイベントではない",
+  "multipart.description": "マルチパート（アップロード）プロセス中に生成されたイベントやフラグメントを管理する",
+  "multipart.description.tooltip": "つまり、初期化されたマルチパートアップロードではなく、完全またはアボートのマルチパートアップロードイベントではない",
 
   "select.all": "すべて選択",
   "delete.selected": "選択を削除します",
@@ -125,8 +120,7 @@ module.exports = {
   nodata: "データなし",
 
   "delete.multiparts.title": "マルチパートを削除する",
-  "delete.multiparts.message":
-    "{{num}}マルチパートを削除してもよろしいですか？",
+  "delete.multiparts.message": "{{num}}マルチパートを削除してもよろしいですか？",
   "delete.multiparts.on": "削除中...",
   "delete.multiparts.success": "マルチパートを正常に削除しました",
 
@@ -136,8 +130,7 @@ module.exports = {
   "bucket.add.success": "正常に作成されました",
 
   "bucket.delete.title": "バケット削除",
-  "bucket.delete.message":
-    "バケット名:<code>{{name}}</code>, リジョン:<code>{{region}}</code>, このバケットを削除してもよろしいですか？",
+  "bucket.delete.message": "バケット名:<code>{{name}}</code>, リジョン:<code>{{region}}</code>, このバケットを削除してもよろしいですか？",
   "bucket.delete.success": "バケットを正常に削除しました",
 
   "simplePolicy.title": "ポリシー承認を簡素化する",
@@ -162,17 +155,21 @@ module.exports = {
 
   "simplePolicy.ok": "OK",
   "simplePolicy.noauth.message1": "ユーザーリストを取得する権限がありません",
-  "simplePolicy.noauth.message2":
-    "使用グループリストを取得する権限がありません",
+  "simplePolicy.noauth.message2": "使用グループリストを取得する権限がありません",
   "simplePolicy.noauth.message3": "ロールリストを取得する権限がありません",
   "simplePolicy.success": "ポリシーを正常に適用する",
 
   //settings
-  "settings.maxUploadNum": "タスクの並行番号をアップロードする",
-  "settings.maxDownloadNum": "タスク並行番号をダウンロードする",
+  "settings.WhetherResumeUpload": "Whether to use resume upload",
+  "settings.WhetherResumeUpload.msg": "Use resume upload when file size is bigger than config",
+  "settings.ResumeUploadThreshold": "Resume upload threshold",
+  "settings.WhetherResumeDownload": "Whether to use resume download",
+  "settings.WhetherResumeDownload.msg": "Use resume download when file size is bigger than config",
+  "settings.ResumeDownloadThreshold": "Resume download threshould",
+  "settings.maxUploadConcurrency": "タスクの並行番号をアップロードする",
+  "settings.maxDownloadConcurrency": "タスク並行番号をダウンロードする",
   "settings.WhetherShowThumbnail": "画像のサムネイルを表示するかどうか",
-  "settings.WhetherShowThumbnail.msg":
-    "ファイル一覧にサムネイルを表示すると一定量のトラフィックが消費されます",
+  "settings.WhetherShowThumbnail.msg": "ファイル一覧にサムネイルを表示すると一定量のトラフィックが消費されます",
   "settings.success": "正常に保存",
   "settings.autoUpgrade": "自動更新",
   "settings.autoUpgrade.msg": "自動ダウンロードパッケージ",
@@ -239,12 +236,10 @@ module.exports = {
   "unit.second": "s",
 
   "genAuthToken.message3.1": "ロールを指定する必要があります",
-  "genAuthToken.message3.2":
-    "このロールは、この{{type}}にアクセスするための少なくとも{{privilege}}権限が必要です。",
+  "genAuthToken.message3.2": "このロールは、この{{type}}にアクセスするための少なくとも{{privilege}}権限が必要です。",
 
   "genAuthToken.message4": "認証トークン",
-  "genAuthToken.message5":
-    "記の生成された認証コードを使用してS3ブラウザにログインすると、この{{type}} [{{object}}]にアクセスする権限を得ることができます。{{expiration}}まで有効です。",
+  "genAuthToken.message5": "記の生成された認証コードを使用してS3ブラウザにログインすると、この{{type}} [{{object}}]にアクセスする権限を得ることができます。{{expiration}}まで有効です。",
   "genAuthToken.message6.1": "生成する",
   "genAuthToken.message6.2": "再生成する",
 
@@ -255,17 +250,13 @@ module.exports = {
   "deleteModal.message2": "キャンセルされました",
   "deleteModal.message3": "いくつかのディレクトリやファイルは削除できません",
 
-  "paste.message1":
-    'このディレクトリに<span class="text-info">{{action}}</span> <span class="text-info">{{name}}...</span>  (同じファイルまたはディレクトリが対象となります)？',
+  "paste.message1": 'このディレクトリに<span class="text-info">{{action}}</span> <span class="text-info">{{name}}...</span>  (同じファイルまたはディレクトリが対象となります)？',
 
   "acl.update.title": "Updateを更新する",
   "acl.update.success": "ACLは正常に更新されました",
-  "aclType.private.message":
-    "プライベート: オブジェクトへのすべてのアクセスを認証する必要がある",
-  "aclType.public-read.message":
-    "一般公開: オブジェクト認証の操作のために書く必要があります。オブジェクトは匿名で読み取ることができます",
-  "aclType.public-read-write.message":
-    "パブリックの読み書き: 誰もがオブジェクトを読み書きできます",
+  "aclType.private.message": "プライベート: オブジェクトへのすべてのアクセスを認証する必要がある",
+  "aclType.public-read.message": "一般公開: オブジェクト認証の操作のために書く必要があります。オブジェクトは匿名で読み取ることができます",
+  "aclType.public-read-write.message": "パブリックの読み書き: 誰もがオブジェクトを読み書きできます",
 
   "getAddress.title": "アドレスを取得する",
   address: "アドレス",
@@ -273,12 +264,10 @@ module.exports = {
   generate: "生成",
   "qrcode.download": "コードをスキャンしダウンロードする",
 
-  "restore.checker.message1":
-    "プレビューまたはダウンロードするためにアーカイブを復元する必要があります。",
+  "restore.checker.message1": "プレビューまたはダウンロードするためにアーカイブを復元する必要があります。",
   "restore.immediately": "すぐに復元する",
   "restore.checker.message2": "アーカイブが復元されました。有効期限",
-  "restore.onprogress":
-    "アーカイブファイルが回復しています、しばらくお待ちください ...",
+  "restore.onprogress": "アーカイブファイルが回復しています、しばらくお待ちください ...",
   "restore.on": "送信...",
   "restore.success": "復元要求が正常に送信されました",
   "restore.days": "日々",
@@ -294,8 +283,7 @@ module.exports = {
   save: "セーブ",
   size: "サイズ",
   filesize: "ファイルサイズ",
-  "codepreview.notsupport":
-    "このファイルは直接開くことはできません。ローカルにダウンロードしてから開いてください。",
+  "codepreview.notsupport": "このファイルは直接開くことはできません。ローカルにダウンロードしてから開いてください。",
   "download.file": "ダウンロードファイル",
 
   lastModifyTime: "最終更新日",
@@ -315,8 +303,7 @@ module.exports = {
   "clear.all": "すべてクリア",
 
   "clear.all.title": "すべてクリア",
-  "clear.all.download.message":
-    "すべてのダウンロードタスクをクリアしてもよろしいですか？",
+  "clear.all.download.message": "すべてのダウンロードタスクをクリアしてもよろしいですか？",
   "clear.all.upload.message": "すべてのアップロードタスクをクリアしますか？",
 
   "pause.on": "停止中...",
@@ -358,17 +345,13 @@ module.exports = {
 
   "ak.status.update.title.Active": "AccessKey無効化",
   "ak.status.update.title.Inactive": "AccessKey有効化",
-  "ak.status.update.message.Active":
-    "このアクセスキーを<code>無効化</code>しますか？",
-  "ak.status.update.message.Inactive":
-    'このアクセスキーを<code class="text-success">有効化</code>しますか？',
+  "ak.status.update.message.Active": "このアクセスキーを<code>無効化</code>しますか？",
+  "ak.status.update.message.Inactive": 'このアクセスキーを<code class="text-success">有効化</code>しますか？',
   "ak.delete.title": "AccessKey削除",
   "ak.delete.message": "このアクセスキーを<code>削除</code>しますか？",
 
-  "user.update.message.tip":
-    "AliyunRAMFullAccess権限を持っていることを確認してください",
-  "user.list.message.tip":
-    "ここでは、必要なユーザー管理機能のみを提供しています。さらに拡張するために、RAMコンソールを操作してください:",
+  "user.update.message.tip": "AliyunRAMFullAccess権限を持っていることを確認してください",
+  "user.list.message.tip": "ここでは、必要なユーザー管理機能のみを提供しています。さらに拡張するために、RAMコンソールを操作してください:",
 
   "status.Active": "アクティブ",
   "status.Inactive": "非アクティブ",
@@ -389,8 +372,7 @@ module.exports = {
   test: "テスト",
 
   "mail.test.title": "テストメール",
-  "mail.test.message":
-    'テストメッセージを: <span class="text-primary">{{from}}</span>へ送信する',
+  "mail.test.message": 'テストメッセージを: <span class="text-primary">{{from}}</span>へ送信する',
   "mail.test.success": "正常に送信されました",
   "mail.send.on": "送信中...",
 
@@ -430,13 +412,11 @@ module.exports = {
 
   "upgrade.start": "更新を開始",
   "upgrade.downloading": "ダウンロード",
-  "upgrade.download.field":
-    "自動更新に失敗しました。インストールパッケージを手動でダウンロードしてください。",
+  "upgrade.download.field": "自動更新に失敗しました。インストールパッケージを手動でダウンロードしてください。",
   "upgrade.download.success": "ダウンロード、インストール、再起動",
 
   "Insufficient disk space": "ディスク容量不足",
 
   "grant.email.title": "S3ブラウザ認証",
-  "grant.email.body.title":
-    "S3ブラウザは現在2つのログイン方法をサポートしていますが、いずれかを選択できます:"
+  "grant.email.body.title": "S3ブラウザは現在2つのログイン方法をサポートしていますが、いずれかを選択できます:"
 };

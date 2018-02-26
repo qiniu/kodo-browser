@@ -30,8 +30,7 @@ module.exports = {
   "auth.region.popup.msg1": "公有云直接选择可用区域即可",
   "auth.region.popup.msg2": "专有云请输入指定的区域，如：cn-east-1",
 
-  "auth.remember.popup.msg1":
-    '勾选"记住秘钥"可保存AK秘钥，再次登录时，单击AK历史，可选择该秘钥登录，不需要手动输入AK。请不要再临时使用的电脑上勾选！',
+  "auth.remember.popup.msg1": '勾选"记住秘钥"可保存AK秘钥，再次登录时，单击AK历史，可选择该秘钥登录，不需要手动输入AK。请不要再临时使用的电脑上勾选！',
 
   region: "区域",
   "auth.description": "备注",
@@ -108,10 +107,8 @@ module.exports = {
   creationTime: "创建时间",
 
   "multipart.management": "Multipart管理",
-  "multipart.description":
-    "管理通过Mutipart（分块）方式上传过程中产生的事件与碎片。",
-  "multipart.description.tooltip":
-    "即已经被初始化的Multipart Upload但是未被Complete或者Abort的Multipart Upload事件",
+  "multipart.description": "管理通过Mutipart（分块）方式上传过程中产生的事件与碎片。",
+  "multipart.description.tooltip": "即已经被初始化的Multipart Upload但是未被Complete或者Abort的Multipart Upload事件",
 
   "select.all": "全选",
   "delete.selected": "删除所选",
@@ -163,14 +160,19 @@ module.exports = {
   "simplePolicy.success": "应用policy成功",
 
   //settings
-  "settings.maxUploadNum": "最大上传任务数",
-  "settings.maxDownloadNum": "最大下载任务数",
+  "settings.WhetherResumeUpload": "是否启用断点上传",
+  "settings.WhetherResumeUpload.msg": "当文件大于设置的大小后使用断点上传以提高传输速度",
+  "settings.ResumeUploadThreshold": "断点上传文件大小",
+  "settings.WhetherResumeDownload": "是否启用断点下载",
+  "settings.WhetherResumeDownload.msg": "当文件大于设置的大小后使用断点下载以提高传输速度",
+  "settings.ResumeDownloadThreshold": "断点下载文件大小",
+  "settings.maxUploadConcurrency": "最大上传任务数",
+  "settings.maxDownloadConcurrency": "最大下载任务数",
   "settings.WhetherShowThumbnail": "是否显示图片缩略",
-  "settings.WhetherShowThumbnail.msg":
-    "在文件列表中显示图片缩略, 会消耗一定的流量",
-  "settings.success": "已经保存设置",
+  "settings.WhetherShowThumbnail.msg": "在文件列表中显示图片缩略, 会消耗一定的流量",
   "settings.autoUpgrade": "自动更新",
   "settings.autoUpgrade.msg": "自动下载更新包",
+  "settings.success": "已经保存设置",
 
   //bookmark
   "bookmarks.title": "书签管理",
@@ -234,12 +236,10 @@ module.exports = {
   "unit.second": "秒",
 
   "genAuthToken.message3.1": "还需要指定一个角色",
-  "genAuthToken.message3.2":
-    "这个角色需要至少有这个{{type}}的{{privilege}}权限",
+  "genAuthToken.message3.2": "这个角色需要至少有这个{{type}}的{{privilege}}权限",
 
   "genAuthToken.message4": "生成的授权码",
-  "genAuthToken.message5":
-    "使用上面生成的授权码登录S3浏览器，可以达到只拥有[{{object}}]这个{{type}}的{{privilege}}权限的效果,有效期至{{expiration}}。",
+  "genAuthToken.message5": "使用上面生成的授权码登录S3浏览器，可以达到只拥有[{{object}}]这个{{type}}的{{privilege}}权限的效果,有效期至{{expiration}}。",
   "genAuthToken.message6.1": "确定生成",
   "genAuthToken.message6.2": "重新生成",
 
@@ -250,16 +250,13 @@ module.exports = {
   "deleteModal.message2": "用户取消删除",
   "deleteModal.message3": "部分目录或文件无法删除",
 
-  "paste.message1":
-    '将 <span class="text-info">{{name}}等</span> <span class="text-info">{{action}}</span> 到这个目录下面（如有相同的文件或目录则覆盖）？',
+  "paste.message1": '将 <span class="text-info">{{name}}等</span> <span class="text-info">{{action}}</span> 到这个目录下面（如有相同的文件或目录则覆盖）？',
 
   "acl.update.title": "设置ACL权限",
   "acl.update.success": "修改ACL权限成功",
   "aclType.private.message": "私有：对object的所有访问操作需要进行身份验证",
-  "aclType.public-read.message":
-    "公共读：对object写操作需要进行身份验证；可以对object进行匿名读",
-  "aclType.public-read-write.message":
-    "公共读写：所有人都可以对object进行读写操作",
+  "aclType.public-read.message": "公共读：对object写操作需要进行身份验证；可以对object进行匿名读",
+  "aclType.public-read-write.message": "公共读写：所有人都可以对object进行读写操作",
 
   "getAddress.title": "获取地址",
   address: "地址",
@@ -353,10 +350,8 @@ module.exports = {
   "ak.delete.title": "删除AccessKey",
   "ak.delete.message": "确定要删除该AccessKey？",
 
-  "user.update.message.tip":
-    "请自行确保当前操作登录用户需要有 AliyunRAMFullAccess 权限。",
-  "user.list.message.tip":
-    "这里只提供必要的用户管理功能，更进一步的增强功能，请到RAM控制台操作:",
+  "user.update.message.tip": "请自行确保当前操作登录用户需要有 AliyunRAMFullAccess 权限。",
+  "user.list.message.tip": "这里只提供必要的用户管理功能，更进一步的增强功能，请到RAM控制台操作:",
 
   "status.Active": "已启用",
   "status.Inactive": "已禁用",
@@ -423,6 +418,5 @@ module.exports = {
   "Insufficient disk space": "磁盘空间不足",
 
   "grant.email.title": "S3 Browser 授权",
-  "grant.email.body.title":
-    "S3 Browser 目前支持2种方式登录, 您可以选择任意一种:"
+  "grant.email.body.title": "S3 Browser 目前支持2种方式登录, 您可以选择任意一种:"
 };

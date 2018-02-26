@@ -12,8 +12,8 @@ upgrade.json 配置
 ```
 {
   "version": "1.5.0",
-  "package_url": "http://luogc.oss-cn-hangzhou.qiniu.com/oss-browser-publish/",
-  "files": ["app.asar","electron.asar"]
+  "package_url": "https://"
+  "files": ["app.asar", "electron.asar"]
 }
 ```
 
@@ -29,18 +29,18 @@ upgrade.json 配置
 |package_url| 是| 安装包所在路径前缀 |
 |files|否| 如果配置，则只更新改字段配置的文件。如果不配置，表示全包下载。可选项: app.asar, electron.asar 或者不配置 |
 
-### (2) 安装包在OSS中的目录结构:
+### (2) 安装包在S3中的目录结构:
 
-package_url: http://luogc.oss-cn-hangzhou.qiniu.com/oss-browser-publish/
+package_url: http://s3-browser.qiniudn.com/publish/
 
 ```
-oss-browser-publish
-  |-- 1.5.0
-    |-- oss-browser-darwin-x64.zip
-    |-- oss-browser-linux-x64.zip
-    |-- oss-browser-linux-ia32.zip
-    |-- oss-browser-win32-x64.zip
-    |-- oss-browser-win32-ia32.zip
+publish
+  |-- 1.0.0
+    |-- s3-browser-darwin-x64.zip
+    |-- s3-browser-linux-x64.zip
+    |-- s3-browser-linux-ia32.zip
+    |-- s3-browser-win32-x64.zip
+    |-- s3-browser-win32-ia32.zip
     |-- darwin-x64
         |-- app.asar
         |-- electron.asar

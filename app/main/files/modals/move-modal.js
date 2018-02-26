@@ -20,7 +20,7 @@ angular.module('web')
         // reg: {
         //   folderName: /^[^\/]+$/
         // },
-        // ossFsConfig: {
+        // s3FileConfig: {
         //   id: authInfo.id,
         //   secret: authInfo.secret,
         //   region: currentInfo.region,
@@ -35,7 +35,7 @@ angular.module('web')
         canMove: false
       });
 
-      //$scope.originPath = 'kodo://'+currentInfo.bucket+'/'+currentInfo.key;
+      //$scope.originPath = 's3://'+currentInfo.bucket+'/'+currentInfo.key;
       start();
 
       function stop() {

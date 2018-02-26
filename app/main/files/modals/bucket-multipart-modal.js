@@ -12,19 +12,19 @@ angular.module('web')
           txt: '',
           limitTo: 20
         },
-        loadNext: loadNext,
+        tryLoadMore: tryLoadMore,
 
         //全选相关
         sel: {
           all: false, //boolean
-          has: false, //[] item: ossObject={name,path,...}
+          has: false, //[] item: s3Object={name,path,...}
           x: {}       //{} {'i_'+$index, true|false}
         },
         selectAll: selectAll,
         selectChanged: selectChanged,
       });
 
-      function loadNext(){
+      function tryLoadMore(){
         $scope.sch.limitTo+= 20;
       }
 

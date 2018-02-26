@@ -74,7 +74,7 @@ Client.prototype.uploadFile = function (params) {
   let s3params = extend({}, params.s3Params);
   if (s3params.ContentType === undefined) {
     let defaultContentType = params.defaultContentType || 'application/octet-stream';
-    s3params.ContentType = mime.lookup(localFile, defaultContentType);
+    s3params.ContentType = mime.getType(localFile) || defaultContentType;
   }
 
   openFile();

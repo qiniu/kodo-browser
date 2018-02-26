@@ -54,16 +54,16 @@ angular.module('web')
 
         var actions = [];
         if(privType=='readOnly'){
-          actions = ['oss:GetObject',
-            'oss:HeadObject',
-            "oss:GetObjectMeta",
-            "oss:GetObjectACL",
-            'oss:ListObjects',
-            'oss:GetSymlink'
+          actions = ['s3:GetObject',
+            's3:HeadObject',
+            "s3:GetObjectMeta",
+            "s3:GetObjectACL",
+            's3:ListObjects',
+            's3:GetSymlink'
           ];
         }
         else{
-          actions = ['oss:*'];
+          actions = ['s3:*'];
         }
 
 
@@ -78,7 +78,7 @@ angular.module('web')
             "Effect": "Allow",
             "Action": actions,
             "Resource": [
-              "acs:oss:*:*:" + bucket + "/" + key + "*"
+              "acs:s3:*:*:" + bucket + "/" + key + "*"
             ]
           });
 
@@ -86,14 +86,14 @@ angular.module('web')
           t.push({
             "Effect": "Allow",
             "Action": [
-              "oss:ListObjects"
+              "s3:ListObjects"
             ],
             "Resource": [
-              "acs:oss:*:*:" + bucket
+              "acs:s3:*:*:" + bucket
             ],
             "Condition": {
               "StringLike": {
-                "oss:Prefix": key + "*"
+                "s3:Prefix": key + "*"
               }
             }
           });
@@ -104,7 +104,7 @@ angular.module('web')
             "Effect": "Allow",
             "Action": actions,
             "Resource": [
-              "acs:oss:*:*:" + currentInfo.bucket + "/" + item.path
+              "acs:s3:*:*:" + currentInfo.bucket + "/" + item.path
             ]
           });
         }
@@ -150,7 +150,7 @@ angular.module('web')
             stoken: credentials.SecurityToken,
             expiration: credentials.Expiration,
             region: region,
-            s3path: 'kodo://' + bucket + '/'+ key,
+            s3path: 's3://' + bucket + '/'+ key,
             privilege: info.privType,
           }
 

@@ -11,7 +11,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
   "Toast",
   "Dialog",
   "safeApply",
-  function(
+  function (
     $scope,
     $timeout,
     $translate,
@@ -36,7 +36,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
       sch: {
         downname: null
       },
-      schKeyFn: function(item) {
+      schKeyFn: function (item) {
         return (
           item.to.name +
           " " +
@@ -70,7 +70,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
         Dialog.confirm(
           title,
           message,
-          function(btn) {
+          function (btn) {
             if (btn) {
               doRemove(item);
             }
@@ -106,8 +106,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
     }
 
     function clearAll() {
-      if (
-        !$scope.lists.downloadJobList ||
+      if (!$scope.lists.downloadJobList ||
         $scope.lists.downloadJobList.length == 0
       ) {
         return;
@@ -117,7 +116,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
       Dialog.confirm(
         title,
         message,
-        function(btn) {
+        function (btn) {
           if (btn) {
             var arr = $scope.lists.downloadJobList;
             for (var i = 0; i < arr.length; i++) {
@@ -151,7 +150,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
         Toast.info(T("pause.on")); //'正在暂停...'
         $scope.allActionBtnDisabled = true;
 
-        angular.forEach(arr, function(n) {
+        angular.forEach(arr, function (n) {
           if (
             n.status == "running" ||
             n.status == "waiting" ||
@@ -161,7 +160,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
         });
         Toast.success(T("pause.success")); //'暂停成功'
 
-        $timeout(function() {
+        $timeout(function () {
           osDownloadManager.saveProg();
           $scope.allActionBtnDisabled = false;
         }, 100);

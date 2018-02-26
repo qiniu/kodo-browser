@@ -14,7 +14,7 @@ class UploadJob extends Base {
    * @param osClient
    * @param config
    *    config.from {object|string}  {name, path} or /home/admin/a.jpg
-   *    config.to   {object|string}  {bucket, key} or kodo://bucket/test/a.jpg
+   *    config.to   {object|string}  {bucket, key} or s3://bucket/test/a.jpg
    *    config.prog   {object}  {loaded, total}
    *    config.status     {string} default 'waiting'
    *

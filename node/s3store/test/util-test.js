@@ -11,7 +11,7 @@ describe("util.js", function() {
 
   describe("parseS3Path", function() {
     it("parseS3Path", function() {
-      var obj = util.parseS3Path("kodo://abc/123");
+      var obj = util.parseS3Path("s3://abc/123");
       obj.bucket.should.equal("abc");
       obj.key.should.equal("123");
     });

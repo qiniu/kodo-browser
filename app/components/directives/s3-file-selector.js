@@ -1,6 +1,6 @@
 /**
 angular.extend($scope, {
-  ossFsConfig: {
+  s3FileConfig: {
     id: '',
     secret: '',
     region: '',
@@ -8,12 +8,12 @@ angular.extend($scope, {
     key: ''
   },
   selectedItem: {
-    ossPath:'',
+    s3Path:'',
     region: ''
   }
 });
 
-<div oss-file-selector config="ossFsConfig"
+<div s3-file-selector config="s3FileConfig"
     selected-path="selectedItem" height="220"
     show-buckets="false" folder-only="true"></div>
 */
@@ -21,18 +21,18 @@ angular.extend($scope, {
 angular.module("web").directive("ossFileSelector", [
   "$timeout",
   "osClient",
-  function($timeout, osClient) {
+  function ($timeout, osClient) {
     return {
       restrict: "EA",
       transclude: false,
       scope: {
         config: "=", // {region, bucket, key, id, secret}
-        selectedItem: "=", // {region, ossPath}
+        selectedItem: "=", // {region, s3Path}
         showBuckets: "=", // true
         folderOnly: "=", // true
         height: "=" // 200
       },
-      templateUrl: "components/directives/oss-file-selector.html",
+      templateUrl: "components/directives/s3-file-selector.html",
       controller: ["$scope", ctrl]
     };
 
@@ -50,26 +50,24 @@ angular.module("web").directive("ossFileSelector", [
       function refresh() {
         var v = $scope.keepConfig;
         if (!v.bucket) {
-          //if(!$scope.ngModel)$scope.ngModel={};
-          $scope.selectedItem.ossPath = "kodo://";
+          $scope.selectedItem.s3Path = "s3://";
           $scope.selectedItem.region = "";
           $scope.isLoading = true;
-          osClient.listAllBuckets().then(function(arr) {
+          osClient.listAllBuckets().then(function (arr) {
             $scope.items = arr;
             $scope.isLoading = false;
           });
         } else {
-          if (!v.key) $scope.selectedItem.ossPath = "kodo://" + v.bucket + "/";
-          else $scope.selectedItem.ossPath = "kodo://" + v.bucket + "/" + v.key;
+          if (!v.key) $scope.selectedItem.s3Path = "s3://" + v.bucket + "/";
+          else $scope.selectedItem.s3Path = "s3://" + v.bucket + "/" + v.key;
 
           $scope.selectedItem.region = v.region;
 
           if (v.key.lastIndexOf("/") == v.key.length - 1) {
-            //isFolder
             $scope.isLoading = true;
             osClient
               .listAllFiles(v.region, v.bucket, v.key, $scope.folderOnly)
-              .then(function(arr) {
+              .then(function (arr) {
                 $scope.items = arr;
                 $scope.isLoading = false;
               });
@@ -77,30 +75,30 @@ angular.module("web").directive("ossFileSelector", [
         }
       }
 
-      $scope.$watch("keepConfig", function(v) {
+      $scope.$watch("keepConfig", function (v) {
         refresh();
       });
 
-      $scope.select = function(item) {
+      $scope.select = function (item) {
         if (item.isBucket) {
-          $scope.selectedItem.ossPath = "kodo://" + item.name;
+          $scope.selectedItem.s3Path = "s3://" + item.name;
         } else if (item.isFolder) {
-          $scope.selectedItem.ossPath =
-            "kodo://" +
+          $scope.selectedItem.s3Path =
+            "s3://" +
             $scope.keepConfig.bucket +
             "/" +
             item.path.replace(/\/$/, "") +
             "/";
         } else {
-          $scope.selectedItem.ossPath =
-            "kodo://" +
+          $scope.selectedItem.s3Path =
+            "s3://" +
             $scope.keepConfig.bucket +
             "/" +
             item.path.replace(/\/$/, "");
         }
       };
 
-      $scope.goIn = function(item) {
+      $scope.goIn = function (item) {
         if (item.isBucket) {
           $scope.keepConfig.region = item.region;
           $scope.keepConfig.key = "";
@@ -115,9 +113,9 @@ angular.module("web").directive("ossFileSelector", [
         refresh();
       };
 
-      $scope.goUp = function() {
-        var v = $scope.selectedItem.ossPath;
-        if (v == "kodo://") {
+      $scope.goUp = function () {
+        var v = $scope.selectedItem.s3Path;
+        if (v == "s3://") {
           return;
         }
         var info = osClient.parseS3Path(v);

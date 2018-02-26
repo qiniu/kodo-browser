@@ -2,7 +2,7 @@ angular.module('web')
   .controller('addressBarCtrl', ['$scope', '$translate','Fav', 'AuthInfo','Toast','settingsSvs',
   function ($scope, $translate, Fav, AuthInfo,Toast,settingsSvs) {
 
-    var DEF_ADDR =  'kodo://';
+    var DEF_ADDR =  's3://';
     var T = $translate.instant;
 
     angular.extend($scope, {

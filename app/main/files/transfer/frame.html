@@ -1,10 +1,9 @@
 <section ng-controller="transferFrameCtrl">
   <div ng-hide="transVisible" class="trans-dock-btn">
     <a href="" ng-click="toggleTransVisible(true);transTab = 1">
-      <i class="fa fa-cloud-upload"></i> {{totalNum.upDone}}/{{lists.uploadJobList.length}}</a>
-    &nbsp;&nbsp;
+      <i class="fa fa-cloud-upload"></i> {{totalStat.upDone}}/{{lists.uploadJobList.length}}</a> &nbsp;&nbsp;
     <a href="" ng-click="toggleTransVisible(true);transTab = 2">
-      <i class="fa fa-cloud-download"></i> {{totalNum.downDone}}/{{lists.downloadJobList.length}}</a>
+      <i class="fa fa-cloud-download"></i> {{totalStat.downDone}}/{{lists.downloadJobList.length}}</a>
   </div>
 
   <div ng-show="transVisible" class="trans-frame" ng-init="transTab=1">
@@ -12,18 +11,14 @@
     <ul class="nav nav-tabs trans-nav">
       <li role="presentation" ng-class="{active:transTab==1}">
         <a href="#" ng-click="transTab=1">
-          <!-- 上传 -->
-          <i class="fa fa-upload"></i>
-          {{'upload'|translate}}
-          <label class="badge badge-info">{{totalNum.upDone}}/{{lists.uploadJobList.length}}</label>
+          <i class="fa fa-upload"></i> {{'upload'|translate}}
+          <label class="badge badge-info">{{totalStat.upDone}}/{{lists.uploadJobList.length}}</label>
         </a>
       </li>
       <li role="presentation" ng-class="{active:transTab==2}">
         <a href="#" ng-click="transTab=2">
-          <!-- 下载 -->
-          <i class="fa fa-download"></i>
-          {{'download'|translate}}
-          <label class="badge">{{totalNum.downDone}}/{{lists.downloadJobList.length}}</label>
+          <i class="fa fa-download"></i> {{'download'|translate}}
+          <label class="badge">{{totalStat.downDone}}/{{lists.downloadJobList.length}}</label>
         </a>
       </li>
 

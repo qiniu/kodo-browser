@@ -6,8 +6,6 @@ var fs = require("fs");
 var path = require("path");
 var os = require("os");
 var minimist = require("minimist");
-//var NwBuilder = require('nw-builder');
-//var pkg = require('./package');
 require("shelljs/global");
 
 var DIST = "./dist";

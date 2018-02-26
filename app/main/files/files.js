@@ -33,81 +33,77 @@ angular.module("web").controller("filesCtrl", [
 
     angular.extend($scope, {
       showTab: 1,
+      keepMoveOptions: null,
+
       ref: {
         isBucketList: false,
         isListView: true
       },
 
-      keepMoveOptions: null,
+      transVisible: localStorage.getItem("transVisible") == "true",
+      toggleTransVisible: function (visible) {
+        $scope.transVisible = visible;
+        localStorage.setItem("transVisible", visible);
+      },
 
+      goIn: goIn,
+      getCurrentS3path: getCurrentS3path,
+
+      //bucket ops
+      showBucketMultipart: showBucketMultipart,
+      showAddBucket: showAddBucket,
+      showUpdateBucket: showUpdateBucket,
+      showDeleteBucket: showDeleteBucket,
+
+      //object ops
+      showAddFolder: showAddFolder,
+      showRename: showRename,
+      showMove: showMove,
+      showDeleteFiles: showDeleteFiles,
+      showDeleteFilesSelected: showDeleteFilesSelected,
+      tryLoadMore: tryLoadMore,
+
+      //search
       sch: {
         bucketName: "",
         objectName: ""
       },
       searchObjectName: searchObjectName,
 
-      goIn: goIn,
-
-      transVisible: localStorage.getItem("transVisible") == "true",
-      toggleTransVisible: function (f) {
-        $scope.transVisible = f;
-        localStorage.setItem("transVisible", f);
-      },
-
-      //bucket ops
-      showDeleteBucket: showDeleteBucket,
-      showAddBucket: showAddBucket,
-      showUpdateBucket: showUpdateBucket,
-      showBucketMultipart: showBucketMultipart,
-
-      //object ops
-      showAddFolder: showAddFolder,
-      showDeleteFiles: showDeleteFiles,
-      showDeleteFilesSelected: showDeleteFilesSelected,
-      showRename: showRename,
-      showMove: showMove,
-
-      //全选相关
+      //selection
       sel: {
         hasArchive: false,
         all: false, //boolean
-        has: false, //[] item: ossObject={name,path,...}
+        has: false, //[] item: s3Object={name,path,...}
         x: {} //{} {'i_'+$index, true|false}
       },
       selectAll: selectAll,
       selectChanged: selectChanged,
 
-      //bucket 单选
+      //bucket selection
       bucket_sel: {
         item: null
       },
       selectBucket: selectBucket,
 
-      //上传， 下载
+      //upload && download
       handlers: {
         uploadFilesHandler: null,
         downloadFilesHandler: null
       },
-      handlerDrop: handlerDrop, //拖拽释放
+      handlerDrop: handlerDrop,
       showUploadDialog: showUploadDialog,
       showDownloadDialog: showDownloadDialog,
-
-      //预览 编辑
-      showPreview: showPreview,
-      //item 下载
       showDownload: showDownload,
 
-      //地址
+      //utils
       showAddress: showAddress,
+      showPreview: showPreview,
       showACL: showACL,
-
       showHttpHeaders: showHttpHeaders,
-
-      loadNext: loadNext,
 
       showPaste: showPaste,
       cancelPaste: cancelPaste,
-      getCurrentOssPath: getCurrentOssPath,
 
       mock: {
         uploads: "",
@@ -152,9 +148,9 @@ angular.module("web").controller("filesCtrl", [
           return (
             '<i class="fa fa-paste text-primary"></i> ' +
             T("paste") +
-            ($scope.keepMoveOptions
-              ? "(" + $scope.keepMoveOptions.items.length + ")"
-              : "")
+            ($scope.keepMoveOptions ?
+              "(" + $scope.keepMoveOptions.items.length + ")" :
+              "")
           );
         },
         function ($itemScope, $event) {
@@ -330,11 +326,38 @@ angular.module("web").controller("filesCtrl", [
     ];
 
     /////////////////////////////////
+    function goIn(bucket, prefix) {
+      var s3path = "s3://";
+      if (bucket) {
+        s3path = `s3://${bucket}/${prefix || ""}`;
+      }
 
-    var tid_uploads;
+      $rootScope.$broadcast("gotoS3Address", s3path);
+    }
+
+    function getCurrentS3path() {
+      return `s3://${$scope.currentInfo.bucket}/${$scope.currentInfo.key}`;
+    }
+
+    /////////////////////////////////
+    var searchTid;
+
+    function searchObjectName() {
+      $timeout.cancel(searchTid);
+
+      searchTid = $timeout(function () {
+        var info = angular.copy($scope.currentInfo);
+
+        info.key += $scope.sch.objectName;
+        listFiles(info);
+      }, 600);
+    }
+
+    var uploadsTid;
+
     function uploadsChange() {
-      $timeout.cancel(tid_uploads);
-      tid_uploads = $timeout(function () {
+      $timeout.cancel(uploadsTid);
+      uploadsTid = $timeout(function () {
         if ($scope.mock.uploads) {
           var arr = $scope.mock.uploads.split(",");
           $scope.handlers.uploadFilesHandler(arr, $scope.currentInfo);
@@ -342,24 +365,28 @@ angular.module("web").controller("filesCtrl", [
       }, 600);
     }
 
-    var tid_downloads;
+    var downloadsTid;
+
     function downloadsChange() {
-      $timeout.cancel(tid_downloads);
-      tid_downloads = $timeout(function () {
+      $timeout.cancel(downloadsTid);
+      downloadsTid = $timeout(function () {
         if ($scope.mock.downloads) {
           _downloadMulti($scope.mock.downloads);
         }
       }, 600);
     }
 
-    var ttid;
+    var refreshTid;
+
     $scope.$on("needrefreshfilelists", function (e) {
-      $timeout.cancel(ttid);
-      ttid = $timeout(function () {
+      $timeout.cancel(refreshTid);
+
+      refreshTid = $timeout(function () {
         goIn($scope.currentInfo.bucket, $scope.currentInfo.key);
       }, 600);
     });
 
+    /////////////////////////////////
     $timeout(init, 100);
 
     function init() {
@@ -376,20 +403,21 @@ angular.module("web").controller("filesCtrl", [
 
       if (authInfo.s3path) {
         $scope.ref.isBucketList = false;
-        //bucketMap
-        $rootScope.bucketMap = {};
+
         var bucket = osClient.parseS3Path(authInfo.s3path).bucket;
+
+        $rootScope.bucketMap = {};
         $rootScope.bucketMap[bucket] = {
           region: authInfo.region
         };
 
         $timeout(function () {
           addEvents();
-          //$rootScope.$broadcast('s3AddressChange', authInfo.s3path);
           $scope.$broadcast("filesViewReady");
         });
       } else {
         $scope.ref.isBucketList = true;
+
         listBuckets(function () {
           addEvents();
           $scope.$broadcast("filesViewReady");
@@ -397,21 +425,9 @@ angular.module("web").controller("filesCtrl", [
       }
     }
 
-    //按名称过滤
-    var ttid2;
-
-    function searchObjectName() {
-      $timeout.cancel(ttid2);
-      ttid2 = $timeout(function () {
-        var info = angular.copy($scope.currentInfo);
-        info.key += $scope.sch.objectName;
-        listFiles(info);
-      }, 600);
-    }
-
     function addEvents() {
       $scope.$on("s3AddressChange", function (e, addr, forceRefresh) {
-        console.log("on:s3AddressChange:", addr, "forceRefresh:", forceRefresh);
+        console.log(`on:s3AddressChange: ${addr}, forceRefresh: ${!!forceRefresh}`);
 
         var info = osClient.parseS3Path(addr);
 
@@ -421,7 +437,7 @@ angular.module("web").controller("filesCtrl", [
           var lastGan = info.key.lastIndexOf("/");
 
           //if not endswith /
-          if (info.key && lastGan != info.key.length - 1) {
+          if (lastGan != info.key.length - 1) {
             var fileKey = info.key;
             var fileName = info.key.substring(lastGan + 1);
 
@@ -434,14 +450,14 @@ angular.module("web").controller("filesCtrl", [
           $scope.currentBucket = info.bucket;
 
           if (!$rootScope.bucketMap[info.bucket]) {
-            Toast.error("No permission");
+            Toast.error("Forbidden");
 
-            clearObjectsList();
+            clearFilesList();
             return;
           }
 
-          info.region = $rootScope.bucketMap[info.bucket].region;
           $scope.ref.isBucketList = false;
+          info.region = $rootScope.bucketMap[info.bucket].region;
 
           //search
           if (fileName) {
@@ -456,6 +472,7 @@ angular.module("web").controller("filesCtrl", [
         } else {
           //list buckets
           $scope.currentBucket = null;
+
           $scope.ref.isBucketList = true;
 
           //只有从来没有 list buckets 过，才list，减少http请求开销
@@ -463,28 +480,52 @@ angular.module("web").controller("filesCtrl", [
             listBuckets();
           }
 
-          clearObjectsList();
+          clearFilesList();
         }
       });
     }
 
-    function goIn(bucket, prefix) {
-      var s3path = "kodo://";
+    function listBuckets(fn) {
+      $scope.isLoading = true;
 
-      if (bucket) {
-        s3path = "kodo://" + bucket + "/" + (prefix || "");
-      }
+      osClient.listAllBuckets().then(function (buckets) {
+        $scope.isLoading = false;
 
-      $rootScope.$broadcast("gotoS3Address", s3path);
+        $scope.buckets = buckets;
+
+        var m = {};
+        angular.forEach(buckets, function (n) {
+          m[n.name] = n;
+        });
+        $rootScope.bucketMap = m;
+
+        safeApply($scope);
+
+        if (fn) fn();
+
+      }, function (err) {
+        console.log(`list buckets error: ${err.message}`);
+        $scope.isLoading = false;
+
+        clearFilesList();
+
+        $scope.buckets = [];
+        $rootScope.bucketMap = {};
+
+        safeApply($scope);
+
+        if (fn) fn();
+      });
     }
 
     function listFiles(info, marker, fn) {
-      clearObjectsList();
+      clearFilesList();
 
-      info = info || $scope.currentInfo;
       $scope.isLoading = true;
 
-      doListFiles(info, marker, function (err) {
+      info = info || $scope.currentInfo;
+
+      tryListFiles(info, marker, function (err) {
         if (err) {
           Toast.error(JSON.stringify(err));
         }
@@ -494,104 +535,117 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    function doListFiles(info, marker, fn) {
-      osClient.listFiles(info.region, info.bucket, info.key, marker || "").then(
-        function (result) {
-          var arr = result.data;
+    function tryListFiles(info, marker, fn) {
+      osClient.listFiles(info.region, info.bucket, info.key, marker || "").then(function (result) {
+        var data = result.data;
 
-          settingsSvs.showImageSnapshot.get() == 1
-            ? signPicURL(info, arr)
-            : null;
-
-          $scope.objects = $scope.objects.concat(arr);
-          $scope.nextObjectsMarker = result.marker || null;
-
-          safeApply($scope);
-          if (fn) fn(null);
-        },
-        function (err) {
-          console.log("list files, info:", info, ", marker:", maker, ", error:", err);
-
-          clearObjectsList();
-
-          if (fn) fn(err);
+        if (settingsSvs.showImageSnapshot.get() == 1) {
+          signImagePreviewURL(info, data);
         }
-      );
+
+        $scope.objects = $scope.objects.concat(data);
+        $scope.nextObjectsMarker = result.marker || null;
+
+        safeApply($scope);
+
+        if (fn) fn(null);
+
+      }, function (err) {
+        console.log(`list files: s3://${info.bucket}/${info.key}?marker=${maker}, error: ${err.message}`);
+
+        clearFilesList();
+
+        if (fn) fn(err);
+      });
     }
 
-    function loadNext() {
+    function tryLoadMore() {
       if ($scope.nextObjectsMarker) {
-        console.log("loadNext with marker: " + $scope.nextObjectsMarker);
+        var info = $scope.currentInfo;
 
-        doListFiles($scope.currentInfo, $scope.nextObjectsMarker);
+        console.log(`loading next s3://${info.bucket}/${info.key}?marker=${$scope.nextObjectsMarker}`);
+
+        tryListFiles(info, $scope.nextObjectsMarker);
       }
     }
 
-    function clearObjectsList() {
+    function clearFilesList() {
       initSelect();
+
       $scope.objects = [];
       $scope.nextObjectsMarker = null;
     }
 
-    function signPicURL(info, result) {
+    function signImagePreviewURL(info, result) {
       var authInfo = AuthInfo.get();
-      if (authInfo.id.indexOf("STS.") == 0) {
-        angular.forEach(result, function (n) {
-          osClient
-            .getImageBase64Url(info.region, info.bucket, n.path)
-            .then(function (data) {
-              if (data.ContentType.indexOf("image/") == 0) {
-                var base64str = new Buffer(data.Body).toString("base64");
-                n.pic_url = "data:" + data.ContentType + ";base64," + base64str;
-              }
-            });
-        });
-      } else {
-        angular.forEach(result, function (n) {
-          if (!n.isFolder && fileSvs.getFileType(n).type == "picture") {
-            n.pic_url = osClient.signaturePicUrl(
-              info.region,
-              info.bucket,
-              n.path,
-              3600,
-              "image/resize,w_48"
-            );
-          }
-        });
-      }
+
+      angular.forEach(result, function (n) {
+        if (!n.isFolder && fileSvs.getFileType(n).type == "picture") {
+          n.pic_url = osClient.signaturePicUrl(
+            info.region,
+            info.bucket,
+            n.path,
+            3600,
+            "image/resize,w_48"
+          );
+        }
+      });
     }
 
-    function listBuckets(fn) {
-      $scope.isLoading = true;
-      osClient.listAllBuckets().then(
-        function (buckets) {
-          $scope.isLoading = false;
-          $scope.buckets = buckets;
-
-          var m = {};
-          angular.forEach(buckets, function (n) {
-            m[n.name] = n;
-          });
-          $rootScope.bucketMap = m;
-
-          safeApply($scope);
-
-          if (fn) fn();
-        },
-        function (err) {
-          console.log(err);
-          $scope.isLoading = false;
-
-          clearObjectsList();
-
-          $scope.buckets = [];
-          $rootScope.bucketMap = {};
-
-          safeApply($scope);
-
-          if (fn) fn();
+    function showBucketMultipart(item) {
+      $modal.open({
+        templateUrl: "main/files/modals/bucket-multipart-modal.html",
+        controller: "bucketMultipartModalCtrl",
+        size: "lg",
+        backdrop: "static",
+        resolve: {
+          bucketInfo: function () {
+            return item;
+          }
         }
-      );
+      });
+    }
+
+    function showAddBucket() {
+      $modal.open({
+        templateUrl: "main/files/modals/add-bucket-modal.html",
+        controller: "addBucketModalCtrl",
+        resolve: {
+          item: function () {
+            return null;
+          },
+          callback: function () {
+            return function () {
+              Toast.success(T("bucket.add.success"));
+
+              $timeout(function () {
+                listBuckets();
+              }, 500);
+            };
+          }
+        }
+      });
+    }
+
+    function showUpdateBucket(item) {
+      $modal.open({
+        templateUrl: "main/files/modals/update-bucket-modal.html",
+        controller: "updateBucketModalCtrl",
+        resolve: {
+          item: function () {
+            return item;
+          },
+          callback: function () {
+            return function () {
+              Toast.success(T("bucketACL.update.success"));
+
+              $timeout(function () {
+                listBuckets();
+              }, 300);
+            };
+          }
+        }
+      });
     }
 
     function showDeleteBucket(item) {
@@ -645,27 +699,6 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    function showAddBucket() {
-      $modal.open({
-        templateUrl: "main/files/modals/add-bucket-modal.html",
-        controller: "addBucketModalCtrl",
-        resolve: {
-          item: function () {
-            return null;
-          },
-          callback: function () {
-            return function () {
-              Toast.success(T("bucket.add.success")); //'创建Bucket成功'
-              //创建Bucket不是实时的，等待1秒后刷新
-              $timeout(function () {
-                listBuckets();
-              }, 1000);
-            };
-          }
-        }
-      });
-    }
-
     function showAddFolder() {
       $modal.open({
         templateUrl: "main/files/modals/add-folder-modal.html",
@@ -676,45 +709,12 @@ angular.module("web").controller("filesCtrl", [
           },
           callback: function () {
             return function () {
-              Toast.success(T("folder.create.success")); //'创建目录成功'
+              Toast.success(T("folder.create.success"));
+
               $timeout(function () {
                 listFiles();
               }, 300);
             };
-          }
-        }
-      });
-    }
-
-    function showUpdateBucket(item) {
-      $modal.open({
-        templateUrl: "main/files/modals/update-bucket-modal.html",
-        controller: "updateBucketModalCtrl",
-        resolve: {
-          item: function () {
-            return item;
-          },
-          callback: function () {
-            return function () {
-              Toast.success(T("bucketACL.update.success")); //'修改Bucket权限成功'
-              $timeout(function () {
-                listBuckets();
-              }, 300);
-            };
-          }
-        }
-      });
-    }
-
-    function showBucketMultipart(item) {
-      $modal.open({
-        templateUrl: "main/files/modals/bucket-multipart-modal.html",
-        controller: "bucketMultipartModalCtrl",
-        size: "lg",
-        backdrop: "static",
-        resolve: {
-          bucketInfo: function () {
-            return item;
           }
         }
       });
@@ -735,7 +735,6 @@ angular.module("web").controller("filesCtrl", [
       } else if (fileType.type == "picture") {
         templateUrl = "main/files/modals/preview/picture-modal.html";
         controller = "pictureModalCtrl";
-        //backdrop = 'static';
       } else if (fileType.type == "video") {
         templateUrl = "main/files/modals/preview/media-modal.html";
         controller = "mediaModalCtrl";
@@ -768,11 +767,9 @@ angular.module("web").controller("filesCtrl", [
               callback: function (reloadStorageStatus) {
                 if (reloadStorageStatus) {
                   $timeout(function () {
-                    //listFiles();
                     osClient.loadStorageStatus(
                       $scope.currentInfo.region,
-                      $scope.currentInfo.bucket,
-                      [item]
+                      $scope.currentInfo.bucket, [item]
                     );
                   }, 300);
                 }
@@ -862,7 +859,6 @@ angular.module("web").controller("filesCtrl", [
     var lastSeleteIndex = -1;
 
     function selectChanged(e, index) {
-      //批量选中
       if (e && e.shiftKey) {
         var min = Math.min(lastSeleteIndex, index);
         var max = Math.max(lastSeleteIndex, index);
@@ -887,7 +883,6 @@ angular.module("web").controller("filesCtrl", [
 
       lastSeleteIndex = index;
     }
-    ////////////////////////////////
 
     function selectBucket(item) {
       if ($scope.bucket_sel.item == item) {
@@ -897,14 +892,14 @@ angular.module("web").controller("filesCtrl", [
       }
     }
 
-    //上传下载
-    var oudtid, oddtid;
+    ////////////////////////////////
+    var uploadDialog, downloadDialog;
 
     function showUploadDialog() {
-      if (oudtid) return;
-      oudtid = true;
+      if (uploadDialog) return;
+      uploadDialog = true;
       $timeout(function () {
-        oudtid = false;
+        uploadDialog = false;
       }, 600);
 
       Dialog.showUploadDialog(function (filePaths) {
@@ -914,10 +909,10 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showDownloadDialog() {
-      if (oddtid) return;
-      oddtid = true;
+      if (downloadDialog) return;
+      downloadDialog = true;
       $timeout(function () {
-        oddtid = false;
+        downloadDialog = false;
       }, 600);
 
       Dialog.showDownloadDialog(function (folderPaths) {
@@ -931,17 +926,17 @@ angular.module("web").controller("filesCtrl", [
     function _downloadMulti(to) {
       to = to.replace(/(\/*$)/g, "");
 
-      var fromArr = angular.copy($scope.sel.has);
-      angular.forEach(fromArr, function (n) {
+      var selectedFiles = angular.copy($scope.sel.has);
+      angular.forEach(selectedFiles, function (n) {
         n.region = $scope.currentInfo.region;
         n.bucket = $scope.currentInfo.bucket;
       });
 
       /**
-       * @param fromOssPath {array}  item={region, bucket, path, name, size }
+       * @param fromS3Path {array}  item={region, bucket, path, name, size }
        * @param toLocalPath {string}
        */
-      $scope.handlers.downloadFilesHandler(fromArr, to);
+      $scope.handlers.downloadFilesHandler(selectedFiles, to);
     }
 
     /**
@@ -964,7 +959,6 @@ angular.module("web").controller("filesCtrl", [
       return false;
     }
 
-    //授权
     function showGrant(items) {
       $modal.open({
         templateUrl: "main/files/modals/grant-modal.html",
@@ -980,7 +974,6 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    //生成授权码
     function showGrantToken(item) {
       $modal.open({
         templateUrl: "main/files/modals/grant-token-modal.html",
@@ -996,7 +989,6 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    //重命名
     function showRename(item) {
       $modal.open({
         templateUrl: "main/files/modals/rename-modal.html",
@@ -1026,27 +1018,13 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    function getCurrentOssPath() {
-      return (
-        "kodo://" + $scope.currentInfo.bucket + "/" + $scope.currentInfo.key
-      );
-    }
-    function cancelPaste() {
-      $scope.keepMoveOptions = null;
-      safeApply($scope);
-    }
     function showPaste() {
-      // if($scope.keepMoveOptions.originPath==getCurrentOssPath()){
-      //   $scope.keepMoveOptions = null;
-      //   return;
-      // }
       var keyword = $scope.keepMoveOptions.isCopy ? T("copy") : T("move");
 
       if (
         $scope.keepMoveOptions.items.length == 1 &&
         $scope.currentInfo.bucket == $scope.keepMoveOptions.currentInfo.bucket
       ) {
-        //1个支持重命名
         $modal.open({
           templateUrl: "main/files/modals/rename-modal.html",
           controller: "renameModalCtrl",
@@ -1067,6 +1045,7 @@ angular.module("web").controller("filesCtrl", [
             callback: function () {
               return function () {
                 $scope.keepMoveOptions = null;
+
                 $timeout(function () {
                   listFiles();
                 }, 100);
@@ -1082,11 +1061,8 @@ angular.module("web").controller("filesCtrl", [
         action: keyword
       });
 
-      //  '将 <span class="text-info">'+
-      //     + '等</span> ' + keyword+' 到这个目录下面（如有相同的文件或目录则覆盖）？';
-
-      Dialog.confirm(keyword, msg, function (b) {
-        if (b) {
+      Dialog.confirm(keyword, msg, function (isMove) {
+        if (isMove) {
           $modal.open({
             templateUrl: "main/files/modals/move-modal.html",
             controller: "moveModalCtrl",
@@ -1121,16 +1097,20 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    //移动
+    function cancelPaste() {
+      $scope.keepMoveOptions = null;
+      safeApply($scope);
+    }
+
     function showMove(items, isCopy) {
       $scope.keepMoveOptions = {
         items: items,
         isCopy: isCopy,
         currentInfo: angular.copy($scope.currentInfo),
-        originPath: getCurrentOssPath()
+        originPath: getCurrentS3path()
       };
     }
-    //地址
+
     function showAddress(item) {
       $modal.open({
         templateUrl: "main/files/modals/get-address.html",
@@ -1146,7 +1126,6 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    //acl
     function showACL(item) {
       $modal.open({
         templateUrl: "main/files/modals/update-acl-modal.html",
@@ -1191,11 +1170,9 @@ angular.module("web").controller("filesCtrl", [
           callback: function () {
             return function () {
               $timeout(function () {
-                //listFiles();
                 osClient.loadStorageStatus(
                   $scope.currentInfo.region,
-                  $scope.currentInfo.bucket,
-                  [item]
+                  $scope.currentInfo.bucket, [item]
                 );
               }, 300);
             };

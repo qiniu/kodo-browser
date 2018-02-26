@@ -1,6 +1,6 @@
 # 邮件发送设置
 
-> [For English](en-smtpSetting.md)
+> [For English](en-smtp.md)
 
 ## 举例参考:
 

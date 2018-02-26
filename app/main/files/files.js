@@ -539,9 +539,9 @@ angular.module("web").controller("filesCtrl", [
       osClient.listFiles(info.region, info.bucket, info.key, marker || "").then(function (result) {
         var data = result.data;
 
-        if (settingsSvs.showImageSnapshot.get() == 1) {
-          signImagePreviewURL(info, data);
-        }
+        // if (settingsSvs.showImageSnapshot.get() == 1) {
+        //   signImagePreviewURL(info, data);
+        // }
 
         $scope.objects = $scope.objects.concat(data);
         $scope.nextObjectsMarker = result.marker || null;

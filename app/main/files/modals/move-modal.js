@@ -1,21 +1,19 @@
 angular.module('web')
-  .controller('moveModalCtrl', ['$scope','$uibModalInstance','$timeout','items','isCopy','renamePath','fromInfo','moveTo', 'callback','osClient','Toast','AuthInfo','safeApply',
-    function ($scope, $modalInstance, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, osClient, Toast,AuthInfo, safeApply) {
+  .controller('moveModalCtrl', ['$scope', '$uibModalInstance', '$timeout', 'items', 'isCopy', 'renamePath', 'fromInfo', 'moveTo', 'callback', 'osClient', 'Toast', 'AuthInfo', 'safeApply',
+    function ($scope, $modalInstance, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, osClient, Toast, AuthInfo, safeApply) {
 
       var authInfo = AuthInfo.get();
-
 
       angular.extend($scope, {
         renamePath: renamePath,
         fromInfo: fromInfo,
         items: items,
         isCopy: isCopy,
-        step : 2,
+        step: 2,
 
         cancel: cancel,
         start: start,
         stop: stop,
-
 
         // reg: {
         //   folderName: /^[^\/]+$/
@@ -40,23 +38,22 @@ angular.module('web')
 
       function stop() {
         //$modalInstance.dismiss('cancel');
-        $scope.isStop=true;
+        $scope.isStop = true;
         osClient.stopCopyFiles();
       }
 
-      function cancel(){
+      function cancel() {
         $modalInstance.dismiss('cancel');
       }
 
       function start() {
-        $scope.isStop=false;
+        $scope.isStop = false;
         $scope.step = 2;
-
 
         var target = angular.copy($scope.moveTo);
         var items = angular.copy($scope.items);
 
-        angular.forEach(items, function(n){
+        angular.forEach(items, function (n) {
           //n.region = currentInfo.region;
           n.bucket = fromInfo.bucket;
         });
@@ -64,16 +61,16 @@ angular.module('web')
         //console.log(fromInfo.region, items, target, renamePath);
 
         //复制 or 移动
-        osClient.copyFiles(fromInfo.region, items, target, function progress(prog){
+        osClient.copyFiles(fromInfo.region, items, target, function progress(prog) {
           //进度
           $scope.progress = angular.copy(prog);
           safeApply($scope);
-        }, !isCopy, renamePath).then(function(terr){
+        }, !isCopy, renamePath).then(function (terr) {
           //结果
           $scope.step = 3;
           $scope.terr = terr;
           callback();
         });
       }
-    }])
-;
+    }
+  ]);

@@ -11,7 +11,7 @@ angular.module("web").controller("userUpdateCtrl", [
   "ramSvs",
   "Toast",
   "Const",
-  function(
+  function (
     $scope,
     $rootScope,
     $translate,
@@ -27,7 +27,7 @@ angular.module("web").controller("userUpdateCtrl", [
 
     var countryNum = angular.copy(Const.countryNum);
     var countryNumMap = {};
-    angular.forEach(countryNum, function(n) {
+    angular.forEach(countryNum, function (n) {
       countryNumMap[n.value] = n;
     });
 
@@ -36,24 +36,26 @@ angular.module("web").controller("userUpdateCtrl", [
         email: Const.REG.EMAIL
       },
       item: initNewItem(item),
-      cancel: cancel,
       countryNum: countryNum,
       countryNumMap: countryNumMap,
-      onSubmit: onSubmit
+      onSubmit: onSubmit,
+      cancel: cancel
     });
 
     init();
+
     function init() {
       var numkv = angular.copy(countryNum[0]);
       $scope.item._MobilePhonePre = numkv.value;
       $scope.item._MobilePhoneNum = "";
 
       if (item.UserId) {
-        ramSvs.getUser(item.UserName).then(function(result) {
+        ramSvs.getUser(item.UserName).then(function (result) {
           angular.extend($scope.item, initNewItem(result.User));
         });
       }
     }
+
     function initNewItem(item) {
       var info = {
         UserName: item.UserName,
@@ -83,7 +85,7 @@ angular.module("web").controller("userUpdateCtrl", [
       delete item._MobilePhonePre;
       delete item._MobilePhoneNum;
 
-      ramSvs.updateUser(item).then(function(result) {
+      ramSvs.updateUser(item).then(function (result) {
         callback();
         cancel();
       });

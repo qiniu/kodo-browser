@@ -11,7 +11,7 @@ angular.module("web").controller("usersCtrl", [
   "ramSvs",
   "Dialog",
   "Toast",
-  function(
+  function (
     $scope,
     $rootScope,
     $q,
@@ -31,36 +31,33 @@ angular.module("web").controller("usersCtrl", [
       sch: {
         txt: ""
       },
-      open: function() {},
-      cancel: cancel,
+      open: function () {},
       refresh: refresh,
+      showAK: showAK,
       showUpdate: showUpdate,
       showRemove: showRemove,
-      showAK: showAK
+      cancel: cancel
     });
 
     refresh();
+
     function refresh() {
       $scope.isLoading = true;
       $scope.err = null;
       ramSvs.listUsers().then(
-        function(arr) {
+        function (arr) {
           $scope.isLoading = false;
-          arr.sort(function(a, b) {
+          arr.sort(function (a, b) {
             return a.UpdateDate < b.UpdateDate ? 1 : -1;
           });
           $scope.items = arr;
           //UserId, UserName, DisplayName, CreateDate, UpdateDate, Comments;
         },
-        function(err) {
+        function (err) {
           $scope.err = err;
           $scope.isLoading = false;
         }
       );
-    }
-
-    function cancel() {
-      $modalInstance.dismiss("close");
     }
 
     function showUpdate(item) {
@@ -68,28 +65,29 @@ angular.module("web").controller("usersCtrl", [
         templateUrl: "main/modals/user-update.html",
         controller: "userUpdateCtrl",
         resolve: {
-          item: function() {
+          item: function () {
             return item;
           },
-          callback: function() {
-            return function() {
+          callback: function () {
+            return function () {
               refresh();
             };
           }
         }
       });
     }
+
     function showAK(item) {
       $modal.open({
         templateUrl: "main/modals/user-ak.html",
         controller: "userAKCtrl",
         size: "lg",
         resolve: {
-          user: function() {
+          user: function () {
             return item;
           },
-          callback: function() {
-            return function() {
+          callback: function () {
+            return function () {
               refresh();
             };
           }
@@ -99,23 +97,25 @@ angular.module("web").controller("usersCtrl", [
 
     function showRemove(item) {
       var title = T("user.delete.title");
-      var message = T("user.delete.message", { name: item.UserName });
+      var message = T("user.delete.message", {
+        name: item.UserName
+      });
 
-      Dialog.confirm(title, message, function(b) {
+      Dialog.confirm(title, message, function (b) {
         if (!b) return;
         Toast.info(T("user.delete.on"));
-        ramSvs.listPoliciesForUser(item.UserName).then(function(result) {
+        ramSvs.listPoliciesForUser(item.UserName).then(function (result) {
           var arr = result.Policies.Policy;
-          dig(arr, function(n) {
+          dig(arr, function (n) {
             return ramSvs.detachPolicyFromUser(n.PolicyName, item.UserName);
-          }).then(function() {
-            ramSvs.listAccessKeys(item.UserName).then(function(result) {
+          }).then(function () {
+            ramSvs.listAccessKeys(item.UserName).then(function (result) {
               var arr = result.AccessKeys.AccessKey;
-              dig(arr, function(n) {
+              dig(arr, function (n) {
                 return ramSvs.deleteAccessKey(item.UserName, n.AccessKeyId);
-              }).then(function() {
+              }).then(function () {
                 //删除
-                ramSvs.deleteUser(item.UserName).then(function() {
+                ramSvs.deleteUser(item.UserName).then(function () {
                   Toast.success(T("user.delete.success"));
                   refresh();
                 });
@@ -130,18 +130,23 @@ angular.module("web").controller("usersCtrl", [
         var c = 0;
         var df = $q.defer();
         _();
+
         function _() {
           if (c >= len) {
             df.resolve();
             return;
           }
-          fn(arr[c]).then(function() {
+          fn(arr[c]).then(function () {
             c++;
             _();
           });
         }
         return df.promise;
       }
+    }
+
+    function cancel() {
+      $modalInstance.dismiss("close");
     }
   }
 ]);

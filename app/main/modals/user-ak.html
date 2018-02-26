@@ -3,8 +3,7 @@
     <span aria-hidden="true">&times;</span>
   </button>
   <h4 class="modal-title">
-    <i class="fa fa-user text-orange"></i>
-    {{'aks'|translate}}
+    <i class="fa fa-user text-orange"></i> {{'aks'|translate}}
     <span class="text-info">({{user.UserName}})</span>
   </h4>
 </div>
@@ -67,8 +66,7 @@
       <td>{{item.CreateDate|timeFormat}}</td>
 
       <td>
-        <a href="" ng-click="updateStatus(item)" ng-class="{'text-danger':item.Status=='Active'}">{{(item.Status=='Active'?'disable':'enable')|translate}}</a>
-        |
+        <a href="" ng-click="updateStatus(item)" ng-class="{'text-danger':item.Status=='Active'}">{{(item.Status=='Active'?'disable':'enable')|translate}}</a> |
         <a href="" class="text-danger" ng-click="showRemove(item)">{{'delete'|translate}}</a>
       </td>
     </tr>

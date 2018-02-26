@@ -4,7 +4,7 @@ angular
   .module("web")
   .factory("DiffModal", [
     "$uibModal",
-    function($modal) {
+    function ($modal) {
       return {
         /**
          * @param title
@@ -13,7 +13,7 @@ angular
          * @param callback
          * @param editable
          */
-        show: function(title, originalContent, content, callback, editable) {
+        show: function (title, originalContent, content, callback, editable) {
           editable = editable === false ? false : true;
 
           $modal.open({
@@ -21,20 +21,20 @@ angular
             controller: "diffModalCtrl",
             size: "lg",
             resolve: {
-              title: function() {
+              title: function () {
                 return title || "Diff";
               },
-              editable: function() {
+              editable: function () {
                 return editable;
               },
-              originalContent: function() {
+              originalContent: function () {
                 return originalContent;
               },
-              content: function() {
+              content: function () {
                 return content;
               },
-              callback: function() {
-                return function(v) {
+              callback: function () {
+                return function (v) {
                   if (editable) callback(v);
                   else callback();
                 };
@@ -54,7 +54,7 @@ angular
     "originalContent",
     "content",
     "callback",
-    function(
+    function (
       $scope,
       $modalInstance,
       $timeout,
@@ -78,7 +78,7 @@ angular
       var editor;
 
       function initUI() {
-        $timeout(function() {
+        $timeout(function () {
           editor = CodeMirror.MergeView(document.getElementById("diff-view"), {
             value: content,
             origLeft: originalContent,

@@ -2,7 +2,7 @@ angular
   .module("web")
   .factory("Dialog", [
     "$uibModal",
-    function($modal) {
+    function ($modal) {
       var dialog = require("electron").remote.dialog;
 
       return {
@@ -16,25 +16,24 @@ angular
       function showUploadDialog(fn) {
         var isMac = navigator.userAgent.indexOf("Macintosh") != -1;
 
-        dialog.showOpenDialog(
-          {
+        dialog.showOpenDialog({
             title: "Upload",
-            properties: isMac
-              ? ["openFile", "openDirectory", "multiSelections"]
-              : ["openFile", "multiSelections"]
+            properties: isMac ?
+              ["openFile", "openDirectory", "multiSelections"] :
+              ["openFile", "multiSelections"]
           },
-          function(filePaths) {
+          function (filePaths) {
             if (typeof fn == "function") fn(filePaths);
           }
         );
       }
+
       function showDownloadDialog(fn) {
-        dialog.showOpenDialog(
-          {
+        dialog.showOpenDialog({
             title: "Download",
             properties: ["openDirectory"]
           },
-          function(filePaths) {
+          function (filePaths) {
             if (typeof fn == "function") fn(filePaths);
           }
         );
@@ -50,27 +49,37 @@ angular
        *    opt.hideIcon:     default: false
        */
       function alert(title, msg, fn, opt) {
-        opt = opt || { cls: "primary" };
+        opt = opt || {
+          cls: "primary"
+        };
         if (typeof opt == "number") {
           switch (opt) {
-            case 2:
-              opt = { cls: "warning" };
-              break;
-            case 1:
-              opt = { cls: "danger" };
-              break;
-            default:
-              opt = { cls: "primary" };
-              break;
+          case 2:
+            opt = {
+              cls: "warning"
+            };
+            break;
+          case 1:
+            opt = {
+              cls: "danger"
+            };
+            break;
+          default:
+            opt = {
+              cls: "primary"
+            };
+            break;
           }
         } else {
-          opt = Object.assign({ cls: "primary" }, opt);
+          opt = Object.assign({
+            cls: "primary"
+          }, opt);
         }
         var putData = {
           title: title,
           message: msg,
           opt: opt,
-          callback: fn || function(flag) {}
+          callback: fn || function (flag) {}
         };
 
         $modal.open({
@@ -78,7 +87,7 @@ angular
           controller: "alertDialogCtrl",
           size: opt.size || "md",
           resolve: {
-            putData: function() {
+            putData: function () {
               return putData;
             }
           }
@@ -86,27 +95,37 @@ angular
       }
 
       function confirm(title, msg, fn, opt) {
-        opt = opt || { cls: "primary" };
+        opt = opt || {
+          cls: "primary"
+        };
         if (typeof opt == "number") {
           switch (opt) {
-            case 2:
-              opt = { cls: "warning" };
-              break;
-            case 1:
-              opt = { cls: "danger" };
-              break;
-            default:
-              opt = { cls: "primary" };
-              break;
+          case 2:
+            opt = {
+              cls: "warning"
+            };
+            break;
+          case 1:
+            opt = {
+              cls: "danger"
+            };
+            break;
+          default:
+            opt = {
+              cls: "primary"
+            };
+            break;
           }
         } else {
-          opt = Object.assign({ cls: "primary" }, opt);
+          opt = Object.assign({
+            cls: "primary"
+          }, opt);
         }
         var putData = {
           title: title,
           message: msg,
           opt: opt,
-          callback: fn || function(flag) {}
+          callback: fn || function (flag) {}
         };
 
         $modal.open({
@@ -114,7 +133,7 @@ angular
           controller: "confirmDialogCtrl",
           size: opt.size || "md",
           resolve: {
-            putData: function() {
+            putData: function () {
               return putData;
             }
           }
@@ -126,14 +145,14 @@ angular
     "$scope",
     "$uibModalInstance",
     "putData",
-    function($scope, $modalInstance, putData) {
+    function ($scope, $modalInstance, putData) {
       angular.extend($scope, putData);
       $scope.isAlert = true;
-      $scope.cancel = function() {
+      $scope.cancel = function () {
         $modalInstance.dismiss("cancel");
         putData.callback(false);
       };
-      $scope.ok = function() {
+      $scope.ok = function () {
         $modalInstance.dismiss("cancel");
         putData.callback(true);
       };
@@ -143,13 +162,13 @@ angular
     "$scope",
     "$uibModalInstance",
     "putData",
-    function($scope, $modalInstance, putData) {
+    function ($scope, $modalInstance, putData) {
       angular.extend($scope, putData);
-      $scope.cancel = function() {
+      $scope.cancel = function () {
         $modalInstance.dismiss("cancel");
         putData.callback(false);
       };
-      $scope.ok = function() {
+      $scope.ok = function () {
         $modalInstance.dismiss("cancel");
         putData.callback(true);
       };

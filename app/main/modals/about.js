@@ -8,7 +8,7 @@ angular.module("web").controller("aboutCtrl", [
   "autoUpgradeSvs",
   "safeApply",
   "pscope",
-  function(
+  function (
     $scope,
     $state,
     $modalInstance,
@@ -18,32 +18,29 @@ angular.module("web").controller("aboutCtrl", [
     pscope
   ) {
     angular.extend($scope, {
-      cancel: cancel,
-      startUpgrade: startUpgrade,
-      installAndRestart: installAndRestart,
-      open: open,
       app_logo: Global.app.logo,
+      custom_about_html: Global.about_html,
       info: {
         currentVersion: Global.app.version
       },
-      custom_about_html: Global.about_html
+      open: open,
+      startUpgrade: startUpgrade,
+      installAndRestart: installAndRestart,
+      cancel: cancel
     });
 
-    $interval(function() {
+    $interval(function () {
       Object.assign($scope.info, pscope.upgradeInfo);
     }, 1000);
 
-    function installAndRestart() {
-      gInstallAndRestart($scope.info.lastVersion);
-    }
-
     init();
+
     function init() {
       $scope.info = pscope.upgradeInfo;
 
       if (!$scope.info.isLastVersion) {
         var converter = new showdown.Converter();
-        autoUpgradeSvs.getLastestReleaseNote($scope.info.lastVersion, function(
+        autoUpgradeSvs.getLastestReleaseNote($scope.info.lastVersion, function (
           text
         ) {
           text = text + "";
@@ -54,12 +51,16 @@ angular.module("web").controller("aboutCtrl", [
       }
     }
 
+    function open(a) {
+      openExternal(a);
+    }
+
     function startUpgrade() {
       autoUpgradeSvs.start();
     }
 
-    function open(a) {
-      openExternal(a);
+    function installAndRestart() {
+      gInstallAndRestart($scope.info.lastVersion);
     }
 
     function cancel() {

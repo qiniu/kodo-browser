@@ -1,18 +1,17 @@
-var gulp = require("gulp");
-var plugins = require("gulp-load-plugins")({
-  lazy: false
-});
-var fs = require("fs");
-var path = require("path");
-var os = require("os");
-var minimist = require("minimist");
-require("shelljs/global");
+var gulp = require("gulp"),
+  plugins = require("gulp-load-plugins")({
+    lazy: false
+  }),
+  fs = require("fs"),
+  path = require("path"),
+  os = require("os"),
+  minimist = require("minimist");
 
 var DIST = "./dist";
 
-function getCustomPath() {
-  var minimist = require("minimist");
+require("shelljs/global");
 
+function getCustomPath() {
   var knownOptions = {
     string: "custom",
     default: {
@@ -31,11 +30,12 @@ function getCustomPath() {
       customPath = path.join(__dirname, customPath, "**/*");
     }
   }
+
   return customPath || "custom/**/*";
 }
 
 //var VERSION = pkg.version;
-var taskFns = {
+var appTasks = {
   appJS: function () {
     console.log("--rebuilding app.js...");
     //combine all js files of the app
@@ -54,6 +54,16 @@ var taskFns = {
         console.log("--done");
       });
   },
+  appCSS: function () {
+    console.log("--rebuilding lib.css...");
+    gulp
+      .src("./app/**/*.css")
+      .pipe(plugins.concat("app.css"))
+      .pipe(gulp.dest(DIST))
+      .on("end", function () {
+        console.log("--done");
+      });
+  },
   templates: function () {
     console.log("--rebuilding templates.js...");
     //combine all template files of the app into a js file
@@ -66,37 +76,27 @@ var taskFns = {
       .on("end", function () {
         console.log("--done");
       });
-  },
-  appCSS: function () {
-    console.log("--rebuilding lib.css...");
-    gulp
-      .src("./app/**/*.css")
-      .pipe(plugins.concat("app.css"))
-      .pipe(gulp.dest(DIST))
-      .on("end", function () {
-        console.log("--done");
-      });
   }
 };
 
-gulp.task("js", taskFns.appJS);
-
-gulp.task("templates", taskFns.templates);
-
-gulp.task("css", taskFns.appCSS);
+gulp.task("js", appTasks.appJS);
+gulp.task("css", appTasks.appCSS);
+gulp.task("templates", appTasks.templates);
 
 gulp.task("libJS", function () {
   //concatenate vendor JS files
 
-  var arr = [
+  var vendors = [
     "./node_modules/jquery/dist/jquery.js",
     "./node_modules/jquery.qrcode/jquery.qrcode.min.js",
     "./node_modules/moment/min/moment-with-locales.js",
     "./node_modules/bootstrap/dist/js/bootstrap.js",
     "./node_modules/angular/angular.js",
     "./node_modules/angular-sanitize/angular-sanitize.js",
+    "./node_modules/angular-translate/dist/angular-translate.min.js",
     "./node_modules/angular-ui-router/release/angular-ui-router.js",
     "./node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js",
+    "./node_modules/angular-bootstrap-contextmenu/contextMenu.js",
     "./node_modules/showdown/dist/showdown.js",
     "./node_modules/clipboard/dist/clipboard.min.js",
 
@@ -107,21 +107,18 @@ gulp.task("libJS", function () {
     "./node_modules/codemirror/lib/codemirror.js",
     "./node_modules/codemirror/addon/mode/simple.js",
     "./node_modules/codemirror/addon/merge/merge.js",
-    "./node_modules/codemirror/mode/meta.js",
-
-    "./node_modules/angular-translate/dist/angular-translate.min.js",
-    "./node_modules/angular-bootstrap-contextmenu/contextMenu.js"
+    "./node_modules/codemirror/mode/meta.js"
   ];
 
   // code mirror modes
   var modePath = "./node_modules/codemirror/mode/";
   var modes = fs.readdirSync(modePath);
   modes.forEach(function (n) {
-    arr.push(modePath + n + "/*.js");
+    vendors.push(modePath + n + "/*.js");
   });
 
   gulp
-    .src(arr)
+    .src(vendors)
     .pipe(plugins.concat("lib.js"))
     .pipe(gulp.dest(DIST));
 });
@@ -151,6 +148,7 @@ gulp.task("copy-fonts", function () {
 gulp.task("copy-icons", function () {
   gulp.src("./app/icons/**").pipe(gulp.dest(DIST + "/icons"));
 });
+
 gulp.task("copy-node", function () {
   gulp.src(["./node/**/*"]).pipe(gulp.dest(DIST + "/node"));
 });
@@ -158,6 +156,7 @@ gulp.task("copy-node", function () {
 gulp.task("copy-docs", function () {
   gulp.src(["./release-notes/**/*"]).pipe(gulp.dest(DIST + "/release-notes"));
 });
+
 gulp.task("copy-static", function () {
   gulp.src(["./static/**/*"]).pipe(gulp.dest(DIST + "/static"));
 });
@@ -175,23 +174,24 @@ gulp.task("copy-index", function () {
 });
 
 gulp.task("gen-package", function () {
-  gulp.src(["./package.json"]).on("end", function () {
-    var info = require("./package");
+  var pkg = require("./package");
 
-    delete info.devDependencies;
-    info.scripts = {
-      start: "electron ."
-    };
-    info.main = "main.js";
+  delete pkg.devDependencies;
 
-    try {
-      fs.statSync(DIST);
-    } catch (e) {
-      fs.mkdirSync(DIST);
-    }
-    fs.writeFileSync(DIST + "/package.json", JSON.stringify(info, " ", 2));
-    exec("cd dist && cnpm i");
-  });
+  pkg.scripts = {
+    start: "electron ."
+  };
+  pkg.main = "main.js";
+
+  try {
+    fs.statSync(DIST);
+  } catch (e) {
+    fs.mkdirSync(DIST);
+  }
+
+  console.log(`--generating ${DIST}/package.json`);
+  fs.writeFileSync(DIST + "/package.json", JSON.stringify(pkg, " ", 2));
+  exec(`cd ${DIST} && cnpm i`);
 });
 
 gulp.task("watch", function () {
@@ -208,21 +208,21 @@ gulp.task("watch", function () {
   );
 
   gulp.watch(["app/**/*"], function (event) {
-    console.log(Math.random(), event);
+    console.log(new Date(), event);
 
     if (event.path.endsWith(".js") && !event.path.endsWith("_test.js")) {
-      taskFns.appJS();
+      appTasks.appJS();
     }
 
     if (event.path.endsWith(".css")) {
-      taskFns.appCSS();
+      appTasks.appCSS();
     }
 
     if (
       event.path.endsWith(".html") &&
       event.path != path.join(__dirname, "app/index.html")
     ) {
-      taskFns.templates();
+      appTasks.templates();
     }
   });
 
@@ -235,16 +235,16 @@ gulp.task("watch", function () {
 
 gulp.task("build", [
   "js",
-  "templates",
   "css",
-  "copy-index",
+  "templates",
   "libJS",
   "libCSS",
-  "copy-fonts",
   "copy-node",
-  "copy-docs",
+  "copy-fonts",
   "copy-icons",
   "copy-static",
+  "copy-docs",
+  "copy-index",
   "gen-package"
 ]);
 

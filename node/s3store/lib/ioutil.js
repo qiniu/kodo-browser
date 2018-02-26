@@ -3,7 +3,7 @@
 let AWS = require('aws-sdk'),
   crypto = require('crypto'),
   EventEmitter = require('events').EventEmitter,
-  fs = require('fs-extra'),
+  fs = require('fs'),
   mime = require('mime'),
   Pend = require('pend');
 

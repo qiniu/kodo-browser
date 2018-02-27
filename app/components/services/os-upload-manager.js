@@ -335,7 +335,7 @@ angular.module("web").factory("osUploadManager", [
         var data = fs.readFileSync(getUpProgFilePath());
 
         return JSON.parse(data ? data.toString() : "[]");
-      } catch (e) {}
+      } catch (e) { }
 
       return [];
     }

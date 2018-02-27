@@ -2,7 +2,7 @@
 
   <div class="col-sm-7 pd0">
 
-    <div class="btn-group" role="group" ng-if="!copy.pwd">
+    <div class="btn-group" role="group" ng-if="!copy.pwd && (!ref.bucketPerm || ref.bucketPerm.write)">
       <button ng-disabled="currentAuthInfo.privilege=='readOnly'" type="button" class="btn btn-info btn-sm" ng-click="showAddFolder()">
         <i class="glyphicon glyphicon-plus text-success"></i>
         <!-- 新建目录 -->
@@ -18,18 +18,20 @@
     &nbsp;
     <div class="btn-group" role="group" ng-if="!copy.pwd">
 
-      <button ng-disabled="currentAuthInfo.privilege=='readOnly'" type="button" class="btn btn-default btn-sm" ng-click="showUploadDialog()">
+      <button ng-disabled="currentAuthInfo.privilege=='readOnly'" type="button" class="btn btn-default btn-sm" ng-click="showUploadDialog()"
+        ng-if="(!ref.bucketPerm || ref.bucketPerm.write)">
         <i class="glyphicon glyphicon-cloud-upload text-info"></i>
         {{'upload'|translate}}
         <!-- 上传 -->
       </button>
-      <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has" ng-click="showDownloadDialog()">
+      <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has" ng-click="showDownloadDialog()" ng-if="(!ref.bucketPerm || ref.bucketPerm.read)">
         <i class="glyphicon glyphicon-cloud-download text-primary"></i>
         <!-- 下载 -->
         {{'download'|translate}}
       </button>
 
-      <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has || currentAuthInfo.privilege=='readOnly'" ng-click="showMove(sel.has, true)">
+      <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has || currentAuthInfo.privilege=='readOnly'" ng-click="showMove(sel.has, true)"
+        ng-if="(!ref.bucketPerm || ref.bucketPerm.copy)">
         <i class="fa fa-clone text-primary"></i>
         <!-- 复制 -->
         {{'copy'|translate}}
@@ -46,14 +48,15 @@
       </button>
       <ul class="dropdown-menu" role="menu">
         <li>
-          <a href="" class="" ng-if="sel.has && currentAuthInfo.privilege!='readOnly'" ng-click="showMove(sel.has)">
+          <a href="" class="" ng-if="sel.has && currentAuthInfo.privilege!='readOnly'" ng-click="showMove(sel.has)" ng-if="(!ref.bucketPerm || ref.bucketPerm.move)">
             <i class="fa fa-cut text-primary"></i>
             <!-- 移动 -->
             {{'move'|translate}}
           </a>
         </li>
         <li>
-          <a href="" ng-if="(sel.has.length==1) && currentAuthInfo.privilege!='readOnly' && sel.has[0].storageClass!='Archive'" ng-click="showRename(sel.has[0])">
+          <a href="" ng-if="(sel.has.length==1) && currentAuthInfo.privilege!='readOnly' && sel.has[0].storageClass!='Archive'" ng-click="showRename(sel.has[0])"
+            ng-if="(!ref.bucketPerm || ref.bucketPerm.write)">
             <i class="fa fa-edit text-info"></i>
             <!-- 重命名 -->
             {{'rename'|translate}}
@@ -77,7 +80,7 @@
         </li>
 
         <li>
-          <a href="" class="" ng-if="sel.has && currentAuthInfo.privilege!='readOnly'" ng-click="showDeleteFilesSelected()">
+          <a href="" class="" ng-if="(!ref.bucketPerm || ref.bucketPerm.remove)" ng-click="showDeleteFilesSelected()">
             <i class="fa fa-remove text-danger"></i>
             {{'delete'|translate}}
             <!-- 删除 -->
@@ -89,7 +92,7 @@
 
     <div class="btn-group" role="toolbar" ng-if="keepMoveOptions">
       <button class="btn btn-default btn-sm" type="button" uib-tooltip="{{'paste.resources'|translate}}" tooltip-placement="bottom"
-        tooltip-append-to-body="true" ng-click="showPaste()">
+        tooltip-append-to-body="true" ng-click="showPaste()" ng-if="(!ref.bucketPerm || ref.bucketPerm.write)">
         <span class="text-primary">
           <i class="fa fa-paste"></i>
           {{'paste'|translate}}({{keepMoveOptions.items.length}})

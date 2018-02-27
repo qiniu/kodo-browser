@@ -37,7 +37,8 @@ angular.module("web").controller("filesCtrl", [
 
       ref: {
         isBucketList: false,
-        isListView: true
+        isListView: true,
+        bucketPerm: {}
       },
 
       transVisible: localStorage.getItem("transVisible") == "true",
@@ -542,6 +543,11 @@ angular.module("web").controller("filesCtrl", [
         // if (settingsSvs.showImageSnapshot.get() == 1) {
         //   signImagePreviewURL(info, data);
         // }
+
+        //try to resolve bucket perm
+        var authInfo = AuthInfo.get();
+        $scope.ref.bucketPerm = authInfo.perm[info.bucket];
+
 
         $scope.objects = $scope.objects.concat(data);
         $scope.nextObjectsMarker = result.marker || null;

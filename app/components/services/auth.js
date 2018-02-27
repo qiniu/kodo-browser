@@ -111,6 +111,7 @@ angular.module("web").factory("Auth", [
           data.id = body.access_key_id;
           data.secret = body.access_key_secret;
           data.token = body.token;
+          data.perm = body.bucket_perm;
 
           AuthInfo.save(data);
 

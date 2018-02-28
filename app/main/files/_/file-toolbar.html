@@ -48,15 +48,16 @@
       </button>
       <ul class="dropdown-menu" role="menu">
         <li>
-          <a href="" class="" ng-if="sel.has && currentAuthInfo.privilege!='readOnly'" ng-click="showMove(sel.has)" ng-if="(!ref.bucketPerm || ref.bucketPerm.move)">
+          <a href="" class="" ng-if="sel.has && currentAuthInfo.privilege!='readOnly' && (!ref.bucketPerm || ref.bucketPerm.move)"
+            ng-click="showMove(sel.has)">
             <i class="fa fa-cut text-primary"></i>
             <!-- 移动 -->
             {{'move'|translate}}
           </a>
         </li>
         <li>
-          <a href="" ng-if="(sel.has.length==1) && currentAuthInfo.privilege!='readOnly' && sel.has[0].storageClass!='Archive'" ng-click="showRename(sel.has[0])"
-            ng-if="(!ref.bucketPerm || ref.bucketPerm.write)">
+          <a href="" ng-if="(sel.has.length==1) && currentAuthInfo.privilege!='readOnly' && sel.has[0].storageClass!='Archive' && (!ref.bucketPerm || ref.bucketPerm.write)"
+            ng-click="showRename(sel.has[0])">
             <i class="fa fa-edit text-info"></i>
             <!-- 重命名 -->
             {{'rename'|translate}}

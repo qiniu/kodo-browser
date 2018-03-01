@@ -1,5 +1,5 @@
 angular.module("web").factory("autoUpgradeSvs", [
-  function() {
+  function () {
     var NAME = "s3-browser";
     var util = require("./node/s3store/lib/util");
 
@@ -58,19 +58,19 @@ angular.module("web").factory("autoUpgradeSvs", [
       var _statusChangeFn;
       var _progressChangeFn;
 
-      this.update = function() {
+      this.update = function () {
         //copy
         console.log("copy:", __dirname);
         fs.renameSync(to + ".download", to);
         this._changeStatus("finished");
       };
-      this.check = function(crc, md5, fn) {
+      this.check = function (crc, md5, fn) {
         //crc
         console.log("crc64 check");
         return util.checksumFile(to + ".download", crc, md5, fn);
       };
 
-      this.precheck = function() {
+      this.precheck = function () {
         this.progress = 0;
         this.total = 0;
 
@@ -81,7 +81,7 @@ angular.module("web").factory("autoUpgradeSvs", [
         }
       };
 
-      this.start = function() {
+      this.start = function () {
         this.progress = 0;
         this.total = 0;
         var that = this;
@@ -102,11 +102,11 @@ angular.module("web").factory("autoUpgradeSvs", [
 
         request
           .head(from)
-          .on("error", function(err) {
+          .on("error", function (err) {
             console.log(err);
             this._changeStatus("failed", err);
           })
-          .on("response", function(response) {
+          .on("response", function (response) {
             console.log(response.statusCode); // 200
             console.log(response.headers); // 'image/png'
 
@@ -116,14 +116,16 @@ angular.module("web").factory("autoUpgradeSvs", [
               that.progress = Math.round(current * 10000 / that.total) / 100;
               console.log(that.total);
 
-              var ws = fs.createWriteStream(to + ".download", { flags: "a+" });
+              var ws = fs.createWriteStream(to + ".download", {
+                flags: "a+"
+              });
 
               request(from)
-                .on("error", function(err) {
+                .on("error", function (err) {
                   console.log(err);
                   that._changeStatus("failed", err);
                 })
-                .on("data", function(chunk) {
+                .on("data", function (chunk) {
                   current += chunk.length;
                   that.progress =
                     Math.round(current * 10000 / that.total) / 100;
@@ -135,13 +137,13 @@ angular.module("web").factory("autoUpgradeSvs", [
                   return chunk;
                 })
                 .pipe(ws)
-                .on("finish", function() {
+                .on("finish", function () {
                   that._changeStatus("verifying");
 
                   that.check(
                     response.headers["x-oss-hash-crc64ecma"],
                     response.headers["content-md5"],
-                    function(err) {
+                    function (err) {
                       console.log("check error:", err);
                       if (err) that._changeStatus("failed", err);
                       else {
@@ -156,19 +158,19 @@ angular.module("web").factory("autoUpgradeSvs", [
             }
           });
       };
-      this.onProgressChange = function(fn) {
+      this.onProgressChange = function (fn) {
         _progressChangeFn = fn;
       };
-      this.onStatusChange = function(fn) {
+      this.onStatusChange = function (fn) {
         _statusChangeFn = fn;
       };
-      this._changeStatus = function(status, err) {
+      this._changeStatus = function (status, err) {
         //console.log(status, err)
         this.status = status;
         this.message = err;
         if (_statusChangeFn) _statusChangeFn(status);
       };
-      this._changeProgress = function(prog) {
+      this._changeProgress = function (prog) {
         if (_progressChangeFn) _progressChangeFn(prog);
       };
     }
@@ -185,7 +187,7 @@ angular.module("web").factory("autoUpgradeSvs", [
         return;
       }
 
-      $.getJSON(upgrade_url, function(data) {
+      $.getJSON(upgrade_url, function (data) {
         var isLastVersion = compareVersion(gVersion, data.version) >= 0;
         var lastVersion = data.version;
 
@@ -225,10 +227,10 @@ angular.module("web").factory("autoUpgradeSvs", [
 
           job = new FlatDownloadJob(data.file, pkgLink, to);
 
-          job.onStatusChange(function(status) {
+          job.onStatusChange(function (status) {
             upgradeOpt.upgradeJob.status = status;
           });
-          job.onProgressChange(function(progress) {
+          job.onProgressChange(function (progress) {
             upgradeOpt.upgradeJob.progress = progress;
           });
           job.precheck();

@@ -14,6 +14,8 @@ class DownloadJob extends Base {
    * @param config
    *    config.from {object|string}  {bucket, key} or s3://bucket/test/a.jpg
    *    config.to   {object|string}  {name, path} or /home/admin/a.jpg
+   *    config.resumeDownload  {bool} default false
+   *    config.multipartDownloadThreshold  {number} default 100M
    *
    */
   constructor(osClient, config) {
@@ -31,12 +33,10 @@ class DownloadJob extends Base {
       return;
     }
 
-    this.id =
-      "dj-" + new Date().getTime() + "-" + ("" + Math.random()).substring(2);
+    this.id = "dj-" + new Date().getTime() + "-" + ("" + Math.random()).substring(2);
 
     this.client = osClient;
     this.region = this._config.region;
-    this.resumePoints = this._config.resumePoints;
 
     this.from = util.parseS3Path(this._config.from); //s3 path
     this.to = util.parseLocalPath(this._config.to); //local path
@@ -46,21 +46,29 @@ class DownloadJob extends Base {
       loaded: 0
     };
 
+    this.maxConcurrency = config.maxConcurrency || 10;
+    this.resumeDownload = this._config.resumeDownload || false;
+    this.multipartDownloadThreshold = this._config.multipartDownloadThreshold || 100;
+    this.multipartDownloadSize = this._config.multipartDownloadSize || 8;
+
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
     this.stopFlag = this.status != "running";
-    this.maxConcurrency = 10;
   }
 }
 
 DownloadJob.prototype.start = function () {
   if (this.status == "running") return;
 
+  if (isDebug) {
+    console.log(`Try downloading s3://${this.from.bucket}/${this.from.key} to ${this.to.path}`);
+  }
+
   this.message = "";
+  this.stopFlag = false;
   this.startTime = new Date().getTime();
   this.endTime = null;
 
-  this.stopFlag = false;
   this._changeStatus("running");
 
   // start
@@ -79,11 +87,11 @@ DownloadJob.prototype.stop = function () {
 
   clearInterval(this.speedTid);
 
-  this._changeStatus("stopped");
   this.stopFlag = true;
-
   this.speed = 0;
   this.predictLeftTime = 0;
+
+  this._changeStatus("stopped");
 
   return this;
 };
@@ -96,23 +104,11 @@ DownloadJob.prototype.wait = function () {
   }
 
   this._lastStatusFailed = this.status == "failed";
-  this._changeStatus("waiting");
   this.stopFlag = true;
 
+  this._changeStatus("waiting");
+
   return this;
-};
-
-DownloadJob.prototype._changeStatus = function (status) {
-  this.status = status;
-  this.emit("statuschange", this.status);
-
-  if (status == "failed" || status == "stopped" || status == "finished") {
-    clearInterval(this.speedTid);
-
-    this.endTime = new Date().getTime();
-    this.speed = 0;
-    this.predictLeftTime = 0;
-  }
 };
 
 /**
@@ -128,8 +124,10 @@ DownloadJob.prototype.startDownload = function (checkPoints) {
   var client = ioutil.createClient({
     s3Client: self.client,
     s3MaxAsync: self.maxConcurrency,
-    multipartDownloadThreshold: 100 << 20, // 100M
-    multipartDownloadSize: 16 << 20 // 16M
+    resumeDownload: self.resumeDownload,
+    resumePoints: self.resumePoints,
+    multipartDownloadThreshold: self.multipartDownloadThreshold * 1024 * 1024, // 100M
+    multipartDownloadSize: self.multipartDownloadSize * 1024 * 1024 // 16M
   });
 
   var tmpfile = self.to.path + ".download";
@@ -146,11 +144,13 @@ DownloadJob.prototype.startDownload = function (checkPoints) {
   var downloader = client.downloadFile(params);
   downloader.on('fileStat', function (e2) {
     self.prog.total = e2.progressTotal;
+
     self.emit('progress', self.prog);
   });
   downloader.on('progress', function (e2) {
     self.prog.total = e2.progressTotal;
-    self.prog.loaded = e2.progressAmount;
+    self.prog.loaded = e2.progressLoaded;
+
     self.emit('progress', self.prog);
   });
   downloader.on('fileDownloaded', function (data) {
@@ -161,9 +161,11 @@ DownloadJob.prototype.startDownload = function (checkPoints) {
         console.error("rename file error:", err);
 
         self._changeStatus("failed");
+
         self.emit("error", err);
       } else {
         self._changeStatus("finished");
+
         self.emit("complete");
       }
     });
@@ -173,6 +175,7 @@ DownloadJob.prototype.startDownload = function (checkPoints) {
 
     self.message = err.message;
     self._changeStatus("failed");
+
     self.emit("error", err);
   });
 };
@@ -192,21 +195,34 @@ DownloadJob.prototype.startSpeedCounter = function () {
     }
 
     self.speed = self.prog.loaded - self.lastLoaded;
-    if (self.speed === 0) {
+    if (self.speed <= 0) {
       self.speed = self.lastSpeed * 0.8;
     }
     if (self.lastSpeed != self.speed) {
       self.emit("speedChange", self.speed);
     }
 
-    self.lastSpeed = self.speed;
     self.lastLoaded = self.prog.loaded;
+    self.lastSpeed = self.speed;
 
     self.predictLeftTime =
-      self.speed == 0 ?
+      self.speed <= 0 ?
       0 :
       Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
   }, 1000);
+};
+
+DownloadJob.prototype._changeStatus = function (status) {
+  this.status = status;
+  this.emit("statuschange", this.status);
+
+  if (status == "failed" || status == "stopped" || status == "finished") {
+    clearInterval(this.speedTid);
+
+    this.endTime = new Date().getTime();
+    this.speed = 0;
+    this.predictLeftTime = 0;
+  }
 };
 
 module.exports = DownloadJob;

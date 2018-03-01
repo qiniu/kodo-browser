@@ -1,4 +1,4 @@
-angular.module("web").factory("Cipher", function() {
+angular.module("web").factory("Cipher", function () {
   var crypto = require("crypto");
   var ALGORITHM = "aes192";
   var KEY = "x82m#*lx8vv";

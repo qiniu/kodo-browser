@@ -3,7 +3,7 @@ angular.module("web").factory("settingsSvs", [
     return {
       autoUpgrade: {
         get: function () {
-          return parseInt(localStorage.getItem("autoUpgrade") || 1);
+          return parseInt(localStorage.getItem("autoUpgrade") || 0);
         },
         set: function (v) {
           return localStorage.setItem("autoUpgrade", v);
@@ -12,7 +12,7 @@ angular.module("web").factory("settingsSvs", [
 
       resumeUpload: {
         get: function () {
-          return parseInt(localStorage.getItem("resumeUpload") || 1);
+          return parseInt(localStorage.getItem("resumeUpload") || 0);
         },
         set: function (v) {
           return localStorage.setItem("resumeUpload", v);
@@ -30,7 +30,7 @@ angular.module("web").factory("settingsSvs", [
 
       resumeDownload: {
         get: function () {
-          return parseInt(localStorage.getItem("resumeDownload") || 1);
+          return parseInt(localStorage.getItem("resumeDownload") || 0);
         },
         set: function (v) {
           return localStorage.setItem("resumeDownload", v);

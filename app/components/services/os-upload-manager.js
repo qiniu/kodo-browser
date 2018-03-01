@@ -21,14 +21,17 @@ angular.module("web").factory("osUploadManager", [
     safeApply,
     settingsSvs
   ) {
-    var fs = require("fs");
-    var path = require("path");
-    var os = require("os");
-    var S3Store = require("./node/s3store");
+    var fs = require("fs"),
+      path = require("path"),
+      os = require("os"),
+      S3Store = require("./node/s3store"),
+      Pend = require('pend');
 
-    var stopCreatingFlag = false;
-    var concurrency = 0;
     var $scope;
+    var concurrency = 0;
+    var resumeUpload = 0;
+    var resumeUploadThreshold = 100; // unit in M
+    var stopCreatingFlag = false;
 
     return {
       init: init,
@@ -45,13 +48,14 @@ angular.module("web").factory("osUploadManager", [
       $scope = scope;
       $scope.lists.uploadJobList = [];
 
-      concurrency = 0;
+      resumeUpload = settingsSvs.resumeUpload.get();
+      resumeUploadThreshold = settingsSvs.resumeUploadThreshold.get();
 
       var authInfo = AuthInfo.get();
       var progs = tryLoadProg();
 
-      angular.forEach(progs, function (n) {
-        var job = createJob(authInfo, n);
+      angular.forEach(progs, function (prog) {
+        var job = createJob(authInfo, prog);
         if (job.status == "waiting" || job.status == "running") {
           job.stop();
         }
@@ -60,76 +64,40 @@ angular.module("web").factory("osUploadManager", [
       });
     }
 
-    function addEvents(job) {
-      $scope.lists.uploadJobList.push(job);
-      safeApply($scope);
-      checkStart();
+    /**
+      * 创建单个job
+      * @param  auth { id, secret}
+      * @param  opt   { region, from, to, progress, checkPoints, ...}
+      * @param  opt.from {name, path}
+      * @param  opt.to   {bucket, key}
+      * @return job  { start(), stop(), status, progress }
+                job.events: statuschange, progress
+      */
+    function createJob(auth, opt) {
+      var region = opt.region || auth.region || "cn-east-1";
 
-      //save
-      saveProg();
+      opt.region = region;
+      opt.resumeUpload = resumeUpload == 1;
+      opt.mulipartUploadThreshold = resumeUploadThreshold;
 
-      job.on("partcomplete", function (prog) {
-        safeApply($scope);
-        saveProg();
-      });
-      job.on("statuschange", function (status) {
-        if (status == "stopped") {
-          concurrency--;
-          $timeout(checkStart, 100);
+      var store = new S3Store({
+        credential: {
+          accessKeyId: auth.id,
+          secretAccessKey: auth.secret
+        },
+        endpoint: osClient.getS3Endpoint(region, opt.to.bucket, auth.s3apitpl || auth.eptpl),
+        region: region,
+        httpOptions: {
+          connectTimeout: 3000, // 3s
+          timeout: 3600000 // 1h
         }
-
-        safeApply($scope);
-        saveProg();
       });
-      job.on("speedChange", function () {
-        safeApply($scope);
-      });
-      job.on("complete", function () {
-        concurrency--;
-        checkStart();
-        checkNeedRefreshFileList(job.to.bucket, job.to.key);
-      });
-      job.on("error", function (err) {
-        console.error(err);
 
-        concurrency--;
-        checkStart();
-      });
-    }
-
-    function checkStart() {
-      var maxConcurrency = settingsSvs.maxUploadJobCount.get();
-
-      concurrency = Math.max(0, concurrency);
-      if (concurrency < maxConcurrency) {
-        var jobs = $scope.lists.uploadJobList;
-        for (var i = 0; i < jobs.length; i++) {
-          if (concurrency >= maxConcurrency) {
-            return;
-          }
-
-          var n = jobs[i];
-          if (n.status == "waiting") {
-            n.start();
-            concurrency++;
-          }
-        }
-      }
-    }
-
-    function checkNeedRefreshFileList(bucket, key) {
-      if ($scope.currentInfo.bucket == bucket) {
-        var p = path.dirname(key) + "/";
-        p = p == "./" ? "" : p;
-
-        if ($scope.currentInfo.key == p) {
-          $scope.$emit("needrefreshfilelists");
-        }
-      }
+      return store.createUploadJob(opt);
     }
 
     /**
-     * 上传
+     * upload
      * @param filePaths []  {array<string>}  有可能是目录，需要遍历
      * @param bucketInfo {object} {bucket, region, key}
      * @param jobsAddingFn {Function} 快速加入列表回调方法， 返回jobs引用，但是该列表长度还在增长。
@@ -262,33 +230,72 @@ angular.module("web").factory("osUploadManager", [
       }
     }
 
-    /**
-      * 创建单个job
-      * @param  auth { id, secret}
-      * @param  opt   { region, from, to, progress, checkPoints, ...}
-      * @param  opt.from {name, path}
-      * @param  opt.to   {bucket, key}
-      ...
-      * @return job  { start(), stop(), status, progress }
-              job.events: statuschange, progress
-      */
-    function createJob(auth, opt) {
-      var region = opt.region || auth.region || "cn-east-1";
+    function addEvents(job) {
+      $scope.lists.uploadJobList.push(job);
+      safeApply($scope);
+      checkStart();
 
-      var store = new S3Store({
-        credential: {
-          accessKeyId: auth.id,
-          secretAccessKey: auth.secret
-        },
-        endpoint: osClient.getS3Endpoint(region, opt.to.bucket, auth.s3apitpl || auth.eptpl),
-        region: region,
-        httpOptions: {
-          connectTimeout: 3000, // 3s
-          timeout: 3600000 // 1h
-        }
+      //save
+      saveProg();
+
+      job.on("partcomplete", function (prog) {
+        safeApply($scope);
+        saveProg();
       });
+      job.on("statuschange", function (status) {
+        if (status == "stopped") {
+          concurrency--;
+          $timeout(checkStart, 100);
+        }
 
-      return store.createUploadJob(opt);
+        safeApply($scope);
+        saveProg();
+      });
+      job.on("speedChange", function () {
+        safeApply($scope);
+      });
+      job.on("complete", function () {
+        concurrency--;
+        checkStart();
+        checkNeedRefreshFileList(job.to.bucket, job.to.key);
+      });
+      job.on("error", function (err) {
+        console.error(err);
+
+        concurrency--;
+        checkStart();
+      });
+    }
+
+    function checkStart() {
+      var maxConcurrency = settingsSvs.maxUploadJobCount.get();
+
+      concurrency = Math.max(0, concurrency);
+      if (concurrency < maxConcurrency) {
+        var jobs = $scope.lists.uploadJobList;
+        for (var i = 0; i < jobs.length; i++) {
+          if (concurrency >= maxConcurrency) {
+            return;
+          }
+
+          var n = jobs[i];
+          if (n.status == "waiting") {
+            n.start();
+            concurrency++;
+          }
+        }
+      }
+    }
+
+    function checkNeedRefreshFileList(bucket, key) {
+      if ($scope.currentInfo.bucket == bucket) {
+        var p = path.dirname(key) + "/";
+        p = p == "./" ? "" : p;
+
+        if ($scope.currentInfo.key == p) {
+          $scope.$emit("needrefreshfilelists");
+        }
+      }
     }
 
     /**
@@ -335,7 +342,7 @@ angular.module("web").factory("osUploadManager", [
         var data = fs.readFileSync(getUpProgFilePath());
 
         return JSON.parse(data ? data.toString() : "[]");
-      } catch (e) { }
+      } catch (e) {}
 
       return [];
     }

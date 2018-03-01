@@ -1,6 +1,6 @@
 angular.module("web").factory("DelayDone", [
   "$timeout",
-  function($timeout) {
+  function ($timeout) {
     var mDelayCall = {};
 
     return {
@@ -40,12 +40,12 @@ angular.module("web").factory("DelayDone", [
 
       function _dig() {
         var n = arr[c];
-        fn(n, function() {
+        fn(n, function () {
           c++;
           if (c >= len) {
             doneFn();
           } else {
-            $timeout(function() {
+            $timeout(function () {
               _dig();
             }, 1);
           }

@@ -6,14 +6,14 @@ angular.module("web").factory("Auth", [
   "AuthInfo",
   function ($q, $location, $translate, osClient, AuthInfo) {
     var $http = require('request');
+    var T = $translate.instant;
+
 
     return {
       login: login,
       loginPass: loginPass,
       logout: logout
     };
-
-    var T = $translate.instant;
 
     function login(data) {
       var df = $q.defer();

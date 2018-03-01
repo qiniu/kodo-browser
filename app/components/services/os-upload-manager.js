@@ -48,8 +48,6 @@ angular.module("web").factory("osUploadManager", [
       $scope = scope;
       $scope.lists.uploadJobList = [];
 
-      concurrency = 0;
-
       resumeUpload = settingsSvs.resumeUpload.get();
       resumeUploadThreshold = settingsSvs.resumeUploadThreshold.get();
 
@@ -77,6 +75,10 @@ angular.module("web").factory("osUploadManager", [
       */
     function createJob(auth, opt) {
       var region = opt.region || auth.region || "cn-east-1";
+
+      opt.region = region;
+      opt.resumeUpload = resumeUpload == 1;
+      opt.mulipartUploadThreshold = resumeUploadThreshold;
 
       var store = new S3Store({
         credential: {

@@ -17,10 +17,8 @@ class UploadJob extends Base {
    *    config.to   {object|string}  {bucket, key} or s3://bucket/test/a.jpg
    *    config.prog   {object}  {loaded, total}
    *    config.status     {string} default 'waiting'
-   *    config.maxConcurrency  {number} default 10
-   *    config.resumeUpload  {bool} default true
+   *    config.resumeUpload  {bool} default false
    *    config.multipartUploadThreshold  {number} default 100M
-   *    config.multipartUploadSize  {number} default 8M
    *
    * events:
    *    statuschange(state) 'running'|'waiting'|'stopped'|'failed'|'finished'
@@ -58,7 +56,7 @@ class UploadJob extends Base {
     };
 
     this.maxConcurrency = config.maxConcurrency || 10;
-    this.resumeUpload = this._config.resumeUpload || true;
+    this.resumeUpload = this._config.resumeUpload || false;
     this.multipartUploadThreshold = this._config.multipartUploadThreshold || 100;
     this.multipartUploadSize = this._config.multipartUploadSize || 8;
 

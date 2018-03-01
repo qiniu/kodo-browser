@@ -14,6 +14,8 @@ class DownloadJob extends Base {
    * @param config
    *    config.from {object|string}  {bucket, key} or s3://bucket/test/a.jpg
    *    config.to   {object|string}  {name, path} or /home/admin/a.jpg
+   *    config.resumeDownload  {bool} default false
+   *    config.multipartDownloadThreshold  {number} default 100M
    *
    */
   constructor(osClient, config) {

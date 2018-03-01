@@ -21,14 +21,16 @@ angular.module("web").factory("osDownloadManager", [
     safeApply,
     settingsSvs
   ) {
-    var fs = require("fs");
-    var path = require("path");
-    var os = require("os");
-    var S3Store = require("./node/s3store");
+    var fs = require("fs"),
+      path = require("path"),
+      os = require("os"),
+      S3Store = require("./node/s3store");
 
-    var stopCreatingFlag = false;
-    var concurrency = 0;
     var $scope;
+    var concurrency = 0;
+    var resumeDownload = 0;
+    var resumeDownloadThreshold = 100; // unit in M
+    var stopCreatingFlag = false;
 
     return {
       init: init,
@@ -44,12 +46,14 @@ angular.module("web").factory("osDownloadManager", [
     function init(scope) {
       $scope = scope;
       $scope.lists.downloadJobList = [];
-      concurrency = 0;
 
-      var arr = loadProg();
+      resumeDownload = settingsSvs.resumeDownload.get();
+      resumeDownloadThreshold = settingsSvs.resumeDownloadThreshold.get();
+
       var authInfo = AuthInfo.get();
+      var progs = tryLoadProg();
 
-      angular.forEach(arr, function (n) {
+      angular.forEach(progs, function (n) {
         var job = createJob(authInfo, n);
         if (job.status == "waiting" || job.status == "running") {
           job.stop();
@@ -59,59 +63,38 @@ angular.module("web").factory("osDownloadManager", [
       });
     }
 
-    function addEvents(job) {
-      $scope.lists.downloadJobList.push(job);
-      $scope.calcTotalProg();
-      safeApply($scope);
-      checkStart();
+    /**
+     * @param  auth {id, secret}
+     * @param  opt { region, from, to, ...}
+     * @param  opt.from {bucket, key}
+     * @param  opt.to   {name, path}
+     * @return job  { start(), stop(), status, progress }
+     */
+    function createJob(auth, opt) {
+      var region = opt.region || auth.region || "cn-east-1";
 
-      //save
-      saveProg();
+      opt.region = region;
+      opt.resumeDownload = resumeDownload == 1;
+      opt.mulipartDownloadThreshold = resumeDownloadThreshold;
 
-      job.on("partcomplete", function (prog) {
-        safeApply($scope);
-        saveProg($scope);
-      });
-      job.on("statuschange", function (status) {
-        if (status == "stopped") {
-          concurrency--;
-          checkStart();
+      var store = new S3Store({
+        credential: {
+          accessKeyId: auth.id,
+          secretAccessKey: auth.secret
+        },
+        endpoint: osClient.getS3Endpoint(
+          region,
+          opt.from.bucket,
+          auth.s3apitpl || auth.eptpl
+        ),
+        region: region,
+        httpOptions: {
+          connectTimeout: 3000, // 3s
+          timeout: 3600000 // 1h
         }
-
-        safeApply($scope);
-        saveProg();
       });
-      job.on("speedChange", function () {
-        safeApply($scope);
-      });
-      job.on("complete", function () {
-        concurrency--;
-        checkStart();
-      });
-      job.on("error", function (err) {
-        console.error(err);
-        concurrency--;
-        checkStart();
-      });
-    }
 
-    //流控, 同时只能有 n 个下载任务.
-    function checkStart() {
-      var maxConcurrency = settingsSvs.maxDownloadJobCount.get();
-
-      concurrency = Math.max(0, concurrency);
-      if (concurrency < maxConcurrency) {
-        var arr = $scope.lists.downloadJobList;
-        for (var i = 0; i < arr.length; i++) {
-          if (concurrency >= maxConcurrency) return;
-
-          var n = arr[i];
-          if (n.status == "waiting") {
-            n.start();
-            concurrency++;
-          }
-        }
-      }
+      return store.createDownloadJob(opt);
     }
 
     /**
@@ -255,34 +238,60 @@ angular.module("web").factory("osDownloadManager", [
         }
       }
     }
-    /**
-     * @param  auth {id, secret}
-     * @param  opt { region, from, to, ...}
-     * @param  opt.from {bucket, key}
-     * @param  opt.to   {name, path}
-     * @return job  { start(), stop(), status, progress }
-     */
-    function createJob(auth, opt) {
-      var region = opt.region || auth.region || "cn-east-1";
 
-      var store = new S3Store({
-        credential: {
-          accessKeyId: auth.id,
-          secretAccessKey: auth.secret
-        },
-        endpoint: osClient.getS3Endpoint(
-          region,
-          opt.from.bucket,
-          auth.s3apitpl || auth.eptpl
-        ),
-        region: region,
-        httpOptions: {
-          connectTimeout: 3000, // 3s
-          timeout: 3600000 // 1h
-        }
+    function addEvents(job) {
+      $scope.lists.downloadJobList.push(job);
+      $scope.calcTotalProg();
+      safeApply($scope);
+      checkStart();
+
+      //save
+      saveProg();
+
+      job.on("partcomplete", function (prog) {
+        safeApply($scope);
+        saveProg($scope);
       });
+      job.on("statuschange", function (status) {
+        if (status == "stopped") {
+          concurrency--;
+          checkStart();
+        }
 
-      return store.createDownloadJob(opt);
+        safeApply($scope);
+        saveProg();
+      });
+      job.on("speedChange", function () {
+        safeApply($scope);
+      });
+      job.on("complete", function () {
+        concurrency--;
+        checkStart();
+      });
+      job.on("error", function (err) {
+        console.error(err);
+        concurrency--;
+        checkStart();
+      });
+    }
+
+    //流控, 同时只能有 n 个下载任务.
+    function checkStart() {
+      var maxConcurrency = settingsSvs.maxDownloadJobCount.get();
+
+      concurrency = Math.max(0, concurrency);
+      if (concurrency < maxConcurrency) {
+        var arr = $scope.lists.downloadJobList;
+        for (var i = 0; i < arr.length; i++) {
+          if (concurrency >= maxConcurrency) return;
+
+          var n = arr[i];
+          if (n.status == "waiting") {
+            n.start();
+            concurrency++;
+          }
+        }
+      }
     }
 
     function saveProg() {
@@ -316,7 +325,7 @@ angular.module("web").factory("osDownloadManager", [
     /**
      * 获取保存的进度
      */
-    function loadProg() {
+    function tryLoadProg() {
       try {
         var data = fs.readFileSync(getDownProgFilePath());
         return JSON.parse(data ? data.toString() : "[]");

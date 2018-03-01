@@ -3,8 +3,8 @@ angular.module("web").factory("BaseHttp", [
   "$http",
   "$rootScope",
   "$timeout",
-  function($http, $rootScope, $timeout) {
-    return function(opt) {
+  function ($http, $rootScope, $timeout) {
+    return function (opt) {
       $rootScope.onRequest = true;
 
       opt.headers = opt.headers || {};
@@ -18,11 +18,11 @@ angular.module("web").factory("BaseHttp", [
       }
       var httpPromise = $http(opt);
 
-      httpPromise.success(function(data, status, header) {
+      httpPromise.success(function (data, status, header) {
         setOnRequestFalse();
       });
 
-      httpPromise.error(function(err, status, header) {
+      httpPromise.error(function (err, status, header) {
         if (opt.params && opt.params.ignoreError) {
           //pass
         } else if (opt.data && opt.data.ignoreError) {
@@ -40,7 +40,7 @@ angular.module("web").factory("BaseHttp", [
 
     function setOnRequestFalse() {
       $timeout.cancel(tid);
-      tid = $timeout(function() {
+      tid = $timeout(function () {
         $rootScope.onRequest = false;
       }, 600);
     }

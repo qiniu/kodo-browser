@@ -36,7 +36,7 @@
           {{'settings.ResumeUploadThreshold'|translate}}:
         </label>
         <div class="col-sm-7">
-          <input type="number" name="resumeUploadThreshold" ng-model="set.resumeUploadThreshold" ng-change="setChange(form1,'resumeUploadThreshold')" max="10" min="1" required class=" form-control" />
+          <input type="number" name="resumeUploadThreshold" ng-model="set.resumeUploadThreshold" ng-change="setChange(form1,'resumeUploadThreshold')" max="1000" min="10" required class=" form-control" />
         </div>
       </div>
 
@@ -61,7 +61,7 @@
           {{'settings.ResumeDownloadThreshold'|translate}}:
         </label>
         <div class="col-sm-7">
-          <input type="number" name="resumeDownloadThreshold" ng-model="set.resumeDownloadThreshold" ng-change="setChange(form1,'resumeDownloadThreshold')" max="10" min="1" required class=" form-control" />
+          <input type="number" name="resumeDownloadThreshold" ng-model="set.resumeDownloadThreshold" ng-change="setChange(form1,'resumeDownloadThreshold')" max="1000" min="10" required class=" form-control" />
         </div>
       </div>
 
@@ -102,22 +102,6 @@
               <input type="checkbox" name="autoUpgrade" ng-model="set.autoUpgrade" ng-change="setChange(form1,'autoUpgrade')" ng-true-value="1"
                 ng-false-value="0" />
               ({{'settings.autoUpgrade.msg'|translate}})
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="col-sm-4 control-label">
-          <!-- 是否显示图片缩略: -->
-          {{'settings.WhetherShowThumbnail'|translate}}:
-        </label>
-        <div class="col-sm-7">
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" name="showImageSnapshot" ng-model="set.showImageSnapshot" ng-change="setChange(form1,'showImageSnapshot')"
-                ng-true-value="1" ng-false-value="0" />
-              ({{'settings.WhetherShowThumbnail.msg'|translate}})
             </label>
           </div>
         </div>

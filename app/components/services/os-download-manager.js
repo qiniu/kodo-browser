@@ -43,8 +43,8 @@ angular.module("web").factory("osDownloadManager", [
 
     function init(scope) {
       $scope = scope;
-      concurrency = 0;
       $scope.lists.downloadJobList = [];
+      concurrency = 0;
 
       var arr = loadProg();
       var authInfo = AuthInfo.get();

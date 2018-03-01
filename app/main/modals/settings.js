@@ -54,7 +54,8 @@ angular.module("web").controller("settingsCtrl", [
     function setChange(form1, key, ttl) {
       $timeout.cancel(tid);
       tid = $timeout(function () {
-        if (!form1.$valid) return;
+        //if (!form1.$valid) return;
+
         settingsSvs[key].set($scope.set[key]);
         Toast.success(T("settings.success")); //已经保存设置
       }, ttl || 100);

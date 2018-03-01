@@ -4,7 +4,6 @@ require("events").EventEmitter.prototype._maxListeners = 1000;
 
 const AWS = require("aws-sdk");
 
-var TIMEOUT = 60000; //60秒
 var UploadJob = require("./upload-job");
 var DownloadJob = require("./download-job");
 
@@ -38,6 +37,7 @@ function S3Store(config) {
     console.log("config.endpoint format is error");
     return;
   }
+
   this._config.endpoint = {
     protocol: arr[0],
     host: arr[1]
@@ -53,8 +53,8 @@ function S3Store(config) {
     s3ForcePathStyle: true,
     signatureVersion: "v4",
     httpOptions: {
-      connectTimeout: 3000, // 3s
-      timeout: 3600000 // 1h
+      connectTimeout: this._config.connectTimeout || 3000, // 3s
+      timeout: this._config.timeout || 3600000 // 1h
     }
   });
 }
@@ -80,17 +80,11 @@ function S3Store(config) {
  * @param options
  *    options.from  {object|string} local path, as object: {name:'a.jpg', path:'/home/admin/a.jpg'},  as string: '/home/admin/a.jpg'
  *    options.to    {object|string} s3 path, as object: {bucket:'bucket',key:'pic/b.jpg'} as string: 's3://bucket/pic/b.jpg'
- *
- *    options.checkPoints {object} saveCpt
- *    options.enableCrc64 {boolean}
+ *    options.checkPoints {object} saved progs
  */
 S3Store.prototype.createUploadJob = function createUploadJob(options) {
-  var self = this;
-
   //默认是 waiting 状态
-  var job = new UploadJob(self.client, options);
-
-  return job;
+  return new UploadJob(this.client, options);
 };
 
 /**
@@ -116,16 +110,10 @@ S3Store.prototype.createUploadJob = function createUploadJob(options) {
  *                       as: 's3://bucket/users/test_user/pic/b.jpg'
  *    options.to  {string} local path string,  example: '/home/admin/a.jpg'
  *
- *    options.checkpoint {object} saveCpt
- *    options.enableCrc64 {boolean}
+ *    options.checkPoints {object} saved progs
  */
 S3Store.prototype.createDownloadJob = function createDownloadJob(options) {
-  var self = this;
-
-  //默认是 waiting 状态
-  var job = new DownloadJob(self.client, options);
-
-  return job;
+  return new DownloadJob(this.client, options);
 };
 
 module.exports = S3Store;

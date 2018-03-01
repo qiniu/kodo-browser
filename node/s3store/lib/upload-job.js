@@ -17,6 +17,10 @@ class UploadJob extends Base {
    *    config.to   {object|string}  {bucket, key} or s3://bucket/test/a.jpg
    *    config.prog   {object}  {loaded, total}
    *    config.status     {string} default 'waiting'
+   *    config.maxConcurrency  {number} default 10
+   *    config.resumeUpload  {bool} default true
+   *    config.multipartUploadThreshold  {number} default 100M
+   *    config.multipartUploadSize  {number} default 8M
    *
    * events:
    *    statuschange(state) 'running'|'waiting'|'stopped'|'failed'|'finished'
@@ -40,12 +44,10 @@ class UploadJob extends Base {
       return;
     }
 
-    this.id =
-      "uj-" + new Date().getTime() + "-" + ("" + Math.random()).substring(2);
+    this.id = "uj-" + new Date().getTime() + "-" + ("" + Math.random()).substring(2);
 
     this.client = osClient;
     this.region = this._config.region;
-    this.resumePoints = this._config.resumePoints;
 
     this.from = util.parseLocalPath(this._config.from);
     this.to = util.parseS3Path(this._config.to);
@@ -55,10 +57,14 @@ class UploadJob extends Base {
       loaded: 0
     };
 
+    this.maxConcurrency = config.maxConcurrency || 10;
+    this.resumeUpload = this._config.resumeUpload || true;
+    this.multipartUploadThreshold = this._config.multipartUploadThreshold || 100;
+    this.multipartUploadSize = this._config.multipartUploadSize || 8;
+
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
     this.stopFlag = this.status != "running";
-    this.maxConcurrency = 10;
   }
 }
 
@@ -70,15 +76,14 @@ UploadJob.prototype.start = function () {
   }
 
   this.message = "";
+  this.stopFlag = false;
   this.startTime = new Date().getTime();
   this.endTime = null;
 
-  this.stopFlag = false;
   this._changeStatus("running");
-  this._hasCallComplete = false;
 
   // start
-  this.startUpload(this.resumePoints);
+  this.startUpload();
   this.startSpeedCounter();
 
   return this;
@@ -93,11 +98,11 @@ UploadJob.prototype.stop = function () {
 
   clearInterval(this.speedTid);
 
-  this._changeStatus("stopped");
   this.stopFlag = true;
-
   this.speed = 0;
   this.predictLeftTime = 0;
+
+  this._changeStatus("stopped");
 
   return this;
 };
@@ -110,23 +115,11 @@ UploadJob.prototype.wait = function () {
   }
 
   this._lastStatusFailed = this.status == "failed";
-  this._changeStatus("waiting");
   this.stopFlag = true;
 
+  this._changeStatus("waiting");
+
   return this;
-};
-
-UploadJob.prototype._changeStatus = function (status) {
-  this.status = status;
-  this.emit("statuschange", this.status);
-
-  if (status == "failed" || status == "stopped" || status == "finished") {
-    clearInterval(this.speedTid);
-
-    this.endTime = new Date().getTime();
-    this.speed = 0;
-    this.predictLeftTime = 0;
-  }
 };
 
 /**
@@ -142,8 +135,10 @@ UploadJob.prototype.startUpload = function () {
   var client = ioutil.createClient({
     s3Client: self.client,
     s3MaxAsync: self.maxConcurrency,
-    multipartUploadThreshold: 100 << 20, // 100M
-    multipartUploadSize: 16 << 20 // 16M
+    resumeUpload: self.resumeUpload,
+    resumePoints: self.resumePoints,
+    multipartUploadThreshold: self.multipartUploadThreshold * 1024 * 1024,
+    multipartUploadSize: self.multipartUploadSize * 1024 * 1024,
   });
 
   var params = {
@@ -158,15 +153,18 @@ UploadJob.prototype.startUpload = function () {
   var uploader = client.uploadFile(params);
   uploader.on('fileStat', function (e2) {
     self.prog.total = e2.progressTotal;
+
     self.emit('progress', self.prog);
   });
   uploader.on('progress', function (e2) {
     self.prog.total = e2.progressTotal;
-    self.prog.loaded = e2.progressAmount;
+    self.prog.loaded = e2.progressLoaded;
+
     self.emit('progress', self.prog);
   });
   uploader.on('fileUploaded', function (data) {
     self._changeStatus("finished");
+
     self.emit("complete");
   });
   uploader.on('error', function (err) {
@@ -174,6 +172,7 @@ UploadJob.prototype.startUpload = function () {
 
     self.message = err.message;
     self._changeStatus("failed");
+
     self.emit("error", err);
   });
 };
@@ -193,43 +192,34 @@ UploadJob.prototype.startSpeedCounter = function () {
     }
 
     self.speed = self.prog.loaded - self.lastLoaded;
-    if (self.speed === 0) {
+    if (self.speed <= 0) {
       self.speed = self.lastSpeed * 0.8;
     }
     if (self.lastSpeed != self.speed) {
       self.emit("speedChange", self.speed);
     }
 
-    self.lastSpeed = self.speed;
     self.lastLoaded = self.prog.loaded;
+    self.lastSpeed = self.speed;
 
     self.predictLeftTime =
-      self.speed == 0 ?
+      self.speed <= 0 ?
       0 :
       Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
   }, 1000);
 };
 
-UploadJob.prototype.deleteFile = function () {
-  var self = this;
+UploadJob.prototype._changeStatus = function (status) {
+  this.status = status;
+  this.emit("statuschange", this.status);
 
-  var params = {
-    Bucket: self.to.bucket,
-    Key: self.to.key
-  };
+  if (status == "failed" || status == "stopped" || status == "finished") {
+    clearInterval(this.speedTid);
 
-  self.oss.deleteObject(params, function (err) {
-    if (err) {
-      console.error(
-        `Deleting s3://${self.to.bucket}/${self.to.key}`,
-        err
-      );
-    } else {
-      console.log(
-        `Deleted s3://${self.to.bucket}/${self.to.key}`
-      );
-    }
-  });
+    this.endTime = new Date().getTime();
+    this.speed = 0;
+    this.predictLeftTime = 0;
+  }
 };
 
 module.exports = UploadJob;

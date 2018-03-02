@@ -134,8 +134,6 @@ ipcMain.on("asynchronous", (event, data) => {
 });
 
 ipcMain.on("asynchronous-job", (event, data) => {
-  console.log(JSON.stringify(data));
-
   switch (data.key) {
   case "job-upload":
     var client = new Client(data.options);

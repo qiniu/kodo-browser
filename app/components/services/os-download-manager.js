@@ -28,8 +28,6 @@ angular.module("web").factory("osDownloadManager", [
 
     var $scope;
     var concurrency = 0;
-    var resumeDownload = 0;
-    var resumeDownloadThreshold = 100; // unit in M
     var stopCreatingFlag = false;
 
     return {
@@ -46,9 +44,6 @@ angular.module("web").factory("osDownloadManager", [
     function init(scope) {
       $scope = scope;
       $scope.lists.downloadJobList = [];
-
-      resumeDownload = settingsSvs.resumeDownload.get();
-      resumeDownloadThreshold = settingsSvs.resumeDownloadThreshold.get();
 
       var authInfo = AuthInfo.get();
       var progs = tryLoadProg();
@@ -74,8 +69,8 @@ angular.module("web").factory("osDownloadManager", [
       var region = opt.region || auth.region || "cn-east-1";
 
       opt.region = region;
-      opt.resumeDownload = resumeDownload == 1;
-      opt.mulipartDownloadThreshold = resumeDownloadThreshold;
+      opt.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
+      opt.mulipartDownloadThreshold = settingsSvs.resumeDownloadThreshold.get();
 
       var store = new S3Store({
         credential: {

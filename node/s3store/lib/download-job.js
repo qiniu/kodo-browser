@@ -4,13 +4,16 @@ var fs = require("fs"),
   path = require("path"),
   util = require("./util"),
   ioutil = require("./ioutil"),
-  Base = require("./base");
+  Base = require("./base"),
+  {
+    ipcRenderer
+  } = require("electron");
 var isDebug = process.env.NODE_ENV == "development";
 
 class DownloadJob extends Base {
   /**
    *
-   * @param osClient
+   * @param s3options
    * @param config
    *    config.from {object|string}  {bucket, key} or s3://bucket/test/a.jpg
    *    config.to   {object|string}  {name, path} or /home/admin/a.jpg
@@ -18,7 +21,7 @@ class DownloadJob extends Base {
    *    config.multipartDownloadThreshold  {number} default 100M
    *
    */
-  constructor(osClient, config) {
+  constructor(s3options, config) {
     super();
 
     this._config = {};
@@ -35,8 +38,7 @@ class DownloadJob extends Base {
 
     this.id = "dj-" + new Date().getTime() + "-" + ("" + Math.random()).substring(2);
 
-    this.client = osClient;
-    this.region = this._config.region;
+    this.s3options = s3options;
 
     this.from = util.parseS3Path(this._config.from); //s3 path
     this.to = util.parseLocalPath(this._config.to); //local path
@@ -54,6 +56,7 @@ class DownloadJob extends Base {
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
     this.stopFlag = this.status != "running";
+    this.tmpfile = this.to.path + ".download";
   }
 }
 
@@ -68,11 +71,32 @@ DownloadJob.prototype.start = function () {
   this.stopFlag = false;
   this.startTime = new Date().getTime();
   this.endTime = null;
+  this._listener = this.startDownload.bind(this);
 
   this._changeStatus("running");
 
   // start
-  this.startDownload(this.resumePoints);
+  ipcRenderer.send('asynchronous-job', {
+    job: this.id,
+    key: 'job-download',
+    options: {
+      s3Options: this.s3options,
+      maxConcurrency: this.maxConcurrency,
+      resumeDownload: this.resumeDownload,
+      multipartDownloadThreshold: this.multipartDownloadThreshold * 1024 * 1024,
+      multipartDownloadSize: this.multipartDownloadSize * 1024 * 1024
+    },
+    params: {
+      s3Params: {
+        Bucket: this.from.bucket,
+        Key: this.from.key
+      },
+      localFile: this.tmpfile,
+      isDebug: isDebug
+    }
+  });
+  ipcRenderer.on(this.id, this._listener);
+
   this.startSpeedCounter();
 
   return this;
@@ -114,70 +138,56 @@ DownloadJob.prototype.wait = function () {
 /**
  * downloading
  */
-DownloadJob.prototype.startDownload = function (checkPoints) {
+DownloadJob.prototype.startDownload = function (event, data) {
   var self = this;
 
-  if (isDebug) {
-    console.log(`Start downloading s3://${self.from.bucket}/${self.from.key}`);
-  }
+  switch (data.key) {
+  case 'fileStat':
+    var prog = data.data;
 
-  var client = ioutil.createClient({
-    s3Client: self.client,
-    s3MaxAsync: self.maxConcurrency,
-    resumeDownload: self.resumeDownload,
-    resumePoints: self.resumePoints,
-    multipartDownloadThreshold: self.multipartDownloadThreshold * 1024 * 1024, // 100M
-    multipartDownloadSize: self.multipartDownloadSize * 1024 * 1024 // 16M
-  });
-
-  var tmpfile = self.to.path + ".download";
-
-  var params = {
-    s3Params: {
-      Bucket: self.from.bucket,
-      Key: self.from.key
-    },
-    localFile: tmpfile,
-    isDebug: isDebug
-  };
-
-  var downloader = client.downloadFile(params);
-  downloader.on('fileStat', function (e2) {
-    self.prog.total = e2.progressTotal;
-
+    self.prog.total = prog.progressTotal;
     self.emit('progress', self.prog);
-  });
-  downloader.on('progress', function (e2) {
-    self.prog.total = e2.progressTotal;
-    self.prog.loaded = e2.progressLoaded;
+    break;
 
+  case 'progress':
+    var prog = data.data;
+
+    self.prog.loaded = prog.progressLoaded;
     self.emit('progress', self.prog);
-  });
-  downloader.on('fileDownloaded', function (data) {
+    break;
+
+  case 'fileDownloaded':
+    ipcRenderer.removeListener(self.id, self._listener);
+
     self._changeStatus("verifying");
 
-    fs.rename(tmpfile, self.to.path, function (err) {
+    fs.rename(self.tmpfile, self.to.path, function (err) {
       if (err) {
-        console.error("rename file error:", err);
+        console.error(`rename file ${self.tmpfile} to ${self.to.path} error:`, err);
 
         self._changeStatus("failed");
-
         self.emit("error", err);
       } else {
         self._changeStatus("finished");
-
         self.emit("complete");
       }
     });
-  });
-  downloader.on('error', function (err) {
-    console.warn("download object error:", err);
 
-    self.message = err.message;
+    break;
+
+  case 'error':
+    console.warn("download object error:", data.error);
+
+    ipcRenderer.removeListener(self.id, self._listener);
+
+    self.message = data.error.message;
     self._changeStatus("failed");
+    self.emit("error", data.error);
+    break;
 
-    self.emit("error", err);
-  });
+  default:
+    console.log(`unsupported key: ${JSON.stringify(data)}`);
+  }
 };
 
 DownloadJob.prototype.startSpeedCounter = function () {

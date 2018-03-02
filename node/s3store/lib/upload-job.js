@@ -5,13 +5,16 @@ var fs = require("fs"),
   mime = require("mime"),
   util = require("./util"),
   ioutil = require("./ioutil"),
-  Base = require("./base");
+  Base = require("./base"),
+  {
+    ipcRenderer
+  } = require("electron");
 var isDebug = process.env.NODE_ENV == "development";
 
 class UploadJob extends Base {
   /**
    *
-   * @param osClient
+   * @param s3options
    * @param config
    *    config.from {object|string}  {name, path} or /home/admin/a.jpg
    *    config.to   {object|string}  {bucket, key} or s3://bucket/test/a.jpg
@@ -27,7 +30,7 @@ class UploadJob extends Base {
    *    complete
    *    progress ({loaded:100, total: 1200})
    */
-  constructor(osClient, config) {
+  constructor(s3options, config) {
     super();
 
     this._config = {};
@@ -44,8 +47,7 @@ class UploadJob extends Base {
 
     this.id = "uj-" + new Date().getTime() + "-" + ("" + Math.random()).substring(2);
 
-    this.client = osClient;
-    this.region = this._config.region;
+    this.s3options = s3options;
 
     this.from = util.parseLocalPath(this._config.from);
     this.to = util.parseS3Path(this._config.to);
@@ -77,11 +79,32 @@ UploadJob.prototype.start = function () {
   this.stopFlag = false;
   this.startTime = new Date().getTime();
   this.endTime = null;
+  this._listener = this.startUpload.bind(this);
 
   this._changeStatus("running");
 
   // start
-  this.startUpload();
+  ipcRenderer.send('asynchronous-job', {
+    job: this.id,
+    key: 'job-upload',
+    options: {
+      s3Options: this.s3options,
+      maxConcurrency: this.maxConcurrency,
+      resumeUpload: this.resumeUpload,
+      multipartUploadThreshold: this.multipartUploadThreshold * 1024 * 1024,
+      multipartUploadSize: this.multipartUploadSize * 1024 * 1024
+    },
+    params: {
+      s3Params: {
+        Bucket: this.to.bucket,
+        Key: this.to.key
+      },
+      localFile: this.from.path,
+      isDebug: isDebug
+    }
+  });
+  ipcRenderer.on(this.id, this._listener);
+
   this.startSpeedCounter();
 
   return this;
@@ -123,56 +146,42 @@ UploadJob.prototype.wait = function () {
 /**
  * uploading
  */
-UploadJob.prototype.startUpload = function () {
-  var self = this;
+UploadJob.prototype.startUpload = function (event, data) {
+  switch (data.key) {
+  case 'fileStat':
+    var prog = data.data;
 
-  if (isDebug) {
-    console.log(`Start uploading ${self.from.path} to s3://${self.to.bucket}/${self.to.key}`);
+    this.prog.total = prog.progressTotal;
+    this.emit('progress', this.prog);
+    break;
+
+  case 'progress':
+    var prog = data.data;
+
+    this.prog.loaded = prog.progressLoaded;
+    this.emit('progress', this.prog);
+    break;
+
+  case 'fileUploaded':
+    ipcRenderer.removeListener(this.id, this._listener);
+
+    this._changeStatus("finished");
+    this.emit("complete");
+    break;
+
+  case 'error':
+    console.warn("upload object error:", data.error);
+
+    ipcRenderer.removeListener(this.id, this._listener);
+
+    this.message = data.error.message;
+    this._changeStatus("failed");
+    this.emit("error", data.error);
+    break;
+
+  default:
+    console.log(`unsupported key: ${JSON.stringify(data)}`);
   }
-
-  var client = ioutil.createClient({
-    s3Client: self.client,
-    s3MaxAsync: self.maxConcurrency,
-    resumeUpload: self.resumeUpload,
-    resumePoints: self.resumePoints,
-    multipartUploadThreshold: self.multipartUploadThreshold * 1024 * 1024,
-    multipartUploadSize: self.multipartUploadSize * 1024 * 1024,
-  });
-
-  var params = {
-    s3Params: {
-      Bucket: self.to.bucket,
-      Key: self.to.key
-    },
-    localFile: self.from.path,
-    isDebug: isDebug
-  };
-
-  var uploader = client.uploadFile(params);
-  uploader.on('fileStat', function (e2) {
-    self.prog.total = e2.progressTotal;
-
-    self.emit('progress', self.prog);
-  });
-  uploader.on('progress', function (e2) {
-    self.prog.total = e2.progressTotal;
-    self.prog.loaded = e2.progressLoaded;
-
-    self.emit('progress', self.prog);
-  });
-  uploader.on('fileUploaded', function (data) {
-    self._changeStatus("finished");
-
-    self.emit("complete");
-  });
-  uploader.on('error', function (err) {
-    console.warn("upload object error:", err);
-
-    self.message = err.message;
-    self._changeStatus("failed");
-
-    self.emit("error", err);
-  });
 };
 
 UploadJob.prototype.startSpeedCounter = function () {

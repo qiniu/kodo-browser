@@ -8,7 +8,9 @@ const {
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const nativeImage = require("electron").nativeImage;
+const {
+  Client
+} = require("./node/s3store/lib/ioutil");
 
 app.commandLine.appendSwitch("ignore-connections-limit", "poc.com,s3-qos.poc.com,wasuqiniu.cn,s3api.wasuqiniu.cn");
 
@@ -94,19 +96,20 @@ function createWindow() {
   }
 }
 
-//监听web page里发出的message
+// listener events send from renderer process
 ipcMain.on("asynchronous", (event, data) => {
   switch (data.key) {
   case "getStaticServerPort":
-    //在main process里向web page发出message
     event.sender.send("asynchronous-reply", {
       key: data.key,
       port: port
     });
     break;
+
   case "openDevTools":
     win.webContents.openDevTools();
     break;
+
   case "installRestart":
     var version = data.version;
     var from = path.join(path.dirname(__dirname), version + "-app.asar");
@@ -125,6 +128,94 @@ ipcMain.on("asynchronous", (event, data) => {
         }
       });
     }, 1000);
+
+    break;
+  }
+});
+
+ipcMain.on("asynchronous-job", (event, data) => {
+  console.log(JSON.stringify(data));
+
+  switch (data.key) {
+  case "job-upload":
+    var client = new Client(data.options);
+
+    var uploader = client.uploadFile(data.params);
+    uploader.on('fileStat', function (e2) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'fileStat',
+        data: {
+          progressLoaded: 0,
+          progressTotal: e2.progressTotal
+        }
+      });
+    });
+    uploader.on('progress', function (e2) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'progress',
+        data: {
+          progressLoaded: e2.progressLoaded,
+          progressTotal: e2.progressTotal
+        }
+      });
+    });
+    uploader.on('fileUploaded', function (result) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'fileUploaded',
+        data: result
+      });
+    });
+    uploader.on('error', function (err) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'error',
+        error: err
+      });
+    });
+
+    break;
+
+  case "job-download":
+    var client = new Client(data.options);
+
+    var downloader = client.downloadFile(data.params);
+    downloader.on('fileStat', function (e2) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'fileStat',
+        data: {
+          progressLoaded: 0,
+          progressTotal: e2.progressTotal
+        }
+      });
+    });
+    downloader.on('progress', function (e2) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'progress',
+        data: {
+          progressLoaded: e2.progressLoaded,
+          progressTotal: e2.progressTotal
+        }
+      });
+    });
+    downloader.on('fileDownloaded', function (result) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'fileDownloaded',
+        data: result
+      });
+    });
+    downloader.on('error', function (err) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'error',
+        error: err
+      });
+    });
 
     break;
   }

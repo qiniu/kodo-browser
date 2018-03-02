@@ -58,18 +58,23 @@
 
   <script src="templates.js"></script>
   <script>
-    const { ipcRenderer, shell } = require('electron');
+    const {
+      ipcRenderer,
+      shell
+    } = require('electron');
     var isDev = process.env.NODE_ENV == 'development';
 
     ipcRenderer.on('asynchronous-reply', (event, data) => {
       switch (data.key) {
-        case 'getStaticServerPort':
-          Global.staticServerPort = data.port;
-          break;
+      case 'getStaticServerPort':
+        Global.staticServerPort = data.port;
+        break;
       }
     });
     setTimeout(function () {
-      ipcRenderer.send('asynchronous', { key: 'getStaticServerPort' });
+      ipcRenderer.send('asynchronous', {
+        key: 'getStaticServerPort'
+      });
     }, 1000);
 
     //自动升级
@@ -80,18 +85,22 @@
     //   ipcRenderer.send('asynchronous-message', 'checkUpgrade');
     // },60000);
 
-
     function openExternal(url) {
       // Open a URL in the default way
       shell.openExternal(url);
     }
 
     function openDevTools() {
-      ipcRenderer.send('asynchronous', { key: 'openDevTools' });
+      ipcRenderer.send('asynchronous', {
+        key: 'openDevTools'
+      });
     }
 
     function gInstallAndRestart(version) {
-      ipcRenderer.send('asynchronous', { key: 'installRestart', version: version });
+      ipcRenderer.send('asynchronous', {
+        key: 'installRestart',
+        version: version
+      });
     }
 
     var pkg = require('./package');
@@ -123,7 +132,6 @@
         }
     })();
 
-
     $(function () {
       $(document).on('dragover', function (ev) {
         ev.preventDefault();
@@ -134,9 +142,9 @@
         return false;
       })
     });
-
   </script>
   <script src="app.js"></script>
 
 </body>
+
 </html>

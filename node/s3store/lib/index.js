@@ -43,7 +43,7 @@ function S3Store(config) {
     host: arr[1]
   };
 
-  this.client = new AWS.S3({
+  this._s3options = {
     apiVersion: "2006-03-01",
     endpoint: this._config.endpoint.protocol + "://" + this._config.endpoint.host,
     region: this._config.region,
@@ -56,7 +56,8 @@ function S3Store(config) {
       connectTimeout: this._config.connectTimeout || 3000, // 3s
       timeout: this._config.timeout || 3600000 // 1h
     }
-  });
+  };
+
 }
 
 /**
@@ -83,8 +84,7 @@ function S3Store(config) {
  *    options.checkPoints {object} saved progs
  */
 S3Store.prototype.createUploadJob = function createUploadJob(options) {
-  //默认是 waiting 状态
-  return new UploadJob(this.client, options);
+  return new UploadJob(this._s3options, options);
 };
 
 /**
@@ -113,7 +113,7 @@ S3Store.prototype.createUploadJob = function createUploadJob(options) {
  *    options.checkPoints {object} saved progs
  */
 S3Store.prototype.createDownloadJob = function createDownloadJob(options) {
-  return new DownloadJob(this.client, options);
+  return new DownloadJob(this._s3options, options);
 };
 
 module.exports = S3Store;

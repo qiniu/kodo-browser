@@ -1,30 +1,33 @@
 angular.module("web").controller("mainCtrl", [
   "$scope",
-  "$rootScope",
   "$timeout",
-  "$state",
-  "$q",
-  "Const",
   "AuthInfo",
   "autoUpgradeSvs",
-  function(
+  function (
     $scope,
-    $rootScope,
     $timeout,
-    $state,
-    $q,
-    Const,
     AuthInfo,
     autoUpgradeSvs
   ) {
+    var authInfo = AuthInfo.get();
+    if (authInfo) {
+      var {
+        ipcRenderer
+      } = require("electron");
+      ipcRenderer.send("asynchronous", {
+        key: "AuthInfo",
+        data: authInfo
+      });
+    }
+
     angular.extend($scope, {
       upgradeInfo: {
         isLastVersion: true
       }
     });
 
-    $timeout(function() {
-      autoUpgradeSvs.load(function(info) {
+    $timeout(function () {
+      autoUpgradeSvs.load(function (info) {
         angular.extend($scope.upgradeInfo, info);
       });
     }, 2000);

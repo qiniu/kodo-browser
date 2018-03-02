@@ -208,6 +208,9 @@ DownloadJob.prototype.startSpeedCounter = function () {
     if (self.speed <= 0) {
       self.speed = self.lastSpeed * 0.8;
     }
+    if (self.lastSpeed/self.speed > 1.2) {
+      self.speed = self.lastSpeed * 0.8;
+    }
     if (self.lastSpeed != self.speed) {
       self.emit("speedChange", self.speed);
     }

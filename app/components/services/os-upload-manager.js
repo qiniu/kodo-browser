@@ -74,6 +74,7 @@ angular.module("web").factory("osUploadManager", [
       opt.region = region;
       opt.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
       opt.mulipartUploadThreshold = settingsSvs.resumeUploadThreshold.get();
+      opt.mulipartUploadSize = settingsSvs.resumeUploadSize.get();
 
       var store = new S3Store({
         credential: {

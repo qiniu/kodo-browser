@@ -48,7 +48,7 @@ angular.module("web").factory("settingsSvs", [
 
       maxUploadJobCount: {
         get: function () {
-          return parseInt(localStorage.getItem("maxUploadJobCount") || 3);
+          return parseInt(localStorage.getItem("maxUploadJobCount") || 10);
         },
         set: function (v) {
           return localStorage.setItem("maxUploadJobCount", v);
@@ -57,7 +57,7 @@ angular.module("web").factory("settingsSvs", [
 
       maxDownloadJobCount: {
         get: function () {
-          return parseInt(localStorage.getItem("maxDownloadJobCount") || 3);
+          return parseInt(localStorage.getItem("maxDownloadJobCount") || 10);
         },
         set: function (v) {
           return localStorage.setItem("maxDownloadJobCount", v);

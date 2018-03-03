@@ -104,7 +104,7 @@ UploadJob.prototype.start = function () {
     }
   };
   if (this.isDebug) {
-    console.log(`[JOB] => ${JSON.stringify(job)}`);
+    console.log(`[JOB] ${JSON.stringify(job)}`);
   }
   ipcRenderer.send('asynchronous-job', job);
   ipcRenderer.on(this.id, this._listener);

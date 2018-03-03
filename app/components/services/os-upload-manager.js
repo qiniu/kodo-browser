@@ -232,6 +232,7 @@ angular.module("web").factory("osUploadManager", [
 
     function addEvents(job) {
       $scope.lists.uploadJobList.push(job);
+      $scope.calcTotalProg();
       safeApply($scope);
       trySchedJob();
 
@@ -274,7 +275,7 @@ angular.module("web").factory("osUploadManager", [
 
       concurrency = Math.max(0, concurrency);
       if (isDebug) {
-        console.log(`[JOB] sched max: ${maxConcurrency}, cur: ${concurrency}, jobs: ${$scope.lists.uploadJobList.length}`)
+        console.log(`[JOB] upload max: ${maxConcurrency}, cur: ${concurrency}, jobs: ${$scope.lists.uploadJobList.length}`)
       }
 
       if (concurrency < maxConcurrency) {
@@ -287,7 +288,7 @@ angular.module("web").factory("osUploadManager", [
 
           var job = jobs[i];
           if (isDebug) {
-            console.log(`[JOB] sched ${JSON.stringify(job)}`);
+            console.log(`[JOB] sched ${job.status} => ${JSON.stringify(job._config)}`);
           }
 
           if (job.status == "waiting") {

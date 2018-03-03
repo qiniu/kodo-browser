@@ -245,12 +245,13 @@ ipcMain.on("asynchronous-job", (event, data) => {
         });
       }
     });
-    worker.on("exit", function (code) {
+    worker.on("exit", function (code, signal) {
       event.sender.send(data.job, {
         job: data.job,
-        key: 'exit',
+        key: 'debug',
         exit: {
-          code: code
+          code: code,
+          signal: signal
         }
       });
     });
@@ -261,6 +262,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
         error: err
       });
     });
+
+    // var client = new Client(data.options);
 
     // var uploader = client.uploadFile(data.params);
     // uploader.on('fileStat', function (e2) {

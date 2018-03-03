@@ -33,8 +33,8 @@ angular.module("web").factory("osDownloadManager", [
     return {
       init: init,
       createDownloadJobs: createDownloadJobs,
-      checkStart: checkStart,
-      saveProg: saveProg,
+      trySchedJob: trySchedJob,
+      trySaveProg: trySaveProg,
 
       stopCreatingJobs: function () {
         stopCreatingFlag = true;
@@ -239,40 +239,40 @@ angular.module("web").factory("osDownloadManager", [
       $scope.lists.downloadJobList.push(job);
       $scope.calcTotalProg();
       safeApply($scope);
-      checkStart();
+      trySchedJob();
 
       //save
-      saveProg();
+      trySaveProg();
 
       job.on("partcomplete", function (prog) {
         safeApply($scope);
-        saveProg($scope);
+        trySaveProg($scope);
       });
       job.on("statuschange", function (status) {
         if (status == "stopped") {
           concurrency--;
-          checkStart();
+          trySchedJob();
         }
 
         safeApply($scope);
-        saveProg();
+        trySaveProg();
       });
       job.on("speedChange", function () {
         safeApply($scope);
       });
       job.on("complete", function () {
         concurrency--;
-        checkStart();
+        trySchedJob();
       });
       job.on("error", function (err) {
         console.error(err);
         concurrency--;
-        checkStart();
+        trySchedJob();
       });
     }
 
     //流控, 同时只能有 n 个下载任务.
-    function checkStart() {
+    function trySchedJob() {
       var maxConcurrency = settingsSvs.maxDownloadJobCount.get();
 
       concurrency = Math.max(0, concurrency);
@@ -290,7 +290,7 @@ angular.module("web").factory("osDownloadManager", [
       }
     }
 
-    function saveProg() {
+    function trySaveProg() {
       DelayDone.delayRun(
         "save_download_prog",
         1000,

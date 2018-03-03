@@ -58,7 +58,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
 
     function checkStartJob(item) {
       item.wait();
-      osDownloadManager.checkStart();
+      osDownloadManager.trySchedJob();
     }
 
     function showRemoveItem(item) {
@@ -88,7 +88,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
           break;
         }
       }
-      osDownloadManager.saveProg();
+      osDownloadManager.trySaveProg();
       $scope.calcTotalProg();
       safeApply($scope);
     }
@@ -131,7 +131,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
               i--;
             }
             $scope.calcTotalProg();
-            osDownloadManager.saveProg();
+            osDownloadManager.trySaveProg();
           }
         },
         1
@@ -161,7 +161,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
         Toast.success(T("pause.success")); //'暂停成功'
 
         $timeout(function () {
-          osDownloadManager.saveProg();
+          osDownloadManager.trySaveProg();
           $scope.allActionBtnDisabled = false;
         }, 100);
       }
@@ -182,7 +182,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
             if (n && (n.status == "stopped" || n.status == "failed")) {
               n.wait();
             }
-            osDownloadManager.checkStart();
+            osDownloadManager.trySchedJob();
             fn();
           },
           function doneFy() {

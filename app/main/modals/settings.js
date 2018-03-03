@@ -29,6 +29,7 @@ angular.module("web").controller("settingsCtrl", [
 
     angular.extend($scope, {
       set: {
+        isDebug: settingsSvs.isDebug.get(),
         autoUpgrade: settingsSvs.autoUpgrade.get(),
         resumeUpload: settingsSvs.resumeUpload.get(),
         resumeUploadThreshold: settingsSvs.resumeUploadThreshold.get(),

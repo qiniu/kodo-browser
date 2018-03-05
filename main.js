@@ -50,17 +50,14 @@ case "darwin":
   );
 
   execNode = path.join(app.getAppPath(), "node_modules", ".bin", "node");
-
   break;
 
 case "linux":
   execNode = path.join(app.getAppPath(), "node_modules", ".bin", "node.bin");
-
   break;
 
 case "win32":
   execNode = path.join(app.getAppPath(), "node_modules", ".bin", "node.exe");
-
   break;
 }
 
@@ -149,9 +146,9 @@ ipcMain.on("asynchronous", (event, data) => {
   }
 });
 
-ipcMain.on("asynchronousjob", (event, data) => {
+ipcMain.on("asynchronous-job", (event, data) => {
   switch (data.key) {
-  case "jobupload":
+  case "job-upload":
     var client = new Client(data.options);
 
     var worker = fork(path.resolve("./node/s3store/lib/uploadworker.js"), [], {
@@ -163,7 +160,7 @@ ipcMain.on("asynchronousjob", (event, data) => {
       key: "start",
       data: data
     });
-    worker.on("message", msg => {
+    worker.on("message", function (msg) {
       if (data.params.isDebug) {
         event.sender.send(data.job, {
           job: data.job,
@@ -226,6 +223,22 @@ ipcMain.on("asynchronousjob", (event, data) => {
           message: msg
         });
       }
+    });
+    worker.on("exit", function (code) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'exit',
+        exit: {
+          code: code
+        }
+      });
+    });
+    worker.on("error", function (err) {
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'error',
+        error: err
+      });
     });
 
     // var uploader = client.uploadFile(data.params);

@@ -1,4 +1,5 @@
 var gulp = require("gulp"),
+  run = require('gulp-run'),
   plugins = require("gulp-load-plugins")({
     lazy: false
   }),
@@ -145,6 +146,29 @@ gulp.task("copy-fonts", function () {
     .pipe(gulp.dest(DIST + "/fonts"));
 });
 
+gulp.task("copy-bin", function () {
+  var execNode;
+  switch (process.platform) {
+  case "darwin":
+    execNode = path.resolve("./vendor/bin/node");
+    break;
+
+  case "linux":
+    execNode = path.resolve("./vendor/bin/node.bin");
+    break;
+
+  case "win32":
+    execNode = path.resolve("./vendor/bin/node.exe");
+    break;
+  }
+
+  gulp
+    .src([
+      execNode
+    ])
+    .pipe(gulp.dest(DIST + "/node_modules/.bin"));
+});
+
 gulp.task("copy-icons", function () {
   gulp.src("./app/icons/**").pipe(gulp.dest(DIST + "/icons"));
 });
@@ -207,7 +231,10 @@ gulp.task("gen-package", function () {
 
   console.log(`--generating ${DIST}/package.json`);
   fs.writeFileSync(DIST + "/package.json", JSON.stringify(pkg, " ", 2));
-  exec(`cd ${DIST} && cnpm i`);
+
+  run(`cd ${DIST} && cnpm i`).exec(function () {
+    console.log("--done");
+  });
 });
 
 gulp.task("watch", function () {

@@ -11,7 +11,7 @@ ZIP=node ../zip.js
 
 ELECTRON_MIRROR=http://npm.taobao.org/mirrors/electron/
 ELECTRON_VERSION=1.8.2
-BUILD=ELECTRON_MIRROR=$(ELECTRON_MIRROR) $(PKGER) ./dist $(NAME) --asar --overwrite --out=build --electron-version $(ELECTRON_VERSION)
+BUILD=ELECTRON_MIRROR=$(ELECTRON_MIRROR) $(PKGER) ./dist $(NAME) --overwrite --out=build --electron-version $(ELECTRON_VERSION)
 
 
 i:
@@ -35,8 +35,6 @@ build:
 win64:
 	rm -f ./dist/node/bin/node.bin ./dist/node/bin/node
 	$(BUILD) --platform=win32 --arch=x64 --icon=$(CUSTOM)/icon.ico
-	cp -rf $(NODEBIN) build/$(NAME)-win32-x64/resources
-	cp -rf $(S3STORE) build/$(NAME)-win32-x64/resources
 	cp -rf $(CUSTOM) build/$(NAME)-win32-x64/resources
 	#rm -rf releases/$(VERSION)/$(NAME)-win32-x64.zip && mkdir -p releases/$(VERSION)
 	#cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-win32-x64.zip $(NAME)-win32-x64/
@@ -61,8 +59,6 @@ linux32:
 mac:
 	rm -rf ./dist/node/bin/node.exe ./dist/node/bin/node.bin ./dist/node/s3store/node_modules
 	$(BUILD) --platform=darwin --arch=x64 --icon=$(CUSTOM)/icon.icns
-	cp -rf $(NODEBIN) build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
-	cp -rf $(S3STORE) build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
 	cp -rf $(CUSTOM) build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
 	# rm -rf releases/$(VERSION)/$(NAME)-darwin-x64.zip && mkdir -p releases/$(VERSION)
 	# cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-darwin-x64.zip $(NAME)-darwin-x64/

@@ -47,26 +47,21 @@ try {
 let win;
 let execNode;
 
-let subnode = "";
-if (process.env.NODE_ENV == "development") {
-  subnode = "node";
-}
-
 switch (process.platform) {
 case "darwin":
   app.dock.setIcon(
     custom.logo_png || path.join(root, "icons", "icon.png")
   );
 
-  execNode = path.join(root, subnode, "bin", "node");
+  execNode = path.join(root, "app", "node", "bin", "node");
   break;
 
 case "linux":
-  execNode = path.join(root, subnode, "bin", "node.bin");
+  execNode = path.join(root, "app", "node", "bin", "node.bin");
   break;
 
 case "win32":
-  execNode = path.join(root, subnode, "bin", "node.exe");
+  execNode = path.join(root, "app", "node", "bin", "node.exe");
   break;
 }
 
@@ -158,7 +153,7 @@ ipcMain.on("asynchronous", (event, data) => {
 ipcMain.on("asynchronous-job", (event, data) => {
   switch (data.key) {
   case "job-upload":
-    var execScript = path.join(root, subnode, "s3store", "lib", "upload-worker.js");
+    var execScript = path.join(root, "app", "node", "s3store", "lib", "upload-worker.js");
 
     event.sender.send(data.job, {
       job: data.job,

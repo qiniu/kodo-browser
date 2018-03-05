@@ -303,7 +303,7 @@ ipcMain.on("asynchronous-job", (event, data) => {
 
     break;
 
-  case "jobdownload":
+  case "job-download":
     var client = new Client(data.options);
 
     var downloader = client.downloadFile(data.params);

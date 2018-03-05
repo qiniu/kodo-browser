@@ -1,4 +1,5 @@
 var gulp = require("gulp"),
+  run = require("gulp-run"),
   plugins = require("gulp-load-plugins")({
     lazy: false
   }),
@@ -150,7 +151,9 @@ gulp.task("copy-icons", function () {
 });
 
 gulp.task("copy-node", function () {
-  gulp.src(["./node/**/*"]).pipe(gulp.dest(DIST + "/node"));
+  gulp
+    .src(["./node/**/*", "!./node/**/node_modules/**/*"])
+    .pipe(gulp.dest(DIST + "/node"));
 });
 
 gulp.task("copy-docs", function () {
@@ -191,13 +194,16 @@ gulp.task("gen-package", function () {
 
   console.log(`--generating ${DIST}/package.json`);
   fs.writeFileSync(DIST + "/package.json", JSON.stringify(pkg, " ", 2));
-  exec(`cd ${DIST} && cnpm i`);
+
+  run(`cd ${DIST} && cnpm i`).exec(function () {
+    console.log("--done");
+  });
 });
 
 gulp.task("watch", function () {
   gulp.watch(
     [
-      "!" + DIST + "/**/node_modules/**",
+      "!" + DIST + "/**/node_modules/**/*",
       DIST + "/**/*.html",
       DIST + "/**/*.js",
       DIST + "/**/*.css"
@@ -230,7 +236,7 @@ gulp.task("watch", function () {
 
   gulp.watch(["./static/**"], ["copy-static"]);
 
-  gulp.watch(["./node/**/*"], ["copy-node"]);
+  gulp.watch(["./node/**/*", "!./node/**/node_modules/**/*"], ["copy-node"]);
 });
 
 gulp.task("build", [

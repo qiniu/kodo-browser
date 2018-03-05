@@ -2,7 +2,8 @@
 VERSION=1.5.0
 NAME=s3-browser
 CUSTOM=./custom
-NODE=./vendor/bin
+NODEBIN=./dist/node/bin
+S3STORE=./node/s3store
 
 GULP=node ./node_modules/gulp/bin/gulp.js
 PKGER=node node_modules/electron-packager/cli.js
@@ -34,35 +35,37 @@ build:
 win64:
 	rm -f ./dist/node/bin/node.bin ./dist/node/bin/node
 	$(BUILD) --platform=win32 --arch=x64 --icon=$(CUSTOM)/icon.ico
-	cp -f $(NODE) build/$(NAME)-win32-x64/resources/
+	cp -rf $(NODEBIN) build/$(NAME)-win32-x64/resources
+	cp -rf $(S3STORE) build/$(NAME)-win32-x64/resources
 	cp -rf $(CUSTOM) build/$(NAME)-win32-x64/resources
-	rm -rf releases/$(VERSION)/$(NAME)-win32-x64.zip && mkdir -p releases/$(VERSION)
-	cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-win32-x64.zip $(NAME)-win32-x64/
+	#rm -rf releases/$(VERSION)/$(NAME)-win32-x64.zip && mkdir -p releases/$(VERSION)
+	#cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-win32-x64.zip $(NAME)-win32-x64/
 win32:
 	rm -f ./dist/node/bin/node.bin ./dist/node/bin/node
 	$(BUILD) --platform=win32 --arch=ia32 --icon=$(CUSTOM)/icon.ico
 	cp -rf $(CUSTOM) build/$(NAME)-win32-ia32/resources
-	rm -rf releases/$(VERSION)/$(NAME)-win32-ia32.zip && mkdir -p releases/$(VERSION)
-	cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-win32-ia32.zip $(NAME)-win32-ia32/
+	# rm -rf releases/$(VERSION)/$(NAME)-win32-ia32.zip && mkdir -p releases/$(VERSION)
+	# cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-win32-ia32.zip $(NAME)-win32-ia32/
 linux64:
 	rm -f ./dist/node/bin/node.exe ./dist/node/bin/node
 	$(BUILD) --platform=linux --arch=x64
 	cp -rf $(CUSTOM) build/$(NAME)-linux-x64/resources
-	rm -rf releases/$(VERSION)/$(NAME)-linux-x64.zip && mkdir -p releases/$(VERSION)
-	cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-linux-x64.zip $(NAME)-linux-x64/
+	# rm -rf releases/$(VERSION)/$(NAME)-linux-x64.zip && mkdir -p releases/$(VERSION)
+	# cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-linux-x64.zip $(NAME)-linux-x64/
 linux32:
 	rm -f ./dist/node/bin/node.exe ./dist/node/bin/node
 	$(BUILD) --platform=linux --arch=ia32
 	cp -rf $(CUSTOM) build/$(NAME)-linux-ia32/resources
-	rm -rf releases/$(VERSION)/$(NAME)-linux-ia32.zip && mkdir -p releases/$(VERSION)
-	cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-linux-ia32.zip $(NAME)-linux-ia32/
+	# rm -rf releases/$(VERSION)/$(NAME)-linux-ia32.zip && mkdir -p releases/$(VERSION)
+	# cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-linux-ia32.zip $(NAME)-linux-ia32/
 mac:
-	rm -f ./dist/node/bin/node.exe ./dist/node/bin/node.bin
+	rm -rf ./dist/node/bin/node.exe ./dist/node/bin/node.bin ./dist/node/s3store/node_modules
 	$(BUILD) --platform=darwin --arch=x64 --icon=$(CUSTOM)/icon.icns
-	cp -rf $(NODE)/node build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
+	cp -rf $(NODEBIN) build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
+	cp -rf $(S3STORE) build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
 	cp -rf $(CUSTOM) build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
-	rm -rf releases/$(VERSION)/$(NAME)-darwin-x64.zip && mkdir -p releases/$(VERSION)
-	cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-darwin-x64.zip $(NAME)-darwin-x64/
+	# rm -rf releases/$(VERSION)/$(NAME)-darwin-x64.zip && mkdir -p releases/$(VERSION)
+	# cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-darwin-x64.zip $(NAME)-darwin-x64/
 dmg:
 	rm build/$(NAME)-darwin-x64/LICENSE* build/$(NAME)-darwin-x64/version || continue
 	ln -s /Applications/ build/$(NAME)-darwin-x64/Applications || continue

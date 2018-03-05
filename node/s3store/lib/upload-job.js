@@ -180,10 +180,11 @@ UploadJob.prototype.startUpload = function (event, data) {
     break;
 
   case 'debug':
-    console.warn("debug", data);
+    console.log("Debug", data);
+    break;
 
   default:
-    console.warn("unsupported key", data);
+    console.warn("Unknown", data);
   }
 };
 

@@ -34,9 +34,6 @@ for (var port of PORTS) {
 
 ///*****************************************
 let root = path.dirname(__dirname);
-if (fs.existsSync(path.join(root, "app.asar"))) {
-  root = path.join(root, "app.asar");
-}
 
 var custom = {};
 try {
@@ -50,21 +47,26 @@ try {
 let win;
 let execNode;
 
+let subnode = "";
+if (process.env.NODE_ENV == "development") {
+  subnode = "node";
+}
+
 switch (process.platform) {
 case "darwin":
   app.dock.setIcon(
     custom.logo_png || path.join(root, "icons", "icon.png")
   );
 
-  execNode = path.join(root, "node", "bin", "node");
+  execNode = path.join(root, subnode, "bin", "node");
   break;
 
 case "linux":
-  execNode = path.join(root, "node", "bin", "node.bin");
+  execNode = path.join(root, subnode, "bin", "node.bin");
   break;
 
 case "win32":
-  execNode = path.join(root, "node", "bin", "node.exe");
+  execNode = path.join(root, subnode, "bin", "node.exe");
   break;
 }
 
@@ -156,7 +158,7 @@ ipcMain.on("asynchronous", (event, data) => {
 ipcMain.on("asynchronous-job", (event, data) => {
   switch (data.key) {
   case "job-upload":
-    var execScript = path.join(root, "node", "s3store", "lib", "upload-worker.js");
+    var execScript = path.join(root, subnode, "s3store", "lib", "upload-worker.js");
 
     event.sender.send(data.job, {
       job: data.job,

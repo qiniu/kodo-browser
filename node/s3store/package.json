@@ -1,13 +1,13 @@
 {
   "name": "s3store",
   "version": "1.0.0",
-  "scripts": {
-    "test": "NODE_ENV=test mocha test",
-    "testwin": "set NODE_ENV=test&&mocha test"
-  },
+  "scripts": {},
   "main": "lib/index.js",
-  "devDependencies": {
-    "mocha": "^3.4.2",
-    "should": "^11.2.1"
+  "dependencies": {
+    "aws-sdk": "^2.205.0",
+    "electron": "^1.8.2",
+    "events": "^2.0.0",
+    "mime": "^2.2.0",
+    "pend": "^1.2.0"
   }
 }

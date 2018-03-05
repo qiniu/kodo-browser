@@ -1,5 +1,5 @@
 var gulp = require("gulp"),
-  run = require('gulp-run'),
+  run = require("gulp-run"),
   plugins = require("gulp-load-plugins")({
     lazy: false
   }),
@@ -146,51 +146,14 @@ gulp.task("copy-fonts", function () {
     .pipe(gulp.dest(DIST + "/fonts"));
 });
 
-gulp.task("copy-bin", function () {
-  var execNode;
-  switch (process.platform) {
-  case "darwin":
-    execNode = path.resolve("./vendor/bin/node");
-    break;
-
-  case "linux":
-    execNode = path.resolve("./vendor/bin/node.bin");
-    break;
-
-  case "win32":
-    execNode = path.resolve("./vendor/bin/node.exe");
-    break;
-  }
-
-  gulp
-    .src([
-      execNode
-    ])
-    .pipe(gulp.dest(DIST + "/node/bin"));
-});
-
 gulp.task("copy-icons", function () {
   gulp.src("./app/icons/**").pipe(gulp.dest(DIST + "/icons"));
 });
 
-gulp.task("copy-bin", function () {
-  switch (process.platform) {
-  case "linux":
-    gulp.src(["./vendor/bin/node.bin"]).pipe(gulp.dest(DIST + "/node/bin"));
-    break;
-
-  case "darwin":
-    gulp.src(["./vendor/bin/node"]).pipe(gulp.dest(DIST + "/node/bin"));
-    break;
-
-  case "win32":
-    gulp.src(["./vendor/bin/node.exe"]).pipe(gulp.dest(DIST + "/node/bin"));
-
-  }
-});
-
 gulp.task("copy-node", function () {
-  gulp.src(["./node/**/*"]).pipe(gulp.dest(DIST + "/node"));
+  gulp
+    .src(["./node/**/*", "!./node/**/node_modules/**/*"])
+    .pipe(gulp.dest(DIST + "/node"));
 });
 
 gulp.task("copy-docs", function () {
@@ -240,7 +203,7 @@ gulp.task("gen-package", function () {
 gulp.task("watch", function () {
   gulp.watch(
     [
-      "!" + DIST + "/**/node_modules/**",
+      "!" + DIST + "/**/node_modules/**/*",
       DIST + "/**/*.html",
       DIST + "/**/*.js",
       DIST + "/**/*.css"
@@ -273,7 +236,7 @@ gulp.task("watch", function () {
 
   gulp.watch(["./static/**"], ["copy-static"]);
 
-  gulp.watch(["./node/**/*"], ["copy-node"]);
+  gulp.watch(["./node/**/*", "!./node/**/node_modules/**/*"], ["copy-node"]);
 });
 
 gulp.task("build", [
@@ -282,7 +245,6 @@ gulp.task("build", [
   "templates",
   "libJS",
   "libCSS",
-  "copy-bin",
   "copy-node",
   "copy-fonts",
   "copy-icons",

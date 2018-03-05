@@ -19,6 +19,15 @@ angular.module("web").factory("settingsSvs", [
         }
       },
 
+      resumeUploadSize: {
+        get: function () {
+          return parseInt(localStorage.getItem("resumeUploadSize") || 8);
+        },
+        set: function (v) {
+          return localStorage.setItem("resumeUploadSize", v);
+        }
+      },
+
       resumeUploadThreshold: {
         get: function () {
           return parseInt(localStorage.getItem("resumeUploadThreshold") || 100);
@@ -34,6 +43,15 @@ angular.module("web").factory("settingsSvs", [
         },
         set: function (v) {
           return localStorage.setItem("resumeDownload", v);
+        }
+      },
+
+      resumeDownloadSize: {
+        get: function () {
+          return parseInt(localStorage.getItem("resumeDownloadSize") || 8);
+        },
+        set: function (v) {
+          return localStorage.setItem("resumeDownloadSize", v);
         }
       },
 

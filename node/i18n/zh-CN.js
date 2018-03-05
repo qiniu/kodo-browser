@@ -161,11 +161,13 @@ module.exports = {
 
   //settings
   "settings.WhetherResumeUpload": "是否启用断点上传",
-  "settings.WhetherResumeUpload.msg": "当文件大于设置的大小后使用断点上传以提高传输速度",
-  "settings.ResumeUploadThreshold": "断点上传文件大小",
+  "settings.WhetherResumeUpload.msg": "当文件大于设置值后使用断点上传以提高传输速度",
+  "settings.ResumeUploadThreshold": "断点上传文件阀值",
+  "settings.ResumeUploadSize": "断点上传文件大小",
   "settings.WhetherResumeDownload": "是否启用断点下载",
-  "settings.WhetherResumeDownload.msg": "当文件大于设置的大小后使用断点下载以提高传输速度",
-  "settings.ResumeDownloadThreshold": "断点下载文件大小",
+  "settings.WhetherResumeDownload.msg": "当文件大于设置值后使用断点下载以提高传输速度",
+  "settings.ResumeDownloadThreshold": "断点下载文件阀值",
+  "settings.ResumeDownloadSize": "断点下载文件大小",
   "settings.maxUploadConcurrency": "最大上传任务数",
   "settings.maxDownloadConcurrency": "最大下载任务数",
   "settings.WhetherShowThumbnail": "是否显示图片缩略",

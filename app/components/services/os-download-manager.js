@@ -71,6 +71,7 @@ angular.module("web").factory("osDownloadManager", [
       opt.region = region;
       opt.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
       opt.mulipartDownloadThreshold = settingsSvs.resumeDownloadThreshold.get();
+      opt.mulipartDownloadSize = settingsSvs.resumeDownloadSize.get();
 
       var store = new S3Store({
         credential: {

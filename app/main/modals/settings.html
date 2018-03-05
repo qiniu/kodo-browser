@@ -42,6 +42,15 @@
 
       <div class="form-group">
         <label class="col-sm-4 control-label">
+          {{'settings.ResumeUploadSize'|translate}}:
+        </label>
+        <div class="col-sm-7">
+          <input type="number" name="resumeUploadSize" ng-model="set.resumeUploadSize" ng-change="setChange(form1,'resumeUploadSize')" max="100" min="8" required class=" form-control" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label">
           <!-- 是否启用断点续下载: true -->
           {{'settings.WhetherResumeDownload'|translate}}:
         </label>
@@ -62,6 +71,15 @@
         </label>
         <div class="col-sm-7">
           <input type="number" name="resumeDownloadThreshold" ng-model="set.resumeDownloadThreshold" ng-change="setChange(form1,'resumeDownloadThreshold')" max="1000" min="10" required class=" form-control" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label">
+          {{'settings.ResumeDownloadSize'|translate}}:
+        </label>
+        <div class="col-sm-7">
+          <input type="number" name="resumeDownloadSize" ng-model="set.resumeDownloadSize" ng-change="setChange(form1,'resumeDownloadSize')" max="100" min="8" required class=" form-control" />
         </div>
       </div>
 

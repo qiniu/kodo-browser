@@ -35,6 +35,11 @@ for (var port of PORTS) {
 ///*****************************************
 let root = path.dirname(__dirname);
 
+let appRoot = path.dirname(__dirname);
+if (process.env.NODE_ENV != "development") {
+  appRoot = path.join(appRoot, "app");
+}
+
 var custom = {};
 try {
   custom = require(path.join(root, "custom"));
@@ -53,15 +58,15 @@ case "darwin":
     custom.logo_png || path.join(root, "icons", "icon.png")
   );
 
-  execNode = path.join(root, "app", "node", "bin", "node");
+  execNode = path.join(appRoot, "node", "bin", "node");
   break;
 
 case "linux":
-  execNode = path.join(root, "app", "node", "bin", "node.bin");
+  execNode = path.join(appRoot, "node", "bin", "node.bin");
   break;
 
 case "win32":
-  execNode = path.join(root, "app", "node", "bin", "node.exe");
+  execNode = path.join(appRoot, "node", "bin", "node.exe");
   break;
 }
 
@@ -153,7 +158,7 @@ ipcMain.on("asynchronous", (event, data) => {
 ipcMain.on("asynchronous-job", (event, data) => {
   switch (data.key) {
   case "job-upload":
-    var execScript = path.join(root, "app", "node", "s3store", "lib", "upload-worker.js");
+    var execScript = path.join(appRoot, "node", "s3store", "lib", "upload-worker.js");
 
     event.sender.send(data.job, {
       job: data.job,

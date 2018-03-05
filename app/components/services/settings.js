@@ -1,6 +1,15 @@
 angular.module("web").factory("settingsSvs", [
   function () {
     return {
+      isDebug: {
+        get: function () {
+          return parseInt(localStorage.getItem("isDebug") || 0);
+        },
+        set: function (v) {
+          return localStorage.setItem("isDebug", v);
+        }
+      },
+
       autoUpgrade: {
         get: function () {
           return parseInt(localStorage.getItem("autoUpgrade") || 0);

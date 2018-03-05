@@ -33,8 +33,8 @@ angular.module("web").factory("osDownloadManager", [
     return {
       init: init,
       createDownloadJobs: createDownloadJobs,
-      checkStart: checkStart,
-      saveProg: saveProg,
+      trySchedJob: trySchedJob,
+      trySaveProg: trySaveProg,
 
       stopCreatingJobs: function () {
         stopCreatingFlag = true;
@@ -45,11 +45,11 @@ angular.module("web").factory("osDownloadManager", [
       $scope = scope;
       $scope.lists.downloadJobList = [];
 
-      var authInfo = AuthInfo.get();
+      var auth = AuthInfo.get();
       var progs = tryLoadProg();
 
-      angular.forEach(progs, function (n) {
-        var job = createJob(authInfo, n);
+      angular.forEach(progs, function (prog) {
+        var job = createJob(auth, prog);
         if (job.status == "waiting" || job.status == "running") {
           job.stop();
         }
@@ -65,13 +65,14 @@ angular.module("web").factory("osDownloadManager", [
      * @param  opt.to   {name, path}
      * @return job  { start(), stop(), status, progress }
      */
-    function createJob(auth, opt) {
-      var region = opt.region || auth.region || "cn-east-1";
+    function createJob(auth, options) {
+      var region = options.region || auth.region || "cn-east-1";
 
-      opt.region = region;
-      opt.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
-      opt.mulipartDownloadThreshold = settingsSvs.resumeDownloadThreshold.get();
-      opt.mulipartDownloadSize = settingsSvs.resumeDownloadSize.get();
+      options.region = region;
+      options.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
+      options.mulipartDownloadThreshold = settingsSvs.resumeDownloadThreshold.get();
+      options.mulipartDownloadSize = settingsSvs.resumeDownloadSize.get();
+      options.isDebug = (settingsSvs.isDebug.get() == 1);
 
       var store = new S3Store({
         credential: {
@@ -80,7 +81,7 @@ angular.module("web").factory("osDownloadManager", [
         },
         endpoint: osClient.getS3Endpoint(
           region,
-          opt.from.bucket,
+          options.from.bucket,
           auth.s3apitpl || auth.eptpl
         ),
         region: region,
@@ -90,7 +91,7 @@ angular.module("web").factory("osDownloadManager", [
         }
       });
 
-      return store.createDownloadJob(opt);
+      return store.createDownloadJob(options);
     }
 
     /**
@@ -239,58 +240,69 @@ angular.module("web").factory("osDownloadManager", [
       $scope.lists.downloadJobList.push(job);
       $scope.calcTotalProg();
       safeApply($scope);
-      checkStart();
+      trySchedJob();
 
       //save
-      saveProg();
+      trySaveProg();
 
       job.on("partcomplete", function (prog) {
         safeApply($scope);
-        saveProg($scope);
+        trySaveProg($scope);
       });
       job.on("statuschange", function (status) {
         if (status == "stopped") {
           concurrency--;
-          checkStart();
+          trySchedJob();
         }
 
         safeApply($scope);
-        saveProg();
+        trySaveProg();
       });
       job.on("speedChange", function () {
         safeApply($scope);
       });
       job.on("complete", function () {
         concurrency--;
-        checkStart();
+        trySchedJob();
       });
       job.on("error", function (err) {
-        console.error(err);
+        console.error(`download s3://${job.from.bucket}/${job.from.key} error: ${err.message}`);
+
         concurrency--;
-        checkStart();
+        trySchedJob();
       });
     }
 
     //流控, 同时只能有 n 个下载任务.
-    function checkStart() {
+    function trySchedJob() {
       var maxConcurrency = settingsSvs.maxDownloadJobCount.get();
+      var isDebug = (settingsSvs.isDebug.get() == 1);
 
       concurrency = Math.max(0, concurrency);
+      if (isDebug) {
+        console.log(`[JOB] download max: ${maxConcurrency}, cur: ${concurrency}, jobs: ${$scope.lists.downloadJobList.length}`)
+      }
+
       if (concurrency < maxConcurrency) {
-        var arr = $scope.lists.downloadJobList;
-        for (var i = 0; i < arr.length; i++) {
+        var jobs = $scope.lists.downloadJobList;
+        for (var i = 0; i < jobs.length; i++) {
           if (concurrency >= maxConcurrency) return;
 
-          var n = arr[i];
-          if (n.status == "waiting") {
-            n.start();
+          var job = jobs[i];
+          if (isDebug) {
+            console.log(`[JOB] sched ${job.status} => ${JSON.stringify(job._config)}`);
+          }
+
+          if (job.status == "waiting") {
             concurrency++;
+
+            job.start();
           }
         }
       }
     }
 
-    function saveProg() {
+    function trySaveProg() {
       DelayDone.delayRun(
         "save_download_prog",
         1000,

@@ -1,3 +1,7 @@
+import {
+  settings
+} from "cluster";
+
 angular.module("web").factory("osUploadManager", [
   "$q",
   "$state",
@@ -24,8 +28,7 @@ angular.module("web").factory("osUploadManager", [
     var fs = require("fs"),
       path = require("path"),
       os = require("os"),
-      S3Store = require("./node/s3store"),
-      Pend = require('pend');
+      S3Store = require("./node/s3store");
 
     var $scope;
     var concurrency = 0;
@@ -34,8 +37,8 @@ angular.module("web").factory("osUploadManager", [
     return {
       init: init,
       createUploadJobs: createUploadJobs,
-      checkStart: checkStart,
-      saveProg: saveProg,
+      trySchedJob: trySchedJob,
+      trySaveProg: trySaveProg,
 
       stopCreatingJobs: function () {
         stopCreatingFlag = true;
@@ -46,11 +49,11 @@ angular.module("web").factory("osUploadManager", [
       $scope = scope;
       $scope.lists.uploadJobList = [];
 
-      var authInfo = AuthInfo.get();
+      var auth = AuthInfo.get();
       var progs = tryLoadProg();
 
       angular.forEach(progs, function (prog) {
-        var job = createJob(authInfo, prog);
+        var job = createJob(auth, prog);
         if (job.status == "waiting" || job.status == "running") {
           job.stop();
         }
@@ -62,34 +65,35 @@ angular.module("web").factory("osUploadManager", [
     /**
       * 创建单个job
       * @param  auth { id, secret}
-      * @param  opt   { region, from, to, progress, checkPoints, ...}
-      * @param  opt.from {name, path}
-      * @param  opt.to   {bucket, key}
+      * @param  options   { region, from, to, progress, checkPoints, ...}
+      * @param  options.from {name, path}
+      * @param  options.to   {bucket, key}
       * @return job  { start(), stop(), status, progress }
                 job.events: statuschange, progress
       */
-    function createJob(auth, opt) {
-      var region = opt.region || auth.region || "cn-east-1";
+    function createJob(auth, options) {
+      var region = options.region || auth.region || "cn-east-1";
 
-      opt.region = region;
-      opt.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
-      opt.mulipartUploadThreshold = settingsSvs.resumeUploadThreshold.get();
-      opt.mulipartUploadSize = settingsSvs.resumeUploadSize.get();
+      options.region = region;
+      options.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
+      options.mulipartUploadThreshold = settingsSvs.resumeUploadThreshold.get();
+      options.mulipartUploadSize = settingsSvs.resumeUploadSize.get();
+      options.isDebug = (settingsSvs.isDebug.get() == 1);
 
       var store = new S3Store({
         credential: {
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
         },
-        endpoint: osClient.getS3Endpoint(region, opt.to.bucket, auth.s3apitpl || auth.eptpl),
-        region: region,
+        endpoint: osClient.getS3Endpoint(region, options.to.bucket, auth.s3apitpl || auth.eptpl),
+        region: options.region,
         httpOptions: {
           connectTimeout: 3000, // 3s
           timeout: 3600000 // 1h
         }
       });
 
-      return store.createUploadJob(opt);
+      return store.createUploadJob(options);
     }
 
     /**
@@ -228,56 +232,69 @@ angular.module("web").factory("osUploadManager", [
 
     function addEvents(job) {
       $scope.lists.uploadJobList.push(job);
+      $scope.calcTotalProg();
       safeApply($scope);
-      checkStart();
+      trySchedJob();
 
       //save
-      saveProg();
+      trySaveProg();
 
       job.on("partcomplete", function (prog) {
         safeApply($scope);
-        saveProg();
+        trySaveProg();
       });
       job.on("statuschange", function (status) {
         if (status == "stopped") {
           concurrency--;
-          $timeout(checkStart, 100);
+          $timeout(trySchedJob, 500);
         }
 
         safeApply($scope);
-        saveProg();
+        trySaveProg();
       });
       job.on("speedChange", function () {
         safeApply($scope);
       });
       job.on("complete", function () {
         concurrency--;
-        checkStart();
+        trySchedJob();
+
         checkNeedRefreshFileList(job.to.bucket, job.to.key);
       });
       job.on("error", function (err) {
-        console.error(err);
+        console.error(`upload s3://${job.to.bucket}/${job.to.key} error: ${err.message}`);
 
         concurrency--;
-        checkStart();
+        trySchedJob();
       });
     }
 
-    function checkStart() {
+    function trySchedJob() {
       var maxConcurrency = settingsSvs.maxUploadJobCount.get();
+      var isDebug = (settingsSvs.isDebug.get() == 1);
 
       concurrency = Math.max(0, concurrency);
+      if (isDebug) {
+        console.log(`[JOB] upload max: ${maxConcurrency}, cur: ${concurrency}, jobs: ${$scope.lists.uploadJobList.length}`)
+      }
+
       if (concurrency < maxConcurrency) {
         var jobs = $scope.lists.uploadJobList;
+
         for (var i = 0; i < jobs.length; i++) {
           if (concurrency >= maxConcurrency) {
             return;
           }
 
-          var n = jobs[i];
-          if (n.status == "waiting") {
-            n.start();
+          var job = jobs[i];
+          if (isDebug) {
+            console.log(`[JOB] sched ${job.status} => ${JSON.stringify(job._config)}`);
+          }
+
+          if (job.status == "waiting") {
             concurrency++;
+
+            job.start();
           }
         }
       }
@@ -297,7 +314,7 @@ angular.module("web").factory("osUploadManager", [
     /**
      * 保存进度
      */
-    function saveProg() {
+    function trySaveProg() {
       DelayDone.delayRun(
         "save_upload_prog",
         1000,
@@ -323,7 +340,7 @@ angular.module("web").factory("osUploadManager", [
             });
           });
 
-          fs.writeFileSync(getUpProgFilePath(), JSON.stringify(t));
+          fs.writeFileSync(getProgFilePath(), JSON.stringify(t));
           $scope.calcTotalProg();
         },
         20
@@ -335,7 +352,7 @@ angular.module("web").factory("osUploadManager", [
      */
     function tryLoadProg() {
       try {
-        var data = fs.readFileSync(getUpProgFilePath());
+        var data = fs.readFileSync(getProgFilePath());
 
         return JSON.parse(data ? data.toString() : "[]");
       } catch (e) {}
@@ -343,7 +360,7 @@ angular.module("web").factory("osUploadManager", [
       return [];
     }
 
-    function getUpProgFilePath() {
+    function getProgFilePath() {
       var folder = path.join(os.homedir(), ".s3-browser");
       if (!fs.existsSync(folder)) {
         fs.mkdirSync(folder);

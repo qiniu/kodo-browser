@@ -17,6 +17,32 @@
 
       <div class="form-group">
         <label class="col-sm-4 control-label">
+          <!-- 最大上传任务数: -->
+          {{'settings.maxUploadConcurrency'|translate}}:
+        </label>
+        <div class="col-sm-7">
+          <input type="number" name="maxUploadJobCount" ng-model="set.maxUploadJobCount" ng-change="setChange(form1,'maxUploadJobCount')" max="20" min="1" required class=" form-control" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label">
+          <!-- 最大下载任务数: -->
+          {{'settings.maxDownloadConcurrency'|translate}}:
+        </label>
+        <div class="col-sm-7">
+          <input type="number" name="maxDownloadJobCount" ng-model="set.maxDownloadJobCount" ng-change="setChange(form1,'maxDownloadJobCount')" max="20" min="1" required class=" form-control" />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>
+        <h5 class="text-primary">{{'settings.WhetherResumeUpload'|translate}}</h5>
+      </legend>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label">
           <!-- 是否启用断点续上传: true -->
           {{'settings.WhetherResumeUpload'|translate}}:
         </label>
@@ -48,6 +74,12 @@
           <input type="number" name="resumeUploadSize" ng-model="set.resumeUploadSize" ng-change="setChange(form1,'resumeUploadSize')" max="100" min="8" required class=" form-control" />
         </div>
       </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>
+        <h5 class="text-primary">{{'settings.WhetherResumeDownload'|translate}}</h5>
+      </legend>
 
       <div class="form-group">
         <label class="col-sm-4 control-label">
@@ -82,32 +114,28 @@
           <input type="number" name="resumeDownloadSize" ng-model="set.resumeDownloadSize" ng-change="setChange(form1,'resumeDownloadSize')" max="100" min="8" required class=" form-control" />
         </div>
       </div>
-
-      <div class="form-group">
-        <label class="col-sm-4 control-label">
-          <!-- 最大上传任务数: -->
-          {{'settings.maxUploadConcurrency'|translate}}:
-        </label>
-        <div class="col-sm-7">
-          <input type="number" name="maxUploadJobCount" ng-model="set.maxUploadJobCount" ng-change="setChange(form1,'maxUploadJobCount')" max="20" min="1" required class=" form-control" />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="col-sm-4 control-label">
-          <!-- 最大下载任务数: -->
-          {{'settings.maxDownloadConcurrency'|translate}}:
-        </label>
-        <div class="col-sm-7">
-          <input type="number" name="maxDownloadJobCount" ng-model="set.maxDownloadJobCount" ng-change="setChange(form1,'maxDownloadJobCount')" max="20" min="1" required class=" form-control" />
-        </div>
-      </div>
     </fieldset>
 
     <fieldset>
       <legend>
         <h5 class="text-primary">{{'settings.subtitle.sys'|translate}}</h5>
       </legend>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label">
+          <!-- 调试日志: -->
+          {{'settings.isDebug'|translate}}:
+        </label>
+        <div class="col-sm-7">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="isDebug" ng-model="set.isDebug" ng-change="setChange(form1,'isDebug')" ng-true-value="1"
+                ng-false-value="0" />
+              ({{'settings.isDebug.msg'|translate}})
+            </label>
+          </div>
+        </div>
+      </div>
 
       <div class="form-group">
         <label class="col-sm-4 control-label">

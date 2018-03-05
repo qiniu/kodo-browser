@@ -77,7 +77,9 @@ Client.prototype.uploadFile = function (params) {
 
   params.s3Params.Key = encodeSpecialCharacters(params.s3Params.Key);
 
-  let s3params = extend({}, params.s3Params);
+  let s3params = {};
+  Object.assign(s3params, params.s3Params);
+
   if (s3params.ContentType === undefined) {
     let defaultContentType = params.defaultContentType || 'application/octet-stream';
     s3params.ContentType = mime.getType(localFile) || defaultContentType;
@@ -150,11 +152,7 @@ Client.prototype.uploadFile = function (params) {
         startMultipartUpload();
       }
     } else {
-      console.time(`Elapsed put s3://${s3params.Bucket}/${s3params.Key}`);
-
       doWithRetry(tryPuttingObject, self.s3RetryCount, self.s3RetryDelay, function (err, data) {
-        console.timeEnd(`Elapsed put s3://${s3params.Bucket}/${s3params.Key}`);
-
         if (isAborted) return;
 
         if (err) {
@@ -168,8 +166,6 @@ Client.prototype.uploadFile = function (params) {
   }
 
   function startMultipartUpload() {
-    console.log(`Multiparting  s3://${s3params.Bucket}/${s3params.Key}`);
-
     doWithRetry(tryMultipartUpload, self.s3RetryCount, self.s3RetryDelay, function (err, data) {
       if (isAborted) return;
 
@@ -183,8 +179,6 @@ Client.prototype.uploadFile = function (params) {
 
     function tryMultipartUpload(cb) {
       if (isAborted) return;
-
-      console.time(`Elapsed multipart  s3://${s3params.Bucket}/${s3params.Key}`);
 
       uploader.progressLoaded = 0;
       uploader.emit('progress', uploader);
@@ -202,16 +196,10 @@ Client.prototype.uploadFile = function (params) {
       s3uploader.on('httpUploadProgress', function (prog) {
         if (isAborted) return;
 
-        if (isDebug) {
-          console.log(`[M] => ${JSON.stringify(prog)}`);
-        }
-
         uploader.progressLoaded = prog.loaded;
         uploader.emit('progress', uploader);
       });
       s3uploader.send(function (err, data) {
-        console.timeEnd(`Elapsed multipart  s3://${s3params.Bucket}/${s3params.Key}`);
-
         if (isAborted) return;
 
         if (err) {
@@ -228,8 +216,6 @@ Client.prototype.uploadFile = function (params) {
   }
 
   function resumeMultipartUpload() {
-    console.log(`Resuming  s3://${s3params.Bucket}/${s3params.Key}`);
-
     doWithRetry(tryResumeMultipartUpload, self.s3RetryCount, self.s3RetryDelay, function (err, data) {
       if (isAborted) return;
 
@@ -292,8 +278,6 @@ Client.prototype.uploadFile = function (params) {
   }
 
   function makeMultipartUpload(uploadId, partSize) {
-    console.time(`Elapsed resume  s3://${s3params.Bucket}/${s3params.Key}`);
-
     let cursor = 0;
     let nextPartNumber = 1;
     while (cursor < localFileStat.size) {
@@ -317,8 +301,6 @@ Client.prototype.uploadFile = function (params) {
     }
 
     self.s3pend.wait(function (err) {
-      console.timeEnd(`Elapsed resume  s3://${s3params.Bucket}/${s3params.Key}`);
-
       if (isAborted) return;
 
       if (err) {
@@ -368,7 +350,9 @@ Client.prototype.uploadFile = function (params) {
         return;
       }
 
-      let params = extend({}, s3params);
+      let params = {};
+      Object.assign(params, s3params);
+
       params.UploadId = uploadId;
       params.PartNumber = part.PartNumber;
       params.ContentLength = end - start;
@@ -385,10 +369,6 @@ Client.prototype.uploadFile = function (params) {
 
         uploader.progressParts[part.PartNumber] = prog.loaded;
         uploader.progressLoaded += prog.loaded - oldLoaded;
-
-        if (isDebug) {
-          console.log(`[R] => ${JSON.stringify({loaded: uploader.progressLoaded, total: uploader.progressTotal, part: part.PartNumber, key: s3params.Key})}`);
-        }
 
         uploader.emit('progress', uploader);
       });
@@ -463,10 +443,6 @@ Client.prototype.uploadFile = function (params) {
     s3uploader.on('httpUploadProgress', function (prog) {
       if (isAborted) return;
 
-      if (isDebug) {
-        console.log(`[P] => ${JSON.stringify(prog)}`);
-      }
-
       uploader.progressLoaded = prog.loaded;
       uploader.emit('progress', uploader);
     });
@@ -509,7 +485,8 @@ Client.prototype.downloadFile = function (params) {
 
   params.s3Params.Key = encodeSpecialCharacters(params.s3Params.Key);
 
-  let s3params = extend({}, params.s3Params);
+  let s3params = {};
+  Object.assign(s3params, params.s3Params);
 
   tryOpenFile();
 
@@ -559,8 +536,6 @@ Client.prototype.downloadFile = function (params) {
         startMultipartDownload();
       }
     } else {
-      console.time(`Elpased get  s3://${s3params.Bucket}/${s3params.Key}`);
-
       doWithRetry(tryGettingObject, self.s3RetryCount, self.s3RetryDelay, function (err, data) {
         if (isAborted) return;
 
@@ -569,16 +544,12 @@ Client.prototype.downloadFile = function (params) {
           return;
         }
 
-        console.timeEnd(`Elpased get  s3://${s3params.Bucket}/${s3params.Key}`);
-
         uploader.emit('fileDownloaded', data);
       });
     }
   }
 
   function startMultipartDownload() {
-    console.log(`Multiparting  s3://${s3params.Bucket}/${s3params.Key}`);
-
     if (isAborted) return;
 
     fs.open(localFile, 'w+', function (err, fd) {
@@ -603,8 +574,6 @@ Client.prototype.downloadFile = function (params) {
   }
 
   function makeMultipartDownload(fd) {
-    console.time(`Elapsed multipart  s3://${s3params.Bucket}/${s3params.Key}`);
-
     let cursor = 0;
     let nextPartNumber = 1;
     while (cursor < uploader.progressTotal) {
@@ -630,8 +599,6 @@ Client.prototype.downloadFile = function (params) {
     }
 
     self.s3pend.wait(function (err) {
-      console.timeEnd(`Elapsed multipart  s3://${s3params.Bucket}/${s3params.Key}`);
-
       if (fd) {
         fs.closeSync(fd);
         fd = null;
@@ -683,7 +650,8 @@ Client.prototype.downloadFile = function (params) {
         return;
       }
 
-      let params = extend({}, s3params);
+      let params = {};
+      Object.assign(params, s3params);
       params.Range = `bytes=${part.Start}-${part.End}`;
 
       let s3downloader = self.s3.getObject(params);
@@ -694,10 +662,6 @@ Client.prototype.downloadFile = function (params) {
 
         uploader.progressParts[part.PartNumber] = prog.loaded;
         uploader.progressLoaded += prog.loaded - oldLoaded;
-
-        if (isDebug) {
-          console.log(`[M] => ${JSON.stringify({loaded: uploader.progressLoaded, total: uploader.progressTotal, part: part, key: s3params.Key})}`);
-        }
 
         uploader.emit('progress', uploader);
       });
@@ -743,10 +707,6 @@ Client.prototype.downloadFile = function (params) {
     let s3downloader = self.s3.getObject(s3params);
     s3downloader.on('httpDownloadProgress', function (prog) {
       if (isAborted) return;
-
-      if (isDebug) {
-        console.log(`[P] => ${JSON.stringify(prog)}`);
-      }
 
       uploader.progressLoaded = prog.loaded;
       uploader.emit('progress', uploader);
@@ -806,17 +766,6 @@ function doWithRetry(fn, tryCount, delay, cb) {
       }
     });
   }
-}
-
-function extend(target, source) {
-  for (var propName in source) {
-    target[propName] = source[propName];
-  }
-  return target;
-}
-
-function cleanETag(eTag) {
-  return eTag ? eTag.replace(/^\s*'?\s*"?\s*(.*?)\s*"?\s*'?\s*$/, "$1") : "";
 }
 
 function encodeSpecialCharacters(filename) {

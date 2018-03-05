@@ -160,21 +160,23 @@ module.exports = {
   "simplePolicy.success": "Apply policy successfully",
 
   //settings
-  "settings.WhetherResumeUpload": "Whether to use resume upload",
-  "settings.WhetherResumeUpload.msg": "Use resume upload when file size is bigger than config",
+  "settings.WhetherResumeUpload": "Resume upload",
+  "settings.WhetherResumeUpload.msg": "Enable resume upload",
   "settings.ResumeUploadThreshold": "Resume upload threshold",
   "settings.ResumeUploadSize": "Resume upload size",
-  "settings.WhetherResumeDownload": "Whether to use resume download",
-  "settings.WhetherResumeDownload.msg": "Use resume download when file size is bigger than config",
+  "settings.WhetherResumeDownload": "Resume download",
+  "settings.WhetherResumeDownload.msg": "Enable resume download",
   "settings.ResumeDownloadThreshold": "Resume download threshould",
   "settings.ResumeDownloadSize": "Resume download size",
   "settings.maxUploadConcurrency": "Upload tasks concurrent number",
   "settings.maxDownloadConcurrency": "Download tasks concurrent number",
   "settings.WhetherShowThumbnail": "Whether to show the image thumbnail",
   "settings.WhetherShowThumbnail.msg": "Displaying thumbnails in the list of files will consume a certain amount of traffic",
-  "settings.success": "Saved successfully",
+  "settings.isDebug": "Debug",
+  "settings.isDebug.msg": "Enable debug log",
   "settings.autoUpgrade": "Auto update",
   "settings.autoUpgrade.msg": "Download update package automatically",
+  "settings.success": "Saved successfully",
 
   //bookmark
   "bookmarks.title": "Bookmarks",

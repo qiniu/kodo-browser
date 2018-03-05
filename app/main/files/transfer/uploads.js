@@ -56,7 +56,7 @@ angular.module("web").controller("transferUploadsCtrl", [
 
     function checkStartJob(item) {
       item.wait();
-      osUploadManager.checkStart();
+      osUploadManager.trySchedJob();
     }
 
     function showRemoveItem(item) {
@@ -86,7 +86,7 @@ angular.module("web").controller("transferUploadsCtrl", [
           break;
         }
       }
-      osUploadManager.saveProg();
+      osUploadManager.trySaveProg();
       $scope.calcTotalProg();
     }
 
@@ -128,7 +128,7 @@ angular.module("web").controller("transferUploadsCtrl", [
               i--;
             }
             $scope.calcTotalProg();
-            osUploadManager.saveProg();
+            osUploadManager.trySaveProg();
           }
         },
         1
@@ -158,7 +158,7 @@ angular.module("web").controller("transferUploadsCtrl", [
         Toast.info(T("pause.success"));
 
         $timeout(function () {
-          osUploadManager.saveProg();
+          osUploadManager.trySaveProg();
           $scope.allActionBtnDisabled = false;
         }, 100);
       }
@@ -181,7 +181,7 @@ angular.module("web").controller("transferUploadsCtrl", [
               n.wait();
             }
 
-            osUploadManager.checkStart();
+            osUploadManager.trySchedJob();
 
             fn();
           },

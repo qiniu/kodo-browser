@@ -9,7 +9,6 @@ var fs = require("fs"),
   {
     ipcRenderer
   } = require("electron");
-var isDebug = process.env.NODE_ENV == "development";
 
 class UploadJob extends Base {
   /**
@@ -65,13 +64,14 @@ class UploadJob extends Base {
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
     this.stopFlag = this.status != "running";
+    this.isDebug = this._config.isDebug;
   }
 }
 
 UploadJob.prototype.start = function () {
   if (this.status == "running") return;
 
-  if (isDebug) {
+  if (this.isDebug) {
     console.log(`Try uploading ${this.from.path} to s3://${this.to.bucket}/${this.to.key}`);
   }
 
@@ -84,7 +84,7 @@ UploadJob.prototype.start = function () {
   this._changeStatus("running");
 
   // start
-  ipcRenderer.send('asynchronous-job', {
+  var job = {
     job: this.id,
     key: 'job-upload',
     options: {
@@ -100,9 +100,13 @@ UploadJob.prototype.start = function () {
         Key: this.to.key
       },
       localFile: this.from.path,
-      isDebug: isDebug
+      isDebug: this.isDebug
     }
-  });
+  };
+  if (this.isDebug) {
+    console.log(`[JOB] ${JSON.stringify(job)}`);
+  }
+  ipcRenderer.send('asynchronous-job', job);
   ipcRenderer.on(this.id, this._listener);
 
   this.startSpeedCounter();
@@ -113,7 +117,7 @@ UploadJob.prototype.start = function () {
 UploadJob.prototype.stop = function () {
   if (this.status == "stopped") return;
 
-  if (isDebug) {
+  if (this.isDebug) {
     console.log(`Pausing ${this.from.path}`);
   }
 
@@ -131,7 +135,7 @@ UploadJob.prototype.stop = function () {
 UploadJob.prototype.wait = function () {
   if (this.status == "waiting") return;
 
-  if (isDebug) {
+  if (this.isDebug) {
     console.log(`Pendding ${this.from.path}`);
   }
 
@@ -147,6 +151,10 @@ UploadJob.prototype.wait = function () {
  * uploading
  */
 UploadJob.prototype.startUpload = function (event, data) {
+  if (this.isDebug) {
+    console.log(`[IPC MAIN] => ${JSON.stringify(data)}`);
+  }
+
   switch (data.key) {
   case 'fileStat':
     var prog = data.data;
@@ -171,7 +179,6 @@ UploadJob.prototype.startUpload = function (event, data) {
 
   case 'error':
     console.warn("upload object error:", data.error);
-
     ipcRenderer.removeListener(this.id, this._listener);
 
     this.message = data.error.message;

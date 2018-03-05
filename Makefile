@@ -2,6 +2,7 @@
 VERSION=1.5.0
 NAME=s3-browser
 CUSTOM=./custom
+NODE=./vendor/bin
 
 GULP=node ./node_modules/gulp/bin/gulp.js
 PKGER=node node_modules/electron-packager/cli.js
@@ -33,6 +34,7 @@ build:
 win64:
 	rm -f ./dist/node/bin/node.bin ./dist/node/bin/node
 	$(BUILD) --platform=win32 --arch=x64 --icon=$(CUSTOM)/icon.ico
+	cp -f $(NODE) build/$(NAME)-win32-x64/resources/
 	cp -rf $(CUSTOM) build/$(NAME)-win32-x64/resources
 	rm -rf releases/$(VERSION)/$(NAME)-win32-x64.zip && mkdir -p releases/$(VERSION)
 	cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-win32-x64.zip $(NAME)-win32-x64/
@@ -57,6 +59,7 @@ linux32:
 mac:
 	rm -f ./dist/node/bin/node.exe ./dist/node/bin/node.bin
 	$(BUILD) --platform=darwin --arch=x64 --icon=$(CUSTOM)/icon.icns
+	cp -rf $(NODE)/node build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
 	cp -rf $(CUSTOM) build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
 	rm -rf releases/$(VERSION)/$(NAME)-darwin-x64.zip && mkdir -p releases/$(VERSION)
 	cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-darwin-x64.zip $(NAME)-darwin-x64/

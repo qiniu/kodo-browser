@@ -9,10 +9,13 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const {
+  fork
+} = require("child_process");
+const {
   Client
 } = require("./node/s3store/lib/ioutil");
 
-app.commandLine.appendSwitch("ignoreconnectionslimit", "poc.com,s3qos.poc.com,wasuqiniu.cn,s3api.wasuqiniu.cn");
+app.commandLine.appendSwitch("ignore-connections-limit", "poc.com,s3qos.poc.com,wasuqiniu.cn,s3api.wasuqiniu.cn");
 
 ///*****************************************
 //静态服务
@@ -30,10 +33,14 @@ for (var port of PORTS) {
 }
 
 ///*****************************************
+let root = path.dirname(__dirname);
+if (fs.existsSync(path.join(root, "app.asar"))) {
+  root = path.join(root, "app.asar");
+}
 
 var custom = {};
 try {
-  custom = require(path.join(__dirname, "../custom"));
+  custom = require(path.join(root, "custom"));
 } catch (e) {
   console.log("no custom settings");
 }
@@ -46,18 +53,18 @@ let execNode;
 switch (process.platform) {
 case "darwin":
   app.dock.setIcon(
-    custom.logo_png || path.join(__dirname, "icons", "icon.png")
+    custom.logo_png || path.join(root, "icons", "icon.png")
   );
 
-  execNode = path.join(app.getAppPath(), "node_modules", ".bin", "node");
+  execNode = path.join(root, "node", "bin", "node");
   break;
 
 case "linux":
-  execNode = path.join(app.getAppPath(), "node_modules", ".bin", "node.bin");
+  execNode = path.join(root, "node", "bin", "node.bin");
   break;
 
 case "win32":
-  execNode = path.join(app.getAppPath(), "node_modules", ".bin", "node.exe");
+  execNode = path.join(root, "node", "bin", "node.exe");
   break;
 }
 
@@ -149,9 +156,21 @@ ipcMain.on("asynchronous", (event, data) => {
 ipcMain.on("asynchronous-job", (event, data) => {
   switch (data.key) {
   case "job-upload":
+    var execScript = path.join(root, "node", "s3store", "lib", "upload-worker.js");
+
+    event.sender.send(data.job, {
+      job: data.job,
+      key: 'debug',
+      env: {
+        node: execNode,
+        script: execScript
+      }
+    });
+
     var client = new Client(data.options);
 
-    var worker = fork(path.resolve("./node/s3store/lib/uploadworker.js"), [], {
+    var worker = fork(execScript, [], {
+      cwd: root,
       execPath: execNode,
       stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
       silent: true

@@ -166,7 +166,7 @@ gulp.task("copy-bin", function () {
     .src([
       execNode
     ])
-    .pipe(gulp.dest(DIST + "/node_modules/.bin"));
+    .pipe(gulp.dest(DIST + "/node/bin"));
 });
 
 gulp.task("copy-icons", function () {
@@ -176,15 +176,15 @@ gulp.task("copy-icons", function () {
 gulp.task("copy-bin", function () {
   switch (process.platform) {
   case "linux":
-    gulp.src(["./vendor/bin/node.bin"]).pipe(gulp.dest(DIST + "/node_modules/.bin"));
+    gulp.src(["./vendor/bin/node.bin"]).pipe(gulp.dest(DIST + "/node/bin"));
     break;
 
   case "darwin":
-    gulp.src(["./vendor/bin/node"]).pipe(gulp.dest(DIST + "/node_modules/.bin"));
+    gulp.src(["./vendor/bin/node"]).pipe(gulp.dest(DIST + "/node/bin"));
     break;
 
   case "win32":
-    gulp.src(["./vendor/bin/node.exe"]).pipe(gulp.dest(DIST + "/node_modules/.bin"));
+    gulp.src(["./vendor/bin/node.exe"]).pipe(gulp.dest(DIST + "/node/bin"));
 
   }
 });

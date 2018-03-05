@@ -179,8 +179,11 @@ UploadJob.prototype.startUpload = function (event, data) {
     this.emit("error", data.error);
     break;
 
+  case 'debug':
+    console.warn("debug", data);
+
   default:
-    console.log(`unsupported key: ${JSON.stringify(data)}`);
+    console.warn("unsupported key", data);
   }
 };
 

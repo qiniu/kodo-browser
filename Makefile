@@ -8,7 +8,7 @@ PKGER=node node_modules/electron-packager/cli.js
 ZIP=node ../zip.js
 
 ELECTRON_MIRROR=http://npm.taobao.org/mirrors/electron/
-ELECTRON_VERSION=1.6.5
+ELECTRON_VERSION=1.8.2
 BUILD=ELECTRON_MIRROR=$(ELECTRON_MIRROR) $(PKGER) ./dist $(NAME) --asar --overwrite --out=build --version $(ELECTRON_VERSION)
 
 
@@ -51,7 +51,7 @@ linux32:
 	rm -rf releases/$(VERSION)/$(NAME)-linux-ia32.zip && mkdir -p releases/$(VERSION)
 	cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-linux-ia32.zip $(NAME)-linux-ia32/
 mac:
-	$(BUILD) --platform=darwin --arch=x64 --icon=$(CUSTOM)/icon.icns
+	$(BUILD) --extraResource= --platform=darwin --arch=x64 --icon=$(CUSTOM)/icon.icns
 	cp -rf $(CUSTOM) build/$(NAME)-darwin-x64/$(NAME).app/Contents/Resources
 	rm -rf releases/$(VERSION)/$(NAME)-darwin-x64.zip && mkdir -p releases/$(VERSION)
 	cd build && $(ZIP) ../releases/$(VERSION)/$(NAME)-darwin-x64.zip $(NAME)-darwin-x64/

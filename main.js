@@ -12,7 +12,7 @@ const {
   Client
 } = require("./node/s3store/lib/ioutil");
 
-app.commandLine.appendSwitch("ignore-connections-limit", "poc.com,s3-qos.poc.com,wasuqiniu.cn,s3api.wasuqiniu.cn");
+app.commandLine.appendSwitch("ignoreconnectionslimit", "poc.com,s3qos.poc.com,wasuqiniu.cn,s3api.wasuqiniu.cn");
 
 ///*****************************************
 //静态服务
@@ -41,11 +41,27 @@ try {
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
+let execNode;
 
-if (process.platform == "darwin") {
+switch (process.platform) {
+case "darwin":
   app.dock.setIcon(
     custom.logo_png || path.join(__dirname, "icons", "icon.png")
   );
+
+  execNode = path.join(app.getAppPath(), "node_modules", ".bin", "node");
+
+  break;
+
+case "linux":
+  execNode = path.join(app.getAppPath(), "node_modules", ".bin", "node.bin");
+
+  break;
+
+case "win32":
+  execNode = path.join(app.getAppPath(), "node_modules", ".bin", "node.exe");
+
+  break;
 }
 
 function createWindow() {
@@ -62,7 +78,7 @@ function createWindow() {
     opt.icon = custom.logo_png || path.join(__dirname, "icons", "icon.png");
   }
 
-  // Create the browser window.   http://electron.atom.io/docs/api/browser-window/
+  // Create the browser window.   http://electron.atom.io/docs/api/browserwindow/
   win = new BrowserWindow(opt);
 
   win.setTitle(opt.title);
@@ -100,7 +116,7 @@ function createWindow() {
 ipcMain.on("asynchronous", (event, data) => {
   switch (data.key) {
   case "getStaticServerPort":
-    event.sender.send("asynchronous-reply", {
+    event.sender.send("asynchronousreply", {
       key: data.key,
       port: port
     });
@@ -112,14 +128,14 @@ ipcMain.on("asynchronous", (event, data) => {
 
   case "installRestart":
     var version = data.version;
-    var from = path.join(path.dirname(__dirname), version + "-app.asar");
+    var from = path.join(path.dirname(__dirname), version + "app.asar");
     var to = path.join(path.dirname(__dirname), "app.asar");
 
     setTimeout(function () {
       fs.rename(from, to, function (e) {
         if (e) {
           fs.writeFileSync(
-            path.join(os.homedir(), ".s3-browser", "upgrade-error.txt"),
+            path.join(os.homedir(), ".s3browser", "upgradeerror.txt"),
             JSON.stringify(e)
           );
         } else {
@@ -133,50 +149,124 @@ ipcMain.on("asynchronous", (event, data) => {
   }
 });
 
-ipcMain.on("asynchronous-job", (event, data) => {
+ipcMain.on("asynchronousjob", (event, data) => {
   switch (data.key) {
-  case "job-upload":
+  case "jobupload":
     var client = new Client(data.options);
 
-    var uploader = client.uploadFile(data.params);
-    uploader.on('fileStat', function (e2) {
-      event.sender.send(data.job, {
-        job: data.job,
-        key: 'fileStat',
-        data: {
-          progressLoaded: 0,
-          progressTotal: e2.progressTotal
-        }
-      });
+    var worker = fork(path.resolve("./node/s3store/lib/uploadworker.js"), [], {
+      execPath: execNode,
+      stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
+      silent: true
     });
-    uploader.on('progress', function (e2) {
-      event.sender.send(data.job, {
-        job: data.job,
-        key: 'progress',
-        data: {
-          progressLoaded: e2.progressLoaded,
-          progressTotal: e2.progressTotal
-        }
-      });
+    worker.send({
+      key: "start",
+      data: data
     });
-    uploader.on('fileUploaded', function (result) {
-      event.sender.send(data.job, {
-        job: data.job,
-        key: 'fileUploaded',
-        data: result
-      });
+    worker.on("message", msg => {
+      if (data.params.isDebug) {
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'debug',
+          message: msg
+        });
+      }
+
+      switch (msg.key) {
+      case 'fileStat':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'fileStat',
+          data: {
+            progressLoaded: 0,
+            progressTotal: msg.data.progressTotal
+          }
+        });
+
+        break;
+
+      case 'progress':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'progress',
+          data: {
+            progressLoaded: msg.data.progressLoaded,
+            progressTotal: msg.data.progressTotal
+          }
+        });
+
+        break;
+
+      case 'fileUploaded':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'fileUploaded',
+          data: msg.data
+        });
+
+        worker.kill();
+
+        break;
+
+      case 'error':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'error',
+          error: msg.error
+        });
+
+        worker.kill();
+
+        break;
+
+      default:
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'unknown',
+          message: msg
+        });
+      }
     });
-    uploader.on('error', function (err) {
-      event.sender.send(data.job, {
-        job: data.job,
-        key: 'error',
-        error: err
-      });
-    });
+
+    // var uploader = client.uploadFile(data.params);
+    // uploader.on('fileStat', function (e2) {
+    //   event.sender.send(data.job, {
+    //     job: data.job,
+    //     key: 'fileStat',
+    //     data: {
+    //       progressLoaded: 0,
+    //       progressTotal: e2.progressTotal
+    //     }
+    //   });
+    // });
+    // uploader.on('progress', function (e2) {
+    //   event.sender.send(data.job, {
+    //     job: data.job,
+    //     key: 'progress',
+    //     data: {
+    //       progressLoaded: e2.progressLoaded,
+    //       progressTotal: e2.progressTotal
+    //     }
+    //   });
+    // });
+    // uploader.on('fileUploaded', function (result) {
+    //   event.sender.send(data.job, {
+    //     job: data.job,
+    //     key: 'fileUploaded',
+    //     data: result
+    //   });
+    // });
+    // uploader.on('error', function (err) {
+    //   event.sender.send(data.job, {
+    //     job: data.job,
+    //     key: 'error',
+    //     error: err
+    //   });
+    // });
 
     break;
 
-  case "job-download":
+  case "jobdownload":
     var client = new Client(data.options);
 
     var downloader = client.downloadFile(data.params);
@@ -242,7 +332,7 @@ if (shouldQuit) {
 app.on("ready", createWindow);
 
 // Quit when all windows are closed.
-app.on("window-all-closed", () => {
+app.on("windowallclosed", () => {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   //if (process.platform !== 'darwin') {
@@ -251,7 +341,7 @@ app.on("window-all-closed", () => {
 });
 
 app.on("activate", () => {
-  // On OS X it's common to re-create a window in the app when the
+  // On OS X it's common to recreate a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (win === null) {
     createWindow();

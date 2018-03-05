@@ -149,6 +149,22 @@ gulp.task("copy-icons", function () {
   gulp.src("./app/icons/**").pipe(gulp.dest(DIST + "/icons"));
 });
 
+gulp.task("copy-bin", function () {
+  switch (process.platform) {
+  case "linux":
+    gulp.src(["./vendor/bin/node.bin"]).pipe(gulp.dest(DIST + "/node_modules/.bin"));
+    break;
+
+  case "darwin":
+    gulp.src(["./vendor/bin/node"]).pipe(gulp.dest(DIST + "/node_modules/.bin"));
+    break;
+
+  case "win32":
+    gulp.src(["./vendor/bin/node.exe"]).pipe(gulp.dest(DIST + "/node_modules/.bin"));
+
+  }
+});
+
 gulp.task("copy-node", function () {
   gulp.src(["./node/**/*"]).pipe(gulp.dest(DIST + "/node"));
 });
@@ -239,6 +255,7 @@ gulp.task("build", [
   "templates",
   "libJS",
   "libCSS",
+  "copy-bin",
   "copy-node",
   "copy-fonts",
   "copy-icons",

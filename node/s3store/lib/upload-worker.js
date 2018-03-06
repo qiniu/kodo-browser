@@ -1,27 +1,26 @@
 "use strict";
 
-const proc = require("process");
 const {
   Client
 } = require("./ioutil");
 
-proc.on('uncaughtException', function (err) {
-  proc.send({
+process.on('uncaughtException', function (err) {
+  process.send({
     key: 'error',
-    error: err
+    exception: err
   });
 });
 
-proc.send({
+process.send({
   key: 'env',
-  execPath: proc.execPath,
-  version: proc.version
+  execPath: process.execPath,
+  version: process.version
 });
 
-proc.on('message', function (msg) {
+process.on('message', function (msg) {
   switch (msg.key) {
   case 'stop':
-    proc.exit(0);
+    process.exit(0);
     break;
 
   case 'start':
@@ -29,7 +28,7 @@ proc.on('message', function (msg) {
 
     var uploader = client.uploadFile(msg.data.params);
     uploader.on('fileStat', function (e2) {
-      proc.send({
+      process.send({
         job: msg.data.job,
         key: 'fileStat',
         data: {
@@ -39,7 +38,7 @@ proc.on('message', function (msg) {
       });
     });
     uploader.on('progress', function (e2) {
-      proc.send({
+      process.send({
         job: msg.data.job,
         key: 'progress',
         data: {
@@ -49,14 +48,14 @@ proc.on('message', function (msg) {
       });
     });
     uploader.on('fileUploaded', function (result) {
-      proc.send({
+      process.send({
         job: msg.data.job,
         key: 'fileUploaded',
         data: result
       });
     });
     uploader.on('error', function (err) {
-      proc.send({
+      process.send({
         job: msg.data.job,
         key: 'error',
         error: err
@@ -66,7 +65,7 @@ proc.on('message', function (msg) {
     break;
 
   default:
-    proc.send({
+    process.send({
       key: msg.key,
       message: msg
     });

@@ -46,7 +46,7 @@ var appTasks = {
       //.pipe(plugins.jshint.reporter('default'))
       .pipe(
         plugins.babel({
-          presets: ["es2015"]
+          presets: ["env"]
         })
       )
       .pipe(plugins.concat("app.js"))

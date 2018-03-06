@@ -172,11 +172,15 @@ module.exports = {
   "settings.maxDownloadConcurrency": "Download tasks concurrent number",
   "settings.WhetherShowThumbnail": "Whether to show the image thumbnail",
   "settings.WhetherShowThumbnail.msg": "Displaying thumbnails in the list of files will consume a certain amount of traffic",
+  "settings.system": "System Settings",
   "settings.isDebug": "Debug",
   "settings.isDebug.msg": "Enable debug log",
+  "settings.useElectronNode": "Electron Node",
+  "settings.useElectronNode.msg": "Enable Electron Node",
   "settings.autoUpgrade": "Auto update",
   "settings.autoUpgrade.msg": "Download update package automatically",
   "settings.success": "Saved successfully",
+
 
   //bookmark
   "bookmarks.title": "Bookmarks",
@@ -363,13 +367,6 @@ module.exports = {
   disable: "Disable",
   show: "Show",
   "can.not.get.accessKeySecret": "Can not get AccessKeySecret",
-
-  "settings.subtitle.updown": "Transfer Settings",
-  "settings.subtitle.sys": "System Settings",
-  "settings.subtitle.email": "Email Sending Settings",
-  "settings.mailSmtp.addr": "SMTP Address",
-  "settings.mailSmtp.ssl": "Use SSL",
-  "settings.mailSmtp.from": "Email(From)",
 
   user: "UserName",
   pass: "Password",

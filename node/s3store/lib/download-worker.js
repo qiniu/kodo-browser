@@ -26,8 +26,8 @@ process.on('message', function (msg) {
   case 'start':
     var client = new Client(msg.data.options);
 
-    var uploader = client.uploadFile(msg.data.params);
-    uploader.on('fileStat', function (e2) {
+    let downloader = client.downloadFile(msg.data.params);
+    downloader.on('fileStat', function (e2) {
       process.send({
         job: msg.data.job,
         key: 'fileStat',
@@ -37,7 +37,7 @@ process.on('message', function (msg) {
         }
       });
     });
-    uploader.on('progress', function (e2) {
+    downloader.on('progress', function (e2) {
       process.send({
         job: msg.data.job,
         key: 'progress',
@@ -47,14 +47,14 @@ process.on('message', function (msg) {
         }
       });
     });
-    uploader.on('fileUploaded', function (result) {
+    downloader.on('fileDownloaded', function (result) {
       process.send({
         job: msg.data.job,
-        key: 'fileUploaded',
+        key: 'fileDownloaded',
         data: result
       });
     });
-    uploader.on('error', function (err) {
+    downloader.on('error', function (err) {
       process.send({
         job: msg.data.job,
         key: 'error',

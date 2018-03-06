@@ -270,7 +270,7 @@ ipcMain.on("asynchronous", (event, data) => {
 ipcMain.on("asynchronous-job", (event, data) => {
   switch (data.key) {
   case "job-upload":
-    let forkOptions = {
+    var forkOptions = {
       cwd: root,
       stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
       silent: true
@@ -279,7 +279,7 @@ ipcMain.on("asynchronous-job", (event, data) => {
       forkOptions.execPath = execNode;
     }
 
-    let execScript = path.join(appRoot, "node", "s3store", "lib", "upload-worker.js");
+    var execScript = path.join(appRoot, "node", "s3store", "lib", "upload-worker.js");
 
     if (data.params.isDebug) {
       event.sender.send(data.job, {
@@ -292,7 +292,7 @@ ipcMain.on("asynchronous-job", (event, data) => {
       });
     }
 
-    let worker = fork(execScript, [], forkOptions);
+    var worker = fork(execScript, [], forkOptions);
     forkedWorkers.set(data.job, worker);
 
     worker.send({
@@ -395,37 +395,121 @@ ipcMain.on("asynchronous-job", (event, data) => {
     break;
 
   case "job-download":
-    let client = new Client(data.options);
+    var forkOptions = {
+      cwd: root,
+      stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
+      silent: true
+    };
+    if (data.params.useElectronNode != true) {
+      forkOptions.execPath = execNode;
+    }
 
-    let downloader = client.downloadFile(data.params);
-    downloader.on('fileStat', function (e2) {
+    var execScript = path.join(appRoot, "node", "s3store", "lib", "download-worker.js");
+
+    if (data.params.isDebug) {
       event.sender.send(data.job, {
         job: data.job,
-        key: 'fileStat',
-        data: {
-          progressLoaded: 0,
-          progressTotal: e2.progressTotal
+        key: 'debug',
+        env: {
+          fork: forkOptions,
+          script: execScript
+        }
+      });
+    }
+
+    var worker = fork(execScript, [], forkOptions);
+    forkedWorkers.set(data.job, worker);
+
+    worker.send({
+      key: "start",
+      data: data
+    });
+
+    worker.on("message", function (msg) {
+      if (data.params.isDebug) {
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'debug',
+          message: msg
+        });
+      }
+
+      switch (msg.key) {
+      case 'fileStat':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'fileStat',
+          data: {
+            progressLoaded: 0,
+            progressTotal: msg.data.progressTotal
+          }
+        });
+
+        break;
+
+      case 'progress':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'progress',
+          data: {
+            progressLoaded: msg.data.progressLoaded,
+            progressTotal: msg.data.progressTotal
+          }
+        });
+
+        break;
+
+      case 'fileDownloaded':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'fileDownloaded',
+          data: msg.data
+        });
+
+        worker.kill();
+        forkedWorkers.delete(data.job);
+
+        break;
+
+      case 'error':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'error',
+          error: msg.error
+        });
+
+        worker.kill();
+        forkedWorkers.delete(data.job);
+
+        break;
+
+      case 'env':
+        // ignore
+        break;
+
+      default:
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'unknown',
+          message: msg
+        });
+      }
+    });
+    worker.on("exit", function (code, signal) {
+      forkedWorkers.delete(data.job);
+
+      event.sender.send(data.job, {
+        job: data.job,
+        key: 'debug',
+        exit: {
+          code: code,
+          signal: signal
         }
       });
     });
-    downloader.on('progress', function (e2) {
-      event.sender.send(data.job, {
-        job: data.job,
-        key: 'progress',
-        data: {
-          progressLoaded: e2.progressLoaded,
-          progressTotal: e2.progressTotal
-        }
-      });
-    });
-    downloader.on('fileDownloaded', function (result) {
-      event.sender.send(data.job, {
-        job: data.job,
-        key: 'fileDownloaded',
-        data: result
-      });
-    });
-    downloader.on('error', function (err) {
+    worker.on("error", function (err) {
+      forkedWorkers.delete(data.job);
+
       event.sender.send(data.job, {
         job: data.job,
         key: 'error',
@@ -434,6 +518,13 @@ ipcMain.on("asynchronous-job", (event, data) => {
     });
 
     break;
+
+  default:
+    event.sender.send(data.job, {
+      job: data.job,
+      key: 'unknown',
+      data: data
+    });
   }
 });
 

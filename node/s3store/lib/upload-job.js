@@ -187,7 +187,9 @@ UploadJob.prototype.startUpload = function (event, data) {
     break;
 
   case 'debug':
-    console.log("Debug", data);
+    if (!this.isDebug) {
+      console.log("Debug", data);
+    }
     break;
 
   default:

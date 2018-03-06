@@ -8,7 +8,6 @@ var fs = require("fs"),
   {
     ipcRenderer
   } = require("electron");
-var isDebug = process.env.NODE_ENV == "development";
 
 class DownloadJob extends Base {
   /**
@@ -57,13 +56,14 @@ class DownloadJob extends Base {
     this.status = this._config.status || "waiting";
     this.stopFlag = this.status != "running";
     this.tmpfile = this.to.path + ".download";
+    this.isDebug = this._config.isDebug;
   }
 }
 
 DownloadJob.prototype.start = function () {
   if (this.status == "running") return;
 
-  if (isDebug) {
+  if (this.isDebug) {
     console.log(`Try downloading s3://${this.from.bucket}/${this.from.key} to ${this.to.path}`);
   }
 
@@ -76,7 +76,7 @@ DownloadJob.prototype.start = function () {
   this._changeStatus("running");
 
   // start
-  ipcRenderer.send('asynchronous-job', {
+  var job = {
     job: this.id,
     key: 'job-download',
     options: {
@@ -92,9 +92,13 @@ DownloadJob.prototype.start = function () {
         Key: this.from.key
       },
       localFile: this.tmpfile,
-      isDebug: isDebug
+      isDebug: this.isDebug
     }
-  });
+  };
+  if (this.isDebug) {
+    console.log(`[JOB] ${JSON.stringify(job)}`);
+  }
+  ipcRenderer.send('asynchronous-job', job);
   ipcRenderer.on(this.id, this._listener);
 
   this.startSpeedCounter();
@@ -105,7 +109,7 @@ DownloadJob.prototype.start = function () {
 DownloadJob.prototype.stop = function () {
   if (this.status == "stopped") return;
 
-  if (isDebug) {
+  if (this.isDebug) {
     console.log(`Pausing s3://${this.from.bucket}/${this.from.key}`);
   }
 
@@ -123,7 +127,7 @@ DownloadJob.prototype.stop = function () {
 DownloadJob.prototype.wait = function () {
   if (this.status == "waiting") return;
 
-  if (isDebug) {
+  if (this.isDebug) {
     console.log(`Pendding s3://${this.from.bucket}/${this.from.key}`);
   }
 
@@ -140,6 +144,10 @@ DownloadJob.prototype.wait = function () {
  */
 DownloadJob.prototype.startDownload = function (event, data) {
   var self = this;
+
+  if (self.isDebug) {
+    console.log(`[IPC MAIN] => ${JSON.stringify(data)}`);
+  }
 
   switch (data.key) {
   case 'fileStat':
@@ -177,7 +185,6 @@ DownloadJob.prototype.startDownload = function (event, data) {
 
   case 'error':
     console.warn("download object error:", data.error);
-
     ipcRenderer.removeListener(self.id, self._listener);
 
     self.message = data.error.message;
@@ -185,8 +192,14 @@ DownloadJob.prototype.startDownload = function (event, data) {
     self.emit("error", data.error);
     break;
 
+  case 'debug':
+    if (!self.isDebug) {
+      console.log("Debug", data);
+    }
+    break;
+
   default:
-    console.log(`unsupported key: ${JSON.stringify(data)}`);
+    console.log("Unknown", data);
   }
 };
 

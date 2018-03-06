@@ -89,8 +89,8 @@ UploadJob.prototype.start = function () {
     key: 'job-upload',
     options: {
       s3Options: this.s3options,
-      maxConcurrency: this.maxConcurrency,
       resumeUpload: this.resumeUpload,
+      maxConcurrency: this.maxConcurrency,
       multipartUploadThreshold: this.multipartUploadThreshold * 1024 * 1024,
       multipartUploadSize: this.multipartUploadSize * 1024 * 1024
     },
@@ -100,6 +100,7 @@ UploadJob.prototype.start = function () {
         Key: this.to.key
       },
       localFile: this.from.path,
+      useElectronNode: this.useElectronNode,
       isDebug: this.isDebug
     }
   };

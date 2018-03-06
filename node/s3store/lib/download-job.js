@@ -81,8 +81,8 @@ DownloadJob.prototype.start = function () {
     key: 'job-download',
     options: {
       s3Options: this.s3options,
-      maxConcurrency: this.maxConcurrency,
       resumeDownload: this.resumeDownload,
+      maxConcurrency: this.maxConcurrency,
       multipartDownloadThreshold: this.multipartDownloadThreshold * 1024 * 1024,
       multipartDownloadSize: this.multipartDownloadSize * 1024 * 1024
     },
@@ -92,6 +92,7 @@ DownloadJob.prototype.start = function () {
         Key: this.from.key
       },
       localFile: this.tmpfile,
+      useElectronNode: this.useElectronNode,
       isDebug: this.isDebug
     }
   };

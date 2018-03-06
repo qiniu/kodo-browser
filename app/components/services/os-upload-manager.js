@@ -76,8 +76,9 @@ angular.module("web").factory("osUploadManager", [
 
       options.region = region;
       options.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
-      options.mulipartUploadThreshold = settingsSvs.resumeUploadThreshold.get();
-      options.mulipartUploadSize = settingsSvs.resumeUploadSize.get();
+      options.mulipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
+      options.mulipartUploadSize = settingsSvs.multipartUploadSize.get();
+      options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
 
       var store = new S3Store({
@@ -270,7 +271,7 @@ angular.module("web").factory("osUploadManager", [
     }
 
     function trySchedJob() {
-      var maxConcurrency = settingsSvs.maxUploadJobCount.get();
+      var maxConcurrency = settingsSvs.maxUploadConcurrency.get();
       var isDebug = (settingsSvs.isDebug.get() == 1);
 
       concurrency = Math.max(0, concurrency);

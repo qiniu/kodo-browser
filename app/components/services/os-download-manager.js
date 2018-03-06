@@ -70,8 +70,9 @@ angular.module("web").factory("osDownloadManager", [
 
       options.region = region;
       options.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
-      options.mulipartDownloadThreshold = settingsSvs.resumeDownloadThreshold.get();
-      options.mulipartDownloadSize = settingsSvs.resumeDownloadSize.get();
+      options.mulipartDownloadThreshold = settingsSvs.multipartDownloadThreshold.get();
+      options.mulipartDownloadSize = settingsSvs.multipartDownloadSize.get();
+      options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
 
       var store = new S3Store({
@@ -275,7 +276,7 @@ angular.module("web").factory("osDownloadManager", [
 
     //流控, 同时只能有 n 个下载任务.
     function trySchedJob() {
-      var maxConcurrency = settingsSvs.maxDownloadJobCount.get();
+      var maxConcurrency = settingsSvs.maxDownloadConcurrency.get();
       var isDebug = (settingsSvs.isDebug.get() == 1);
 
       concurrency = Math.max(0, concurrency);

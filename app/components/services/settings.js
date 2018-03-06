@@ -10,6 +10,15 @@ angular.module("web").factory("settingsSvs", [
         }
       },
 
+      useElectronNode: {
+        get: function () {
+          return parseInt(localStorage.getItem("useElectronNode") || 0);
+        },
+        set: function (v) {
+          return localStorage.setItem("useElectronNode", v);
+        }
+      },
+
       autoUpgrade: {
         get: function () {
           return parseInt(localStorage.getItem("autoUpgrade") || 0);
@@ -28,21 +37,34 @@ angular.module("web").factory("settingsSvs", [
         }
       },
 
-      resumeUploadSize: {
+      maxUploadConcurrency: {
         get: function () {
-          return parseInt(localStorage.getItem("resumeUploadSize") || 8);
+          return parseInt(localStorage.getItem("maxUploadConcurrency") || 10);
         },
         set: function (v) {
-          return localStorage.setItem("resumeUploadSize", v);
+          return localStorage.setItem("maxUploadConcurrency", v);
         }
       },
 
-      resumeUploadThreshold: {
+      multipartUploadSize: {
         get: function () {
-          return parseInt(localStorage.getItem("resumeUploadThreshold") || 100);
+          return parseInt(localStorage.getItem("multipartUploadSize") || 8);
         },
         set: function (v) {
-          return localStorage.setItem("resumeUploadThreshold", v);
+          if (parseInt(v)%4 != 0) {
+            return;
+          }
+
+          return localStorage.setItem("multipartUploadSize", v);
+        }
+      },
+
+      multipartUploadThreshold: {
+        get: function () {
+          return parseInt(localStorage.getItem("multipartUploadThreshold") || 100);
+        },
+        set: function (v) {
+          return localStorage.setItem("multipartUploadThreshold", v);
         }
       },
 
@@ -55,68 +77,39 @@ angular.module("web").factory("settingsSvs", [
         }
       },
 
-      resumeDownloadSize: {
+      maxDownloadConcurrency: {
         get: function () {
-          return parseInt(localStorage.getItem("resumeDownloadSize") || 8);
+          return parseInt(localStorage.getItem("maxDownloadConcurrency") || 10);
         },
         set: function (v) {
-          return localStorage.setItem("resumeDownloadSize", v);
+          return localStorage.setItem("maxDownloadConcurrency", v);
         }
       },
 
-      resumeDownloadThreshold: {
+      multipartDownloadSize: {
         get: function () {
-          return parseInt(localStorage.getItem("resumeDownloadThreshold") || 100);
+          return parseInt(localStorage.getItem("multipartDownloadSize") || 8);
         },
         set: function (v) {
-          return localStorage.setItem("resumeDownloadThreshold", v);
+          return localStorage.setItem("multipartDownloadSize", v);
         }
       },
 
-      maxUploadJobCount: {
+      multipartDownloadThreshold: {
         get: function () {
-          return parseInt(localStorage.getItem("maxUploadJobCount") || 10);
+          return parseInt(localStorage.getItem("multipartDownloadThreshold") || 100);
         },
         set: function (v) {
-          return localStorage.setItem("maxUploadJobCount", v);
-        }
-      },
-
-      maxDownloadJobCount: {
-        get: function () {
-          return parseInt(localStorage.getItem("maxDownloadJobCount") || 10);
-        },
-        set: function (v) {
-          return localStorage.setItem("maxDownloadJobCount", v);
-        }
-      },
-
-      showImageSnapshot: {
-        get: function () {
-          return parseInt(localStorage.getItem("showImageSnapshot") || 1);
-        },
-        set: function (v) {
-          return localStorage.setItem("showImageSnapshot", v);
+          return localStorage.setItem("multipartDownloadThreshold", v);
         }
       },
 
       historiesLength: {
         get: function () {
-          return parseInt(localStorage.getItem("historiesLength") || 100);
+          return parseInt(localStorage.getItem("multipartDownloadThreshold") || 100);
         },
         set: function (v) {
-          return localStorage.setItem("historiesLength", v);
-        }
-      },
-
-      mailSmtp: {
-        get: function () {
-          return JSON.parse(
-            localStorage.getItem("mailSender") || '{"port":465}'
-          );
-        },
-        set: function (v) {
-          return localStorage.setItem("mailSender", JSON.stringify(v));
+          return localStorage.setItem("multipartDownloadThreshold", v);
         }
       }
     };

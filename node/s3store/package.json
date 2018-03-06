@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "aws-sdk": "^2.205.0",
-    "electron": "^1.8.2",
+    "electron": "^1.8.3",
     "events": "^2.0.0",
     "mime": "^2.2.0",
     "pend": "^1.2.0"

@@ -107,17 +107,12 @@ let createWindow = () => {
       return;
     }
 
-    let btns = ["Force Quit", "Cancel", "Waiting for jobs"];
-    if (process.platform == "darwin") {
-      btns = btns.reverse();
+    // always stop 
+    if (winBlockedTid) {
+      clearInterval(winBlockedTid);
     }
 
-    // prevent if there still alive workers.
-    dialog.showMessageBox({
-      type: "warning",
-      message: `There still ${forkedWorkers.size} ${forkedWorkers.size > 1 ? "jobs" : "job"} in processing, are you sure to quit?`,
-      buttons: btns
-    }, (btn) => {
+    let confirmCb = (btn) => {
       if (process.platform == "darwin") {
         switch (btn) {
         case 0:
@@ -135,11 +130,6 @@ let createWindow = () => {
         default:
           btn = 1;
         }
-      }
-
-      // always stop 
-      if (winBlockedTid) {
-        clearInterval(winBlockedTid);
       }
 
       switch (btn) {
@@ -178,7 +168,19 @@ let createWindow = () => {
         // cancel close
         e.preventDefault();
       }
-    });
+    };
+
+    let btns = ["Force Quit", "Cancel", "Waiting for jobs"];
+    if (process.platform == "darwin") {
+      btns = btns.reverse();
+    }
+
+    // prevent if there still alive workers.
+    confirmCb(dialog.showMessageBox({
+      type: "warning",
+      message: `There still ${forkedWorkers.size} ${forkedWorkers.size > 1 ? "jobs" : "job"} in processing, are you sure to quit?`,
+      buttons: btns
+    }));
   };
 
   if (process.platform == "linux") {
@@ -301,6 +303,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
     });
 
     worker.on("message", function (msg) {
+      if (!win) return;
+
       if (data.params.isDebug) {
         event.sender.send(data.job, {
           job: data.job,
@@ -426,6 +430,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
     });
 
     worker.on("message", function (msg) {
+      if (!win) return;
+
       if (data.params.isDebug) {
         event.sender.send(data.job, {
           job: data.job,

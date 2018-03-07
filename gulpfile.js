@@ -1,18 +1,42 @@
-var gulp = require("gulp"),
-  run = require("gulp-run"),
+let gulp = require("gulp"),
   plugins = require("gulp-load-plugins")({
     lazy: false
   }),
+  packager = require('electron-packager'),
   os = require("os"),
   fs = require("fs"),
-  path = require("path");
+  path = require("path"),
+  pkg = require("./package");
 
-var DIST = "./dist";
+let NAME = pkg.name;
+let VERSION = pkg.version;
+let ELECTRON_MIRROR = "http://npm.taobao.org/mirrors/electron/";
+let ELECTRON_VERSION = "1.8.3";
+let ROOT = __dirname;
+let CUSTOM = `${ROOT}/custom`;
+let DIST = `${ROOT}/dist`;
+let TARGET = `${ROOT}/build`;
+let RELEASE = `${ROOT}/release`;
+
+let packagerOptions = {
+  dir: DIST,
+  name: NAME,
+  asar: false,
+  out: TARGET,
+  overwrite: true,
+  appVersion: VERSION,
+  appCopyright: "",
+  electronVersion: ELECTRON_VERSION,
+  packageManager: "yarn",
+  extraResource: [
+    `${CUSTOM}`
+  ]
+};
 
 require("shelljs/global");
 
-var appTasks = {
-  appJS: function () {
+let appTasks = {
+  appJS: () => {
     console.log("--rebuilding app.js...");
     gulp
       .src(["!./app/**/*_test.js", "./app/**/*.js"])
@@ -23,23 +47,23 @@ var appTasks = {
       )
       .pipe(plugins.concat("app.js"))
       .pipe(gulp.dest(DIST))
-      .on("end", function () {
+      .on("end", () => {
         console.log("--done");
       });
   },
 
-  appCSS: function () {
+  appCSS: () => {
     console.log("--rebuilding lib.css...");
     gulp
       .src("./app/**/*.css")
       .pipe(plugins.concat("app.css"))
       .pipe(gulp.dest(DIST))
-      .on("end", function () {
+      .on("end", () => {
         console.log("--done");
       });
   },
 
-  templates: function () {
+  templates: () => {
     console.log("--rebuilding templates.js...");
     gulp
       .src(["!./app/index.html", "./app/**/*.html"])
@@ -47,7 +71,7 @@ var appTasks = {
         standalone: true
       }))
       .pipe(gulp.dest(DIST))
-      .on("end", function () {
+      .on("end", () => {
         console.log("--done");
       });
   }
@@ -57,9 +81,9 @@ gulp.task("js", appTasks.appJS);
 gulp.task("css", appTasks.appCSS);
 gulp.task("templates", appTasks.templates);
 
-gulp.task("libJS", function () {
+gulp.task("libJS", () => {
   //concatenate vendor JS files
-  var vendors = [
+  let vendors = [
     "./node_modules/jquery/dist/jquery.js",
     "./node_modules/jquery.qrcode/jquery.qrcode.min.js",
 
@@ -86,8 +110,8 @@ gulp.task("libJS", function () {
   ];
 
   // code mirror modes
-  var modePath = "./node_modules/codemirror/mode/";
-  var modes = fs.readdirSync(modePath);
+  let modePath = "./node_modules/codemirror/mode/";
+  let modes = fs.readdirSync(modePath);
   modes.forEach(function (n) {
     vendors.push(modePath + n + "/*.js");
   });
@@ -98,7 +122,7 @@ gulp.task("libJS", function () {
     .pipe(gulp.dest(DIST));
 });
 
-gulp.task("libCSS", function () {
+gulp.task("libCSS", () => {
   //concatenate vendor CSS files
   gulp
     .src([
@@ -111,7 +135,7 @@ gulp.task("libCSS", function () {
     .pipe(gulp.dest(DIST + "/css"));
 });
 
-gulp.task("copy-fonts", function () {
+gulp.task("copy-fonts", () => {
   gulp
     .src([
       "./node_modules/bootstrap/fonts/*",
@@ -120,21 +144,21 @@ gulp.task("copy-fonts", function () {
     .pipe(gulp.dest(DIST + "/fonts"));
 });
 
-gulp.task("copy-icons", function () {
+gulp.task("copy-icons", () => {
   gulp.src("./app/icons/**").pipe(gulp.dest(DIST + "/icons"));
 });
 
-gulp.task("copy-node", function () {
+gulp.task("copy-node", () => {
   gulp
     .src(["./node/**/*", "!./node/**/node_modules/**/*"])
     .pipe(gulp.dest(DIST + "/node"));
 });
 
-gulp.task("copy-static", function () {
+gulp.task("copy-static", () => {
   gulp.src(["./static/**/*"]).pipe(gulp.dest(DIST + "/static"));
 });
 
-gulp.task("copy-index", function () {
+gulp.task("copy-index", () => {
   gulp
     .src([
       "./app/index.html",
@@ -145,8 +169,8 @@ gulp.task("copy-index", function () {
     .pipe(gulp.dest(DIST));
 });
 
-gulp.task("gen-package", function () {
-  var pkg = require("./package");
+gulp.task("gen-package", () => {
+  let pkg = require("./package");
 
   delete pkg.devDependencies;
 
@@ -165,12 +189,12 @@ gulp.task("gen-package", function () {
   console.log(`--generating ${DIST}/package.json`);
   fs.writeFileSync(DIST + "/package.json", JSON.stringify(pkg, " ", 2));
 
-  run(`cd ${DIST} && yarn install`).exec(function () {
+  plugins.run(`cd ${DIST} && yarn install`).exec(() => {
     console.log("--done");
   });
 });
 
-gulp.task("watch", function () {
+gulp.task("watch", () => {
   gulp.watch([
     DIST + "/**/*.js",
     DIST + "/**/*.css",
@@ -204,6 +228,130 @@ gulp.task("watch", function () {
   gulp.watch(["./static/**"], ["copy-static"]);
 
   gulp.watch(["./node/**/*", "!./node/**/node_modules/**/*"], ["copy-node"]);
+});
+
+gulp.task("mac", () => {
+  console.log(`--package ${NAME}-darwin-x64`);
+
+  plugins.run(`rm -rf ${TARGET}/${NAME}-darwin-x64`).exec(() => {
+    let options = Object.assign({}, packagerOptions);
+    options.platform = "darwin";
+    options.arch = "x64";
+    options.icon = `${CUSTOM}/icon.icns`;
+
+    packager(options, (errs, paths) => {
+      if (errs && errs.length > 0) {
+        console.error(`--package  ${NAME}-darwin-x64: ${errs}`);
+        return;
+      }
+
+      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.exe ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.bin`).exec(() => {
+        console.log("--done");
+      });
+    });
+  });
+});
+
+gulp.task("dmg", ["mac"], () => {
+  console.log(`--package ${NAME}.dmg`);
+
+  plugins.run(`rm -f ${RELEASE}/${VERSION}/${NAME}.dmg`).exec(() => {
+    plugins.run(`rm ${TARGET}/${NAME}-darwin-x64/LICENSE* ${TARGET}/${NAME}-darwin-x64/version`).exec(() => {
+      plugins.run(`ln -s /Applications/ ${TARGET}/${NAME}-darwin-x64/Applications`).exec(() => {
+        plugins.run(`cp -f ${DIST}/icons/icon.icns ${TARGET}/${NAME}-darwin-x64/.VolumeIcon.icns`).exec(() => {
+          plugins.run(`hdiutil create -size 250M -format UDZO -srcfolder ${TARGET}/$(NAME)-darwin-x64 -o ${RELEASE}/${VERSION}/${NAME}.dmg`).exec(() => {
+            console.log("--done");
+          });
+        });
+      });
+    });
+  });
+});
+
+gulp.task("win64", () => {
+  console.log(`--package ${NAME}-win32-x64`);
+
+  plugins.run(`rm -rf ${TARGET}/${NAME}-win32-x64`).exec(() => {
+    let options = Object.assign({}, packagerOptions);
+    options.platform = "win32";
+    options.arch = "x64";
+    options.icon = `${CUSTOM}/icon.ico`;
+
+    packager(options, (errs, paths) => {
+      if (errs && errs.length > 0) {
+        console.error(`--package  ${NAME}-win32-x64: ${errs}`);
+        return;
+      }
+
+      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.bin`).exec(() => {
+        console.log("--done");
+      });
+    });
+  });
+});
+
+gulp.task("win32", () => {
+  console.log(`--package ${NAME}-win32-ia32`);
+
+  plugins.run(`rm -rf ${TARGET}/${NAME}-win32-ia32`).exec(() => {
+    let options = Object.assign({}, packagerOptions);
+    options.platform = "win32";
+    options.arch = "ia32";
+    options.icon = `${CUSTOM}/icon.ico`;
+
+    packager(options, (errs, paths) => {
+      if (errs && errs.length > 0) {
+        console.error(`--package  ${NAME}-win32-ia32: ${errs}`);
+        return;
+      }
+
+      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.bin`).exec(() => {
+        console.log("--done");
+      });
+    });
+  });
+});
+
+gulp.task("linux64", () => {
+  console.log(`--package ${NAME}-linux-x64`);
+
+  plugins.run(`rm -rf ${TARGET}/${NAME}-linux-x64`).exec(() => {
+    let options = Object.assign({}, packagerOptions);
+    options.platform = "linux";
+    options.arch = "x64";
+
+    packager(options, (errs, paths) => {
+      if (errs && errs.length > 0) {
+        console.error(`--package  ${NAME}-linux-x64: ${errs}`);
+        return;
+      }
+
+      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.exe`).exec(() => {
+        console.log("--done");
+      });
+    });
+  });
+});
+
+gulp.task("linux32", () => {
+  console.log(`--package ${NAME}-linux-ia32`);
+
+  plugins.run(`rm -rf ${TARGET}/${NAME}-linux-ia32`).exec(() => {
+    let options = Object.assign({}, packagerOptions);
+    options.platform = "linux";
+    options.arch = "ia32";
+
+    packager(options, (errs, paths) => {
+      if (errs && errs.length > 0) {
+        console.error(`--package  ${NAME}-linux-ia32: ${errs}`);
+        return;
+      }
+
+      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.exe`).exec(() => {
+        console.log("--done");
+      });
+    });
+  });
 });
 
 gulp.task("build", [

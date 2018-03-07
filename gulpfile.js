@@ -3,47 +3,19 @@ var gulp = require("gulp"),
   plugins = require("gulp-load-plugins")({
     lazy: false
   }),
-  fs = require("fs"),
-  path = require("path"),
   os = require("os"),
-  minimist = require("minimist");
+  fs = require("fs"),
+  path = require("path");
 
 var DIST = "./dist";
 
 require("shelljs/global");
 
-function getCustomPath() {
-  var knownOptions = {
-    string: "custom",
-    default: {
-      custom: "./custom"
-    }
-  };
-
-  var options = minimist(process.argv.slice(2), knownOptions);
-
-  if (options && options.custom) {
-    var customPath = path.join(options.custom, "**/*");
-
-    if (customPath.indexOf("~") == 0) {
-      customPath = path.join(os.homedir(), customPath, "**/*");
-    } else if (customPath.indexOf(".") == 0) {
-      customPath = path.join(__dirname, customPath, "**/*");
-    }
-  }
-
-  return customPath || "custom/**/*";
-}
-
-//var VERSION = pkg.version;
 var appTasks = {
   appJS: function () {
     console.log("--rebuilding app.js...");
-    //combine all js files of the app
     gulp
       .src(["!./app/**/*_test.js", "./app/**/*.js"])
-      //.pipe(plugins.jshint())
-      //.pipe(plugins.jshint.reporter('default'))
       .pipe(
         plugins.babel({
           presets: ["env"]
@@ -55,6 +27,7 @@ var appTasks = {
         console.log("--done");
       });
   },
+
   appCSS: function () {
     console.log("--rebuilding lib.css...");
     gulp
@@ -65,9 +38,9 @@ var appTasks = {
         console.log("--done");
       });
   },
+
   templates: function () {
     console.log("--rebuilding templates.js...");
-    //combine all template files of the app into a js file
     gulp
       .src(["!./app/index.html", "./app/**/*.html"])
       .pipe(plugins.angularTemplatecache("templates.js", {
@@ -86,24 +59,25 @@ gulp.task("templates", appTasks.templates);
 
 gulp.task("libJS", function () {
   //concatenate vendor JS files
-
   var vendors = [
     "./node_modules/jquery/dist/jquery.js",
     "./node_modules/jquery.qrcode/jquery.qrcode.min.js",
+
     "./node_modules/moment/min/moment-with-locales.js",
     "./node_modules/bootstrap/dist/js/bootstrap.js",
+
     "./node_modules/angular/angular.js",
     "./node_modules/angular-sanitize/angular-sanitize.js",
     "./node_modules/angular-translate/dist/angular-translate.min.js",
     "./node_modules/angular-ui-router/release/angular-ui-router.js",
     "./node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js",
     "./node_modules/angular-bootstrap-contextmenu/contextMenu.js",
+
     "./node_modules/showdown/dist/showdown.js",
     "./node_modules/clipboard/dist/clipboard.min.js",
 
     //code mirror
     "./vendor/diff_match_patch.js",
-
     "./node_modules/angular-ui-codemirror/src/ui-codemirror.js",
     "./node_modules/codemirror/lib/codemirror.js",
     "./node_modules/codemirror/addon/mode/simple.js",
@@ -156,10 +130,6 @@ gulp.task("copy-node", function () {
     .pipe(gulp.dest(DIST + "/node"));
 });
 
-gulp.task("copy-docs", function () {
-  gulp.src(["./release-notes/**/*"]).pipe(gulp.dest(DIST + "/release-notes"));
-});
-
 gulp.task("copy-static", function () {
   gulp.src(["./static/**/*"]).pipe(gulp.dest(DIST + "/static"));
 });
@@ -170,7 +140,6 @@ gulp.task("copy-index", function () {
       "./app/index.html",
       "./main.js",
       "./server.js",
-      "./vendor/*.js",
       "./release-notes.md"
     ])
     .pipe(gulp.dest(DIST));
@@ -185,6 +154,7 @@ gulp.task("gen-package", function () {
     start: "electron ."
   };
   pkg.main = "main.js";
+  pkg.license = "UNLICENSED";
 
   try {
     fs.statSync(DIST);
@@ -195,25 +165,22 @@ gulp.task("gen-package", function () {
   console.log(`--generating ${DIST}/package.json`);
   fs.writeFileSync(DIST + "/package.json", JSON.stringify(pkg, " ", 2));
 
-  run(`cd ${DIST} && cnpm i`).exec(function () {
+  run(`cd ${DIST} && yarn install`).exec(function () {
     console.log("--done");
   });
 });
 
 gulp.task("watch", function () {
-  gulp.watch(
-    [
-      "!" + DIST + "/**/node_modules/**/*",
-      DIST + "/**/*.html",
-      DIST + "/**/*.js",
-      DIST + "/**/*.css"
-    ],
-    function (event) {
-      return gulp.src(event.path).pipe(plugins.connect.reload());
-    }
-  );
+  gulp.watch([
+    DIST + "/**/*.js",
+    DIST + "/**/*.css",
+    DIST + "/**/*.html",
+    "!" + DIST + "/**/node_modules/**/*"
+  ], function (event) {
+    return gulp.src(event.path).pipe(plugins.connect.reload());
+  });
 
-  gulp.watch(["app/**/*"], function (event) {
+  gulp.watch(["./app/**/*"], function (event) {
     console.log(new Date(), event);
 
     if (event.path.endsWith(".js") && !event.path.endsWith("_test.js")) {
@@ -232,7 +199,7 @@ gulp.task("watch", function () {
     }
   });
 
-  gulp.watch(["./app/index.html", "./main.js"], ["copy-index"]);
+  gulp.watch(["./app/index.html", "./main.js", "./server.js"], ["copy-index"]);
 
   gulp.watch(["./static/**"], ["copy-static"]);
 
@@ -249,7 +216,6 @@ gulp.task("build", [
   "copy-fonts",
   "copy-icons",
   "copy-static",
-  "copy-docs",
   "copy-index",
   "gen-package"
 ]);

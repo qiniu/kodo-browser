@@ -377,6 +377,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
     worker.on("exit", function (code, signal) {
       forkedWorkers.delete(data.job);
 
+      if (!win) return;
+
       event.sender.send(data.job, {
         job: data.job,
         key: 'debug',
@@ -388,6 +390,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
     });
     worker.on("error", function (err) {
       forkedWorkers.delete(data.job);
+
+      if (!win) return;
 
       event.sender.send(data.job, {
         job: data.job,
@@ -504,6 +508,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
     worker.on("exit", function (code, signal) {
       forkedWorkers.delete(data.job);
 
+      if (!win) return;
+
       event.sender.send(data.job, {
         job: data.job,
         key: 'debug',
@@ -515,6 +521,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
     });
     worker.on("error", function (err) {
       forkedWorkers.delete(data.job);
+
+      if (!win) return;
 
       event.sender.send(data.job, {
         job: data.job,

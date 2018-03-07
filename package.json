@@ -1,18 +1,18 @@
 {
   "name": "s3-browser",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "license": "UNLICENSED",
   "main": "dist/main.js",
   "scripts": {
-    "test": "ava test",
     "dev": "./node_modules/.bin/npm-run-all --parallel build watch dev:run",
     "dev:run": "./node_modules/.bin/cross-env NODE_ENV=development electron .",
-    "postbuild": "",
     "prod": "./node_modules/.bin/cross-env NODE_ENV=production cd dist && electron .",
-    "watch": "./node_modules/.bin/gulp watch --custom=$custom",
-    "build": "./node_modules/.bin/gulp build --custom=$custom"
+    "watch": "./node_modules/.bin/gulp watch",
+    "build": "./node_modules/.bin/gulp build",
+    "postbuild": ""
   },
   "engines": {
-    "node": "8.2.1"
+    "node": ">= 8.2.1"
   },
   "devDependencies": {
     "angular": "1.6.9",
@@ -22,7 +22,6 @@
     "angular-ui-bootstrap": "^2.5.6",
     "angular-ui-codemirror": "0.3.0",
     "angular-ui-router": "1.0.3",
-    "ava": "^0.25.0",
     "babel-core": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "bootstrap": "3.3.7",
@@ -45,17 +44,11 @@
     "jquery": "^3.3.1",
     "jquery.qrcode": "^1.0.3",
     "jshint": "^2.9.5",
-    "karma": "^2.0.0",
-    "karma-chrome-launcher": "^2.2.0",
-    "karma-jasmine": "^1.1.1",
-    "minimist": "^1.2.0",
-    "mocha": "~5.0.2",
     "moment": "^2.21.0",
     "npm-run-all": "^4.1.2",
     "shelljs": "~0.8.1",
     "should": "~13.2.1",
-    "showdown": "^1.8.6",
-    "spectron": "^3.8.0"
+    "showdown": "^1.8.6"
   },
   "dependencies": {
     "aws-sdk": "^2.205.0",

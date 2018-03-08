@@ -51,7 +51,7 @@ process.on('message', function (msg) {
       process.send({
         job: msg.data.job,
         key: 'fileUploaded',
-        data: result
+        data: result || {}
       });
     });
     uploader.on('error', function (err) {

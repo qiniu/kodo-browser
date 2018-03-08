@@ -51,7 +51,7 @@ process.on('message', function (msg) {
       process.send({
         job: msg.data.job,
         key: 'fileDownloaded',
-        data: result
+        data: result || {}
       });
     });
     downloader.on('error', function (err) {

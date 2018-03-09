@@ -74,7 +74,7 @@ angular.module("web").controller("usersCtrl", [
             };
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showAK(item) {
@@ -92,7 +92,7 @@ angular.module("web").controller("usersCtrl", [
             };
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showRemove(item) {

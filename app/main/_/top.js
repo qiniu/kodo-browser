@@ -77,7 +77,7 @@ angular.module("web").controller("topCtrl", [
             return fn;
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     };
 
     function logout() {
@@ -119,7 +119,7 @@ angular.module("web").controller("topCtrl", [
         templateUrl: "main/modals/fav-list.html",
         controller: "favListCtrl",
         size: "lg"
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showAbout() {
@@ -132,7 +132,7 @@ angular.module("web").controller("topCtrl", [
             return $scope;
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
   }
 ]);

@@ -14,6 +14,9 @@ module.exports = {
     "ja-JP": "S3 ブラウザ"
   },
 
+  ecloudURL: "",
+  s3apiURL: "",
+
   //logo png 格式, 主要用于mac和linux系统
   logo_png: path.join(__dirname, "./icon.png"),
 

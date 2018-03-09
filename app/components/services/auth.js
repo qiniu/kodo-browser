@@ -100,14 +100,14 @@ angular.module("web").factory("Auth", [
         if (err) {
           df.reject(err);
         } else {
-          delete data.username;
           delete data.password;
 
           if (body.code == "NoSuchAccount") {
-            df.reject("NoSuchAccount")
-            return
+            df.reject("NoSuchAccount");
+            return;
           }
           data.isAuthed = true;
+          data.isSuper = body.isSuper;
           data.id = body.access_key_id;
           data.secret = body.access_key_secret;
           data.token = body.token;
@@ -119,7 +119,7 @@ angular.module("web").factory("Auth", [
         }
       });
 
-      return df.promise
+      return df.promise;
     }
 
     function logout() {

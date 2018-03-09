@@ -1,6 +1,6 @@
 <nav class="navbar navbar-default navbar-fixed-top navbar-inverse my-nav" ng-controller="topCtrl">
 
-  <div class="container container-fluid">
+  <div class="container-fluid">
 
     <div class="navbar-header">
       <a class="navbar-brand" ng-click="click10()">
@@ -27,35 +27,23 @@
         </li>
         <li>
           <a href="" ng-click="showAbout()">
-            <i class="fa fa-about"></i> {{'about'|translate}}
+            <i class="fa fa-info"></i> {{'about'|translate}}
             <!-- 关于 -->
             <small class="new-animate label label-success" ng-if="!upgradeInfo.isLastVersion">new</small>
           </a>
         </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            {{authInfo.id|sub:20}}
+            <i class="fa fa-user-circle"></i> {{authInfo.username|sub:20}}
             <span class="caret"></span>
           </a>
 
           <ul class="dropdown-menu">
-            <li ng-if="authInfo.id.indexOf('STS.')!=0">
-              <a href="" ng-click="showUserList()">
-                <i class="fa fa-users"></i>
-                {{'users'|translate}}
-                <!-- user -->
-              </a>
-            </li>
-            <li ng-if="authInfo.id.indexOf('STS.')!=0">
-              <a href="" ng-click="showFavList()">
-                <i class="fa fa-star"></i>
-                {{'bookmarks'|translate}}
-                <!-- 书签管理 -->
-              </a>
-            </li>
             <li>
               <a href="" ng-click="logout()">
-                <i class="fa fa-power-off"></i>
+                <i class="text-danger fa fa-power-off"></i>
                 {{'logout'|translate}}
                 <!-- 退出 -->
               </a>

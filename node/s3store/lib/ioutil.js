@@ -107,7 +107,7 @@ Client.prototype.uploadFile = function (params) {
   function handleAbort() {
     isAborted = true;
 
-    uploader.emit('abort', data);
+    uploader.emit('abort');
   }
 
   function tryOpenFile() {

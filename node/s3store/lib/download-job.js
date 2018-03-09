@@ -147,7 +147,7 @@ DownloadJob.prototype.startDownload = function (event, data) {
   let self = this;
 
   if (self.isDebug) {
-    console.log(`[IPC MAIN] => ${JSON.stringify(data)}`);
+    console.log("[IPC MAIN]", data);
   }
 
   switch (data.key) {
@@ -185,7 +185,7 @@ DownloadJob.prototype.startDownload = function (event, data) {
     break;
 
   case 'error':
-    console.warn("download object error:", data.error);
+    console.warn("download object error:", data);
     ipcRenderer.removeListener(self.id, self._listener);
 
     self.message = data;
@@ -221,7 +221,7 @@ DownloadJob.prototype.startSpeedCounter = function () {
     let avgSpeed = self.prog.loaded / (self.startTime - new Date().getTime()) * 1000;
 
     self.speed = self.prog.loaded - self.lastLoaded;
-    if (self.speed <= 0 || (self.lastSpeed / self.speed) > 1.2) {
+    if (self.speed <= 0 || (self.lastSpeed / self.speed) > 1.1) {
       self.speed = self.lastSpeed * 0.95;
     }
     if (self.speed < avgSpeed) {

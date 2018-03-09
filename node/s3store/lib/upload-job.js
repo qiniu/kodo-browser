@@ -153,7 +153,7 @@ UploadJob.prototype.wait = function () {
  */
 UploadJob.prototype.startUpload = function (event, data) {
   if (this.isDebug) {
-    console.log(`[IPC MAIN] => ${JSON.stringify(data)}`);
+    console.log("[IPC MAIN]", data);
   }
 
   switch (data.key) {
@@ -179,7 +179,7 @@ UploadJob.prototype.startUpload = function (event, data) {
     break;
 
   case 'error':
-    console.warn("upload object error:", data.error);
+    console.error("upload object error:", data);
     ipcRenderer.removeListener(this.id, this._listener);
 
     this.message = data;
@@ -215,7 +215,7 @@ UploadJob.prototype.startSpeedCounter = function () {
     let avgSpeed = self.loaded / (self.startTime - new Date().getTime()) * 1000;
 
     self.speed = self.prog.loaded - self.lastLoaded;
-    if (self.speed <= 0 || (self.lastSpeed / self.speed) > 1.2) {
+    if (self.speed <= 0 || (self.lastSpeed / self.speed) > 1.1) {
       self.speed = self.lastSpeed * 0.95;
     }
     if (self.speed < avgSpeed) {

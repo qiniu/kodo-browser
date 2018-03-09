@@ -283,7 +283,7 @@ gulp.task("win64", () => {
         return;
       }
 
-      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.bin`).exec(() => {
+      plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {
         console.log("--done");
       });
     });
@@ -305,7 +305,7 @@ gulp.task("win32", () => {
         return;
       }
 
-      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.bin`).exec(() => {
+      plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {
         console.log("--done");
       });
     });
@@ -326,7 +326,7 @@ gulp.task("linux64", () => {
         return;
       }
 
-      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.exe`).exec(() => {
+      plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.exe`).exec(() => {
         console.log("--done");
       });
     });
@@ -347,7 +347,7 @@ gulp.task("linux32", () => {
         return;
       }
 
-      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.exe`).exec(() => {
+      plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.exe`).exec(() => {
         console.log("--done");
       });
     });

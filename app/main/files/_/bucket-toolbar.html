@@ -4,17 +4,11 @@
 
     <div class="btn-group" role="group" ng-if="ref.isBucketList">
 
-      <button ng-disabled="currentAuthInfo.id.indexOf('STS.')==0" type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()">
+      <button ng-disabled="!currentAuthInfo.isSuper" type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()">
         <i class="glyphicon glyphicon-plus text-success"></i>
         <!-- 新建 Bucket -->
         {{'bucket.add'|translate}}
       </button>
-
-      <!-- 简化Policy授权 -->
-      <!-- <button type="button" class="btn btn-default btn-sm" ng-disabled="!bucket_sel.item" ng-click="showGrant([bucket_sel.item])">
-        <i class="fa fa-shield text-warning"></i>
-        {{'simplePolicy'|translate}}
-      </button> -->
 
     </div>
 
@@ -36,6 +30,7 @@
     </div>
 
   </div>
+
   <div class="col-sm-4 pd0">
 
     <div class="input-group input-group-sm mgb0">

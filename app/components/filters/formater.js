@@ -1,21 +1,28 @@
 "use strict";
 
-angular
-  .module("web")
-  .filter("sub", function() {
-    return function(s, len) {
+angular.module("web")
+  .filter("sub", function () {
+    return function (s, len) {
+      if (!s) {
+        return "";
+      }
+
       if (s.length < len) return s;
       else return s.substring(0, len) + "...";
     };
   })
-  .filter("hideSecret", function() {
-    return function(s) {
+  .filter("hideSecret", function () {
+    return function (s) {
+      if (!s) {
+        return "";
+      }
+
       if (s.length < 6) return "******";
       else return s.substring(0, 3) + "****" + s.substring(s.length - 3);
     };
   })
-  .filter("timeFormat", function() {
-    return function(d, de) {
+  .filter("timeFormat", function () {
+    return function (d, de) {
       de = de || "";
       try {
         if (!d) return de;
@@ -29,8 +36,8 @@ angular
       }
     };
   })
-  .filter("elapse", function() {
-    return function(st, et) {
+  .filter("elapse", function () {
+    return function (st, et) {
       et = et || new Date().getTime();
 
       var ms = et - st;
@@ -63,14 +70,14 @@ angular
   })
   .filter("leftTimeFormat", [
     "utilSvs",
-    function(utilSvs) {
-      return function(ms) {
+    function (utilSvs) {
+      return function (ms) {
         return utilSvs.leftTime(ms);
       };
     }
   ])
-  .filter("sizeFormat", function() {
-    return function(n, ex) {
+  .filter("sizeFormat", function () {
+    return function (n, ex) {
       if (n == 0) return 0;
       if (!n) return "0";
 
@@ -113,8 +120,8 @@ angular
       return t.length > 0 ? t.join("") : 0;
     };
   })
-  .filter("persent", function() {
-    return function(a, b, status) {
+  .filter("persent", function () {
+    return function (a, b, status) {
       if (a == 0 && b == 0) {
         if (status == "finished") {
           return 100;
@@ -125,24 +132,24 @@ angular
   })
   .filter("statusCls", [
     "jobUtil",
-    function(jobUtil) {
-      return function(s) {
+    function (jobUtil) {
+      return function (s) {
         return jobUtil.getStatusCls(s);
       };
     }
   ])
   .filter("status", [
     "jobUtil",
-    function(jobUtil) {
-      return function(s, isUp) {
+    function (jobUtil) {
+      return function (s, isUp) {
         return jobUtil.getStatusLabel(s, isUp);
       };
     }
   ])
   .filter("fileIcon", [
     "fileSvs",
-    function(fileSvs) {
-      return function(item) {
+    function (fileSvs) {
+      return function (item) {
         if (item.storageClass == "Archive") {
           //restore
           if (item.storageStatus == 2) {
@@ -158,53 +165,53 @@ angular
         else if (info.type == "picture") return "file-image-o";
         else if (info.type == "doc") {
           switch (info.ext[0]) {
-            case "doc":
-            case "docx":
-              return "file-word-o";
-            case "pdf":
-              return "file-pdf-o";
-            case "ppt":
-            case "pptx":
-              return "file-powerpoint-o";
-            case "exl":
-              return "file-excel-o";
+          case "doc":
+          case "docx":
+            return "file-word-o";
+          case "pdf":
+            return "file-pdf-o";
+          case "ppt":
+          case "pptx":
+            return "file-powerpoint-o";
+          case "exl":
+            return "file-excel-o";
           }
           return "file-o";
         } else if (info.type == "code") {
           return "file-text-o";
         } else if (info.type == "others") {
           switch (info.ext[0]) {
-            case "gz":
-            case "tar":
-            case "zip":
-            case "jar":
-            case "bz":
-            case "war":
-            case "xz":
-              return "file-zip-o";
+          case "gz":
+          case "tar":
+          case "zip":
+          case "jar":
+          case "bz":
+          case "war":
+          case "xz":
+            return "file-zip-o";
 
-            case "pkg":
-              return "dropbox";
-            case "app":
-            case "dmg":
-              return "apple";
-            case "apk":
-              return "android";
+          case "pkg":
+            return "dropbox";
+          case "app":
+          case "dmg":
+            return "apple";
+          case "apk":
+            return "android";
 
-            case "msi":
-            case "deb":
-            case "bin":
+          case "msi":
+          case "deb":
+          case "bin":
 
-            case "exe":
-              return "cog";
+          case "exe":
+            return "cog";
 
-            case "img":
-            case "iso":
-              return "dot-circle-o";
+          case "img":
+          case "iso":
+            return "dot-circle-o";
 
-            case "cmd":
-            case "sh":
-              return "terminal";
+          case "cmd":
+          case "sh":
+            return "terminal";
           }
           return "file-o";
         } else return "file-o";

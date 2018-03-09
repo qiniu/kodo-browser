@@ -6,8 +6,8 @@
   <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
   <title>S3 Browser</title>
   <script>
-    const path = require('path');
     const os = require('os');
+    const path = require('path');
 
     var custom = {};
     try {
@@ -63,19 +63,6 @@
       shell
     } = require('electron');
     var isDev = process.env.NODE_ENV == 'development';
-
-    ipcRenderer.on('asynchronous-reply', (event, data) => {
-      switch (data.key) {
-      case 'getStaticServerPort':
-        Global.staticServerPort = data.port;
-        break;
-      }
-    });
-    setTimeout(function () {
-      ipcRenderer.send('asynchronous', {
-        key: 'getStaticServerPort'
-      });
-    }, 1000);
 
     function openExternal(url) {
       // Open a URL in the default way

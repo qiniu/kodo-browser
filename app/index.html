@@ -77,14 +77,6 @@
       });
     }, 1000);
 
-    //自动升级
-    // setTimeout(function(){
-    //   ipcRenderer.send('asynchronous-message', 'checkUpgrade');
-    // },2000);
-    // setInterval(function(){
-    //   ipcRenderer.send('asynchronous-message', 'checkUpgrade');
-    // },60000);
-
     function openExternal(url) {
       // Open a URL in the default way
       shell.openExternal(url);
@@ -112,6 +104,11 @@
         version: custom.version || pkg.version //version
       },
       i18n: require('./node/i18n'),
+
+      custom_settings: {
+        ecloudURL: custom.ecloudURL,
+        s3apiURL: custom.s3apiURL
+      },
 
       config_path: path.join(os.homedir(), '.s3-browser'),
 

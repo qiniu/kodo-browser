@@ -1,3 +1,5 @@
+import { Glob } from "@uirouter/core";
+
 angular.module("web").controller("loginCtrl", [
   "$scope",
   "$rootScope",
@@ -34,8 +36,8 @@ angular.module("web").controller("loginCtrl", [
       },
       item: {
         eptpl: DEF_EPTPL,
-        ecloudtpl: "",
-        s3apitpl: ""
+        ecloudtpl: Global.custom_settings.ecloudURL,
+        s3apitpl: Global.custom_settings.s3apiURL
       },
       eptplType: "default",
 

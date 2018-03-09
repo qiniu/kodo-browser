@@ -91,7 +91,7 @@ angular
               return putData;
             }
           }
-        });
+        }).result.then(angular.noop, angular.noop);
       }
 
       function confirm(title, msg, fn, opt) {
@@ -137,7 +137,7 @@ angular
               return putData;
             }
           }
-        });
+        }).result.then(angular.noop, angular.noop);
       }
     }
   ])

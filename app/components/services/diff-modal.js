@@ -40,7 +40,7 @@ angular
                 };
               }
             }
-          });
+          }).result.then(angular.noop, angular.noop);
         }
       };
     }

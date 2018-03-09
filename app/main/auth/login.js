@@ -1,5 +1,3 @@
-import { Glob } from "@uirouter/core";
-
 angular.module("web").controller("loginCtrl", [
   "$scope",
   "$rootScope",

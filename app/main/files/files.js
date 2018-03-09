@@ -609,7 +609,7 @@ angular.module("web").controller("filesCtrl", [
             return item;
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showAddBucket() {
@@ -630,7 +630,7 @@ angular.module("web").controller("filesCtrl", [
             };
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showUpdateBucket(item) {
@@ -651,7 +651,7 @@ angular.module("web").controller("filesCtrl", [
             };
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showDeleteBucket(item) {
@@ -702,7 +702,7 @@ angular.module("web").controller("filesCtrl", [
             };
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showAddFolder() {
@@ -723,7 +723,7 @@ angular.module("web").controller("filesCtrl", [
             };
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showPreview(item, type) {
@@ -811,7 +811,7 @@ angular.module("web").controller("filesCtrl", [
             };
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showCRC(item) {
@@ -826,7 +826,7 @@ angular.module("web").controller("filesCtrl", [
             return angular.copy($scope.currentInfo);
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showDownload(item) {
@@ -977,7 +977,7 @@ angular.module("web").controller("filesCtrl", [
             return angular.copy($scope.currentInfo);
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showGrantToken(item) {
@@ -992,7 +992,7 @@ angular.module("web").controller("filesCtrl", [
             return angular.copy($scope.currentInfo);
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showRename(item) {
@@ -1021,7 +1021,7 @@ angular.module("web").controller("filesCtrl", [
             };
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showPaste() {
@@ -1058,7 +1058,8 @@ angular.module("web").controller("filesCtrl", [
               };
             }
           }
-        });
+        }).result.then(angular.noop, angular.noop);
+
         return;
       }
 
@@ -1098,7 +1099,7 @@ angular.module("web").controller("filesCtrl", [
                 };
               }
             }
-          });
+          }).result.then(angular.noop, angular.noop);
         }
       });
     }
@@ -1129,7 +1130,7 @@ angular.module("web").controller("filesCtrl", [
             return angular.copy($scope.currentInfo);
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showACL(item) {
@@ -1144,7 +1145,7 @@ angular.module("web").controller("filesCtrl", [
             return angular.copy($scope.currentInfo);
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showHttpHeaders(item) {
@@ -1159,7 +1160,7 @@ angular.module("web").controller("filesCtrl", [
             return angular.copy($scope.currentInfo);
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showRestore(item) {
@@ -1184,7 +1185,7 @@ angular.module("web").controller("filesCtrl", [
             };
           }
         }
-      });
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showUserList() {
@@ -1193,7 +1194,7 @@ angular.module("web").controller("filesCtrl", [
         controller: "usersCtrl",
         size: "lg",
         backdrop: "static"
-      });
+      }).result.then(angular.noop, angular.noop);
     }
   }
 ]);

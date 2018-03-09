@@ -7,7 +7,8 @@ const {
 process.on('uncaughtException', function (err) {
   process.send({
     key: 'error',
-    exception: err
+    exception: err,
+    stack: err.stack
   });
 });
 
@@ -51,7 +52,7 @@ process.on('message', function (msg) {
       process.send({
         job: msg.data.job,
         key: 'fileDownloaded',
-        data: result
+        data: result || {}
       });
     });
     downloader.on('error', function (err) {

@@ -1,6 +1,6 @@
 "use strict";
 
-var fs = require("fs"),
+let fs = require("fs"),
   path = require("path"),
   util = require("./util"),
   ioutil = require("./ioutil"),
@@ -76,7 +76,7 @@ DownloadJob.prototype.start = function () {
   this._changeStatus("running");
 
   // start
-  var job = {
+  let job = {
     job: this.id,
     key: 'job-download',
     options: {
@@ -144,10 +144,10 @@ DownloadJob.prototype.wait = function () {
  * downloading
  */
 DownloadJob.prototype.startDownload = function (event, data) {
-  var self = this;
+  let self = this;
 
   if (self.isDebug) {
-    console.log(`[IPC MAIN] => ${JSON.stringify(data)}`);
+    console.log("[IPC MAIN]", data);
   }
 
   switch (data.key) {
@@ -185,10 +185,10 @@ DownloadJob.prototype.startDownload = function (event, data) {
     break;
 
   case 'error':
-    console.warn("download object error:", data.error);
+    console.warn("download object error:", data);
     ipcRenderer.removeListener(self.id, self._listener);
 
-    self.message = data.error.message;
+    self.message = data;
     self._changeStatus("failed");
     self.emit("error", data.error);
     break;
@@ -205,7 +205,7 @@ DownloadJob.prototype.startDownload = function (event, data) {
 };
 
 DownloadJob.prototype.startSpeedCounter = function () {
-  var self = this;
+  let self = this;
 
   self.lastLoaded = self.prog.loaded || 0;
   self.lastSpeed = 0;
@@ -218,12 +218,14 @@ DownloadJob.prototype.startSpeedCounter = function () {
       return;
     }
 
+    let avgSpeed = self.prog.loaded / (self.startTime - new Date().getTime()) * 1000;
+
     self.speed = self.prog.loaded - self.lastLoaded;
-    if (self.speed <= 0) {
+    if (self.speed <= 0 || (self.lastSpeed / self.speed) > 1.1) {
       self.speed = self.lastSpeed * 0.95;
     }
-    if (self.lastSpeed / self.speed > 1.2) {
-      self.speed = self.lastSpeed * 0.95;
+    if (self.speed < avgSpeed) {
+      self.speed = avgSpeed;
     }
     if (self.lastSpeed != self.speed) {
       self.emit("speedChange", self.speed * 1.2);

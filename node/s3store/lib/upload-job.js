@@ -1,6 +1,6 @@
 "use strict";
 
-var fs = require("fs"),
+let fs = require("fs"),
   path = require("path"),
   mime = require("mime"),
   util = require("./util"),
@@ -84,7 +84,7 @@ UploadJob.prototype.start = function () {
   this._changeStatus("running");
 
   // start
-  var job = {
+  let job = {
     job: this.id,
     key: 'job-upload',
     options: {
@@ -153,7 +153,7 @@ UploadJob.prototype.wait = function () {
  */
 UploadJob.prototype.startUpload = function (event, data) {
   if (this.isDebug) {
-    console.log(`[IPC MAIN] => ${JSON.stringify(data)}`);
+    console.log("[IPC MAIN]", data);
   }
 
   switch (data.key) {
@@ -179,10 +179,10 @@ UploadJob.prototype.startUpload = function (event, data) {
     break;
 
   case 'error':
-    console.warn("upload object error:", data.error);
+    console.error("upload object error:", data);
     ipcRenderer.removeListener(this.id, this._listener);
 
-    this.message = data.error.message;
+    this.message = data;
     this._changeStatus("failed");
     this.emit("error", data.error);
     break;
@@ -199,7 +199,7 @@ UploadJob.prototype.startUpload = function (event, data) {
 };
 
 UploadJob.prototype.startSpeedCounter = function () {
-  var self = this;
+  let self = this;
 
   self.lastLoaded = self.prog.loaded || 0;
   self.lastSpeed = 0;
@@ -212,12 +212,14 @@ UploadJob.prototype.startSpeedCounter = function () {
       return;
     }
 
+    let avgSpeed = self.loaded / (self.startTime - new Date().getTime()) * 1000;
+
     self.speed = self.prog.loaded - self.lastLoaded;
-    if (self.speed <= 0) {
+    if (self.speed <= 0 || (self.lastSpeed / self.speed) > 1.1) {
       self.speed = self.lastSpeed * 0.95;
     }
-    if (self.lastSpeed / self.speed > 1.2) {
-      self.speed = self.lastSpeed * 0.95;
+    if (self.speed < avgSpeed) {
+      self.speed = avgSpeed;
     }
     if (self.lastSpeed != self.speed) {
       self.emit("speedChange", self.speed * 1.2);

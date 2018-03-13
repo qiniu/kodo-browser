@@ -29,11 +29,13 @@ angular.module("web").controller("loginCtrl", [
     angular.extend($scope, {
       gtab: parseInt(localStorage.getItem("gtag") || 1),
       flags: {
+        showMore: 0,
         remember: "NO",
         showHis: "NO"
       },
       item: {
         eptpl: DEF_EPTPL,
+        domain: Global.custom_settings.domain,
         ecloudtpl: Global.custom_settings.ecloudURL,
         s3apitpl: Global.custom_settings.s3apiURL
       },
@@ -166,6 +168,10 @@ angular.module("web").controller("loginCtrl", [
 
       var data = angular.copy($scope.item);
 
+      //append domain
+      if (data.username) {
+        data.username = data.username + Global.custom_settings.domain;
+      }
       //trim password
       if (data.password) {
         data.password = data.password.trim();

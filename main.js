@@ -19,22 +19,6 @@ const {
 app.commandLine.appendSwitch("ignore-connections-limit", "poc.com,s3qos.poc.com");
 
 ///*****************************************
-//local server
-const PORTS = [7123, 7124, 7125, 7126, 8123, 8124, 8125, 8126];
-let serverPort;
-
-for (serverPort of PORTS) {
-  try {
-    require("./server.js").listen(serverPort);
-
-    console.log(`listening on port ${serverPort}`);
-    break;
-  } catch (e) {
-    console.warn(`failed to listen on port ${serverPort}: `, e);
-  }
-}
-
-///*****************************************
 let root = path.dirname(__dirname);
 
 let appRoot = path.dirname(__dirname);

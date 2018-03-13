@@ -4,7 +4,7 @@
 
     <div class="btn-group" role="group" ng-if="ref.isBucketList">
 
-      <button ng-disabled="!currentAuthInfo.isSuper" type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()">
+      <button ng-if="currentAuthInfo.isSuper" type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()">
         <i class="glyphicon glyphicon-plus text-success"></i>
         <!-- 新建 Bucket -->
         {{'bucket.add'|translate}}

@@ -14,6 +14,7 @@ module.exports = {
     "ja-JP": "S3 ブラウザ"
   },
 
+  domain: "@qiniu.com",
   ecloudURL: "http://storage.poc.com",
   s3apiURL: "http://s3-qos.poc.com",
 

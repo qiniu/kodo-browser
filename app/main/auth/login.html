@@ -144,40 +144,50 @@
         </form>
 
         <form ng-if="gtab==2 && hideCloud" class="form-horizontal" name="form2" ng-submit="onSubmitPass(form2)">
-          <div class="form-group has-feedback" ng-class="{'has-error':!form2.ecloudtpl.$valid}">
-            <label for="ecloudtpl" class="col-sm-4 control-label">
-              <span class="red">*</span> ECLOUD:
-            </label>
-
-            <div class="col-sm-8">
-              <input type="text" required ng-model="item.ecloudtpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="ecloudtpl" name="ecloudtpl" placeholder="https://">
-            </div>
-          </div>
-
-          <div class="form-group has-feedback" ng-class="{'has-error':!form2.s3apitpl.$valid}">
-            <label for="s3apitpl" class="col-sm-4 control-label">
-              <span class="red">*</span> S3API:
-            </label>
-
-            <div class="col-sm-8">
-              <input type="text" required ng-model="item.s3apitpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="s3apitpl" name="s3apitpl" placeholder="https://">
-            </div>
-          </div>
-
           <div class="form-group has-feedback" ng-class="{'has-error': !form2.auser.$valid }">
             <label for="auser" class="col-sm-4 control-label">
-              <span class="red">*</span> {{'auth.username'|translate}}:</label>
+              <span class="red">*</span> {{'auth.username'|translate}}:
+            </label>
             <div class="col-sm-8">
-              <input type="text" required ng-model="item.username" class="form-control" id="auser" name="auser" placeholder="{{'auth.username.placeholder'|translate}}">
+              <div class="input-group">
+                <input type="text" required ng-model="item.username" class="form-control" id="auser" name="auser" placeholder="{{'auth.username.placeholder'|translate}}">
+                <span class="input-group-addon">{{ item.domain }}</span>
+              </div>
             </div>
           </div>
           <div class="form-group has-feedback" ng-class="{'has-error': !form2.apass.$valid }">
             <label for="apass" class="col-sm-4 control-label">
-              <span class="red">*</span> {{'auth.password'|translate}}:</label>
+              <span class="red">*</span> {{'auth.password'|translate}}:
+            </label>
             <div class="col-sm-8">
               <input type="password" required ng-model="item.password" class="form-control" id="apass" name="apass" placeholder="{{'auth.password.placeholder'|translate}}">
             </div>
           </div>
+
+          <fieldset class="login-fieldset">
+            <legend>
+              <input type="checkbox" ng-model="flags.showMore" ng-true-value="1" ng-false-value="0" /> 高级选项
+            </legend>
+            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.ecloudtpl.$valid}">
+              <label for="ecloudtpl" class="col-sm-4 control-label">
+                <span class="red">*</span> ECLOUD:
+              </label>
+
+              <div class="col-sm-8">
+                <input type="text" required ng-model="item.ecloudtpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="ecloudtpl" name="ecloudtpl" placeholder="https://">
+              </div>
+            </div>
+
+            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.s3apitpl.$valid}">
+              <label for="s3apitpl" class="col-sm-4 control-label">
+                <span class="red">*</span> S3API:
+              </label>
+
+              <div class="col-sm-8">
+                <input type="text" required ng-model="item.s3apitpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="s3apitpl" name="s3apitpl" placeholder="https://">
+              </div>
+            </div>
+          </fieldset>
 
           <div class="form-group">
             <div class="col-sm-offset-3 col-sm-9">

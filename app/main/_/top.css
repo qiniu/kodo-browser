@@ -41,6 +41,11 @@
   cursor: pointer;
 }
 
+.login-fieldset > legend {
+  color: #555;
+  font-size: 12px;
+}
+
 @keyframes newcolor {
   0% {
     background: red;

@@ -62,7 +62,7 @@
 
     <div class="btn-group" role="toolbar" ng-if="keepMoveOptions">
       <button class="btn btn-default btn-sm" type="button" uib-tooltip="{{'paste.resources'|translate}}" tooltip-placement="bottom"
-        tooltip-append-to-body="true" ng-click="showPaste()" ng-if="(!ref.bucketPerm || ref.bucketPerm.write)">
+        tooltip-append-to-body="true" ng-click="showPaste()">
         <span class="text-primary">
           <i class="fa fa-paste"></i>
           {{'paste'|translate}}({{keepMoveOptions.items.length}})

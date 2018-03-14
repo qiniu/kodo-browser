@@ -64,6 +64,7 @@
     "mime": "^2.2.0",
     "nodemailer": "4.6.0",
     "nodemailer-smtp-transport": "2.7.4",
+    "npm": "^5.7.1",
     "pend": "^1.2.0",
     "request": "^2.83.0"
   }

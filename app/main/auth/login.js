@@ -197,7 +197,7 @@ angular.module("web").controller("loginCtrl", [
           $location.url("/");
         },
         function (err) {
-          Toast.error(err.code + ":" + err.message);
+          Toast.error(err);
         }
       );
 

@@ -102,8 +102,8 @@ angular.module("web").factory("Auth", [
         } else {
           delete data.password;
 
-          if (body.code == "NoSuchAccount") {
-            df.reject("NoSuchAccount");
+          if (body.code == "NoSuchAccount" || body.code == "AmbiguousGrantByPassword") {
+            df.reject("用户名或者密码错误");
             return;
           }
           data.isAuthed = true;

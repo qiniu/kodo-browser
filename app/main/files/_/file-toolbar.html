@@ -51,7 +51,7 @@
         {{'rename'|translate}}
       </button>
 
-      <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has || currentAuthInfo.privilege=='readOnly'" ng-if="(!ref.bucketPerm || ref.bucketPerm.write)"
+      <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has || currentAuthInfo.privilege=='readOnly'" ng-if="(!ref.bucketPerm || ref.bucketPerm.remove)"
         ng-click="showDeleteFilesSelected()">
         <i class="fa fa-clone text-primary"></i>
         <!-- 删除 -->

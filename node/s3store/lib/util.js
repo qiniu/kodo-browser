@@ -35,7 +35,7 @@ function parseS3Path(s3path) {
   var key = a.substring(bucket.length + 1);
   return {
     bucket: bucket,
-    key: key
+    key: key.replace(/\\/g, "/")
   };
 }
 

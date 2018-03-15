@@ -157,44 +157,44 @@ UploadJob.prototype.startUpload = function (event, data) {
   }
 
   switch (data.key) {
-  case 'fileStat':
-    var prog = data.data;
+    case 'fileStat':
+      var prog = data.data;
 
-    this.prog.total = prog.progressTotal;
-    this.emit('progress', this.prog);
-    break;
+      this.prog.total = prog.progressTotal;
+      this.emit('progress', this.prog);
+      break;
 
-  case 'progress':
-    var prog = data.data;
+    case 'progress':
+      var prog = data.data;
 
-    this.prog.loaded = prog.progressLoaded;
-    this.emit('progress', this.prog);
-    break;
+      this.prog.loaded = prog.progressLoaded;
+      this.emit('progress', this.prog);
+      break;
 
-  case 'fileUploaded':
-    ipcRenderer.removeListener(this.id, this._listener);
+    case 'fileUploaded':
+      ipcRenderer.removeListener(this.id, this._listener);
 
-    this._changeStatus("finished");
-    this.emit("complete");
-    break;
+      this._changeStatus("finished");
+      this.emit("complete");
+      break;
 
-  case 'error':
-    console.error("upload object error:", data);
-    ipcRenderer.removeListener(this.id, this._listener);
+    case 'error':
+      console.error("upload object error:", data);
+      ipcRenderer.removeListener(this.id, this._listener);
 
-    this.message = data;
-    this._changeStatus("failed");
-    this.emit("error", data.error);
-    break;
+      this.message = data;
+      this._changeStatus("failed");
+      this.emit("error", data.error);
+      break;
 
-  case 'debug':
-    if (!this.isDebug) {
-      console.log("Debug", data);
-    }
-    break;
+    case 'debug':
+      if (!this.isDebug) {
+        console.log("Debug", data);
+      }
+      break;
 
-  default:
-    console.warn("Unknown", data);
+    default:
+      console.warn("Unknown", data);
   }
 };
 
@@ -230,8 +230,8 @@ UploadJob.prototype.startSpeedCounter = function () {
 
     self.predictLeftTime =
       self.speed <= 0 ?
-      0 :
-      Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
+        0 :
+        Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
   }, 1000);
 };
 

@@ -182,11 +182,6 @@ angular.module("web").factory("osUploadManager", [
 
         filePath = bucketInfo.key ? bucketInfo.key + "/" + filePath : filePath;
 
-        //修复window下 \ 问题
-        if (path.sep != "/") {
-          filePath = filePath.replace(/\\/g, "/");
-        }
-
         if (fs.statSync(absPath).isDirectory()) {
           //创建目录
           osClient
@@ -210,6 +205,13 @@ angular.module("web").factory("osUploadManager", [
           });
         } else {
           //文件
+
+          //修复window下 \ 问题
+          filePath = path.normalize(fileName);
+          if (path.sep != "/") {
+            filePath = filePath.replace(/\\/g, "/");
+          }
+
           var job = createJob(authInfo, {
             region: bucketInfo.region,
             from: {
@@ -218,7 +220,7 @@ angular.module("web").factory("osUploadManager", [
             },
             to: {
               bucket: bucketInfo.bucket,
-              key: path.normalize(filePath)
+              key: filePath
             }
           });
 

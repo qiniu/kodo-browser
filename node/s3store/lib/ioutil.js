@@ -778,5 +778,10 @@ function encodeSpecialCharacters(filename) {
 
 function smallestPartSizeFromFileSize(fileSize) {
   var partSize = Math.ceil(fileSize / MAX_MULTIPART_COUNT);
-  return (partSize < MIN_MULTIPART_SIZE) ? MIN_MULTIPART_SIZE : partSize;
+
+  if (partSize < MIN_MULTIPART_SIZE) {
+    return MIN_MULTIPART_SIZE;
+  }
+
+  return partSize + (MIN_MULTIPART_SIZE - partSize%MIN_MULTIPART_SIZE);
 }

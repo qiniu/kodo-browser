@@ -207,7 +207,7 @@ angular.module("web").factory("osUploadManager", [
           //文件
 
           //修复window下 \ 问题
-          filePath = path.normalize(fileName);
+          filePath = path.normalize(filePath);
           if (path.sep != "/") {
             filePath = filePath.replace(/\\/g, "/");
           }

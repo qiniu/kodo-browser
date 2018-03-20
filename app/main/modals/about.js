@@ -19,10 +19,9 @@ angular.module("web").controller("aboutCtrl", [
   ) {
     angular.extend($scope, {
       app_logo: Global.app.logo,
+      app_version: Global.app.version,
       custom_about_html: Global.about_html,
-      info: {
-        currentVersion: Global.app.version
-      },
+
       open: open,
       startUpgrade: startUpgrade,
       installAndRestart: installAndRestart,
@@ -40,13 +39,12 @@ angular.module("web").controller("aboutCtrl", [
 
       if (!$scope.info.isLastVersion) {
         var converter = new showdown.Converter();
-        autoUpgradeSvs.getLastestReleaseNote($scope.info.lastVersion, function (
-          text
-        ) {
+        autoUpgradeSvs.getLastestReleaseNote($scope.info.lastVersion, function (text) {
           text = text + "";
+
           var html = converter.makeHtml(text);
+
           $scope.info.lastReleaseNote = html;
-          //safeApply($scope);
         });
       }
     }

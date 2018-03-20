@@ -290,7 +290,7 @@ AccessKeySecret: ${secret}<br/>
 授予权限(permission): ${privType}<br/>
 <br/>
 
-2. ${T('auth.passLogin')}:<br/><br/>
+2. ${T('auth.passlogin')}:<br/><br/>
 
 <code>${tokenStr}</code>
 

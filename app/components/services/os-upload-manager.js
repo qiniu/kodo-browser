@@ -86,7 +86,7 @@ angular.module("web").factory("osUploadManager", [
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
         },
-        endpoint: osClient.getS3Endpoint(region, options.to.bucket, auth.s3apitpl || auth.eptpl),
+        endpoint: osClient.getS3Endpoint(region, options.to.bucket, auth.servicetpl || auth.eptpl),
         region: options.region,
         httpOptions: {
           connectTimeout: 3000, // 3s
@@ -184,11 +184,17 @@ angular.module("web").factory("osUploadManager", [
 
         if (fs.statSync(absPath).isDirectory()) {
           //创建目录
+          var subDirPath = filePath + "/";
+          subDirPath = path.normalize(subDirPath);
+          if (path.sep != "/") {
+            subDirPath = subDirPath.replace(/\\/g, "/");
+          }
+
           osClient
-            .createFolder(bucketInfo.region, bucketInfo.bucket, filePath + "/")
+            .createFolder(bucketInfo.region, bucketInfo.bucket, subDirPath)
             .then(function () {
               //判断是否刷新文件列表
-              checkNeedRefreshFileList(bucketInfo.bucket, filePath + "/");
+              checkNeedRefreshFileList(bucketInfo.bucket, subDirPath);
             });
 
           //递归遍历目录

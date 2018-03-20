@@ -10,17 +10,9 @@
 <div class="modal-body">
   <h4 class="text-center">
     <img ng-src="{{app_logo}}" style="display:inline-block;" width="40" /> &nbsp;&nbsp;{{'app.name'|translate}}
-    <small class="text-orange">v {{info.currentVersion}}</small>
+    <small class="text-orange">v {{app_version}}</small>
 
-    <div ng-if="custom_about_html" ng-bind-html="custom_about_html"></div>
-
-    <div class="pd4" ng-if="!custom_about_html">
-      <small class="text-muted">
-        {{'opensource.address'|translate}}:
-
-        <a href="" ng-click="open('https://github.com/s3-browser/s3-browser')">https://github.com/s3-browser/s3-browser</a>
-      </small>
-    </div>
+    <div class="pd4" ng-if="custom_about_html" ng-bind-html="custom_about_html"></div>
   </h4>
 
   <hr/>
@@ -33,14 +25,11 @@
         {{'foundNewVersion'|translate}}
         <!-- 发现新版本： -->
         v {{info.lastVersion}} &nbsp;&nbsp;&nbsp;&nbsp;
-        <!-- ng-click="open(info.link)" -->
         <a ng-if="!info.upgradeJob||info.upgradeJob.status=='waiting'" href="" ng-click="startUpgrade()" class="btn btn-sm btn-success">
           <i class="fa fa-download"></i>
-          <!-- {{'clickToDownload'|translate}} -->
           {{'upgrade.start'|translate}}
         </a>
       </span>
-      <!-- {{info.upgradeJob}} -->
 
       <!-- progress -->
       <div ng-if="info.upgradeJob.status=='running'" style="margin:4px auto;">
@@ -48,13 +37,11 @@
         {{'upgrade.downloading'|translate}}
         <div class="progress" style="height:10px">
           <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="{{info.upgradeJob.progress}}" aria-valuemin="0" aria-valuemax="100" style="width: {{info.upgradeJob.progress}}%">
-            <!-- <span>{{info.upgradeJob.progress}}%</span> -->
           </div>
         </div>
       </div>
 
       <div ng-if="info.upgradeJob.status=='failed'">
-
         {{'upgrade.download.failed'|translate}}
         <a href="" ng-click="open(info.link)" class="btn btn-sm btn-primary">
           <i class="fa fa-download"></i>
@@ -75,13 +62,11 @@
       </section>
     </div>
 
-    <div ng-if="info.isLastVersion">
-      <span class="text-primary">
+    <div ng-if="info.isLastVersion" class="text-center">
+      <span class="text-success">
         {{'currentIsLastest'|translate}}
       </span>
     </div>
-
   </div>
 
-</div>
 </div>

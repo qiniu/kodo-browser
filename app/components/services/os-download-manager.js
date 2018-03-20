@@ -83,7 +83,7 @@ angular.module("web").factory("osDownloadManager", [
         endpoint: osClient.getS3Endpoint(
           region,
           options.from.bucket,
-          auth.s3apitpl || auth.eptpl
+          auth.servicetpl || auth.eptpl
         ),
         region: region,
         httpOptions: {

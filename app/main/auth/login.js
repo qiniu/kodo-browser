@@ -21,6 +21,8 @@ angular.module("web").controller("loginCtrl", [
   ) {
     var DEF_EPTPL = "https://{region}-s3.qiniu.com";
     var KEY_REMEMBER = Const.KEY_REMEMBER;
+    var KEY_LOGINTPL = Const.KEY_LOGINTPL;
+    var KEY_SERVICETPL = Const.KEY_SERVICETPL;
     var SHOW_HIS = Const.SHOW_HIS;
     var regions = angular.copy(Const.regions);
 
@@ -34,17 +36,18 @@ angular.module("web").controller("loginCtrl", [
         showHis: "NO"
       },
       item: {
-        eptpl: DEF_EPTPL,
         domain: Global.custom_settings.domain,
-        ecloudtpl: Global.custom_settings.ecloudURL,
-        s3apitpl: Global.custom_settings.s3apiURL
+        eptpl: DEF_EPTPL,
+        logintpl: (localStorage.getItem(KEY_LOGINTPL) || Global.custom_settings.loginURL),
+        servicetpl: (localStorage.getItem(KEY_SERVICETPL)  || Global.custom_settings.serviceURL)
       },
       eptplType: "default",
 
-      hideTopNav: 1,
-      hideCloud: true,
       regions: regions,
       defaultRegion: "",
+
+      hideTopNav: 1,
+      hideCloud: true,
 
       onSubmit: onSubmit,
       showCleanHistories: showCleanHistories,
@@ -83,10 +86,10 @@ angular.module("web").controller("loginCtrl", [
     }
 
     function showRemoveHis(h) {
-      var title = T("auth.removeAK.title"); //删除AK
+      var title = T("auth.removeAK.title"); 
       var message = T("auth.removeAK.message", {
         id: h.id
-      }); //'ID：'+h.id+', 确定删除?'
+      }); 
       Dialog.confirm(
         title,
         message,
@@ -191,6 +194,9 @@ angular.module("web").controller("loginCtrl", [
           if ($scope.flags.remember == "YES") {
             AuthInfo.addToHistories(data);
           }
+
+          localStorage.setItem(KEY_LOGINTPL, data.logintpl);
+          localStorage.setItem(KEY_SERVICETPL, data.servicetpl);
 
           Toast.success(T("login.successfully"), 1000);
 

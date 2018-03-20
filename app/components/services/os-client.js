@@ -661,6 +661,11 @@ angular.module("web").factory("osClient", [
     /**************************************/
 
     function createFolder(region, bucket, prefix) {
+      prefix = path.normalize(prefix);
+      if (path.sep != "/") {
+        prefix = prefix.replace(/\\/g, "/");
+      }
+
       return new Promise(function (resolve, reject) {
         var client = getClient({
           region: region,
@@ -1307,7 +1312,7 @@ angular.module("web").factory("osClient", [
       var endpoint = getS3Endpoint(
         region,
         bucket,
-        authInfo.s3apitpl || authInfo.eptpl
+        authInfo.servicetpl || authInfo.eptpl
       );
 
       var options = {
@@ -1350,8 +1355,8 @@ angular.module("web").factory("osClient", [
       key = encodeURIComponent(key);
 
       var authInfo = AuthInfo.get();
-      if (authInfo.s3apitpl) {
-        var endpoint = authInfo.s3apitpl;
+      if (authInfo.servicetpl) {
+        var endpoint = authInfo.servicetpl;
         if (endpoint[endpoint.length - 1] !== "/") {
           endpoint += "/";
         }
@@ -1396,7 +1401,7 @@ angular.module("web").factory("osClient", [
         region = authInfo.region || "cn-east-1";
       }
 
-      eptpl = eptpl || authInfo.s3apitpl || authInfo.eptpl || "http://{region}-s3.qiniu.com";
+      eptpl = eptpl || authInfo.servicetpl || authInfo.eptpl || "http://{region}-s3.qiniu.com";
       eptpl = eptpl.replace("{region}", region);
 
       return eptpl;

@@ -12,19 +12,24 @@ module.exports = {
 
   optional: "オプション",
   default: "デフォルト",
+  region: "リージョン",
+
   "auth.accessLogin": "Access Key ログイン",
   "auth.id.placeholder": "AccessKeyId",
   "auth.secret.placeholder": "AccessKeySecret",
-  "auth.passLogin": "アカウントのログイン",
+  "auth.passlogin": "アカウントのログイン",
+  "auth.settings": "詳細設定",
   "auth.username": "ユーザー名",
   "auth.password": "パスワード",
   "auth.username.placeholder": "ユーザー名",
   "auth.password.placeholder": "パスワード",
 
   "auth.eptpl": "エンドポイントテンプレート",
-  "auth.eptpl.placeholder": "デフォルト: http://{region}.qiniu.com",
+  "auth.eptpl.placeholder": "デフォルト: http://{region}-s3.qiniu.com",
   "auth.eptpl.popup.msg1": "パブリッククラウドの場合は、デフォルト設定をそのまま使用できます",
   "auth.eptpl.popup.msg2": "プライベートクラウドの場合は、次のようなカスタムエンドポイントを入力してください。:",
+  "auth.logintpl": "ログインアドレス",
+  "auth.servicetpl": "サービスアドレス",
 
   "auth.region.placeholder": "利用可能な地域を入力してください",
   "auth.region.popup.msg1": "パブリッククラウドは利用可能なエリアを直接選択します",
@@ -32,22 +37,19 @@ module.exports = {
 
   "auth.remember.popup.msg1": "AKキーを保存するには、 「覚えている」ボタンをチェックします。ログインするときは、AK Historyをクリックしてログインするキーを選択します.AKを手動で入力する必要はありません。 一時的な使用のためにコンピュータをチェックしないでください！",
 
-  region: "リージョン",
   "auth.description": "説明",
   "auth.description.placeholder": "オプション、最大30単語",
   "auth.remember": "覚えている",
   "auth.login": "ログイン",
+
+  "auth.removeAK.title": "AK削除",
+  "auth.removeAK.message": "本当にAKを削除しますか：<code>{{id}}</code>？",
+
   "auth.akHistories": "AK の歴史",
-
-  "auth.authToken": "Auth-Token",
-  "auth.authToken.tooltip": "ドキュメントを表示する",
-  "auth.authToken.placeholder": "認証トークンを入力してください",
-  "auth.authToken.error.invalid": "有効な認証トークンを入力してください",
-  "auth.authToken.error.expired": "認証トークンは期限切れです",
-  "auth.authToken.info.validUntil": "{{expiration}}まで有効です。",
-  "auth.authToken.info.leftTime": "残した時間",
-
   "auth.clearHistories": "AK 履歴削除",
+  "auth.clearAKHistories.title": "AK 履歴削除",
+  "auth.clearAKHistories.message": "確定ですか?",
+  "auth.clearAKHistories.successMessage": "すべてのAKの歴史は削除された",
 
   actions: "アクション",
   use: "利用",
@@ -55,13 +57,6 @@ module.exports = {
   ok: "OK",
   cancel: "キャンセル",
   close: "クローズ",
-
-  "auth.removeAK.title": "AK削除",
-  "auth.removeAK.message": "本当にAKを削除しますか：<code>{{id}}</code>？",
-
-  "auth.clearAKHistories.title": "AK 履歴削除",
-  "auth.clearAKHistories.message": "確定ですか?",
-  "auth.clearAKHistories.successMessage": "すべてのAKの歴史は削除された",
 
   "storageClassesType.standard": "標準",
   "storageClassesType.ia": "IA",

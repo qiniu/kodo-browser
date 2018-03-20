@@ -12,10 +12,13 @@ module.exports = {
 
   optional: "Optional",
   default: "Default",
+  region: "Region",
+
   "auth.accessLogin": "Access Key Login",
   "auth.id.placeholder": "AccessKeyId",
   "auth.secret.placeholder": "AccessKeySecret",
-  "auth.passLogin": "Account Login",
+  "auth.passlogin": "Account Login",
+  "auth.settings": "Advanced",
   "auth.username": "Username",
   "auth.password": "Password",
   "auth.username.placeholder": "Username",
@@ -25,6 +28,8 @@ module.exports = {
   "auth.eptpl.placeholder": "Default: http://{region}-s3.qiniu.com",
   "auth.eptpl.popup.msg1": "For Public Cloud, you can directly use the default settings",
   "auth.eptpl.popup.msg2": "For Private Cloud, Please enter a custom Endpoint, such as:",
+  "auth.logintpl": "Login Endpoint",
+  "auth.servicetpl": "Service Endpoint",
 
   "auth.region.placeholder": "Please enter available region",
   "auth.region.popup.msg1": "For Public Cloud, you can select available region from the list",
@@ -32,22 +37,19 @@ module.exports = {
 
   "auth.remember.popup.msg1": 'Check "Remember" to save the AK. When you login again, click AK History to select the key to log in. You do not need to enter AK manually. Please do not check it on a temporary computer!',
 
-  region: "Region",
   "auth.description": "Description",
   "auth.description.placeholder": "Optional, Up to 30 words",
   "auth.remember": "Remember",
   "auth.login": "Login",
+
+  "auth.removeAK.title": "Remove AK",
+  "auth.removeAK.message": "Remove AK：<code>{{id}}</code>, Are you sure?",
+
   "auth.akHistories": "AK Histories",
-
-  "auth.authToken": "Auth-Token",
-  "auth.authToken.tooltip": "View document",
-  "auth.authToken.placeholder": "Please enter the authorization token",
-  "auth.authToken.error.invalid": "Please enter a valid authorization token",
-  "auth.authToken.error.expired": "The authorization token has expired",
-  "auth.authToken.info.validUntil": "Valid until {{expiration}}",
-  "auth.authToken.info.leftTime": "Left Time",
-
   "auth.clearHistories": "Clear Histories",
+  "auth.clearAKHistories.title": "Clear AK Histories",
+  "auth.clearAKHistories.message": "Are you sure?",
+  "auth.clearAKHistories.successMessage": "All AK Histories has been clear",
 
   actions: "Actions",
   use: "Use",
@@ -55,13 +57,6 @@ module.exports = {
   ok: "OK",
   cancel: "Cancel",
   close: "Close",
-
-  "auth.removeAK.title": "Remove AK",
-  "auth.removeAK.message": "Remove AK：<code>{{id}}</code>, Are you sure?",
-
-  "auth.clearAKHistories.title": "Clear AK Histories",
-  "auth.clearAKHistories.message": "Are you sure?",
-  "auth.clearAKHistories.successMessage": "All AK Histories has been clear",
 
   "storageClassesType.standard": "Standard",
   "storageClassesType.ia": "IA",

@@ -82,7 +82,7 @@ angular.module("web").factory("Auth", [
         timeout: 5000
       };
 
-      var endpoint = data.ecloudtpl;
+      var endpoint = data.logintpl;
       if (endpoint[endpoint.length - 1] === "/") {
         endpoint += "api/session";
       } else {

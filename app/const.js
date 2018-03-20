@@ -17,6 +17,8 @@ angular.module("web").factory("Const", [
       AUTH_INFO_KEY: "auth-info",
       AUTH_HIS: "auth-his",
       AUTH_KEEP: "auth-keep",
+      KEY_LOGINTPL: "auth-logintpl",
+      KEY_SERVICETPL: "auth-servicetpl",
       KEY_REMEMBER: "auth-remember",
       SHOW_HIS: "show-his",
 

@@ -15,8 +15,8 @@ module.exports = {
   },
 
   domain: "@qiniu.com",
-  ecloudURL: "http://storage.tc.echosoul.cn",
-  s3apiURL: "http://s3-qos.tc.echosoul.cn",
+  loginURL: "http://storage.tc.echosoul.cn",
+  serviceURL: "http://s3-qos.tc.echosoul.cn",
 
   //logo png 格式, 主要用于mac和linux系统
   logo_png: path.join(__dirname, "./icon.png"),

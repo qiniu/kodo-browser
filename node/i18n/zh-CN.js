@@ -12,10 +12,13 @@ module.exports = {
 
   optional: "可选",
   default: "默认",
+  region: "区域",
+
   "auth.accessLogin": "Access Key 登录",
   "auth.id.placeholder": "请输入 AccessKeyId",
   "auth.secret.placeholder": "请输入 SecretAccessKey",
-  "auth.passLogin": "帐号登录",
+  "auth.passlogin": "帐号登录",
+  "auth.settings": "高级选项",
   "auth.username": "用户名",
   "auth.password": "密码",
   "auth.username.placeholder": "请输入用户名",
@@ -25,6 +28,8 @@ module.exports = {
   "auth.eptpl.placeholder": "默认: http://{region}-s3.qiniu.com",
   "auth.eptpl.popup.msg1": "公有云直接使用默认即可",
   "auth.eptpl.popup.msg2": "专有云请输入自定义 Endpoint, 如: ",
+  "auth.logintpl": "登录地址",
+  "auth.servicetpl": "服务地址",
 
   "auth.region.placeholder": "请输入可用的区域",
   "auth.region.popup.msg1": "公有云直接选择可用区域即可",
@@ -32,22 +37,19 @@ module.exports = {
 
   "auth.remember.popup.msg1": '勾选"记住秘钥"可保存AK秘钥，再次登录时，单击AK历史，可选择该秘钥登录，不需要手动输入AK。请不要再临时使用的电脑上勾选！',
 
-  region: "区域",
   "auth.description": "备注",
   "auth.description.placeholder": "可以为空，最多30个字",
   "auth.remember": "记住秘钥",
   "auth.login": "登入",
+
+  "auth.removeAK.title": "删除AK",
+  "auth.removeAK.message": "ID：<code>{{id}}</code>, 确定删除?",
+
   "auth.akHistories": "AK历史",
-
-  "auth.authToken": "授权码",
-  "auth.authToken.tooltip": "点击查看帮助",
-  "auth.authToken.placeholder": "请输入授权码",
-  "auth.authToken.error.invalid": "请输入有效的授权码",
-  "auth.authToken.error.expired": "授权码已经过期",
-  "auth.authToken.info.validUntil": "有效期至{{expiration}}",
-  "auth.authToken.info.leftTime": "剩余时间",
-
   "auth.clearHistories": "清空历史",
+  "auth.clearAKHistories.title": "清空AK历史",
+  "auth.clearAKHistories.message": "确定?",
+  "auth.clearAKHistories.successMessage": "已清空AK历史",
 
   actions: "操作",
   use: "使用",
@@ -55,13 +57,6 @@ module.exports = {
   ok: "确定",
   cancel: "取消",
   close: "关闭",
-
-  "auth.removeAK.title": "删除AK",
-  "auth.removeAK.message": "ID：<code>{{id}}</code>, 确定删除?",
-
-  "auth.clearAKHistories.title": "清空AK历史",
-  "auth.clearAKHistories.message": "确定?",
-  "auth.clearAKHistories.successMessage": "已清空AK历史",
 
   "storageClassesType.standard": "标准类型",
   "storageClassesType.ia": "低频访问类型",

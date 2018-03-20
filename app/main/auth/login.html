@@ -40,7 +40,7 @@
           </li>
           <li role="presentation" ng-class="{active:gtab==2}">
             <a href="" ng-click="gtab=2">
-              {{'auth.passLogin'|translate}}
+              {{'auth.passlogin'|translate}}
             </a>
           </li>
         </ul>
@@ -166,31 +166,31 @@
 
           <fieldset class="login-fieldset">
             <legend>
-              <input type="checkbox" ng-model="flags.showMore" ng-true-value="1" ng-false-value="0" /> 高级选项
+              <input type="checkbox" ng-model="flags.showMore" ng-true-value="1" ng-false-value="0" /> {{'auth.settings'|translate}}
             </legend>
-            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.ecloudtpl.$valid}">
-              <label for="ecloudtpl" class="col-sm-4 control-label">
-                <span class="red">*</span> ECLOUD:
+            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.logintpl.$valid}">
+              <label for="logintpl" class="col-sm-4 control-label">
+                <span class="red">*</span> {{'auth.logintpl'|translate}}:
               </label>
 
               <div class="col-sm-8">
-                <input type="text" required ng-model="item.ecloudtpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="ecloudtpl" name="ecloudtpl" placeholder="https://">
+                <input type="text" required ng-model="item.logintpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="logintpl" name="logintpl" placeholder="https://">
               </div>
             </div>
 
-            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.s3apitpl.$valid}">
-              <label for="s3apitpl" class="col-sm-4 control-label">
-                <span class="red">*</span> S3API:
+            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.servicetpl.$valid}">
+              <label for="servicetpl" class="col-sm-4 control-label">
+                <span class="red">*</span> {{'auth.servicetpl'|translate}}:
               </label>
 
               <div class="col-sm-8">
-                <input type="text" required ng-model="item.s3apitpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="s3apitpl" name="s3apitpl" placeholder="https://">
+                <input type="text" required ng-model="item.servicetpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="servicetpl" name="servicetpl" placeholder="https://">
               </div>
             </div>
           </fieldset>
 
           <div class="form-group">
-            <div class="col-sm-offset-3 col-sm-9">
+            <div class="col-sm-offset-4 col-sm-9">
               <button type="submit" class="btn btn-primary">
                 {{'auth.login'|translate}}
               </button>

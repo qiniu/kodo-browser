@@ -661,6 +661,11 @@ angular.module("web").factory("osClient", [
     /**************************************/
 
     function createFolder(region, bucket, prefix) {
+      prefix = path.normalize(prefix);
+      if (path.sep != "/") {
+        prefix = prefix.replace(/\\/g, "/");
+      }
+
       return new Promise(function (resolve, reject) {
         var client = getClient({
           region: region,

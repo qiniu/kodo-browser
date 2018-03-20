@@ -184,11 +184,17 @@ angular.module("web").factory("osUploadManager", [
 
         if (fs.statSync(absPath).isDirectory()) {
           //创建目录
+          var subDirPath = filePath + "/";
+          subDirPath = path.normalize(subDirPath);
+          if (path.sep != "/") {
+            subDirPath = subDirPath.replace(/\\/g, "/");
+          }
+
           osClient
-            .createFolder(bucketInfo.region, bucketInfo.bucket, filePath + "/")
+            .createFolder(bucketInfo.region, bucketInfo.bucket, subDirPath)
             .then(function () {
               //判断是否刷新文件列表
-              checkNeedRefreshFileList(bucketInfo.bucket, filePath + "/");
+              checkNeedRefreshFileList(bucketInfo.bucket, subDirPath);
             });
 
           //递归遍历目录

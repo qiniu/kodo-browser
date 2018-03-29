@@ -16,7 +16,7 @@ let ROOT = __dirname;
 let CUSTOM = `${ROOT}/custom`;
 let DIST = `${ROOT}/dist`;
 let TARGET = `${ROOT}/build`;
-let RELEASE = `${ROOT}/release`;
+let RELEASE = `${ROOT}/releases`;
 
 let packagerOptions = {
   dir: DIST,
@@ -252,14 +252,14 @@ gulp.task("mac", () => {
   });
 });
 
-gulp.task("dmg", ["mac"], () => {
+gulp.task("dmg", () => {
   console.log(`--package ${NAME}.dmg`);
 
   plugins.run(`rm -f ${RELEASE}/${VERSION}/${NAME}.dmg`).exec(() => {
     plugins.run(`rm ${TARGET}/${NAME}-darwin-x64/LICENSE* ${TARGET}/${NAME}-darwin-x64/version`).exec(() => {
       plugins.run(`ln -s /Applications/ ${TARGET}/${NAME}-darwin-x64/Applications`).exec(() => {
         plugins.run(`cp -f ${DIST}/icons/icon.icns ${TARGET}/${NAME}-darwin-x64/.VolumeIcon.icns`).exec(() => {
-          plugins.run(`hdiutil create -size 250M -format UDZO -srcfolder ${TARGET}/$(NAME)-darwin-x64 -o ${RELEASE}/${VERSION}/${NAME}.dmg`).exec(() => {
+          plugins.run(`hdiutil create -size 350m -format UDZO -srcfolder ${TARGET}/${NAME}-darwin-x64 -o ${RELEASE}/${VERSION}/${NAME}.dmg`).exec(() => {
             console.log("--done");
           });
         });

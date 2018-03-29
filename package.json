@@ -10,6 +10,7 @@
     "watch": "./node_modules/.bin/gulp watch",
     "build": "./node_modules/.bin/gulp build",
     "build:mac": "./node_modules/.bin/gulp mac",
+    "build:dmg": "./node_modules/.bin/gulp dmg",
     "build:win32": "./node_modules/.bin/gulp win32",
     "build:win64": "./node_modules/.bin/gulp win64",
     "build:linux32": "./node_modules/.bin/gulp linux32",

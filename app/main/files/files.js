@@ -531,8 +531,14 @@ angular.module("web").controller("filesCtrl", [
           Toast.error(JSON.stringify(err));
         }
 
-        $scope.isLoading = false;
-        safeApply($scope);
+        if ($scope.nextObjectsMarker) {
+          $timeout(() => {
+            tryLoadMore();
+          }, 100);
+        } else {
+          $scope.isLoading = false;
+          safeApply($scope);
+        }
       });
     }
 
@@ -547,7 +553,6 @@ angular.module("web").controller("filesCtrl", [
         //try to resolve bucket perm
         var authInfo = AuthInfo.get();
         $scope.ref.bucketPerm = authInfo.perm[info.bucket];
-
 
         $scope.objects = $scope.objects.concat(data);
         $scope.nextObjectsMarker = result.marker || null;
@@ -571,7 +576,20 @@ angular.module("web").controller("filesCtrl", [
 
         console.log(`loading next s3://${info.bucket}/${info.key}?marker=${$scope.nextObjectsMarker}`);
 
-        tryListFiles(info, $scope.nextObjectsMarker);
+        tryListFiles(info, $scope.nextObjectsMarker, function (err) {
+          if (err) {
+            Toast.error(JSON.stringify(err));
+          }
+
+          if ($scope.nextObjectsMarker) {
+            $timeout(() => {
+              tryLoadMore();
+            }, 100);
+          } else {
+            $scope.isLoading = false;
+            safeApply($scope);
+          }
+        });
       }
     }
 

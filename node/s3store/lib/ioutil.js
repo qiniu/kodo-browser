@@ -711,16 +711,6 @@ Client.prototype.downloadFile = function (params) {
       uploader.progressLoaded = prog.loaded;
       uploader.emit('progress', uploader);
     });
-    s3downloader.on('httpData', function (chunk, response) {
-      if (isAborted) return;
-
-      if (response.error) {
-        cb(response.error);
-        return;
-      }
-
-      fileStream.write(chunk);
-    });
     s3downloader.on('httpDone', function (response) {
       if (isAborted) return;
 
@@ -739,7 +729,7 @@ Client.prototype.downloadFile = function (params) {
 
       cb(err);
     });
-    s3downloader.send();
+    s3downloader.createReadStream().pipe(fileStream);
   }
 };
 

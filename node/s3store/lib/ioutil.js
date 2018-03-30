@@ -704,32 +704,27 @@ Client.prototype.downloadFile = function (params) {
       autoClose: true
     });
 
-    let s3downloader = self.s3.getObject(s3params);
-    s3downloader.on('httpDownloadProgress', function (prog) {
+    let s3downloader = self.s3.getObject(s3params).createReadStream();
+    s3downloader.on('data', (chunk) => {
       if (isAborted) return;
 
-      uploader.progressLoaded = prog.loaded;
+      uploader.progressLoaded += chunk.length;
       uploader.emit('progress', uploader);
     });
-    s3downloader.on('httpDone', function (response) {
+    s3downloader.on('end', () => {
       if (isAborted) return;
-
-      if (response.error) {
-        cb(response.error);
-        return;
-      }
 
       uploader.progressLoaded = uploader.progressTotal;
       uploader.emit('progress', uploader);
 
-      cb(null, response.data);
+      cb(null); 
     });
-    s3downloader.on('httpError', function (err) {
+    s3downloader.on('error', (err) => {
       if (isAborted) return;
 
       cb(err);
     });
-    s3downloader.createReadStream().pipe(fileStream);
+    s3downloader.pipe(fileStream);
   }
 };
 

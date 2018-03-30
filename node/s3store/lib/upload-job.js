@@ -129,6 +129,12 @@ UploadJob.prototype.stop = function () {
   this.predictLeftTime = 0;
 
   this._changeStatus("stopped");
+  this.emit("stop");
+
+  ipcRenderer.send('asynchronous-job', {
+    job: this.id,
+    key: 'job-stop',
+  });
 
   return this;
 };
@@ -144,6 +150,7 @@ UploadJob.prototype.wait = function () {
   this.stopFlag = true;
 
   this._changeStatus("waiting");
+  this.emit("pause");
 
   return this;
 };

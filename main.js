@@ -517,6 +517,16 @@ ipcMain.on("asynchronous-job", (event, data) => {
 
     break;
 
+  case "job-stop":
+    var worker = forkedWorkers.get(data.job);
+    if (worker) {
+      worker.send({
+        key: "stop"
+      });
+    }
+
+    break;
+
   default:
     event.sender.send(data.job, {
       job: data.job,

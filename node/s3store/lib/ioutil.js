@@ -651,50 +651,41 @@ Client.prototype.downloadFile = function (params) {
       }
 
       let params = {};
+      let partStream = fs.createWriteStream(null, {
+        fd: fd,
+        flags: 'r+',
+        start: part.Start,
+        autoClose: false
+      });
+
       Object.assign(params, s3params);
       params.Range = `bytes=${part.Start}-${part.End}`;
 
-      let s3downloader = self.s3.getObject(params);
-      s3downloader.on('httpDownloadProgress', function (prog) {
+      let s3downloader = self.s3.getObject(params).createReadStream();
+      s3downloader.on('data', (chunk) => {
         if (isAborted) return;
 
-        let oldLoaded = uploader.progressParts[part.PartNumber] || 0;
-
-        uploader.progressParts[part.PartNumber] = prog.loaded;
-        uploader.progressLoaded += prog.loaded - oldLoaded;
+        uploader.progressParts[part.PartNumber] += chunk.length;
+        uploader.progressLoaded += chunk.length;
 
         uploader.emit('progress', uploader);
       });
-      s3downloader.send(function (err, data) {
+      s3downloader.on('end', () => {
+        part.Done = true;
+
+        downloadedParts[part.PartNumber] = part;
+
+        uploader.totalDownloadedParts += 1;
+        uploader.emit('progress', uploader);
+
+        cb(null);
+      });
+      s3downloader.on('error', (err) => {
         if (isAborted) return;
 
-        if (err) {
-          cb(err);
-          return;
-        }
-
-        let partStream = fs.createWriteStream(null, {
-          fd: fd,
-          flags: 'r+',
-          start: part.Start,
-          autoClose: false
-        });
-        partStream.on('error', function (err) {
-          cb(err);
-        });
-        partStream.write(data.Body, function () {
-          data.Body = null;
-
-          part.Done = true;
-
-          downloadedParts[part.PartNumber] = part;
-
-          uploader.totalDownloadedParts += 1;
-          uploader.emit('progress', uploader);
-
-          cb(null, data);
-        });
+        cb(err);
       });
+      s3downloader.pipe(partStream);
     }
   }
 
@@ -717,7 +708,7 @@ Client.prototype.downloadFile = function (params) {
       uploader.progressLoaded = uploader.progressTotal;
       uploader.emit('progress', uploader);
 
-      cb(null); 
+      cb(null);
     });
     s3downloader.on('error', (err) => {
       if (isAborted) return;
@@ -768,5 +759,5 @@ function smallestPartSizeFromFileSize(fileSize) {
     return MIN_MULTIPART_SIZE;
   }
 
-  return partSize + (MIN_MULTIPART_SIZE - partSize%MIN_MULTIPART_SIZE);
+  return partSize + (MIN_MULTIPART_SIZE - partSize % MIN_MULTIPART_SIZE);
 }

@@ -74,6 +74,11 @@ angular.module("web").factory("osUploadManager", [
     function createJob(auth, options) {
       var region = options.region || auth.region || "cn-east-1";
 
+      if (options.to.key.indexOf(' ') > 0) {
+        alert("命名不能含有空格")
+        return
+      }
+
       options.region = region;
       options.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
       options.mulipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
@@ -181,6 +186,11 @@ angular.module("web").factory("osUploadManager", [
         var filePath = path.relative(dirPath, absPath);
 
         filePath = bucketInfo.key ? bucketInfo.key + "/" + filePath : filePath;
+
+        if (fileName.indexOf(' ') > 0 || filePath.indexOf(' ') > 0) {
+          alert("命名不能含有空格")
+          return
+        }
 
         if (fs.statSync(absPath).isDirectory()) {
           //创建目录
@@ -364,7 +374,7 @@ angular.module("web").factory("osUploadManager", [
         var data = fs.readFileSync(getProgFilePath());
 
         return JSON.parse(data ? data.toString() : "[]");
-      } catch (e) {}
+      } catch (e) { }
 
       return [];
     }

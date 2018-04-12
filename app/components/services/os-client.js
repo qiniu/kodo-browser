@@ -261,21 +261,21 @@ angular.module("web").factory("osClient", [
             }, function (
               err
             ) {
-              if (err) {
-                terr.push({
-                  item: item,
-                  error: err
-                });
+                if (err) {
+                  terr.push({
+                    item: item,
+                    error: err
+                  });
 
-                progress.errorCount++;
-                c++;
-                $timeout(dig, NEXT_TICK);
-              } else {
-                c++;
-                progress.current++;
-                $timeout(dig, NEXT_TICK);
-              }
-            });
+                  progress.errorCount++;
+                  c++;
+                  $timeout(dig, NEXT_TICK);
+                } else {
+                  c++;
+                  progress.current++;
+                  $timeout(dig, NEXT_TICK);
+                }
+              });
           }
         }
       }
@@ -401,7 +401,7 @@ angular.module("web").factory("osClient", [
                 if (progFn) {
                   try {
                     progFn(progress);
-                  } catch (e) {}
+                  } catch (e) { }
                 }
 
                 t.push({
@@ -414,7 +414,7 @@ angular.module("web").factory("osClient", [
               if (progFn) {
                 try {
                   progFn(progress);
-                } catch (e) {}
+                } catch (e) { }
               }
               c++;
 
@@ -548,7 +548,7 @@ angular.module("web").factory("osClient", [
         if (progFn) {
           try {
             progFn(progress);
-          } catch (e) {}
+          } catch (e) { }
         }
 
         function _() {
@@ -586,7 +586,7 @@ angular.module("web").factory("osClient", [
                 if (progFn) {
                   try {
                     progFn(progress);
-                  } catch (e) {}
+                  } catch (e) { }
                 }
 
                 terr.push({
@@ -599,7 +599,7 @@ angular.module("web").factory("osClient", [
               if (progFn) {
                 try {
                   progFn(progress);
-                } catch (e) {}
+                } catch (e) { }
               }
 
               $timeout(_, NEXT_TICK);
@@ -614,7 +614,7 @@ angular.module("web").factory("osClient", [
               if (progFn) {
                 try {
                   progFn(progress);
-                } catch (e) {}
+                } catch (e) { }
               }
 
               $timeout(_, NEXT_TICK);
@@ -1042,6 +1042,8 @@ angular.module("web").factory("osClient", [
 
           //文件
           if (result["Contents"]) {
+            var ONE_HOUR = 60 * 60 * 1000 // ms
+
             result["Contents"].forEach(function (n) {
               n.Prefix = n.Prefix || "";
 
@@ -1055,6 +1057,7 @@ angular.module("web").factory("osClient", [
                 n.type = n.Type;
                 n.lastModified = n.LastModified;
                 n.url = getS3Url(region, opt.Bucket, n.Key);
+                n.WithinAnHour = (((new Date()) - n.LastModified) <= ONE_HOUR)
 
                 t.push(n);
               }
@@ -1380,8 +1383,8 @@ angular.module("web").factory("osClient", [
         if (region.indexOf("http") != 0) {
           region =
             isHttps ?
-            "https://" + region + "/" + bucket + "/" + key :
-            "http://" + region + "/" + bucket + "/" + key;
+              "https://" + region + "/" + bucket + "/" + key :
+              "http://" + region + "/" + bucket + "/" + key;
         }
         return region;
       }

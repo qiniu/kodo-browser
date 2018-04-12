@@ -109,7 +109,7 @@ angular.module("web").factory("osDownloadManager", [
 
       loop(
         bucketInfos,
-        function (jobs) {},
+        function (jobs) { },
         function () {
           if (jobsAddedFn) {
             jobsAddedFn();
@@ -135,7 +135,7 @@ angular.module("web").factory("osDownloadManager", [
           dig(
             arr[c],
             t,
-            function () {},
+            function () { },
             function () {
               c2++;
               if (c2 >= len) {
@@ -338,7 +338,7 @@ angular.module("web").factory("osDownloadManager", [
       try {
         var data = fs.readFileSync(getDownProgFilePath());
         return JSON.parse(data ? data.toString() : "[]");
-      } catch (e) {}
+      } catch (e) { }
       return [];
     }
 

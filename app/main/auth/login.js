@@ -46,7 +46,8 @@ angular.module("web").controller("loginCtrl", [
       regions: regions,
       defaultRegion: "",
 
-      hideTopNav: 1,
+      showGuestNav: 1,
+      showCloudLogin: Global.custom_settings.appCloud,
 
       onSubmit: onSubmit,
       showCleanHistories: showCleanHistories,

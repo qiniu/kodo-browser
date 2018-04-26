@@ -14,6 +14,9 @@ module.exports = {
     "ja-JP": "S3 ブラウザ"
   },
 
+  // 是否显示公有与登录信息
+  appCloud: 1,
+
   domain: "@qiniu.com",
   loginURL: "http://storage.tc.echosoul.cn",
   serviceURL: "http://s3-qos.tc.echosoul.cn",

@@ -552,7 +552,9 @@ angular.module("web").controller("filesCtrl", [
 
         //try to resolve bucket perm
         var authInfo = AuthInfo.get();
-        $scope.ref.bucketPerm = authInfo.perm[info.bucket];
+        if (authInfo.perm) {
+          $scope.ref.bucketPerm = authInfo.perm[info.bucket];
+        }
 
         $scope.objects = $scope.objects.concat(data);
         $scope.nextObjectsMarker = result.marker || null;

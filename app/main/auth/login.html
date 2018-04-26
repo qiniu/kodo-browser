@@ -33,14 +33,14 @@
 
       <div class="panel-heading pd0" style="border:0">
         <ul class="nav nav-tabs">
-          <li role="presentation" ng-class="{active:gtab==1}" ng-if="!hideCloud">
-            <a href="" ng-click="gtab=1">
-              {{'auth.accessLogin'|translate}}
-            </a>
-          </li>
           <li role="presentation" ng-class="{active:gtab==2}">
             <a href="" ng-click="gtab=2">
               {{'auth.passlogin'|translate}}
+            </a>
+          </li>
+          <li role="presentation" ng-class="{active:gtab==1}">
+            <a href="" ng-click="gtab=1">
+              {{'auth.accessLogin'|translate}}
             </a>
           </li>
         </ul>
@@ -48,28 +48,7 @@
 
       <div class="panel-body">
 
-        <form ng-if="gtab==1 && !hideCloud" class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
-          <div class="form-group">
-            <label for="endpoint" class="col-sm-4 control-label">
-              <span class="red">*</span> Endpoint:
-              <span uib-popover-template="'auth-endpoint-popup.html'" popover-trigger="'mouseenter'" popover-append-to-body="true">
-                <i class="fa fa-question-circle"></i>
-              </span>
-            </label>
-
-            <div class="col-sm-8" style="padding:0">
-              <div ng-class="{'col-sm-12':eptplType=='default','col-sm-4':eptplType=='customize'}">
-                <select class="form-control" ng-model="eptplType" ng-change="eptplChange(eptplType)">
-                  <option value="default">{{'default'|translate}} ({{'public.cloud'|translate}})</option>
-                  <option value="customize">{{'customize'|translate}}</option>
-                </select>
-              </div>
-              <div class="col-sm-8" style="padding-left:0" ng-if="eptplType=='customize'" ng-class="{'has-error':!form1.endpoint.$valid}">
-                <input type="text" required ng-model="item.eptpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="endpoint" name="endpoint" placeholder="https://">
-              </div>
-            </div>
-          </div>
-
+        <form ng-if="gtab==1" class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
           <div class="form-group has-feedback" ng-class="{'has-error': !form1.aid.$valid }">
             <label for="aid" class="col-sm-4 control-label">
               <span class="red">*</span> AccessKeyId:</label>
@@ -85,65 +64,31 @@
             </div>
           </div>
 
-          <div class="form-group" ng-class="{'has-error': !form1.acrg.$valid && eptplType=='customize', 'has-feedback': eptplType=='customize'}">
-            <label for="input4" class="col-sm-4 control-label">
-              {{'region'|translate}}:
-              <span uib-popover-template="'auth-region-popup.html'" popover-trigger="'mouseenter'" popover-append-to-body="true">
-                <i class="fa fa-question-circle"></i>
-              </span>
-            </label>
-            <div class="col-sm-8" ng-if="eptplType!='customize'">
-              <select required ng-model="item.region" class="form-control" id="arg" placeholder="{{'auth.region.placeholder'|translate}}" ng-options="rg.id as ('region.'+rg.id|translate) for rg in regions">
-              </select>
-            </div>
-            <div class="col-sm-8" ng-if="eptplType=='customize'">
-              <input type="text" required ng-model="item.region" class="form-control" id="acrg" name="acrg" placeholder="{{'auth.region.placeholder'|translate}}">
-            </div>
-          </div>
+          <fieldset class="login-fieldset">
+            <legend>
+              <input type="checkbox" ng-model="flags.showMore" ng-true-value="1" ng-false-value="0" /> {{'auth.settings'|translate}}
+            </legend>
+            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.servicetpl.$valid}">
+              <label for="servicetpl" class="col-sm-4 control-label">
+                <span class="red">*</span> {{'auth.servicetpl'|translate}}:
+              </label>
 
-
-          <div class="form-group">
-            <label for="input5" class="col-sm-4 control-label">
-              {{'auth.description'|translate}}:
-              <!-- 备注(最多30个字): -->
-            </label>
-            <div class="col-sm-8">
-              <input type="text" ng-model="item.desc" maxlength="30" class="form-control" id="input5" placeholder="{{'auth.description.placeholder'|translate}}">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="col-sm-offset-4 col-sm-8">
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" ng-model="flags.remember" ng-true-value="'YES'" ng-false-value="'NO'"> {{'auth.remember'|translate}}
-                  <!-- 记住秘钥 -->
-
-                  <span uib-popover-template="'auth-remember-popup.html'" popover-trigger="'mouseenter'" popover-append-to-body="true">
-                    <i class="fa fa-question-circle"></i>
-                  </span>
-                </label>
+              <div class="col-sm-8">
+                <input type="text" required ng-model="item.servicetpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="servicetpl" name="servicetpl" placeholder="https://">
               </div>
             </div>
-          </div>
+          </fieldset>
 
           <div class="form-group">
             <div class="col-sm-offset-4 col-sm-8">
               <button type="submit" class="btn btn-primary">
                 {{'auth.login'|translate}}
-                <!-- 登入 -->
               </button>
-
-              <button type="button" class="btn btn-default" ng-model="flags.showHis" uib-btn-checkbox btn-checkbox-true="'YES'" btn-checkbox-false="'NO'">
-                {{'auth.akHistories'|translate}}
-                <!-- AK历史 -->
-              </button>
-
             </div>
           </div>
         </form>
 
-        <form ng-if="gtab==2 && hideCloud" class="form-horizontal" name="form2" ng-submit="onSubmitPass(form2)">
+        <form ng-if="gtab==2" class="form-horizontal" name="form2" ng-submit="onSubmitPass(form2)">
           <div class="form-group has-feedback" ng-class="{'has-error': !form2.auser.$valid }">
             <label for="auser" class="col-sm-4 control-label">
               <span class="red">*</span> {{'auth.username'|translate}}:

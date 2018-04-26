@@ -9,7 +9,7 @@
       <label class="app-version" ng-click="showReleaseNote()">v{{app.version}}</label>
     </div>
 
-    <div class="collapse navbar-collapse" id="collapse-1" ng-if="!hideTopNav">
+    <div class="collapse navbar-collapse" id="collapse-1" ng-if="!showGuestNav">
       <ul class="nav navbar-nav">
         <li ng-class="{active:showTab==1}">
           <a href="#">
@@ -55,7 +55,7 @@
 
     </div>
 
-    <form class="navbar-form navbar-right" ng-if="hideTopNav">
+    <form class="navbar-form navbar-right" ng-if="showGuestNav">
       <div class="form-inline form-group">
         <label class="control-label">{{'language'|translate}}:</label>
         <select class="form-control input-sm" ng-model="langSettings.lang" ng-change="langSettings.changeLanguage(langSettings.lang)"

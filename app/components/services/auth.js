@@ -8,7 +8,6 @@ angular.module("web").factory("Auth", [
     var $http = require('request');
     var T = $translate.instant;
 
-
     return {
       login: login,
       loginPass: loginPass,
@@ -38,6 +37,7 @@ angular.module("web").factory("Auth", [
           } else if (result.RequestId && result.CommonPrefixes) {
             //login success
             data.isAuthed = true;
+            data.isSuper = false;
 
             AuthInfo.save(data);
 
@@ -59,6 +59,7 @@ angular.module("web").factory("Auth", [
           } else if (result.Buckets) {
             //login success
             data.isAuthed = true;
+            data.isSuper = false;
 
             AuthInfo.save(data);
 

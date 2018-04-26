@@ -46,8 +46,8 @@ angular.module("web").controller("loginCtrl", [
       regions: regions,
       defaultRegion: "",
 
-      hideTopNav: 1,
-      hideCloud: true,
+      showGuestNav: 1,
+      showCloudLogin: Global.custom_settings.appCloud,
 
       onSubmit: onSubmit,
       showCleanHistories: showCleanHistories,
@@ -132,7 +132,11 @@ angular.module("web").controller("loginCtrl", [
 
       var data = angular.copy($scope.item);
 
-      //trim password
+      // append domain
+      if (data.id) {
+        data.username = data.id + Global.custom_settings.domain;
+      }
+      // trim password
       if (data.secret) {
         data.secret = data.secret.trim();
       }
@@ -151,6 +155,8 @@ angular.module("web").controller("loginCtrl", [
           if ($scope.flags.remember == "YES") {
             AuthInfo.addToHistories(data);
           }
+
+          localStorage.setItem(KEY_SERVICETPL, data.servicetpl);
 
           Toast.success(T("login.successfully"), 1000);
 
@@ -203,7 +209,7 @@ angular.module("web").controller("loginCtrl", [
           $location.url("/");
         },
         function (err) {
-          Toast.error(err);
+          Toast.error(err.code + ":" + err.message);
         }
       );
 

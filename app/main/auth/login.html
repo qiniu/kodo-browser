@@ -49,6 +49,16 @@
       <div class="panel-body">
 
         <form ng-if="gtab==1" class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
+          <div class="form-group" ng-if="regions && regions.length > 0">
+            <label for="input4" class="col-sm-4 control-label">
+              <span class="red">*</span>
+              {{'region'|translate}}:
+            </label>
+            <div class="col-sm-8">
+              <select required ng-model="item.servicetpl" class="form-control" id="input4" placeholder="{{'auth.region.placeholder'|translate}}" ng-options="rg.endpoint as ('region.'+rg.id|translate) for rg in regions"></select>
+            </div>
+          </div>
+
           <div class="form-group has-feedback" ng-class="{'has-error': !form1.aid.$valid }">
             <label for="aid" class="col-sm-4 control-label">
               <span class="red">*</span> AccessKeyId:</label>
@@ -63,21 +73,6 @@
               <input type="password" required ng-model="item.secret" class="form-control" id="akey" name="akey" placeholder="{{'auth.secret.placeholder'|translate}}">
             </div>
           </div>
-
-          <fieldset class="login-fieldset">
-            <legend>
-              <input type="checkbox" ng-model="flags.showMore" ng-true-value="1" ng-false-value="0" /> {{'auth.settings'|translate}}
-            </legend>
-            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.servicetpl.$valid}">
-              <label for="servicetpl" class="col-sm-4 control-label">
-                <span class="red">*</span> {{'auth.servicetpl'|translate}}:
-              </label>
-
-              <div class="col-sm-8">
-                <input type="text" required ng-model="item.servicetpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="servicetpl" name="servicetpl" placeholder="https://">
-              </div>
-            </div>
-          </fieldset>
 
           <div class="form-group">
             <div class="col-sm-offset-4 col-sm-8">

@@ -37,16 +37,19 @@ angular.module("web").factory("Const", [
         {
           id: "cn-east-1",
           label: "华东 1",
+          endpoint: "https://cn-east-1-s3.qiniu.com",
           storageClasses: getStorageClasses(2)
         },
         {
           id: "cn-north-1",
           label: "华北 1",
+          endpoint: "https://cn-north-1-s3.qiniu.com",
           storageClasses: getStorageClasses(2)
         },
         {
           id: "cn-south-1",
           label: "华南 1",
+          endpoint: "https://cn-south-1-s3.qiniu.com",
           storageClasses: getStorageClasses(2)
         }
       ],

@@ -1057,7 +1057,7 @@ angular.module("web").factory("osClient", [
                 n.type = n.Type;
                 n.lastModified = n.LastModified;
                 n.url = getS3Url(region, opt.Bucket, n.Key);
-                n.WithinAnHour = (((new Date()) - n.LastModified) <= ONE_HOUR)
+                n.WithinFourHour = (((new Date()) - n.LastModified) <= 4 * ONE_HOUR)
 
                 t.push(n);
               }

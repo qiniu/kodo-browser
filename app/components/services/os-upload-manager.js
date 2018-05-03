@@ -74,9 +74,9 @@ angular.module("web").factory("osUploadManager", [
     function createJob(auth, options) {
       var region = options.region || auth.region || "cn-east-1";
 
-      // if (options.to.key.indexOf(' ') > 0) {
-      //   alert("命名不能含有空格")
-      //   return
+      // if (options.to.key.indexOf(' ') >= 0) {
+      //   Toast.error('文件名不能包含空格');
+      //   return;
       // }
 
       options.region = region;
@@ -187,11 +187,6 @@ angular.module("web").factory("osUploadManager", [
 
         filePath = bucketInfo.key ? bucketInfo.key + "/" + filePath : filePath;
 
-        // if (fileName.indexOf(' ') > 0 || filePath.indexOf(' ') > 0) {
-        //   alert("命名不能含有空格")
-        //   return
-        // }
-
         if (fs.statSync(absPath).isDirectory()) {
           //创建目录
           var subDirPath = filePath + "/";
@@ -210,7 +205,7 @@ angular.module("web").factory("osUploadManager", [
           //递归遍历目录
           fs.readdir(absPath, function (err, arr) {
             if (err) {
-              console.log(err.stack);
+              console.error(err.stack);
             } else {
               loop(absPath, dirPath, arr, function (jobs) {
                 $timeout(function () {
@@ -240,11 +235,13 @@ angular.module("web").factory("osUploadManager", [
             }
           });
 
-          addEvents(job);
+          if (job) {
+            addEvents(job);
 
-          $timeout(function () {
-            callFn([job]);
-          }, 1);
+            $timeout(function () {
+              callFn([job]);
+            }, 1);
+          }
         }
       }
     }
@@ -374,7 +371,7 @@ angular.module("web").factory("osUploadManager", [
         var data = fs.readFileSync(getProgFilePath());
 
         return JSON.parse(data ? data.toString() : "[]");
-      } catch (e) { }
+      } catch (e) {}
 
       return [];
     }

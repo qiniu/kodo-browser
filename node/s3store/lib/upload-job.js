@@ -36,11 +36,11 @@ class UploadJob extends Base {
     Object.assign(this._config, config);
 
     if (!this._config.from) {
-      console.log("upload needs from option");
+      console.warn(`Option from is required, but got ${this._config.from}`);
       return;
     }
     if (!this._config.to) {
-      console.log("upload needs to option");
+      console.warn(`Option to is required, but got ${this._config.to}`);
       return;
     }
 
@@ -68,7 +68,7 @@ class UploadJob extends Base {
   }
 }
 
-UploadJob.prototype.start = function () {
+UploadJob.prototype.start = function (overwrite) {
   if (this.status == "running") return;
 
   if (this.isDebug) {
@@ -100,12 +100,13 @@ UploadJob.prototype.start = function () {
         Key: this.to.key
       },
       localFile: this.from.path,
-      useElectronNode: this.useElectronNode,
+      overwriteDup: !!overwrite,
+      useElectronNode: !!this.useElectronNode,
       isDebug: this.isDebug
     }
   };
   if (this.isDebug) {
-    console.log(`[JOB] ${JSON.stringify(job)}`);
+    console.log(`[JOB] sched starting => ${JSON.stringify(job)}`);
   }
   ipcRenderer.send('asynchronous-job', job);
   ipcRenderer.on(this.id, this._listener);
@@ -164,44 +165,51 @@ UploadJob.prototype.startUpload = function (event, data) {
   }
 
   switch (data.key) {
-    case 'fileStat':
-      var prog = data.data;
+  case 'fileDuplicated':
+    ipcRenderer.removeListener(this.id, this._listener);
 
-      this.prog.total = prog.progressTotal;
-      this.emit('progress', this.prog);
-      break;
+    this._changeStatus("duplicated");
+    this.emit('fileDuplicated', data);
+    break;
 
-    case 'progress':
-      var prog = data.data;
+  case 'fileStat':
+    var prog = data.data;
 
-      this.prog.loaded = prog.progressLoaded;
-      this.emit('progress', this.prog);
-      break;
+    this.prog.total = prog.progressTotal;
+    this.emit('progress', this.prog);
+    break;
 
-    case 'fileUploaded':
-      ipcRenderer.removeListener(this.id, this._listener);
+  case 'progress':
+    var prog = data.data;
 
-      this._changeStatus("finished");
-      this.emit("complete");
-      break;
+    this.prog.loaded = prog.progressLoaded;
+    this.emit('progress', this.prog);
+    break;
 
-    case 'error':
-      console.error("upload object error:", data);
-      ipcRenderer.removeListener(this.id, this._listener);
+  case 'fileUploaded':
+    ipcRenderer.removeListener(this.id, this._listener);
 
-      this.message = data;
-      this._changeStatus("failed");
-      this.emit("error", data.error);
-      break;
+    this._changeStatus("finished");
+    this.emit("complete");
+    break;
 
-    case 'debug':
-      if (!this.isDebug) {
-        console.log("Debug", data);
-      }
-      break;
+  case 'error':
+    console.error("upload object error:", data);
+    ipcRenderer.removeListener(this.id, this._listener);
 
-    default:
-      console.warn("Unknown", data);
+    this.message = data;
+    this._changeStatus("failed");
+    this.emit("error", data.error);
+    break;
+
+  case 'debug':
+    if (!this.isDebug) {
+      console.log("Debug", data);
+    }
+    break;
+
+  default:
+    console.warn("Unknown", data);
   }
 };
 
@@ -237,8 +245,8 @@ UploadJob.prototype.startSpeedCounter = function () {
 
     self.predictLeftTime =
       self.speed <= 0 ?
-        0 :
-        Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
+      0 :
+      Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
   }, 1000);
 };
 
@@ -246,7 +254,7 @@ UploadJob.prototype._changeStatus = function (status) {
   this.status = status;
   this.emit("statuschange", this.status);
 
-  if (status == "failed" || status == "stopped" || status == "finished") {
+  if (status == "failed" || status == "stopped" || status == "finished" || status == "duplicated") {
     clearInterval(this.speedTid);
 
     this.endTime = new Date().getTime();

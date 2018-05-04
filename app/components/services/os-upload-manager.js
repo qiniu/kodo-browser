@@ -255,11 +255,14 @@ angular.module("web").factory("osUploadManager", [
       //save
       trySaveProg();
 
-      job.on("partcomplete", function (prog) {
+      job.on('fileDuplicated', (data) => {
+        // ignore
+      });
+      job.on("partcomplete", (prog) => {
         safeApply($scope);
         trySaveProg();
       });
-      job.on("statuschange", function (status) {
+      job.on("statuschange", (status) => {
         if (status == "stopped") {
           concurrency--;
           $timeout(trySchedJob, 500);
@@ -268,16 +271,16 @@ angular.module("web").factory("osUploadManager", [
         safeApply($scope);
         trySaveProg();
       });
-      job.on("speedChange", function () {
+      job.on("speedChange", () => {
         safeApply($scope);
       });
-      job.on("complete", function () {
+      job.on("complete", () => {
         concurrency--;
         trySchedJob();
 
         checkNeedRefreshFileList(job.to.bucket, job.to.key);
       });
-      job.on("error", function (err) {
+      job.on("error", (err) => {
         console.error(`upload s3://${job.to.bucket}/${job.to.key} error: ${err.message}`);
 
         concurrency--;
@@ -291,7 +294,7 @@ angular.module("web").factory("osUploadManager", [
 
       concurrency = Math.max(0, concurrency);
       if (isDebug) {
-        console.log(`[JOB] upload max: ${maxConcurrency}, cur: ${concurrency}, jobs: ${$scope.lists.uploadJobList.length}`)
+        console.log(`[JOB] upload max: ${maxConcurrency}, cur: ${concurrency}, jobs: ${$scope.lists.uploadJobList.length}`);
       }
 
       if (concurrency < maxConcurrency) {

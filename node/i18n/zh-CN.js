@@ -296,6 +296,7 @@ module.exports = {
 
   "upload.addtolist.on": "正在添加到上传队列",
   "upload.addtolist.success": "已全部添加到上传队列",
+  "upload.duplicated": "文件已经存在",
 
   "transframe.search.placeholder": "根据名称或状态搜索",
 

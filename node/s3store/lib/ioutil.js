@@ -62,8 +62,9 @@ Client.prototype.uploadFile = function (params) {
 
   let parts = [];
   let uploadedParts = {};
-  let isAborted = false;
   let checkPoints = params.resumePoints;
+  let isOverwrite = params.overwriteDup;
+  let isAborted = false;
   let isDebug = params.isDebug;
 
   let uploader = new EventEmitter();
@@ -85,7 +86,20 @@ Client.prototype.uploadFile = function (params) {
     s3params.ContentType = mime.getType(localFile) || defaultContentType;
   }
 
-  tryOpenFile();
+  if (!isOverwrite) {
+    self.s3.headObject({
+      Bucket: s3params.Bucket,
+      Key: s3params.Key,
+    }, (err, data) => {
+      if (err) {
+        tryOpenFile();
+      } else {
+        uploader.emit("fileDuplicated", uploader);
+      }
+    });
+  } else {
+    tryOpenFile();
+  }
 
   return uploader;
 

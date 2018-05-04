@@ -274,7 +274,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
         env: {
           fork: forkOptions,
           script: execScript
-        }
+        },
+        data: data
       });
     }
 
@@ -298,6 +299,14 @@ ipcMain.on("asynchronous-job", (event, data) => {
       }
 
       switch (msg.key) {
+      case 'fileDuplicated':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'fileDuplicated',
+        });
+
+        break;
+
       case 'fileStat':
         event.sender.send(data.job, {
           job: data.job,

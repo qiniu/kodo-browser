@@ -59,7 +59,6 @@
 
           <div class="progress mg0" style="height:4px;">
             <div class="progress-bar progress-bar-{{item.status|statusCls}}" ng-style="{width: (item.prog.loaded|persent:item.prog.total:item.status) + '%'}">
-
             </div>
           </div>
         </div>
@@ -76,8 +75,13 @@
 
         <div class="col-sm-4 text-overflow">
           <small ng-show="item.prog.total">
-            <span ng-if="item.prog.loaded!=item.prog.total">{{item.prog.loaded|sizeFormat}}/</span>{{item.prog.total|sizeFormat}}</small>
+            <span ng-if="item.prog.loaded!=item.prog.total">{{item.prog.loaded|sizeFormat}}/</span>{{item.prog.total|sizeFormat}}
+          </small>
           <small ng-show="item.predictLeftTime">, {{item.predictLeftTime|leftTimeFormat}}</small>
+          <small ng-if="item.status == 'duplicated'" class="text-danger">
+            <i class="glyphicon glyphicon-alert"></i>
+            {{'upload.duplicated'|translate}}
+          </small>
         </div>
 
         <div class="col-sm-2 text-right">
@@ -85,13 +89,17 @@
             <i class="glyphicon glyphicon-pause text-warning"></i>
           </a> -->
 
-          <a ng-if="item.status=='stopped' || item.status=='failed' || item.status=='finished'" href="" ng-click="showRemoveItem(item)"
-            class="btn btn-default btn-xs">
-            <i class="glyphicon glyphicon-remove text-danger "></i>
+          <a ng-if="item.status=='stopped' || item.status=='failed' || item.status=='finished' || item.status=='duplicated'" href="" ng-click="showRemoveItem(item)"
+            class="btn btn-danger btn-xs">
+            <i class="glyphicon glyphicon-remove"></i>
           </a>
 
-          <a ng-if="item.status=='stopped' || item.status=='failed'" href="" ng-click="checkStartJob(item)" class="btn btn-default btn-xs">
-            <i class="glyphicon glyphicon-play text-success"></i>
+          <a ng-if="item.status=='stopped' || item.status=='failed'" href="" ng-click="checkStartJob(item)" class="btn btn-success btn-xs">
+            <i class="glyphicon glyphicon-play"></i>
+          </a>
+
+          <a ng-if="item.status=='duplicated'" href="" ng-click="checkStartJob(item, true)" class="btn btn-warning btn-xs">
+            <i class="glyphicon glyphicon-repeat"></i>
           </a>
         </div>
 

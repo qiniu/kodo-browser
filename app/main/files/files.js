@@ -505,7 +505,8 @@ angular.module("web").controller("filesCtrl", [
         if (fn) fn();
 
       }, function (err) {
-        console.log(`list buckets error: ${err.message}`);
+        console.error(`list buckets error: ${err.message}`);
+
         $scope.isLoading = false;
 
         clearFilesList();
@@ -546,10 +547,6 @@ angular.module("web").controller("filesCtrl", [
       osClient.listFiles(info.region, info.bucket, info.key, marker || "").then(function (result) {
         var data = result.data;
 
-        // if (settingsSvs.showImageSnapshot.get() == 1) {
-        //   signImagePreviewURL(info, data);
-        // }
-
         //try to resolve bucket perm
         var authInfo = AuthInfo.get();
         if (authInfo.perm) {
@@ -564,7 +561,7 @@ angular.module("web").controller("filesCtrl", [
         if (fn) fn(null);
 
       }, function (err) {
-        console.log(`list files: s3://${info.bucket}/${info.key}?marker=${maker}, error: ${err.message}`);
+        console.error(`list files: s3://${info.bucket}/${info.key}?marker=${maker}, error: ${err.message}`);
 
         clearFilesList();
 

@@ -54,8 +54,13 @@ angular.module("web").controller("transferUploadsCtrl", [
       }
     }
 
-    function checkStartJob(item) {
-      item.wait();
+    function checkStartJob(item, force) {
+      if (force) {
+        item.start(true);
+      } else {
+        item.wait();
+      }
+
       osUploadManager.trySchedJob();
     }
 

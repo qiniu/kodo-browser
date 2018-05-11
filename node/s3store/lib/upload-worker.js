@@ -28,7 +28,13 @@ process.on('message', function (msg) {
     var client = new Client(msg.data.options);
 
     var uploader = client.uploadFile(msg.data.params);
-    uploader.on('fileStat', function (e2) {
+    uploader.on('fileDuplicated', (e2) => {
+      process.send({
+        job: msg.data.job,
+        key: 'fileDuplicated'
+      });
+    });
+    uploader.on('fileStat', (e2) => {
       process.send({
         job: msg.data.job,
         key: 'fileStat',
@@ -38,7 +44,7 @@ process.on('message', function (msg) {
         }
       });
     });
-    uploader.on('progress', function (e2) {
+    uploader.on('progress', (e2) => {
       process.send({
         job: msg.data.job,
         key: 'progress',
@@ -48,14 +54,14 @@ process.on('message', function (msg) {
         }
       });
     });
-    uploader.on('fileUploaded', function (result) {
+    uploader.on('fileUploaded', (result) => {
       process.send({
         job: msg.data.job,
         key: 'fileUploaded',
         data: result || {}
       });
     });
-    uploader.on('error', function (err) {
+    uploader.on('error', (err) => {
       process.send({
         job: msg.data.job,
         key: 'error',

@@ -297,6 +297,7 @@ module.exports = {
 
   "upload.addtolist.on": "Being added to the upload queue",
   "upload.addtolist.success": "All added",
+  "upload.duplicated": "File duplicated",
 
   "transframe.search.placeholder": "Filter by name or status",
 

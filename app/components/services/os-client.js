@@ -338,7 +338,7 @@ angular.module("web").factory("osClient", [
         if (removeAfterCopy) {
           params.Metadata = {
             "COPY-BY-RENAME": "true"
-          }
+          };
         }
 
         client.copyObject(params,
@@ -1042,7 +1042,7 @@ angular.module("web").factory("osClient", [
 
           //文件
           if (result["Contents"]) {
-            var ONE_HOUR = 60 * 60 * 1000 // ms
+            var ONE_HOUR = 60 * 60 * 1000; // ms
 
             result["Contents"].forEach(function (n) {
               n.Prefix = n.Prefix || "";
@@ -1057,7 +1057,7 @@ angular.module("web").factory("osClient", [
                 n.type = n.Type;
                 n.lastModified = n.LastModified;
                 n.url = getS3Url(region, opt.Bucket, n.Key);
-                n.WithinFourHours = (((new Date()) - n.LastModified) <= 4 * ONE_HOUR)
+                n.WithinFourHours = (((new Date()) - n.LastModified) <= 4 * ONE_HOUR);
 
                 t.push(n);
               }

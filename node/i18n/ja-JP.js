@@ -296,6 +296,7 @@ module.exports = {
 
   "upload.addtolist.on": "ダウンロードキューに追加中",
   "upload.addtolist.success": "すべて追加されました",
+  "upload.duplicated": "ファイルは既に存在します",
 
   "transframe.search.placeholder": "名前またはステータスによるフィルタリング",
 

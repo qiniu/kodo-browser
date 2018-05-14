@@ -5,14 +5,8 @@
     <div class="btn-group" role="group" ng-if="!copy.pwd && (!ref.bucketPerm || ref.bucketPerm.write)">
       <button ng-disabled="currentAuthInfo.privilege=='readOnly'" type="button" class="btn btn-info btn-sm" ng-click="showAddFolder()">
         <i class="glyphicon glyphicon-plus text-success"></i>
-        <!-- 新建目录 -->
         {{'folder.create'|translate}}
       </button>
-      <!-- mock -->
-      <div style="position:absolute;width:2px;height:1px;opacity:0.01;overflow:hidden;">
-        <input type="text" style="position:absolute;top:0;left:0" ng-model="mock.uploads" ng-change="mock.uploadsChange()" />
-        <input type="text" style="position:absolute;top:0;left:1" ng-model="mock.downloads" ng-change="mock.downloadsChange()" />
-      </div>
     </div>
 
     &nbsp;
@@ -22,39 +16,33 @@
         ng-if="(!ref.bucketPerm || ref.bucketPerm.write)">
         <i class="glyphicon glyphicon-cloud-upload text-info"></i>
         {{'upload'|translate}}
-        <!-- 上传 -->
       </button>
       <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has" ng-click="showDownloadDialog()" ng-if="(!ref.bucketPerm || ref.bucketPerm.read)">
         <i class="glyphicon glyphicon-cloud-download text-primary"></i>
-        <!-- 下载 -->
         {{'download'|translate}}
       </button>
 
       <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has || currentAuthInfo.privilege=='readOnly'" ng-click="showMove(sel.has, true)"
         ng-if="(!ref.bucketPerm || ref.bucketPerm.copy)">
         <i class="fa fa-clone text-primary"></i>
-        <!-- 复制 -->
         {{'copy'|translate}}
       </button>
 
       <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has || currentAuthInfo.privilege=='readOnly'" ng-if="(!ref.bucketPerm || ref.bucketPerm.move)"
         ng-click="showMove(sel.has)">
         <i class="fa fa-clone text-primary"></i>
-        <!-- 移动 -->
         {{'move'|translate}}
       </button>
 
       <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has || currentAuthInfo.privilege=='readOnly'" ng-if="(!ref.bucketPerm || ref.bucketPerm.rename)"
         ng-click="showRename(sel.has[0])">
         <i class="fa fa-clone text-primary"></i>
-        <!-- 重命名 -->
         {{'rename'|translate}}
       </button>
 
       <button type="button" class="btn btn-default btn-sm" ng-disabled="!sel.has || currentAuthInfo.privilege=='readOnly'" ng-if="(!ref.bucketPerm || ref.bucketPerm.remove)"
         ng-click="showDeleteFilesSelected()">
         <i class="fa fa-clone text-primary"></i>
-        <!-- 删除 -->
         {{'delete'|translate}}
       </button>
 
@@ -66,7 +54,6 @@
         <span class="text-primary">
           <i class="fa fa-paste"></i>
           {{'paste'|translate}}({{keepMoveOptions.items.length}})
-          <!-- 粘贴 -->
       </button>
 
       <button class="btn btn-default btn-sm" style="padding-left:3px;padding-right:3px;" type="button" uib-tooltip="{{(keepMoveOptions.isCopy?'copy.cancel':'move.cancel')|translate }}"
@@ -92,10 +79,6 @@
   </div>
   <div class="col-sm-3 pd0">
     <span ng-include="'main/files/_/list-view-options.html'"></span>
-    <span ng-if="currentAuthInfo.id.indexOf('STS.')!=0" class="f8 text-muted pull-right" style="line-height:30px;">
-      <!-- 区域: -->
-      {{'region'|translate}}: {{currentInfo.region}} &nbsp;
-    </span>
   </div>
 
   <div class="clearfix"></div>

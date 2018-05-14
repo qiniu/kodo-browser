@@ -51,7 +51,6 @@ angular
 
     function linkFn(scope, ele, attr) {}
   })
-
   .factory("Toast", [
     "$rootScope",
     function ($rootScope) {

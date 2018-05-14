@@ -411,19 +411,14 @@ angular.module("web").controller("filesCtrl", [
         $rootScope.bucketMap[bucket] = {
           region: authInfo.region
         };
-
-        $timeout(function () {
-          addEvents();
-          $scope.$broadcast("filesViewReady");
-        });
       } else {
         $scope.ref.isBucketList = true;
-
-        listBuckets(function () {
-          addEvents();
-          $scope.$broadcast("filesViewReady");
-        });
       }
+
+      $timeout(function () {
+        addEvents();
+        $scope.$broadcast("filesViewReady");
+      });
     }
 
     function addEvents() {
@@ -446,10 +441,8 @@ angular.module("web").controller("filesCtrl", [
           }
         }
 
-        //has bucket , list objects
         if (info.bucket) {
-          $scope.currentBucket = info.bucket;
-
+          // list objects
           if (!$rootScope.bucketMap[info.bucket]) {
             Toast.error("Forbidden");
 
@@ -457,36 +450,35 @@ angular.module("web").controller("filesCtrl", [
             return;
           }
 
+          $scope.currentBucket = info.bucket;
           $scope.ref.isBucketList = false;
-          info.region = $rootScope.bucketMap[info.bucket].region;
 
           //search
           if (fileName) {
             $scope.sch.objectName = fileName;
             searchObjectName();
           } else {
-            //fix ubuntu
             $timeout(function () {
               listFiles();
             }, 100);
           }
         } else {
-          //list buckets
+          // list buckets
           $scope.currentBucket = null;
-
           $scope.ref.isBucketList = true;
 
-          //只有从来没有 list buckets 过，才list，减少http请求开销
           if (!$scope.buckets && forceRefresh) {
-            listBuckets();
+            $timeout(function () {
+              listBuckets();
+            }, 100);
           }
-
-          clearFilesList();
         }
       });
     }
 
     function listBuckets(fn) {
+      clearFilesList();
+
       $scope.isLoading = true;
 
       osClient.listAllBuckets().then(function (buckets) {
@@ -502,21 +494,18 @@ angular.module("web").controller("filesCtrl", [
 
         safeApply($scope);
 
-        if (fn) fn();
+        if (fn) fn(null);
 
       }, function (err) {
-        console.error(`list buckets error: ${err.message}`);
+        console.error("list buckets error", err);
 
         $scope.isLoading = false;
 
         clearFilesList();
 
-        $scope.buckets = [];
-        $rootScope.bucketMap = {};
-
         safeApply($scope);
 
-        if (fn) fn();
+        if (fn) fn(err);
       });
     }
 
@@ -527,17 +516,25 @@ angular.module("web").controller("filesCtrl", [
 
       info = info || $scope.currentInfo;
 
+      //try to resolve bucket perm
+      var authInfo = AuthInfo.get();
+      if (authInfo.perm) {
+        $scope.ref.bucketPerm = authInfo.perm[info.bucket];
+      }
+
       tryListFiles(info, marker, function (err) {
         if (err) {
           Toast.error(JSON.stringify(err));
+          return;
         }
+
+        $scope.isLoading = false;
 
         if ($scope.nextObjectsMarker) {
           $timeout(() => {
             tryLoadMore();
           }, 100);
         } else {
-          $scope.isLoading = false;
           safeApply($scope);
         }
       });
@@ -547,21 +544,14 @@ angular.module("web").controller("filesCtrl", [
       osClient.listFiles(info.region, info.bucket, info.key, marker || "").then(function (result) {
         var data = result.data;
 
-        //try to resolve bucket perm
-        var authInfo = AuthInfo.get();
-        if (authInfo.perm) {
-          $scope.ref.bucketPerm = authInfo.perm[info.bucket];
-        }
-
         $scope.objects = $scope.objects.concat(data);
         $scope.nextObjectsMarker = result.marker || null;
 
         safeApply($scope);
 
         if (fn) fn(null);
-
       }, function (err) {
-        console.error(`list files: s3://${info.bucket}/${info.key}?marker=${maker}, error: ${err.message}`);
+        console.error(`list files: s3://${info.bucket}/${info.key}?marker=${maker}i`, err);
 
         clearFilesList();
 
@@ -594,6 +584,9 @@ angular.module("web").controller("filesCtrl", [
 
     function clearFilesList() {
       initSelect();
+
+      $scope.buckets = [];
+      $rootScope.bucketMap = {};
 
       $scope.objects = [];
       $scope.nextObjectsMarker = null;

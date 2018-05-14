@@ -17,7 +17,6 @@ angular
         var h = parseInt(scope.autoHeight);
 
         ele.css({
-          //'border-bottom': '1px solid #ccc',
           overflow: "auto",
           position: "relative"
         });

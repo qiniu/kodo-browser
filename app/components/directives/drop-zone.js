@@ -1,4 +1,4 @@
-angular.module("web").directive("dropZone", function() {
+angular.module("web").directive("dropZone", function () {
   return {
     link: linkFn,
     restrict: "EA",
@@ -9,17 +9,18 @@ angular.module("web").directive("dropZone", function() {
   };
 
   function linkFn(scope, ele, attr) {
-    $(document).on("dragenter", stopPrev);
-    $(document).on("dragover", stopPrev);
-    $(document).on("dragleave", stopPrev);
-    $(document).on("drop", stopPrev);
+    $(document).on("dragenter", stopPrev)
+      .on("dragover", stopPrev)
+      .on("dragleave", stopPrev)
+      .on("drop", stopPrev);
+
     function stopPrev(e) {
       e.originalEvent.stopPropagation();
       e.originalEvent.preventDefault();
     }
 
     var shadow;
-    $(ele).on("dragenter", function() {
+    $(ele).on("dragenter", function () {
       shadow = $("<div></div>")
         .css({
           position: "absolute",
@@ -35,10 +36,10 @@ angular.module("web").directive("dropZone", function() {
         .appendTo("body");
 
       shadow
-        .on("dragleave", function() {
+        .on("dragleave", function () {
           shadow.remove();
         })
-        .on("drop", function(e) {
+        .on("drop", function (e) {
           shadow.remove();
           scope.dropZone(e);
         });

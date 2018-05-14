@@ -14,17 +14,13 @@
     <tr ng-repeat="item in items" ng-click="goIn(item);$event.stopPropagation()" ng-class="{info:item.path==keepConfig.key}">
       <td>
         <div class="text-overflow" style="cursor:pointer;">
-
           <span>
             <i ng-if="showBuckets && item.region" class="fa fa-database text-warning"></i>
             <i ng-if="item.isFolder" class="fa fa-folder text-orange"></i>
             <i ng-if="!folderOnly && !item.region && !item.isFolder" class="fa fa-file-o"></i>
             &nbsp;
-            <label>
-              <span>{{item.name}}</span>
-          </label>
+            <label><span>{{item.name}}</span></label>
           </span>
-
         </div>
       </td>
     </tr>

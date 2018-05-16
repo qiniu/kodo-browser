@@ -34,6 +34,7 @@ angular.module("web").controller("filesCtrl", [
     angular.extend($scope, {
       showTab: 1,
       keepMoveOptions: null,
+      currentListView: true,
 
       ref: {
         isBucketList: false,
@@ -104,15 +105,67 @@ angular.module("web").controller("filesCtrl", [
       showHttpHeaders: showHttpHeaders,
 
       showPaste: showPaste,
-      cancelPaste: cancelPaste,
+      cancelPaste: cancelPaste
+    });
 
-      mock: {
-        uploads: "",
-        downloads: "",
-        uploadsChange: uploadsChange,
-        downloadsChange: downloadsChange
+    $scope.$watch("ref.isListView", function (v) {
+      if ($scope.currentListView) {
+        $scope.currentListView = v;
+
+        return;
+      }
+
+      if (!v) {
+        $scope.currentListView = v;
+
+        return;
+      }
+
+      if ($scope.ref.isBucketList) {
+        listBuckets();
+      } else {
+        listFiles();
       }
     });
+
+    $scope.bucketSpacerMenuOptions = [
+      [
+        function () {
+          return (
+            '<i class="glyphicon glyphicon-plus text-success"></i> ' +
+            T("bucket.add")
+          );
+        },
+        function ($itemScope, $event) {
+          showAddBucket();
+        }
+      ]
+    ];
+    $scope.bucketMenuOptions = [
+      [
+        function ($itemScope, $event, modelValue, text, $li) {
+          $scope.bucket_sel.item = $itemScope.item;
+          return (
+            '<i class="fa fa-shield text-warning"></i> ' + T("simplePolicy")
+          );
+        },
+        function ($itemScope, $event) {
+          // Action
+          showGrant([$scope.bucket_sel.item]);
+        }
+      ],
+
+      [
+        function ($itemScope, $event, modelValue, text, $li) {
+          $scope.bucket_sel.item = $itemScope.item;
+          return '<i class="fa fa-remove text-danger"></i> ' + T("delete");
+        },
+        function ($itemScope, $event) {
+          // Action
+          showDeleteBucket($scope.bucket_sel.item);
+        }
+      ]
+    ];
 
     $scope.fileSpacerMenuOptions = [
       [
@@ -287,45 +340,6 @@ angular.module("web").controller("filesCtrl", [
       ];
     };
 
-    $scope.bucketSpacerMenuOptions = [
-      [
-        function () {
-          return (
-            '<i class="glyphicon glyphicon-plus text-success"></i> ' +
-            T("bucket.add")
-          );
-        },
-        function ($itemScope, $event) {
-          showAddBucket();
-        }
-      ]
-    ];
-    $scope.bucketMenuOptions = [
-      [
-        function ($itemScope, $event, modelValue, text, $li) {
-          $scope.bucket_sel.item = $itemScope.item;
-          return (
-            '<i class="fa fa-shield text-warning"></i> ' + T("simplePolicy")
-          );
-        },
-        function ($itemScope, $event) {
-          // Action
-          showGrant([$scope.bucket_sel.item]);
-        }
-      ],
-
-      [
-        function ($itemScope, $event, modelValue, text, $li) {
-          $scope.bucket_sel.item = $itemScope.item;
-          return '<i class="fa fa-remove text-danger"></i> ' + T("delete");
-        },
-        function ($itemScope, $event) {
-          // Action
-          showDeleteBucket($scope.bucket_sel.item);
-        }
-      ]
-    ];
-
     /////////////////////////////////
     function goIn(bucket, prefix) {
       var s3path = "s3://";
@@ -467,11 +481,9 @@ angular.module("web").controller("filesCtrl", [
           $scope.currentBucket = null;
           $scope.ref.isBucketList = true;
 
-          if (!$scope.buckets && forceRefresh) {
-            $timeout(function () {
-              listBuckets();
-            }, 100);
-          }
+          $timeout(function () {
+            listBuckets();
+          }, 100);
         }
       });
     }
@@ -494,14 +506,14 @@ angular.module("web").controller("filesCtrl", [
 
         safeApply($scope);
 
+        showBuckets(buckets);
+
         if (fn) fn(null);
 
       }, function (err) {
         console.error("list buckets error", err);
 
         $scope.isLoading = false;
-
-        clearFilesList();
 
         safeApply($scope);
 
@@ -584,9 +596,6 @@ angular.module("web").controller("filesCtrl", [
 
     function clearFilesList() {
       initSelect();
-
-      $scope.buckets = [];
-      $rootScope.bucketMap = {};
 
       $scope.objects = [];
       $scope.nextObjectsMarker = null;
@@ -1205,6 +1214,29 @@ angular.module("web").controller("filesCtrl", [
         size: "lg",
         backdrop: "static"
       }).result.then(angular.noop, angular.noop);
+    }
+
+    function showBuckets(buckets) {
+      $('#bucket-list').bootstrapTable({
+        columns: [{
+          field: 'name',
+          title: T('bucket.name'),
+          formatter: (val, row, idx, field) => {
+            return `<i class="fa fa-database text-warning"></i>
+                    <a href="" ng-click="goIn(${val})">
+                      <span>${val}</span>
+                    </a>`;
+          },
+          events: {
+            'click a': (evt, val, row, idx) => {
+              goIn(val);
+
+              return false;
+            }
+          }
+        }],
+        data: buckets
+      });
     }
   }
 ]);

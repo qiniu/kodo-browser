@@ -13,7 +13,7 @@ angular
   .directive("toastList", function () {
     return {
       restrict: "EA",
-      template: "components/directives/toast-list.html",
+      templateUrl: "components/directives/toast-list.html",
       controller: [
         "$scope",
         "$timeout",

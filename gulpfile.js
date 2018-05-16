@@ -89,6 +89,7 @@ gulp.task("libJS", () => {
 
     "./node_modules/moment/min/moment-with-locales.js",
     "./node_modules/bootstrap/dist/js/bootstrap.js",
+    "./node_modules/bootstrap-table/dist/bootstrap-table.min.js",
 
     "./node_modules/angular/angular.js",
     "./node_modules/angular-sanitize/angular-sanitize.js",
@@ -127,6 +128,7 @@ gulp.task("libCSS", () => {
   gulp
     .src([
       "./node_modules/bootstrap/dist/css/bootstrap.css",
+      "./node_modules/bootstrap-table/dist/bootstrap-table.min.css",
       "./node_modules/font-awesome/css/font-awesome.css",
       "./node_modules/codemirror/lib/codemirror.css",
       "./node_modules/codemirror/addon/merge/merge.css"

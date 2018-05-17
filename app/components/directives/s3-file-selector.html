@@ -11,7 +11,7 @@
   <div is-loading ng-if='isLoading'></div>
 
   <table ng-if='!isLoading' class="table table-condensed table-striped" style="margin:0">
-    <tr ng-repeat="item in items" ng-click="goIn(item);$event.stopPropagation()" ng-class="{info:item.path==keepConfig.key}">
+    <tr ng-repeat="item in items" ng-click="gotoAddress(item);$event.stopPropagation()" ng-class="{info:item.path==keepConfig.key}">
       <td>
         <div class="text-overflow" style="cursor:pointer;">
           <span>

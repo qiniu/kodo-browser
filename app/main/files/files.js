@@ -1,6 +1,7 @@
 angular.module("web").controller("filesCtrl", [
-  "$scope",
   "$rootScope",
+  "$scope",
+  "$filter",
   "$uibModal",
   "$timeout",
   "$translate",
@@ -10,12 +11,12 @@ angular.module("web").controller("filesCtrl", [
   "osClient",
   "settingsSvs",
   "fileSvs",
-  "safeApply",
   "Toast",
   "Dialog",
   function (
-    $scope,
     $rootScope,
+    $scope,
+    $filter,
     $modal,
     $timeout,
     $translate,
@@ -25,7 +26,6 @@ angular.module("web").controller("filesCtrl", [
     osClient,
     settingsSvs,
     fileSvs,
-    safeApply,
     Toast,
     Dialog
   ) {
@@ -33,62 +33,60 @@ angular.module("web").controller("filesCtrl", [
 
     angular.extend($scope, {
       showTab: 1,
-      keepMoveOptions: null,
-      currentListView: true,
 
       ref: {
         isBucketList: false,
-        isListView: true,
-        bucketPerm: {}
+        isListView: true
       },
+
+      currentListView: true,
+      currentBucketPerm: {},
+      keepMoveOptions: null,
 
       transVisible: localStorage.getItem("transVisible") == "true",
       toggleTransVisible: function (visible) {
-        $scope.transVisible = visible;
         localStorage.setItem("transVisible", visible);
+
+        $timeout(() => {
+          $scope.transVisible = visible;
+        });
       },
 
-      goIn: goIn,
-      getCurrentS3path: getCurrentS3path,
-
-      //bucket ops
-      showBucketMultipart: showBucketMultipart,
-      showAddBucket: showAddBucket,
-      showUpdateBucket: showUpdateBucket,
-      showDeleteBucket: showDeleteBucket,
-
-      //object ops
-      showAddFolder: showAddFolder,
-      showRename: showRename,
-      showMove: showMove,
-      showDeleteFiles: showDeleteFiles,
-      showDeleteFilesSelected: showDeleteFilesSelected,
-      tryLoadMore: tryLoadMore,
-
-      //search
+      // search
       sch: {
         bucketName: "",
         objectName: ""
       },
       searchObjectName: searchObjectName,
 
-      //selection
-      sel: {
-        hasArchive: false,
-        all: false, //boolean
-        has: false, //[] item: s3Object={name,path,...}
-        x: {} //{} {'i_'+$index, true|false}
-      },
-      selectAll: selectAll,
-      selectChanged: selectChanged,
-
-      //bucket selection
+      // bucket selection
       bucket_sel: {
         item: null
       },
       selectBucket: selectBucket,
 
-      //upload && download
+      // file selection
+      sel: {
+        all: false, //boolean
+        has: [], //[] item: s3Object={name,path,...}
+        x: {} //{} {'i_'+$index, true|false}
+      },
+      selectFile: selectFile,
+
+      // bucket ops
+      showAddBucket: showAddBucket,
+      showUpdateBucket: showUpdateBucket,
+      showBucketMultipart: showBucketMultipart,
+      showDeleteBucket: showDeleteBucket,
+
+      // object ops
+      showAddFolder: showAddFolder,
+      showRename: showRename,
+      showMove: showMove,
+      showDeleteFiles: showDeleteFiles,
+      showDeleteFilesSelected: showDeleteFilesSelected,
+
+      // upload && download
       handlers: {
         uploadFilesHandler: null,
         downloadFilesHandler: null
@@ -98,250 +96,40 @@ angular.module("web").controller("filesCtrl", [
       showDownloadDialog: showDownloadDialog,
       showDownload: showDownload,
 
-      //utils
+      // utils
+      gotoAddress: gotoAddress,
       showAddress: showAddress,
       showPreview: showPreview,
       showACL: showACL,
-      showHttpHeaders: showHttpHeaders,
 
       showPaste: showPaste,
       cancelPaste: cancelPaste
     });
 
-    $scope.$watch("ref.isListView", function (v) {
-      if ($scope.currentListView) {
-        $scope.currentListView = v;
+    $scope.$watch("ref.isListView", (v) => {
+      $timeout(() => {
+        if ($scope.currentListView) {
+          $scope.currentListView = v;
 
-        return;
-      }
+          return;
+        }
 
-      if (!v) {
-        $scope.currentListView = v;
+        if (!v) {
+          $scope.currentListView = v;
 
-        return;
-      }
+          return;
+        }
 
-      if ($scope.ref.isBucketList) {
-        listBuckets();
-      } else {
-        listFiles();
-      }
+        if ($scope.ref.isBucketList) {
+          showBucketsTable($scope.buckets);
+        } else {
+          showFilesTable($scope.objects);
+        }
+      });
     });
 
-    $scope.bucketSpacerMenuOptions = [
-      [
-        function () {
-          return (
-            '<i class="glyphicon glyphicon-plus text-success"></i> ' +
-            T("bucket.add")
-          );
-        },
-        function ($itemScope, $event) {
-          showAddBucket();
-        }
-      ]
-    ];
-    $scope.bucketMenuOptions = [
-      [
-        function ($itemScope, $event, modelValue, text, $li) {
-          $scope.bucket_sel.item = $itemScope.item;
-          return (
-            '<i class="fa fa-shield text-warning"></i> ' + T("simplePolicy")
-          );
-        },
-        function ($itemScope, $event) {
-          // Action
-          showGrant([$scope.bucket_sel.item]);
-        }
-      ],
-
-      [
-        function ($itemScope, $event, modelValue, text, $li) {
-          $scope.bucket_sel.item = $itemScope.item;
-          return '<i class="fa fa-remove text-danger"></i> ' + T("delete");
-        },
-        function ($itemScope, $event) {
-          // Action
-          showDeleteBucket($scope.bucket_sel.item);
-        }
-      ]
-    ];
-
-    $scope.fileSpacerMenuOptions = [
-      [
-        function () {
-          return (
-            '<i class="glyphicon glyphicon-cloud-upload text-info"></i> ' +
-            T("upload")
-          );
-        },
-        function ($itemScope, $event) {
-          showUploadDialog();
-        },
-        function () {
-          return $scope.currentAuthInfo.privilege != "readOnly";
-        }
-      ],
-      [
-        function () {
-          return (
-            '<i class="glyphicon glyphicon-plus text-success"></i> ' +
-            T("folder.create")
-          );
-        },
-        function ($itemScope, $event) {
-          showAddFolder();
-        },
-        function () {
-          return $scope.currentAuthInfo.privilege != "readOnly";
-        }
-      ],
-
-      [
-        function () {
-          return (
-            '<i class="fa fa-paste text-primary"></i> ' +
-            T("paste") +
-            ($scope.keepMoveOptions ?
-              "(" + $scope.keepMoveOptions.items.length + ")" :
-              "")
-          );
-        },
-        function ($itemScope, $event) {
-          showPaste();
-        },
-        function () {
-          return $scope.keepMoveOptions;
-        }
-      ]
-    ];
-    $scope.fileMenuOptions = function (item, $index) {
-      if ($scope.sel.x["i_" + $index]) {
-        //pass
-      } else {
-        $scope.objects.forEach(function (n, i) {
-          $scope.sel.x["i_" + i] = false;
-        });
-        $scope.sel.x["i_" + $index] = true;
-        selectChanged();
-      }
-
-      return [
-        [
-          function () {
-            //download
-            return (
-              '<i class="glyphicon glyphicon-cloud-download text-primary"></i> ' +
-              T("download")
-            );
-          },
-          function ($itemScope, $event) {
-            showDownloadDialog();
-          },
-          function () {
-            return $scope.sel.has;
-          }
-        ],
-        [
-          function () {
-            //copy
-            return '<i class="fa fa-clone text-primary"></i> ' + T("copy");
-          },
-          function ($itemScope, $event) {
-            showMove($scope.sel.has, true);
-          },
-          function () {
-            return (
-              $scope.sel.has && $scope.currentAuthInfo.privilege != "readOnly"
-            );
-          }
-        ],
-
-        [
-          function () {
-            //move
-            return '<i class="fa fa-cut text-primary"></i> ' + T("move");
-          },
-          function ($itemScope, $event) {
-            showMove($scope.sel.has);
-          },
-          function () {
-            return (
-              $scope.sel.has && $scope.currentAuthInfo.privilege != "readOnly"
-            );
-          }
-        ],
-
-        [
-          function () {
-            return '<i class="fa fa-edit text-info"></i> ' + T("rename");
-          },
-          function ($itemScope, $event) {
-            showRename($scope.sel.has[0]);
-          },
-          function () {
-            return (
-              $scope.sel.has &&
-              $scope.sel.has.length == 1 &&
-              $scope.currentAuthInfo.privilege != "readOnly" &&
-              $scope.sel.has[0].storageClass != "Archive"
-            );
-          }
-        ],
-
-        [
-          function () {
-            //获取地址
-            return '<i class="fa fa-download"></i> ' + T("getAddress");
-          },
-          function ($itemScope, $event) {
-            showAddress($scope.sel.has[0]);
-          },
-          function () {
-            return (
-              $scope.sel.has &&
-              $scope.sel.has.length == 1 &&
-              !$scope.sel.has[0].isFolder &&
-              $scope.currentAuthInfo.id.indexOf("STS.") != 0
-            );
-          }
-        ],
-
-        [
-          function () {
-            //Http头
-            return '<i class="fa fa-cog"></i> ' + T("http.headers");
-          },
-          function ($itemScope, $event) {
-            showHttpHeaders($scope.sel.has[0]);
-          },
-          function () {
-            return (
-              $scope.sel.has &&
-              $scope.sel.has.length == 1 &&
-              !$scope.sel.has[0].isFolder
-            );
-          }
-        ],
-
-        [
-          function () {
-            return '<i class="fa fa-remove text-danger"></i> ' + T("delete");
-          },
-          function ($itemScope, $event) {
-            showDeleteFilesSelected();
-          },
-          function () {
-            return (
-              $scope.sel.has && $scope.currentAuthInfo.privilege != "readOnly"
-            );
-          }
-        ]
-      ];
-    };
-
     /////////////////////////////////
-    function goIn(bucket, prefix) {
+    function gotoAddress(bucket, prefix) {
       var s3path = "s3://";
       if (bucket) {
         s3path = `s3://${bucket}/${prefix || ""}`;
@@ -350,17 +138,27 @@ angular.module("web").controller("filesCtrl", [
       $rootScope.$broadcast("gotoS3Address", s3path);
     }
 
-    function getCurrentS3path() {
+    function getCurrentPath() {
       return `s3://${$scope.currentInfo.bucket}/${$scope.currentInfo.key}`;
     }
 
     /////////////////////////////////
+    var refreshTid;
+
+    $scope.$on("refreshFilesList", (e) => {
+      $timeout.cancel(refreshTid);
+
+      refreshTid = $timeout(() => {
+        gotoAddress($scope.currentInfo.bucket, $scope.currentInfo.key);
+      }, 600);
+    });
+
     var searchTid;
 
     function searchObjectName() {
       $timeout.cancel(searchTid);
 
-      searchTid = $timeout(function () {
+      searchTid = $timeout(() => {
         var info = angular.copy($scope.currentInfo);
 
         info.key += $scope.sch.objectName;
@@ -372,10 +170,11 @@ angular.module("web").controller("filesCtrl", [
 
     function uploadsChange() {
       $timeout.cancel(uploadsTid);
-      uploadsTid = $timeout(function () {
+
+      uploadsTid = $timeout(() => {
         if ($scope.mock.uploads) {
-          var arr = $scope.mock.uploads.split(",");
-          $scope.handlers.uploadFilesHandler(arr, $scope.currentInfo);
+          var uploads = $scope.mock.uploads.split(",");
+          $scope.handlers.uploadFilesHandler(uploads, $scope.currentInfo);
         }
       }, 600);
     }
@@ -384,59 +183,52 @@ angular.module("web").controller("filesCtrl", [
 
     function downloadsChange() {
       $timeout.cancel(downloadsTid);
-      downloadsTid = $timeout(function () {
+
+      downloadsTid = $timeout(() => {
         if ($scope.mock.downloads) {
-          _downloadMulti($scope.mock.downloads);
+          tryDownloadFiles($scope.mock.downloads);
         }
       }, 600);
     }
-
-    var refreshTid;
-
-    $scope.$on("needrefreshfilelists", function (e) {
-      $timeout.cancel(refreshTid);
-
-      refreshTid = $timeout(function () {
-        goIn($scope.currentInfo.bucket, $scope.currentInfo.key);
-      }, 600);
-    });
 
     /////////////////////////////////
     $timeout(init, 100);
 
     function init() {
-      var authInfo = AuthInfo.get();
-      if (!authInfo.isAuthed) {
-        Auth.logout().then(function () {
+      var user = AuthInfo.get();
+      if (!user.isAuthed) {
+        Auth.logout().then(() => {
           $location.url("/login");
         });
 
         return;
       }
 
-      $rootScope.currentAuthInfo = authInfo;
+      $rootScope.currentUser = user;
 
-      if (authInfo.s3path) {
+      if (user.s3path) {
         $scope.ref.isBucketList = false;
 
-        var bucket = osClient.parseS3Path(authInfo.s3path).bucket;
+        var bucket = osClient.parseS3Path(user.s3path).bucket;
 
         $rootScope.bucketMap = {};
         $rootScope.bucketMap[bucket] = {
-          region: authInfo.region
+          region: user.region
         };
       } else {
         $scope.ref.isBucketList = true;
       }
 
-      $timeout(function () {
+      $timeout(() => {
         addEvents();
         $scope.$broadcast("filesViewReady");
       });
     }
 
     function addEvents() {
-      $scope.$on("s3AddressChange", function (e, addr, forceRefresh) {
+      $scope.$on("s3AddressChange", (evt, addr, forceRefresh) => {
+        evt.stopPropagation();
+
         console.log(`on:s3AddressChange: ${addr}, forceRefresh: ${!!forceRefresh}`);
 
         var info = osClient.parseS3Path(addr);
@@ -446,10 +238,10 @@ angular.module("web").controller("filesCtrl", [
         if (info.key) {
           var lastGan = info.key.lastIndexOf("/");
 
-          //if not endswith /
+          // if not endswith /
           if (lastGan != info.key.length - 1) {
-            var fileKey = info.key;
-            var fileName = info.key.substring(lastGan + 1);
+            var fileKey = info.key,
+              fileName = info.key.substring(lastGan + 1);
 
             info.key = info.key.substring(0, lastGan + 1);
           }
@@ -467,12 +259,23 @@ angular.module("web").controller("filesCtrl", [
           $scope.currentBucket = info.bucket;
           $scope.ref.isBucketList = false;
 
-          //search
+          // try to resolve bucket perm
+          var user = $rootScope.currentUser;
+          if (user.perm) {
+            if (user.isSuper) {
+              $scope.currentBucketPerm = user.perm;
+            } else {
+              $scope.currentBucketPerm = user.perm[info.bucket];
+            }
+          }
+
+          // search
           if (fileName) {
             $scope.sch.objectName = fileName;
+
             searchObjectName();
           } else {
-            $timeout(function () {
+            $timeout(() => {
               listFiles();
             }, 100);
           }
@@ -481,7 +284,7 @@ angular.module("web").controller("filesCtrl", [
           $scope.currentBucket = null;
           $scope.ref.isBucketList = true;
 
-          $timeout(function () {
+          $timeout(() => {
             listBuckets();
           }, 100);
         }
@@ -491,31 +294,33 @@ angular.module("web").controller("filesCtrl", [
     function listBuckets(fn) {
       clearFilesList();
 
-      $scope.isLoading = true;
+      $timeout(() => {
+        $scope.isLoading = true;
+      });
 
-      osClient.listAllBuckets().then(function (buckets) {
-        $scope.isLoading = false;
+      osClient.listAllBuckets().then((buckets) => {
+        $timeout(() => {
+          $scope.isLoading = false;
 
-        $scope.buckets = buckets;
+          $scope.buckets = buckets;
 
-        var m = {};
-        angular.forEach(buckets, function (n) {
-          m[n.name] = n;
+          var m = {};
+          angular.forEach(buckets, (bkt) => {
+            m[bkt.name] = bkt;
+          });
+          $rootScope.bucketMap = m;
         });
-        $rootScope.bucketMap = m;
 
-        safeApply($scope);
-
-        showBuckets(buckets);
+        showBucketsTable(buckets);
 
         if (fn) fn(null);
 
-      }, function (err) {
+      }, (err) => {
         console.error("list buckets error", err);
 
-        $scope.isLoading = false;
-
-        safeApply($scope);
+        $timeout(() => {
+          $scope.isLoading = false;
+        });
 
         if (fn) fn(err);
       });
@@ -524,45 +329,40 @@ angular.module("web").controller("filesCtrl", [
     function listFiles(info, marker, fn) {
       clearFilesList();
 
-      $scope.isLoading = true;
+      $timeout(() => {
+        $scope.isLoading = true;
+      });
 
-      info = info || $scope.currentInfo;
-
-      //try to resolve bucket perm
-      var authInfo = AuthInfo.get();
-      if (authInfo.perm) {
-        $scope.ref.bucketPerm = authInfo.perm[info.bucket];
-      }
-
-      tryListFiles(info, marker, function (err) {
+      tryListFiles((info || $scope.currentInfo), marker, (err, files) => {
         if (err) {
           Toast.error(JSON.stringify(err));
           return;
         }
 
-        $scope.isLoading = false;
+        $timeout(() => {
+          $scope.isLoading = false;
+        });
+
+        showFilesTable(files);
 
         if ($scope.nextObjectsMarker) {
           $timeout(() => {
             tryLoadMore();
           }, 100);
-        } else {
-          safeApply($scope);
         }
       });
     }
 
     function tryListFiles(info, marker, fn) {
-      osClient.listFiles(info.region, info.bucket, info.key, marker || "").then(function (result) {
-        var data = result.data;
+      osClient.listFiles(info.region, info.bucket, info.key, marker || "").then((result) => {
+        $timeout(() => {
+          $scope.objects = $scope.objects.concat(result.data);
+          $scope.nextObjectsMarker = result.marker || null;
+        });
 
-        $scope.objects = $scope.objects.concat(data);
-        $scope.nextObjectsMarker = result.marker || null;
+        if (fn) fn(null, result.data);
 
-        safeApply($scope);
-
-        if (fn) fn(null);
-      }, function (err) {
+      }, (err) => {
         console.error(`list files: s3://${info.bucket}/${info.key}?marker=${maker}i`, err);
 
         clearFilesList();
@@ -577,73 +377,37 @@ angular.module("web").controller("filesCtrl", [
 
         console.log(`loading next s3://${info.bucket}/${info.key}?marker=${$scope.nextObjectsMarker}`);
 
-        tryListFiles(info, $scope.nextObjectsMarker, function (err) {
+        tryListFiles(info, $scope.nextObjectsMarker, (err, files) => {
           if (err) {
             Toast.error(JSON.stringify(err));
+            return;
           }
+
+          showFilesTable(files, true);
 
           if ($scope.nextObjectsMarker) {
             $timeout(() => {
               tryLoadMore();
             }, 100);
-          } else {
-            $scope.isLoading = false;
-            safeApply($scope);
           }
         });
       }
     }
 
-    function clearFilesList() {
-      initSelect();
-
-      $scope.objects = [];
-      $scope.nextObjectsMarker = null;
-    }
-
-    function signImagePreviewURL(info, result) {
-      var authInfo = AuthInfo.get();
-
-      angular.forEach(result, function (n) {
-        if (!n.isFolder && fileSvs.getFileType(n).type == "picture") {
-          n.pic_url = osClient.signaturePicUrl(
-            info.region,
-            info.bucket,
-            n.path,
-            3600,
-            "image/resize,w_48"
-          );
-        }
-      });
-    }
-
-    function showBucketMultipart(item) {
-      $modal.open({
-        templateUrl: "main/files/modals/bucket-multipart-modal.html",
-        controller: "bucketMultipartModalCtrl",
-        size: "lg",
-        backdrop: "static",
-        resolve: {
-          bucketInfo: function () {
-            return item;
-          }
-        }
-      }).result.then(angular.noop, angular.noop);
-    }
-
+    /////////////////////////////////
     function showAddBucket() {
       $modal.open({
         templateUrl: "main/files/modals/add-bucket-modal.html",
         controller: "addBucketModalCtrl",
         resolve: {
-          item: function () {
+          item: () => {
             return null;
           },
-          callback: function () {
-            return function () {
+          callback: () => {
+            return () => {
               Toast.success(T("bucket.add.success"));
 
-              $timeout(function () {
+              $timeout(() => {
                 listBuckets();
               }, 500);
             };
@@ -657,14 +421,14 @@ angular.module("web").controller("filesCtrl", [
         templateUrl: "main/files/modals/update-bucket-modal.html",
         controller: "updateBucketModalCtrl",
         resolve: {
-          item: function () {
+          item: () => {
             return item;
           },
-          callback: function () {
-            return function () {
+          callback: () => {
+            return () => {
               Toast.success(T("bucketACL.update.success"));
 
-              $timeout(function () {
+              $timeout(() => {
                 listBuckets();
               }, 300);
             };
@@ -673,21 +437,36 @@ angular.module("web").controller("filesCtrl", [
       }).result.then(angular.noop, angular.noop);
     }
 
+    function showBucketMultipart(item) {
+      $modal.open({
+        templateUrl: "main/files/modals/bucket-multipart-modal.html",
+        controller: "bucketMultipartModalCtrl",
+        size: "lg",
+        backdrop: "static",
+        resolve: {
+          bucketInfo: () => {
+            return item;
+          }
+        }
+      }).result.then(angular.noop, angular.noop);
+    }
+
     function showDeleteBucket(item) {
-      var title = T("bucket.delete.title");
-      var message = T("bucket.delete.message", {
-        name: item.name,
-        region: item.region
-      });
+      var title = T("bucket.delete.title"),
+        message = T("bucket.delete.message", {
+          name: item.name,
+          region: item.region
+        });
+
       Dialog.confirm(
         title,
         message,
-        function (b) {
-          if (b) {
-            osClient.deleteBucket(item.region, item.name).then(function () {
+        (btn) => {
+          if (btn) {
+            osClient.deleteBucket(item.region, item.name).then(() => {
               Toast.success(T("bucket.delete.success")); //删除Bucket成功
-              //删除Bucket不是实时的，等待1秒后刷新
-              $timeout(function () {
+
+              $timeout(() => {
                 listBuckets();
               }, 1000);
             });
@@ -697,46 +476,19 @@ angular.module("web").controller("filesCtrl", [
       );
     }
 
-    function showDeleteFilesSelected() {
-      showDeleteFiles($scope.sel.has);
-    }
-
-    function showDeleteFiles(items) {
-      $modal.open({
-        templateUrl: "main/files/modals/delete-files-modal.html",
-        controller: "deleteFilesModalCtrl",
-        backdrop: "static",
-        resolve: {
-          items: function () {
-            return items;
-          },
-          currentInfo: function () {
-            return angular.copy($scope.currentInfo);
-          },
-          callback: function () {
-            return function () {
-              $timeout(function () {
-                listFiles();
-              }, 300);
-            };
-          }
-        }
-      }).result.then(angular.noop, angular.noop);
-    }
-
     function showAddFolder() {
       $modal.open({
         templateUrl: "main/files/modals/add-folder-modal.html",
         controller: "addFolderModalCtrl",
         resolve: {
-          currentInfo: function () {
+          currentInfo: () => {
             return angular.copy($scope.currentInfo);
           },
-          callback: function () {
-            return function () {
+          callback: () => {
+            return () => {
               Toast.success(T("folder.create.success"));
 
-              $timeout(function () {
+              $timeout(() => {
                 listFiles();
               }, 300);
             };
@@ -749,9 +501,9 @@ angular.module("web").controller("filesCtrl", [
       var fileType = fileSvs.getFileType(item);
       fileType.type = type || fileType.type;
 
-      var templateUrl = "main/files/modals/preview/others-modal.html";
-      var controller = "othersModalCtrl";
-      var backdrop = true;
+      var templateUrl = "main/files/modals/preview/others-modal.html",
+        controller = "othersModalCtrl",
+        backdrop = true;
 
       if (fileType.type == "code") {
         templateUrl = "main/files/modals/preview/code-modal.html";
@@ -778,20 +530,20 @@ angular.module("web").controller("filesCtrl", [
         size: "lg",
         //backdrop: backdrop,
         resolve: {
-          bucketInfo: function () {
+          bucketInfo: () => {
             return angular.copy($scope.currentInfo);
           },
-          objectInfo: function () {
+          objectInfo: () => {
             return item;
           },
-          fileType: function () {
+          fileType: () => {
             return fileType;
           },
-          showFn: function () {
+          showFn: () => {
             return {
-              callback: function (reloadStorageStatus) {
+              callback: (reloadStorageStatus) => {
                 if (reloadStorageStatus) {
-                  $timeout(function () {
+                  $timeout(() => {
                     osClient.loadStorageStatus(
                       $scope.currentInfo.region,
                       $scope.currentInfo.bucket, [item]
@@ -800,31 +552,28 @@ angular.module("web").controller("filesCtrl", [
                 }
               },
               preview: showPreview,
-              download: function () {
+              download: () => {
                 showDownload(item);
               },
-              grant: function () {
+              grant: () => {
                 showGrant([item]);
               },
-              move: function (isCopy) {
+              move: (isCopy) => {
                 showMove([item], isCopy);
               },
-              remove: function () {
+              remove: () => {
                 showDeleteFiles([item]);
               },
-              rename: function () {
+              rename: () => {
                 showRename(item);
               },
-              address: function () {
+              address: () => {
                 showAddress(item);
               },
-              acl: function () {
+              acl: () => {
                 showACL(item);
               },
-              httpHeaders: function () {
-                showHttpHeaders(item);
-              },
-              crc: function () {
+              crc: () => {
                 showCRC(item);
               }
             };
@@ -833,166 +582,15 @@ angular.module("web").controller("filesCtrl", [
       }).result.then(angular.noop, angular.noop);
     }
 
-    function showCRC(item) {
-      $modal.open({
-        templateUrl: "main/files/modals/crc-modal.html",
-        controller: "crcModalCtrl",
-        resolve: {
-          item: function () {
-            return angular.copy(item);
-          },
-          currentInfo: function () {
-            return angular.copy($scope.currentInfo);
-          }
-        }
-      }).result.then(angular.noop, angular.noop);
-    }
-
-    function showDownload(item) {
-      var bucketInfo = angular.copy($scope.currentInfo);
-      var fromInfo = angular.copy(item);
-
-      fromInfo.region = bucketInfo.region;
-      fromInfo.bucket = bucketInfo.bucket;
-
-      Dialog.showDownloadDialog(function (folderPaths) {
-        if (!folderPaths || folderPaths.length == 0) return;
-
-        var to = folderPaths[0];
-        to = to.replace(/(\/*$)/g, "");
-
-        $scope.handlers.downloadFilesHandler([fromInfo], to);
-      });
-    }
-
-    ////////////////////////
-    function initSelect() {
-      $scope.sel.all = false;
-      $scope.sel.has = false;
-      $scope.sel.x = {};
-    }
-
-    function selectAll() {
-      var f = $scope.sel.all;
-      $scope.sel.has = f ? $scope.objects : false;
-      var len = $scope.objects.length;
-      for (var i = 0; i < len; i++) {
-        $scope.sel.x["i_" + i] = f;
-      }
-    }
-
-    var lastSeleteIndex = -1;
-
-    function selectChanged(e, index) {
-      if (e && e.shiftKey) {
-        var min = Math.min(lastSeleteIndex, index);
-        var max = Math.max(lastSeleteIndex, index);
-        for (var i = min; i <= max; i++) {
-          $scope.sel.x["i_" + i] = true;
-        }
-      }
-
-      var len = $scope.objects.length;
-      var all = true;
-      var has = false;
-      for (var i = 0; i < len; i++) {
-        if (!$scope.sel.x["i_" + i]) {
-          all = false;
-        } else {
-          if (!has) has = [];
-          has.push($scope.objects[i]);
-        }
-      }
-      $scope.sel.all = all;
-      $scope.sel.has = has;
-
-      lastSeleteIndex = index;
-    }
-
-    function selectBucket(item) {
-      if ($scope.bucket_sel.item == item) {
-        $scope.bucket_sel.item = null;
-      } else {
-        $scope.bucket_sel.item = item;
-      }
-    }
-
-    ////////////////////////////////
-    var uploadDialog, downloadDialog;
-
-    function showUploadDialog() {
-      if (uploadDialog) return;
-      uploadDialog = true;
-      $timeout(function () {
-        uploadDialog = false;
-      }, 600);
-
-      Dialog.showUploadDialog(function (filePaths) {
-        if (!filePaths || filePaths.length == 0) return;
-        $scope.handlers.uploadFilesHandler(filePaths, $scope.currentInfo);
-      });
-    }
-
-    function showDownloadDialog() {
-      if (downloadDialog) return;
-      downloadDialog = true;
-      $timeout(function () {
-        downloadDialog = false;
-      }, 600);
-
-      Dialog.showDownloadDialog(function (folderPaths) {
-        if (!folderPaths || folderPaths.length == 0 || !$scope.sel.has) return;
-
-        var to = folderPaths[0];
-        _downloadMulti(to);
-      });
-    }
-
-    function _downloadMulti(to) {
-      to = to.replace(/(\/*$)/g, "");
-
-      var selectedFiles = angular.copy($scope.sel.has);
-      angular.forEach(selectedFiles, function (n) {
-        n.region = $scope.currentInfo.region;
-        n.bucket = $scope.currentInfo.bucket;
-      });
-
-      /**
-       * @param fromS3Path {array}  item={region, bucket, path, name, size }
-       * @param toLocalPath {string}
-       */
-      $scope.handlers.downloadFilesHandler(selectedFiles, to);
-    }
-
-    /**
-     * 监听 drop
-     * @param e
-     * @returns {boolean}
-     */
-    function handlerDrop(e) {
-      var files = e.originalEvent.dataTransfer.files;
-      var filePaths = [];
-      if (files) {
-        angular.forEach(files, function (n) {
-          filePaths.push(n.path);
-        });
-      }
-
-      $scope.handlers.uploadFilesHandler(filePaths, $scope.currentInfo);
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-
     function showGrant(items) {
       $modal.open({
         templateUrl: "main/files/modals/grant-modal.html",
         controller: "grantModalCtrl",
         resolve: {
-          items: function () {
+          items: () => {
             return items;
           },
-          currentInfo: function () {
+          currentInfo: () => {
             return angular.copy($scope.currentInfo);
           }
         }
@@ -1004,10 +602,10 @@ angular.module("web").controller("filesCtrl", [
         templateUrl: "main/files/modals/grant-token-modal.html",
         controller: "grantTokenModalCtrl",
         resolve: {
-          item: function () {
+          item: () => {
             return item;
           },
-          currentInfo: function () {
+          currentInfo: () => {
             return angular.copy($scope.currentInfo);
           }
         }
@@ -1020,21 +618,21 @@ angular.module("web").controller("filesCtrl", [
         controller: "renameModalCtrl",
         backdrop: "static",
         resolve: {
-          item: function () {
+          item: () => {
             return angular.copy(item);
           },
-          moveTo: function () {
+          moveTo: () => {
             return angular.copy($scope.currentInfo);
           },
-          currentInfo: function () {
+          currentInfo: () => {
             return angular.copy($scope.currentInfo);
           },
-          isCopy: function () {
+          isCopy: () => {
             return false;
           },
-          callback: function () {
-            return function () {
-              $timeout(function () {
+          callback: () => {
+            return () => {
+              $timeout(() => {
                 listFiles();
               }, 300);
             };
@@ -1055,23 +653,23 @@ angular.module("web").controller("filesCtrl", [
           controller: "renameModalCtrl",
           backdrop: "static",
           resolve: {
-            item: function () {
+            item: () => {
               return angular.copy($scope.keepMoveOptions.items[0]);
             },
-            moveTo: function () {
+            moveTo: () => {
               return angular.copy($scope.currentInfo);
             },
-            currentInfo: function () {
+            currentInfo: () => {
               return angular.copy($scope.keepMoveOptions.currentInfo);
             },
-            isCopy: function () {
+            isCopy: () => {
               return $scope.keepMoveOptions.isCopy;
             },
-            callback: function () {
-              return function () {
+            callback: () => {
+              return () => {
                 $scope.keepMoveOptions = null;
 
-                $timeout(function () {
+                $timeout(() => {
                   listFiles();
                 }, 100);
               };
@@ -1087,32 +685,33 @@ angular.module("web").controller("filesCtrl", [
         action: keyword
       });
 
-      Dialog.confirm(keyword, msg, function (isMove) {
+      Dialog.confirm(keyword, msg, (isMove) => {
         if (isMove) {
           $modal.open({
             templateUrl: "main/files/modals/move-modal.html",
             controller: "moveModalCtrl",
             backdrop: "static",
             resolve: {
-              items: function () {
+              items: () => {
                 return angular.copy($scope.keepMoveOptions.items);
               },
-              moveTo: function () {
+              moveTo: () => {
                 return angular.copy($scope.currentInfo);
               },
-              isCopy: function () {
+              isCopy: () => {
                 return $scope.keepMoveOptions.isCopy;
               },
-              renamePath: function () {
+              renamePath: () => {
                 return "";
               },
-              fromInfo: function () {
+              fromInfo: () => {
                 return angular.copy($scope.keepMoveOptions.currentInfo);
               },
-              callback: function () {
-                return function () {
+              callback: () => {
+                return () => {
                   $scope.keepMoveOptions = null;
-                  $timeout(function () {
+
+                  $timeout(() => {
                     listFiles();
                   }, 100);
                 };
@@ -1124,8 +723,9 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function cancelPaste() {
-      $scope.keepMoveOptions = null;
-      safeApply($scope);
+      $timeout(() => {
+        $scope.keepMoveOptions = null;
+      });
     }
 
     function showMove(items, isCopy) {
@@ -1133,7 +733,7 @@ angular.module("web").controller("filesCtrl", [
         items: items,
         isCopy: isCopy,
         currentInfo: angular.copy($scope.currentInfo),
-        originPath: getCurrentS3path()
+        originPath: getCurrentPath()
       };
     }
 
@@ -1142,10 +742,10 @@ angular.module("web").controller("filesCtrl", [
         templateUrl: "main/files/modals/get-address.html",
         controller: "getAddressModalCtrl",
         resolve: {
-          item: function () {
+          item: () => {
             return angular.copy(item);
           },
-          currentInfo: function () {
+          currentInfo: () => {
             return angular.copy($scope.currentInfo);
           }
         }
@@ -1157,25 +757,10 @@ angular.module("web").controller("filesCtrl", [
         templateUrl: "main/files/modals/update-acl-modal.html",
         controller: "updateACLModalCtrl",
         resolve: {
-          item: function () {
+          item: () => {
             return angular.copy(item);
           },
-          currentInfo: function () {
-            return angular.copy($scope.currentInfo);
-          }
-        }
-      }).result.then(angular.noop, angular.noop);
-    }
-
-    function showHttpHeaders(item) {
-      $modal.open({
-        templateUrl: "main/files/modals/update-http-headers-modal.html",
-        controller: "updateHttpHeadersModalCtrl",
-        resolve: {
-          item: function () {
-            return angular.copy(item);
-          },
-          currentInfo: function () {
+          currentInfo: () => {
             return angular.copy($scope.currentInfo);
           }
         }
@@ -1187,15 +772,15 @@ angular.module("web").controller("filesCtrl", [
         templateUrl: "main/files/modals/restore-modal.html",
         controller: "restoreModalCtrl",
         resolve: {
-          item: function () {
+          item: () => {
             return angular.copy(item);
           },
-          currentInfo: function () {
+          currentInfo: () => {
             return angular.copy($scope.currentInfo);
           },
-          callback: function () {
-            return function () {
-              $timeout(function () {
+          callback: () => {
+            return () => {
+              $timeout(() => {
                 osClient.loadStorageStatus(
                   $scope.currentInfo.region,
                   $scope.currentInfo.bucket, [item]
@@ -1207,36 +792,389 @@ angular.module("web").controller("filesCtrl", [
       }).result.then(angular.noop, angular.noop);
     }
 
-    function showUserList() {
+    function showCRC(item) {
       $modal.open({
-        templateUrl: "main/modals/users.html",
-        controller: "usersCtrl",
-        size: "lg",
-        backdrop: "static"
+        templateUrl: "main/files/modals/crc-modal.html",
+        controller: "crcModalCtrl",
+        resolve: {
+          item: () => {
+            return angular.copy(item);
+          },
+          currentInfo: () => {
+            return angular.copy($scope.currentInfo);
+          }
+        }
       }).result.then(angular.noop, angular.noop);
     }
 
-    function showBuckets(buckets) {
-      $('#bucket-list').bootstrapTable({
+    function showDownload(item) {
+      var bucketInfo = angular.copy($scope.currentInfo),
+        fromInfo = angular.copy(item);
+
+      fromInfo.region = bucketInfo.region;
+      fromInfo.bucket = bucketInfo.bucket;
+
+      Dialog.showDownloadDialog((folderPaths) => {
+        if (!folderPaths || folderPaths.length == 0) {
+          Toast.info(T('chooseone'));
+
+          return;
+        }
+
+        var to = folderPaths[0].replace(/(\/*$)/g, "");
+
+        $scope.handlers.downloadFilesHandler([fromInfo], to);
+      });
+    }
+
+    function showDeleteFilesSelected() {
+      showDeleteFiles($scope.sel.has);
+    }
+
+    function showDeleteFiles(items) {
+      $modal.open({
+        templateUrl: "main/files/modals/delete-files-modal.html",
+        controller: "deleteFilesModalCtrl",
+        backdrop: "static",
+        resolve: {
+          items: () => {
+            return items;
+          },
+          currentInfo: () => {
+            return angular.copy($scope.currentInfo);
+          },
+          callback: () => {
+            return () => {
+              $timeout(() => {
+                listFiles();
+              }, 300);
+            };
+          }
+        }
+      }).result.then(angular.noop, angular.noop);
+    }
+
+    ////////////////////////
+    function selectBucket(item) {
+      if ($scope.bucket_sel.item == item) {
+        $scope.bucket_sel.item = null;
+      } else {
+        $scope.bucket_sel.item = item;
+      }
+    }
+
+    function selectFile(item) {
+      $timeout(() => {
+        var idx = $scope.objects.indexOf(item);
+        if (idx > -1) {
+          $scope.sel.x[`i_${idx}`] = !$scope.sel.x[`i_${idx}`];
+
+          var subidx = $scope.sel.has.indexOf(item);
+          if (subidx > -1) {
+            if (!$scope.sel.x[`i_${idx}`]) {
+              $scope.sel.has.splice(subidx, 1);
+            }
+          } else {
+            if ($scope.sel.x[`i_${idx}`]) {
+              $scope.sel.has.push(item);
+            }
+          }
+
+          $scope.sel.all = $scope.sel.has.length == $scope.objects.length;
+        }
+      });
+    }
+
+    function initFilesSelect() {
+      $timeout(() => {
+        $scope.sel.all = false;
+        $scope.sel.has = [];
+        $scope.sel.x = {};
+      });
+    }
+
+    function clearFilesList() {
+      initFilesSelect();
+
+      $timeout(() => {
+        $scope.objects = [];
+        $scope.nextObjectsMarker = null;
+      });
+    }
+
+    ////////////////////////////////
+    var uploadDialog, downloadDialog;
+
+    function showUploadDialog() {
+      if (uploadDialog) return;
+
+      uploadDialog = true;
+      $timeout(() => {
+        uploadDialog = false;
+      }, 600);
+
+      Dialog.showUploadDialog((filePaths) => {
+        if (!filePaths || filePaths.length == 0) {
+          Toast.info(T('choosenone'));
+
+          return;
+        }
+
+        $scope.handlers.uploadFilesHandler(filePaths, $scope.currentInfo);
+      });
+    }
+
+    function showDownloadDialog() {
+      if (downloadDialog) return;
+
+      downloadDialog = true;
+      $timeout(() => {
+        downloadDialog = false;
+      }, 600);
+
+      Dialog.showDownloadDialog((folderPaths) => {
+        if (!folderPaths || folderPaths.length == 0 || $scope.sel.has.length == 0) {
+          Toast.info(T('choosenone'));
+
+          return;
+        }
+
+        tryDownloadFiles(folderPaths[0]);
+      });
+    }
+
+    function tryDownloadFiles(to) {
+      to = to.replace(/(\/*$)/g, "");
+
+      var selectedFiles = angular.copy($scope.sel.has);
+      angular.forEach(selectedFiles, (n) => {
+        n.region = $scope.currentInfo.region;
+        n.bucket = $scope.currentInfo.bucket;
+      });
+
+      /**
+       * @param fromS3Path {array}  item={region, bucket, path, name, size }
+       * @param toLocalPath {string}
+       */
+      $scope.handlers.downloadFilesHandler(selectedFiles, to);
+    }
+
+    /**
+     * 监听 drop
+     * @param e
+     * @returns {boolean}
+     */
+    function handlerDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      var files = e.originalEvent.dataTransfer.files;
+      var filePaths = [];
+      if (files) {
+        angular.forEach(files, (n) => {
+          filePaths.push(n.path);
+        });
+      }
+
+      $scope.handlers.uploadFilesHandler(filePaths, $scope.currentInfo);
+
+      return false;
+    }
+
+    function showBucketsTable(buckets) {
+      var $list = $('#bucket-list').bootstrapTable({
         columns: [{
+          field: 'id',
+          title: '-',
+          radio: true,
+          formatter: (val, row, idx, field) => {
+            if (row == $scope.bucket_sel.item) {
+              $list.bootstrapTable('check', idx);
+            }
+          }
+        }, {
           field: 'name',
           title: T('bucket.name'),
           formatter: (val, row, idx, field) => {
-            return `<i class="fa fa-database text-warning"></i>
-                    <a href="" ng-click="goIn(${val})">
-                      <span>${val}</span>
-                    </a>`;
+            return `<i class="fa fa-database text-warning"></i> <a href=""><span>${val}</span></a>`;
           },
           events: {
             'click a': (evt, val, row, idx) => {
-              goIn(val);
+              gotoAddress(val);
 
               return false;
             }
           }
         }],
-        data: buckets
+        clickToSelect: true,
+        onCheck: (row, $row) => {
+          if (row == $scope.bucket_sel.item) {
+            $row.parents('tr').removeClass('info');
+
+            $row.prop('checked', false);
+
+            $timeout(() => {
+              $scope.bucket_sel.item = null;
+            });
+          } else {
+            $list.find('tr').removeClass('info');
+            $row.parents('tr').addClass('info');
+
+            $timeout(() => {
+              $scope.bucket_sel.item = row;
+            });
+          }
+
+          return false;
+        }
       });
+
+      $list.bootstrapTable('load', buckets);
+    }
+
+    function showFilesTable(files, isAppend) {
+      var $list = $('#file-list').bootstrapTable({
+        columns: [{
+          field: 'id',
+          title: '-',
+          checkbox: true,
+          formatter: (val, row, idx, field) => {
+            if ($scope.sel.x[`i_${idx}`]) {
+              $list.bootstrapTable('check', idx);
+            }
+          }
+        }, {
+          field: 'name',
+          title: T('name'),
+          formatter: (val, row, idx, field) => {
+            return `<div class="text-overflow file-item-name" style="cursor:pointer; ${row.isFolder?'color:orange':''}"><i class="fa fa-${$filter('fileIcon')(row)}"></i> <a href="" uib-tooltip-html="'<div class=\'break\'>${val}</div>'" tooltip-placement="right" tooltip-popup-delay="500" tooltip-append-to-body="true"><span>${val}</span></a></div>`;
+          },
+          events: {
+            'click a': (evt, val, row, idx) => {
+              if (row.isFolder) {
+                $list.bootstrapTable('removeAll');
+
+                gotoAddress($scope.currentBucket, row.path);
+              }
+
+              return false;
+            }
+          }
+        }, {
+          field: 'size',
+          title: `${T('type')} / ${T('size')}`,
+          formatter: (val, row, idx, field) => {
+            if (row.isFolder) {
+              return `<span class="text-muted">${T('folder')}</span>`;
+            }
+
+            return $filter('sizeFormat')(val);
+          }
+        }, {
+          field: 'lastModified',
+          title: T('lastModifyTime'),
+          formatter: (val, row, idx, field) => {
+            if (row.isFolder) {
+              return '-';
+            }
+
+            return $filter('timeFormat')(val);
+          }
+        }, {
+          field: 'actions',
+          title: T('actions'),
+          formatter: (val, row, idx, field) => {
+            if (!$scope.currentBucketPerm) {
+              return "-";
+            }
+
+            var acts = ['<div class="btn-group btn-group-xs">'];
+            if ($scope.currentBucketPerm.read) {
+              acts.push(`<button type="button" class="btn download"><span class="fa fa-download"></span></button>`);
+            }
+            if ($scope.currentBucketPerm.remove) {
+              acts.push(`<button type="button" class="btn remove text-danger"><span class="fa fa-trash"></span></button>`);
+            }
+            acts.push('</div>');
+
+            return acts.join("");
+          },
+          events: {
+            'click button.download': (evt, val, row, idx) => {
+              showDownload(row);
+
+              return false;
+            },
+            'click button.remove': (evt, val, row, idx) => {
+              showDeleteFiles([row]);
+
+              return false;
+            }
+          }
+        }],
+        rowStyle: (row, idx) => {
+          if (row.WithinFourHours) {
+            return {
+              classes: 'warning'
+            };
+          }
+
+          return {};
+        },
+        'onCheck': (row, $row) => {
+          $row.parents('tr').addClass('info');
+
+          $timeout(() => {
+            $scope.sel.x[`i_${$row.data('index')}`] = true;
+
+            var idx = $scope.sel.has.indexOf(row);
+            if (idx < 0) {
+              $scope.sel.has.push(row);
+            }
+
+            $scope.sel.all = $scope.sel.has.length == $scope.objects.length;
+          });
+        },
+        'onUncheck': (row, $row) => {
+          $row.parents('tr').removeClass('info');
+
+          $timeout(() => {
+            $scope.sel.x[`i_${$row.data('index')}`] = false;
+
+            var idx = $scope.sel.has.indexOf(row);
+            if (idx > -1) {
+              $scope.sel.has.splice(idx, 1);
+            }
+
+            $scope.sel.all = $scope.sel.has.length == $scope.objects.length;
+          });
+        },
+        onCheckAll: (rows) => {
+          $list.find('tr').removeClass('info').addClass('info');
+
+          initFilesSelect();
+
+          $timeout(() => {
+            $scope.sel.all = true;
+            $scope.sel.has = rows;
+
+            angular.forEach(rows, (row, idx) => {
+              $scope.sel.x[`i_${idx}`] = true;
+            });
+          });
+        },
+        onUncheckAll: (rows) => {
+          $list.find('tr').removeClass('info');
+
+          initFilesSelect();
+        }
+      });
+
+      if (isAppend) {
+        $list.append(files);
+      } else {
+        $list.bootstrapTable('load', files);
+      }
     }
   }
 ]);

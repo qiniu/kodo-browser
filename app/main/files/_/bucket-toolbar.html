@@ -4,26 +4,23 @@
 
     <div class="btn-group" role="group" ng-if="ref.isBucketList">
 
-      <button ng-if="currentAuthInfo.isSuper" type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()">
-        <i class="glyphicon glyphicon-plus text-success"></i>
-        <!-- 新建 Bucket -->
+      <button type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()" ng-if="currentUser.isSuper">
+        <i class="glyphicon glyphicon-plus"></i>
         {{'bucket.add'|translate}}
       </button>
 
     </div>
 
     <div class="btn-group" role="group">
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" ng-disabled="!bucket_sel.item" data-toggle="dropdown">
-        <!-- 更多 -->
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" ng-disabled="!bucket_sel.item">
         {{'more'|translate}}
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" role="menu">
         <li>
-          <a href="" ng-disabled="!bucket_sel.item" ng-click="showDeleteBucket(bucket_sel.item)">
+          <a href="" ng-click="showDeleteBucket(bucket_sel.item)" ng-disabled="!currentUser.isSuper">
             <i class="fa fa-remove text-danger"></i>
             {{'delete'|translate}}
-            <!-- 删除 -->
           </a>
         </li>
       </ul>
@@ -34,7 +31,7 @@
   <div class="col-sm-4 pd0">
 
     <div class="input-group input-group-sm mgb0">
-      <input type="text" ng-model="sch.bucketName" class="form-control" cleanable-input placeholder="{{'bucket.name'|translate}}">
+      <input ng-model="sch.bucketName" type="text" class="form-control" cleanable-input placeholder="{{'bucket.name'|translate}}">
       <span class="input-group-addon">
         <i class="fa fa-search"></i>
         {{(buckets|filter:sch.bucketName).length}}

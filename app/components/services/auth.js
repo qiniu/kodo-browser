@@ -42,6 +42,8 @@ angular.module("web").factory("Auth", [
               read: true,
               write: true,
               copy: true,
+              move: true,
+              rename: true,
               remove: true
             };
 

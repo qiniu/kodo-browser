@@ -325,7 +325,7 @@ angular.module("web").factory("osUploadManager", [
         p = p == "./" ? "" : p;
 
         if ($scope.currentInfo.key == p) {
-          $scope.$emit("needrefreshfilelists");
+          $scope.$emit("refreshFilesList");
         }
       }
     }

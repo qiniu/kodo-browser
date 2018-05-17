@@ -100,7 +100,7 @@ angular
           }
         };
 
-        $scope.goIn = function (item) {
+        $scope.gotoAddress = function (item) {
           if (item.isBucket) {
             $scope.keepConfig.region = item.region;
             $scope.keepConfig.key = "";

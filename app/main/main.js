@@ -13,10 +13,10 @@ angular.module("web").controller("mainCtrl", [
       }
     });
 
-    $timeout(function () {
-      autoUpgradeSvs.load(function (info) {
-        angular.extend($scope.upgradeInfo, info);
-      });
-    }, 2000);
+    // $timeout(function () {
+    //   autoUpgradeSvs.load(function (info) {
+    //     angular.extend($scope.upgradeInfo, info);
+    //   });
+    // }, 2000);
   }
 ]);

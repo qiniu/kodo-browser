@@ -2,7 +2,6 @@ angular
   .module("web", [
     "ui.router",
     "ui.bootstrap",
-    "ui.bootstrap.contextMenu",
     "ui.codemirror",
     "pascalprecht.translate",
     "ngSanitize",

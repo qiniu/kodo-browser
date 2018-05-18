@@ -12,13 +12,13 @@
     </div>
 
     <div class="btn-group" role="group">
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" ng-disabled="!bucket_sel.item">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" ng-disabled="!bucket_sel">
         {{'more'|translate}}
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" role="menu">
         <li>
-          <a href="" ng-click="showDeleteBucket(bucket_sel.item)" ng-disabled="!currentUser.isSuper">
+          <a href="" ng-click="showDeleteBucket(bucket_sel)" ng-disabled="!currentUser.isSuper">
             <i class="fa fa-remove text-danger"></i>
             {{'delete'|translate}}
           </a>

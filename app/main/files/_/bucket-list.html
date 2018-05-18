@@ -6,8 +6,8 @@
   </section>
 
   <section ng-if="!ref.isListView">
-    <div class="pd10" style="height:100%" ng-click="bucket_sel.item=null;">
-      <div ng-repeat="item in buckets|filter:sch.bucketName" class="item-block" ng-class="{'active':bucket_sel.item.name==item.name}" ng-click="selectBucket(item);$event.stopPropagation()" ng-dblclick="gotoAddress(item.name);$event.stopPropagation()">
+    <div class="pd10" style="height:100%">
+      <div ng-repeat="item in buckets|filter:sch.bucketName" class="item-block" ng-class="{'active':bucket_sel.name==item.name}" ng-click="selectBucket(item);$event.stopPropagation()" ng-dblclick="gotoAddress(item.name);$event.stopPropagation()">
         <i class="fa fa-database text-warning"></i>
         <div class="item-block-name" uib-tooltip-html="'<div class=\'break\'>'+item.name+'</div>'" tooltip-append-to-body="true">{{item.name}}</div>
         <div class="item-block-desc">{{item.region}}</div>

@@ -60,9 +60,7 @@ angular.module("web").controller("filesCtrl", [
       searchObjectName: searchObjectName,
 
       // bucket selection
-      bucket_sel: {
-        item: null
-      },
+      bucket_sel: null,
       selectBucket: selectBucket,
 
       // file selection
@@ -107,6 +105,12 @@ angular.module("web").controller("filesCtrl", [
     });
 
     $scope.$watch("ref.isListView", (v) => {
+      if ($scope.ref.isBucketList) {
+        initBucketSelect();
+      } else {
+        initFilesSelect();
+      }
+
       $timeout(() => {
         if ($scope.currentListView) {
           $scope.currentListView = v;
@@ -856,11 +860,13 @@ angular.module("web").controller("filesCtrl", [
 
     ////////////////////////
     function selectBucket(item) {
-      if ($scope.bucket_sel.item == item) {
-        $scope.bucket_sel.item = null;
-      } else {
-        $scope.bucket_sel.item = item;
-      }
+      $timeout(() => {
+        if ($scope.bucket_sel == item) {
+          $scope.bucket_sel = null;
+        } else {
+          $scope.bucket_sel = item;
+        }
+      });
     }
 
     function selectFile(item) {
@@ -882,6 +888,12 @@ angular.module("web").controller("filesCtrl", [
 
           $scope.sel.all = $scope.sel.has.length == $scope.objects.length;
         }
+      });
+    }
+
+    function initBucketSelect() {
+      $timeout(() => {
+        $scope.bucket_sel = null;
       });
     }
 
@@ -986,12 +998,7 @@ angular.module("web").controller("filesCtrl", [
         columns: [{
           field: 'id',
           title: '-',
-          radio: true,
-          formatter: (val, row, idx, field) => {
-            if (row == $scope.bucket_sel.item) {
-              $list.bootstrapTable('check', idx);
-            }
-          }
+          radio: true
         }, {
           field: 'name',
           title: T('bucket.name'),
@@ -1008,20 +1015,23 @@ angular.module("web").controller("filesCtrl", [
         }],
         clickToSelect: true,
         onCheck: (row, $row) => {
-          if (row == $scope.bucket_sel.item) {
+          if (row == $scope.bucket_sel) {
             $row.parents('tr').removeClass('info');
 
-            $row.prop('checked', false);
+            $list.bootstrapTable('uncheckBy', {
+              field: 'name',
+              values: [row.name],
+            });
 
             $timeout(() => {
-              $scope.bucket_sel.item = null;
+              $scope.bucket_sel = null;
             });
           } else {
             $list.find('tr').removeClass('info');
             $row.parents('tr').addClass('info');
 
             $timeout(() => {
-              $scope.bucket_sel.item = row;
+              $scope.bucket_sel = row;
             });
           }
 
@@ -1029,7 +1039,7 @@ angular.module("web").controller("filesCtrl", [
         }
       });
 
-      $list.bootstrapTable('load', buckets);
+      $list.bootstrapTable('load', buckets).bootstrapTable('uncheckAll');
     }
 
     function showFilesTable(files, isAppend) {
@@ -1037,12 +1047,7 @@ angular.module("web").controller("filesCtrl", [
         columns: [{
           field: 'id',
           title: '-',
-          checkbox: true,
-          formatter: (val, row, idx, field) => {
-            if ($scope.sel.x[`i_${idx}`]) {
-              $list.bootstrapTable('check', idx);
-            }
-          }
+          checkbox: true
         }, {
           field: 'name',
           title: T('name'),
@@ -1052,8 +1057,6 @@ angular.module("web").controller("filesCtrl", [
           events: {
             'click a': (evt, val, row, idx) => {
               if (row.isFolder) {
-                $list.bootstrapTable('removeAll');
-
                 gotoAddress($scope.currentBucket, row.path);
               }
 
@@ -1121,7 +1124,7 @@ angular.module("web").controller("filesCtrl", [
 
           return {};
         },
-        'onCheck': (row, $row) => {
+        onCheck: (row, $row) => {
           $row.parents('tr').addClass('info');
 
           $timeout(() => {
@@ -1135,7 +1138,7 @@ angular.module("web").controller("filesCtrl", [
             $scope.sel.all = $scope.sel.has.length == $scope.objects.length;
           });
         },
-        'onUncheck': (row, $row) => {
+        onUncheck: (row, $row) => {
           $row.parents('tr').removeClass('info');
 
           $timeout(() => {
@@ -1173,7 +1176,7 @@ angular.module("web").controller("filesCtrl", [
       if (isAppend) {
         $list.append(files);
       } else {
-        $list.bootstrapTable('load', files);
+        $list.bootstrapTable('load', files).bootstrapTable('uncheckAll');
       }
     }
   }

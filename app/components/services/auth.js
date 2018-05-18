@@ -37,7 +37,15 @@ angular.module("web").factory("Auth", [
           } else if (result.RequestId && result.CommonPrefixes) {
             //login success
             data.isAuthed = true;
-            data.isSuper = false;
+            data.isSuper = true;
+            data.perm = {
+              read: true,
+              write: true,
+              copy: true,
+              move: true,
+              rename: true,
+              remove: true
+            };
 
             AuthInfo.save(data);
 
@@ -59,7 +67,13 @@ angular.module("web").factory("Auth", [
           } else if (result.Buckets) {
             //login success
             data.isAuthed = true;
-            data.isSuper = false;
+            data.isSuper = true;
+            data.perm = {
+              read: true,
+              write: true,
+              copy: true,
+              remove: true
+            };
 
             AuthInfo.save(data);
 

@@ -50,7 +50,7 @@
       {{'close'|translate}}
     </button>
 
-  <button ng-if="previewBarVisible && currentAuthInfo.privilege!='readOnly'" type="button" class="pull-right btn btn-primary btn-sm" ng-click="saveContent()">
+  <button ng-if="previewBarVisible && currentUser.privilege!='readOnly'" type="button" class="pull-right btn btn-primary btn-sm" ng-click="saveContent()">
         <i class="fa fa-save"></i>
         <!-- 保存 -->
         {{'save'|translate}}

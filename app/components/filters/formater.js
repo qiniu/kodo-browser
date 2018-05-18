@@ -150,20 +150,13 @@ angular.module("web")
     "fileSvs",
     function (fileSvs) {
       return function (item) {
-        if (item.storageClass == "Archive") {
-          //restore
-          if (item.storageStatus == 2) {
-            return "hourglass-2 text-warning";
-          } else if (item.storageStatus != 3) {
-            return "square";
-          }
-        }
         var info = fileSvs.getFileType(item);
 
+        if (info.type == "folder") return "folder";
         if (info.type == "video") return "file-video-o";
-        else if (info.type == "audio") return "file-audio-o";
-        else if (info.type == "picture") return "file-image-o";
-        else if (info.type == "doc") {
+        if (info.type == "audio") return "file-audio-o";
+        if (info.type == "picture") return "file-image-o";
+        if (info.type == "doc") {
           switch (info.ext[0]) {
           case "doc":
           case "docx":
@@ -177,9 +170,9 @@ angular.module("web")
             return "file-excel-o";
           }
           return "file-o";
-        } else if (info.type == "code") {
-          return "file-text-o";
-        } else if (info.type == "others") {
+        }
+        if (info.type == "code") return "file-text-o";
+        if (info.type == "others") {
           switch (info.ext[0]) {
           case "gz":
           case "tar":
@@ -189,7 +182,6 @@ angular.module("web")
           case "war":
           case "xz":
             return "file-zip-o";
-
           case "pkg":
             return "dropbox";
           case "app":
@@ -197,24 +189,20 @@ angular.module("web")
             return "apple";
           case "apk":
             return "android";
-
           case "msi":
           case "deb":
           case "bin":
-
           case "exe":
             return "cog";
-
           case "img":
           case "iso":
             return "dot-circle-o";
-
           case "cmd":
           case "sh":
             return "terminal";
           }
-          return "file-o";
-        } else return "file-o";
+        }
+        return "file-o";
       };
     }
   ]);

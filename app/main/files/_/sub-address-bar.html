@@ -35,11 +35,11 @@
       <input type="text" ng-model="subAddress" class="form-control address-url" placeholder="/">
 
       <span class="input-group-addon">
-       <span class="text-danger" ng-if="currentAuthInfo.privilege=='readOnly'">
+       <span class="text-danger" ng-if="currentUser.privilege=='readOnly'">
          <!-- 只读 -->
          {{'readonly'|translate}}
        </span>
-       <span class="text-success" ng-if="currentAuthInfo.privilege=='all'">
+       <span class="text-success" ng-if="currentUser.privilege=='all'">
          <!-- 可写 -->
          {{'readwrite'|translate}}
        </span>

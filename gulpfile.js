@@ -89,11 +89,12 @@ gulp.task("libJS", () => {
 
     "./node_modules/moment/min/moment-with-locales.js",
     "./node_modules/bootstrap/dist/js/bootstrap.js",
+    "./node_modules/bootstrap-table/dist/bootstrap-table.min.js",
 
     "./node_modules/angular/angular.js",
     "./node_modules/angular-sanitize/angular-sanitize.js",
     "./node_modules/angular-translate/dist/angular-translate.min.js",
-    "./node_modules/angular-ui-router/release/angular-ui-router.js",
+    "./node_modules/@uirouter/angularjs/release/angular-ui-router.js",
     "./node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js",
     "./node_modules/angular-bootstrap-contextmenu/contextMenu.js",
 
@@ -127,6 +128,7 @@ gulp.task("libCSS", () => {
   gulp
     .src([
       "./node_modules/bootstrap/dist/css/bootstrap.css",
+      "./node_modules/bootstrap-table/dist/bootstrap-table.min.css",
       "./node_modules/font-awesome/css/font-awesome.css",
       "./node_modules/codemirror/lib/codemirror.css",
       "./node_modules/codemirror/addon/merge/merge.css"

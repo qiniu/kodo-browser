@@ -2,10 +2,8 @@
 
 require("events").EventEmitter.prototype._maxListeners = 1000;
 
-const AWS = require("aws-sdk");
-
-var UploadJob = require("./upload-job");
-var DownloadJob = require("./download-job");
+let UploadJob = require("./upload-job"),
+  DownloadJob = require("./download-job");
 
 /**
  * S3Store
@@ -57,7 +55,6 @@ function S3Store(config) {
       timeout: this._config.timeout || 3600000 // 1h
     }
   };
-
 }
 
 /**

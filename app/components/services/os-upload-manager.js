@@ -1,7 +1,3 @@
-import {
-  settings
-} from "cluster";
-
 angular.module("web").factory("osUploadManager", [
   "$q",
   "$state",
@@ -81,8 +77,8 @@ angular.module("web").factory("osUploadManager", [
 
       options.region = region;
       options.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
-      options.mulipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
       options.mulipartUploadSize = settingsSvs.multipartUploadSize.get();
+      options.mulipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
       options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
 
@@ -281,7 +277,9 @@ angular.module("web").factory("osUploadManager", [
         checkNeedRefreshFileList(job.to.bucket, job.to.key);
       });
       job.on("error", (err) => {
-        console.error(`upload s3://${job.to.bucket}/${job.to.key} error: ${err.message}`);
+        if (err) {
+          console.error(`upload s3://${job.to.bucket}/${job.to.key} error: ${err.message}`);
+        }
 
         concurrency--;
         trySchedJob();

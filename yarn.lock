@@ -907,6 +907,10 @@ buffer-from@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.0.0.tgz#4cb8832d23612589b0406e9e2956c17f06fdf531"
 
+buffer-transform@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/buffer-transform/-/buffer-transform-1.0.0.tgz#d28cfd0f290d1834e11fffa5eb9e01df0ce3c275"
+
 buffer@4.9.1:
   version "4.9.1"
   resolved "https://registry.yarnpkg.com/buffer/-/buffer-4.9.1.tgz#6d1bb601b07a4efced97094132093027c95bc298"

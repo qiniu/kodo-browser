@@ -157,7 +157,9 @@ Client.prototype.uploadFile = function (params) {
 
       self.multipartUploadSize = partSize;
 
-      if (self.resumeUpload && self.multipartUploadSize === uploader.progressPartSize) {
+      if (self.resumeUpload &&
+        (uploader.progressParts === null ||
+          self.multipartUploadSize === uploader.progressPartSize)) {
         resumeMultipartUpload();
       } else {
         startMultipartUpload();
@@ -375,7 +377,9 @@ Client.prototype.downloadFile = function (params) {
 
   function startDownloadFile() {
     if (localFileSize >= self.multipartDownloadThreshold) {
-      if (self.resumeDownload && self.multipartDownloadSize === uploader.progressPartSize) {
+      if (self.resumeDownload &&
+        (uploader.progressParts === null ||
+          self.multipartDownloadSize === uploader.progressPartSize)) {
         resumeMultipartDownload();
       } else {
         startMultipartDownload();

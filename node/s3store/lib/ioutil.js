@@ -59,18 +59,19 @@ Client.prototype.uploadFile = function (params) {
   let self = this;
 
   let localFile = params.localFile;
-  let localFileStat = null;
-
   let isOverwrite = params.overwriteDup;
   let isAborted = false;
   let isDebug = params.isDebug;
+
+  let s3uploader = null;
+  let s3UploadedParts = params.uploadedParts || null;
+  let s3UploadedPartSize = params.uploadedPartSize;
 
   let uploader = new EventEmitter();
   uploader.setMaxListeners(0);
   uploader.progressLoaded = 0;
   uploader.progressTotal = 0;
-  uploader.progressPartSize = params.uploadedPartSize;
-  uploader.progressParts = params.uploadedParts || null;
+  uploader.progressResumable = false;
   uploader.abort = handleAbort;
 
   params.s3Params.Key = encodeSpecialCharacters(params.s3Params.Key);
@@ -106,7 +107,6 @@ Client.prototype.uploadFile = function (params) {
 
   function handleError(err) {
     if (isAborted) return;
-    isAborted = true;
 
     if (err && err.retryable === false) {
       handleAbort();
@@ -118,7 +118,14 @@ Client.prototype.uploadFile = function (params) {
   function handleAbort() {
     isAborted = true;
 
-    uploader.emit('abort');
+    if (s3uploader) {
+      s3uploader.abort();
+    }
+
+    uploader.emit('abort', {
+      uploadedParts: s3UploadedParts,
+      uploadedPartSize: s3UploadedPartSize
+    });
   }
 
   function tryOpenFile() {
@@ -130,8 +137,6 @@ Client.prototype.uploadFile = function (params) {
         return;
       }
 
-      localFileStat = stats;
-
       uploader.progressLoaded = 0;
       uploader.progressTotal = stats.size;
       uploader.emit("fileStat", uploader);
@@ -141,11 +146,11 @@ Client.prototype.uploadFile = function (params) {
   }
 
   function startUploadFile() {
-    if (localFileStat.size >= self.multipartUploadThreshold) {
-      let partSize = self.multipartUploadSize;
-      let partsCount = Math.ceil(localFileStat.size / partSize);
+    if (uploader.progressTotal >= self.multipartUploadThreshold) {
+      let partSize = s3UploadedPartSize || self.multipartUploadSize;
+      let partsCount = Math.ceil(uploader.progressTotal / partSize);
       if (partsCount > MAX_MULTIPART_COUNT) {
-        partSize = smallestPartSizeFromFileSize(localFileStat.size);
+        partSize = smallestPartSizeFromFileSize(uploader.progressTotal);
       }
       if (partSize > MAX_PUTOBJECT_SIZE) {
         let err = new Error(`File size exceeds maximum object size: ${localFile}`);
@@ -157,9 +162,9 @@ Client.prototype.uploadFile = function (params) {
 
       self.multipartUploadSize = partSize;
 
-      if (self.resumeUpload &&
-        (uploader.progressParts === null ||
-          self.multipartUploadSize === uploader.progressPartSize)) {
+      uploader.progressResumable = (self.resumeUpload && (uploadedParts === null || self.multipartUploadSize === s3UploadedPartSize));
+
+      if (uploader.progressResumable) {
         resumeMultipartUpload();
       } else {
         startMultipartUpload();
@@ -196,7 +201,7 @@ Client.prototype.uploadFile = function (params) {
       uploader.progressLoaded = 0;
       uploader.emit('progress', uploader);
 
-      var s3uploader = new AWS.S3.ManagedUpload({
+      s3uploader = new AWS.S3.ManagedUpload({
         service: self.s3,
         params: {
           Bucket: s3params.Bucket,
@@ -206,12 +211,14 @@ Client.prototype.uploadFile = function (params) {
         partSize: self.multipartUploadSize,
         queueSize: self.maxConcurrency
       });
+
       s3uploader.on('httpUploadProgress', function (prog) {
         if (isAborted) return;
 
         uploader.progressLoaded = prog.loaded;
         uploader.emit('progress', uploader);
       });
+
       s3uploader.send(function (err, data) {
         if (isAborted) return;
 
@@ -243,14 +250,15 @@ Client.prototype.uploadFile = function (params) {
     function tryResumeMultipartUpload(cb) {
       if (isAborted) return;
 
-      angular.forEach(uploader.progressParts, (part, partNumber) => {
+      // calc uploaded progress
+      angular.forEach(s3UploadedParts, (part, partNumber) => {
         if (part.ETag !== null) {
           uploader.progressLoaded += self.multipartUploadSize;
         }
       });
       uploader.emit('progress', uploader);
 
-      var s3uploader = new AWS.S3.ManagedUpload({
+      s3uploader = new AWS.S3.ManagedUpload({
         service: self.s3,
         params: {
           Bucket: s3params.Bucket,
@@ -261,15 +269,17 @@ Client.prototype.uploadFile = function (params) {
         partSize: self.multipartUploadSize,
         queueSize: self.maxConcurrency
       });
-      s3uploader.completeInfo = uploader.progressParts;
+      s3uploader.completeInfo = uploadedParts;
 
       s3uploader.on('httpUploadProgress', function (prog) {
         if (isAborted) return;
 
-        uploader.progressParts = s3uploader.completeInfo;
+        s3UploadedParts = s3uploader.completeInfo;
+
         uploader.progressLoaded = prog.loaded;
         uploader.emit('progress', uploader);
       });
+
       s3uploader.send(function (err, data) {
         if (isAborted) return;
 
@@ -287,16 +297,18 @@ Client.prototype.uploadFile = function (params) {
   }
 
   function tryPuttingObject(cb) {
-    s3params.ContentLength = localFileStat.size;
+    s3params.ContentLength = uploader.progressTotal;
     s3params.Body = fs.createReadStream(localFile);
 
-    let s3uploader = self.s3.putObject(s3params);
+    s3uploader = self.s3.putObject(s3params);
+
     s3uploader.on('httpUploadProgress', (prog) => {
       if (isAborted) return;
 
       uploader.progressLoaded = prog.loaded;
       uploader.emit('progress', uploader);
     });
+
     s3uploader.send((err, data) => {
       if (isAborted) return;
 
@@ -317,18 +329,18 @@ Client.prototype.downloadFile = function (params) {
   let self = this;
 
   let localFile = params.localFile;
-  let localFileSize = 0;
-
   let isAborted = false;
   let isDebug = params.isDebug;
 
-  let uploader = new EventEmitter();
-  uploader.setMaxListeners(0);
-  uploader.progressLoaded = 0;
-  uploader.progressTotal = 0;
-  uploader.progressPartSize = params.downloadedPartSize;
-  uploader.progressParts = params.downloadedParts || [];
-  uploader.abort = handleAbort;
+  let s3downloader = null;
+  let s3DownloadedParts = params.downloadedParts || [];
+  let s3DownloadedPartSize = params.downloadedPartSize;
+
+  let downloader = new EventEmitter();
+  downloader.setMaxListeners(0);
+  downloader.progressLoaded = 0;
+  downloader.progressTotal = 0;
+  downloader.abort = handleAbort;
 
   params.s3Params.Key = encodeSpecialCharacters(params.s3Params.Key);
 
@@ -337,7 +349,7 @@ Client.prototype.downloadFile = function (params) {
 
   tryOpenFile();
 
-  return uploader;
+  return downloader;
 
   process.on('uncaughtException', function (err) {
     handleError(err);
@@ -346,16 +358,24 @@ Client.prototype.downloadFile = function (params) {
   function handleError(err) {
     if (isAborted) return;
 
-    isAborted = true;
     if (err && err.retryable === false) {
       handleAbort();
     }
 
-    uploader.emit('error', err);
+    downloader.emit('error', err);
   }
 
   function handleAbort() {
     isAborted = true;
+
+    if (s3downloader) {
+      s3downloader.abort();
+    }
+
+    downloader.emit('abort', {
+      downloadedParts: s3DownloadedParts,
+      downloadedPartSize: s3DownloadedPartSize
+    });
   }
 
   function tryOpenFile() {
@@ -365,21 +385,23 @@ Client.prototype.downloadFile = function (params) {
         return;
       }
 
-      localFileSize = metadata.ContentLength;
-
-      uploader.progressLoaded = 0;
-      uploader.progressTotal = metadata.ContentLength;
-      uploader.emit("fileStat", uploader);
+      downloader.progressLoaded = 0;
+      downloader.progressTotal = metadata.ContentLength;
+      downloader.emit("fileStat", downloader);
 
       startDownloadFile();
     });
   }
 
   function startDownloadFile() {
-    if (localFileSize >= self.multipartDownloadThreshold) {
-      if (self.resumeDownload &&
-        (uploader.progressParts === null ||
-          self.multipartDownloadSize === uploader.progressPartSize)) {
+    if (downloader.progressTotal >= self.multipartDownloadThreshold) {
+      let partSize = s3DownloadedPartSize || self.multipartDownloadSize;
+
+      self.multipartDownloadSize = partSize;
+
+      downloader.progressResumable = (self.resumeDownload && (downloadedParts === null || self.multipartDownloadSize === s3DownloadedPartSize));
+
+      if (uploader.progressResumable) {
         resumeMultipartDownload();
       } else {
         startMultipartDownload();
@@ -393,7 +415,7 @@ Client.prototype.downloadFile = function (params) {
           return;
         }
 
-        uploader.emit('fileDownloaded', data);
+        downloader.emit('fileDownloaded', data);
       });
     }
   }
@@ -427,7 +449,7 @@ Client.prototype.downloadFile = function (params) {
           return;
         }
 
-        uploader.emit('fileDownloaded');
+        downloader.emit('fileDownloaded');
       });
     });
 
@@ -439,11 +461,11 @@ Client.prototype.downloadFile = function (params) {
 
       let cursor = 0;
       let nextPartNumber = 1;
-      while (cursor < uploader.progressTotal) {
+      while (cursor < downloader.progressTotal) {
         let start = cursor;
         let end = cursor + self.multipartDownloadSize;
-        if (end > uploader.progressTotal) {
-          end = uploader.progressTotal;
+        if (end > downloader.progressTotal) {
+          end = downloader.progressTotal;
         }
         cursor = end;
 
@@ -490,7 +512,7 @@ Client.prototype.downloadFile = function (params) {
           return;
         }
 
-        uploader.emit('fileDownloaded');
+        downloader.emit('fileDownloaded');
       });
     });
 
@@ -500,26 +522,26 @@ Client.prototype.downloadFile = function (params) {
         return;
       }
 
-      angular.forEach(uploader.progressParts, (part, partNumber) => {
+      angular.forEach(s3DownloadedParts, (part, partNumber) => {
         if (part.Done === true) {
-          uploader.progressLoaded += self.multipartDownloadSize;
+          downloader.progressLoaded += self.multipartDownloadSize;
         }
       });
-      uploader.emit("progress", uploader);
+      downloader.emit("progress", downloader);
 
       let cursor = 0;
       let nextPartNumber = 1;
-      while (cursor < uploader.progressTotal) {
+      while (cursor < downloader.progressTotal) {
         let start = cursor;
         let end = cursor + self.multipartDownloadSize;
-        if (end > uploader.progressTotal) {
-          end = uploader.progressTotal;
+        if (end > downloader.progressTotal) {
+          end = downloader.progressTotal;
         }
         cursor = end;
 
         // already done loaded
-        if (!uploader.progressParts[nextPartNumber] ||
-          uploader.progressParts[nextPartNumber].Done !== true) {
+        if (!s3DownloadedParts[nextPartNumber] ||
+          s3DownloadedParts[nextPartNumber].Done !== true) {
           let part = {
             Done: false,
             Start: start,
@@ -547,8 +569,8 @@ Client.prototype.downloadFile = function (params) {
           return;
         }
 
-        uploader.progressParts[part.PartNumber] = part;
-        uploader.emit('filePartDownloaded', part);
+        downloader.progressParts[part.PartNumber] = part;
+        downloader.emit('filePartDownloaded', part);
       });
     };
 
@@ -577,15 +599,15 @@ Client.prototype.downloadFile = function (params) {
       s3downloader.on('data', (chunk) => {
         if (isAborted) return;
 
-        uploader.progressLoaded += chunk.length;
-        uploader.emit('progress', uploader);
+        downloader.progressLoaded += chunk.length;
+        downloader.emit('progress', downloader);
       });
       s3downloader.on('end', () => {
         if (isAborted) return;
 
         part.Done = true;
 
-        uploader.emit('progress', uploader);
+        downloader.emit('progress', downloader);
 
         cb(null, part);
       });
@@ -608,14 +630,14 @@ Client.prototype.downloadFile = function (params) {
     s3downloader.on('data', (chunk) => {
       if (isAborted) return;
 
-      uploader.progressLoaded += chunk.length;
-      uploader.emit('progress', uploader);
+      downloader.progressLoaded += chunk.length;
+      downloader.emit('progress', downloader);
     });
     s3downloader.on('end', () => {
       if (isAborted) return;
 
-      uploader.progressLoaded = uploader.progressTotal;
-      uploader.emit('progress', uploader);
+      downloader.progressLoaded = downloader.progressTotal;
+      downloader.emit('progress', downloader);
 
       cb(null);
     });

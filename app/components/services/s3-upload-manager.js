@@ -1,8 +1,7 @@
-angular.module("web").factory("osUploadManager", [
-  "$q",
+angular.module("web").factory("s3UploadMgr", [
   "$state",
   "$timeout",
-  "osClient",
+  "s3Client",
   "AuthInfo",
   "Toast",
   "Const",
@@ -10,10 +9,9 @@ angular.module("web").factory("osUploadManager", [
   "safeApply",
   "settingsSvs",
   function (
-    $q,
     $state,
     $timeout,
-    osClient,
+    s3Client,
     AuthInfo,
     Toast,
     Const,
@@ -59,7 +57,6 @@ angular.module("web").factory("osUploadManager", [
     }
 
     /**
-      * 创建单个job
       * @param  auth { id, secret}
       * @param  options   { region, from, to, progress, checkPoints, ...}
       * @param  options.from {name, path}
@@ -77,8 +74,8 @@ angular.module("web").factory("osUploadManager", [
 
       options.region = region;
       options.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
-      options.mulipartUploadSize = settingsSvs.multipartUploadSize.get();
-      options.mulipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
+      options.multipartUploadSize = settingsSvs.multipartUploadSize.get();
+      options.multipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
       options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
 
@@ -87,11 +84,11 @@ angular.module("web").factory("osUploadManager", [
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
         },
-        endpoint: osClient.getS3Endpoint(region, options.to.bucket, auth.servicetpl || auth.eptpl),
+        endpoint: s3Client.getS3Endpoint(region, options.to.bucket, auth.servicetpl || auth.eptpl),
         region: options.region,
         httpOptions: {
           connectTimeout: 3000, // 3s
-          timeout: 3600000 // 1h
+          timeout: 86400000 // 1d
         }
       });
 
@@ -110,14 +107,14 @@ angular.module("web").factory("osUploadManager", [
 
       var authInfo = AuthInfo.get();
 
-      digArr(filePaths, function () {
+      _kdig(filePaths, () => {
         if (jobsAddingFn) {
           jobsAddingFn();
         }
       });
       return;
 
-      function digArr(filePaths, fn) {
+      function _kdig(filePaths, fn) {
         var t = [];
         var len = filePaths.length;
         var c = 0;
@@ -191,10 +188,9 @@ angular.module("web").factory("osUploadManager", [
             subDirPath = subDirPath.replace(/\\/g, "/");
           }
 
-          osClient
+          s3Client
             .createFolder(bucketInfo.region, bucketInfo.bucket, subDirPath)
             .then(function () {
-              //判断是否刷新文件列表
               checkNeedRefreshFileList(bucketInfo.bucket, subDirPath);
             });
 
@@ -243,38 +239,59 @@ angular.module("web").factory("osUploadManager", [
     }
 
     function addEvents(job) {
-      $scope.lists.uploadJobList.push(job);
-      $scope.calcTotalProg();
-      safeApply($scope);
-      trySchedJob();
+      if (!job.uploadedParts) {
+        job.uploadedParts = [];
+      }
 
-      //save
+      $scope.lists.uploadJobList.push(job);
+
+      trySchedJob();
       trySaveProg();
 
-      job.on('fileDuplicated', (data) => {
-        // ignore
+      $timeout(() => {
+        $scope.calcTotalProg();
       });
-      job.on("partcomplete", (prog) => {
-        safeApply($scope);
+
+      job.on('fileDuplicated', (data) => {
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
+      });
+      job.on("partcomplete", (part) => {
+        job.uploadedParts[part.PartNumber] = part;
+
         trySaveProg();
+
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
       });
       job.on("statuschange", (status) => {
         if (status == "stopped") {
           concurrency--;
-          $timeout(trySchedJob, 500);
+          trySchedJob();
         }
 
-        safeApply($scope);
         trySaveProg();
+
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
       });
       job.on("speedChange", () => {
-        safeApply($scope);
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
       });
       job.on("complete", () => {
         concurrency--;
         trySchedJob();
 
-        checkNeedRefreshFileList(job.to.bucket, job.to.key);
+        $timeout(() => {
+          $scope.calcTotalProg();
+
+          checkNeedRefreshFileList(job.to.bucket, job.to.key);
+        });
       });
       job.on("error", (err) => {
         if (err) {
@@ -283,6 +300,10 @@ angular.module("web").factory("osUploadManager", [
 
         concurrency--;
         trySchedJob();
+
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
       });
     }
 
@@ -299,9 +320,7 @@ angular.module("web").factory("osUploadManager", [
         var jobs = $scope.lists.uploadJobList;
 
         for (var i = 0; i < jobs.length; i++) {
-          if (concurrency >= maxConcurrency) {
-            return;
-          }
+          if (concurrency >= maxConcurrency) return;
 
           var job = jobs[i];
           if (isDebug) {
@@ -317,56 +336,25 @@ angular.module("web").factory("osUploadManager", [
       }
     }
 
-    function checkNeedRefreshFileList(bucket, key) {
-      if ($scope.currentInfo.bucket == bucket) {
-        var p = path.dirname(key) + "/";
-        p = p == "./" ? "" : p;
-
-        if ($scope.currentInfo.key == p) {
-          $scope.$emit("refreshFilesList");
-        }
-      }
-    }
-
-    /**
-     * 保存进度
-     */
     function trySaveProg() {
-      DelayDone.delayRun(
-        "save_upload_prog",
-        1000,
-        function () {
-          var t = [];
-          angular.forEach($scope.lists.uploadJobList, function (n) {
-            if (n.status == "finished") return;
+      var t = [];
+      angular.forEach($scope.lists.uploadJobList, function (job) {
+        if (job.status == "finished") return;
 
-            if (n.checkPoints && n.checkPoints.chunks) {
-              var checkPoints = angular.copy(n.checkPoints);
-              delete checkPoints.chunks;
-            }
+        t.push({
+          region: job.region,
+          to: job.to,
+          from: job.from,
+          prog: job.prog,
+          status: job.status,
+          message: job.message,
+          uploadedParts: job.uploadedParts
+        });
+      });
 
-            t.push({
-              crc64Str: n.crc64Str,
-              checkPoints: checkPoints,
-              region: n.region,
-              to: n.to,
-              from: n.from,
-              status: n.status,
-              message: n.message,
-              prog: n.prog
-            });
-          });
-
-          fs.writeFileSync(getProgFilePath(), JSON.stringify(t));
-          $scope.calcTotalProg();
-        },
-        20
-      );
+      fs.writeFileSync(getProgFilePath(), JSON.stringify(t));
     }
 
-    /**
-     * 获取保存的进度
-     */
     function tryLoadProg() {
       try {
         var data = fs.readFileSync(getProgFilePath());
@@ -383,8 +371,20 @@ angular.module("web").factory("osUploadManager", [
         fs.mkdirSync(folder);
       }
 
-      var username = AuthInfo.get().id || "";
+      var username = AuthInfo.get().id || "s3-browser";
+
       return path.join(folder, "upprog_" + username + ".json");
+    }
+
+    function checkNeedRefreshFileList(bucket, key) {
+      if ($scope.currentInfo.bucket == bucket) {
+        var p = path.dirname(key) + "/";
+        p = p == "./" ? "" : p;
+
+        if ($scope.currentInfo.key == p) {
+          $scope.$emit("refreshFilesList");
+        }
+      }
     }
   }
 ]);

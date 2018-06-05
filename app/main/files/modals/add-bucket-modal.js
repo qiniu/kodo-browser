@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'osClient', 'Const',
-    function ($scope, $modalInstance, $translate, callback, osClient, Const) {
+  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const',
+    function ($scope, $modalInstance, $translate, callback, s3Client, Const) {
       var T = $translate.instant;
 
       var bucketACL = angular.copy(Const.bucketACL);
@@ -70,7 +70,7 @@ angular.module('web')
 
         var item = angular.copy($scope.item);
 
-        osClient.createBucket(item.region, item.name, item.acl, item.storageClass).then(function (result) {
+        s3Client.createBucket(item.region, item.name, item.acl, item.storageClass).then(function (result) {
           callback();
           cancel();
         });

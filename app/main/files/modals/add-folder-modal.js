@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addFolderModalCtrl', ['$scope', '$uibModalInstance', 'currentInfo', 'callback', 'osClient',
-    function ($scope, $modalInstance, currentInfo, callback, osClient) {
+  .controller('addFolderModalCtrl', ['$scope', '$uibModalInstance', 'currentInfo', 'callback', 's3Client',
+    function ($scope, $modalInstance, currentInfo, callback, s3Client) {
 
       angular.extend($scope, {
         currentInfo: currentInfo,
@@ -21,7 +21,7 @@ angular.module('web')
 
         var folderName = $scope.item.name;
 
-        osClient.createFolder(currentInfo.region, currentInfo.bucket, currentInfo.key + folderName + '/').then(function () {
+        s3Client.createFolder(currentInfo.region, currentInfo.bucket, currentInfo.key + folderName + '/').then(function () {
           callback();
           cancel();
         });

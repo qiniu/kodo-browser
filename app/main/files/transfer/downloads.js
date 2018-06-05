@@ -6,7 +6,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
   "$translate",
   "$interval",
   "jobUtil",
-  "osDownloadManager",
+  "s3DownloadMgr",
   "DelayDone",
   "Toast",
   "Dialog",
@@ -17,7 +17,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
     $translate,
     $interval,
     jobUtil,
-    osDownloadManager,
+    s3DownloadMgr,
     DelayDone,
     Toast,
     Dialog,
@@ -58,7 +58,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
 
     function checkStartJob(item) {
       item.wait();
-      osDownloadManager.trySchedJob();
+      s3DownloadMgr.trySchedJob();
     }
 
     function showRemoveItem(item) {
@@ -88,7 +88,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
           break;
         }
       }
-      osDownloadManager.trySaveProg();
+      s3DownloadMgr.trySaveProg();
       $scope.calcTotalProg();
       safeApply($scope);
     }
@@ -131,7 +131,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
               i--;
             }
             $scope.calcTotalProg();
-            osDownloadManager.trySaveProg();
+            s3DownloadMgr.trySaveProg();
           }
         },
         1
@@ -145,23 +145,23 @@ angular.module("web").controller("transferDownloadsCtrl", [
       if (arr && arr.length > 0) {
         stopFlag = true;
 
-        osDownloadManager.stopCreatingJobs();
+        s3DownloadMgr.stopCreatingJobs();
 
         Toast.info(T("pause.on")); //'正在暂停...'
         $scope.allActionBtnDisabled = true;
 
         angular.forEach(arr, function (n) {
-          if (
-            n.status == "running" ||
-            n.status == "waiting" ||
-            n.status == "verifying"
-          )
+          if (n.resumable && (
+              n.status == "running" ||
+              n.status == "waiting" ||
+              n.status == "verifying"
+            ))
             n.stop();
         });
         Toast.success(T("pause.success")); //'暂停成功'
 
         $timeout(function () {
-          osDownloadManager.trySaveProg();
+          s3DownloadMgr.trySaveProg();
           $scope.allActionBtnDisabled = false;
         }, 100);
       }
@@ -182,7 +182,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
             if (n && (n.status == "stopped" || n.status == "failed")) {
               n.wait();
             }
-            osDownloadManager.trySchedJob();
+            s3DownloadMgr.trySchedJob();
             fn();
           },
           function doneFy() {

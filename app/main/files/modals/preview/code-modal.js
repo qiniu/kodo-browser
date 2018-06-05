@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('codeModalCtrl', ['$scope', '$uibModalInstance','$translate','$timeout', '$uibModal', 'bucketInfo', 'objectInfo', 'fileType', 'showFn', 'Toast', 'DiffModal', 'osClient', 'safeApply',
-    function ($scope, $modalInstance,$translate, $timeout, $modal, bucketInfo, objectInfo, fileType, showFn, Toast, DiffModal, osClient, safeApply) {
+  .controller('codeModalCtrl', ['$scope', '$uibModalInstance','$translate','$timeout', '$uibModal', 'bucketInfo', 'objectInfo', 'fileType', 'showFn', 'Toast', 'DiffModal', 's3Client', 'safeApply',
+    function ($scope, $modalInstance,$translate, $timeout, $modal, bucketInfo, objectInfo, fileType, showFn, Toast, DiffModal, s3Client, safeApply) {
       var T = $translate.instant;
       angular.extend($scope, {
         bucketInfo: bucketInfo,
@@ -43,7 +43,7 @@ angular.module('web')
           DiffModal.show('Diff', originalContent, v, function (v) {
             Toast.info(T('saving')); //'正在保存...'
 
-            osClient.saveContent(bucketInfo.region, bucketInfo.bucket, objectInfo.path, v).then(function (result) {
+            s3Client.saveContent(bucketInfo.region, bucketInfo.bucket, objectInfo.path, v).then(function (result) {
               Toast.success(T('save.successfully'));//'保存成功'
               cancel();
             });
@@ -55,7 +55,7 @@ angular.module('web')
 
       function getContent() {
         $scope.isLoading = true;
-        osClient.getContent(bucketInfo.region, bucketInfo.bucket, objectInfo.path).then(function (result) {
+        s3Client.getContent(bucketInfo.region, bucketInfo.bucket, objectInfo.path).then(function (result) {
           $scope.isLoading = false;
 
           var data = result.Body.toString();

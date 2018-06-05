@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('renameModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$uibModal', 'item', 'isCopy', 'currentInfo', 'moveTo', 'callback', 'osClient', 'Dialog', 'Toast',
-    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, callback, osClient, Dialog, Toast) {
+  .controller('renameModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$uibModal', 'item', 'isCopy', 'currentInfo', 'moveTo', 'callback', 's3Client', 'Dialog', 'Toast',
+    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, callback, s3Client, Dialog, Toast) {
       var T = $translate.instant;
       //console.log(item)
       angular.extend($scope, {
@@ -38,7 +38,7 @@ angular.module('web')
           if (item.path == newPath) return;
 
           $scope.isLoading = true;
-          osClient.checkFolderExists(moveTo.region, moveTo.bucket, newPath).then(function (has) {
+          s3Client.checkFolderExists(moveTo.region, moveTo.bucket, newPath).then(function (has) {
             if (has) {
               Dialog.confirm(title, msg1, function (b) {
                 if (b) {
@@ -66,7 +66,7 @@ angular.module('web')
 
           $scope.isLoading = true;
 
-          osClient.checkFileExists(moveTo.region, moveTo.bucket, newPath).then(function (data) {
+          s3Client.checkFileExists(moveTo.region, moveTo.bucket, newPath).then(function (data) {
             Dialog.confirm(title, msg2, function (b) {
               if (b) {
                 renameFile(newPath);
@@ -86,7 +86,7 @@ angular.module('web')
         var successMsg = T('rename.success'); //重命名成功
 
         Toast.info(onMsg);
-        osClient.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy).then(function () {
+        s3Client.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy).then(function () {
           Toast.success(successMsg);
           $scope.isLoading = false;
           callback();

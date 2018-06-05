@@ -8,7 +8,7 @@ angular.module("web").controller("filesCtrl", [
   "$location",
   "Auth",
   "AuthInfo",
-  "osClient",
+  "s3Client",
   "settingsSvs",
   "fileSvs",
   "Toast",
@@ -23,7 +23,7 @@ angular.module("web").controller("filesCtrl", [
     $location,
     Auth,
     AuthInfo,
-    osClient,
+    s3Client,
     settingsSvs,
     fileSvs,
     Toast,
@@ -213,7 +213,7 @@ angular.module("web").controller("filesCtrl", [
       if (user.s3path) {
         $scope.ref.isBucketList = false;
 
-        var bucket = osClient.parseS3Path(user.s3path).bucket;
+        var bucket = s3Client.parseS3Path(user.s3path).bucket;
 
         $rootScope.bucketMap = {};
         $rootScope.bucketMap[bucket] = {
@@ -235,7 +235,7 @@ angular.module("web").controller("filesCtrl", [
 
         console.log(`on:s3AddressChange: ${addr}, forceRefresh: ${!!forceRefresh}`);
 
-        var info = osClient.parseS3Path(addr);
+        var info = s3Client.parseS3Path(addr);
 
         $scope.currentInfo = info;
 
@@ -302,7 +302,7 @@ angular.module("web").controller("filesCtrl", [
         $scope.isLoading = true;
       });
 
-      osClient.listAllBuckets().then((buckets) => {
+      s3Client.listAllBuckets().then((buckets) => {
         $timeout(() => {
           $scope.isLoading = false;
 
@@ -358,7 +358,7 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function tryListFiles(info, marker, fn) {
-      osClient.listFiles(info.region, info.bucket, info.key, marker || "").then((result) => {
+      s3Client.listFiles(info.region, info.bucket, info.key, marker || "").then((result) => {
         $timeout(() => {
           $scope.objects = $scope.objects.concat(result.data);
           $scope.nextObjectsMarker = result.marker || null;
@@ -467,7 +467,7 @@ angular.module("web").controller("filesCtrl", [
         message,
         (btn) => {
           if (btn) {
-            osClient.deleteBucket(item.region, item.name).then(() => {
+            s3Client.deleteBucket(item.region, item.name).then(() => {
               Toast.success(T("bucket.delete.success")); //删除Bucket成功
 
               $timeout(() => {
@@ -548,7 +548,7 @@ angular.module("web").controller("filesCtrl", [
               callback: (reloadStorageStatus) => {
                 if (reloadStorageStatus) {
                   $timeout(() => {
-                    osClient.loadStorageStatus(
+                    s3Client.loadStorageStatus(
                       $scope.currentInfo.region,
                       $scope.currentInfo.bucket, [item]
                     );
@@ -785,7 +785,7 @@ angular.module("web").controller("filesCtrl", [
           callback: () => {
             return () => {
               $timeout(() => {
-                osClient.loadStorageStatus(
+                s3Client.loadStorageStatus(
                   $scope.currentInfo.region,
                   $scope.currentInfo.bucket, [item]
                 );

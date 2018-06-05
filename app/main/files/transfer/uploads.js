@@ -7,7 +7,7 @@ angular.module("web").controller("transferUploadsCtrl", [
   "$interval",
   "jobUtil",
   "DelayDone",
-  "osUploadManager",
+  "s3UploadMgr",
   "Toast",
   "Dialog",
   function (
@@ -17,7 +17,7 @@ angular.module("web").controller("transferUploadsCtrl", [
     $interval,
     jobUtil,
     DelayDone,
-    osUploadManager,
+    s3UploadMgr,
     Toast,
     Dialog
   ) {
@@ -61,7 +61,7 @@ angular.module("web").controller("transferUploadsCtrl", [
         item.wait();
       }
 
-      osUploadManager.trySchedJob();
+      s3UploadMgr.trySchedJob();
     }
 
     function showRemoveItem(item) {
@@ -91,7 +91,7 @@ angular.module("web").controller("transferUploadsCtrl", [
           break;
         }
       }
-      osUploadManager.trySaveProg();
+      s3UploadMgr.trySaveProg();
       $scope.calcTotalProg();
     }
 
@@ -133,7 +133,7 @@ angular.module("web").controller("transferUploadsCtrl", [
               i--;
             }
             $scope.calcTotalProg();
-            osUploadManager.trySaveProg();
+            s3UploadMgr.trySaveProg();
           }
         },
         1
@@ -147,23 +147,23 @@ angular.module("web").controller("transferUploadsCtrl", [
       if (arr && arr.length > 0) {
         stopFlag = true;
 
-        osUploadManager.stopCreatingJobs();
+        s3UploadMgr.stopCreatingJobs();
 
         Toast.info(T("pause.on")); //'正在暂停...'
         $scope.allActionBtnDisabled = true;
 
         angular.forEach(arr, function (n) {
-          if (
-            n.status == "running" ||
-            n.status == "waiting" ||
-            n.status == "verifying"
-          )
+          if (item.resumable && (
+              n.status == "running" ||
+              n.status == "waiting" ||
+              n.status == "verifying"
+            ))
             n.stop();
         });
         Toast.info(T("pause.success"));
 
         $timeout(function () {
-          osUploadManager.trySaveProg();
+          s3UploadMgr.trySaveProg();
           $scope.allActionBtnDisabled = false;
         }, 100);
       }
@@ -186,7 +186,7 @@ angular.module("web").controller("transferUploadsCtrl", [
               n.wait();
             }
 
-            osUploadManager.trySchedJob();
+            s3UploadMgr.trySchedJob();
 
             fn();
           },

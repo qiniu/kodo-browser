@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('getAddressModalCtrl', ['$scope', '$q','$translate', '$uibModalInstance', 'item', 'currentInfo', 'osClient','safeApply','Const','Mailer','Toast',
-    function ($scope, $q, $translate, $modalInstance, item, currentInfo, osClient ,safeApply, Const,Mailer,Toast) {
+  .controller('getAddressModalCtrl', ['$scope', '$q','$translate', '$uibModalInstance', 'item', 'currentInfo', 's3Client','safeApply','Const','Mailer','Toast',
+    function ($scope, $q, $translate, $modalInstance, item, currentInfo, s3Client ,safeApply, Const,Mailer,Toast) {
       var T = $translate.instant;
 
       angular.extend($scope, {
@@ -58,7 +58,7 @@ angular.module('web')
         if(!form1.$valid)return;
 
         var v = $scope.info.sec;
-        var url = osClient.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, v);
+        var url = s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, v);
         $scope.info.url = url;
       }
 

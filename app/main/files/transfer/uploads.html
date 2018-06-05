@@ -2,18 +2,19 @@
   <header class="pd4 text-right" style="border-bottom:1px solid #ddd;">
 
     <div class="pull-left" style="position:relative">
-      <input type="text" cleanable-input placeholder="{{'transframe.search.placeholder'|translate}}" class="form-control input-sm"
-        style="width:200px;" ng-model="sch.upname">
+      <input type="text" cleanable-input placeholder="{{'transframe.search.placeholder'|translate}}" class="form-control input-sm" style="width:200px;" ng-model="sch.upname">
     </div>
 
     <div class="pull-left">
       <a href="" ng-if="totalStat.upStopped>0" class="btn btn-link btn-sm" style="text-decoration:none" ng-click="sch.upname='stopped'">
         <span class=" text-warning">
-          <i class="fa fa-info-circle"></i> {{totalStat.upStopped}}</span>
+          <i class="fa fa-info-circle"></i> {{totalStat.upStopped}}
+        </span>
       </a>
       <a href="" ng-if="totalStat.upFailed>0" class="btn btn-link btn-sm" style="text-decoration:none" ng-click="sch.upname='failed'">
         <span class=" text-danger">
-          <i class="fa fa-remove"></i> {{totalStat.upFailed}}</span>
+          <i class="fa fa-remove"></i> {{totalStat.upFailed}}
+        </span>
       </a>
     </div>
 
@@ -31,8 +32,7 @@
     </button> -->
 
     <!-- 清空已完成 -->
-    <button type="button" class="btn btn-default btn-sm" ng-click="clearAllCompleted()" uib-tooltip="{{'clear.finished'|translate}}"
-      tooltip-append-to-body="true">
+    <button type="button" class="btn btn-default btn-sm" ng-click="clearAllCompleted()" uib-tooltip="{{'clear.finished'|translate}}" tooltip-append-to-body="true">
       <span class="">
         <i class="glyphicon glyphicon-trash"></i>
       </span>
@@ -58,8 +58,7 @@
           </div>
 
           <div class="progress mg0" style="height:4px;">
-            <div class="progress-bar progress-bar-{{item.status|statusCls}}" ng-style="{width: (item.prog.loaded|persent:item.prog.total:item.status) + '%'}">
-            </div>
+            <div class="progress-bar progress-bar-{{item.status|statusCls}}" ng-style="{width: (item.prog.loaded|persent:item.prog.total:item.status) + '%'}"></div>
           </div>
         </div>
 
@@ -85,12 +84,11 @@
         </div>
 
         <div class="col-sm-2 text-right">
-          <!-- <a ng-if="item.status=='running' || item.status=='waiting' || item.status=='verifying'" href="" ng-click="item.stop()" class="btn btn-default btn-xs">
+          <a ng-if="item.resumable && (item.status=='running' || item.status=='waiting' || item.status=='verifying')" href="" ng-click="item.stop()" class="btn btn-default btn-xs">
             <i class="glyphicon glyphicon-pause text-warning"></i>
-          </a> -->
+          </a>
 
-          <a ng-if="item.status=='stopped' || item.status=='failed' || item.status=='finished' || item.status=='duplicated'" href="" ng-click="showRemoveItem(item)"
-            class="btn btn-danger btn-xs">
+          <a ng-if="item.status=='stopped' || item.status=='failed' || item.status=='finished' || item.status=='duplicated'" href="" ng-click="showRemoveItem(item)" class="btn btn-danger btn-xs">
             <i class="glyphicon glyphicon-remove"></i>
           </a>
 
@@ -108,15 +106,15 @@
     </ul>
 
     <div class="clearfix text-center" style="padding:4px;">
-      {{limitToNum
-      < (lists.uploadJobList|listFilter:schKeyFn:sch.upname).length?( 'loading'|translate): ''}} </div>
+      {{limitToNum < (lists.uploadJobList|listFilter:schKeyFn:sch.upname).length?( 'loading'|translate): ''}}
     </div>
-  </div>
 
-  <script type="text/ng-template" id="upload-path-tooltip-tpl.html">
+  </div>
+</div>
+
+<script type="text/ng-template" id="upload-path-tooltip-tpl.html">
   <div class="break text-left">
-    <div><label class="text-primary">From:</label>{{item.from.path}}</div>
-    <div><label class="text-success">To:</label>s3://{{item.to.bucket}}/{{item.to.key}}</div>
+    <div><label class="text-primary">From:</label> {{item.from.path}}</div>
+    <div><label class="text-success">To:</label> s3://{{item.to.bucket}}/{{item.to.key}}</div>
   </div>
 </script>
-</div>

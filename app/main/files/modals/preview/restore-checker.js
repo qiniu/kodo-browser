@@ -13,10 +13,10 @@ angular.module('web')
           afterCheckSuccess: '&',
           afterRestoreSubmit: '&'
         },
-        controller: ['$scope', '$timeout','$uibModal','osClient','safeApply', ctrlFn]
+        controller: ['$scope', '$timeout','$uibModal','s3Client','safeApply', ctrlFn]
       }
 
-      function ctrlFn($scope, $timeout, $modal, osClient, safeApply){
+      function ctrlFn($scope, $timeout, $modal, s3Client, safeApply){
 
         angular.extend($scope, {
           info: {
@@ -37,10 +37,10 @@ angular.module('web')
           $scope._Loading =true;
           $scope.info.needRestore = false;
 
-          osClient.getFileInfo($scope.bucketInfo.region, $scope.bucketInfo.bucket, $scope.objectInfo.path).then(function(data){
+          s3Client.getFileInfo($scope.bucketInfo.region, $scope.bucketInfo.bucket, $scope.objectInfo.path).then(function(data){
 
             if(data.Restore){
-              var info = osClient.parseRestoreInfo(data.Restore);
+              var info = s3Client.parseRestoreInfo(data.Restore);
               if(info['ongoing-request']=='true'){
                 $scope.info.type = 2;// '归档文件正在恢复中，请耐心等待...';
                 $scope.info.showContent=false;

@@ -22,8 +22,8 @@ angular
   .module("web")
   .directive("ossFileSelector", [
     "$timeout",
-    "osClient",
-    function ($timeout, osClient) {
+    "s3Client",
+    function ($timeout, s3Client) {
       return {
         restrict: "EA",
         transclude: false,
@@ -55,7 +55,7 @@ angular
             $scope.selectedItem.s3Path = "s3://";
             $scope.selectedItem.region = "";
             $scope.isLoading = true;
-            osClient.listAllBuckets().then(function (arr) {
+            s3Client.listAllBuckets().then(function (arr) {
               $scope.items = arr;
               $scope.isLoading = false;
             });
@@ -67,7 +67,7 @@ angular
 
             if (v.key.lastIndexOf("/") == v.key.length - 1) {
               $scope.isLoading = true;
-              osClient
+              s3Client
                 .listAllFiles(v.region, v.bucket, v.key, $scope.folderOnly)
                 .then(function (arr) {
                   $scope.items = arr;
@@ -120,7 +120,7 @@ angular
           if (v == "s3://") {
             return;
           }
-          var info = osClient.parseS3Path(v);
+          var info = s3Client.parseS3Path(v);
 
           if (info.key == "") {
             if (!$scope.showBuckets) {

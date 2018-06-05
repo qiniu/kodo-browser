@@ -176,6 +176,7 @@ UploadJob.prototype.startUpload = function (event, data) {
     var prog = data.data;
 
     this.prog.total = prog.progressTotal;
+    this.prog.resumable = prog.progressResumable;
     this.emit('progress', this.prog);
     break;
 
@@ -183,7 +184,14 @@ UploadJob.prototype.startUpload = function (event, data) {
     var prog = data.data;
 
     this.prog.loaded = prog.progressLoaded;
+    this.prog.resumable = prog.progressResumable;
     this.emit('progress', this.prog);
+    break;
+
+  case 'filePartUploaded':
+    var part = data.data;
+
+    self.emit('partcomplete', part);
     break;
 
   case 'fileUploaded':

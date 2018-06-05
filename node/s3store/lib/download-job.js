@@ -170,6 +170,7 @@ DownloadJob.prototype.startDownload = function (event, data) {
     var prog = data.data;
 
     self.prog.loaded = prog.progressLoaded;
+    self.prog.resumable = prog.progressResumable;
     self.emit('progress', self.prog);
     break;
 

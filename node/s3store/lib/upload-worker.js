@@ -28,30 +28,39 @@ process.on('message', function (msg) {
     var client = new Client(msg.data.options);
 
     var uploader = client.uploadFile(msg.data.params);
-    uploader.on('fileDuplicated', (e2) => {
+    uploader.on('fileDuplicated', (prog) => {
       process.send({
         job: msg.data.job,
         key: 'fileDuplicated'
       });
     });
-    uploader.on('fileStat', (e2) => {
+    uploader.on('fileStat', (prog) => {
       process.send({
         job: msg.data.job,
         key: 'fileStat',
         data: {
           progressLoaded: 0,
-          progressTotal: e2.progressTotal
+          progressTotal: prog.progressTotal,
+          progressResumable: prog.progressResumable
         }
       });
     });
-    uploader.on('progress', (e2) => {
+    uploader.on('progress', (prog) => {
       process.send({
         job: msg.data.job,
         key: 'progress',
         data: {
-          progressLoaded: e2.progressLoaded,
-          progressTotal: e2.progressTotal
+          progressLoaded: prog.progressLoaded,
+          progressTotal: prog.progressTotal,
+          progressResumable: prog.progressResumable
         }
+      });
+    });
+    uploader.on('filePartUploaded', (part) => {
+      process.send({
+        job: msg.data.job,
+        key: 'filePartUploaded',
+        data: part || {}
       });
     });
     uploader.on('fileUploaded', (result) => {
@@ -68,12 +77,19 @@ process.on('message', function (msg) {
         error: err
       });
     });
+    uploader.on('debug', (data) => {
+      process.send({
+        job: msg.data.job,
+        key: 'debug',
+        data: data
+      });
+    });
 
     break;
 
   default:
     process.send({
-      key: msg.key,
+      key: `[Error] ${msg.key}`,
       message: msg
     });
   }

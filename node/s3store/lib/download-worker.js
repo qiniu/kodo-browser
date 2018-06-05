@@ -45,7 +45,8 @@ process.on('message', (msg) => {
         key: 'progress',
         data: {
           progressLoaded: prog.progressLoaded,
-          progressTotal: prog.progressTotal
+          progressTotal: prog.progressTotal,
+          progressResumable: prog.progressResumable
         }
       });
     });

@@ -61,7 +61,7 @@ Client.prototype.uploadFile = function (params) {
 
   let s3uploader = null;
   let s3UploadedParts = params.uploadedParts || null;
-  let s3UploadedPartSize = params.uploadedPartSize;
+  let s3UploadedPartSize = params.uploadedPartSize || self.multipartUploadSize;
 
   let uploader = new EventEmitter();
   uploader.setMaxListeners(0);
@@ -72,11 +72,10 @@ Client.prototype.uploadFile = function (params) {
 
   params.s3Params.Key = encodeSpecialCharacters(params.s3Params.Key);
 
-  let s3params = {};
-  Object.assign(s3params, params.s3Params);
-
+  let s3params = Object.assign({}, params.s3Params);
   if (s3params.ContentType === undefined) {
     let defaultContentType = params.defaultContentType || 'application/octet-stream';
+
     s3params.ContentType = mime.getType(localFile) || defaultContentType;
   }
 
@@ -133,8 +132,21 @@ Client.prototype.uploadFile = function (params) {
         return;
       }
 
+      let partsCount = Math.ceil(stats.size / s3UploadedPartSize);
+      if (partsCount > MAX_MULTIPART_COUNT) {
+        s3UploadedPartSize = smallestPartSizeFromFileSize(stats.size);
+      }
+      if (s3UploadedPartSize > MAX_PUTOBJECT_SIZE) {
+        let err = new Error(`File size exceeds maximum object size: ${localFile}`);
+        err.retryable = false;
+
+        handleError(err);
+        return;
+      }
+
       uploader.progressLoaded = 0;
       uploader.progressTotal = stats.size;
+      uploader.progressResumable = (self.resumeUpload && (s3UploadedParts === null || s3UploadedPartSize === self.multipartUploadSize));
       uploader.emit("fileStat", uploader);
 
       startUploadFile();
@@ -143,23 +155,6 @@ Client.prototype.uploadFile = function (params) {
 
   function startUploadFile() {
     if (uploader.progressTotal >= self.multipartUploadThreshold) {
-      let partSize = s3UploadedPartSize || self.multipartUploadSize;
-      let partsCount = Math.ceil(uploader.progressTotal / partSize);
-      if (partsCount > MAX_MULTIPART_COUNT) {
-        partSize = smallestPartSizeFromFileSize(uploader.progressTotal);
-      }
-      if (partSize > MAX_PUTOBJECT_SIZE) {
-        let err = new Error(`File size exceeds maximum object size: ${localFile}`);
-        err.retryable = false;
-
-        handleError(err);
-        return;
-      }
-
-      self.multipartUploadSize = partSize;
-
-      uploader.progressResumable = (self.resumeUpload && (uploadedParts === null || self.multipartUploadSize === s3UploadedPartSize));
-
       if (uploader.progressResumable) {
         resumeMultipartUpload();
       } else {
@@ -204,7 +199,7 @@ Client.prototype.uploadFile = function (params) {
           Key: s3params.Key,
           Body: fs.createReadStream(localFile)
         },
-        partSize: self.multipartUploadSize,
+        partSize: s3UploadedPartSize,
         queueSize: self.maxConcurrency
       });
 
@@ -247,9 +242,9 @@ Client.prototype.uploadFile = function (params) {
       if (isAborted) return;
 
       // calc uploaded progress
-      s3UploadedParts.forEach((part, partNumber) => {
+      s3UploadedParts.forEach((part, idx) => {
         if (part.ETag !== null) {
-          uploader.progressLoaded += self.multipartUploadSize;
+          uploader.progressLoaded += s3UploadedPartSize;
         }
       });
       uploader.emit('progress', uploader);
@@ -262,15 +257,21 @@ Client.prototype.uploadFile = function (params) {
           Body: fs.createReadStream(localFile)
         },
         leavePartsOnError: true,
-        partSize: self.multipartUploadSize,
+        partSize: s3UploadedPartSize,
         queueSize: self.maxConcurrency
       });
-      s3uploader.completeInfo = uploadedParts;
+      s3uploader.completeInfo = Object.assign({}, s3UploadedParts);
 
       s3uploader.on('httpUploadProgress', function (prog) {
         if (isAborted) return;
 
-        s3UploadedParts = s3uploader.completeInfo;
+        s3uploader.completeInfo.forEach((part, idx) => {
+          if (part.ETag !== null && !s3UploadedParts[part.PartNumber]) {
+            s3UploadedParts[part.PartNumber] = part;
+
+            uploader.emit('filePartUploaded', part);
+          }
+        });
 
         uploader.progressLoaded = prog.loaded;
         uploader.emit('progress', uploader);
@@ -336,6 +337,7 @@ Client.prototype.downloadFile = function (params) {
   downloader.setMaxListeners(0);
   downloader.progressLoaded = 0;
   downloader.progressTotal = 0;
+  downloader.progressResumable = false;
   downloader.abort = handleAbort;
 
   params.s3Params.Key = encodeSpecialCharacters(params.s3Params.Key);
@@ -527,7 +529,7 @@ Client.prototype.downloadFile = function (params) {
         return;
       }
 
-      s3DownloadedParts.forEach((part, partNumber) => {
+      s3DownloadedParts.forEach((part, idx) => {
         if (part.Done === true) {
           downloader.progressLoaded += s3DownloadedPartSize;
         }

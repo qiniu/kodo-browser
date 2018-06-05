@@ -60,11 +60,11 @@
   "dependencies": {
     "aws-sdk": "^2.246.1",
     "clipboard": "^2.0.1",
+    "concurrent-queue": "^7.0.2",
     "mime": "^2.3.1",
     "nodemailer": "4.6.5",
     "nodemailer-smtp-transport": "2.7.4",
     "npm": "^6.1.0",
-    "pend": "^1.2.0",
     "request": "^2.87.0"
   }
 }

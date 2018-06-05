@@ -34,7 +34,8 @@ process.on('message', (msg) => {
         key: 'fileStat',
         data: {
           progressLoaded: 0,
-          progressTotal: prog.progressTotal
+          progressTotal: prog.progressTotal,
+          progressResumable: prog.progressResumable
         }
       });
     });
@@ -67,6 +68,13 @@ process.on('message', (msg) => {
         job: msg.data.job,
         key: 'error',
         error: err
+      });
+    });
+    downloader.on('debug', (data) => {
+      process.send({
+        job: msg.data.job,
+        key: 'debug',
+        data: data
       });
     });
 

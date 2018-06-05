@@ -162,6 +162,7 @@ DownloadJob.prototype.startDownload = function (event, data) {
     var prog = data.data;
 
     self.prog.total = prog.progressTotal;
+    self.prog.resumable = prog.progressResumable;
     self.emit('progress', self.prog);
     break;
 
@@ -170,6 +171,12 @@ DownloadJob.prototype.startDownload = function (event, data) {
 
     self.prog.loaded = prog.progressLoaded;
     self.emit('progress', self.prog);
+    break;
+
+  case 'filePartDownloaded':
+    var part = data.data;
+
+    self.emit('partcomplete', part);
     break;
 
   case 'fileDownloaded':

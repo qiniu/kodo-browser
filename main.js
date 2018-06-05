@@ -331,6 +331,15 @@ ipcMain.on("asynchronous-job", (event, data) => {
 
         break;
 
+      case 'filePartUploaded':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'filePartUploaded',
+          data: msg.data
+        });
+
+        break;
+
       case 'fileUploaded':
         event.sender.send(data.job, {
           job: data.job,
@@ -458,6 +467,15 @@ ipcMain.on("asynchronous-job", (event, data) => {
             progressLoaded: msg.data.progressLoaded,
             progressTotal: msg.data.progressTotal
           }
+        });
+
+        break;
+
+      case 'filePartDownloaded':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'filePartDownloaded',
+          data: msg.data
         });
 
         break;

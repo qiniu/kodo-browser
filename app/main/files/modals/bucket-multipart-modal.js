@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('bucketMultipartModalCtrl', ['$scope','$q','$uibModalInstance','$translate','Dialog','bucketInfo','Toast','osClient','safeApply',
-    function ($scope, $q, $modalInstance, $translate, Dialog, bucketInfo,Toast, osClient,safeApply) {
+  .controller('bucketMultipartModalCtrl', ['$scope','$q','$uibModalInstance','$translate','Dialog','bucketInfo','Toast','s3Client','safeApply',
+    function ($scope, $q, $modalInstance, $translate, Dialog, bucketInfo,Toast, s3Client,safeApply) {
       var T = $translate.instant;
 
       angular.extend($scope, {
@@ -39,7 +39,7 @@ angular.module('web')
         });
       }
       function listUploads(fn){
-        osClient.listAllUploads(bucketInfo.region, bucketInfo.name).then(function(result){
+        s3Client.listAllUploads(bucketInfo.region, bucketInfo.name).then(function(result){
           $scope.items = result;
           if(fn) fn();
         });
@@ -56,7 +56,7 @@ angular.module('web')
         Dialog.confirm( title, message, function(b){
           if(b){
             Toast.success(T('delete.multiparts.on')); //'正在删除碎片...'
-            osClient.abortAllUploads(bucketInfo.region, bucketInfo.name, items)
+            s3Client.abortAllUploads(bucketInfo.region, bucketInfo.name, items)
             .then(function(){
               Toast.success(T('delete.multiparts.success')); //'删除碎片成功'
               refresh();

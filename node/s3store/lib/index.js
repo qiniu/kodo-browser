@@ -52,7 +52,7 @@ function S3Store(config) {
     signatureVersion: "v4",
     httpOptions: {
       connectTimeout: this._config.connectTimeout || 3000, // 3s
-      timeout: this._config.timeout || 3600000 // 1h
+      timeout: this._config.timeout || 86400000 // 1d
     }
   };
 }

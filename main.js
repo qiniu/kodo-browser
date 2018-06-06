@@ -313,7 +313,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
           key: 'fileStat',
           data: {
             progressLoaded: 0,
-            progressTotal: msg.data.progressTotal
+            progressTotal: msg.data.progressTotal,
+            progressResumable: msg.data.progressResumable
           }
         });
 
@@ -325,8 +326,18 @@ ipcMain.on("asynchronous-job", (event, data) => {
           key: 'progress',
           data: {
             progressLoaded: msg.data.progressLoaded,
-            progressTotal: msg.data.progressTotal
+            progressTotal: msg.data.progressTotal,
+            progressResumable: msg.data.progressResumable
           }
+        });
+
+        break;
+
+      case 'filePartUploaded':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'filePartUploaded',
+          data: msg.data
         });
 
         break;
@@ -444,7 +455,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
           key: 'fileStat',
           data: {
             progressLoaded: 0,
-            progressTotal: msg.data.progressTotal
+            progressTotal: msg.data.progressTotal,
+            progressResumable: msg.data.progressResumable
           }
         });
 
@@ -456,8 +468,18 @@ ipcMain.on("asynchronous-job", (event, data) => {
           key: 'progress',
           data: {
             progressLoaded: msg.data.progressLoaded,
-            progressTotal: msg.data.progressTotal
+            progressTotal: msg.data.progressTotal,
+            progressResumable: msg.data.progressResumable
           }
+        });
+
+        break;
+
+      case 'filePartDownloaded':
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'filePartDownloaded',
+          data: msg.data
         });
 
         break;

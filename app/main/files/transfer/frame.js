@@ -1,17 +1,15 @@
 angular.module("web").controller("transferFrameCtrl", [
   "$scope",
   "$translate",
-  "osUploadManager",
-  "osDownloadManager",
+  "s3UploadMgr",
+  "s3DownloadMgr",
   "Toast",
-  "safeApply",
   function (
     $scope,
     $translate,
-    osUploadManager,
-    osDownloadManager,
-    Toast,
-    safeApply
+    s3UploadMgr,
+    s3DownloadMgr,
+    Toast
   ) {
     var T = $translate.instant;
 
@@ -23,10 +21,6 @@ angular.module("web").controller("transferFrameCtrl", [
         downloadJobList: []
       },
 
-      totalProg: {
-        loaded: 0,
-        total: 0
-      },
       totalStat: {
         running: 0,
         total: 0,
@@ -41,12 +35,12 @@ angular.module("web").controller("transferFrameCtrl", [
       calcTotalProg: calcTotalProg
     });
 
-    //functions in parent scope
+    // functions in parent scope
     $scope.handlers.uploadFilesHandler = uploadFilesHandler;
     $scope.handlers.downloadFilesHandler = downloadFilesHandler;
 
-    osUploadManager.init($scope);
-    osDownloadManager.init($scope);
+    s3UploadMgr.init($scope);
+    s3DownloadMgr.init($scope);
 
     /**
      * upload
@@ -56,7 +50,7 @@ angular.module("web").controller("transferFrameCtrl", [
     function uploadFilesHandler(filePaths, bucketInfo) {
       Toast.info(T("upload.addtolist.on"));
 
-      osUploadManager.createUploadJobs(filePaths, bucketInfo, function (isCancelled) {
+      s3UploadMgr.createUploadJobs(filePaths, bucketInfo, function (isCancelled) {
         Toast.info(T("upload.addtolist.success"));
 
         $scope.transTab = 1;
@@ -66,13 +60,13 @@ angular.module("web").controller("transferFrameCtrl", [
 
     /**
      * download
-     * @param fromOssPath {array}  item={region, bucket, path, name, size=0, isFolder=false}, create folder if required
+     * @param fromS3Path {array}  item={region, bucket, path, name, size=0, isFolder=false}, create folder if required
      * @param toLocalPath {string}
      */
-    function downloadFilesHandler(fromOssPath, toLocalPath) {
+    function downloadFilesHandler(fromS3Path, toLocalPath) {
       Toast.info(T("download.addtolist.on"));
 
-      osDownloadManager.createDownloadJobs(fromOssPath, toLocalPath, function (isCancelled) {
+      s3DownloadMgr.createDownloadJobs(fromS3Path, toLocalPath, function (isCancelled) {
         Toast.info(T("download.addtolist.success"));
 
         $scope.transTab = 2;
@@ -122,15 +116,13 @@ angular.module("web").controller("transferFrameCtrl", [
       });
 
       $scope.totalStat.running = c + c2;
+      $scope.totalStat.total = $scope.lists.uploadJobList.length + $scope.lists.downloadJobList.length;
       $scope.totalStat.upDone = $scope.lists.uploadJobList.length - c;
       $scope.totalStat.upStopped = cs;
       $scope.totalStat.upFailed = cf;
       $scope.totalStat.downDone = $scope.lists.downloadJobList.length - c2;
       $scope.totalStat.downStopped = cs2;
       $scope.totalStat.downFailed = cf2;
-
-      $scope.totalStat.total =
-        $scope.lists.uploadJobList.length + $scope.lists.downloadJobList.length;
     }
   }
 ]);

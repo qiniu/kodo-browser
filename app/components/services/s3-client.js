@@ -1,6 +1,6 @@
 const AWS = require("aws-sdk");
 
-angular.module("web").factory("osClient", [
+angular.module("web").factory("s3Client", [
   "$q",
   "$rootScope",
   "$timeout",
@@ -1292,7 +1292,7 @@ angular.module("web").factory("osClient", [
         signatureVersion: "v4",
         httpOptions: {
           connectTimeout: 3000, // 3s
-          timeout: 3600000 // 1h
+          timeout: 86400000 // 1d
         }
       });
 

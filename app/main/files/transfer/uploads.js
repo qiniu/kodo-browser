@@ -7,7 +7,7 @@ angular.module("web").controller("transferUploadsCtrl", [
   "$interval",
   "jobUtil",
   "DelayDone",
-  "osUploadManager",
+  "s3UploadMgr",
   "Toast",
   "Dialog",
   function (
@@ -17,7 +17,7 @@ angular.module("web").controller("transferUploadsCtrl", [
     $interval,
     jobUtil,
     DelayDone,
-    osUploadManager,
+    s3UploadMgr,
     Toast,
     Dialog
   ) {
@@ -61,7 +61,7 @@ angular.module("web").controller("transferUploadsCtrl", [
         item.wait();
       }
 
-      osUploadManager.trySchedJob();
+      s3UploadMgr.trySchedJob();
     }
 
     function showRemoveItem(item) {
@@ -73,8 +73,14 @@ angular.module("web").controller("transferUploadsCtrl", [
         Dialog.confirm(
           title,
           message,
-          function (btn) {
+          (btn) => {
             if (btn) {
+              if (item.status == "running" ||
+                item.status == "waiting" ||
+                item.status == "verifying") {
+                item.stop();
+              }
+
               doRemove(item);
             }
           },
@@ -84,32 +90,37 @@ angular.module("web").controller("transferUploadsCtrl", [
     }
 
     function doRemove(item) {
-      var arr = $scope.lists.uploadJobList;
-      for (var i = 0; i < arr.length; i++) {
-        if (item === arr[i]) {
-          arr.splice(i, 1);
+      var jobs = $scope.lists.uploadJobList;
+      for (var i = 0; i < jobs.length; i++) {
+        if (item === jobs[i]) {
+          jobs.splice(i, 1);
           break;
         }
       }
-      osUploadManager.trySaveProg();
-      $scope.calcTotalProg();
+
+      $timeout(() => {
+        s3UploadMgr.trySaveProg();
+        $scope.calcTotalProg();
+      });
     }
 
     function clearAllCompleted() {
-      var arr = $scope.lists.uploadJobList;
-      for (var i = 0; i < arr.length; i++) {
-        if ("finished" == arr[i].status) {
-          arr.splice(i, 1);
+      var jobs = $scope.lists.uploadJobList;
+      for (var i = 0; i < jobs.length; i++) {
+        if ("finished" == jobs[i].status) {
+          jobs.splice(i, 1);
           i--;
         }
       }
-      $scope.calcTotalProg();
+
+      $timeout(() => {
+        $scope.calcTotalProg();
+      });
     }
 
     function clearAll() {
       if (!$scope.lists.uploadJobList ||
-        $scope.lists.uploadJobList.length == 0
-      ) {
+        $scope.lists.uploadJobList.length == 0) {
         return;
       }
 
@@ -118,22 +129,25 @@ angular.module("web").controller("transferUploadsCtrl", [
       Dialog.confirm(
         title,
         message,
-        function (btn) {
+        (btn) => {
           if (btn) {
-            var arr = $scope.lists.uploadJobList;
-            for (var i = 0; i < arr.length; i++) {
-              var n = arr[i];
-              if (
-                n.status == "running" ||
-                n.status == "waiting" ||
-                n.status == "verifying"
-              )
-                n.stop();
-              arr.splice(i, 1);
+            var jobs = $scope.lists.uploadJobList;
+            for (var i = 0; i < jobs.length; i++) {
+              var job = jobs[i];
+              if (job.status == "running" ||
+                job.status == "waiting" ||
+                job.status == "verifying") {
+                job.stop();
+              }
+
+              jobs.splice(i, 1);
               i--;
             }
-            $scope.calcTotalProg();
-            osUploadManager.trySaveProg();
+
+            $timeout(() => {
+              s3UploadMgr.trySaveProg();
+              $scope.calcTotalProg();
+            });
           }
         },
         1
@@ -147,23 +161,23 @@ angular.module("web").controller("transferUploadsCtrl", [
       if (arr && arr.length > 0) {
         stopFlag = true;
 
-        osUploadManager.stopCreatingJobs();
+        s3UploadMgr.stopCreatingJobs();
 
         Toast.info(T("pause.on")); //'正在暂停...'
         $scope.allActionBtnDisabled = true;
 
         angular.forEach(arr, function (n) {
-          if (
-            n.status == "running" ||
-            n.status == "waiting" ||
-            n.status == "verifying"
-          )
+          if (item.resumable && (
+              n.status == "running" ||
+              n.status == "waiting" ||
+              n.status == "verifying"
+            ))
             n.stop();
         });
         Toast.info(T("pause.success"));
 
         $timeout(function () {
-          osUploadManager.trySaveProg();
+          s3UploadMgr.trySaveProg();
           $scope.allActionBtnDisabled = false;
         }, 100);
       }
@@ -186,7 +200,7 @@ angular.module("web").controller("transferUploadsCtrl", [
               n.wait();
             }
 
-            osUploadManager.trySchedJob();
+            s3UploadMgr.trySchedJob();
 
             fn();
           },

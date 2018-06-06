@@ -6,7 +6,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
   "$translate",
   "$interval",
   "jobUtil",
-  "osDownloadManager",
+  "s3DownloadMgr",
   "DelayDone",
   "Toast",
   "Dialog",
@@ -17,7 +17,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
     $translate,
     $interval,
     jobUtil,
-    osDownloadManager,
+    s3DownloadMgr,
     DelayDone,
     Toast,
     Dialog,
@@ -58,7 +58,8 @@ angular.module("web").controller("transferDownloadsCtrl", [
 
     function checkStartJob(item) {
       item.wait();
-      osDownloadManager.trySchedJob();
+
+      s3DownloadMgr.trySchedJob();
     }
 
     function showRemoveItem(item) {
@@ -70,8 +71,14 @@ angular.module("web").controller("transferDownloadsCtrl", [
         Dialog.confirm(
           title,
           message,
-          function (btn) {
+          (btn) => {
             if (btn) {
+              if (item.status == "running" ||
+                item.status == "waiting" ||
+                item.status == "verifying") {
+                item.stop();
+              }
+
               doRemove(item);
             }
           },
@@ -81,57 +88,64 @@ angular.module("web").controller("transferDownloadsCtrl", [
     }
 
     function doRemove(item) {
-      var arr = $scope.lists.downloadJobList;
-      for (var i = 0; i < arr.length; i++) {
-        if (item === arr[i]) {
-          arr.splice(i, 1);
+      var jobs = $scope.lists.downloadJobList;
+      for (var i = 0; i < jobs.length; i++) {
+        if (item === jobs[i]) {
+          jobs.splice(i, 1);
           break;
         }
       }
-      osDownloadManager.trySaveProg();
-      $scope.calcTotalProg();
-      safeApply($scope);
+
+      $timeout(() => {
+        s3DownloadMgr.trySaveProg();
+        $scope.calcTotalProg();
+      });
     }
 
     function clearAllCompleted() {
-      var arr = $scope.lists.downloadJobList;
-      for (var i = 0; i < arr.length; i++) {
-        if ("finished" == arr[i].status) {
-          arr.splice(i, 1);
+      var jobs = $scope.lists.downloadJobList;
+      for (var i = 0; i < jobs.length; i++) {
+        if ("finished" == jobs[i].status) {
+          jobs.splice(i, 1);
           i--;
         }
       }
 
-      $scope.calcTotalProg();
+      $timeout(() => {
+        $scope.calcTotalProg();
+      });
     }
 
     function clearAll() {
       if (!$scope.lists.downloadJobList ||
-        $scope.lists.downloadJobList.length == 0
-      ) {
+        $scope.lists.downloadJobList.length == 0) {
         return;
       }
+
       var title = T("clear.all.title"); //清空所有
       var message = T("clear.all.download.message"); //确定清空所有下载任务?
       Dialog.confirm(
         title,
         message,
-        function (btn) {
+        (btn) => {
           if (btn) {
-            var arr = $scope.lists.downloadJobList;
-            for (var i = 0; i < arr.length; i++) {
-              var n = arr[i];
-              if (
-                n.status == "running" ||
-                n.status == "waiting" ||
-                n.status == "verifying"
-              )
-                n.stop();
-              arr.splice(i, 1);
+            var jobs = $scope.lists.downloadJobList;
+            for (var i = 0; i < jobs.length; i++) {
+              var job = jobs[i];
+              if (job.status == "running" ||
+                job.status == "waiting" ||
+                job.status == "verifying") {
+                job.stop();
+              }
+
+              jobs.splice(i, 1);
               i--;
             }
-            $scope.calcTotalProg();
-            osDownloadManager.trySaveProg();
+
+            $timeout(() => {
+              s3DownloadMgr.trySaveProg();
+              $scope.calcTotalProg();
+            });
           }
         },
         1
@@ -141,51 +155,53 @@ angular.module("web").controller("transferDownloadsCtrl", [
     var stopFlag = false;
 
     function stopAll() {
-      var arr = $scope.lists.downloadJobList;
-      if (arr && arr.length > 0) {
+      var jobs = $scope.lists.downloadJobList;
+      if (jobs && jobs.length > 0) {
         stopFlag = true;
 
-        osDownloadManager.stopCreatingJobs();
+        s3DownloadMgr.stopCreatingJobs();
 
         Toast.info(T("pause.on")); //'正在暂停...'
         $scope.allActionBtnDisabled = true;
 
-        angular.forEach(arr, function (n) {
-          if (
-            n.status == "running" ||
-            n.status == "waiting" ||
-            n.status == "verifying"
-          )
+        angular.forEach(jobs, (job) => {
+          if (job.prog.resumable && (
+              job.status == "running" ||
+              job.status == "waiting" ||
+              job.status == "verifying"
+            ))
             n.stop();
         });
         Toast.success(T("pause.success")); //'暂停成功'
 
-        $timeout(function () {
-          osDownloadManager.trySaveProg();
+        $timeout(() => {
+          s3DownloadMgr.trySaveProg();
           $scope.allActionBtnDisabled = false;
-        }, 100);
+        });
       }
     }
 
     function startAll() {
-      var arr = $scope.lists.downloadJobList;
       stopFlag = false;
 
       //串行
-      if (arr && arr.length > 0) {
+      var jobs = $scope.lists.downloadJobList;
+      if (jobs && jobs.length > 0) {
         $scope.allActionBtnDisabled = true;
         DelayDone.seriesRun(
-          arr,
-          function eachItemFn(n, fn) {
+          jobs,
+          (job, fn) => {
             if (stopFlag) return;
 
-            if (n && (n.status == "stopped" || n.status == "failed")) {
-              n.wait();
+            if (job && (job.status == "stopped" || job.status == "failed")) {
+              job.wait();
             }
-            osDownloadManager.trySchedJob();
+
+            s3DownloadMgr.trySchedJob();
+
             fn();
           },
-          function doneFy() {
+          () => {
             $scope.allActionBtnDisabled = false;
           }
         );

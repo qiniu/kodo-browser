@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('crcModalCtrl', ['$scope', '$q', '$uibModalInstance', 'item', 'currentInfo', 'osClient', 'safeApply',
-    function ($scope, $q, $modalInstance, item, currentInfo, osClient, safeApply) {
+  .controller('crcModalCtrl', ['$scope', '$q', '$uibModalInstance', 'item', 'currentInfo', 's3Client', 'safeApply',
+    function ($scope, $q, $modalInstance, item, currentInfo, s3Client, safeApply) {
 
       angular.extend($scope, {
         item: item,
@@ -21,7 +21,7 @@ angular.module('web')
       init();
 
       function init() {
-        osClient.getFileInfo(
+        s3Client.getFileInfo(
           currentInfo.region,
           currentInfo.bucket,
           item.path

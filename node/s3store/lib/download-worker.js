@@ -18,7 +18,7 @@ process.send({
   version: process.version
 });
 
-process.on('message', function (msg) {
+process.on('message', (msg) => {
   switch (msg.key) {
   case 'stop':
     process.exit(0);
@@ -28,38 +28,54 @@ process.on('message', function (msg) {
     var client = new Client(msg.data.options);
 
     let downloader = client.downloadFile(msg.data.params);
-    downloader.on('fileStat', function (e2) {
+    downloader.on('fileStat', (prog) => {
       process.send({
         job: msg.data.job,
         key: 'fileStat',
         data: {
           progressLoaded: 0,
-          progressTotal: e2.progressTotal
+          progressTotal: prog.progressTotal,
+          progressResumable: prog.progressResumable
         }
       });
     });
-    downloader.on('progress', function (e2) {
+    downloader.on('progress', (prog) => {
       process.send({
         job: msg.data.job,
         key: 'progress',
         data: {
-          progressLoaded: e2.progressLoaded,
-          progressTotal: e2.progressTotal
+          progressLoaded: prog.progressLoaded,
+          progressTotal: prog.progressTotal,
+          progressResumable: prog.progressResumable
         }
       });
     });
-    downloader.on('fileDownloaded', function (result) {
+    downloader.on('filePartDownloaded', (part) => {
+      process.send({
+        job: msg.data.job,
+        key: 'filePartDownloaded',
+        data: part || {}
+      });
+    });
+    downloader.on('fileDownloaded', (result) => {
       process.send({
         job: msg.data.job,
         key: 'fileDownloaded',
         data: result || {}
       });
     });
-    downloader.on('error', function (err) {
+    downloader.on('error', (err) => {
       process.send({
         job: msg.data.job,
         key: 'error',
         error: err
+      });
+    });
+    downloader.on('debug', (data) => {
+      process.send({
+        job: msg.data.job,
+        key: 'debug',
+        data: data
       });
     });
 
@@ -67,7 +83,7 @@ process.on('message', function (msg) {
 
   default:
     process.send({
-      key: msg.key,
+      key: `[Error] ${msg.key}`,
       message: msg
     });
   }

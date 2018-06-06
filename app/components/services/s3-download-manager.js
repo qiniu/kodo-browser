@@ -1,23 +1,19 @@
-angular.module("web").factory("osDownloadManager", [
-  "$q",
+angular.module("web").factory("s3DownloadMgr", [
   "$state",
   "$timeout",
   "AuthInfo",
-  "osClient",
+  "s3Client",
   "Toast",
   "Const",
-  "DelayDone",
   "safeApply",
   "settingsSvs",
   function (
-    $q,
     $state,
     $timeout,
     AuthInfo,
-    osClient,
+    s3Client,
     Toast,
     Const,
-    DelayDone,
     safeApply,
     settingsSvs
   ) {
@@ -36,7 +32,7 @@ angular.module("web").factory("osDownloadManager", [
       trySchedJob: trySchedJob,
       trySaveProg: trySaveProg,
 
-      stopCreatingJobs: function () {
+      stopCreatingJobs: () => {
         stopCreatingFlag = true;
       }
     };
@@ -48,7 +44,7 @@ angular.module("web").factory("osDownloadManager", [
       var auth = AuthInfo.get();
       var progs = tryLoadProg();
 
-      angular.forEach(progs, function (prog) {
+      angular.forEach(progs, (prog) => {
         var job = createJob(auth, prog);
         if (job.status == "waiting" || job.status == "running") {
           job.stop();
@@ -70,8 +66,8 @@ angular.module("web").factory("osDownloadManager", [
 
       options.region = region;
       options.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
-      options.mulipartDownloadThreshold = settingsSvs.multipartDownloadThreshold.get();
-      options.mulipartDownloadSize = settingsSvs.multipartDownloadSize.get();
+      options.multipartDownloadThreshold = settingsSvs.multipartDownloadThreshold.get();
+      options.multipartDownloadSize = settingsSvs.multipartDownloadSize.get();
       options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
 
@@ -80,7 +76,7 @@ angular.module("web").factory("osDownloadManager", [
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
         },
-        endpoint: osClient.getS3Endpoint(
+        endpoint: s3Client.getS3Endpoint(
           region,
           options.from.bucket,
           auth.servicetpl || auth.eptpl
@@ -88,7 +84,7 @@ angular.module("web").factory("osDownloadManager", [
         region: region,
         httpOptions: {
           connectTimeout: 3000, // 3s
-          timeout: 3600000 // 1h
+          timeout: 86400000 // 1d
         }
       });
 
@@ -107,15 +103,13 @@ angular.module("web").factory("osDownloadManager", [
       var authInfo = AuthInfo.get();
       var dirPath = path.dirname(bucketInfos[0].path);
 
-      loop(
-        bucketInfos,
-        function (jobs) {},
-        function () {
-          if (jobsAddedFn) {
-            jobsAddedFn();
-          }
+      loop(bucketInfos, (jobs) => {
+
+      }, () => {
+        if (jobsAddedFn) {
+          jobsAddedFn();
         }
-      );
+      });
 
       function loop(arr, callFn, callFn2) {
         var t = [];
@@ -132,17 +126,15 @@ angular.module("web").factory("osDownloadManager", [
         _kdig();
 
         function _kdig() {
-          dig(
-            arr[c],
-            t,
-            function () {},
-            function () {
-              c2++;
-              if (c2 >= len) {
-                callFn2(t);
-              }
+          dig(arr[c], t, () => {
+
+          }, () => {
+            c2++;
+            if (c2 >= len) {
+              callFn2(t);
             }
-          );
+          });
+
           c++;
           if (c == len) {
             callFn(t);
@@ -156,55 +148,51 @@ angular.module("web").factory("osDownloadManager", [
         }
       }
 
-      function dig(s3Info, t, callFn, callFn2) {
+      function dig(s3info, t, callFn, callFn2) {
         if (stopCreatingFlag) {
           return;
         }
 
-        var fileName = path.basename(s3Info.path);
+        var fileName = path.basename(s3info.path);
         var filePath = path.join(
           toLocalPath,
-          path.relative(dirPath, s3Info.path)
+          path.relative(dirPath, s3info.path)
         );
 
-        if (s3Info.isFolder) {
-          //目录
-          fs.mkdir(filePath, function (err) {
+        if (s3info.isFolder) {
+          fs.mkdir(filePath, (err) => {
             if (err && err.code != "EEXIST") {
               Toast.error("mkdir [" + filePath + "] failed:" + err.message);
               return;
             }
 
             //遍历 s3 目录
-            function progDig(marker) {
-              osClient
-                .listFiles(s3Info.region, s3Info.bucket, s3Info.path, marker)
-                .then(function (result) {
-                  var arr2 = result.data;
-                  arr2.forEach(function (n) {
-                    n.region = s3Info.region;
-                    n.bucket = s3Info.bucket;
+            function tryLoadFiles(marker) {
+              s3Client
+                .listFiles(s3info.region, s3info.bucket, s3info.path, marker)
+                .then((result) => {
+                  var files = result.data;
+                  files.forEach((f) => {
+                    f.region = s3info.region;
+                    f.bucket = s3info.bucket;
                   });
-                  loop(
-                    arr2,
-                    function (jobs) {
-                      t = t.concat(jobs);
-                      if (result.marker) {
-                        $timeout(function () {
-                          progDig(result.marker);
-                        }, 10);
-                      } else {
-                        if (callFn) callFn();
-                      }
-                    },
-                    callFn2
-                  );
+
+                  loop(files, (jobs) => {
+                    t = t.concat(jobs);
+                    if (result.marker) {
+                      $timeout(() => {
+                        tryLoadFiles(result.marker);
+                      }, 10);
+                    } else {
+                      if (callFn) callFn();
+                    }
+                  }, callFn2);
                 });
             }
-            progDig();
+
+            tryLoadFiles();
           });
         } else {
-          //文件
           if (process.platform == "win32") {
             //修复window下，文件名含非法字符需要转义
             if (/[\/\\\:\<\>\?\*\"\|]/.test(fileName)) {
@@ -215,11 +203,12 @@ angular.module("web").factory("osDownloadManager", [
               );
             }
           }
+
           var job = createJob(authInfo, {
-            region: s3Info.region,
+            region: s3info.region,
             from: {
-              bucket: s3Info.bucket,
-              key: s3Info.path
+              bucket: s3info.bucket,
+              key: s3info.path
             },
             to: {
               name: fileName,
@@ -238,56 +227,79 @@ angular.module("web").factory("osDownloadManager", [
     }
 
     function addEvents(job) {
-      $scope.lists.downloadJobList.push(job);
-      $scope.calcTotalProg();
-      safeApply($scope);
-      trySchedJob();
+      if (!job.downloadedParts) {
+        job.downloadedParts = [];
+      }
 
-      //save
+      $scope.lists.downloadJobList.push(job);
+
+      trySchedJob();
       trySaveProg();
 
-      job.on("partcomplete", function (prog) {
-        safeApply($scope);
-        trySaveProg($scope);
+      $timeout(() => {
+        $scope.calcTotalProg();
       });
-      job.on("statuschange", function (status) {
+
+      job.on("partcomplete", (part) => {
+        job.downloadedParts[part.PartNumber] = part;
+
+        trySaveProg();
+
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
+      });
+      job.on("statuschange", (status) => {
         if (status == "stopped") {
           concurrency--;
           trySchedJob();
         }
 
-        safeApply($scope);
         trySaveProg();
+
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
       });
-      job.on("speedChange", function () {
-        safeApply($scope);
+      job.on("speedChange", () => {
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
       });
-      job.on("complete", function () {
+      job.on("complete", () => {
         concurrency--;
         trySchedJob();
+
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
       });
-      job.on("error", function (err) {
+      job.on("error", (err) => {
         if (err) {
           console.error(`download s3://${job.from.bucket}/${job.from.key} error: ${err.message}`);
         }
 
         concurrency--;
         trySchedJob();
+
+        $timeout(() => {
+          $scope.calcTotalProg();
+        });
       });
     }
 
-    //流控, 同时只能有 n 个下载任务.
     function trySchedJob() {
       var maxConcurrency = settingsSvs.maxDownloadConcurrency.get();
       var isDebug = (settingsSvs.isDebug.get() == 1);
 
       concurrency = Math.max(0, concurrency);
       if (isDebug) {
-        console.log(`[JOB] download max: ${maxConcurrency}, cur: ${concurrency}, jobs: ${$scope.lists.downloadJobList.length}`)
+        console.log(`[JOB] download max: ${maxConcurrency}, cur: ${concurrency}, jobs: ${$scope.lists.downloadJobList.length}`);
       }
 
       if (concurrency < maxConcurrency) {
         var jobs = $scope.lists.downloadJobList;
+
         for (var i = 0; i < jobs.length; i++) {
           if (concurrency >= maxConcurrency) return;
 
@@ -299,58 +311,62 @@ angular.module("web").factory("osDownloadManager", [
           if (job.status == "waiting") {
             concurrency++;
 
-            job.start();
+            if (job.prog.resumable) {
+              var progs = tryLoadProg();
+              if (progs && progs[job.id]) {
+                job.start(progs[job.id].downloadedParts);
+              } else {
+                job.start();
+              }
+            } else {
+              job.start();
+            }
           }
         }
       }
     }
 
     function trySaveProg() {
-      DelayDone.delayRun(
-        "save_download_prog",
-        1000,
-        function () {
-          var t = [];
-          angular.forEach($scope.lists.downloadJobList, function (n) {
-            if (n.status == "finished") return;
+      var t = {};
+      angular.forEach($scope.lists.downloadJobList, function (job) {
+        if (job.status == "finished") return;
 
-            t.push({
-              checkPoints: n.checkPoints,
-              region: n.region,
-              to: n.to,
-              from: n.from,
-              message: n.message,
-              status: n.status,
-              prog: n.prog
-            });
-          });
-          //console.log('save:', t);
+        t[job.id] = {
+          region: job.region,
+          to: job.to,
+          from: job.from,
+          prog: job.prog,
+          status: job.status,
+          message: job.message,
+          downloadedParts: job.downloadedParts
+        };
+      });
 
-          fs.writeFileSync(getDownProgFilePath(), JSON.stringify(t));
-          $scope.calcTotalProg();
-        },
-        20
-      );
+      fs.writeFileSync(getDownProgFilePath(), JSON.stringify(t));
     }
 
     /**
-     * 获取保存的进度
+     * resolve prog saved
      */
     function tryLoadProg() {
       try {
         var data = fs.readFileSync(getDownProgFilePath());
+
         return JSON.parse(data ? data.toString() : "[]");
       } catch (e) {}
+
       return [];
     }
 
-    //下载进度保存路径
+    // prog save path
     function getDownProgFilePath() {
       var folder = path.join(os.homedir(), ".s3-browser");
       if (!fs.existsSync(folder)) {
         fs.mkdirSync(folder);
       }
-      var username = AuthInfo.get().id || "";
+
+      var username = AuthInfo.get().id || "s3-browser";
+
       return path.join(folder, "downprog_" + username + ".json");
     }
   }

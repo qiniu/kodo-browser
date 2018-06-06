@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('moveModalCtrl', ['$scope', '$uibModalInstance', '$timeout', 'items', 'isCopy', 'renamePath', 'fromInfo', 'moveTo', 'callback', 'osClient', 'Toast', 'AuthInfo', 'safeApply',
-    function ($scope, $modalInstance, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, osClient, Toast, AuthInfo, safeApply) {
+  .controller('moveModalCtrl', ['$scope', '$uibModalInstance', '$timeout', 'items', 'isCopy', 'renamePath', 'fromInfo', 'moveTo', 'callback', 's3Client', 'Toast', 'AuthInfo', 'safeApply',
+    function ($scope, $modalInstance, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, s3Client, Toast, AuthInfo, safeApply) {
 
       var authInfo = AuthInfo.get();
 
@@ -39,7 +39,7 @@ angular.module('web')
       function stop() {
         //$modalInstance.dismiss('cancel');
         $scope.isStop = true;
-        osClient.stopCopyFiles();
+        s3Client.stopCopyFiles();
       }
 
       function cancel() {
@@ -61,7 +61,7 @@ angular.module('web')
         //console.log(fromInfo.region, items, target, renamePath);
 
         //复制 or 移动
-        osClient.copyFiles(fromInfo.region, items, target, function progress(prog) {
+        s3Client.copyFiles(fromInfo.region, items, target, function progress(prog) {
           //进度
           $scope.progress = angular.copy(prog);
           safeApply($scope);

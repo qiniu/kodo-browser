@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('pictureModalCtrl', ['$scope', '$uibModalInstance', '$timeout', '$uibModal', 'osClient', 'safeApply', 'showFn', 'bucketInfo', 'objectInfo','AuthInfo', 'fileType',
-    function ($scope, $modalInstance, $timeout, $modal, osClient, safeApply, showFn, bucketInfo, objectInfo, AuthInfo, fileType) {
+  .controller('pictureModalCtrl', ['$scope', '$uibModalInstance', '$timeout', '$uibModal', 's3Client', 'safeApply', 'showFn', 'bucketInfo', 'objectInfo','AuthInfo', 'fileType',
+    function ($scope, $modalInstance, $timeout, $modal, s3Client, safeApply, showFn, bucketInfo, objectInfo, AuthInfo, fileType) {
 
       angular.extend($scope, {
         bucketInfo: bucketInfo,
@@ -34,7 +34,7 @@ angular.module('web')
       function getContent() {
         var info  = AuthInfo.get();
         if(info.id.indexOf('STS.')==0){
-          osClient.getImageBase64Url(bucketInfo.region, bucketInfo.bucket, objectInfo.path).then(function(data){
+          s3Client.getImageBase64Url(bucketInfo.region, bucketInfo.bucket, objectInfo.path).then(function(data){
             if(data.ContentType.indexOf('image/')==0){
               var base64str = new Buffer(data.Body).toString('base64');
               $scope.imgsrc = 'data:'+data.ContentType+';base64,'+base64str;
@@ -42,7 +42,7 @@ angular.module('web')
           })
         }
         else{
-          var url = osClient.signatureUrl(bucketInfo.region, bucketInfo.bucket, objectInfo.path);
+          var url = s3Client.signatureUrl(bucketInfo.region, bucketInfo.bucket, objectInfo.path);
           $timeout(function () {
             $scope.imgsrc = url;
           }, 300);

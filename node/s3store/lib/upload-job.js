@@ -68,7 +68,7 @@ class UploadJob extends Base {
   }
 }
 
-UploadJob.prototype.start = function (overwrite) {
+UploadJob.prototype.start = function (overwrite, uploadedParts) {
   if (this.status == "running") return;
 
   if (this.isDebug) {
@@ -100,6 +100,7 @@ UploadJob.prototype.start = function (overwrite) {
         Key: this.to.key
       },
       localFile: this.from.path,
+      uploadedParts: uploadedParts,
       overwriteDup: !!overwrite,
       useElectronNode: !!this.useElectronNode,
       isDebug: this.isDebug
@@ -176,6 +177,7 @@ UploadJob.prototype.startUpload = function (event, data) {
     var prog = data.data;
 
     this.prog.total = prog.progressTotal;
+    this.prog.resumable = prog.progressResumable;
     this.emit('progress', this.prog);
     break;
 
@@ -183,7 +185,14 @@ UploadJob.prototype.startUpload = function (event, data) {
     var prog = data.data;
 
     this.prog.loaded = prog.progressLoaded;
+    this.prog.resumable = prog.progressResumable;
     this.emit('progress', this.prog);
+    break;
+
+  case 'filePartUploaded':
+    var part = data.data;
+
+    this.emit('partcomplete', part);
     break;
 
   case 'fileUploaded':

@@ -60,7 +60,7 @@ class DownloadJob extends Base {
   }
 }
 
-DownloadJob.prototype.start = function () {
+DownloadJob.prototype.start = function (downloadedParts) {
   if (this.status == "running") return;
 
   if (this.isDebug) {
@@ -92,6 +92,7 @@ DownloadJob.prototype.start = function () {
         Key: this.from.key
       },
       localFile: this.tmpfile,
+      downloadedParts: downloadedParts,
       useElectronNode: this.useElectronNode,
       isDebug: this.isDebug
     }
@@ -162,6 +163,7 @@ DownloadJob.prototype.startDownload = function (event, data) {
     var prog = data.data;
 
     self.prog.total = prog.progressTotal;
+    self.prog.resumable = prog.progressResumable;
     self.emit('progress', self.prog);
     break;
 
@@ -169,7 +171,14 @@ DownloadJob.prototype.startDownload = function (event, data) {
     var prog = data.data;
 
     self.prog.loaded = prog.progressLoaded;
+    self.prog.resumable = prog.progressResumable;
     self.emit('progress', self.prog);
+    break;
+
+  case 'filePartDownloaded':
+    var part = data.data;
+
+    self.emit('partcomplete', part);
     break;
 
   case 'fileDownloaded':

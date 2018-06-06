@@ -243,11 +243,12 @@ Client.prototype.uploadFile = function (params) {
 
       // calc uploaded progress
       if (s3UploadedParts) {
-        s3UploadedParts.forEach((part, idx) => {
+        s3UploadedParts.forEach((part) => {
           if (part && part.ETag !== null) {
             uploader.progressLoaded += s3UploadedPartSize;
           }
         });
+
         uploader.emit('progress', uploader);
       } else {
         s3UploadedParts = [];
@@ -420,7 +421,7 @@ Client.prototype.downloadFile = function (params) {
   function startMultipartDownload() {
     if (isAborted) return;
 
-    fs.open(localFile, 'w+', (err, fd) => {
+    fs.open(localFile, 'w', (err, fd) => {
       if (isAborted) return;
 
       if (err) {
@@ -497,7 +498,7 @@ Client.prototype.downloadFile = function (params) {
   function resumeMultipartDownload() {
     if (isAborted) return;
 
-    fs.open(localFile, 'w+', (err, fd) => {
+    fs.open(localFile, 'a', (err, fd) => {
       if (isAborted) return;
 
       if (err) {
@@ -534,11 +535,12 @@ Client.prototype.downloadFile = function (params) {
       }
 
       if (s3DownloadedParts) {
-        s3DownloadedParts.forEach((part, idx) => {
+        s3DownloadedParts.forEach((part) => {
           if (part && part.Done === true) {
             downloader.progressLoaded += part.End - part.Start;
           }
         });
+
         downloader.emit("progress", downloader);
       } else {
         s3DownloadedParts = [];
@@ -605,7 +607,7 @@ Client.prototype.downloadFile = function (params) {
 
       let partStream = fs.createWriteStream(null, {
         fd: fd,
-        flags: 'r+',
+        flags: 'a',
         start: part.Start,
         autoClose: false
       });
@@ -639,7 +641,7 @@ Client.prototype.downloadFile = function (params) {
 
   function tryGettingObject(cb) {
     let fileStream = fs.createWriteStream(localFile, {
-      flags: 'w+',
+      flags: 'w',
       autoClose: false
     });
 

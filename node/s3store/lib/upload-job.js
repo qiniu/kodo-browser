@@ -64,6 +64,7 @@ class UploadJob extends Base {
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
     this.stopFlag = this.status != "running";
+    this._listener = this.startUpload.bind(this);
     this.isDebug = this._config.isDebug;
   }
 }
@@ -79,7 +80,6 @@ UploadJob.prototype.start = function (overwrite, uploadedParts) {
   this.stopFlag = false;
   this.startTime = new Date().getTime();
   this.endTime = null;
-  this._listener = this.startUpload.bind(this);
 
   this._changeStatus("running");
 
@@ -137,6 +137,7 @@ UploadJob.prototype.stop = function () {
     job: this.id,
     key: 'job-stop',
   });
+  ipcRenderer.removeListener(this.id, this._listener);
 
   return this;
 };

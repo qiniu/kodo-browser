@@ -73,8 +73,14 @@ angular.module("web").controller("transferUploadsCtrl", [
         Dialog.confirm(
           title,
           message,
-          function (btn) {
+          (btn) => {
             if (btn) {
+              if (item.status == "running" ||
+                item.status == "waiting" ||
+                item.status == "verifying") {
+                item.stop();
+              }
+
               doRemove(item);
             }
           },
@@ -84,32 +90,37 @@ angular.module("web").controller("transferUploadsCtrl", [
     }
 
     function doRemove(item) {
-      var arr = $scope.lists.uploadJobList;
-      for (var i = 0; i < arr.length; i++) {
-        if (item === arr[i]) {
-          arr.splice(i, 1);
+      var jobs = $scope.lists.uploadJobList;
+      for (var i = 0; i < jobs.length; i++) {
+        if (item === jobs[i]) {
+          jobs.splice(i, 1);
           break;
         }
       }
-      s3UploadMgr.trySaveProg();
-      $scope.calcTotalProg();
+
+      $timeout(() => {
+        s3UploadMgr.trySaveProg();
+        $scope.calcTotalProg();
+      });
     }
 
     function clearAllCompleted() {
-      var arr = $scope.lists.uploadJobList;
-      for (var i = 0; i < arr.length; i++) {
-        if ("finished" == arr[i].status) {
-          arr.splice(i, 1);
+      var jobs = $scope.lists.uploadJobList;
+      for (var i = 0; i < jobs.length; i++) {
+        if ("finished" == jobs[i].status) {
+          jobs.splice(i, 1);
           i--;
         }
       }
-      $scope.calcTotalProg();
+
+      $timeout(() => {
+        $scope.calcTotalProg();
+      });
     }
 
     function clearAll() {
       if (!$scope.lists.uploadJobList ||
-        $scope.lists.uploadJobList.length == 0
-      ) {
+        $scope.lists.uploadJobList.length == 0) {
         return;
       }
 
@@ -118,22 +129,25 @@ angular.module("web").controller("transferUploadsCtrl", [
       Dialog.confirm(
         title,
         message,
-        function (btn) {
+        (btn) => {
           if (btn) {
-            var arr = $scope.lists.uploadJobList;
-            for (var i = 0; i < arr.length; i++) {
-              var n = arr[i];
-              if (
-                n.status == "running" ||
-                n.status == "waiting" ||
-                n.status == "verifying"
-              )
-                n.stop();
-              arr.splice(i, 1);
+            var jobs = $scope.lists.uploadJobList;
+            for (var i = 0; i < jobs.length; i++) {
+              var job = jobs[i];
+              if (job.status == "running" ||
+                job.status == "waiting" ||
+                job.status == "verifying") {
+                job.stop();
+              }
+
+              jobs.splice(i, 1);
               i--;
             }
-            $scope.calcTotalProg();
-            s3UploadMgr.trySaveProg();
+
+            $timeout(() => {
+              s3UploadMgr.trySaveProg();
+              $scope.calcTotalProg();
+            });
           }
         },
         1

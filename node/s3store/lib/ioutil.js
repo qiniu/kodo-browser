@@ -96,7 +96,7 @@ Client.prototype.uploadFile = function (params) {
 
   return uploader;
 
-  process.on('uncaughtException', function (err) {
+  process.on('uncaughtException', (err) => {
     handleError(err);
   });
 
@@ -124,7 +124,7 @@ Client.prototype.uploadFile = function (params) {
   }
 
   function tryOpenFile() {
-    fs.stat(localFile, function (err, stats) {
+    fs.stat(localFile, (err, stats) => {
       if (err) {
         err.retryable = false;
 
@@ -203,14 +203,14 @@ Client.prototype.uploadFile = function (params) {
         queueSize: self.maxConcurrency
       });
 
-      s3uploader.on('httpUploadProgress', function (prog) {
+      s3uploader.on('httpUploadProgress', (prog) => {
         if (isAborted) return;
 
         uploader.progressLoaded = prog.loaded;
         uploader.emit('progress', uploader);
       });
 
-      s3uploader.send(function (err, data) {
+      s3uploader.send((err, data) => {
         if (isAborted) return;
 
         if (err) {
@@ -242,12 +242,16 @@ Client.prototype.uploadFile = function (params) {
       if (isAborted) return;
 
       // calc uploaded progress
-      s3UploadedParts.forEach((part, idx) => {
-        if (part.ETag !== null) {
-          uploader.progressLoaded += s3UploadedPartSize;
-        }
-      });
-      uploader.emit('progress', uploader);
+      if (s3UploadedParts) {
+        s3UploadedParts.forEach((part, idx) => {
+          if (part.ETag !== null) {
+            uploader.progressLoaded += s3UploadedPartSize;
+          }
+        });
+        uploader.emit('progress', uploader);
+      } else {
+        s3UploadedParts = [];
+      }
 
       s3uploader = new AWS.S3.ManagedUpload({
         service: self.s3,
@@ -260,9 +264,9 @@ Client.prototype.uploadFile = function (params) {
         partSize: s3UploadedPartSize,
         queueSize: self.maxConcurrency
       });
-      s3uploader.completeInfo = Object.assign({}, s3UploadedParts);
+      s3uploader.completeInfo = s3UploadedParts.slice(0, s3UploadedParts.length);
 
-      s3uploader.on('httpUploadProgress', function (prog) {
+      s3uploader.on('httpUploadProgress', (prog) => {
         if (isAborted) return;
 
         s3uploader.completeInfo.forEach((part, idx) => {
@@ -277,7 +281,7 @@ Client.prototype.uploadFile = function (params) {
         uploader.emit('progress', uploader);
       });
 
-      s3uploader.send(function (err, data) {
+      s3uploader.send((err, data) => {
         if (isAborted) return;
 
         if (err) {
@@ -330,7 +334,7 @@ Client.prototype.downloadFile = function (params) {
   let isDebug = params.isDebug;
 
   let s3downloader = null;
-  let s3DownloadedParts = params.downloadedParts || [];
+  let s3DownloadedParts = params.downloadedParts || null;
   let s3DownloadedPartSize = params.downloadedPartSize || self.multipartDownloadSize;
 
   let downloader = new EventEmitter();
@@ -349,7 +353,7 @@ Client.prototype.downloadFile = function (params) {
 
   return downloader;
 
-  process.on('uncaughtException', function (err) {
+  process.on('uncaughtException', (err) => {
     handleError(err);
   });
 
@@ -377,7 +381,7 @@ Client.prototype.downloadFile = function (params) {
   }
 
   function tryOpenFile() {
-    self.s3.headObject(s3params, function (err, metadata) {
+    self.s3.headObject(s3params, (err, metadata) => {
       if (err) {
         handleError(err);
         return;
@@ -529,12 +533,16 @@ Client.prototype.downloadFile = function (params) {
         return;
       }
 
-      s3DownloadedParts.forEach((part, idx) => {
-        if (part.Done === true) {
-          downloader.progressLoaded += s3DownloadedPartSize;
-        }
-      });
-      downloader.emit("progress", downloader);
+      if (s3DownloadedParts) {
+        s3DownloadedParts.forEach((part, idx) => {
+          if (part.Done === true) {
+            downloader.progressLoaded += s3DownloadedPartSize;
+          }
+        });
+        downloader.emit("progress", downloader);
+      } else {
+        s3DownloadedParts = [];
+      }
 
       let s3queue = queue().limit(self.s3concurrency).process((task, taskCb) => {
         let partDownloader = startDownloadPart(fd, task);

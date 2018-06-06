@@ -127,7 +127,7 @@ angular.module("web").factory("s3UploadMgr", [
           var n = filePaths[c];
           var dirPath = path.dirname(n);
 
-          dig(filePaths[c], dirPath, function (jobs) {
+          dig(filePaths[c], dirPath, (jobs) => {
             t = t.concat(jobs);
             c++;
 
@@ -153,7 +153,7 @@ angular.module("web").factory("s3UploadMgr", [
 
         //串行
         function inDig() {
-          dig(path.join(parentPath, arr[c]), dirPath, function (jobs) {
+          dig(path.join(parentPath, arr[c]), dirPath, (jobs) => {
             t = t.concat(jobs);
 
             c++;
@@ -190,17 +190,17 @@ angular.module("web").factory("s3UploadMgr", [
 
           s3Client
             .createFolder(bucketInfo.region, bucketInfo.bucket, subDirPath)
-            .then(function () {
+            .then(() => {
               checkNeedRefreshFileList(bucketInfo.bucket, subDirPath);
             });
 
           //递归遍历目录
-          fs.readdir(absPath, function (err, arr) {
+          fs.readdir(absPath, (err, arr) => {
             if (err) {
               console.error(err.stack);
             } else {
-              loop(absPath, dirPath, arr, function (jobs) {
-                $timeout(function () {
+              loop(absPath, dirPath, arr, (jobs) => {
+                $timeout(() => {
                   callFn(jobs);
                 }, 1);
               });
@@ -230,7 +230,7 @@ angular.module("web").factory("s3UploadMgr", [
           if (job) {
             addEvents(job);
 
-            $timeout(function () {
+            $timeout(() => {
               callFn([job]);
             }, 1);
           }
@@ -330,18 +330,28 @@ angular.module("web").factory("s3UploadMgr", [
           if (job.status == "waiting") {
             concurrency++;
 
-            job.start();
+            if (job.prog.resume) {
+              var progs = tryLoadProg();
+
+              if (progs && progs[job.id]) {
+                job.start(true, progs[job.id].uploadedParts);
+              } else {
+                job.start(true);
+              }
+            } else {
+              job.start();
+            }
           }
         }
       }
     }
 
     function trySaveProg() {
-      var t = [];
-      angular.forEach($scope.lists.uploadJobList, function (job) {
+      var t = {};
+      angular.forEach($scope.lists.uploadJobList, (job) => {
         if (job.status == "finished") return;
 
-        t.push({
+        t[job.id] = {
           region: job.region,
           to: job.to,
           from: job.from,
@@ -349,7 +359,7 @@ angular.module("web").factory("s3UploadMgr", [
           status: job.status,
           message: job.message,
           uploadedParts: job.uploadedParts
-        });
+        };
       });
 
       fs.writeFileSync(getProgFilePath(), JSON.stringify(t));

@@ -21,10 +21,6 @@ angular.module("web").controller("transferFrameCtrl", [
         downloadJobList: []
       },
 
-      totalProg: {
-        loaded: 0,
-        total: 0
-      },
       totalStat: {
         running: 0,
         total: 0,

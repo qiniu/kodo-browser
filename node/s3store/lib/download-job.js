@@ -60,7 +60,7 @@ class DownloadJob extends Base {
   }
 }
 
-DownloadJob.prototype.start = function () {
+DownloadJob.prototype.start = function (downloadedParts) {
   if (this.status == "running") return;
 
   if (this.isDebug) {
@@ -92,6 +92,7 @@ DownloadJob.prototype.start = function () {
         Key: this.from.key
       },
       localFile: this.tmpfile,
+      downloadedParts: downloadedParts,
       useElectronNode: this.useElectronNode,
       isDebug: this.isDebug
     }

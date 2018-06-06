@@ -244,7 +244,7 @@ Client.prototype.uploadFile = function (params) {
       // calc uploaded progress
       if (s3UploadedParts) {
         s3UploadedParts.forEach((part, idx) => {
-          if (part.ETag !== null) {
+          if (part && part.ETag !== null) {
             uploader.progressLoaded += s3UploadedPartSize;
           }
         });
@@ -389,7 +389,7 @@ Client.prototype.downloadFile = function (params) {
 
       downloader.progressLoaded = 0;
       downloader.progressTotal = metadata.ContentLength;
-      downloader.progressResumable = (self.resumeDownload && (s3DownloadedParts.length == 0 || s3DownloadedPartSize === self.multipartDownloadSize));
+      downloader.progressResumable = (self.resumeDownload && (!s3DownloadedParts || s3DownloadedParts.length == 0 || s3DownloadedPartSize === self.multipartDownloadSize));
       downloader.emit("fileStat", downloader);
 
       startDownloadFile();
@@ -535,8 +535,8 @@ Client.prototype.downloadFile = function (params) {
 
       if (s3DownloadedParts) {
         s3DownloadedParts.forEach((part, idx) => {
-          if (part.Done === true) {
-            downloader.progressLoaded += s3DownloadedPartSize;
+          if (part && part.Done === true) {
+            downloader.progressLoaded += part.End - part.Start;
           }
         });
         downloader.emit("progress", downloader);

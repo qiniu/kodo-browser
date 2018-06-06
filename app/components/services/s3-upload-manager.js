@@ -330,7 +330,7 @@ angular.module("web").factory("s3UploadMgr", [
           if (job.status == "waiting") {
             concurrency++;
 
-            if (job.prog.resume) {
+            if (job.prog.resumable) {
               var progs = tryLoadProg();
 
               if (progs && progs[job.id]) {

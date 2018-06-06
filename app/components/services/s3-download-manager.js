@@ -311,18 +311,27 @@ angular.module("web").factory("s3DownloadMgr", [
           if (job.status == "waiting") {
             concurrency++;
 
-            job.start();
+            if (job.prog.resumable) {
+              var progs = tryLoadProg();
+              if (progs && progs[job.id]) {
+                job.start(progs[job.id].downloadedParts);
+              } else {
+                job.start();
+              }
+            } else {
+              job.start();
+            }
           }
         }
       }
     }
 
     function trySaveProg() {
-      var t = [];
+      var t = {};
       angular.forEach($scope.lists.downloadJobList, function (job) {
         if (job.status == "finished") return;
 
-        t.push({
+        t[job.id] = {
           region: job.region,
           to: job.to,
           from: job.from,
@@ -330,7 +339,7 @@ angular.module("web").factory("s3DownloadMgr", [
           status: job.status,
           message: job.message,
           downloadedParts: job.downloadedParts
-        });
+        };
       });
 
       fs.writeFileSync(getDownProgFilePath(), JSON.stringify(t));

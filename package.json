@@ -1,6 +1,6 @@
 {
   "name": "s3-browser",
-  "version": "2.2.0",
+  "version": "3.1.0",
   "license": "UNLICENSED",
   "main": "dist/main.js",
   "scripts": {

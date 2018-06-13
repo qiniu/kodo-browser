@@ -546,7 +546,9 @@ Client.prototype.downloadFile = function (params) {
         s3DownloadedParts = [];
       }
 
-      let s3queue = queue().limit(self.s3concurrency).process((task, taskCb) => {
+      let s3queue = queue().limit({
+        concurrency: self.s3concurrency
+      }).process((task, taskCb) => {
         let partDownloader = startDownloadPart(fd, task);
         partDownloader(taskCb);
       });

@@ -23,9 +23,7 @@ class DownloadJob extends Base {
   constructor(s3options, config) {
     super();
 
-    this._config = {};
-    Object.assign(this._config, config);
-
+    this._config = Object.assign({}, config);
     if (!this._config.from) {
       console.log("upload needs from option");
       return;

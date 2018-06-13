@@ -570,7 +570,7 @@ Client.prototype.downloadFile = function (params) {
             Done: false,
             Start: start,
             End: end,
-            PartNumber: nextPartNumber++
+            PartNumber: nextPartNumber
           };
 
           s3queue(part, (err, data) => {
@@ -586,6 +586,8 @@ Client.prototype.downloadFile = function (params) {
             downloader.emit('filePartDownloaded', data);
           });
         }
+
+        nextPartNumber++;
       }
 
       s3queue.drained(cb);

@@ -257,8 +257,9 @@ angular.module("web").factory("s3UploadMgr", [
           $scope.calcTotalProg();
         });
       });
-      job.on("partcomplete", (part) => {
-        job.uploadedParts[part.PartNumber] = part;
+      job.on("partcomplete", (data) => {
+        job.uploadedId = data.uploadId;
+        job.uploadedParts[data.part.PartNumber] = data.part;
 
         trySaveProg();
 
@@ -334,7 +335,7 @@ angular.module("web").factory("s3UploadMgr", [
               var progs = tryLoadProg();
 
               if (progs && progs[job.id]) {
-                job.start(true, progs[job.id].uploadedParts);
+                job.start(true, progs[job.id]);
               } else {
                 job.start(true);
               }
@@ -358,6 +359,7 @@ angular.module("web").factory("s3UploadMgr", [
           prog: job.prog,
           status: job.status,
           message: job.message,
+          uploadedId: job.uploadedId,
           uploadedParts: job.uploadedParts
         };
       });

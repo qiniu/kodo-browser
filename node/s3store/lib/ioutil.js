@@ -60,6 +60,7 @@ Client.prototype.uploadFile = function (params) {
   let isDebug = params.isDebug;
 
   let s3uploader = null;
+  let s3uploadedId = params.uploadedId || null;
   let s3UploadedParts = params.uploadedParts || null;
   let s3UploadedPartSize = params.uploadedPartSize || self.multipartUploadSize;
 
@@ -200,7 +201,7 @@ Client.prototype.uploadFile = function (params) {
           Body: fs.createReadStream(localFile)
         },
         partSize: s3UploadedPartSize,
-        queueSize: self.maxConcurrency
+        queueSize: self.s3concurrency
       });
 
       s3uploader.on('httpUploadProgress', (prog) => {
@@ -242,9 +243,12 @@ Client.prototype.uploadFile = function (params) {
       if (isAborted) return;
 
       // calc uploaded progress
+      let s3DoneParts = 0;
       if (s3UploadedParts) {
         s3UploadedParts.forEach((part) => {
           if (part && part.ETag !== null) {
+            s3DoneParts++;
+
             uploader.progressLoaded += s3UploadedPartSize;
           }
         });
@@ -259,12 +263,15 @@ Client.prototype.uploadFile = function (params) {
         params: {
           Bucket: s3params.Bucket,
           Key: s3params.Key,
+          UploadId: s3uploadedId,
           Body: fs.createReadStream(localFile)
         },
         leavePartsOnError: true,
         partSize: s3UploadedPartSize,
-        queueSize: self.maxConcurrency
+        queueSize: self.s3concurrency
       });
+      s3uploader.doneParts = s3DoneParts;
+      s3uploader.totalUploadedBytes = uploader.progressLoaded;
       s3uploader.completeInfo = s3UploadedParts.slice(0, s3UploadedParts.length);
 
       s3uploader.on('httpUploadProgress', (prog) => {
@@ -274,7 +281,10 @@ Client.prototype.uploadFile = function (params) {
           if (part.ETag !== null && !s3UploadedParts[part.PartNumber]) {
             s3UploadedParts[part.PartNumber] = part;
 
-            uploader.emit('filePartUploaded', part);
+            uploader.emit('filePartUploaded', {
+              uploadId: s3uploader.service.config.params.UploadId,
+              part: part
+            });
           }
         });
 

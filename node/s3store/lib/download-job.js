@@ -98,8 +98,8 @@ DownloadJob.prototype.start = function (downloadedParts) {
   if (this.isDebug) {
     console.log(`[JOB] ${JSON.stringify(job)}`);
   }
-  ipcRenderer.send('asynchronous-job', job);
   ipcRenderer.on(this.id, this._listener);
+  ipcRenderer.send('asynchronous-job', job);
 
   this.startSpeedCounter();
 

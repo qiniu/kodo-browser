@@ -69,7 +69,7 @@ class UploadJob extends Base {
   }
 }
 
-UploadJob.prototype.start = function (overwrite, uploadedParts) {
+UploadJob.prototype.start = function (overwrite, prog) {
   if (this.status == "running") return;
 
   if (this.isDebug) {
@@ -84,6 +84,8 @@ UploadJob.prototype.start = function (overwrite, uploadedParts) {
   this._changeStatus("running");
 
   // start
+  prog = prog || {};
+
   let job = {
     job: this.id,
     key: 'job-upload',
@@ -100,7 +102,8 @@ UploadJob.prototype.start = function (overwrite, uploadedParts) {
         Key: this.to.key
       },
       localFile: this.from.path,
-      uploadedParts: uploadedParts,
+      uploadedId: prog.uploadedId,
+      uploadedParts: prog.uploadedParts,
       overwriteDup: !!overwrite,
       useElectronNode: !!this.useElectronNode,
       isDebug: this.isDebug
@@ -109,8 +112,8 @@ UploadJob.prototype.start = function (overwrite, uploadedParts) {
   if (this.isDebug) {
     console.log(`[JOB] sched starting => ${JSON.stringify(job)}`);
   }
-  ipcRenderer.send('asynchronous-job', job);
   ipcRenderer.on(this.id, this._listener);
+  ipcRenderer.send('asynchronous-job', job);
 
   this.startSpeedCounter();
 

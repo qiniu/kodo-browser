@@ -7,8 +7,8 @@ const {
 process.on('uncaughtException', function (err) {
   process.send({
     key: 'error',
-    exception: err,
-    stack: err.stack
+    error: err.message,
+    stack: err.stack.split("\n")
   });
 });
 

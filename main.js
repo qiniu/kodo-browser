@@ -358,7 +358,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
         event.sender.send(data.job, {
           job: data.job,
           key: 'error',
-          error: msg.error
+          error: msg.error,
+          stack: msg.stack
         });
 
         worker.kill();
@@ -400,7 +401,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
       event.sender.send(data.job, {
         job: data.job,
         key: 'error',
-        error: err
+        error: err.message,
+        stack: err.stack.split("\n")
       });
     });
 
@@ -500,7 +502,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
         event.sender.send(data.job, {
           job: data.job,
           key: 'error',
-          error: msg.error
+          error: msg.error,
+          stack: msg.stack
         });
 
         worker.kill();
@@ -542,7 +545,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
       event.sender.send(data.job, {
         job: data.job,
         key: 'error',
-        error: err
+        error: err.message,
+        stack: err.stack.split("\n")
       });
     });
 

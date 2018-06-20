@@ -4,18 +4,24 @@ const stream = require('stream'),
 exports.BufferTransform = BufferTransform;
 
 function BufferTransform(options) {
+  if (!(this instanceof BufferTransform)) {
+    return new BufferTransform(options);
+  }
+
   if (!options) {
     options = {};
   }
-
   this.size = options.size || 16 << 10; // default to 16k
-  this.buf = Buffer.alloc(this.size);
-  this.offset = 0;
 
   stream.Transform.call(this, {
-    highWaterMark: this.size,
     objectMode: true
   });
+
+  // @private
+  this._buf = Buffer.alloc(this.size);
+  this._offset = 0;
+  this._triggered = false;
+  this._flushed = false;
 };
 
 util.inherits(BufferTransform, stream.Transform);
@@ -28,21 +34,21 @@ BufferTransform.prototype._transform = function _transform(chunk, encoding, call
     return;
   }
 
-  var emptySize = this.size - this.offset;
+  var emptySize = this.size - this._offset;
   if (emptySize > chunk.length) {
     // fill buffer with expected data
-    this.offset += chunk.copy(this.buf, this.offset);
+    this._offset += chunk.copy(this._buf, this._offset);
 
     callback(null);
     return;
   }
 
   // write buffer out
-  if (this.offset > 0 && !this.push(this.buf.slice(0, this.offset))) {
+  if (this._offset > 0 && !this.push(this._buf.slice(0, this._offset))) {
     this.emit('error', new Error('write buffer with false.'));
   } else {
     // reset buffer state
-    this.offset = 0;
+    this._offset = 0;
   }
 
   // write chunk out
@@ -50,10 +56,15 @@ BufferTransform.prototype._transform = function _transform(chunk, encoding, call
 };
 
 BufferTransform.prototype._flush = function _flush(callback) {
-  if (this.offset > 0 && !this.push(this.buf.slice(0, this.offset))) {
+  if (this._flushed) {
+    return;
+  }
+  this._flushed = true;
+
+  if (this._offset > 0 && !this.push(this._buf.slice(0, this._offset))) {
     this.emit('error', new Error('write buffer with false.'));
   } else {
-    this.offset = 0;
+    this._offset = 0;
   }
 
   // end stream

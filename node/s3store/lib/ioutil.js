@@ -98,7 +98,10 @@ Client.prototype.uploadFile = function (params) {
   return uploader;
 
   process.on('uncaughtException', (err) => {
-    handleError(err);
+    handleError({
+      error: err.message,
+      stack: err.stack.split("\n")
+    });
   });
 
   function handleError(err) {
@@ -365,7 +368,10 @@ Client.prototype.downloadFile = function (params) {
   return downloader;
 
   process.on('uncaughtException', (err) => {
-    handleError(err);
+    handleError({
+      error: err.message,
+      stack: err.stack.split("\n")
+    });
   });
 
   function handleError(err) {

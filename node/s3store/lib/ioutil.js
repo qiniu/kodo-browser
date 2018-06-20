@@ -653,9 +653,7 @@ Client.prototype.downloadFile = function (params) {
 
         cb(err);
       });
-      s3PartDownloader.pipe(new BufferTransform({
-        size: self.s3buffer
-      })).pipe(partStream);
+      s3PartDownloader.pipe(partStream);
     };
   }
 
@@ -686,9 +684,7 @@ Client.prototype.downloadFile = function (params) {
       cb(err);
     });
 
-    s3downloader.pipe(new BufferTransform({
-      size: self.s3buffer
-    })).pipe(fileStream);
+    s3downloader.pipe(fileStream);
   }
 };
 

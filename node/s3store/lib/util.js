@@ -1,13 +1,15 @@
 var path = require("path"),
   fs = require("fs"),
-  crypto = require("crypto");
+  crypto = require("crypto"),
+  Duplex = require('stream').Duplex;
 
 module.exports = {
   parseLocalPath: parseLocalPath,
   parseS3Path: parseS3Path,
   md5sumFile: md5sumFile,
   checksumFile: checksumFile,
-  printPartTimeLine: printPartTimeLine
+  printPartTimeLine: printPartTimeLine,
+  bufferToStream: bufferToStream
 };
 
 function parseLocalPath(p) {
@@ -119,4 +121,11 @@ function md5sumFile(filename, fn) {
   stream.on("error", function (err) {
     fn(err);
   });
+}
+
+function bufferToStream(buffer) {
+  let stream = new Duplex();
+  stream.push(buffer);
+  stream.push(null);
+  return stream;
 }

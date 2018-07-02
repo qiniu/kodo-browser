@@ -526,7 +526,7 @@ Client.prototype.downloadFile = function (params) {
   function resumeMultipartDownload() {
     if (isAborted) return;
 
-    fs.open(localFile, 'a+', (err, fd) => {
+    fs.open(localFile, fs.constants.O_CREAT|fs.constants.O_WRONLY, (err, fd) => {
       if (isAborted) return;
 
       if (err) {
@@ -638,7 +638,6 @@ Client.prototype.downloadFile = function (params) {
 
     let params = Object.assign({}, s3params);
     params.Range = `bytes=${part.Start}-${part.End}`;
-    downloader.emit('debug', params);
 
     let s3partDownloader = self.s3.getObject(params);
     s3partDownloader.on('httpData', (chunk) => {
@@ -668,7 +667,7 @@ Client.prototype.downloadFile = function (params) {
 
         let partStream = fs.createWriteStream(null, {
           fd: fd,
-          flags: 'a',
+          flags: fs.constants.O_WRONLY,
           start: part.Start,
           autoClose: false
         }),

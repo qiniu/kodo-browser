@@ -526,7 +526,9 @@ Client.prototype.downloadFile = function (params) {
   function resumeMultipartDownload() {
     if (isAborted) return;
 
-    fs.open(localFile, fs.constants.O_CREAT|fs.constants.O_WRONLY, (err, fd) => {
+    let s3fsmode = fs.constants.O_CREAT | fs.constants.O_WRONLY | fs.constants.O_NONBLOCK | fs.constants.O_DIRECT;
+
+    fs.open(localFile, s3fsmode, (err, fd) => {
       if (isAborted) return;
 
       if (err) {
@@ -666,12 +668,12 @@ Client.prototype.downloadFile = function (params) {
         }
 
         let partStream = fs.createWriteStream(null, {
-          fd: fd,
-          flags: fs.constants.O_WRONLY,
-          start: part.Start,
-          autoClose: false
-        }),
-        dataStream = bufferToStream(data.Body);
+            fd: fd,
+            flags: fs.constants.O_WRONLY | fs.constants.O_SYNC | fs.constants.O_DIRECT,
+            start: part.Start,
+            autoClose: false
+          }),
+          dataStream = bufferToStream(data.Body);
 
         dataStream.on('error', (err) => {
           pendCb();
@@ -696,7 +698,7 @@ Client.prototype.downloadFile = function (params) {
 
   function tryGettingObject(cb) {
     let fileStream = fs.createWriteStream(localFile, {
-      flags: 'w',
+      flags: 'w+',
       autoClose: false
     });
 

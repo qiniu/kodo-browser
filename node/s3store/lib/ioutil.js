@@ -4,14 +4,7 @@ let AWS = require('aws-sdk'),
   EventEmitter = require('events').EventEmitter,
   fs = require('fs'),
   mime = require('mime'),
-  queue = require('concurrent-queue'),
-  pend = require('pend'),
-  {
-    bufferToStream
-  } = require('./util'),
-  {
-    BufferTransform
-  } = require('./transform');
+  pend = require('pend');
 
 const {
   MIN_MULTIPART_SIZE,
@@ -30,7 +23,6 @@ function Client(options) {
   options = options ? options : {};
 
   this.s3 = options.s3Client || new AWS.S3(options.s3Options);
-  this.s3buffer = options.bufferSize || 4 << 20; // default to 4M
   this.s3concurrency = options.maxConcurrency || 10; // multipart io limitation!
 
   this.s3pend = new pend();
@@ -480,12 +472,6 @@ Client.prototype.downloadFile = function (params) {
         return;
       }
 
-      let s3queue = queue().limit({
-        concurrency: self.s3concurrency
-      }).process((part, partCb) => {
-        startDownloadPart(fd, part, partCb);
-      });
-
       let cursor = 0;
       let nextPartNumber = 1;
       while (cursor < downloader.progressTotal) {
@@ -503,7 +489,7 @@ Client.prototype.downloadFile = function (params) {
           PartNumber: nextPartNumber++
         };
 
-        s3queue(part, (err, data) => {
+        startDownloadPart(fd, part, (err, data) => {
           if (isAborted) return;
 
           if (err) {
@@ -515,10 +501,8 @@ Client.prototype.downloadFile = function (params) {
         });
       }
 
-      s3queue.drained(() => {
-        self.s3pend.wait((err) => {
-          cb(err);
-        });
+      self.s3pend.wait((err) => {
+        cb(err);
       });
     }
   }
@@ -576,12 +560,6 @@ Client.prototype.downloadFile = function (params) {
         s3DownloadedParts = [];
       }
 
-      let s3queue = queue().limit({
-        concurrency: self.s3concurrency
-      }).process((part, partCb) => {
-        startDownloadPart(fd, part, partCb);
-      });
-
       let cursor = 0;
       let nextPartNumber = 1;
       while (cursor < downloader.progressTotal) {
@@ -602,7 +580,7 @@ Client.prototype.downloadFile = function (params) {
             PartNumber: nextPartNumber
           };
 
-          s3queue(part, (err, data) => {
+          startDownloadPart(fd, part, (err, data) => {
             if (isAborted) return;
 
             if (err) {
@@ -619,10 +597,8 @@ Client.prototype.downloadFile = function (params) {
         nextPartNumber++;
       }
 
-      s3queue.drained(() => {
-        self.s3pend.wait((err) => {
-          cb(err);
-        });
+      self.s3pend.wait((err) => {
+        cb(err);
       });
     }
   }
@@ -638,32 +614,30 @@ Client.prototype.downloadFile = function (params) {
       return;
     }
 
-    let params = Object.assign({}, s3params);
-    params.Range = `bytes=${part.Start}-${part.End}`;
+    self.s3pend.go((pendCb) => {
+      let params = Object.assign({}, s3params);
+      params.Range = `bytes=${part.Start}-${part.End}`;
 
-    let s3partDownloader = self.s3.getObject(params);
-    s3partDownloader.on('httpData', (chunk) => {
-      if (isAborted) return;
+      let s3partDownloader = self.s3.getObject(params);
+      s3partDownloader.on('httpData', (chunk) => {
+        if (isAborted) return;
 
-      downloader.progressLoaded += chunk.length;
-      downloader.emit('progress', downloader);
-    });
-    s3partDownloader.on('httpError', (err) => {
-      if (isAborted) return;
+        downloader.progressLoaded += chunk.length;
+        downloader.emit('progress', downloader);
+      });
+      s3partDownloader.on('httpError', (err) => {
+        if (isAborted) return;
 
-      partCb(err);
-    });
-    s3partDownloader.send((err, data) => {
-      if (isAborted) return;
-
-      if (err) {
         partCb(err);
-        return;
-      }
+      });
+      s3partDownloader.send((err, resp) => {
+        pendCb();
+        downloader.emit('debug', part);
 
-      self.s3pend.go((pendCb) => {
-        if (isAborted) {
-          pendCb();
+        if (isAborted) return;
+
+        if (err) {
+          partCb(err);
           return;
         }
 
@@ -673,19 +647,15 @@ Client.prototype.downloadFile = function (params) {
             start: part.Start,
             autoClose: false
           }),
-          dataStream = bufferToStream(data.Body);
+          dataStream = AWS.util.buffer.toStream(resp.Body);
 
         dataStream.on('error', (err) => {
-          pendCb();
-
-          if (isAborted) {
-            return;
-          }
+          if (isAborted) return;
 
           partCb(err);
         });
         dataStream.on('end', () => {
-          pendCb();
+          if (isAborted) return;
 
           part.Done = true;
 

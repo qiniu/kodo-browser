@@ -261,21 +261,21 @@ angular.module("web").factory("s3Client", [
             }, function (
               err
             ) {
-                if (err) {
-                  terr.push({
-                    item: item,
-                    error: err
-                  });
+              if (err) {
+                terr.push({
+                  item: item,
+                  error: err
+                });
 
-                  progress.errorCount++;
-                  c++;
-                  $timeout(dig, NEXT_TICK);
-                } else {
-                  c++;
-                  progress.current++;
-                  $timeout(dig, NEXT_TICK);
-                }
-              });
+                progress.errorCount++;
+                c++;
+                $timeout(dig, NEXT_TICK);
+              } else {
+                c++;
+                progress.current++;
+                $timeout(dig, NEXT_TICK);
+              }
+            });
           }
         }
       }
@@ -332,7 +332,8 @@ angular.module("web").factory("s3Client", [
         var params = {
           Bucket: to.bucket,
           Key: toKey,
-          CopySource: fromKey
+          CopySource: fromKey,
+          MetadataDirective: "REPLACE"
         };
 
         if (removeAfterCopy) {
@@ -401,7 +402,7 @@ angular.module("web").factory("s3Client", [
                 if (progFn) {
                   try {
                     progFn(progress);
-                  } catch (e) { }
+                  } catch (e) {}
                 }
 
                 t.push({
@@ -414,7 +415,7 @@ angular.module("web").factory("s3Client", [
               if (progFn) {
                 try {
                   progFn(progress);
-                } catch (e) { }
+                } catch (e) {}
               }
               c++;
 
@@ -548,7 +549,7 @@ angular.module("web").factory("s3Client", [
         if (progFn) {
           try {
             progFn(progress);
-          } catch (e) { }
+          } catch (e) {}
         }
 
         function _() {
@@ -570,7 +571,7 @@ angular.module("web").factory("s3Client", [
 
           if (!renameKey) {
             toKey = target.key.replace(/\/$/, "");
-            toKey = (toKey ? toKey + "/" : "") + items[c].name;
+            toKey = (toKey ? toKey + "/" : "") + item.name;
           }
 
           var newTarget = {
@@ -586,11 +587,11 @@ angular.module("web").factory("s3Client", [
                 if (progFn) {
                   try {
                     progFn(progress);
-                  } catch (e) { }
+                  } catch (e) {}
                 }
 
                 terr.push({
-                  item: items[c],
+                  item: item,
                   error: err
                 });
               }
@@ -599,7 +600,7 @@ angular.module("web").factory("s3Client", [
               if (progFn) {
                 try {
                   progFn(progress);
-                } catch (e) { }
+                } catch (e) {}
               }
 
               $timeout(_, NEXT_TICK);
@@ -614,7 +615,7 @@ angular.module("web").factory("s3Client", [
               if (progFn) {
                 try {
                   progFn(progress);
-                } catch (e) { }
+                } catch (e) {}
               }
 
               $timeout(_, NEXT_TICK);
@@ -1383,8 +1384,8 @@ angular.module("web").factory("s3Client", [
         if (region.indexOf("http") != 0) {
           region =
             isHttps ?
-              "https://" + region + "/" + bucket + "/" + key :
-              "http://" + region + "/" + bucket + "/" + key;
+            "https://" + region + "/" + bucket + "/" + key :
+            "http://" + region + "/" + bucket + "/" + key;
         }
         return region;
       }

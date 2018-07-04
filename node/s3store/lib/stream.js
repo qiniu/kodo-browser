@@ -37,12 +37,12 @@ ReadableStream.prototype.download = function (s3params, config) {
       lowerBoundArray.push(i * _maxPartSize + offset);
       upperBoundArray.push(Math.min(lowerBoundArray[i] + _maxPartSize - 1, _totalObjectSize - 1));
 
-      var params = JSON.parse(JSON.stringify(_params));
+      var params = Object.assign({}, _params);
 
       var func = function (cb) {
         var context = this;
 
-        context.params.Range = "bytes=" + context.lowerBound + "-" + context.upperBound;
+        context.params.Range = `bytes=${context.lowerBound}-${context.upperBound}`;
 
         var request = _client.getObject(context.params);
         request.on('httpData', (chunk) => {
@@ -83,6 +83,12 @@ ReadableStream.prototype.download = function (s3params, config) {
 
       for (var i = 0; i < results.length; i++) {
         rs.push(results[i].Body);
+
+        rs.emit('partDownloaded', {
+          PartNumber: series + i,
+          Size: upperBoundArray[i] - lowerBoundArray[i],
+          Done: true
+        });
       }
 
       callback(null, "");

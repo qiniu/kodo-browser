@@ -346,7 +346,7 @@ Client.prototype.downloadFile = function (params) {
   let isDebug = params.isDebug;
 
   let s3downloader = null;
-  let s3DownloadedParts = params.downloadedParts || null;
+  let s3DownloadedSize = params.downloadedSize || 0;
   let s3DownloadedPartSize = params.downloadedPartSize || self.multipartDownloadSize;
 
   let downloader = new EventEmitter();
@@ -390,7 +390,7 @@ Client.prototype.downloadFile = function (params) {
     }
 
     downloader.emit('abort', {
-      downloadedParts: s3DownloadedParts,
+      downloadedSize: s3DownloadedSize,
       downloadedPartSize: s3DownloadedPartSize
     });
   }
@@ -404,7 +404,7 @@ Client.prototype.downloadFile = function (params) {
 
       downloader.progressLoaded = 0;
       downloader.progressTotal = metadata.ContentLength;
-      downloader.progressResumable = (self.resumeDownload && (!s3DownloadedParts || s3DownloadedParts.length == 0 || s3DownloadedPartSize === self.multipartDownloadSize));
+      downloader.progressResumable = (self.resumeDownload && s3DownloadedSize < metadata.ContentLength);
       downloader.emit("fileStat", downloader);
 
       startDownloadFile();
@@ -457,8 +457,8 @@ Client.prototype.downloadFile = function (params) {
       downloader.progressLoaded += prog.loaded;
       downloader.emit('progress', downloader);
     });
-    s3downloader.on('part', (part) => {
-
+    s3downloader.on('partDownloaded', (part) => {
+      downloader.emit('filePartDownloaded', part);
     });
     s3downloader.on('error', (err) => {
       if (isAborted) return;
@@ -479,7 +479,8 @@ Client.prototype.downloadFile = function (params) {
     let s3fsmode = fs.constants.O_CREAT | fs.constants.O_WRONLY | fs.constants.O_NONBLOCK | fs.constants.O_DIRECT;
 
     let fileStream = fs.createWriteStream(localFile, {
-      flags: 'w+',
+      flags: s3fsmode,
+      start: s3DownloadedSize,
       autoClose: true
     });
 
@@ -500,8 +501,8 @@ Client.prototype.downloadFile = function (params) {
       downloader.progressLoaded += prog.loaded;
       downloader.emit('progress', downloader);
     });
-    s3downloader.on('part', (part) => {
-
+    s3downloader.on('partDownloaded', (part) => {
+      downloader.emit('filePartDownloaded', part);
     });
     s3downloader.on('error', (err) => {
       if (isAborted) return;

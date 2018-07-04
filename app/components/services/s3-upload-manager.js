@@ -279,7 +279,7 @@ angular.module("web").factory("s3UploadMgr", [
           $scope.calcTotalProg();
         });
       });
-      job.on("speedChange", () => {
+      job.on("speedchange", () => {
         $timeout(() => {
           $scope.calcTotalProg();
         });

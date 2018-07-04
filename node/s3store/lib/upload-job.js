@@ -63,7 +63,7 @@ class UploadJob extends Base {
 
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
-    this.stopFlag = this.status != "running";
+    this.isStopped = this.status != "running";
     this._listener = this.startUpload.bind(this);
     this.isDebug = this._config.isDebug;
   }
@@ -76,15 +76,15 @@ UploadJob.prototype.start = function (overwrite, prog) {
     console.log(`Try uploading ${this.from.path} to s3://${this.to.bucket}/${this.to.key}`);
   }
 
-  this.message = "";
-  this.stopFlag = false;
-  this.startTime = new Date().getTime();
-  this.endTime = null;
-
-  this._changeStatus("running");
-
   // start
   prog = prog || {};
+
+  this.message = "";
+  this.isStopped = false;
+  this.startedAt = new Date().getTime();
+  this.endedAt = null;
+
+  this._changeStatus("running");
 
   let job = {
     job: this.id,
@@ -129,7 +129,7 @@ UploadJob.prototype.stop = function () {
 
   clearInterval(this.speedTid);
 
-  this.stopFlag = true;
+  this.isStopped = true;
   this.speed = 0;
   this.predictLeftTime = 0;
 
@@ -153,7 +153,7 @@ UploadJob.prototype.wait = function () {
   }
 
   this._lastStatusFailed = this.status == "failed";
-  this.stopFlag = true;
+  this.isStopped = true;
 
   this._changeStatus("waiting");
   this.emit("pause");
@@ -234,13 +234,13 @@ UploadJob.prototype.startSpeedCounter = function () {
 
   clearInterval(self.speedTid);
   self.speedTid = setInterval(function () {
-    if (self.stopFlag) {
+    if (self.isStopped) {
       self.speed = 0;
       self.predictLeftTime = 0;
       return;
     }
 
-    let avgSpeed = self.loaded / (self.startTime - new Date().getTime()) * 1000;
+    let avgSpeed = self.loaded / (self.startedAt - new Date().getTime()) * 1000;
 
     self.speed = self.prog.loaded - self.lastLoaded;
     if (self.speed <= 0 || (self.lastSpeed / self.speed) > 1.1) {
@@ -250,7 +250,7 @@ UploadJob.prototype.startSpeedCounter = function () {
       self.speed = avgSpeed;
     }
     if (self.lastSpeed != self.speed) {
-      self.emit("speedChange", self.speed * 1.2);
+      self.emit("speedchange", self.speed * 1.2);
     }
 
     self.lastLoaded = self.prog.loaded;
@@ -270,7 +270,7 @@ UploadJob.prototype._changeStatus = function (status) {
   if (status == "failed" || status == "stopped" || status == "finished" || status == "duplicated") {
     clearInterval(this.speedTid);
 
-    this.endTime = new Date().getTime();
+    this.endedAt = new Date().getTime();
     this.speed = 0;
     this.predictLeftTime = 0;
   }

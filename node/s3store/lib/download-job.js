@@ -52,24 +52,27 @@ class DownloadJob extends Base {
 
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
-    this.stopFlag = this.status != "running";
+    this.isStopped = this.status != "running";
     this.tmpfile = this.to.path + ".download";
     this._listener = this.startDownload.bind(this);
     this.isDebug = this._config.isDebug;
   }
 }
 
-DownloadJob.prototype.start = function (downloadedParts) {
+DownloadJob.prototype.start = function (prog) {
   if (this.status == "running") return;
 
   if (this.isDebug) {
     console.log(`Try downloading s3://${this.from.bucket}/${this.from.key} to ${this.to.path}`);
   }
 
+  // start
+  porg = prog || {};
+
   this.message = "";
-  this.stopFlag = false;
-  this.startTime = new Date().getTime();
-  this.endTime = null;
+  this.isStopped = false;
+  this.startedAt = new Date().getTime();
+  this.endedAt = null;
 
   this._changeStatus("running");
 
@@ -90,7 +93,7 @@ DownloadJob.prototype.start = function (downloadedParts) {
         Key: this.from.key
       },
       localFile: this.tmpfile,
-      downloadedParts: downloadedParts,
+      downloadedSize: prog.prog.synced,
       useElectronNode: this.useElectronNode,
       isDebug: this.isDebug
     }
@@ -115,7 +118,7 @@ DownloadJob.prototype.stop = function () {
 
   clearInterval(this.speedTid);
 
-  this.stopFlag = true;
+  this.isStopped = true;
   this.speed = 0;
   this.predictLeftTime = 0;
 
@@ -139,7 +142,7 @@ DownloadJob.prototype.wait = function () {
   }
 
   this._lastStatusFailed = this.status == "failed";
-  this.stopFlag = true;
+  this.isStopped = true;
 
   this._changeStatus("waiting");
   this.emit('pause');
@@ -177,7 +180,8 @@ DownloadJob.prototype.startDownload = function (event, data) {
   case 'filePartDownloaded':
     var part = data.data;
 
-    self.emit('partcomplete', part);
+    self.prog.synced += part.Size;
+    self.emit('partcomplete', self.prog);
     break;
 
   case 'fileDownloaded':
@@ -227,13 +231,13 @@ DownloadJob.prototype.startSpeedCounter = function () {
 
   clearInterval(self.speedTid);
   self.speedTid = setInterval(function () {
-    if (self.stopFlag) {
+    if (self.isStopped) {
       self.speed = 0;
       self.predictLeftTime = 0;
       return;
     }
 
-    let avgSpeed = self.prog.loaded / (self.startTime - new Date().getTime()) * 1000;
+    let avgSpeed = self.prog.loaded / (self.startedAt - new Date().getTime()) * 1000;
 
     self.speed = self.prog.loaded - self.lastLoaded;
     if (self.speed <= 0 || (self.lastSpeed / self.speed) > 1.1) {
@@ -243,7 +247,7 @@ DownloadJob.prototype.startSpeedCounter = function () {
       self.speed = avgSpeed;
     }
     if (self.lastSpeed != self.speed) {
-      self.emit("speedChange", self.speed * 1.2);
+      self.emit("speedchange", self.speed * 1.2);
     }
 
     self.lastLoaded = self.prog.loaded;
@@ -263,7 +267,7 @@ DownloadJob.prototype._changeStatus = function (status) {
   if (status == "failed" || status == "stopped" || status == "finished") {
     clearInterval(this.speedTid);
 
-    this.endTime = new Date().getTime();
+    this.endedAt = new Date().getTime();
     this.speed = 0;
     this.predictLeftTime = 0;
   }

@@ -240,14 +240,8 @@ angular.module("web").factory("s3DownloadMgr", [
         $scope.calcTotalProg();
       });
 
-      job.on("partcomplete", (part) => {
-        job.downloadedParts[part.PartNumber] = part;
-
+      job.on("partcomplete", (prog) => {
         trySaveProg();
-
-        $timeout(() => {
-          $scope.calcTotalProg();
-        });
       });
       job.on("statuschange", (status) => {
         if (status == "stopped") {
@@ -261,7 +255,7 @@ angular.module("web").factory("s3DownloadMgr", [
           $scope.calcTotalProg();
         });
       });
-      job.on("speedChange", () => {
+      job.on("speedchange", () => {
         $timeout(() => {
           $scope.calcTotalProg();
         });
@@ -314,7 +308,7 @@ angular.module("web").factory("s3DownloadMgr", [
             if (job.prog.resumable) {
               var progs = tryLoadProg();
               if (progs && progs[job.id]) {
-                job.start(progs[job.id].downloadedParts);
+                job.start(progs[job.id]);
               } else {
                 job.start();
               }
@@ -335,10 +329,12 @@ angular.module("web").factory("s3DownloadMgr", [
           region: job.region,
           to: job.to,
           from: job.from,
-          prog: job.prog,
+          prog: {
+            loaded: job.prog.synced,
+            total: job.prog.total
+          },
           status: job.status,
-          message: job.message,
-          downloadedParts: job.downloadedParts
+          message: job.message
         };
       });
 

@@ -102,8 +102,9 @@ ReadableStream.prototype.download = function (s3params, config) {
     return _maxRetries;
   };
   rs.maxPartSize = function (partSize) {
-    if (partSize < 1024 * 1024 * 5)
-      partSize = 1024 * 1024 * 5;
+    if (partSize < 4 << 20) {
+      partSize = 4 << 20;
+    }
     _maxPartSize = partSize;
     return rs;
   };

@@ -501,7 +501,7 @@ Client.prototype.downloadFile = function (params) {
       downloader.emit('progress', downloader);
     });
     s3downloader.on('part', (part) => {
-      downloader.emit('debug', part);
+
     });
     s3downloader.on('error', (err) => {
       if (isAborted) return;

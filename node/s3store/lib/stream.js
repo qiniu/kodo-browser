@@ -26,6 +26,7 @@ ReadableStream.prototype.download = function (s3params, config) {
   var _maxPartSize = config.maxPartSize ? config.maxPartSize : 4 << 20; //4MB
   var _maxConcurrentStreams = config.maxConcurrentStreams ? config.maxConcurrentStreams : 5;
   var _totalObjectSize = config.totalObjectSize ? config.totalObjectSize : 0;
+  var _totalBytesDownloaded = config.totalBytesDownloaded ? config.totalBytesDownloaded : 0;
 
   var startSeriesDownload = function (series, offset, callback) {
     var functionArray = [];
@@ -147,7 +148,7 @@ ReadableStream.prototype.download = function (s3params, config) {
     assert.notStrictEqual(_totalObjectSize, 0, "'totalObjectSize' parameter is required.");
 
     var seriesNumber = 0;
-    var bytesDownloaded = 0;
+    var bytesDownloaded = _totalBytesDownloaded;
     var functionArray = [];
     while (bytesDownloaded < _totalObjectSize) {
       var func = function (callback) {

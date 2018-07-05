@@ -93,7 +93,7 @@ DownloadJob.prototype.start = function (prog) {
         Key: this.from.key
       },
       localFile: this.tmpfile,
-      downloadedSize: prog.prog.synced,
+      downloadedBytes: (prog.prog && prog.prog.synced) ? prog.prog.synced : 0,
       useElectronNode: this.useElectronNode,
       isDebug: this.isDebug
     }

@@ -346,7 +346,7 @@ Client.prototype.downloadFile = function (params) {
   let isDebug = params.isDebug;
 
   let s3downloader = null;
-  let s3DownloadedSize = params.downloadedSize || 0;
+  let s3DownloadedBytes = params.downloadedBytes || 0;
   let s3DownloadedPartSize = params.downloadedPartSize || self.multipartDownloadSize;
 
   let downloader = new EventEmitter();
@@ -390,7 +390,7 @@ Client.prototype.downloadFile = function (params) {
     }
 
     downloader.emit('abort', {
-      downloadedSize: s3DownloadedSize,
+      downloadedBytes: s3DownloadedBytes,
       downloadedPartSize: s3DownloadedPartSize
     });
   }
@@ -404,7 +404,7 @@ Client.prototype.downloadFile = function (params) {
 
       downloader.progressLoaded = 0;
       downloader.progressTotal = metadata.ContentLength;
-      downloader.progressResumable = (self.resumeDownload && s3DownloadedSize < metadata.ContentLength);
+      downloader.progressResumable = (self.resumeDownload && s3DownloadedBytes < metadata.ContentLength);
       downloader.emit("fileStat", downloader);
 
       startDownloadFile();
@@ -480,7 +480,7 @@ Client.prototype.downloadFile = function (params) {
 
     let fileStream = fs.createWriteStream(localFile, {
       flags: s3fsmode,
-      start: s3DownloadedSize,
+      start: s3DownloadedBytes,
       autoClose: true
     });
 
@@ -493,7 +493,8 @@ Client.prototype.downloadFile = function (params) {
       maxRetries: self.maxRetries,
       maxPartSize: self.multipartDownloadSize,
       maxConcurrentStreams: self.s3concurrency,
-      totalObjectSize: downloader.progressTotal
+      totalObjectSize: downloader.progressTotal,
+      totalBytesDownloaded: s3DownloadedBytes
     });
     s3downloader.on('progress', (prog) => {
       if (isAborted) return;

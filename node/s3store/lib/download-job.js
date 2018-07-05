@@ -67,7 +67,7 @@ DownloadJob.prototype.start = function (prog) {
   }
 
   // start
-  porg = prog || {};
+  prog = prog || {};
 
   this.message = "";
   this.isStopped = false;

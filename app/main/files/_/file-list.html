@@ -10,7 +10,7 @@
       <div ng-repeat="item in objects" class="item-block" ng-class="{'active':sel.x['i_'+$index]==true}" ng-click="selectFile(item);$event.stopPropagation()" ng-dblclick="item.isFolder?gotoAddress(currentBucket,item.path):showPreview(item);$event.stopPropagation()">
         <i class="fa fa-{{item|fileIcon}}" ng-style="item.isFolder?{'color':'orange'}:{}"></i>
 
-        <div class="item-block-name" uib-tooltip-html="'<div class=\'break\'>'+item.name+'</div>'" tooltip-append-to-body="true" tooltip-popup-delay="500">{{item.name}}</div>
+        <div class="item-block-name">{{item.name}}</div>
         <div class="item-block-desc" ng-if="item.isFolder">{{'folder'|translate}}</div>
         <div class="item-block-desc" ng-if="!item.isFolder">{{item.size|sizeFormat}}</div>
       </div>

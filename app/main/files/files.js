@@ -9,7 +9,6 @@ angular.module("web").controller("filesCtrl", [
   "Auth",
   "AuthInfo",
   "s3Client",
-  "settingsSvs",
   "fileSvs",
   "Toast",
   "Dialog",
@@ -24,7 +23,6 @@ angular.module("web").controller("filesCtrl", [
     Auth,
     AuthInfo,
     s3Client,
-    settingsSvs,
     fileSvs,
     Toast,
     Dialog

@@ -205,4 +205,11 @@ angular.module("web")
         return "file-o";
       };
     }
-  ]);
+  ])
+  .filter("htmlEscape", function () {
+    return function (html) {
+      return html.replace(/[\u00A0-\u9999<>\&\'\"]/gim, function(char) {
+        return '&#' + char.charCodeAt(0) + ';';
+      });
+    };
+  });

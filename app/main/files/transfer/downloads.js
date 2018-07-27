@@ -4,24 +4,20 @@ angular.module("web").controller("transferDownloadsCtrl", [
   "$scope",
   "$timeout",
   "$translate",
-  "$interval",
   "jobUtil",
   "s3DownloadMgr",
   "DelayDone",
   "Toast",
   "Dialog",
-  "safeApply",
   function (
     $scope,
     $timeout,
     $translate,
-    $interval,
     jobUtil,
     s3DownloadMgr,
     DelayDone,
     Toast,
-    Dialog,
-    safeApply
+    Dialog
   ) {
     var T = $translate.instant;
 

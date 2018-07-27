@@ -9,7 +9,6 @@ angular.module("web").controller("filesCtrl", [
   "Auth",
   "AuthInfo",
   "s3Client",
-  "settingsSvs",
   "fileSvs",
   "Toast",
   "Dialog",
@@ -24,7 +23,6 @@ angular.module("web").controller("filesCtrl", [
     Auth,
     AuthInfo,
     s3Client,
-    settingsSvs,
     fileSvs,
     Toast,
     Dialog
@@ -1052,7 +1050,7 @@ angular.module("web").controller("filesCtrl", [
           field: 'name',
           title: T('name'),
           formatter: (val, row, idx, field) => {
-            return `<div class="text-overflow file-item-name" style="cursor:pointer; ${row.isFolder?'color:orange':''}"><i class="fa fa-${$filter('fileIcon')(row)}"></i> <a href="" uib-tooltip-html="'<div class=\'break\'>${val}</div>'" tooltip-placement="right" tooltip-popup-delay="500" tooltip-append-to-body="true"><span>${val}</span></a></div>`;
+            return `<div class="text-overflow file-item-name" style="cursor:pointer; ${row.isFolder?'color:orange':''}"><i class="fa fa-${$filter('fileIcon')(row)}"></i> <a href=""><span>${$filter('htmlEscape')(val)}</span></a></div>`;
           },
           events: {
             'click a': (evt, val, row, idx) => {

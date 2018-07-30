@@ -1,5 +1,5 @@
 
-VERSION=2.0.0
+VERSION=5.2.0
 NAME=s3-browser
 CUSTOM=./custom
 

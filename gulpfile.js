@@ -3,15 +3,13 @@ let gulp = require("gulp"),
     lazy: false
   }),
   packager = require('electron-packager'),
-  os = require("os"),
   fs = require("fs"),
   path = require("path"),
   pkg = require("./package");
 
 let NAME = pkg.name;
 let VERSION = pkg.version;
-let ELECTRON_MIRROR = "http://npm.taobao.org/mirrors/electron/";
-let ELECTRON_VERSION = "3.0.0-beta.1";
+let ELECTRON_VERSION = "3.0.0-beta.3";
 let ROOT = __dirname;
 let CUSTOM = `${ROOT}/custom`;
 let DIST = `${ROOT}/dist`;
@@ -241,14 +239,13 @@ gulp.task("mac", () => {
     options.arch = "x64";
     options.icon = `${CUSTOM}/icon.icns`;
 
-    packager(options, (errs, paths) => {
-      if (errs && errs.length > 0) {
-        console.error(`--package  ${NAME}-darwin-x64: ${errs}`);
-        return;
-      }
-
+    packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.exe ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.bin`).exec(() => {
         console.log("--done");
+      });
+    }, (errs) => {
+      errs.forEach((err) => {
+        console.error(`\t${err}`);
       });
     });
   });
@@ -279,14 +276,13 @@ gulp.task("win64", () => {
     options.arch = "x64";
     options.icon = `${CUSTOM}/icon.ico`;
 
-    packager(options, (errs, paths) => {
-      if (errs && errs.length > 0) {
-        console.error(`--package  ${NAME}-win32-x64: ${errs}`);
-        return;
-      }
-
+    packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {
         console.log("--done");
+      });
+    }, (errs) => {
+      errs.forEach((err) => {
+        console.error(`\t${err}`);
       });
     });
   });
@@ -301,14 +297,13 @@ gulp.task("win32", () => {
     options.arch = "ia32";
     options.icon = `${CUSTOM}/icon.ico`;
 
-    packager(options, (errs, paths) => {
-      if (errs && errs.length > 0) {
-        console.error(`--package  ${NAME}-win32-ia32: ${errs}`);
-        return;
-      }
-
+    packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {
         console.log("--done");
+      });
+    }, (errs) => {
+      errs.forEach((err) => {
+        console.error(`\t${err}`);
       });
     });
   });
@@ -322,14 +317,13 @@ gulp.task("linux64", () => {
     options.platform = "linux";
     options.arch = "x64";
 
-    packager(options, (errs, paths) => {
-      if (errs && errs.length > 0) {
-        console.error(`--package  ${NAME}-linux-x64: ${errs}`);
-        return;
-      }
-
+    packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.exe`).exec(() => {
         console.log("--done");
+      });
+    }, (errs) => {
+      errs.forEach((err) => {
+        console.error(`\t${err}`);
       });
     });
   });
@@ -343,14 +337,13 @@ gulp.task("linux32", () => {
     options.platform = "linux";
     options.arch = "ia32";
 
-    packager(options, (errs, paths) => {
-      if (errs && errs.length > 0) {
-        console.error(`--package  ${NAME}-linux-ia32: ${errs}`);
-        return;
-      }
-
+    packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.exe`).exec(() => {
         console.log("--done");
+      });
+    }, (errs) => {
+      errs.forEach((err) => {
+        console.error(`\t${err}`);
       });
     });
   });

@@ -15,7 +15,35 @@
     "build:win64": "./node_modules/.bin/gulp win64",
     "build:linux32": "./node_modules/.bin/gulp linux32",
     "build:linux64": "./node_modules/.bin/gulp linux64",
-    "postbuild": ""
+    "release": "build"
+  },
+  "build": {
+    "appId": "com.qiniu.browser",
+    "asar": false,
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "squirrel",
+      "icon": "build/icons/icon.ico"
+    }
   },
   "engines": {
     "node": ">= 10.0.0"
@@ -37,6 +65,7 @@
     "commander": "~2.16.0",
     "cross-env": "^5.2.0",
     "electron": "electron@beta",
+    "electron-builder": "^20.26.0",
     "electron-packager": "12.1.0",
     "font-awesome": "^4.7.0",
     "gulp": "~3.9.1",

@@ -212,7 +212,7 @@ angular.module("web").factory("s3DownloadMgr", [
             },
             to: {
               name: fileName,
-              path: path.normalize(filePath)
+              path: decodeURIComponent(path.normalize(filePath))
             }
           });
 

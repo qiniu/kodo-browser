@@ -183,7 +183,7 @@ angular.module("web").factory("s3UploadMgr", [
         if (fs.statSync(absPath).isDirectory()) {
           //创建目录
           var subDirPath = filePath + "/";
-          subDirPath = path.normalize(subDirPath);
+          subDirPath = decodeURIComponent(path.normalize(subDirPath));
           if (path.sep != "/") {
             subDirPath = subDirPath.replace(/\\/g, "/");
           }
@@ -210,7 +210,7 @@ angular.module("web").factory("s3UploadMgr", [
           //文件
 
           //修复window下 \ 问题
-          filePath = path.normalize(filePath);
+          filePath = decodeURIComponent(path.normalize(filePath));
           if (path.sep != "/") {
             filePath = filePath.replace(/\\/g, "/");
           }

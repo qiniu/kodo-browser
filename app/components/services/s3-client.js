@@ -662,7 +662,7 @@ angular.module("web").factory("s3Client", [
     /**************************************/
 
     function createFolder(region, bucket, prefix) {
-      prefix = path.normalize(prefix);
+      prefix = decodeURIComponent(path.normalize(prefix));
       if (path.sep != "/") {
         prefix = prefix.replace(/\\/g, "/");
       }

@@ -275,7 +275,7 @@ angular.module('web')
           //  AccessKeyId: result.AccessKey.AccessKeyId,
           //  AccessKeySecret: result.AccessKey.AccessKeySecret,
           //  UserName: userName,
-           subject:  T('grant.email.title'),// 'S3 Browser 授权',
+           subject:  T('grant.email.title'),// 'Qiniu Browser 授权',
            to: toEmail,
            html:
 `${T('grant.email.body.title')}<br/>
@@ -296,7 +296,7 @@ AccessKeySecret: ${secret}<br/>
 
 <br/>
 <hr/>
-您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">S3 Browser</a> 浏览或管理这些文件。
+您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">Qiniu Browser</a> 浏览或管理这些文件。
 `
                    //   '子用户名(Sub User): '+userName+ '<br/>'
                    // + 'AccessKeyId: '+result.AccessKey.AccessKeyId+ '<br/>'
@@ -305,7 +305,7 @@ AccessKeySecret: ${secret}<br/>
                    // + '授予权限(permission): '+$scope.grant.privType + '<br/>'
                    // + '授权路径(s3path): ' + comments.join(',<br/>')
                    // + '<hr/>'
-                   // + '您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">S3 Browser</a> 浏览或管理这些文件。'
+                   // + '您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">Qiniu Browser</a> 浏览或管理这些文件。'
          };
          return sendInfo;
       }

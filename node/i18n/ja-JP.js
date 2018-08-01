@@ -1,5 +1,5 @@
 module.exports = {
-  "app.name": "S3ブラウザ",
+  "app.name": "7つの牛のブラウザ",
   language: "言語",
   name: "名前",
   type: "タイプ",

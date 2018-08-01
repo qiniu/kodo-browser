@@ -82,7 +82,7 @@ let createWindow = () => {
     height: 768,
     minWidth: 800,
     minHeight: 600,
-    title: custom.title || "S3 Browser",
+    title: custom.title || "Qiniu Browser",
     icon: custom.logo_ico || path.join(root, "icons", "icon.ico")
   };
 

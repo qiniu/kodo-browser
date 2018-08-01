@@ -1,5 +1,5 @@
 module.exports = {
-  "app.name": "S3 浏览器",
+  "app.name": "七牛浏览器",
   language: "语言",
   name: "名称",
   type: "类型",
@@ -413,6 +413,6 @@ module.exports = {
 
   "Insufficient disk space": "磁盘空间不足",
 
-  "grant.email.title": "S3 Browser 授权",
-  "grant.email.body.title": "S3 Browser 目前支持2种方式登录, 您可以选择任意一种:"
+  "grant.email.title": "Qiniu Browser 授权",
+  "grant.email.body.title": "Qiniu Browser 目前支持2种方式登录, 您可以选择任意一种:"
 };

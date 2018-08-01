@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-  <title>S3 Browser</title>
+  <title>Qiniu Browser</title>
   <script>
     const os = require('os');
     const path = require('path');
@@ -15,7 +15,7 @@
     } catch (e) {
       console.log('no custom settings')
     };
-    document.title = custom.title || 'S3 Browser';
+    document.title = custom.title || 'Qiniu Browser';
   </script>
   <link href="css/lib.css" rel="stylesheet">
   <link href="app.css" rel="stylesheet">
@@ -120,7 +120,7 @@
       if (custom.appName)
         for (var k in custom.appName) {
           if (Global.i18n[k])
-            Global.i18n[k].content['app.name'] = custom.appName[k] || 'S3 Browser';
+            Global.i18n[k].content['app.name'] = custom.appName[k] || 'Qiniu Browser';
         }
     })();
 

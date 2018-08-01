@@ -1,6 +1,6 @@
 {
-  "name": "s3-browser",
-  "version": "5.2.0",
+  "name": "qn-browser",
+  "version": "6.0.0",
   "license": "UNLICENSED",
   "main": "dist/main.js",
   "scripts": {

@@ -2,16 +2,16 @@ const path = require("path");
 
 module.exports = {
   //窗体title
-  title: "S3 Browser",
+  title: "七牛浏览器",
 
   //app id，打包名称前缀
-  appId: "s3-browser",
+  appId: "qn-browser",
 
   //app名称，需要提供各个语言版本
   appName: {
-    "zh-CN": "S3 浏览器",
-    "en-US": "S3 Browser",
-    "ja-JP": "S3 ブラウザ"
+    "zh-CN": "七牛浏览器",
+    "en-US": "Qiniu Browser",
+    "ja-JP": "7つの牛のブラウザ"
   },
 
   // 是否显示公有与登录信息

@@ -1,5 +1,5 @@
 module.exports = {
-  "app.name": "S3 Browser",
+  "app.name": "Qiniu Browser",
   language: "Language",
   name: "Name",
   type: "Type",
@@ -414,6 +414,6 @@ module.exports = {
 
   "Insufficient disk space": "Insufficient disk space",
 
-  "grant.email.title": "S3 Browser Authorization",
-  "grant.email.body.title": "S3 Browser currently supports 2 ways to login, you can choose any one:"
+  "grant.email.title": "Qiniu Browser Authorization",
+  "grant.email.body.title": "Qiniu Browser currently supports 2 ways to login, you can choose any one:"
 };

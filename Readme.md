@@ -1,7 +1,7 @@
 
-# S3 Browser
+# Qiniu Browser
 
-S3 Browser 提供类似 windows 资源管理器功能。用户可以很方便的浏览文件，上传下载文件，支持断点续传等。
+Qiniu Browser 提供类似 windows 资源管理器功能。用户可以很方便的浏览文件，上传下载文件，支持断点续传等。
 
 本工具使用开源框架 Angular 1.x + [Electron](http://electron.atom.io/)制作。
 

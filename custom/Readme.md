@@ -1,4 +1,4 @@
-# 定制 S3 Browser
+# 定制 Qiniu Browser
 
 通过修改此目录下的配置，目前可以较容易的自定义logo，app名称，版本号，更新地址等。
 

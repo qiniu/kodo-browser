@@ -1,4 +1,4 @@
-All Releases for [ S3 Browser ]
+All Releases for [ Qiniu Browser ]
 
   ||Windows ia32|Windows x64| Mac(dmg) | Mac(zip) |Linux ia32|Linux x64|Release note|
   |-----|-----|-----|-----|----|--------|--------|---|

@@ -1,25 +1,20 @@
 angular.module("web").factory("s3DownloadMgr", [
-  "$state",
   "$timeout",
   "AuthInfo",
   "s3Client",
   "Toast",
-  "Const",
-  "safeApply",
   "settingsSvs",
   function (
-    $state,
     $timeout,
     AuthInfo,
     s3Client,
     Toast,
-    Const,
-    safeApply,
     settingsSvs
   ) {
     var fs = require("fs"),
       path = require("path"),
       os = require("os"),
+      sanitize = require("sanitize-filename"),
       S3Store = require("./node/s3store");
 
     var $scope;
@@ -63,6 +58,15 @@ angular.module("web").factory("s3DownloadMgr", [
      */
     function createJob(auth, options) {
       var region = options.region || auth.region || "cn-east-1";
+      console.info(
+        "GET",
+        "::",
+        region,
+        "::",
+        options.from.bucket + "/" + options.from.key,
+        "==>",
+        options.to.path + "/" + options.to.name
+      );
 
       options.region = region;
       options.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
@@ -153,11 +157,11 @@ angular.module("web").factory("s3DownloadMgr", [
           return;
         }
 
-        var fileName = path.basename(s3info.path);
-        var filePath = path.join(
-          toLocalPath,
-          path.relative(dirPath, s3info.path)
-        );
+        var fileName = sanitize(path.basename(s3info.path)),
+          filePath = toLocalPath;
+        angular.forEach(path.relative(dirPath, s3info.path).split("/"), (folder) => {
+          filePath = path.join(filePath, sanitize(folder));
+        });
 
         if (s3info.isFolder) {
           fs.mkdir(filePath, (err) => {
@@ -193,17 +197,6 @@ angular.module("web").factory("s3DownloadMgr", [
             tryLoadFiles();
           });
         } else {
-          if (process.platform == "win32") {
-            //修复window下，文件名含非法字符需要转义
-            if (/[\/\\\:\<\>\?\*\"\|]/.test(fileName)) {
-              fileName = encodeURIComponent(fileName);
-              filePath = path.join(
-                path.dirname(filePath),
-                encodeURIComponent(path.basename(filePath))
-              );
-            }
-          }
-
           var job = createJob(authInfo, {
             region: s3info.region,
             from: {
@@ -212,7 +205,7 @@ angular.module("web").factory("s3DownloadMgr", [
             },
             to: {
               name: fileName,
-              path: decodeURIComponent(path.normalize(filePath))
+              path: path.normalize(filePath)
             }
           });
 

@@ -66,11 +66,15 @@ angular.module("web").factory("s3UploadMgr", [
       */
     function createJob(auth, options) {
       var region = options.region || auth.region || "cn-east-1";
-
-      // if (options.to.key.indexOf(' ') >= 0) {
-      //   Toast.error('文件名不能包含空格');
-      //   return;
-      // }
+      console.info(
+        "PUT",
+        "::",
+        region,
+        "::",
+        options.from.path + "/" + options.from.name,
+        "==>",
+        options.to.bucket + "/" + options.to.key
+      );
 
       options.region = region;
       options.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
@@ -182,10 +186,9 @@ angular.module("web").factory("s3UploadMgr", [
 
         if (fs.statSync(absPath).isDirectory()) {
           //创建目录
-          var subDirPath = filePath + "/";
-          subDirPath = decodeURIComponent(path.normalize(subDirPath));
+          var subDirPath = path.normalize(filePath + "/");
           if (path.sep != "/") {
-            subDirPath = subDirPath.replace(/\\/g, "/");
+            subDirPath = subDirPath.replace(path.sep, "/");
           }
 
           s3Client
@@ -209,10 +212,10 @@ angular.module("web").factory("s3UploadMgr", [
         } else {
           //文件
 
-          //修复window下 \ 问题
-          filePath = decodeURIComponent(path.normalize(filePath));
+          //修复 window 下 \ 问题
+          filePath = path.normalize(filePath);
           if (path.sep != "/") {
-            filePath = filePath.replace(/\\/g, "/");
+            filePath = filePath.replace(path.sep, "/");
           }
 
           var job = createJob(authInfo, {

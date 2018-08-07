@@ -12,6 +12,7 @@ angular.module("web").factory("s3DownloadMgr", [
     settingsSvs
   ) {
     var fs = require("fs"),
+      pfs = fs.promises,
       path = require("path"),
       os = require("os"),
       sanitize = require("sanitize-filename"),
@@ -107,9 +108,7 @@ angular.module("web").factory("s3DownloadMgr", [
       var authInfo = AuthInfo.get();
       var dirPath = path.dirname(bucketInfos[0].path);
 
-      loop(bucketInfos, (jobs) => {
-
-      }, () => {
+      loop(bucketInfos, (jobs) => {}, () => {
         if (jobsAddedFn) {
           jobsAddedFn();
         }
@@ -158,63 +157,78 @@ angular.module("web").factory("s3DownloadMgr", [
         }
 
         var fileName = sanitize(path.basename(s3info.path)),
-          filePath = toLocalPath;
+          filePath = dirPath;
         angular.forEach(path.relative(dirPath, s3info.path).split("/"), (folder) => {
           filePath = path.join(filePath, sanitize(folder));
         });
 
         if (s3info.isFolder) {
-          fs.mkdir(filePath, (err) => {
-            if (err && err.code != "EEXIST") {
-              Toast.error("mkdir [" + filePath + "] failed:" + err.message);
-              return;
-            }
-
-            //遍历 s3 目录
-            function tryLoadFiles(marker) {
-              s3Client
-                .listFiles(s3info.region, s3info.bucket, s3info.path, marker)
-                .then((result) => {
-                  var files = result.data;
-                  files.forEach((f) => {
-                    f.region = s3info.region;
-                    f.bucket = s3info.bucket;
-                  });
-
-                  loop(files, (jobs) => {
-                    t = t.concat(jobs);
-                    if (result.marker) {
-                      $timeout(() => {
-                        tryLoadFiles(result.marker);
-                      }, 10);
-                    } else {
-                      if (callFn) callFn();
-                    }
-                  }, callFn2);
+          // list all files under s3info.path
+          function tryLoadFiles(marker) {
+            s3Client
+              .listFiles(s3info.region, s3info.bucket, s3info.path, marker)
+              .then((result) => {
+                var files = result.data;
+                files.forEach((f) => {
+                  f.region = s3info.region;
+                  f.bucket = s3info.bucket;
                 });
-            }
 
-            tryLoadFiles();
-          });
+                loop(files, (jobs) => {
+                  t = t.concat(jobs);
+                  if (result.marker) {
+                    $timeout(() => {
+                      tryLoadFiles(result.marker);
+                    }, 10);
+                  } else {
+                    if (callFn) callFn();
+                  }
+                }, callFn2);
+              });
+          }
+
+          tryLoadFiles();
         } else {
-          var job = createJob(authInfo, {
-            region: s3info.region,
-            from: {
-              bucket: s3info.bucket,
-              key: s3info.path
-            },
-            to: {
-              name: fileName,
-              path: path.normalize(filePath)
-            }
+          var fileFolders = path.dirname(filePath).split("/");
+
+          fileFolders.reduce((prevPromise, folder) => {
+            return prevPromise.then((localFolder) => {
+              var absfolder = path.join(localFolder, folder);
+
+              return pfs.stat(absfolder).then((stat) => {
+                if (stat.isDirectory()) {
+                  return Promise.resolve(absfolder);
+                }
+
+                return pfs.mkdir(absfolder).then(() => {
+                  return Promise.resolve(absfolder);
+                });
+              }).catch((err) => {
+                return pfs.mkdir(absfolder).then(() => {
+                  return Promise.resolve(absfolder);
+                });
+              });
+            });
+          }, Promise.resolve(toLocalPath)).then((localPath) => {
+            var job = createJob(authInfo, {
+              region: s3info.region,
+              from: {
+                bucket: s3info.bucket,
+                key: s3info.path
+              },
+              to: {
+                name: fileName,
+                path: path.normalize(path.join(localPath, fileName))
+              }
+            });
+
+            addEvents(job);
+
+            t.push(job);
+
+            if (callFn) callFn();
+            if (callFn2) callFn2();
           });
-
-          addEvents(job);
-
-          t.push(job);
-
-          if (callFn) callFn();
-          if (callFn2) callFn2();
         }
       }
     }

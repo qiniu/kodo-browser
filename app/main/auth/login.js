@@ -38,6 +38,7 @@ angular.module("web").controller("loginCtrl", [
       item: {
         domain: Global.custom_settings.domain,
         eptpl: DEF_EPTPL,
+        customtpl: false,
         logintpl: (localStorage.getItem(KEY_LOGINTPL) || Global.custom_settings.loginURL),
         servicetpl: (localStorage.getItem(KEY_SERVICETPL)  || Global.custom_settings.serviceURL)
       },

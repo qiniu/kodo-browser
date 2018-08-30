@@ -1,6 +1,6 @@
 {
   "name": "qn-browser",
-  "version": "6.3.0",
+  "version": "7.0.0",
   "license": "UNLICENSED",
   "main": "dist/main.js",
   "scripts": {

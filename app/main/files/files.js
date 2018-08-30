@@ -1055,6 +1055,10 @@ angular.module("web").controller("filesCtrl", [
           events: {
             'click a': (evt, val, row, idx) => {
               if (row.isFolder) {
+                $timeout(() => {
+                  $scope.total_folders = 0;
+                });
+
                 gotoAddress($scope.currentBucket, row.path);
               }
 
@@ -1108,6 +1112,10 @@ angular.module("web").controller("filesCtrl", [
             },
             'click button.remove': (evt, val, row, idx) => {
               showDeleteFiles([row]);
+
+              $timeout(() => {
+                $scope.total_folders = $list.find('i.fa-folder').length;
+              });
 
               return false;
             }
@@ -1176,6 +1184,10 @@ angular.module("web").controller("filesCtrl", [
       } else {
         $list.bootstrapTable('load', files).bootstrapTable('uncheckAll');
       }
+
+      $timeout(() => {
+        $scope.total_folders = $list.find('i.fa-folder').length;
+      });
     }
   }
 ]);

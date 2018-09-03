@@ -356,8 +356,6 @@ Client.prototype.downloadFile = function (params) {
   downloader.progressResumable = false;
   downloader.abort = handleAbort;
 
-  params.s3Params.Key = encodeSpecialCharacters(params.s3Params.Key);
-
   let s3params = {};
   Object.assign(s3params, params.s3Params);
 

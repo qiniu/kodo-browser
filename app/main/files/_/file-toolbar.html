@@ -3,6 +3,9 @@
   <div class="col-sm-7 pd0">
 
     <div class="btn-group" role="group" ng-disabled="!currentBucketPerm || !currentBucketPerm.write">
+      <span class="btn btn-info btn-sm" ng-if="total_folders>0">
+        <i class="fa fa-folder" style="color:orange"></i> {{total_folders}}
+      </span>
       <button ng-disabled="" type="button" class="btn btn-info btn-sm" ng-click="showAddFolder()">
         <i class="glyphicon glyphicon-plus"></i>
         {{'folder.create'|translate}}

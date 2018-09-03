@@ -55,7 +55,12 @@
               {{'region'|translate}}:
             </label>
             <div class="col-sm-8">
-              <select required ng-model="item.servicetpl" class="form-control" id="input4" placeholder="{{'auth.region.placeholder'|translate}}" ng-options="rg.endpoint as ('region.'+rg.id|translate) for rg in regions"></select>
+              <select ng-if="!item.customtpl" required ng-model="item.servicetpl" class="form-control" id="input4" placeholder="{{'auth.region.placeholder'|translate}}" ng-options="rg.endpoint as ('region.'+rg.id|translate) for rg in regions"></select>
+              <input ng-if="item.customtpl" class="form-control" ng-model="item.servicetpl" />
+              <span class="text-muted">
+                <input type="checkbox" ng-model="item.customtpl">
+                {{'customize'|translate}}
+              </span>
             </div>
           </div>
 

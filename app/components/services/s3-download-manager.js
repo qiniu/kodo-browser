@@ -202,10 +202,22 @@ angular.module("web").factory("s3DownloadMgr", [
 
                 return pfs.mkdir(absfolder).then(() => {
                   return Promise.resolve(absfolder);
+                }).catch((err) => {
+                  if (err.message.indexOf('EEXIST: file already exists') > -1) {
+                    return Promise.resolve(absfolder);
+                  }
+
+                  throw err;
                 });
               }).catch((err) => {
                 return pfs.mkdir(absfolder).then(() => {
                   return Promise.resolve(absfolder);
+                }).catch((err) => {
+                  if (err.message.indexOf('EEXIST: file already exists') > -1) {
+                    return Promise.resolve(absfolder);
+                  }
+
+                  throw err;
                 });
               });
             });

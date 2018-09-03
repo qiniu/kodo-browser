@@ -158,7 +158,7 @@ angular.module("web").factory("s3DownloadMgr", [
 
         var fileName = sanitize(path.basename(s3info.path)),
           filePath = dirPath;
-        angular.forEach(path.relative(dirPath, s3info.path).split("/"), (folder) => {
+        angular.forEach(path.relative(dirPath.replace(path.sep, "/"), s3info.path).split("/"), (folder) => {
           filePath = path.join(filePath, sanitize(folder));
         });
 
@@ -189,7 +189,7 @@ angular.module("web").factory("s3DownloadMgr", [
 
           tryLoadFiles();
         } else {
-          var fileFolders = path.dirname(filePath).split("/");
+          var fileFolders = path.dirname(filePath.replace(path.sep, "/")).split("/");
 
           fileFolders.reduce((prevPromise, folder) => {
             return prevPromise.then((localFolder) => {

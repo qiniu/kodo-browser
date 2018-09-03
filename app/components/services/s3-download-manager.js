@@ -158,9 +158,15 @@ angular.module("web").factory("s3DownloadMgr", [
 
         var fileName = sanitize(path.basename(s3info.path)),
           filePath = dirPath;
-        angular.forEach(path.relative(dirPath.replace(path.sep, "/"), s3info.path).split("/"), (folder) => {
-          filePath = path.join(filePath, sanitize(folder));
-        });
+        if (path.sep == "\\") {
+          angular.forEach(path.relative(dirPath.replace(/\\/g, "/"), s3info.path).replace(/\\/g, "/").split("/"), (folder) => {
+            filePath = path.join(filePath, sanitize(folder));
+          });
+        } else {
+          angular.forEach(path.relative(dirPath, s3info.path).split("/"), (folder) => {
+            filePath = path.join(filePath, sanitize(folder));
+          });
+        }
 
         if (s3info.isFolder) {
           // list all files under s3info.path
@@ -189,7 +195,12 @@ angular.module("web").factory("s3DownloadMgr", [
 
           tryLoadFiles();
         } else {
-          var fileFolders = path.dirname(filePath.replace(path.sep, "/")).split("/");
+          var fileFolders = "";
+          if (path.sep == "\\") {
+            fileFolders = path.dirname(filePath.replace(/\\/g, "/")).split("/");
+          } else {
+            fileFolders = path.dirname(filePath.replace(path.sep, "/")).split("/");
+          }
 
           fileFolders.reduce((prevPromise, folder) => {
             return prevPromise.then((localFolder) => {

@@ -187,8 +187,8 @@ angular.module("web").factory("s3UploadMgr", [
         if (fs.statSync(absPath).isDirectory()) {
           //创建目录
           var subDirPath = path.normalize(filePath + "/");
-          if (path.sep != "/") {
-            subDirPath = subDirPath.replace(path.sep, "/");
+          if (path.sep == "\\") {
+            subDirPath = subDirPath.replace(/\\/g, "/");
           }
 
           s3Client
@@ -214,8 +214,8 @@ angular.module("web").factory("s3UploadMgr", [
 
           //修复 window 下 \ 问题
           filePath = path.normalize(filePath);
-          if (path.sep != "/") {
-            filePath = filePath.replace(path.sep, "/");
+          if (path.sep == "\\") {
+            filePath = filePath.replace(/\\/g, "/");
           }
 
           var job = createJob(authInfo, {

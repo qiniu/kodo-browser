@@ -410,7 +410,7 @@ Client.prototype.downloadFile = function (params) {
   }
 
   function startDownloadFile() {
-    if (downloader.progressTotal >= self.multipartDownloadThreshold) {
+    if (false && downloader.progressTotal >= self.multipartDownloadThreshold) {
       if (downloader.progressResumable) {
         resumeMultipartDownload();
       } else {

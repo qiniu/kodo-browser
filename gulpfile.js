@@ -1,4 +1,5 @@
 let gulp = require("gulp"),
+  babel = require("gulp-babel"),
   plugins = require("gulp-load-plugins")({
     lazy: false
   }),
@@ -9,7 +10,7 @@ let gulp = require("gulp"),
 
 let NAME = pkg.name;
 let VERSION = pkg.version;
-let ELECTRON_VERSION = "3.0.0-beta.3";
+let ELECTRON_VERSION = "4.0.0-nightly.20180821";
 let ROOT = __dirname;
 let CUSTOM = `${ROOT}/custom`;
 let DIST = `${ROOT}/dist`;
@@ -31,55 +32,34 @@ let packagerOptions = {
   ]
 };
 
-require("shelljs/global");
+gulp.task("app.js", () => {
+  console.log("--rebuilding app.js...");
+  gulp
+    .src(["!./app/**/*_test.js", "./app/**/*.js"])
+    // .pipe(babel({
+		// 	presets: ['@babel/env']
+		// }))
+    .pipe(plugins.concat("app.js"))
+    .pipe(gulp.dest(DIST));
+});
+gulp.task("app.css", () => {
+  console.log("--rebuilding app.css...");
+  gulp
+    .src("./app/**/*.css")
+    .pipe(plugins.concat("app.css"))
+    .pipe(gulp.dest(DIST));
+});
+gulp.task("templates", () => {
+  console.log("--rebuilding templates.js...");
+  gulp
+    .src(["!./app/index.html", "./app/**/*.html"])
+    .pipe(plugins.angularTemplatecache("templates.js", {
+      standalone: true
+    }))
+    .pipe(gulp.dest(DIST));
+});
 
-let appTasks = {
-  appJS: () => {
-    console.log("--rebuilding app.js...");
-    gulp
-      .src(["!./app/**/*_test.js", "./app/**/*.js"])
-      .pipe(
-        plugins.babel({
-          presets: ["env"]
-        })
-      )
-      .pipe(plugins.concat("app.js"))
-      .pipe(gulp.dest(DIST))
-      .on("end", () => {
-        console.log("--done");
-      });
-  },
-
-  appCSS: () => {
-    console.log("--rebuilding lib.css...");
-    gulp
-      .src("./app/**/*.css")
-      .pipe(plugins.concat("app.css"))
-      .pipe(gulp.dest(DIST))
-      .on("end", () => {
-        console.log("--done");
-      });
-  },
-
-  templates: () => {
-    console.log("--rebuilding templates.js...");
-    gulp
-      .src(["!./app/index.html", "./app/**/*.html"])
-      .pipe(plugins.angularTemplatecache("templates.js", {
-        standalone: true
-      }))
-      .pipe(gulp.dest(DIST))
-      .on("end", () => {
-        console.log("--done");
-      });
-  }
-};
-
-gulp.task("js", appTasks.appJS);
-gulp.task("css", appTasks.appCSS);
-gulp.task("templates", appTasks.templates);
-
-gulp.task("libJS", () => {
+gulp.task("lib.js", () => {
   //concatenate vendor JS files
   let vendors = [
     "./node_modules/jquery/dist/jquery.js",
@@ -121,7 +101,7 @@ gulp.task("libJS", () => {
     .pipe(gulp.dest(DIST));
 });
 
-gulp.task("libCSS", () => {
+gulp.task("lib.css", () => {
   //concatenate vendor CSS files
   gulp
     .src([
@@ -350,11 +330,11 @@ gulp.task("linux32", () => {
 });
 
 gulp.task("build", [
-  "js",
-  "css",
+  "app.js",
+  "app.css",
   "templates",
-  "libJS",
-  "libCSS",
+  "lib.js",
+  "lib.css",
   "copy-node",
   "copy-fonts",
   "copy-icons",

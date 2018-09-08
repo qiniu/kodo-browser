@@ -49,6 +49,8 @@
     "node": ">= 10.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
     "@uirouter/angularjs": "^1.0.20",
     "angular": "1.7.3",
     "angular-bootstrap-contextmenu": "^1.1.0",
@@ -56,8 +58,6 @@
     "angular-translate": "^2.18.1",
     "angular-ui-bootstrap": "^2.5.6",
     "angular-ui-codemirror": "0.3.0",
-    "babel-core": "^6.26.3",
-    "babel-preset-env": "^1.7.0",
     "bootstrap": "~3.3.7",
     "bootstrap-table": "^1.12.1",
     "bower": "~1.8.4",
@@ -70,7 +70,7 @@
     "font-awesome": "^4.7.0",
     "gulp": "~3.9.1",
     "gulp-angular-templatecache": "^2.2.1",
-    "gulp-babel": "~8.0.0",
+    "gulp-babel": "^8.0.0",
     "gulp-concat": "~2.6.1",
     "gulp-connect": "^5.6.1",
     "gulp-jshint": "~2.1.0",

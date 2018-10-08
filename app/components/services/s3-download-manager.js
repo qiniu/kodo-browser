@@ -157,7 +157,7 @@ angular.module("web").factory("s3DownloadMgr", [
         }
 
         var fileName = sanitize(path.basename(s3info.path)),
-          filePath = dirPath;
+          filePath = "";
         if (path.sep == "\\") {
           angular.forEach(path.relative(dirPath.replace(/\\/g, "/"), s3info.path).replace(/\\/g, "/").split("/"), (folder) => {
             filePath = path.join(filePath, sanitize(folder));

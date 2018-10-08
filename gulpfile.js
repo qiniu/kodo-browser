@@ -32,32 +32,38 @@ let packagerOptions = {
   ]
 };
 
-gulp.task("app.js", () => {
-  console.log("--rebuilding app.js...");
-  gulp
-    .src(["!./app/**/*_test.js", "./app/**/*.js"])
-    // .pipe(babel({
-		// 	presets: ['@babel/env']
-		// }))
-    .pipe(plugins.concat("app.js"))
-    .pipe(gulp.dest(DIST));
-});
-gulp.task("app.css", () => {
-  console.log("--rebuilding app.css...");
-  gulp
-    .src("./app/**/*.css")
-    .pipe(plugins.concat("app.css"))
-    .pipe(gulp.dest(DIST));
-});
-gulp.task("templates", () => {
-  console.log("--rebuilding templates.js...");
-  gulp
-    .src(["!./app/index.html", "./app/**/*.html"])
-    .pipe(plugins.angularTemplatecache("templates.js", {
-      standalone: true
-    }))
-    .pipe(gulp.dest(DIST));
-});
+let appTasks = {
+  "app.js": () => {
+    console.log("--rebuilding app.js...");
+    gulp
+      .src(["!./app/**/*_test.js", "./app/**/*.js"])
+      // .pipe(babel({
+      // 	presets: ['@babel/env']
+      // }))
+      .pipe(plugins.concat("app.js"))
+      .pipe(gulp.dest(DIST));
+  },
+  "app.css": () => {
+    console.log("--rebuilding app.css...");
+    gulp
+      .src("./app/**/*.css")
+      .pipe(plugins.concat("app.css"))
+      .pipe(gulp.dest(DIST));
+  },
+  "app.templates": () => {
+    console.log("--rebuilding templates.js...");
+    gulp
+      .src(["!./app/index.html", "./app/**/*.html"])
+      .pipe(plugins.angularTemplatecache("templates.js", {
+        standalone: true
+      }))
+      .pipe(gulp.dest(DIST));
+  }
+};
+
+gulp.task("app.js", appTasks["app.js"]);
+gulp.task("app.css", appTasks["app.css"]);
+gulp.task("templates", appTasks["app.templates"]);
 
 gulp.task("lib.js", () => {
   //concatenate vendor JS files
@@ -85,7 +91,10 @@ gulp.task("lib.js", () => {
     "./node_modules/codemirror/lib/codemirror.js",
     "./node_modules/codemirror/addon/mode/simple.js",
     "./node_modules/codemirror/addon/merge/merge.js",
-    "./node_modules/codemirror/mode/meta.js"
+    "./node_modules/codemirror/mode/meta.js",
+
+    //aws sdk
+    "./node_modules/aws-sdk/dist/aws-sdk.js"
   ];
 
   // code mirror modes
@@ -188,18 +197,18 @@ gulp.task("watch", () => {
     console.log(new Date(), event);
 
     if (event.path.endsWith(".js") && !event.path.endsWith("_test.js")) {
-      appTasks.appJS();
+      appTasks["app.js"]();
     }
 
     if (event.path.endsWith(".css")) {
-      appTasks.appCSS();
+      appTasks["app.css"]();
     }
 
     if (
       event.path.endsWith(".html") &&
       event.path != path.join(__dirname, "app/index.html")
     ) {
-      appTasks.templates();
+      appTasks["app.templates"]();
     }
   });
 

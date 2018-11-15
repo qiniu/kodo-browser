@@ -91,10 +91,7 @@ gulp.task("lib.js", () => {
     "./node_modules/codemirror/lib/codemirror.js",
     "./node_modules/codemirror/addon/mode/simple.js",
     "./node_modules/codemirror/addon/merge/merge.js",
-    "./node_modules/codemirror/mode/meta.js",
-
-    //aws sdk
-    "./node_modules/aws-sdk/dist/aws-sdk.js"
+    "./node_modules/codemirror/mode/meta.js"
   ];
 
   // code mirror modes

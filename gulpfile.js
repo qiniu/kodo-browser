@@ -1,5 +1,4 @@
 let gulp = require("gulp"),
-  babel = require("gulp-babel"),
   plugins = require("gulp-load-plugins")({
     lazy: false
   }),
@@ -37,9 +36,6 @@ let appTasks = {
     console.log("--rebuilding app.js...");
     gulp
       .src(["!./app/**/*_test.js", "./app/**/*.js"])
-      // .pipe(babel({
-      // 	presets: ['@babel/env']
-      // }))
       .pipe(plugins.concat("app.js"))
       .pipe(gulp.dest(DIST));
   },

@@ -1,6 +1,6 @@
 angular.module("web").factory("Cipher", function () {
   var crypto = require("crypto");
-  var ALGORITHM = "aes192";
+  var ALGORITHM = "aes-256-cbc";
   var KEY = "x82m#*lx8vv";
 
   return {

@@ -61,20 +61,20 @@ case "win32":
 }
 
 //singleton
-const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
-  // Someone tried to run a second instance, we should focus our window.
+app.requestSingleInstanceLock();
+// Someone tried to run a second instance, we should focus our window.
+app.on('second-instance', (evt, argv, cwd) => {
   if (win) {
     if (win.isMinimized()) {
       win.restore();
     }
 
     win.focus();
+
+    app.quit();
   }
 });
-
-if (shouldQuit) {
-  app.quit();
-}
+app.releaseSingleInstanceLock();
 
 let createWindow = () => {
   let opt = {

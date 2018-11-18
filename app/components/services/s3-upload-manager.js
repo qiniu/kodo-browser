@@ -256,6 +256,7 @@ angular.module("web").factory("s3UploadMgr", [
       });
 
       job.on('fileDuplicated', (data) => {
+        concurrency--;
         $timeout(() => {
           $scope.calcTotalProg();
         });

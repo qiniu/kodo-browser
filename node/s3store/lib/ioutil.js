@@ -69,8 +69,6 @@ Client.prototype.uploadFile = function (params) {
   uploader.progressResumable = false;
   uploader.abort = handleAbort;
 
-  params.s3Params.Key = encodeSpecialCharacters(params.s3Params.Key);
-
   let s3params = Object.assign({}, params.s3Params);
   if (s3params.ContentType === undefined) {
     let defaultContentType = params.defaultContentType || 'application/octet-stream';
@@ -553,14 +551,6 @@ Client.prototype.downloadFile = function (params) {
     s3downloader.pipe(fileStream);
   }
 };
-
-function encodeSpecialCharacters(filename) {
-  // Note: these characters are valid in URIs, but S3 does not like them for
-  // some reason.
-  return filename.replace(/[!'()*]/g, function (char) {
-    return '%' + char.charCodeAt(0).toString(16);
-  });
-}
 
 function smallestPartSizeFromFileSize(fileSize) {
   var partSize = Math.ceil(fileSize / MAX_MULTIPART_COUNT);

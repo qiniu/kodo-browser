@@ -1304,17 +1304,15 @@ angular.module("web").factory("s3Client", [
       var authInfo = AuthInfo.get();
 
       var bucket;
-      if (opt) {
-        if (typeof opt == "object") {
-          angular.extend(authInfo, opt);
-          bucket = opt.bucket;
-        }
+      if (typeof opt == "object") {
+        bucket = opt.bucket;
+
+        opt.region = authInfo.region;
+        angular.extend(authInfo, opt);
       }
 
-      var region = authInfo.region || "cn-east-1";
-
       var endpoint = getS3Endpoint(
-        region,
+        authInfo.region || "cn-east-1",
         bucket,
         authInfo.servicetpl || authInfo.eptpl
       );
@@ -1323,7 +1321,7 @@ angular.module("web").factory("s3Client", [
         accessKeyId: authInfo.id || "ak",
         secretAccessKey: authInfo.secret || "sk",
         endpoint: endpoint,
-        region: region,
+        region: endpoint.region,
         apiVersion: "2013-10-15",
         httpOptions: {
           timeout: authInfo.httpOptions ? authInfo.httpOptions.timeout : 0

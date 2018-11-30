@@ -6,9 +6,9 @@ module.exports = {
   customize: "自定义",
   "public.cloud": "公有云",
 
-  "region.cn-east-1": "华东1(杭州)",
-  "region.cn-north-1": "华北1(北京)",
-  "region.cn-south-1": "华南1(上海)",
+  "region.cn-north-1": "华北 1 (北京)",
+  "region.cn-east-1": "华东 1 (杭州)",
+  "region.cn-south-1": "华南 1 (广州)",
 
   optional: "可选",
   default: "默认",

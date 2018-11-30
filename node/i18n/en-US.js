@@ -6,9 +6,9 @@ module.exports = {
   customize: "Customize",
   "public.cloud": "Public Cloud",
 
+  "region.cn-north-1": "North China 1(Beijing)",
   "region.cn-east-1": "East China 1(Hangzhou)",
   "region.cn-south-1": "South China 1(Guangzhou)",
-  "region.cn-north-1": "North China 1(Beijing)",
 
   optional: "Optional",
   default: "Default",

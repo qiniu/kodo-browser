@@ -6,8 +6,8 @@ module.exports = {
   customize: "カスタマイズ",
   "public.cloud": "パブリッククラウド",
 
-  "region.cn-east-1": "中国東部 1(杭州)",
   "region.cn-north-1": "中国北部 1(北京)",
+  "region.cn-east-1": "中国東部 1(杭州)",
   "region.cn-south-1": "中国南部 1(深セン)",
 
   optional: "オプション",

@@ -23,7 +23,7 @@ angular.module("web").controller("loginCtrl", [
     var KEY_REMEMBER = Const.KEY_REMEMBER;
     var KEY_LOGINTPL = Const.KEY_LOGINTPL;
     var KEY_SERVICETPL = Const.KEY_SERVICETPL;
-    var SHOW_HIS = Const.SHOW_HIS;
+    var KEY_REGION = Const.KEY_REGION;
     var regions = angular.copy(Const.regions);
 
     var T = $translate.instant;
@@ -40,7 +40,7 @@ angular.module("web").controller("loginCtrl", [
         eptpl: DEF_EPTPL,
         customtpl: false,
         logintpl: (localStorage.getItem(KEY_LOGINTPL) || Global.custom_settings.loginURL),
-        servicetpl: (localStorage.getItem(KEY_SERVICETPL)  || Global.custom_settings.serviceURL)
+        servicetpl: (localStorage.getItem(KEY_SERVICETPL) || Global.custom_settings.serviceURL)
       },
       eptplType: "default",
 
@@ -87,10 +87,10 @@ angular.module("web").controller("loginCtrl", [
     }
 
     function showRemoveHis(h) {
-      var title = T("auth.removeAK.title"); 
+      var title = T("auth.removeAK.title");
       var message = T("auth.removeAK.message", {
         id: h.id
-      }); 
+      });
       Dialog.confirm(
         title,
         message,
@@ -142,6 +142,12 @@ angular.module("web").controller("loginCtrl", [
         data.secret = data.secret.trim();
       }
 
+      $scope.regions.forEach((region) => {
+        if (region.endpoint == data.servicetpl) {
+          data.region = region.id;
+        }
+      });
+
       delete data.username;
       delete data.password;
 
@@ -158,6 +164,7 @@ angular.module("web").controller("loginCtrl", [
           }
 
           localStorage.setItem(KEY_SERVICETPL, data.servicetpl);
+          localStorage.setItem(KEY_REGION, data.region);
 
           Toast.success(T("login.successfully"), 1000);
 

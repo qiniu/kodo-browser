@@ -11,7 +11,7 @@ angular.module('web')
       go: go,
       goHome: goHome,
       saveDefaultAddress: saveDefaultAddress,
-      getDefaultAddress:getDefaultAddress,
+      getDefaultAddress: getDefaultAddress,
 
       isFav: isFav,
       toggleFav: toggleFav,

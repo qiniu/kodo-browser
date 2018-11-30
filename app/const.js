@@ -15,10 +15,11 @@ angular.module("web").factory("Const", [
 
     return {
       AUTH_INFO_KEY: "auth-info",
-      AUTH_HIS: "auth-his",
       AUTH_KEEP: "auth-keep",
+      AUTH_HIS: "auth-his",
       KEY_LOGINTPL: "auth-logintpl",
       KEY_SERVICETPL: "auth-servicetpl",
+      KEY_REGION: "auth-region",
       KEY_REMEMBER: "auth-remember",
       SHOW_HIS: "show-his",
 

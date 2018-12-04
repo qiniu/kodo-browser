@@ -1,22 +1,12 @@
 angular.module("web").factory("s3UploadMgr", [
-  "$state",
   "$timeout",
   "s3Client",
   "AuthInfo",
-  "Toast",
-  "Const",
-  "DelayDone",
-  "safeApply",
   "settingsSvs",
   function (
-    $state,
     $timeout,
     s3Client,
     AuthInfo,
-    Toast,
-    Const,
-    DelayDone,
-    safeApply,
     settingsSvs
   ) {
     var fs = require("fs"),
@@ -72,7 +62,7 @@ angular.module("web").factory("s3UploadMgr", [
         region,
         "::",
         options.from.path + "/" + options.from.name,
-        "==>",
+        "=>",
         options.to.bucket + "/" + options.to.key
       );
 

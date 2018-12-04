@@ -1307,8 +1307,11 @@ angular.module("web").factory("s3Client", [
       if (typeof opt == "object") {
         bucket = opt.bucket;
 
-        opt.region = authInfo.region;
-        angular.extend(authInfo, opt);
+        if (typeof authInfo.region != "undefined") {
+          opt.region = authInfo.region;
+        }
+
+        Object.assign(authInfo, opt);
       }
 
       var endpoint = getS3Endpoint(
@@ -1321,7 +1324,7 @@ angular.module("web").factory("s3Client", [
         accessKeyId: authInfo.id || "ak",
         secretAccessKey: authInfo.secret || "sk",
         endpoint: endpoint,
-        region: endpoint.region,
+        region: authInfo.region,
         apiVersion: "2013-10-15",
         httpOptions: {
           timeout: authInfo.httpOptions ? authInfo.httpOptions.timeout : 0

@@ -12,7 +12,10 @@ angular.module("web").factory("AuthInfo", [
         return get(AUTH_INFO);
       },
       save: function (obj) {
-        save(AUTH_INFO, obj);
+        var oldobj = get(AUTH_INFO);
+        Object.assign(oldobj, obj);
+
+        save(AUTH_INFO, oldobj);
       },
       remove: function () {
         remove(AUTH_INFO);

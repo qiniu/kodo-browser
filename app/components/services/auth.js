@@ -16,19 +16,20 @@ angular.module("web").factory("Auth", [
 
     function login(data) {
       var df = $q.defer();
-
+      var client = s3Client.getClient(data);
+        
       data.httpOptions = {
         timeout: 5000
       };
 
       if (data.s3path) {
-        var info = s3Client.parseS3Path(data.s3path);
+        var urlinfo = s3Client.parseS3Path(data.s3path);
 
-        data.bucket = info.bucket;
+        data.bucket = urlinfo.bucket;
 
-        s3Client.getClient(data).listObjects({
-          Bucket: info.bucket,
-          Prefix: info.key,
+        s3client.listObjects({
+          Bucket: urlinfo.bucket,
+          Prefix: urlinfo.key,
           Marker: "",
           MaxKeys: 1
         }, function (err, result) {
@@ -36,6 +37,7 @@ angular.module("web").factory("Auth", [
             df.reject(err);
           } else if (result.RequestId && result.CommonPrefixes) {
             //login success
+            data.region = client.config.region;
             data.isAuthed = true;
             data.isSuper = true;
             data.perm = {
@@ -58,7 +60,7 @@ angular.module("web").factory("Auth", [
           }
         });
       } else {
-        s3Client.getClient(data).listBuckets(function (err, result) {
+        client.listBuckets(function (err, result) {
           if (err) {
             df.reject({
               code: err.code,
@@ -66,6 +68,7 @@ angular.module("web").factory("Auth", [
             });
           } else if (result.Buckets) {
             //login success
+            data.region = client.config.region;
             data.isAuthed = true;
             data.isSuper = true;
             data.perm = {

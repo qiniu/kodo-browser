@@ -5,7 +5,7 @@ module.exports = {
   title: "七牛浏览器",
 
   //app id，打包名称前缀
-  appId: "qn-browser",
+  appId: "kodo-browser",
 
   //app名称，需要提供各个语言版本
   appName: {

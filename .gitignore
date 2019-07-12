@@ -12,3 +12,4 @@ _up.sh
 package-lock.json
 *.download
 *.asar
+.nvmrc

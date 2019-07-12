@@ -29,18 +29,18 @@ upgrade.json 配置
 |package_url| 是| 安装包所在路径前缀 |
 |files|否| 如果配置，则只更新改字段配置的文件。如果不配置，表示全包下载。可选项: app.asar, electron.asar 或者不配置 |
 
-### (2) 安装包在S3中的目录结构:
+### (2) 安装包在 S3 中的目录结构:
 
-package_url: http://s3-browser.qiniudn.com/publish/
+package_url: http://kodo-browser.qiniudn.com/publish/
 
 ```
 publish
   |-- 1.0.0
-    |-- s3-browser-darwin-x64.zip
-    |-- s3-browser-linux-x64.zip
-    |-- s3-browser-linux-ia32.zip
-    |-- s3-browser-win32-x64.zip
-    |-- s3-browser-win32-ia32.zip
+    |-- kodo-browser-darwin-x64.zip
+    |-- kodo-browser-linux-x64.zip
+    |-- kodo-browser-linux-ia32.zip
+    |-- kodo-browser-win32-x64.zip
+    |-- kodo-browser-win32-ia32.zip
     |-- darwin-x64
         |-- app.asar
         |-- electron.asar

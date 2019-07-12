@@ -2,7 +2,7 @@
 
 通过修改此目录下的配置，目前可以较容易的自定义logo，app名称，版本号，更新地址等。
 
-如果需要修改更多内容，请直接修改s3 browser代码。
+如果需要修改更多内容，请直接修改 Kodo Browser 代码。
 
 下面介绍如何修改配置，如何重新build，如何发布。
 
@@ -24,16 +24,16 @@ Node.js 从官网下载最新版本安装即可。
 sudo npm install -g cnpm --registry=https://registry.npm.taobao.org
 ```
 
-### (3) 获取 s3-browser 源码
+### (3) 获取 kodo-browser 源码
 
 先到 https://gitlab.qiniu.io/solutions/s3-browser，克隆一份到你自己的仓库，然后执行以下操作:
 
 ```
-git clone {git地址}
+git clone git@gitlab.qiniu.io:solutions/s3-browser.git
 cd s3-browser
 ```
 
-### (4) 使用mac平台来build。
+### (4) 使用 mac 平台来 build。
 
 需要使用 brew 来安装 wine:
 
@@ -64,7 +64,7 @@ cnpm i -g windows-build-tools
 ## 2. 开始尝试启动
 
 ```
-make i   # 安装 node 模块依赖
+make i      # 安装 node 模块依赖
 make build  # 生成dist目录
 ```
 
@@ -88,36 +88,34 @@ s3-browser/
 
 Makefile有3个变量，可以替换,分别为：NAME,CUSTOM,VERSION.
 
-* 假设你的应用名为: my-s3-browser
+* 假设你的应用名为: my-kodo-browser
 * 假设你的custom目录为: ~/Desktop/custom/
 
 然后指定custom路径 build:
 ```
-make build NAME=my-s3-browser CUSTOM=~/Desktop/custom
+make build NAME=my-kodo-browser CUSTOM=~/Desktop/custom
 ```
 
 开发模式启动：
 ```
-make run NAME=my-s3-browser CUSTOM=~/Desktop/custom
+make run NAME=my-kodo-browser CUSTOM=~/Desktop/custom
 ```
 
 
 ## 4. build
 
 ```
-make all NAME=my-s3-browser CUSTOM=~/Desktop/custom
+make all NAME=my-kodo-browser CUSTOM=~/Desktop/custom
 ```
 
-* Makefile中的 VERSION 和 NAME 变量，VERSION 需要和 custom/index.js 中的version相同，NAME需要和appId相同。
+* Makefile中的 VERSION 和 NAME 变量，VERSION 需要和 custom/index.js 中的 version 相同，NAME 需要和 appId 相同。
 * 可以指定 NAME,CUSTOM 和 VERSION 变量.
 * 除了会在 build 下生成几个目录，还会在 releases 目录下，生成几个压缩包(绿色免安装版)。
-
-
 
 ### (可选) mac平台相关的安装文件
 
 ```
-make dmg NAME=my-s3-browser # 只能在mac系统下build，生成 releases/${VERSION}/my-s3-browser.dmg 文件
+make dmg NAME=my-kodo-browser # 只能在mac系统下build，生成 releases/${VERSION}/my-kodo-browser.dmg 文件
 ```
 * 此命令需要在 make mac 或者 make all 命令后执行。
 * 可以指定 NAME, CUSTOM 和 VERSION 变量。

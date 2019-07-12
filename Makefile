@@ -1,6 +1,6 @@
 
-VERSION=5.2.0
-NAME=s3-browser
+VERSION=0.1.0-beta
+NAME=kodo-browser
 CUSTOM=./custom
 
 GULP=node ./node_modules/gulp/bin/gulp.js

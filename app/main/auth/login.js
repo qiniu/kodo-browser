@@ -29,7 +29,6 @@ angular.module("web").controller("loginCtrl", [
     var T = $translate.instant;
 
     angular.extend($scope, {
-      gtab: parseInt(localStorage.getItem("gtag") || 1),
       flags: {
         showMore: 0,
         remember: "NO",
@@ -63,9 +62,6 @@ angular.module("web").controller("loginCtrl", [
 
     $scope.$watch("item.eptpl", function (v) {
       $scope.eptplType = v == DEF_EPTPL ? "default" : "customize";
-    });
-    $scope.$watch("gtab", function (v) {
-      localStorage.setItem("gtag", v);
     });
 
     function eptplChange(t) {

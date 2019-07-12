@@ -33,22 +33,15 @@
 
       <div class="panel-heading pd0" style="border:0">
         <ul class="nav nav-tabs">
-          <li role="presentation" ng-class="{active:gtab==2}">
-            <a href="" ng-click="gtab=2">
-              {{'auth.passlogin'|translate}}
-            </a>
-          </li>
-          <li role="presentation" ng-class="{active:gtab==1}">
-            <a href="" ng-click="gtab=1">
-              {{'auth.accessLogin'|translate}}
-            </a>
+          <li role="presentation">
+            <a href="">{{'auth.accessLogin'|translate}}</a>
           </li>
         </ul>
       </div>
 
       <div class="panel-body">
 
-        <form ng-if="gtab==1" class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
+        <form class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
           <div class="form-group" ng-if="regions && regions.length > 0">
             <label for="input4" class="col-sm-4 control-label">
               <span class="red">*</span>
@@ -87,69 +80,13 @@
             </div>
           </div>
         </form>
-
-        <form ng-if="gtab==2" class="form-horizontal" name="form2" ng-submit="onSubmitPass(form2)">
-          <div class="form-group has-feedback" ng-class="{'has-error': !form2.auser.$valid }">
-            <label for="auser" class="col-sm-4 control-label">
-              <span class="red">*</span> {{'auth.username'|translate}}:
-            </label>
-            <div class="col-sm-8">
-              <div class="input-group">
-                <input type="text" required ng-model="item.username" class="form-control" id="auser" name="auser" placeholder="{{'auth.username.placeholder'|translate}}">
-                <span class="input-group-addon">{{ item.domain }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="form-group has-feedback" ng-class="{'has-error': !form2.apass.$valid }">
-            <label for="apass" class="col-sm-4 control-label">
-              <span class="red">*</span> {{'auth.password'|translate}}:
-            </label>
-            <div class="col-sm-8">
-              <input type="password" required ng-model="item.password" class="form-control" id="apass" name="apass" placeholder="{{'auth.password.placeholder'|translate}}">
-            </div>
-          </div>
-
-          <fieldset class="login-fieldset">
-            <legend>
-              <input type="checkbox" ng-model="flags.showMore" ng-true-value="1" ng-false-value="0" /> {{'auth.settings'|translate}}
-            </legend>
-            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.logintpl.$valid}">
-              <label for="logintpl" class="col-sm-4 control-label">
-                <span class="red">*</span> {{'auth.logintpl'|translate}}:
-              </label>
-
-              <div class="col-sm-8">
-                <input type="text" required ng-model="item.logintpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="logintpl" name="logintpl" placeholder="https://">
-              </div>
-            </div>
-
-            <div ng-if="flags.showMore == 1" class="form-group has-feedback" ng-class="{'has-error':!form2.servicetpl.$valid}">
-              <label for="servicetpl" class="col-sm-4 control-label">
-                <span class="red">*</span> {{'auth.servicetpl'|translate}}:
-              </label>
-
-              <div class="col-sm-8">
-                <input type="text" required ng-model="item.servicetpl" ng-pattern="/^http(s)?\:\/\//" class="form-control" id="servicetpl" name="servicetpl" placeholder="https://">
-              </div>
-            </div>
-          </fieldset>
-
-          <div class="form-group">
-            <div class="col-sm-offset-4 col-sm-9">
-              <button type="submit" class="btn btn-primary">
-                {{'auth.login'|translate}}
-              </button>
-            </div>
-          </div>
-        </form>
-
       </div>
     </div>
   </div>
 
   <div class="clearfix"></div>
 
-  <div ng-if="gtab==1" class="col-xs-12" ng-show="flags.showHis=='YES'">
+  <div class="col-xs-12" ng-show="flags.showHis=='YES'">
     <header>
       <h4 class="col-xs-6">
         {{'auth.akHistories'|translate}}

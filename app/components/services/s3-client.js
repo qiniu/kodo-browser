@@ -336,20 +336,21 @@ angular.module("web").factory("s3Client", [
           MetadataDirective: "REPLACE"
         };
 
-        if (removeAfterCopy) {
-          params.Metadata = {
-            "COPY-BY-RENAME": "true"
-          };
-        }
-
         client.copyObject(params,
           function (err) {
             if (err) {
               fn(err);
-              return;
+            } else if (removeAfterCopy) {
+              client.deleteObject({Bucket: from.bucket, Key: from.key}, function (err) {
+                if (err) {
+                  fn(err);
+                } else {
+                  fn();
+                }
+              });
+            } else {
+              fn();
             }
-
-            fn();
           }
         );
       }
@@ -642,18 +643,21 @@ angular.module("web").factory("s3Client", [
         MetadataDirective: "REPLACE" // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
       };
 
-      if (!isCopy) {
-        params.Metadata = {
-          "COPY-BY-RENAME": "true"
-        };
-      }
-
       client.copyObject(params, function (err) {
         if (err) {
           handleError(err);
           df.reject(err);
-        } else {
+        } else if (isCopy) {
           df.resolve();
+        } else {
+          client.deleteObject({ Bucket: bucket, Key: oldKey }, function (err) {
+            if (err) {
+              handleError(err);
+              df.reject(err);
+            } else {
+              df.resolve();
+            }
+          });
         }
       });
       return df.promise;

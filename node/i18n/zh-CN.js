@@ -100,8 +100,8 @@ module.exports = {
   privilege: "权限",
   simplePolicy: "简化Policy授权",
   more: "更多",
-  "bucket.name": "Bucket名称",
-  "bucket.region": "Bucket区域",
+  "bucket.name": "Bucket 名称",
+  "bucket.region": "Bucket 区域",
   creationTime: "创建时间",
 
   "multipart.management": "Multipart管理",

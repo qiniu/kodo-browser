@@ -302,21 +302,30 @@ angular.module("web").controller("filesCtrl", [
 
       s3Client.listAllBuckets().then((buckets) => {
         $timeout(() => {
-          $scope.isLoading = false;
-
           $scope.buckets = buckets;
 
           var m = {};
+          var wait = buckets.length;
           angular.forEach(buckets, (bkt) => {
             m[bkt.name] = bkt;
+            s3Client.getBucketLocation(bkt.name).then((region_id) => {
+              bkt.region = region_id;
+              wait -= 1;
+              if (wait == 0) {
+                $timeout(() => {
+                  $scope.isLoading = false;
+                  showBucketsTable(buckets);
+                  if (fn) fn(null);
+                });
+              }
+            }, (err) => {
+              console.error("get bucket location error", bkt.name, err);
+              wait -= 1;
+              if (fn) fn(err);
+            });
           });
           $rootScope.bucketMap = m;
         });
-
-        showBucketsTable(buckets);
-
-        if (fn) fn(null);
-
       }, (err) => {
         console.error("list buckets error", err);
 
@@ -1009,6 +1018,18 @@ angular.module("web").controller("filesCtrl", [
 
               return false;
             }
+          }
+        }, {
+          field: 'region',
+          title: T('bucket.region'),
+          formatter: (val) => {
+            return T(`region.${val}`);
+          }
+        }, {
+          field: 'creationDate',
+          title: T('creationTime'),
+          formatter: (val) => {
+            return $filter('timeFormat')(val);
           }
         }],
         clickToSelect: true,

@@ -19,6 +19,7 @@ angular.module("web").factory("s3Client", [
       createBucket: createBucket,
       deleteBucket: deleteBucket,
 
+      getBucketLocation: getBucketLocation,
       getBucketACL: getBucketACL,
       updateBucketACL: updateBucketACL,
 
@@ -727,6 +728,24 @@ angular.module("web").factory("s3Client", [
       });
 
       return url;
+    }
+
+    function getBucketLocation(bucket) {
+      var df = $q.defer();
+
+      getClient().getBucketLocation({
+        Bucket: bucket
+      }, function (err, data) {
+        if (err) {
+          handleError(err);
+
+          df.reject(err);
+        } else {
+          df.resolve(data.LocationConstraint.replace(/<[^>]+>/, ''));
+        }
+      });
+
+      return df.promise;
     }
 
     function getBucketACL(region, bucket) {

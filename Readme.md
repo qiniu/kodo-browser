@@ -1,33 +1,12 @@
+# KODO Browser
 
-# Qiniu Browser
-
-Qiniu Browser 提供类似 windows 资源管理器功能。用户可以很方便的浏览文件，上传下载文件，支持断点续传等。
+KODO Browser 提供类似 Windows 资源管理器功能。用户可以很方便的浏览文件，上传下载文件，支持断点续传等。
 
 本工具使用开源框架 Angular 1.x + [Electron](http://electron.atom.io/)制作。
 
 > Electron 框架可以让你使用 JavaScript，HTML 和 CSS 构建跨平台的桌面应用程序。它是基于node.js 和 Chromium 开源项目。Electron 可以打包出跨平台的程序，运行在 Mac，Windows 和 Linux 上。
 
-
-## 1. 客户端下载：
-
-最新版本`1.5.0`，下载地址如下，解压即可使用。
-
-> [<h4>Window x32版下载</h4>]()
-
-> [<h4>Window x64版下载</h4>]()
-
-> [<h4>Mac zip版下载</h4>]()
-
-> [<h4>Ubuntu x64版</h4>]()
-
-> [<h4>Ubuntu x32版</h4>]()
-
-其他版本暂不提供，可以自行构建。
-
-> [旧版本下载](all-releases.md)
-
-
-## 2. 功能介绍:
+## 1. 功能介绍:
 
 ```
 功能
@@ -39,11 +18,11 @@ Qiniu Browser 提供类似 windows 资源管理器功能。用户可以很方便
 ```
 
 
-## 3. 开发环境搭建
+## 2. 开发环境搭建
 
 > 如果你要在此基础上开发，请按照以下步骤进行。
 
-### (1) 安装 node.js 最新版本
+### (1) 安装 Node.js v11.15.0
 
 官网: https://nodejs.org/
 
@@ -104,7 +83,7 @@ make win64  # 打包win64程序， 可选: mac, linux64,linux32,win32,win64,all.
 ```
 
 
-## 4. 代码结构
+## 3. 代码结构
 
 ```
 s3-browser/
@@ -122,14 +101,14 @@ s3-browser/
  |-- main.js              # 程序入口
 ```
 
-## 5. 自定义构建
+## 4. 自定义构建
 
 请看这里: [自定义构建](custom/)
 
-## 6. 关于贡献
+## 5. 关于贡献
 
 * 暂不接受代码贡献，如有建议或发现bug，请直接开issue。
 
-## 7. 开源 LICENSE
+## 6. 开源 LICENSE
 
 [Apache License 2.0](LICENSE)

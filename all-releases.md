@@ -1,4 +1,4 @@
-All Releases for [ Qiniu Browser ]
+All Releases for [ KODO Browser ]
 
   ||Windows ia32|Windows x64| Mac(dmg) | Mac(zip) |Linux ia32|Linux x64|Release note|
   |-----|-----|-----|-----|----|--------|--------|---|

@@ -417,6 +417,6 @@ module.exports = {
 
   "Insufficient disk space": "Insufficient disk space",
 
-  "grant.email.title": "Qiniu Browser Authorization",
-  "grant.email.body.title": "Qiniu Browser currently supports 2 ways to login, you can choose any one:"
+  "grant.email.title": "KODO Browser Authorization",
+  "grant.email.body.title": "KODO Browser currently supports 2 ways to login, you can choose any one:"
 };

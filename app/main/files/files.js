@@ -1063,6 +1063,19 @@ angular.module("web").controller("filesCtrl", [
               }
 
               return false;
+            },
+            'dblclick a': (evt, val, row, idx) => {
+              if (row.isFolder) {
+                $timeout(() => {
+                  $scope.total_folders = 0;
+                });
+
+                gotoAddress($scope.currentBucket, row.path);
+              } else {
+                showPreview(row);
+              }
+
+              return false;
             }
           }
         }, {

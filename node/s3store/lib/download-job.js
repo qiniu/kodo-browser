@@ -39,6 +39,7 @@ class DownloadJob extends Base {
 
     this.from = util.parseS3Path(this._config.from); //s3 path
     this.to = util.parseLocalPath(this._config.to); //local path
+    this.region = this._config.region;
 
     this.prog = this._config.prog || {
       total: 0,

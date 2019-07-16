@@ -19,7 +19,7 @@ module.exports = {
 
   domain: "@qiniu.com",
   loginURL: "http://storage.tc.echosoul.cn",
-  serviceURL: "http://s3-qos.tc.echosoul.cn",
+  serviceURL: "https://s3-cn-east-1.qiniucs.com",
 
   //logo png 格式, 主要用于mac和linux系统
   logo_png: path.join(__dirname, "./icon.png"),

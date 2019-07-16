@@ -17,7 +17,7 @@ angular.module("web").factory("Auth", [
     function login(data) {
       var df = $q.defer();
       var client = s3Client.getClient(data);
-        
+
       data.httpOptions = {
         timeout: 5000
       };

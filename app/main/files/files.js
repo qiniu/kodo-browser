@@ -10,6 +10,7 @@ angular.module("web").controller("filesCtrl", [
   "AuthInfo",
   "s3Client",
   "fileSvs",
+  "Const",
   "Toast",
   "Dialog",
   function (
@@ -24,6 +25,7 @@ angular.module("web").controller("filesCtrl", [
     AuthInfo,
     s3Client,
     fileSvs,
+    Const,
     Toast,
     Dialog
   ) {
@@ -214,17 +216,25 @@ angular.module("web").controller("filesCtrl", [
         var bucket = s3Client.parseS3Path(user.s3path).bucket;
 
         $rootScope.bucketMap = {};
-        $rootScope.bucketMap[bucket] = {
-          region: user.region
-        };
+        s3Client.getBucketLocation(bucket).then((regionId) => {
+          $rootScope.bucketMap[bucket] = { region: regionId };
+          $timeout(() => {
+            addEvents();
+            $scope.$broadcast("filesViewReady");
+          });
+        }, (err) => {
+          console.error("Failed to get bucket location, go away!", err);
+          Auth.logout().then(() => {
+            $location.url("/login");
+          });
+        });
       } else {
         $scope.ref.isBucketList = true;
+        $timeout(() => {
+          addEvents();
+          $scope.$broadcast("filesViewReady");
+        });
       }
-
-      $timeout(() => {
-        addEvents();
-        $scope.$broadcast("filesViewReady");
-      });
     }
 
     function addEvents() {
@@ -251,7 +261,10 @@ angular.module("web").controller("filesCtrl", [
 
         if (info.bucket) {
           // list objects
-          if (!$rootScope.bucketMap[info.bucket]) {
+          var bucketInfo = $rootScope.bucketMap[info.bucket]
+          if (bucketInfo) {
+            $scope.currentInfo.region = bucketInfo.region;
+          } else {
             Toast.error("Forbidden");
 
             clearFilesList();
@@ -308,8 +321,8 @@ angular.module("web").controller("filesCtrl", [
           var wait = buckets.length;
           angular.forEach(buckets, (bkt) => {
             m[bkt.name] = bkt;
-            s3Client.getBucketLocation(bkt.name).then((region_id) => {
-              bkt.region = region_id;
+            s3Client.getBucketLocation(bkt.name).then((regionId) => {
+              bkt.region = regionId;
               wait -= 1;
               if (wait == 0) {
                 $timeout(() => {

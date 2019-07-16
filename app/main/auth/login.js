@@ -19,7 +19,7 @@ angular.module("web").controller("loginCtrl", [
     Dialog,
     Toast
   ) {
-    var DEF_EPTPL = "https://{region}-s3.qiniu.com";
+    var DEF_EPTPL = "https://s3-{region}.qiniucs.com";
     var KEY_REMEMBER = Const.KEY_REMEMBER;
     var KEY_LOGINTPL = Const.KEY_LOGINTPL;
     var KEY_SERVICETPL = Const.KEY_SERVICETPL;
@@ -37,14 +37,12 @@ angular.module("web").controller("loginCtrl", [
       item: {
         domain: Global.custom_settings.domain,
         eptpl: DEF_EPTPL,
-        customtpl: false,
         logintpl: (localStorage.getItem(KEY_LOGINTPL) || Global.custom_settings.loginURL),
         servicetpl: (localStorage.getItem(KEY_SERVICETPL) || Global.custom_settings.serviceURL)
       },
       eptplType: "default",
 
       regions: regions,
-      defaultRegion: "",
 
       showGuestNav: 1,
       showCloudLogin: Global.custom_settings.appCloud,

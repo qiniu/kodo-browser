@@ -50,6 +50,7 @@ class UploadJob extends Base {
 
     this.from = util.parseLocalPath(this._config.from);
     this.to = util.parseS3Path(this._config.to);
+    this.region = this._config.region;
 
     this.prog = this._config.prog || {
       total: 0,

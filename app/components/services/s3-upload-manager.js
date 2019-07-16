@@ -2,11 +2,13 @@ angular.module("web").factory("s3UploadMgr", [
   "$timeout",
   "s3Client",
   "AuthInfo",
+  "Const",
   "settingsSvs",
   function (
     $timeout,
     s3Client,
     AuthInfo,
+    Const,
     settingsSvs
   ) {
     var fs = require("fs"),
@@ -55,7 +57,7 @@ angular.module("web").factory("s3UploadMgr", [
                 job.events: statuschange, progress
       */
     function createJob(auth, options) {
-      var region = options.region || auth.region || "cn-east-1";
+      var region = options.region || auth.region;
       console.info(
         "PUT",
         "::",
@@ -72,6 +74,12 @@ angular.module("web").factory("s3UploadMgr", [
       options.multipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
       options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
+
+      angular.forEach(Const.regions, (r) => {
+        if (r.id == region) {
+          auth.servicetpl = r.endpoint;
+        }
+      });
 
       var store = new S3Store({
         credential: {

@@ -1303,7 +1303,7 @@ angular.module("web").factory("s3Client", [
      *    object = {id, secret, region, bucket}
      */
     function getClient(opt) {
-      var options = prepaireOptions(opt);
+      var options = prepareOptions(opt);
 
       var client = new AWS.S3({
         apiVersion: "2006-03-01",
@@ -1323,23 +1323,25 @@ angular.module("web").factory("s3Client", [
       return client;
     }
 
-    function prepaireOptions(opt) {
+    function prepareOptions(opt) {
       var authInfo = AuthInfo.get();
 
       var bucket;
       if (typeof opt == "object") {
-        bucket = opt.bucket;
-
-        if (typeof authInfo.region != "undefined") {
-          opt.region = authInfo.region;
+        if (opt.region) {
+          angular.forEach(Const.regions, (region) => {
+            if (region.id == opt.region) {
+              opt.servicetpl = region.endpoint;
+            }
+          });
         }
-
+        bucket = opt.bucket;
         Object.assign(authInfo, opt);
       }
 
       var endpoint = getS3Endpoint(
-        authInfo.region || "cn-east-1",
-        bucket,
+        authInfo.region,
+        authInfo.bucket,
         authInfo.servicetpl || authInfo.eptpl
       );
 
@@ -1425,11 +1427,8 @@ angular.module("web").factory("s3Client", [
     function getS3Endpoint(region, bucket, eptpl) {
       var authInfo = AuthInfo.get();
 
-      if (!region) {
-        region = authInfo.region || "cn-east-1";
-      }
-
-      eptpl = eptpl || authInfo.servicetpl || authInfo.eptpl || "http://{region}-s3.qiniu.com";
+      region = region || authInfo.region;
+      eptpl = eptpl || authInfo.servicetpl || authInfo.eptpl;
       eptpl = eptpl.replace("{region}", region);
 
       return eptpl;

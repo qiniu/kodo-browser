@@ -2,12 +2,14 @@ angular.module("web").factory("s3DownloadMgr", [
   "$timeout",
   "AuthInfo",
   "s3Client",
+  "Const",
   "Toast",
   "settingsSvs",
   function (
     $timeout,
     AuthInfo,
     s3Client,
+    Const,
     Toast,
     settingsSvs
   ) {
@@ -58,7 +60,7 @@ angular.module("web").factory("s3DownloadMgr", [
      * @return job  { start(), stop(), status, progress }
      */
     function createJob(auth, options) {
-      var region = options.region || auth.region || "cn-east-1";
+      var region = options.region || auth.region;
       console.info(
         "GET",
         "::",
@@ -75,6 +77,12 @@ angular.module("web").factory("s3DownloadMgr", [
       options.multipartDownloadSize = settingsSvs.multipartDownloadSize.get();
       options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
+
+      angular.forEach(Const.regions, (r) => {
+        if (r.id == region) {
+          auth.servicetpl = r.endpoint;
+        }
+      });
 
       var store = new S3Store({
         credential: {

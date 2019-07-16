@@ -91,7 +91,7 @@ let createWindow = () => {
       return;
     }
 
-    // always stop 
+    // always stop
     if (winBlockedTid) {
       clearInterval(winBlockedTid);
     }
@@ -290,6 +290,7 @@ ipcMain.on("asynchronous-job", (event, data) => {
     worker.on("message", function (msg) {
       if (!win) return;
 
+      console.info(msg);
       if (data.params.isDebug) {
         event.sender.send(data.job, {
           job: data.job,

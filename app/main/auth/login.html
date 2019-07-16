@@ -40,23 +40,7 @@
       </div>
 
       <div class="panel-body">
-
         <form class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
-          <div class="form-group" ng-if="regions && regions.length > 0">
-            <label for="input4" class="col-sm-4 control-label">
-              <span class="red">*</span>
-              {{'region'|translate}}:
-            </label>
-            <div class="col-sm-8">
-              <select ng-if="!item.customtpl" required ng-model="item.servicetpl" class="form-control" id="input4" placeholder="{{'auth.region.placeholder'|translate}}" ng-options="rg.endpoint as ('region.'+rg.id|translate) for rg in regions"></select>
-              <input ng-if="item.customtpl" class="form-control" ng-model="item.servicetpl" />
-              <span class="text-muted">
-                <input type="checkbox" ng-model="item.customtpl">
-                {{'customize'|translate}}
-              </span>
-            </div>
-          </div>
-
           <div class="form-group has-feedback" ng-class="{'has-error': !form1.aid.$valid }">
             <label for="aid" class="col-sm-4 control-label">
               <span class="red">*</span> AccessKeyId:</label>

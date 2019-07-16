@@ -1,5 +1,5 @@
 module.exports = {
-  "app.name": "Qiniu Browser",
+  "app.name": "KODO Browser",
   language: "Language",
   name: "Name",
   type: "Type",

@@ -2,16 +2,16 @@ const path = require("path");
 
 module.exports = {
   //窗体title
-  title: "七牛浏览器",
+  title: "KODO 浏览器",
 
   //app id，打包名称前缀
   appId: "kodo-browser",
 
   //app名称，需要提供各个语言版本
   appName: {
-    "zh-CN": "七牛浏览器",
-    "en-US": "Qiniu Browser",
-    "ja-JP": "7つの牛のブラウザ"
+    "zh-CN": "KODO 浏览器",
+    "en-US": "KODO Browser",
+    "ja-JP": "KODOブラウザ"
   },
 
   // 是否显示公有与登录信息

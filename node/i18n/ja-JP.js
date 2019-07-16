@@ -1,5 +1,5 @@
 module.exports = {
-  "app.name": "7つの牛のブラウザ",
+  "app.name": "KODOブラウザ",
   language: "言語",
   name: "名前",
   type: "タイプ",

@@ -6,9 +6,11 @@ module.exports = {
   customize: "カスタマイズ",
   "public.cloud": "パブリッククラウド",
 
-  "region.cn-north-1": "中国北部 1(北京)",
-  "region.cn-east-1": "中国東部 1(杭州)",
-  "region.cn-south-1": "中国南部 1(深セン)",
+  "region.cn-north-1": "中国北部",
+  "region.cn-east-1": "中国東部",
+  "region.cn-south-1": "中国南部",
+  "region.us-north-1": "北米",
+  "region.ap-southeast-1": "東南亜",
 
   optional: "オプション",
   default: "デフォルト",
@@ -99,6 +101,7 @@ module.exports = {
   simplePolicy: "シンプルポリシー",
   more: "さらに",
   "bucket.name": "バケット名",
+  "bucket.region": "バケット領域",
   creationTime: "作成時間",
 
   "multipart.management": "マルチパート",

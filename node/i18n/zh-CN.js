@@ -6,9 +6,11 @@ module.exports = {
   customize: "自定义",
   "public.cloud": "公有云",
 
-  "region.cn-north-1": "华北 1 (北京)",
-  "region.cn-east-1": "华东 1 (杭州)",
-  "region.cn-south-1": "华南 1 (广州)",
+  "region.cn-north-1": "华北",
+  "region.cn-east-1": "华东",
+  "region.cn-south-1": "华南",
+  "region.us-north-1": "北美",
+  "region.ap-southeast-1": "东南亚",
 
   optional: "可选",
   default: "默认",
@@ -99,6 +101,7 @@ module.exports = {
   simplePolicy: "简化Policy授权",
   more: "更多",
   "bucket.name": "Bucket名称",
+  "bucket.region": "Bucket区域",
   creationTime: "创建时间",
 
   "multipart.management": "Multipart管理",

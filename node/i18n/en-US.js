@@ -6,9 +6,11 @@ module.exports = {
   customize: "Customize",
   "public.cloud": "Public Cloud",
 
-  "region.cn-north-1": "North China 1(Beijing)",
-  "region.cn-east-1": "East China 1(Hangzhou)",
-  "region.cn-south-1": "South China 1(Guangzhou)",
+  "region.cn-north-1": "North China",
+  "region.cn-east-1": "East China",
+  "region.cn-south-1": "South China",
+  "region.us-north-1": "North America",
+  "region.ap-southeast-1": "Southeast Asia",
 
   optional: "Optional",
   default: "Default",
@@ -99,6 +101,7 @@ module.exports = {
   simplePolicy: "Simple Policy",
   more: "More",
   "bucket.name": "Bucket Name",
+  "bucket.region": "Bucket Region",
   creationTime: "Creation Time",
 
   "multipart.management": "Multipart",

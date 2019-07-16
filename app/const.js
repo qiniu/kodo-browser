@@ -37,20 +37,32 @@ angular.module("web").factory("Const", [
       regions: [
         {
           id: "cn-east-1",
-          label: "华东 1",
-          endpoint: "https://cn-east-1-s3.qiniu.com",
+          label: "华东",
+          endpoint: "https://s3-cn-east-1.qiniucs.com",
           storageClasses: getStorageClasses(2)
         },
         {
           id: "cn-north-1",
-          label: "华北 1",
-          endpoint: "https://cn-north-1-s3.qiniu.com",
+          label: "华北",
+          endpoint: "https://s3-cn-north-1.qiniucs.com",
           storageClasses: getStorageClasses(2)
         },
         {
           id: "cn-south-1",
-          label: "华南 1",
-          endpoint: "https://cn-south-1-s3.qiniu.com",
+          label: "华南",
+          endpoint: "https://s3-cn-south-1.qiniucs.com",
+          storageClasses: getStorageClasses(2)
+        },
+        {
+          id: "us-north-1",
+          label: "北美",
+          endpoint: "https://s3-us-north-1.qiniucs.com",
+          storageClasses: getStorageClasses(2)
+        },
+        {
+          id: "ap-southeast-1",
+          label: "东南亚",
+          endpoint: "https://s3-ap-southeast-1.qiniucs.com",
           storageClasses: getStorageClasses(2)
         }
       ],

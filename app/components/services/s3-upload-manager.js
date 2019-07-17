@@ -90,7 +90,7 @@ angular.module("web").factory("s3UploadMgr", [
         region: options.region,
         httpOptions: {
           connectTimeout: 3000, // 3s
-          timeout: 86400000 // 1d
+          timeout: 300000 // 5m
         }
       });
 

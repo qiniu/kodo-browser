@@ -97,7 +97,7 @@ angular.module("web").factory("s3DownloadMgr", [
         region: region,
         httpOptions: {
           connectTimeout: 3000, // 3s
-          timeout: 86400000 // 1d
+          timeout: 300000 // 5m
         }
       });
 

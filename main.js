@@ -290,7 +290,7 @@ ipcMain.on("asynchronous-job", (event, data) => {
     worker.on("message", function (msg) {
       if (!win) return;
 
-      console.info(msg);
+      console.info({upload_debug: msg});
       if (data.params.isDebug) {
         event.sender.send(data.job, {
           job: data.job,
@@ -443,6 +443,7 @@ ipcMain.on("asynchronous-job", (event, data) => {
     worker.on("message", function (msg) {
       if (!win) return;
 
+      console.info({download_debug: msg});
       if (data.params.isDebug) {
         event.sender.send(data.job, {
           job: data.job,

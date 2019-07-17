@@ -381,7 +381,7 @@ Client.prototype.downloadFile = function (params) {
   function handleAbort() {
     isAborted = true;
 
-    if (s3downloader) {
+    if (s3downloader && s3downloader.abort) {
       s3downloader.abort();
     }
 

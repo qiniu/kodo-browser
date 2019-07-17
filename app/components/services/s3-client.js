@@ -1316,7 +1316,7 @@ angular.module("web").factory("s3Client", [
         signatureVersion: "v4",
         httpOptions: {
           connectTimeout: 3000, // 3s
-          timeout: 86400000 // 1d
+          timeout: 300000 // 5m
         }
       });
 

@@ -160,3 +160,6 @@ html, body {
 .loadEffect div:nth-child(4){
   -webkit-animation-delay:0.8s;
 }
+.tooltip-inner {
+  word-wrap: break-word;
+}

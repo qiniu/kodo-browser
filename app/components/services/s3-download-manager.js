@@ -241,6 +241,16 @@ angular.module("web").factory("s3DownloadMgr", [
               });
             });
           }, Promise.resolve(toLocalPath)).then((localPath) => {
+            var fileLocalPath = path.normalize(path.join(localPath, fileName));
+            var fileLocalPathWithSuffix = fileLocalPath;
+
+            for (var i = 1; ; i++) {
+              if (fs.existsSync(fileLocalPathWithSuffix)) {
+                fileLocalPathWithSuffix = fileLocalPath + "." + i;
+              } else {
+                break;
+              }
+            }
             var job = createJob(authInfo, {
               region: s3info.region,
               from: {
@@ -249,12 +259,11 @@ angular.module("web").factory("s3DownloadMgr", [
               },
               to: {
                 name: fileName,
-                path: path.normalize(path.join(localPath, fileName))
+                path: fileLocalPathWithSuffix
               }
             });
 
             addEvents(job);
-
             t.push(job);
 
             if (callFn) callFn();

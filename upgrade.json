@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0",
+  "version": "0.1.0-beta",
   "package_url":
-    "https://raw.githubusercontent.com/s3-browser/s3-browser/upgrade.json",
+    "https://raw.githubusercontent.com/qiniu/kodo-browser/upgrade.json",
   "files": ["app.asar"]
 }

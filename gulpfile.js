@@ -226,9 +226,7 @@ gulp.task("mac", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });
@@ -237,7 +235,7 @@ gulp.task("dmg", () => {
   console.log(`--package ${NAME}.dmg`);
 
   plugins.run(`rm -f ${RELEASE}/${VERSION}/${NAME}.dmg`).exec(() => {
-    plugins.run(`rm ${TARGET}/${NAME}-darwin-x64/LICENSE* ${TARGET}/${NAME}-darwin-x64/version`).exec(() => {
+    plugins.run(`rm -f ${TARGET}/${NAME}-darwin-x64/LICENSE* ${TARGET}/${NAME}-darwin-x64/version`).exec(() => {
       plugins.run(`ln -s /Applications/ ${TARGET}/${NAME}-darwin-x64/Applications`).exec(() => {
         plugins.run(`cp -f ${DIST}/icons/icon.icns ${TARGET}/${NAME}-darwin-x64/.VolumeIcon.icns`).exec(() => {
           plugins.run(`hdiutil create -size 350m -format UDZO -srcfolder ${TARGET}/${NAME}-darwin-x64 -o ${RELEASE}/${VERSION}/${NAME}.dmg`).exec(() => {
@@ -263,9 +261,7 @@ gulp.task("win64", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });
@@ -284,9 +280,7 @@ gulp.task("win32", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });
@@ -304,9 +298,7 @@ gulp.task("linux64", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });
@@ -324,9 +316,7 @@ gulp.task("linux32", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });

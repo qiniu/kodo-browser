@@ -1,6 +1,6 @@
 angular.module("web").factory("upgradeSvs", [
   function () {
-    var NAME = Global.app.id || "s3-browser";
+    var NAME = Global.app.id || "kodo-browser";
 
     var release_notes_url = Global.release_notes_url;
     var upgrade_url = Global.upgrade_url;

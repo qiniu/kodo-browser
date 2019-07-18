@@ -92,7 +92,7 @@
 
     var Global = {
       app: {
-        id: custom.appId || '.s3-browser',
+        id: custom.appId || '.kodo-browser',
         logo: custom.logo_png || 'icons/icon.png', //logo
         version: custom.version || pkg.version //version
       },
@@ -108,10 +108,10 @@
       config_path: path.join(os.homedir(), '.s3-browser'),
 
       //release notes目录后缀，里面有 ${version}.md, 如 1.0.0.md
-      release_notes_url: `https://raw.githubusercontent.com/s3-browser/s3-browser/${isDev ? 'develop' : 'master'}/release-notes/`,
+      release_notes_url: `https://raw.githubusercontent.com/qiniu/kodo-browser/${isDev ? 'develop' : 'master'}/release-notes/`,
 
       // //升级检测链接
-      upgrade_url: `https://raw.githubusercontent.com/s3-browser/s3-browser/${isDev ? 'develop' : 'master'}/upgrade.json`,
+      upgrade_url: `https://raw.githubusercontent.com/qiniu/kodo-browser/${isDev ? 'develop' : 'master'}/upgrade.json`,
 
       about_html: custom.about_html
     };
@@ -120,7 +120,7 @@
       if (custom.appName)
         for (var k in custom.appName) {
           if (Global.i18n[k])
-            Global.i18n[k].content['app.name'] = custom.appName[k] || 'Qiniu Browser';
+            Global.i18n[k].content['app.name'] = custom.appName[k] || 'KODO Browser';
         }
     })();
 

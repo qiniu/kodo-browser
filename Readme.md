@@ -79,7 +79,7 @@ make build  # build前端代码到dist目录
 ```
 
 ```
-make win64  # 打包win64程序， 可选: mac, linux64,linux32,win32,win64,all.
+make win64  # 打包 win64 程序， 可选: mac, linux64, linux32, win32, win64, all.
 ```
 
 

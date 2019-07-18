@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('grantTokenModalCtrl', ['$scope', '$q', '$uibModalInstance','$translate', 'item', 'currentInfo','ramSvs','stsSvs','Toast', 'safeApply',
-    function ($scope, $q, $modalInstance, $translate, item, currentInfo,ramSvs, stsSvs, Toast, safeApply) {
+  .controller('grantTokenModalCtrl', ['$scope', '$q', '$uibModalInstance', '$translate', 'item', 'currentInfo', 'ramSvs', 'stsSvs', 'Toast', 'safeApply',
+    function ($scope, $q, $modalInstance, $translate, item, currentInfo, ramSvs, stsSvs, Toast, safeApply) {
       var T = $translate.instant;
       angular.extend($scope, {
         cancel: cancel,
@@ -15,28 +15,28 @@ angular.module('web')
         policyNameReg: /^[a-z0-9A-Z\-]{1,128}$/,
         message5: {
           object: item.name,
-          type: item.isBucket?"Bucket":T('folder'),
+          type: item.isBucket ? "Bucket" : T('folder'),
           privilege: T('privilege.readonly'),
           expiration: '',
-        } 
+        }
       });
 
-      $scope.$watch('grant.privType', function(v){
-        $scope.message5.privilege = T('privilege.'+v.toLowerCase());
+      $scope.$watch('grant.privType', function (v) {
+        $scope.message5.privilege = T('privilege.' + v.toLowerCase());
       });
 
       init();
-      function init(){
+      function init() {
 
         policyChange();
         var ignoreError = true;
 
-        ramSvs.listRoles(ignoreError).then(function(result){
-           $scope.roles = result;
-        },function(err){
-           $scope.roles = [];
+        ramSvs.listRoles(ignoreError).then(function (result) {
+          $scope.roles = result;
+        }, function (err) {
+          $scope.roles = [];
 
-          if(err.message.indexOf('You are not authorized to do this action')!=-1){
+          if (err.message.indexOf('You are not authorized to do this action') != -1) {
             Toast.error(T('simplePolicy.noauth.message3')); //'没有权限获取角色列表'
           }
         });
@@ -53,7 +53,7 @@ angular.module('web')
         var t = [];
 
         var actions = [];
-        if(privType=='readOnly'){
+        if (privType == 'readOnly') {
           actions = ['s3:GetObject',
             's3:HeadObject',
             "s3:GetObjectMeta",
@@ -62,7 +62,7 @@ angular.module('web')
             's3:GetSymlink'
           ];
         }
-        else{
+        else {
           actions = ['s3:*'];
         }
 
@@ -71,8 +71,8 @@ angular.module('web')
 
         if (item.region || item.isFolder) {
           //bucket or folder
-          var bucket = item.region? item.name: currentInfo.bucket;
-          var key = item.path||'';
+          var bucket = item.region ? item.name : currentInfo.bucket;
+          var key = item.path || '';
 
           t.push({
             "Effect": "Allow",
@@ -116,10 +116,10 @@ angular.module('web')
       }
 
       var policy;
-      function policyChange(){
+      function policyChange() {
         var privType = $scope.grant.privType;
         policy = genPolicy(privType);
-        $scope.grant.policy = JSON.stringify(policy,' ',2);
+        $scope.grant.policy = JSON.stringify(policy, ' ', 2);
 
         // var name =  (Math.random()+'').substring(2);
         // name = $scope.item.name.replace(/[\W_]+/g,'-');
@@ -132,12 +132,12 @@ angular.module('web')
         var info = angular.copy($scope.grant);
         var item = angular.copy($scope.item);
         var region = item.region || currentInfo.region;
-        var bucket = item.region? item.name: currentInfo.bucket;
-        var key = item.path||'';
+        var bucket = item.region ? item.name : currentInfo.bucket;
+        var key = item.path || '';
 
         //console.log(info)
 
-        stsSvs.assumeRole(info.roleArn, info.policy, info.durSeconds).then(function(result){
+        stsSvs.assumeRole(info.roleArn, info.policy, info.durSeconds).then(function (result) {
           //console.log(result)
 
           $scope.origin_token = result;
@@ -150,14 +150,14 @@ angular.module('web')
             stoken: credentials.SecurityToken,
             expiration: credentials.Expiration,
             region: region,
-            s3path: 's3://' + bucket + '/'+ key,
+            s3path: 'kodo://' + bucket + '/' + key,
             privilege: info.privType,
           }
 
           $scope.token = Buffer.from(JSON.stringify(tokenInfo)).toString('base64');
 
           $scope.message5.expiration = moment(new Date(result.Credentials.Expiration)).format('YYYY-MM-DD HH:mm:ss');
-        },function(err){
+        }, function (err) {
           console.log(err)
         });
 

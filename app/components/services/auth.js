@@ -23,7 +23,7 @@ angular.module("web").factory("Auth", [
       };
 
       if (data.s3path) {
-        var urlinfo = s3Client.parseS3Path(data.s3path);
+        var urlinfo = s3Client.parseKodoPath(data.s3path);
 
         data.bucket = urlinfo.bucket;
 

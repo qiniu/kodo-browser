@@ -298,7 +298,7 @@ angular.module("web").factory("s3UploadMgr", [
       });
       job.on("error", (err) => {
         if (err) {
-          console.error(`upload s3://${job.to.bucket}/${job.to.key} error: ${err.message}`);
+          console.error(`upload kodo://${job.to.bucket}/${job.to.key} error: ${err.message}`);
         }
 
         concurrency--;
@@ -380,12 +380,12 @@ angular.module("web").factory("s3UploadMgr", [
     }
 
     function getProgFilePath() {
-      var folder = path.join(os.homedir(), ".s3-browser");
+      var folder = Global.config_path;
       if (!fs.existsSync(folder)) {
         fs.mkdirSync(folder);
       }
 
-      var username = AuthInfo.get().id || "s3-browser";
+      var username = AuthInfo.get().id || "kodo-browser";
 
       return path.join(folder, "upprog_" + username + ".json");
     }

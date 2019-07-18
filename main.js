@@ -238,7 +238,7 @@ ipcMain.on("asynchronous", (event, data) => {
       fs.rename(from, to, (e) => {
         if (e) {
           fs.writeFileSync(
-            path.join(homeRoot, ".s3-browser", "upgrade-error.txt"),
+            path.join(homeRoot, ".kodo-browser", "upgrade-error.txt"),
             JSON.stringify(e)
           );
         } else {

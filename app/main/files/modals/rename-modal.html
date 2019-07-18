@@ -16,7 +16,7 @@
         <!-- 所在目录: -->
         {{'folder.in'|translate}}:
       </label>
-      <div class="col-sm-8 input-md pdt4">s3://{{moveTo.bucket}}/{{moveTo.key}}</div>
+      <div class="col-sm-8 input-md pdt4">kodo://{{moveTo.bucket}}/{{moveTo.key}}</div>
     </div>
 
 
@@ -28,8 +28,8 @@
         {{'rename.to'|translate}}:
       </label>
       <div class="col-sm-8">
-        <input type="text" ng-model="item.name" id="name1" autocomplete="off" autofocus
-         name="name" required="required" class="input-md form-control"/>
+        <input type="text" ng-model="item.name" id="name1" autocomplete="off" autofocus name="name" required="required"
+          class="input-md form-control" />
       </div>
 
       <div class="clearfix"></div>
@@ -38,7 +38,8 @@
   </div>
   <div class="modal-footer">
 
-    <button ng-disabled="isLoading || (keep.name==item.name && moveTo.key==currentInfo.key)" type="submit" class="btn btn-success btn-sm">
+    <button ng-disabled="isLoading || (keep.name==item.name && moveTo.key==currentInfo.key)" type="submit"
+      class="btn btn-success btn-sm">
       <i class="glyphicon glyphicon-ok"></i>
       <!-- 确定 -->
       {{'ok'|translate}}

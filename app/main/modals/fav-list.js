@@ -21,7 +21,7 @@ angular.module("web").controller("favListCtrl", [
     refresh();
 
     function goTo(url) {
-      $rootScope.$broadcast("gotoS3Address", url);
+      $rootScope.$broadcast("gotoKodoAddress", url);
       cancel();
     }
 

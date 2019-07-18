@@ -5,7 +5,7 @@ var path = require("path"),
 
 module.exports = {
   parseLocalPath: parseLocalPath,
-  parseS3Path: parseS3Path,
+  parseKodoPath: parseKodoPath,
   md5sumFile: md5sumFile,
   checksumFile: checksumFile,
   printPartTimeLine: printPartTimeLine
@@ -22,16 +22,16 @@ function parseLocalPath(p) {
   };
 }
 
-function parseS3Path(s3path) {
-  if (typeof s3path != "string") {
-    return s3path;
+function parseKodoPath(kodopath) {
+  if (typeof kodopath != "string") {
+    return kodopath;
   }
 
-  if (!s3path.startsWith("s3://")) {
-    throw Error("Invalid s3 path");
+  if (!kodopath.startsWith("kodo://")) {
+    throw Error("Invalid kodo path");
   }
 
-  var a = s3path.substring("s3://".length);
+  var a = kodopath.substring("kodo://".length);
   var bucket = a.split("/", 1)[0];
   var key = a.substring(bucket.length + 1);
   return {

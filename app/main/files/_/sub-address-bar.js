@@ -109,7 +109,7 @@ angular.module('web')
         //console.log('-->',addr);
         $scope.address = addr.url;
         $scope.subAddress = getSubAddress();
-        $scope.$emit('s3AddressChange', addr.url);
+        $scope.$emit('kodoAddressChange', addr.url);
       }
 
       function goAhead() {
@@ -117,7 +117,7 @@ angular.module('web')
         //console.log('-->',addr);
         $scope.address = addr.url;
         $scope.subAddress = getSubAddress();
-        $scope.$emit('s3AddressChange', addr.url);
+        $scope.$emit('kodoAddressChange', addr.url);
       }
       /************ 历史记录前进后退 end **************/
 
@@ -125,8 +125,8 @@ angular.module('web')
 
         goHome();
 
-        $scope.$on('gotoS3Address', function (e, addr) {
-          console.log('on:gotoS3Address', addr);
+        $scope.$on('gotoKodoAddress', function (e, addr) {
+          console.log('on:gotoKodoAddress', addr);
           $scope.address = addr;
           $scope.subAddress = getSubAddress();
           go();
@@ -181,7 +181,7 @@ angular.module('web')
         var addr = getAddress();
         His.add(addr); //历史记录
         console.log(addr)
-        $scope.$emit('s3AddressChange', addr, force);
+        $scope.$emit('kodoAddressChange', addr, force);
       }
       //向上
       function goUp() {

@@ -62,7 +62,7 @@ function S3Store(config) {
  * Usage:
  *
  *  new S3Store(cfg)
- *     .createUploadJob({from:'/home/a.jpg', to:'s3://a/b.jpg'})
+ *     .createUploadJob({from:'/home/a.jpg', to:'kodo://a/b.jpg'})
  *
  * UploadJob class:
 
@@ -77,7 +77,7 @@ function S3Store(config) {
  *
  * @param options
  *    options.from  {object|string} local path, as object: {name:'a.jpg', path:'/home/admin/a.jpg'},  as string: '/home/admin/a.jpg'
- *    options.to    {object|string} s3 path, as object: {bucket:'bucket',key:'pic/b.jpg'} as string: 's3://bucket/pic/b.jpg'
+ *    options.to    {object|string} kodo path, as object: {bucket:'bucket',key:'pic/b.jpg'} as string: 'kodo://bucket/pic/b.jpg'
  *    options.checkPoints {object} saved progs
  */
 S3Store.prototype.createUploadJob = function createUploadJob(options) {
@@ -89,7 +89,7 @@ S3Store.prototype.createUploadJob = function createUploadJob(options) {
  * Usage:
  *
  *  new S3Store(cfg)
- *     .createDownloadJob({from:'/home/a.jpg', to:'s3://a/b.jpg'})
+ *     .createDownloadJob({from:'/home/a.jpg', to:'kodo://a/b.jpg'})
  *
  * DownloadJob class:
 
@@ -103,8 +103,8 @@ S3Store.prototype.createUploadJob = function createUploadJob(options) {
 
  *
  * @param options
- *    options.from    {string} path string, under s3 prefix, example: '/pic/b.jpg', it will be append to presetting s3path
- *                       as: 's3://bucket/users/test_user/pic/b.jpg'
+ *    options.from    {string} path string, under kodo prefix, example: '/pic/b.jpg', it will be append to presetting kodopath
+ *                       as: 'kodo://bucket/users/test_user/pic/b.jpg'
  *    options.to  {string} local path string,  example: '/home/admin/a.jpg'
  *
  *    options.checkPoints {object} saved progs

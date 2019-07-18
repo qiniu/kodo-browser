@@ -317,7 +317,7 @@ angular.module("web").factory("s3DownloadMgr", [
       });
       job.on("error", (err) => {
         if (err) {
-          console.error(`download s3://${job.from.bucket}/${job.from.key} error: ${err.message}`);
+          console.error(`download kodo://${job.from.bucket}/${job.from.key} error: ${err.message}`);
         }
 
         concurrency--;
@@ -403,13 +403,12 @@ angular.module("web").factory("s3DownloadMgr", [
 
     // prog save path
     function getDownProgFilePath() {
-      var folder = path.join(os.homedir(), ".s3-browser");
+      var folder = Global.config_path;
       if (!fs.existsSync(folder)) {
         fs.mkdirSync(folder);
       }
 
-      var username = AuthInfo.get().id || "s3-browser";
-
+      var username = AuthInfo.get().id || "kodo-browser";
       return path.join(folder, "downprog_" + username + ".json");
     }
   }

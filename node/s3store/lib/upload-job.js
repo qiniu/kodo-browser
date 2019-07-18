@@ -16,7 +16,7 @@ class UploadJob extends Base {
    * @param s3options
    * @param config
    *    config.from {object|string}  {name, path} or /home/admin/a.jpg
-   *    config.to   {object|string}  {bucket, key} or s3://bucket/test/a.jpg
+   *    config.to   {object|string}  {bucket, key} or kodo://bucket/test/a.jpg
    *    config.prog   {object}  {loaded, total}
    *    config.status     {string} default 'waiting'
    *    config.resumeUpload  {bool} default false
@@ -49,7 +49,7 @@ class UploadJob extends Base {
     this.s3options = s3options;
 
     this.from = util.parseLocalPath(this._config.from);
-    this.to = util.parseS3Path(this._config.to);
+    this.to = util.parseKodoPath(this._config.to);
     this.region = this._config.region;
 
     this.prog = this._config.prog || {
@@ -74,7 +74,7 @@ UploadJob.prototype.start = function (overwrite, prog) {
   if (this.status == "running") return;
 
   if (this.isDebug) {
-    console.log(`Try uploading ${this.from.path} to s3://${this.to.bucket}/${this.to.key}`);
+    console.log(`Try uploading ${this.from.path} to kodo://${this.to.bucket}/${this.to.key}`);
   }
 
   // start
@@ -171,59 +171,59 @@ UploadJob.prototype.startUpload = function (event, data) {
   }
 
   switch (data.key) {
-  case 'fileDuplicated':
-    ipcRenderer.removeListener(this.id, this._listener);
+    case 'fileDuplicated':
+      ipcRenderer.removeListener(this.id, this._listener);
 
-    this._changeStatus("duplicated");
-    this.emit('fileDuplicated', data);
-    break;
+      this._changeStatus("duplicated");
+      this.emit('fileDuplicated', data);
+      break;
 
-  case 'fileStat':
-    var prog = data.data;
+    case 'fileStat':
+      var prog = data.data;
 
-    this.prog.total = prog.progressTotal;
-    this.prog.resumable = prog.progressResumable;
-    this.emit('progress', this.prog);
-    break;
+      this.prog.total = prog.progressTotal;
+      this.prog.resumable = prog.progressResumable;
+      this.emit('progress', this.prog);
+      break;
 
-  case 'progress':
-    var prog = data.data;
+    case 'progress':
+      var prog = data.data;
 
-    this.prog.loaded = prog.progressLoaded;
-    this.prog.resumable = prog.progressResumable;
-    this.emit('progress', this.prog);
-    break;
+      this.prog.loaded = prog.progressLoaded;
+      this.prog.resumable = prog.progressResumable;
+      this.emit('progress', this.prog);
+      break;
 
-  case 'filePartUploaded':
-    var part = data.data;
+    case 'filePartUploaded':
+      var part = data.data;
 
-    this.emit('partcomplete', part);
-    break;
+      this.emit('partcomplete', part);
+      break;
 
-  case 'fileUploaded':
-    ipcRenderer.removeListener(this.id, this._listener);
+    case 'fileUploaded':
+      ipcRenderer.removeListener(this.id, this._listener);
 
-    this._changeStatus("finished");
-    this.emit("complete");
-    break;
+      this._changeStatus("finished");
+      this.emit("complete");
+      break;
 
-  case 'error':
-    console.error("upload object error:", data);
-    ipcRenderer.removeListener(this.id, this._listener);
+    case 'error':
+      console.error("upload object error:", data);
+      ipcRenderer.removeListener(this.id, this._listener);
 
-    this.message = data;
-    this._changeStatus("failed");
-    this.emit("error", data.error);
-    break;
+      this.message = data;
+      this._changeStatus("failed");
+      this.emit("error", data.error);
+      break;
 
-  case 'debug':
-    if (!this.isDebug) {
-      console.log("Debug", data);
-    }
-    break;
+    case 'debug':
+      if (!this.isDebug) {
+        console.log("Debug", data);
+      }
+      break;
 
-  default:
-    console.warn("Unknown", data);
+    default:
+      console.warn("Unknown", data);
   }
 };
 
@@ -259,8 +259,8 @@ UploadJob.prototype.startSpeedCounter = function () {
 
     self.predictLeftTime =
       self.speed <= 0 ?
-      0 :
-      Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
+        0 :
+        Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
   }, 1000);
 };
 

@@ -134,16 +134,16 @@ angular.module("web").controller("filesCtrl", [
 
     /////////////////////////////////
     function gotoAddress(bucket, prefix) {
-      var s3path = "s3://";
+      var kodopath = "kodo://";
       if (bucket) {
-        s3path = `s3://${bucket}/${prefix || ""}`;
+        kodopath += `${bucket}/${prefix || ""}`;
       }
 
-      $rootScope.$broadcast("gotoS3Address", s3path);
+      $rootScope.$broadcast("gotoKodoAddress", kodopath);
     }
 
     function getCurrentPath() {
-      return `s3://${$scope.currentInfo.bucket}/${$scope.currentInfo.key}`;
+      return `kodo://${$scope.currentInfo.bucket}/${$scope.currentInfo.key}`;
     }
 
     /////////////////////////////////
@@ -213,7 +213,7 @@ angular.module("web").controller("filesCtrl", [
       if (user.s3path) {
         $scope.ref.isBucketList = false;
 
-        var bucket = s3Client.parseS3Path(user.s3path).bucket;
+        var bucket = s3Client.parseKodoPath(user.s3path).bucket;
 
         $rootScope.bucketMap = {};
         s3Client.getBucketLocation(bucket).then((regionId) => {
@@ -238,12 +238,12 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function addEvents() {
-      $scope.$on("s3AddressChange", (evt, addr, forceRefresh) => {
+      $scope.$on("kodoAddressChange", (evt, addr, forceRefresh) => {
         evt.stopPropagation();
 
-        console.log(`on:s3AddressChange: ${addr}, forceRefresh: ${!!forceRefresh}`);
+        console.log(`on:kodoAddressChange: ${addr}, forceRefresh: ${!!forceRefresh}`);
 
-        var info = s3Client.parseS3Path(addr);
+        var info = s3Client.parseKodoPath(addr);
 
         $scope.currentInfo = info;
 
@@ -387,7 +387,7 @@ angular.module("web").controller("filesCtrl", [
         if (fn) fn(null, result.data);
 
       }, (err) => {
-        console.error(`list files: s3://${info.bucket}/${info.key}?marker=${maker}i`, err);
+        console.error(`list files: kodo://${info.bucket}/${info.key}?marker=${maker}i`, err);
 
         clearFilesList();
 
@@ -399,7 +399,7 @@ angular.module("web").controller("filesCtrl", [
       if ($scope.nextObjectsMarker) {
         var info = $scope.currentInfo;
 
-        console.log(`loading next s3://${info.bucket}/${info.key}?marker=${$scope.nextObjectsMarker}`);
+        console.log(`loading next kodo://${info.bucket}/${info.key}?marker=${$scope.nextObjectsMarker}`);
 
         tryListFiles(info, $scope.nextObjectsMarker, (err, files) => {
           if (err) {

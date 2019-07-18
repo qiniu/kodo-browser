@@ -12,7 +12,7 @@ angular.module("web").factory("s3Client", [
     var path = require("path");
 
     var NEXT_TICK = 1;
-    var DEF_ADDR = "s3://";
+    var DEF_ADDR = "kodo://";
 
     return {
       listAllBuckets: listAllBuckets,
@@ -52,7 +52,7 @@ angular.module("web").factory("s3Client", [
       stopDeleteFiles: stopDeleteFiles,
 
       getClient: getClient,
-      parseS3Path: parseS3Path,
+      parseKodoPath: parseKodoPath,
       getS3Endpoint: getS3Endpoint,
       parseRestoreInfo: parseRestoreInfo,
       signatureUrl: signatureUrl,
@@ -1360,7 +1360,7 @@ angular.module("web").factory("s3Client", [
       return options;
     }
 
-    function parseS3Path(s3Path) {
+    function parseKodoPath(s3Path) {
       if (!s3Path || s3Path.indexOf(DEF_ADDR) == -1 || s3Path == DEF_ADDR) {
         return {};
       }

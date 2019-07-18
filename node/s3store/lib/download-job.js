@@ -14,7 +14,7 @@ class DownloadJob extends Base {
    *
    * @param s3options
    * @param config
-   *    config.from {object|string}  {bucket, key} or s3://bucket/test/a.jpg
+   *    config.from {object|string}  {bucket, key} or kodo://bucket/test/a.jpg
    *    config.to   {object|string}  {name, path} or /home/admin/a.jpg
    *    config.resumeDownload  {bool} default false
    *    config.multipartDownloadThreshold  {number} default 100M
@@ -37,7 +37,7 @@ class DownloadJob extends Base {
 
     this.s3options = s3options;
 
-    this.from = util.parseS3Path(this._config.from); //s3 path
+    this.from = util.parseKodoPath(this._config.from); //s3 path
     this.to = util.parseLocalPath(this._config.to); //local path
     this.region = this._config.region;
 
@@ -64,7 +64,7 @@ DownloadJob.prototype.start = function (prog) {
   if (this.status == "running") return;
 
   if (this.isDebug) {
-    console.log(`Try downloading s3://${this.from.bucket}/${this.from.key} to ${this.to.path}`);
+    console.log(`Try downloading kodo://${this.from.bucket}/${this.from.key} to ${this.to.path}`);
   }
 
   // start
@@ -114,7 +114,7 @@ DownloadJob.prototype.stop = function () {
   if (this.status == "stopped") return;
 
   if (this.isDebug) {
-    console.log(`Pausing s3://${this.from.bucket}/${this.from.key}`);
+    console.log(`Pausing kodo://${this.from.bucket}/${this.from.key}`);
   }
 
   clearInterval(this.speedTid);
@@ -139,7 +139,7 @@ DownloadJob.prototype.wait = function () {
   if (this.status == "waiting") return;
 
   if (this.isDebug) {
-    console.log(`Pendding s3://${this.from.bucket}/${this.from.key}`);
+    console.log(`Pending kodo://${this.from.bucket}/${this.from.key}`);
   }
 
   this._lastStatusFailed = this.status == "failed";
@@ -162,65 +162,65 @@ DownloadJob.prototype.startDownload = function (event, data) {
   }
 
   switch (data.key) {
-  case 'fileStat':
-    var prog = data.data;
+    case 'fileStat':
+      var prog = data.data;
 
-    self.prog.total = prog.progressTotal;
-    self.prog.resumable = prog.progressResumable;
-    self.emit('progress', self.prog);
-    break;
+      self.prog.total = prog.progressTotal;
+      self.prog.resumable = prog.progressResumable;
+      self.emit('progress', self.prog);
+      break;
 
-  case 'progress':
-    var prog = data.data;
+    case 'progress':
+      var prog = data.data;
 
-    self.prog.loaded = prog.progressLoaded;
-    self.prog.resumable = prog.progressResumable;
-    self.emit('progress', self.prog);
-    break;
+      self.prog.loaded = prog.progressLoaded;
+      self.prog.resumable = prog.progressResumable;
+      self.emit('progress', self.prog);
+      break;
 
-  case 'filePartDownloaded':
-    var part = data.data;
+    case 'filePartDownloaded':
+      var part = data.data;
 
-    self.prog.synced += part.Size;
-    self.emit('partcomplete', self.prog);
-    break;
+      self.prog.synced += part.Size;
+      self.emit('partcomplete', self.prog);
+      break;
 
-  case 'fileDownloaded':
-    ipcRenderer.removeListener(self.id, self._listener);
+    case 'fileDownloaded':
+      ipcRenderer.removeListener(self.id, self._listener);
 
-    self._changeStatus("verifying");
+      self._changeStatus("verifying");
 
-    fs.rename(self.tmpfile, self.to.path, function (err) {
-      if (err) {
-        console.error(`rename file ${self.tmpfile} to ${self.to.path} error:`, err);
+      fs.rename(self.tmpfile, self.to.path, function (err) {
+        if (err) {
+          console.error(`rename file ${self.tmpfile} to ${self.to.path} error:`, err);
 
-        self._changeStatus("failed");
-        self.emit("error", err);
-      } else {
-        self._changeStatus("finished");
-        self.emit("complete");
+          self._changeStatus("failed");
+          self.emit("error", err);
+        } else {
+          self._changeStatus("finished");
+          self.emit("complete");
+        }
+      });
+
+      break;
+
+    case 'error':
+      console.warn("download object error:", data);
+      ipcRenderer.removeListener(self.id, self._listener);
+
+      self.message = data;
+      self._changeStatus("failed");
+      self.emit("error", data.error);
+      break;
+
+    case 'debug':
+      if (!self.isDebug) {
+        console.log("Debug", data);
       }
-    });
+      break;
 
-    break;
-
-  case 'error':
-    console.warn("download object error:", data);
-    ipcRenderer.removeListener(self.id, self._listener);
-
-    self.message = data;
-    self._changeStatus("failed");
-    self.emit("error", data.error);
-    break;
-
-  case 'debug':
-    if (!self.isDebug) {
-      console.log("Debug", data);
-    }
-    break;
-
-  default:
-    console.log("Unknown", data);
+    default:
+      console.log("Unknown", data);
   }
 };
 
@@ -256,8 +256,8 @@ DownloadJob.prototype.startSpeedCounter = function () {
 
     self.predictLeftTime =
       self.speed <= 0 ?
-      0 :
-      Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
+        0 :
+        Math.floor((self.prog.total - self.prog.loaded) / self.speed * 1000);
   }, 1000);
 };
 

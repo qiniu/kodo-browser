@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('grantModalCtrl', ['$scope', '$q', '$uibModalInstance','$translate', 'items', 'currentInfo','ramSvs','settingsSvs','subUserAKSvs','Mailer','Const','Toast','AuthInfo', 'safeApply',
-    function ($scope, $q, $modalInstance, $translate, items, currentInfo,ramSvs, settingsSvs, subUserAKSvs, Mailer, Const, Toast, AuthInfo, safeApply) {
+  .controller('grantModalCtrl', ['$scope', '$q', '$uibModalInstance', '$translate', 'items', 'currentInfo', 'ramSvs', 'settingsSvs', 'subUserAKSvs', 'Mailer', 'Const', 'Toast', 'AuthInfo', 'safeApply',
+    function ($scope, $q, $modalInstance, $translate, items, currentInfo, ramSvs, settingsSvs, subUserAKSvs, Mailer, Const, Toast, AuthInfo, safeApply) {
       var T = $translate.instant;
       angular.extend($scope, {
         cancel: cancel,
@@ -8,7 +8,7 @@ angular.module('web')
         onSubmit: onSubmit,
         genUserName: genUserName,
         items: items,
-        reg:{
+        reg: {
           email: Const.REG.EMAIL,
         },
         create: {
@@ -18,46 +18,46 @@ angular.module('web')
         grant: {
           toTypes: ['group', 'user', 'role'],
           toType: 'user',
-          privTypes: ['readOnly','all'],
+          privTypes: ['readOnly', 'all'],
           privType: 'readOnly',
         },
         policyNameReg: /^[a-z0-9A-Z\-]{1,128}$/,
         mailSmtp: settingsSvs.mailSmtp.get(),
-        showEmailSettings: function(){
-          $scope.showSettings(function(){
-            $scope.mailSmtp= settingsSvs.mailSmtp.get();
+        showEmailSettings: function () {
+          $scope.showSettings(function () {
+            $scope.mailSmtp = settingsSvs.mailSmtp.get();
           })
         }
       });
 
       init();
-      function init(){
+      function init() {
 
         policyChange();
         var ignoreError = true;
 
-        ramSvs.listUsers(ignoreError).then(function(result){
-           $scope.users = result;
-        }, function(err){
+        ramSvs.listUsers(ignoreError).then(function (result) {
+          $scope.users = result;
+        }, function (err) {
           $scope.users = [];
-          if(err.message.indexOf('You are not authorized to do this action')!=-1){
+          if (err.message.indexOf('You are not authorized to do this action') != -1) {
             Toast.error(T('simplePolicy.noauth.message1')); //'没有权限获取用户列表'
           }
         });
-        ramSvs.listGroups(ignoreError).then(function(result){
-           $scope.groups = result;
-        },function(err){
+        ramSvs.listGroups(ignoreError).then(function (result) {
+          $scope.groups = result;
+        }, function (err) {
           $scope.groups = [];
-          if(err.message.indexOf('You are not authorized to do this action')!=-1){
+          if (err.message.indexOf('You are not authorized to do this action') != -1) {
             Toast.error(T('simplePolicy.noauth.message2')); //'没有权限获取用户组列表'
           }
         });
-        ramSvs.listRoles(ignoreError).then(function(result){
-           $scope.roles = result;
-        },function(err){
+        ramSvs.listRoles(ignoreError).then(function (result) {
+          $scope.roles = result;
+        }, function (err) {
           $scope.roles = [];
 
-          if(err.message.indexOf('You are not authorized to do this action')!=-1){
+          if (err.message.indexOf('You are not authorized to do this action') != -1) {
             Toast.error(T('simplePolicy.noauth.message3')); //'没有权限获取角色列表'
           }
         });
@@ -74,7 +74,7 @@ angular.module('web')
         var t = [];
 
         var actions = [];
-        if(privType=='readOnly'){
+        if (privType == 'readOnly') {
           actions = ['s3:GetObject',
             's3:HeadObject',
             "s3:GetObjectMeta",
@@ -83,15 +83,15 @@ angular.module('web')
             's3:GetSymlink'
           ];
         }
-        else{
+        else {
           actions = ['s3:*'];
         }
 
         angular.forEach($scope.items, function (item) {
           if (item.region || item.isFolder) {
 
-            var bucket = item.region?item.name: currentInfo.bucket;
-            var key = item.path||'';
+            var bucket = item.region ? item.name : currentInfo.bucket;
+            var key = item.path || '';
             t.push({
               "Effect": "Allow",
               "Action": actions,
@@ -135,44 +135,44 @@ angular.module('web')
       }
 
       var policy;
-      function policyChange(){
+      function policyChange() {
         var privType = $scope.grant.privType;
         policy = genPolicy(privType);
-        $scope.grant.policy = JSON.stringify(policy,' ',2);
+        $scope.grant.policy = JSON.stringify(policy, ' ', 2);
 
-        var name =  (Math.random()+'').substring(2);
-        if($scope.items && $scope.items.length==1){
+        var name = (Math.random() + '').substring(2);
+        if ($scope.items && $scope.items.length == 1) {
           name = $scope.items[0].name;//.replace(/[\W_]+/g,'-');
         }
-        $scope.grant.policyName = 'plc-'+ privType +'-'+ name;
+        $scope.grant.policyName = 'plc-' + privType + '-' + name;
       }
 
       function onSubmit(form1) {
         if (!form1.$valid) return false;
 
 
-        checkCreateUser(function(username, sendInfo){
+        checkCreateUser(function (username, sendInfo) {
 
-          if(username){
+          if (username) {
             $scope.grant.userName = username;
-            ramSvs.listUsers(true).then(function(result){
-               $scope.users = result;
+            ramSvs.listUsers(true).then(function (result) {
+              $scope.users = result;
             });
           }
 
-          var policyName= $scope.grant.policyName;
+          var policyName = $scope.grant.policyName;
 
           var title = T('simplePolicy.title');//简化policy授权
           var successMsg = T('simplePolicy.success');//'应用policy成功'
-          checkCreatePolicy(policyName, $scope.grant.policy, title).then(function(){
-            switch($scope.grant.toType){
+          checkCreatePolicy(policyName, $scope.grant.policy, title).then(function () {
+            switch ($scope.grant.toType) {
               case 'user':
-                ramSvs.attachPolicyToUser(policyName, $scope.grant.userName).then(function(){
+                ramSvs.attachPolicyToUser(policyName, $scope.grant.userName).then(function () {
                   //发邮件
-                  if(sendInfo) Mailer.send(sendInfo).then(function(result){
+                  if (sendInfo) Mailer.send(sendInfo).then(function (result) {
                     console.log(result)
                     Toast.success(T('mail.test.success'));
-                  },function(err){
+                  }, function (err) {
                     console.error(err);
                     Toast.error(err);
                   });
@@ -183,13 +183,13 @@ angular.module('web')
                 });
                 break;
               case 'group':
-                ramSvs.attachPolicyToGroup(policyName, $scope.grant.groupName).then(function(){
+                ramSvs.attachPolicyToGroup(policyName, $scope.grant.groupName).then(function () {
                   Toast.success(successMsg);
                   cancel();
                 });
                 break;
               case 'role':
-                ramSvs.attachPolicyToRole(policyName, $scope.grant.roleName).then(function(){
+                ramSvs.attachPolicyToRole(policyName, $scope.grant.roleName).then(function () {
                   Toast.success(successMsg);
                   cancel();
                 });
@@ -199,47 +199,47 @@ angular.module('web')
         });
 
       }
-      function genUserName(){
-        $scope.create.UserName = 'usr-'+new Date().getTime()+ ((Math.random()+'').substring(10));
+      function genUserName() {
+        $scope.create.UserName = 'usr-' + new Date().getTime() + ((Math.random() + '').substring(10));
       }
 
-      function checkCreatePolicy(policyName, policy, title){
+      function checkCreatePolicy(policyName, policy, title) {
         var df = $q.defer();
-        return ramSvs.getPolicy(policyName, 'Custom', true).then(function(result){
-          console.log('getPolicy:',result);
+        return ramSvs.getPolicy(policyName, 'Custom', true).then(function (result) {
+          console.log('getPolicy:', result);
           df.resolve(result.Policy);
-        },function(err){
-          ramSvs.createPolicy(policyName, policy, title).then(function(result){
-            console.log('createPolicy:',result);
+        }, function (err) {
+          ramSvs.createPolicy(policyName, policy, title).then(function (result) {
+            console.log('createPolicy:', result);
             df.resolve(result.Policy);
-          },function(err){
+          }, function (err) {
             df.reject(err);
           })
         });
         return df.promise;
       }
 
-      function checkCreateUser(fn){
-        if($scope.grant.toType!='user'){
+      function checkCreateUser(fn) {
+        if ($scope.grant.toType != 'user') {
           fn();
           return;
         }
 
-        if($scope.grant.userName){
+        if ($scope.grant.userName) {
           fn($scope.grant.userName);
-        }else{
+        } else {
           var userName = $scope.create.UserName;
           var comments = [];
-          angular.forEach($scope.items, function(n){
-             comments.push('s3://'+currentInfo.bucket + "/" + n.path);
+          angular.forEach($scope.items, function (n) {
+            comments.push('kodo://' + currentInfo.bucket + "/" + n.path);
           });
           ramSvs.createUser({
             UserName: userName,
             Email: $scope.create.Email,
-            Comments: ($scope.grant.privType+','+comments.join(',')).substring(0,100)
-          }).then(function(){
+            Comments: ($scope.grant.privType + ',' + comments.join(',')).substring(0, 100)
+          }).then(function () {
 
-            ramSvs.createAccessKey(userName).then(function(result){
+            ramSvs.createAccessKey(userName).then(function (result) {
               //AccessKeyId
               //console.log(result.AccessKey);
               var id = result.AccessKey.AccessKeyId;
@@ -250,7 +250,7 @@ angular.module('web')
                 UserName: userName
               });
 
-              var sendInfo = getSendInfo(id,secret,userName, currentInfo.region, comments,$scope.create.Email, $scope.grant.privType);
+              var sendInfo = getSendInfo(id, secret, userName, currentInfo.region, comments, $scope.create.Email, $scope.grant.privType);
               fn(userName, sendInfo);
             });
 
@@ -259,26 +259,26 @@ angular.module('web')
       }
 
 
-      function getSendInfo(id, secret, userName, region, comments, toEmail, privType){
+      function getSendInfo(id, secret, userName, region, comments, toEmail, privType) {
         var opt = {
           id: id,
           secret: secret,
           desc: userName,
-          region:  region,
+          region: region,
           s3path: comments[0],
           eptpl: AuthInfo.get().eptpl || 'http://{region}.qiniu.com'
         };
 
         var tokenStr = new Buffer(JSON.stringify(opt)).toString('base64');
 
-         var sendInfo = {
+        var sendInfo = {
           //  AccessKeyId: result.AccessKey.AccessKeyId,
           //  AccessKeySecret: result.AccessKey.AccessKeySecret,
           //  UserName: userName,
-           subject:  T('grant.email.title'),// 'KODO Browser 授权',
-           to: toEmail,
-           html:
-`${T('grant.email.body.title')}<br/>
+          subject: T('grant.email.title'),// 'KODO Browser 授权',
+          to: toEmail,
+          html:
+            `${T('grant.email.body.title')}<br/>
 <br/>
 1. ${T('auth.accessLogin')}:<br/>
 <br/>
@@ -298,16 +298,16 @@ AccessKeySecret: ${secret}<br/>
 <hr/>
 您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">KODO Browser</a> 浏览或管理这些文件。
 `
-                   //   '子用户名(Sub User): '+userName+ '<br/>'
-                   // + 'AccessKeyId: '+result.AccessKey.AccessKeyId+ '<br/>'
-                   // + 'AccessKeySecret: '+ result.AccessKey.AccessKeySecret+ '<br/>'
-                   // + '区域(Region): '+ currentInfo.region  + '<br/>'
-                   // + '授予权限(permission): '+$scope.grant.privType + '<br/>'
-                   // + '授权路径(s3path): ' + comments.join(',<br/>')
-                   // + '<hr/>'
-                   // + '您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">KODO Browser</a> 浏览或管理这些文件。'
-         };
-         return sendInfo;
+          //   '子用户名(Sub User): '+userName+ '<br/>'
+          // + 'AccessKeyId: '+result.AccessKey.AccessKeyId+ '<br/>'
+          // + 'AccessKeySecret: '+ result.AccessKey.AccessKeySecret+ '<br/>'
+          // + '区域(Region): '+ currentInfo.region  + '<br/>'
+          // + '授予权限(permission): '+$scope.grant.privType + '<br/>'
+          // + '授权路径(s3path): ' + comments.join(',<br/>')
+          // + '<hr/>'
+          // + '您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">KODO Browser</a> 浏览或管理这些文件。'
+        };
+        return sendInfo;
       }
 
     }

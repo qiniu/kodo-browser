@@ -75,7 +75,7 @@ angular.module("web").factory("Fav", [
 
     //下载进度保存路径
     function getFavFilePath() {
-      var folder = path.join(os.homedir(), ".s3-browser");
+      var folder = Global.config_path;
       if (!fs.existsSync(folder)) {
         fs.mkdirSync(folder);
       }

@@ -24,6 +24,7 @@ angular
     "$timeout",
     "s3Client",
     function ($timeout, s3Client) {
+      var DEF_ADDR = "kodo://";
       return {
         restrict: "EA",
         transclude: false,
@@ -52,7 +53,7 @@ angular
         function refresh() {
           var v = $scope.keepConfig;
           if (!v.bucket) {
-            $scope.selectedItem.s3Path = "s3://";
+            $scope.selectedItem.s3Path = DEF_ADDR;
             $scope.selectedItem.region = "";
             $scope.isLoading = true;
             s3Client.listAllBuckets().then(function (arr) {
@@ -60,8 +61,8 @@ angular
               $scope.isLoading = false;
             });
           } else {
-            if (!v.key) $scope.selectedItem.s3Path = "s3://" + v.bucket + "/";
-            else $scope.selectedItem.s3Path = "s3://" + v.bucket + "/" + v.key;
+            if (!v.key) $scope.selectedItem.s3Path = DEF_ADDR + v.bucket + "/";
+            else $scope.selectedItem.s3Path = DEF_ADDR + v.bucket + "/" + v.key;
 
             $scope.selectedItem.region = v.region;
 
@@ -83,17 +84,17 @@ angular
 
         $scope.select = function (item) {
           if (item.isBucket) {
-            $scope.selectedItem.s3Path = "s3://" + item.name;
+            $scope.selectedItem.s3Path = DEF_ADDR + item.name;
           } else if (item.isFolder) {
             $scope.selectedItem.s3Path =
-              "s3://" +
+              DEF_ADDR +
               $scope.keepConfig.bucket +
               "/" +
               item.path.replace(/\/$/, "") +
               "/";
           } else {
             $scope.selectedItem.s3Path =
-              "s3://" +
+              DEF_ADDR +
               $scope.keepConfig.bucket +
               "/" +
               item.path.replace(/\/$/, "");
@@ -117,12 +118,12 @@ angular
 
         $scope.goUp = function () {
           var v = $scope.selectedItem.s3Path;
-          if (v == "s3://") {
+          if (v === DEF_ADDR) {
             return;
           }
-          var info = s3Client.parseS3Path(v);
+          var info = s3Client.parseKodoPath(v);
 
-          if (info.key == "") {
+          if (info.key === "") {
             if (!$scope.showBuckets) {
               return;
             }

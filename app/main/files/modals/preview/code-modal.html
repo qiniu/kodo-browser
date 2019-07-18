@@ -9,9 +9,8 @@
       <span style="font-size:80%">({{objectInfo.size|sizeFormat}})</span></h4>
 </div>
 <div class="modal-body pd0">
-
   <header class="pd4 bg-success break">
-    s3://{{bucketInfo.bucket}}/{{objectInfo.path}}
+    kodo://{{bucketInfo.bucket}}/{{objectInfo.path}}
   </header>
 
   <div ng-show="isLoading" is-loading style="width:100%;position:absolute;z-index:9999;"></div>

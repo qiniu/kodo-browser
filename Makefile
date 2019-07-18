@@ -1,4 +1,3 @@
-
 VERSION=0.1.0-beta
 NAME=kodo-browser
 CUSTOM=./custom
@@ -39,4 +38,4 @@ dmg:
 all:win32 win64 linux32 linux64 mac
 	@echo 'Done'
 
-.PHONY:build
+.PHONY:build i dev run clean prod watch win64 win32 linux64 linux32 mac dmg all

@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - '11.15'
+cache: yarn
+before_script:
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - make i
+script:
+  - make linux64

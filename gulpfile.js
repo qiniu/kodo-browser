@@ -5,7 +5,8 @@ let gulp = require("gulp"),
   packager = require('electron-packager'),
   fs = require("fs"),
   path = require("path"),
-  pkg = require("./package");
+  pkg = require("./package"),
+  each = require("array-each");
 
 let NAME = pkg.name;
 let VERSION = pkg.version;
@@ -56,6 +57,12 @@ let appTasks = {
       .pipe(gulp.dest(DIST));
   }
 };
+
+each([CUSTOM, DIST, TARGET, RELEASE], (dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+})
 
 gulp.task("app.js", appTasks["app.js"]);
 gulp.task("app.css", appTasks["app.css"]);

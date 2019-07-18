@@ -1040,9 +1040,9 @@ bootstrap-table@^1.12.1:
   version "1.15.3"
   resolved "https://registry.npm.taobao.org/bootstrap-table/download/bootstrap-table-1.15.3.tgz#8b53d0e855865bc4a7716735e0f65be04278684b"
 
-bootstrap@~3.3.7:
-  version "3.3.7"
-  resolved "https://registry.npm.taobao.org/bootstrap/download/bootstrap-3.3.7.tgz#5a389394549f23330875a3b150656574f8a9eb71"
+bootstrap@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.npm.taobao.org/bootstrap/download/bootstrap-3.4.1.tgz#c3a347d419e289ad11f4033e3c4132b87c081d72"
 
 bower@~1.8.4:
   version "1.8.8"

@@ -10,7 +10,7 @@ let gulp = require("gulp"),
 
 let NAME = pkg.name;
 let VERSION = pkg.version;
-let ELECTRON_VERSION = "4.0.0-beta.7";
+let ELECTRON_VERSION = "4.2.7";
 let ROOT = __dirname;
 let CUSTOM = `${ROOT}/custom`;
 let DIST = `${ROOT}/dist`;

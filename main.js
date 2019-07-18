@@ -205,13 +205,12 @@ let createWindow = () => {
 
     // Open the DevTools.
     win.webContents.openDevTools();
-  } else {
-    if (process.platform === "darwin") {
-      // Create the Application's main menu
-      let template = getMenuTemplate();
+  }
 
-      Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-    }
+  if (process.platform === "darwin") {
+    // Create the Application's main menu
+    let template = getMenuTemplate();
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
   }
 };
 

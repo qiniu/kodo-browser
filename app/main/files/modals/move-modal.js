@@ -1,7 +1,8 @@
 angular.module('web')
   .controller('moveModalCtrl', ['$scope', '$uibModalInstance', '$timeout', 'items', 'isCopy', 'renamePath', 'fromInfo', 'moveTo', 'callback', 's3Client', 'Toast', 'AuthInfo', 'safeApply',
     function ($scope, $modalInstance, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, s3Client, Toast, AuthInfo, safeApply) {
-
+      var path = require("path");
+      var filter = require("array-filter");
       var authInfo = AuthInfo.get();
 
       angular.extend($scope, {
@@ -51,9 +52,11 @@ angular.module('web')
         $scope.step = 2;
 
         var target = angular.copy($scope.moveTo);
-        var items = angular.copy($scope.items);
+        var items = filter(angular.copy($scope.items), (item) => {
+          return fromInfo.bucket !== target.bucket || item.Key !== path.join(target.key, path.basename(item.Key));
+        });
 
-        angular.forEach(items, function (n) {
+        angular.forEach(items, (n) => {
           //n.region = currentInfo.region;
           n.bucket = fromInfo.bucket;
         });
@@ -61,11 +64,11 @@ angular.module('web')
         //console.log(fromInfo.region, items, target, renamePath);
 
         //复制 or 移动
-        s3Client.copyFiles(fromInfo.region, items, target, function progress(prog) {
+        s3Client.copyFiles(fromInfo.region, items, target, (prog) => {
           //进度
           $scope.progress = angular.copy(prog);
           safeApply($scope);
-        }, !isCopy, renamePath).then(function (terr) {
+        }, !isCopy, renamePath).then((terr) => {
           //结果
           $scope.step = 3;
           $scope.terr = terr;

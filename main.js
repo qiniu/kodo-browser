@@ -208,6 +208,7 @@ let createWindow = () => {
   }
 
   if (process.platform === "darwin") {
+    console.log("run on macos");
     // Create the Application's main menu
     let template = getMenuTemplate();
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));

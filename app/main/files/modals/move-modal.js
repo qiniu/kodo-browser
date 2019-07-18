@@ -53,7 +53,7 @@ angular.module('web')
 
         var target = angular.copy($scope.moveTo);
         var items = filter(angular.copy($scope.items), (item) => {
-          return fromInfo.bucket !== target.bucket || item.Key !== path.join(target.key, path.basename(item.Key));
+          return fromInfo.bucket !== target.bucket || !item.Key || item.Key !== path.join(target.key, path.basename(item.Key));
         });
 
         if (items.length === 0) {

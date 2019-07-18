@@ -56,6 +56,14 @@ angular.module('web')
           return fromInfo.bucket !== target.bucket || item.Key !== path.join(target.key, path.basename(item.Key));
         });
 
+        if (items.length === 0) {
+          $timeout(() => {
+            cancel();
+            callback();
+          });
+          return;
+        }
+
         angular.forEach(items, (n) => {
           //n.region = currentInfo.region;
           n.bucket = fromInfo.bucket;

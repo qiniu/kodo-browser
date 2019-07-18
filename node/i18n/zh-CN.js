@@ -160,11 +160,11 @@ module.exports = {
   //settings
   "settings.WhetherResumeUpload": "断点上传",
   "settings.WhetherResumeUpload.msg": "启用文件断点上传功能",
-  "settings.ResumeUploadThreshold": "断点上传文件阀值（单位：MB，范围：10 MB - 1000 MB）",
+  "settings.ResumeUploadThreshold": "断点上传文件阈值（单位：MB，范围：10 MB - 1000 MB）",
   "settings.ResumeUploadSize": "断点上传文件大小（单位：MB，范围：8 MB - 100 MB）",
   "settings.WhetherResumeDownload": "断点下载",
   "settings.WhetherResumeDownload.msg": "启用断点下载功能",
-  "settings.ResumeDownloadThreshold": "断点下载文件阀值（单位：MB，范围：10 MB - 1000 MB）",
+  "settings.ResumeDownloadThreshold": "断点下载文件阈值（单位：MB，范围：10 MB - 1000 MB）",
   "settings.ResumeDownloadSize": "断点下载文件大小（单位：MB，范围：8 MB - 100 MB）",
   "settings.maxUploadConcurrency": "最大上传任务数（单位：1 - 20）",
   "settings.maxDownloadConcurrency": "最大下载任务数（单位：1 - 20）",

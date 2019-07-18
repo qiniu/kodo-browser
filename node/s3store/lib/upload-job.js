@@ -61,6 +61,8 @@ class UploadJob extends Base {
     this.resumeUpload = this._config.resumeUpload || false;
     this.multipartUploadThreshold = this._config.multipartUploadThreshold || 100;
     this.multipartUploadSize = this._config.multipartUploadSize || 8;
+    this.uploadedId = this._config.uploadedId;
+    this.uploadedParts = this._config.uploadedParts;
 
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
@@ -241,7 +243,7 @@ UploadJob.prototype.startSpeedCounter = function () {
       return;
     }
 
-    let avgSpeed = self.loaded / (self.startedAt - new Date().getTime()) * 1000;
+    let avgSpeed = self.prog.loaded / (new Date().getTime() - self.startedAt) * 1000;
 
     self.speed = self.prog.loaded - self.lastLoaded;
     if (self.speed <= 0 || (self.lastSpeed / self.speed) > 1.1) {

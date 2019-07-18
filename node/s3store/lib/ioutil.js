@@ -276,8 +276,11 @@ Client.prototype.uploadFile = function (params) {
       s3uploader.on('httpUploadProgress', (prog) => {
         if (isAborted) return;
 
+        uploader.progressLoaded = prog.loaded;
+        uploader.emit('progress', uploader);
+
         s3uploader.completeInfo.forEach((part, idx) => {
-          if (part.ETag !== null && !s3UploadedParts[part.PartNumber]) {
+          if (part !== null && part.ETag !== null && !s3UploadedParts[part.PartNumber]) {
             s3UploadedParts[part.PartNumber] = part;
 
             uploader.emit('filePartUploaded', {
@@ -286,9 +289,6 @@ Client.prototype.uploadFile = function (params) {
             });
           }
         });
-
-        uploader.progressLoaded = prog.loaded;
-        uploader.emit('progress', uploader);
       });
 
       s3uploader.send((err, data) => {

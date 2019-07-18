@@ -368,12 +368,6 @@ angular.module("web").controller("filesCtrl", [
         });
 
         showFilesTable(files);
-
-        if ($scope.nextObjectsMarker) {
-          $timeout(() => {
-            tryLoadMore();
-          }, 100);
-        }
       });
     }
 
@@ -382,6 +376,10 @@ angular.module("web").controller("filesCtrl", [
         $timeout(() => {
           $scope.objects = $scope.objects.concat(result.data);
           $scope.nextObjectsMarker = result.marker || null;
+
+          if ($scope.nextObjectsMarker) {
+            $timeout(tryLoadMore, 100);
+          }
         });
 
         if (fn) fn(null, result.data);
@@ -408,12 +406,6 @@ angular.module("web").controller("filesCtrl", [
           }
 
           showFilesTable(files, true);
-
-          if ($scope.nextObjectsMarker) {
-            $timeout(() => {
-              tryLoadMore();
-            }, 100);
-          }
         });
       }
     }

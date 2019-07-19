@@ -54,7 +54,7 @@ angular.module('web')
         var target = angular.copy($scope.moveTo);
         var items = filter(angular.copy($scope.items), (item) => {
           if (fromInfo.bucket !== target.bucket) {
-            return false;
+            return true;
           }
           if (item.isFolder) {
             return item.path !== path.join(target.key, item.name) + path.sep;

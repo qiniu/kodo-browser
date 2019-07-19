@@ -159,7 +159,7 @@ module.exports = {
 
   //settings
   "settings.WhetherResumeUpload": "断点上传",
-  "settings.WhetherResumeUpload.msg": "启用文件断点上传功能",
+  "settings.WhetherResumeUpload.msg": "启用断点上传功能",
   "settings.ResumeUploadThreshold": "断点上传文件阈值（单位：MB，范围：10 MB - 1000 MB）",
   "settings.ResumeUploadSize": "断点上传文件大小（单位：MB，范围：8 MB - 100 MB）",
   "settings.WhetherResumeDownload": "断点下载",

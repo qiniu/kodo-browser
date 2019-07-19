@@ -5,6 +5,7 @@ const path = require("path");
 const {
   app,
   dialog,
+  Menu,
   ipcMain,
   BrowserWindow
 } = electron;
@@ -204,6 +205,10 @@ let createWindow = () => {
 
     // Open the DevTools.
     win.webContents.openDevTools();
+  } else if (process.platform === "darwin") {
+    console.log("run on macos in production");
+    // Create the Application's main menu
+    Menu.setApplicationMenu(Menu.buildFromTemplate(getMenuTemplate()));
   }
 };
 
@@ -586,3 +591,82 @@ app.on("window-all-closed", () => {
   app.quit();
   //}
 });
+
+// In this file you can include the rest of your app's specific main process
+// code. You can also put them in separate files and require them here.
+function getMenuTemplate() {
+  return [{
+      label: "Application",
+      submenu: [{
+          label: "About Application",
+          selector: "orderFrontStandardAboutPanel:"
+        },
+        {
+          type: "separator"
+        },
+        {
+          label: "Quit",
+          accelerator: "Command+Q",
+          click: function () {
+            app.quit();
+          }
+        }
+      ]
+    },
+    {
+      label: "Edit",
+      submenu: [{
+          label: "Undo",
+          accelerator: "CmdOrCtrl+Z",
+          selector: "undo:"
+        },
+        {
+          label: "Redo",
+          accelerator: "Shift+CmdOrCtrl+Z",
+          selector: "redo:"
+        },
+        {
+          type: "separator"
+        },
+        {
+          label: "Cut",
+          accelerator: "CmdOrCtrl+X",
+          selector: "cut:"
+        },
+        {
+          label: "Copy",
+          accelerator: "CmdOrCtrl+C",
+          selector: "copy:"
+        },
+        {
+          label: "Paste",
+          accelerator: "CmdOrCtrl+V",
+          selector: "paste:"
+        },
+        {
+          label: "Select All",
+          accelerator: "CmdOrCtrl+A",
+          selector: "selectAll:"
+        }
+      ]
+    },
+    {
+      label: "Window",
+      submenu: [{
+          label: "Minimize",
+          accelerator: "CmdOrCtrl+M",
+          click: function () {
+            win.minimize();
+          }
+        },
+        {
+          label: "Close",
+          accelerator: "CmdOrCtrl+W",
+          click: function () {
+            win.close();
+          }
+        }
+      ]
+    }
+  ];
+}

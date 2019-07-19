@@ -1,12 +1,17 @@
 os:
   - linux
   - osx
+  - windows
 language: node_js
 node_js:
   - '11.15'
 cache: yarn
+env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 before_script:
   - |
+    if [ "$TRAVIS_OS_NAME" == "windows" ]; then
+      choco install python vcredist-all make
+    fi
   - export PATH="$HOME/.yarn/bin:$PATH"
   - make i
 script:
@@ -15,4 +20,6 @@ script:
         make linux64
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
         make mac
+    elif [ "$TRAVIS_OS_NAME" == "windows" ]; then
+        make win32 win64
     fi

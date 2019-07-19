@@ -34,22 +34,15 @@ cnpm 是 npm（node 包管理工具）的中国镜像，可以提高下载依赖
 
 ### (3) 如果使用 windows 系统，需要安装下列软件：
 
-* 需要安装 gitbash:
+* 需要安装 git 和 choco:
 
 请自行下载安装。
 
-* 需要安装 windows-build-tools:
+然后安装相关的依赖包。
 
 ```
-cnpm i -g windows-build-tools
+choco install python vcredist-all make
 ```
-
-* 还需要下载 make.exe，放到 `C:\windows\` 目录下
-
-[make.exe(64位版本)](http://luogc.oss-cn-hangzhou.qiniu.com/s3-browser-publish/windows-tools/64/make.exe)
-
-[make.exe(32位版本)](http://luogc.oss-cn-hangzhou.qiniu.com/s3-browser-publish/windows-tools/32/make.exe)
-
 
 ### (4) 下载代码
 

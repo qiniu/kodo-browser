@@ -51,11 +51,9 @@ angular.module("web").factory("settingsSvs", [
           return parseInt(localStorage.getItem("multipartUploadSize") || 8);
         },
         set: function (v) {
-          if (parseInt(v)%4 != 0) {
-            return;
+          if (parseInt(v) % 4 == 0) {
+            return localStorage.setItem("multipartUploadSize", v);
           }
-
-          return localStorage.setItem("multipartUploadSize", v);
         }
       },
 

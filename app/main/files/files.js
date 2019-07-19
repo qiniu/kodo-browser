@@ -29,6 +29,7 @@ angular.module("web").controller("filesCtrl", [
     Toast,
     Dialog
   ) {
+    var deepEqual = require('fast-deep-equal');
     var T = $translate.instant;
 
     angular.extend($scope, {
@@ -374,6 +375,9 @@ angular.module("web").controller("filesCtrl", [
     function tryListFiles(info, marker, fn) {
       s3Client.listFiles(info.region, info.bucket, info.key, marker || "").then((result) => {
         $timeout(() => {
+          if ($scope.info && !deepEqual($scope.info, info)) {
+            return;
+          }
           $scope.objects = $scope.objects.concat(result.data);
           $scope.nextObjectsMarker = result.marker || null;
 
@@ -922,6 +926,7 @@ angular.module("web").controller("filesCtrl", [
 
       $timeout(() => {
         $scope.objects = [];
+        $scope.info = null;
         $scope.nextObjectsMarker = null;
       });
     }

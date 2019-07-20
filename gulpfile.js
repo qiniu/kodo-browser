@@ -3,6 +3,7 @@ let gulp = require("gulp"),
     lazy: false
   }),
   packager = require('electron-packager'),
+  createDMG = require('electron-installer-dmg'),
   fs = require("fs"),
   path = require("path"),
   pkg = require("./package"),
@@ -167,7 +168,6 @@ gulp.task("gen-package", () => {
     start: "electron ."
   };
   pkg.main = "main.js";
-  pkg.license = "UNLICENSED";
 
   try {
     fs.statSync(DIST);
@@ -241,16 +241,21 @@ gulp.task("mac", () => {
 gulp.task("dmg", () => {
   console.log(`--package ${NAME}.dmg`);
 
-  plugins.run(`rm -f ${RELEASE}/${VERSION}/${NAME}.dmg`).exec(() => {
-    plugins.run(`rm -f ${TARGET}/${NAME}-darwin-x64/LICENSE* ${TARGET}/${NAME}-darwin-x64/version`).exec(() => {
-      plugins.run(`ln -s /Applications/ ${TARGET}/${NAME}-darwin-x64/Applications`).exec(() => {
-        plugins.run(`cp -f ${DIST}/icons/icon.icns ${TARGET}/${NAME}-darwin-x64/.VolumeIcon.icns`).exec(() => {
-          plugins.run(`hdiutil create -size 350m -format UDZO -srcfolder ${TARGET}/${NAME}-darwin-x64 -o ${RELEASE}/${VERSION}/${NAME}.dmg`).exec(() => {
-            console.log("--done");
-          });
-        });
-      });
-    });
+  createDMG({
+    appPath: `${TARGET}/${NAME}-darwin-x64/kodo-browser.app`,
+    name: packagerOptions.name,
+    title: packagerOptions.name,
+    icon: `${CUSTOM}/icon.icns`,
+    overwrite: true,
+    debug: false,
+    out: `${TARGET}/${NAME}-darwin-x64`,
+    format: 'ULFO'
+  }, (err) => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log("--done");
+    }
   });
 });
 

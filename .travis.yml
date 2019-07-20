@@ -17,9 +17,9 @@ before_script:
 script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux"]; then
-        make linux64
+        make build linux64
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
-        make mac
+        make build mac dmg
     elif [ "$TRAVIS_OS_NAME" == "windows" ]; then
-        make win32 win64
+        make build win32 win64
     fi

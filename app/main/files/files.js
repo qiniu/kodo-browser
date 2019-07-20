@@ -664,10 +664,8 @@ angular.module("web").controller("filesCtrl", [
     function showPaste() {
       var keyword = $scope.keepMoveOptions.isCopy ? T("copy") : T("move");
 
-      if (
-        $scope.keepMoveOptions.items.length == 1 &&
-        $scope.currentInfo.bucket == $scope.keepMoveOptions.currentInfo.bucket
-      ) {
+      if ($scope.keepMoveOptions.items.length == 1 &&
+          deepEqual($scope.currentInfo, $scope.keepMoveOptions.currentInfo)) {
         $modal.open({
           templateUrl: "main/files/modals/rename-modal.html",
           controller: "renameModalCtrl",

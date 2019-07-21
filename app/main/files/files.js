@@ -373,6 +373,10 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function tryListFiles(info, marker, fn) {
+      if (!info || !info.bucket) {
+        return;
+      }
+
       s3Client.listFiles(info.region, info.bucket, info.key, marker || "").then((result) => {
         $timeout(() => {
           if ($scope.info && !deepEqual($scope.info, info)) {

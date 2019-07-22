@@ -19,6 +19,8 @@
     "build:dmg": "./node_modules/.bin/gulp dmg",
     "build:win32": "./node_modules/.bin/gulp win32",
     "build:win64": "./node_modules/.bin/gulp win64",
+    "build:msi32": "./node_modules/.bin/gulp msi32",
+    "build:msi64": "./node_modules/.bin/gulp msi64",
     "build:linux32": "./node_modules/.bin/gulp linux32",
     "build:linux64": "./node_modules/.bin/gulp linux64",
     "release": "build"
@@ -26,20 +28,6 @@
   "build": {
     "appId": "com.qiniu.browser",
     "asar": false,
-    "dmg": {
-      "contents": [
-        {
-          "x": 110,
-          "y": 150
-        },
-        {
-          "x": 240,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    },
     "linux": {
       "target": [
         "AppImage",
@@ -76,6 +64,7 @@
     "electron-builder": "^20.34.0",
     "electron-installer-dmg": "^3.0.0",
     "electron-packager": "12.2.0",
+    "electron-wix-msi": "2.1.1",
     "event-stream": "3.3.4",
     "font-awesome": "^4.7.0",
     "gulp": "~3.9.1",

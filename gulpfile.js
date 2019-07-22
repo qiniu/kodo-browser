@@ -4,12 +4,13 @@ let gulp = require("gulp"),
   }),
   packager = require('electron-packager'),
   createDMG = require('electron-installer-dmg'),
+  MSICreator = require('electron-wix-msi').MSICreator,
   fs = require("fs"),
   path = require("path"),
   pkg = require("./package"),
   each = require("array-each");
 
-let NAME = pkg.name;
+let NAME = 'Kodo Browser';
 let VERSION = pkg.version;
 let ELECTRON_VERSION = "4.2.7";
 let ROOT = __dirname;
@@ -242,13 +243,13 @@ gulp.task("dmg", () => {
   console.log(`--package ${NAME}.dmg`);
 
   createDMG({
-    appPath: `${TARGET}/${NAME}-darwin-x64/kodo-browser.app`,
-    name: packagerOptions.name,
-    title: packagerOptions.name,
+    appPath: `${TARGET}/${NAME}-darwin-x64/${NAME}.app`,
+    name: NAME,
+    title: `${NAME}, by Qiniu`,
     icon: `${CUSTOM}/icon.icns`,
     overwrite: true,
     debug: false,
-    out: `${TARGET}/${NAME}-darwin-x64`,
+    out: `${TARGET}/${NAME}-darwin-x64-dmg`,
     format: 'ULFO'
   }, (err) => {
     if (err) {
@@ -266,7 +267,7 @@ gulp.task("win64", () => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "win32";
     options.arch = "x64";
-    options.icon = `${CUSTOM}/icon.ico`;
+    options.icon = `${CUSTOM}/icon.png`;
 
     packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {
@@ -285,7 +286,7 @@ gulp.task("win32", () => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "win32";
     options.arch = "ia32";
-    options.icon = `${CUSTOM}/icon.ico`;
+    options.icon = `${CUSTOM}/icon.png`;
 
     packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {
@@ -296,6 +297,50 @@ gulp.task("win32", () => {
     });
   });
 });
+
+gulp.task("msi32", () => {
+  const msiCreator = new MSICreator({
+    appDirectory: `${TARGET}/${NAME}-win32-ia32`,
+    exe: NAME,
+    name: NAME,
+    manufacturer: 'Shanghai Qiniu Information Technology Co., Ltd.',
+    version: VERSION.split('.').map((v) => { return Number.parseInt(v); }).join('.'),
+    appUserModelId: 'com.qiniu.browser',
+    shortcutFolderName: 'Qiniu',
+    arch: 'x86',
+    language: 2052,
+    ui: {
+      chooseDirectory: true
+    },
+    outputDirectory: `${TARGET}/${NAME}-win32-ia32-installer`
+  });
+  (async() => {
+    await msiCreator.create();
+    await msiCreator.compile();
+  })();
+})
+
+gulp.task("msi64", () => {
+  const msiCreator = new MSICreator({
+    appDirectory: `${TARGET}/${NAME}-win32-x64`,
+    exe: NAME,
+    name: NAME,
+    manufacturer: 'Shanghai Qiniu Information Technology Co., Ltd.',
+    version: VERSION.split('.').map((v) => { return Number.parseInt(v); }).join('.'),
+    appUserModelId: 'com.qiniu.browser',
+    shortcutFolderName: 'Qiniu',
+    arch: 'x64',
+    language: 2052,
+    ui: {
+      chooseDirectory: true
+    },
+    outputDirectory: `${TARGET}/${NAME}-win32-x64-installer`
+  });
+  (async() => {
+    await msiCreator.create();
+    await msiCreator.compile();
+  })();
+})
 
 gulp.task("linux64", () => {
   console.log(`--package ${NAME}-linux-x64`);

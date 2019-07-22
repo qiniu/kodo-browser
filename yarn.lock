@@ -2040,6 +2040,16 @@ electron-to-chromium@^1.3.188:
   version "1.3.190"
   resolved "https://registry.npm.taobao.org/electron-to-chromium/download/electron-to-chromium-1.3.190.tgz#5bf599519983bfffd9d4387817039a3ed7ca085f"
 
+electron-wix-msi@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.npm.taobao.org/electron-wix-msi/download/electron-wix-msi-2.1.1.tgz#fb8f42326b3f243004f9abacbb8e6d9b9dab6668"
+  dependencies:
+    debug "^3.1.0"
+    fs-extra "^7.0.0"
+    klaw "^3.0.0"
+    lodash "^4.17.10"
+    uuid "^3.3.2"
+
 electron@^4.0:
   version "4.2.7"
   resolved "https://registry.npm.taobao.org/electron/download/electron-4.2.7.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Felectron%2Fdownload%2Felectron-4.2.7.tgz#bdd2dbf489a4a4255405bd8330cc8509831d29ba"
@@ -3768,6 +3778,12 @@ klaw@^1.0.0:
   optionalDependencies:
     graceful-fs "^4.1.9"
 
+klaw@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npm.taobao.org/klaw/download/klaw-3.0.0.tgz#b11bec9cf2492f06756d6e809ab73a2910259146"
+  dependencies:
+    graceful-fs "^4.1.9"
+
 latest-version@^3.0.0:
   version "3.1.0"
   resolved "https://registry.npm.taobao.org/latest-version/download/latest-version-3.1.0.tgz#a205383fea322b33b5ae3b18abee0dc2f356ee15"
@@ -4142,6 +4158,10 @@ lodash.without@~4.4.0:
 lodash@^4.12.0, lodash@^4.17.11, lodash@~4.17.11:
   version "4.17.14"
   resolved "https://registry.npm.taobao.org/lodash/download/lodash-4.17.14.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Flodash%2Fdownload%2Flodash-4.17.14.tgz#9ce487ae66c96254fe20b599f21b6816028078ba"
+
+lodash@^4.17.10:
+  version "4.17.15"
+  resolved "https://registry.npm.taobao.org/lodash/download/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
 
 lodash@~1.0.1:
   version "1.0.2"

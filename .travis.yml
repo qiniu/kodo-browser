@@ -10,16 +10,17 @@ env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 before_script:
   - |
     if [ "$TRAVIS_OS_NAME" == "windows" ]; then
-      choco install python vcredist-all make
+      powershell Install-WindowsFeature Net-Framework-Core
+      choco install python vcredist-all make wixtoolset
     fi
   - export PATH="$HOME/.yarn/bin:$PATH"
   - make i
 script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux"]; then
-        make build linux64
+        make linux64
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
-        make build mac dmg
+        make dmg
     elif [ "$TRAVIS_OS_NAME" == "windows" ]; then
-        make build win32 win64
+        make win32 win64
     fi

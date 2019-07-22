@@ -22,17 +22,19 @@ watch:
 build:
 	$(GULP) build
 
-win64:
+win64: build
 	npm run build:win64
-win32:
+	npm run build:msi64
+win32: build
 	npm run build:win32
-linux64:
+	npm run build:msi32
+linux64: build
 	npm run build:linux64
-linux32:
+linux32: build
 	npm run build:linux32
-mac:
+mac: build
 	npm run build:mac
-dmg:
+dmg: mac
 	npm run build:dmg
 
 all:win32 win64 linux32 linux64 mac

@@ -11,8 +11,6 @@ let UploadJob = require("./upload-job"),
  * @constructor S3Store
  *
  * @param config
- *    config.aliyunCredential
- *    config.stsToken
  *    config.endpoint
  */
 

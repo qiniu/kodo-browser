@@ -20,11 +20,6 @@ angular.module("web").factory("upgradeSvs", [
 
     //获取最新releaseNote
     function getLastestReleaseNote(version, fn) {
-      // var ind = upgrade_url.lastIndexOf('aliyun/s3-browser');
-      // if(ind>0){
-      //   var pre = upgrade_url.substring(0, 'aliyun/s3-browser'.length+ind);
-      //   $.get(pre + '/master/release-notes/'+version+'.md', fn);
-      // }
       if (!release_notes_url) {
         fn("");
         return;

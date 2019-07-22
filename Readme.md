@@ -1,17 +1,19 @@
 # KODO Browser
 
-KODO Browser 提供类似 Windows 资源管理器功能。用户可以很方便的浏览文件，上传下载文件，支持断点续传等。
+KODO Browser 参考 [OSS Browser](https://github.com/aliyun/oss-browser.git) 设计，提供类似 Windows 资源管理器功能。用户可以很方便的浏览文件，上传下载文件，支持断点续传等。
 
 本工具使用开源框架 Angular 1.x + [Electron](http://electron.atom.io/)制作。
 
 > Electron 框架可以让你使用 JavaScript，HTML 和 CSS 构建跨平台的桌面应用程序。它是基于node.js 和 Chromium 开源项目。Electron 可以打包出跨平台的程序，运行在 Mac，Windows 和 Linux 上。
 
+## [使用手册](https://developer.qiniu.io/kodo/tools/5972/kodo-browser)
+
 ## 1. 功能介绍:
 
 ```
 功能
-  |-- 登录：支持用户名和密码登录
-  |-- Bucket 管理: 新建 bucket，删除 bucket，bucket 权限修改。
+  |-- 登录：支持 AccessKey 和 SecretKey 登录
+  |-- Bucket 管理: 新建 bucket，删除 bucket。
        |-- 文件管理：目录和文件的增删改查， 复制, 文件预览等。
              |-- 文件传输任务管理： 上传下载，断点续传。
   |-- 地址栏功能（支持 kodo://bucket/object，浏览历史前进后退，保存书签）
@@ -32,7 +34,7 @@ KODO Browser 提供类似 Windows 资源管理器功能。用户可以很方便�
 
 cnpm 是 npm（node 包管理工具）的中国镜像，可以提高下载依赖包的效率。
 
-### (3) 如果使用 windows 系统，需要安装下列软件：
+### (3) 如果使用 Windows 系统，需要安装下列软件：
 
 * 需要安装 git 和 choco:
 
@@ -47,7 +49,7 @@ choco install python vcredist-all make
 ### (4) 下载代码
 
 ```
-git clone git@gitlab.qiniu.io:solutions/s3-browser.git
+git clone git@github.com:qiniu/kodo-browser.git
 ```
 
 安装依赖:
@@ -59,49 +61,41 @@ make i
 ### (5) 运行
 
 ```
-make run  # 开发模式运行, command+option+i 可用打开调试界面, win或linux按 F12.
+make run  # 开发模式运行，cmd+option+i 可用打开调试界面，Windows 或 Linux 按 F12
 ```
 
-开发模式下，会自动监听源码,如有修改,会自动build 前端代码到dist目录。
+开发模式下，会自动监听源码，如有修改，会自动 build 前端代码到 dist 目录。
 
 
 ### (6) 打包
 
 ```
-make build  # build前端代码到dist目录
+make build  # build 前端代码到 dist 目录
 ```
 
 ```
-make win64  # 打包 win64 程序， 可选: mac, dmg, linux64, linux32, win32, win64, all.
+make win64  # 打包 win64 程序，可选: mac, dmg, linux64, linux32, win32, win64, all.
 ```
 
 
 ## 3. 代码结构
 
 ```
-s3-browser/
+kodo-browser/
  |-- app/                 # 前端代码, 采用angular1.x + bootstrap3.x
  |-- custom/              # 自定义图标，名称等。请看custom/Readme.md
  |-- node/                # 前端调用的 node 模块
-     |-- s3store/        # 上传下载job类
+     |-- s3store/         # 上传下载 job 类
      |-- i18n/            # 国际化
  |-- vendor/              # 前端第三方库依赖
- |-- node_modules         # node端依赖的模块
- |-- dist                 # 前端临时build出的代码
+ |-- node_modules         # node 端依赖的模块
+ |-- dist                 # 前端临时 build 出的代码
  |-- build                # electron build 出的应用
  |-- gulpfile.js          # 项目管理文件
  |-- package.json         # 项目描述文件
  |-- main.js              # 程序入口
 ```
 
-## 4. 自定义构建
-
-请看这里: [自定义构建](custom/)
-
-## 5. 关于贡献
-
-* 暂不接受代码贡献，如有建议或发现bug，请直接开issue。
-
-## 6. 开源 LICENSE
+## 4. 开源 LICENSE
 
 [Apache License 2.0](LICENSE)

@@ -12,11 +12,5 @@ angular.module("web").controller("mainCtrl", [
         isLastVersion: true
       }
     });
-
-    // $timeout(function () {
-    //   autoUpgradeSvs.load(function (info) {
-    //     angular.extend($scope.upgradeInfo, info);
-    //   });
-    // }, 2000);
   }
 ]);

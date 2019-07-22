@@ -296,16 +296,8 @@ AccessKeySecret: ${secret}<br/>
 
 <br/>
 <hr/>
-您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">KODO Browser</a> 浏览或管理这些文件。
+您可以使用 <a href="https://github.com/qiniu/kodo-browser.git" target="_blank">Kodo Browser</a> 浏览或管理这些文件。
 `
-          //   '子用户名(Sub User): '+userName+ '<br/>'
-          // + 'AccessKeyId: '+result.AccessKey.AccessKeyId+ '<br/>'
-          // + 'AccessKeySecret: '+ result.AccessKey.AccessKeySecret+ '<br/>'
-          // + '区域(Region): '+ currentInfo.region  + '<br/>'
-          // + '授予权限(permission): '+$scope.grant.privType + '<br/>'
-          // + '授权路径(s3path): ' + comments.join(',<br/>')
-          // + '<hr/>'
-          // + '您可以使用 <a href="https://github.com/aliyun/s3-browser" target="_blank">KODO Browser</a> 浏览或管理这些文件。'
         };
         return sendInfo;
       }

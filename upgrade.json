@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0-beta",
+  "version": "1.0.0",
   "package_url":
     "https://raw.githubusercontent.com/qiniu/kodo-browser/upgrade.json",
   "files": ["app.asar"]

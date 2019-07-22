@@ -1,6 +1,6 @@
 angular.module("web").factory("autoUpgradeSvs", [
   function () {
-    var NAME = "s3-browser";
+    var NAME = "kodo-browser";
     var util = require("./node/s3store/lib/util");
 
     var release_notes_url = Global.release_notes_url;
@@ -14,8 +14,6 @@ angular.module("web").factory("autoUpgradeSvs", [
       lastVersion: gVersion,
       fileName: "",
       link: "",
-      // fileName: fileName,
-      // link: linkPre + '/'+ fileName,
       upgradeJob: {
         pkgLink: "",
         progress: 0,

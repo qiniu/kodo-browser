@@ -15,7 +15,7 @@ angular.module('web')
       }
 
       function openDoc() {
-        openExternal('https://help.aliyun.com/document_detail/43394.html')
+        openExternal('https://developer.qiniu.com')
       }
 
       init();

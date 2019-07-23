@@ -11,7 +11,6 @@ angular.module("web").controller("settingsCtrl", [
   "Mailer",
   "Toast",
   "Dialog",
-  "Const",
   function (
     $scope,
     $state,
@@ -22,8 +21,7 @@ angular.module("web").controller("settingsCtrl", [
     settingsSvs,
     Mailer,
     Toast,
-    Dialog,
-    Const
+    Dialog
   ) {
     var T = $translate.instant;
 

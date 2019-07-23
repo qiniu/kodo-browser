@@ -3,8 +3,7 @@ angular.module("web").factory("stsSvs", [
   "$state",
   "AuthInfo",
   "Toast",
-  "Const",
-  function($q, $state, AuthInfo, Toast, Const) {
+  function($q, $state, AuthInfo, Toast) {
     return {
       assumeRole: assumeRole
     };

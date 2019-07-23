@@ -42,25 +42,25 @@ cnpm 是 npm（node 包管理工具）的中国镜像，可以提高下载依赖
 
 然后安装相关的依赖包。
 
-```
+```bash
 choco install python vcredist-all make
 ```
 
 ### (4) 下载代码
 
-```
+```bash
 git clone git@github.com:qiniu/kodo-browser.git
 ```
 
 安装依赖:
 
-```
+```bash
 make i
 ```
 
 ### (5) 运行
 
-```
+```bash
 make run  # 开发模式运行，cmd+option+i 可用打开调试界面，Windows 或 Linux 按 F12
 ```
 
@@ -69,11 +69,11 @@ make run  # 开发模式运行，cmd+option+i 可用打开调试界面，Windows
 
 ### (6) 打包
 
-```
+```bash
 make build  # build 前端代码到 dist 目录
 ```
 
-```
+```bash
 make win64  # 打包 win64 程序，可选: mac, dmg, linux64, linux32, win32, win64, all.
 ```
 
@@ -83,7 +83,6 @@ make win64  # 打包 win64 程序，可选: mac, dmg, linux64, linux32, win32, w
 ```
 kodo-browser/
  |-- app/                 # 前端代码, 采用angular1.x + bootstrap3.x
- |-- custom/              # 自定义图标，名称等。请看custom/Readme.md
  |-- node/                # 前端调用的 node 模块
      |-- s3store/         # 上传下载 job 类
      |-- i18n/            # 国际化
@@ -96,6 +95,64 @@ kodo-browser/
  |-- main.js              # 程序入口
 ```
 
-## 4. 开源 LICENSE
+## 4. 私有云配置
+
+将配置文件放在 `$HOME/.kodo-browser/config.json` 下，配置文件示例如下：
+
+```json
+{
+    "regions": [
+        {
+            "id": "cn-east-1",
+            "label": "华东",
+            "endpoint": "https://s3-cn-east-1.qiniucs.com",
+            "storageClasses": [
+                { "value": "Standard", "name": "标准类型" },
+                { "value": "IA", "name": "低频访问类型" }
+            ]
+        },
+        {
+            "id": "cn-north-1",
+            "label": "华北",
+            "endpoint": "https://s3-cn-north-1.qiniucs.com",
+            "storageClasses": [
+                { "value": "Standard", "name": "标准类型" },
+                { "value": "IA", "name": "低频访问类型" }
+            ]
+        },
+        {
+            "id": "cn-south-1",
+            "label": "华南",
+            "endpoint": "https://s3-cn-south-1.qiniucs.com",
+            "storageClasses": [
+                { "value": "Standard", "name": "标准类型" },
+                { "value": "IA", "name": "低频访问类型" }
+            ]
+        },
+        {
+            "id": "us-north-1",
+            "label": "北美",
+            "endpoint": "https://s3-us-north-1.qiniucs.com",
+            "storageClasses": [
+                { "value": "Standard", "name": "标准类型" },
+                { "value": "IA", "name": "低频访问类型" }
+            ]
+        },
+        {
+            "id": "ap-southeast-1",
+            "label": "东南亚",
+            "endpoint": "https://s3-ap-southeast-1.qiniucs.com",
+            "storageClasses": [
+                { "value": "Standard", "name": "标准类型" },
+                { "value": "IA", "name": "低频访问类型" }
+            ]
+        }
+    ]
+}
+```
+
+可以修改配置文件示例种的 `endpoint` 来修改服务器地址。
+
+## 5. 开源 LICENSE
 
 [Apache License 2.0](LICENSE)

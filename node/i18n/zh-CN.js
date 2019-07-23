@@ -12,6 +12,9 @@ module.exports = {
   "region.us-north-1": "北美",
   "region.ap-southeast-1": "东南亚",
 
+  "config.parse.error": "解析配置文件出错",
+  "config.format.error": "配置文件格式错误",
+
   optional: "可选",
   default: "默认",
   region: "区域",
@@ -30,7 +33,6 @@ module.exports = {
   "auth.eptpl.placeholder": "默认: http://{region}-s3.qiniu.com",
   "auth.eptpl.popup.msg1": "公有云直接使用默认即可",
   "auth.eptpl.popup.msg2": "专有云请输入自定义 Endpoint, 如: ",
-  "auth.logintpl": "登录地址",
   "auth.servicetpl": "服务地址",
 
   "auth.region.placeholder": "请输入可用的区域",

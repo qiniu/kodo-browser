@@ -10,7 +10,6 @@ angular.module("web").controller("filesCtrl", [
   "AuthInfo",
   "s3Client",
   "fileSvs",
-  "Const",
   "Toast",
   "Dialog",
   function (
@@ -25,7 +24,6 @@ angular.module("web").controller("filesCtrl", [
     AuthInfo,
     s3Client,
     fileSvs,
-    Const,
     Toast,
     Dialog
   ) {

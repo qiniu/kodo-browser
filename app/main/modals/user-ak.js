@@ -11,7 +11,6 @@ angular.module("web").controller("userAKCtrl", [
   "subUserAKSvs",
   "Toast",
   "Dialog",
-  "Const",
   function (
     $scope,
     $rootScope,
@@ -23,7 +22,6 @@ angular.module("web").controller("userAKCtrl", [
     subUserAKSvs,
     Toast,
     Dialog,
-    Const
   ) {
     var T = $translate.instant;
 

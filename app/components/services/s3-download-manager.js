@@ -2,14 +2,14 @@ angular.module("web").factory("s3DownloadMgr", [
   "$timeout",
   "AuthInfo",
   "s3Client",
-  "Const",
+  "Config",
   "Toast",
   "settingsSvs",
   function (
     $timeout,
     AuthInfo,
     s3Client,
-    Const,
+    Config,
     Toast,
     settingsSvs
   ) {
@@ -78,7 +78,7 @@ angular.module("web").factory("s3DownloadMgr", [
       options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
 
-      angular.forEach(Const.regions, (r) => {
+      angular.forEach(Config.regions, (r) => {
         if (r.id == region) {
           auth.servicetpl = r.endpoint;
         }

@@ -1,6 +1,5 @@
 VERSION=1.0.0
 NAME=kodo-browser
-CUSTOM=./custom
 
 GULP=node ./node_modules/gulp/bin/gulp.js
 PKGER=node node_modules/electron-packager/cli.js

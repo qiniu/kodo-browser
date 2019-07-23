@@ -6,6 +6,7 @@ angular.module("web").controller("loginCtrl", [
   "AuthInfo",
   "$location",
   "Const",
+  "Config",
   "Dialog",
   "Toast",
   function (
@@ -16,15 +17,15 @@ angular.module("web").controller("loginCtrl", [
     AuthInfo,
     $location,
     Const,
+    Config,
     Dialog,
     Toast
   ) {
     var DEF_EPTPL = "https://s3-{region}.qiniucs.com";
     var KEY_REMEMBER = Const.KEY_REMEMBER;
-    var KEY_LOGINTPL = Const.KEY_LOGINTPL;
     var KEY_SERVICETPL = Const.KEY_SERVICETPL;
     var KEY_REGION = Const.KEY_REGION;
-    var regions = angular.copy(Const.regions);
+    var regions = angular.copy(Config.regions);
 
     var T = $translate.instant;
 
@@ -35,24 +36,20 @@ angular.module("web").controller("loginCtrl", [
         showHis: "NO"
       },
       item: {
-        domain: Global.custom_settings.domain,
+        domain: Global.domain,
         eptpl: DEF_EPTPL,
-        logintpl: (localStorage.getItem(KEY_LOGINTPL) || Global.custom_settings.loginURL),
-        servicetpl: (localStorage.getItem(KEY_SERVICETPL) || Global.custom_settings.serviceURL)
+        servicetpl: (localStorage.getItem(KEY_SERVICETPL) || regions[0].endpoint)
       },
       eptplType: "default",
 
       regions: regions,
 
       showGuestNav: 1,
-      showCloudLogin: Global.custom_settings.appCloud,
 
       onSubmit: onSubmit,
       showCleanHistories: showCleanHistories,
       useHis: useHis,
       showRemoveHis: showRemoveHis,
-
-      onSubmitPass: onSubmitPass,
 
       open: open,
       eptplChange: eptplChange
@@ -129,7 +126,7 @@ angular.module("web").controller("loginCtrl", [
 
       // append domain
       if (data.id) {
-        data.username = data.id + Global.custom_settings.domain;
+        data.username = data.id + Global.domain;
       }
       // trim password
       if (data.secret) {
@@ -159,52 +156,6 @@ angular.module("web").controller("loginCtrl", [
 
           localStorage.setItem(KEY_SERVICETPL, data.servicetpl);
           localStorage.setItem(KEY_REGION, data.region);
-
-          Toast.success(T("login.successfully"), 1000);
-
-          $location.url("/");
-        },
-        function (err) {
-          Toast.error(err.code + ":" + err.message);
-        }
-      );
-
-      return false;
-    }
-
-    function onSubmitPass(form2) {
-      if (!form2.$valid) return;
-
-      localStorage.setItem(KEY_REMEMBER, $scope.flags.remember);
-
-      var data = angular.copy($scope.item);
-
-      //append domain
-      if (data.username) {
-        data.username = data.username + Global.custom_settings.domain;
-      }
-      //trim password
-      if (data.password) {
-        data.password = data.password.trim();
-      }
-
-      delete data.id;
-      delete data.secret;
-
-      if ($scope.flags.remember == "YES") {
-        AuthInfo.remember(data);
-      }
-
-      Toast.info(T("logining"), 1000);
-
-      Auth.loginPass(data).then(
-        function () {
-          if ($scope.flags.remember == "YES") {
-            AuthInfo.addToHistories(data);
-          }
-
-          localStorage.setItem(KEY_LOGINTPL, data.logintpl);
-          localStorage.setItem(KEY_SERVICETPL, data.servicetpl);
 
           Toast.success(T("login.successfully"), 1000);
 

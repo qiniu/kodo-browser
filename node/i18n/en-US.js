@@ -12,6 +12,9 @@ module.exports = {
   "region.us-north-1": "North America",
   "region.ap-southeast-1": "Southeast Asia",
 
+  "config.parse.error": "Failed to parse config file",
+  "config.format.error": "Something is wrong in the config file",
+
   optional: "Optional",
   default: "Default",
   region: "Region",
@@ -30,7 +33,6 @@ module.exports = {
   "auth.eptpl.placeholder": "Default: http://{region}-s3.qiniu.com",
   "auth.eptpl.popup.msg1": "For Public Cloud, you can directly use the default settings",
   "auth.eptpl.popup.msg2": "For Private Cloud, Please enter a custom Endpoint, such as:",
-  "auth.logintpl": "Login Endpoint",
   "auth.servicetpl": "Service Endpoint",
 
   "auth.region.placeholder": "Please enter available region",

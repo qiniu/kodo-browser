@@ -84,6 +84,7 @@
     "showdown": "^1.9.0"
   },
   "dependencies": {
+    "array-each": "^1.0.1",
     "array-filter": "^1.0.0",
     "async": "^1.5.2",
     "aws-sdk": "^2.356.0",

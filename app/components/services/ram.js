@@ -3,8 +3,7 @@ angular.module("web").factory("ramSvs", [
   "$state",
   "AuthInfo",
   "Toast",
-  "Const",
-  function($q, $state, AuthInfo, Toast, Const) {
+  function($q, $state, AuthInfo, Toast) {
     return {
       listUsers: listUsers,
       listGroups: listGroups,

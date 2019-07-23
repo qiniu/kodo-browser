@@ -4,18 +4,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-  <title>KODO Browser</title>
+  <title>Kodo Browser</title>
   <script>
     const os = require('os');
     const path = require('path');
-
-    var custom = {};
-    try {
-      custom = require(path.join(__dirname, '../custom/index.js'));
-    } catch (e) {
-      console.log('no custom settings')
-    };
-    document.title = custom.title || 'KODO Browser';
   </script>
   <link href="css/lib.css" rel="stylesheet">
   <link href="app.css" rel="stylesheet">
@@ -92,37 +84,20 @@
 
     var Global = {
       app: {
-        id: custom.appId || '.kodo-browser',
-        logo: custom.logo_png || 'icons/icon.png', //logo
-        version: custom.version || pkg.version //version
+        id: 'kodo-browser',
+        logo: 'icons/icon.png',
+        version: pkg.version
       },
       i18n: require('./node/i18n'),
-
-      custom_settings: {
-        domain: custom.domain,
-        loginURL: custom.loginURL,
-        serviceURL: custom.serviceURL,
-        appCloud: custom.appCloud
-      },
-
+      domain: '@qiniu.com',
       config_path: path.join(os.homedir(), '.kodo-browser'),
 
       //release notes目录后缀，里面有 ${version}.md, 如 1.0.0.md
       release_notes_url: `https://raw.githubusercontent.com/qiniu/kodo-browser/${isDev ? 'develop' : 'master'}/release-notes/`,
 
       // //升级检测链接
-      upgrade_url: `https://raw.githubusercontent.com/qiniu/kodo-browser/${isDev ? 'develop' : 'master'}/upgrade.json`,
-
-      about_html: custom.about_html
+      upgrade_url: `https://raw.githubusercontent.com/qiniu/kodo-browser/${isDev ? 'develop' : 'master'}/upgrade.json`
     };
-
-    (function () {
-      if (custom.appName)
-        for (var k in custom.appName) {
-          if (Global.i18n[k])
-            Global.i18n[k].content['app.name'] = custom.appName[k] || 'KODO Browser';
-        }
-    })();
 
     $(function () {
       $(document).on('dragover', function (ev) {

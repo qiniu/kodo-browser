@@ -14,7 +14,7 @@ let NAME = 'Kodo Browser';
 let VERSION = pkg.version;
 let ELECTRON_VERSION = "4.2.7";
 let ROOT = __dirname;
-let CUSTOM = `${ROOT}/custom`;
+let ICONS = `${ROOT}/app/icons`;
 let DIST = `${ROOT}/dist`;
 let TARGET = `${ROOT}/build`;
 let RELEASE = `${ROOT}/releases`;
@@ -28,10 +28,7 @@ let packagerOptions = {
   appVersion: VERSION,
   appCopyright: "",
   electronVersion: ELECTRON_VERSION,
-  packageManager: "yarn",
-  extraResource: [
-    `${CUSTOM}`
-  ]
+  packageManager: "yarn"
 };
 
 let appTasks = {
@@ -60,7 +57,7 @@ let appTasks = {
   }
 };
 
-each([CUSTOM, DIST, TARGET, RELEASE], (dir) => {
+each([ICONS, DIST, TARGET, RELEASE], (dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -227,7 +224,7 @@ gulp.task("mac", () => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "darwin";
     options.arch = "x64";
-    options.icon = `${CUSTOM}/icon.icns`;
+    options.icon = `${ICONS}/icon.icns`;
 
     packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.exe ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.bin`).exec(() => {
@@ -246,7 +243,7 @@ gulp.task("dmg", () => {
     appPath: `${TARGET}/${NAME}-darwin-x64/${NAME}.app`,
     name: NAME,
     title: `${NAME}, by Qiniu`,
-    icon: `${CUSTOM}/icon.icns`,
+    icon: `${ICONS}/icon.icns`,
     overwrite: true,
     debug: false,
     out: `${TARGET}/${NAME}-darwin-x64-dmg`,
@@ -267,7 +264,7 @@ gulp.task("win64", () => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "win32";
     options.arch = "x64";
-    options.icon = `${CUSTOM}/icon.png`;
+    options.icon = `${ICONS}/icon.png`;
 
     packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {
@@ -286,7 +283,7 @@ gulp.task("win32", () => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "win32";
     options.arch = "ia32";
-    options.icon = `${CUSTOM}/icon.png`;
+    options.icon = `${ICONS}/icon.png`;
 
     packager(options).then((paths) => {
       plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {

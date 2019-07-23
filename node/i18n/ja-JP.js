@@ -12,6 +12,9 @@ module.exports = {
   "region.us-north-1": "北米",
   "region.ap-southeast-1": "東南亜",
 
+  "config.parse.error": "設定ファイルの解析に失敗しました",
+  "config.format.error": "設定ファイルに問題があります",
+
   optional: "オプション",
   default: "デフォルト",
   region: "リージョン",
@@ -30,7 +33,6 @@ module.exports = {
   "auth.eptpl.placeholder": "デフォルト: http://{region}-s3.qiniu.com",
   "auth.eptpl.popup.msg1": "パブリッククラウドの場合は、デフォルト設定をそのまま使用できます",
   "auth.eptpl.popup.msg2": "プライベートクラウドの場合は、次のようなカスタムエンドポイントを入力してください。:",
-  "auth.logintpl": "ログインアドレス",
   "auth.servicetpl": "サービスアドレス",
 
   "auth.region.placeholder": "利用可能な地域を入力してください",

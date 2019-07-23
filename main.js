@@ -26,15 +26,6 @@ if (process.env.NODE_ENV != "development") {
   appRoot = path.join(appRoot, "app");
 }
 
-let homeRoot = app.getPath("home") || os.homedir();
-
-let custom = {};
-try {
-  custom = require(path.join(root, "custom"));
-} catch (e) {
-  console.log("no custom settings");
-}
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
@@ -45,7 +36,7 @@ let forkedWorkers = new Map();
 switch (process.platform) {
 case "darwin":
   app.dock.setIcon(
-    custom.logo_png || path.join(root, "icons", "icon.png")
+    path.join(root, "app", "icons", "icon.png")
   );
 
   execNode = path.join(appRoot, "node", "bin", "node");
@@ -82,8 +73,8 @@ let createWindow = () => {
     height: 768,
     minWidth: 800,
     minHeight: 600,
-    title: custom.title || "Kodo Browser",
-    icon: custom.logo_ico || path.join(root, "icons", "icon.ico")
+    title: "Kodo Browser",
+    icon: path.join(root, "app", "icons", "icon.ico"),
   };
 
   let confirmForWorkers = (e) => {
@@ -168,7 +159,7 @@ let createWindow = () => {
   };
 
   if (process.platform == "linux") {
-    opt.icon = custom.logo_png || path.join(root, "icons", "icon.png");
+    opt.icon = path.join(root, "app", "icons", "icon.png");
   }
 
   // Create the browser window.   http://electron.atom.io/docs/api/browserwindow/
@@ -236,7 +227,7 @@ ipcMain.on("asynchronous", (event, data) => {
       fs.rename(from, to, (e) => {
         if (e) {
           fs.writeFileSync(
-            path.join(homeRoot, ".kodo-browser", "upgrade-error.txt"),
+            path.join(os.homedir(), ".kodo-browser", "upgrade-error.txt"),
             JSON.stringify(e)
           );
         } else {

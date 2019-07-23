@@ -6,9 +6,9 @@ angular.module("web").factory("s3Client", [
   "$timeout",
   "$state",
   "Toast",
-  "Const",
+  "Config",
   "AuthInfo",
-  function ($q, $rootScope, $timeout, $state, Toast, Const, AuthInfo) {
+  function ($q, $rootScope, $timeout, $state, Toast, Config, AuthInfo) {
     var path = require("path");
 
     var NEXT_TICK = 1;
@@ -1329,7 +1329,7 @@ angular.module("web").factory("s3Client", [
       var bucket;
       if (typeof opt == "object") {
         if (opt.region) {
-          angular.forEach(Const.regions, (region) => {
+          angular.forEach(Config.regions, (region) => {
             if (region.id == opt.region) {
               opt.servicetpl = region.endpoint;
             }

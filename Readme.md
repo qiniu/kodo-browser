@@ -6,7 +6,7 @@ KODO Browser 参考 [OSS Browser](https://github.com/aliyun/oss-browser.git) 设
 
 > Electron 框架可以让你使用 JavaScript，HTML 和 CSS 构建跨平台的桌面应用程序。它是基于node.js 和 Chromium 开源项目。Electron 可以打包出跨平台的程序，运行在 Mac，Windows 和 Linux 上。
 
-## [使用手册](https://developer.qiniu.io/kodo/tools/5972/kodo-browser)
+## [使用手册 & 下载地址](https://developer.qiniu.com/kodo/tools/5972/kodo-browser)
 
 ## 1. 功能介绍:
 

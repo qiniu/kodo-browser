@@ -1011,6 +1011,7 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showBucketsTable(buckets) {
+      initBucketSelect();
       var $list = $('#bucket-list').bootstrapTable({
         columns: [{
           field: 'id',
@@ -1072,6 +1073,7 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showFilesTable(files, isAppend) {
+      initFilesSelect();
       var $list = $('#file-list').bootstrapTable({
         columns: [{
           field: 'id',

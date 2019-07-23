@@ -241,12 +241,13 @@ angular.module("web").factory("s3DownloadMgr", [
               });
             });
           }, Promise.resolve(toLocalPath)).then((localPath) => {
-            var fileLocalPath = path.normalize(path.join(localPath, fileName));
-            var fileLocalPathWithSuffix = fileLocalPath;
+            var ext = path.extname(fileName);
+            var fileLocalPathWithoutExt = path.normalize(path.join(localPath, path.basename(fileName, ext)));
+            var fileLocalPathWithSuffixWithoutExt = fileLocalPathWithoutExt
 
             for (var i = 1; ; i++) {
-              if (fs.existsSync(fileLocalPathWithSuffix)) {
-                fileLocalPathWithSuffix = fileLocalPath + "." + i;
+              if (fs.existsSync(fileLocalPathWithSuffixWithoutExt + ext)) {
+                fileLocalPathWithSuffixWithoutExt = `${fileLocalPathWithoutExt}.${i}`;
               } else {
                 break;
               }
@@ -259,7 +260,7 @@ angular.module("web").factory("s3DownloadMgr", [
               },
               to: {
                 name: fileName,
-                path: fileLocalPathWithSuffix
+                path: fileLocalPathWithSuffixWithoutExt + ext
               }
             });
 

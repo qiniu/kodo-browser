@@ -99,6 +99,14 @@ DownloadJob.prototype.start = function (prog) {
       isDebug: this.isDebug
     }
   };
+  if (fs.existsSync(job.params.localFile)) {
+    if (fs.statSync(job.params.localFile).size !== job.params.downloadedBytes) {
+      job.params.downloadedBytes = 0;
+      fs.truncateSync(job.params.localFile);
+    }
+  } else {
+    job.params.downloadedBytes = 0;
+  }
   if (this.isDebug) {
     console.log(`[JOB] ${JSON.stringify(job)}`);
   }

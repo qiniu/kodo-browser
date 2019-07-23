@@ -48,7 +48,9 @@
     </div>
 
     <div class="btn-group" role="toolbar" ng-if="keepMoveOptions">
-      <button class="btn btn-default btn-sm" type="button" uib-tooltip="{{'paste.resources'|translate}}" tooltip-placement="bottom" tooltip-append-to-body="true" ng-click="showPaste()">
+      <button class="btn btn-default btn-sm" type="button"
+              uib-tooltip="{{'paste.resources'|translate}}" tooltip-placement="bottom" tooltip-append-to-body="true"
+              ng-click="showPaste()" ng-disabled="keepMoveOptions.currentInfo.region !== currentInfo.region">
         <i class="fa fa-paste"></i>
         <span class="text-primary">{{'paste'|translate}}({{keepMoveOptions.items.length}})</span>
       </button>

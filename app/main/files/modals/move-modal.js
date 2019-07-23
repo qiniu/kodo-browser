@@ -1,8 +1,10 @@
 angular.module('web')
   .controller('moveModalCtrl', ['$scope', '$uibModalInstance', '$timeout', 'items', 'isCopy', 'renamePath', 'fromInfo', 'moveTo', 'callback', 's3Client', 'Toast', 'AuthInfo', 'safeApply',
     function ($scope, $modalInstance, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, s3Client, Toast, AuthInfo, safeApply) {
-      var path = require("path");
-      var filter = require("array-filter");
+      const path = require("path");
+      const filter = require("array-filter");
+      const map = require("array-map");
+
       var authInfo = AuthInfo.get();
 
       angular.extend($scope, {
@@ -56,10 +58,12 @@ angular.module('web')
           if (fromInfo.bucket !== target.bucket) {
             return true;
           }
+          var entries = filter([target.key, item.name], (name) => { return name });
+          var path = map(entries, (name) => { return name.replace(/^\/*([^/].+[^/])\/*$/, '$1'); }).join('/');
           if (item.isFolder) {
-            return item.path !== path.join(target.key, item.name) + path.sep;
+            return item.path !== path + '/';
           }
-          return item.path !== path.join(target.key, item.name);
+          return item.path !== path;
         });
 
         if (items.length === 0) {

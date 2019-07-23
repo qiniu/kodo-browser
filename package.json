@@ -86,6 +86,7 @@
   "dependencies": {
     "array-each": "^1.0.1",
     "array-filter": "^1.0.0",
+    "array-map": "^0.0.0",
     "async": "^1.5.2",
     "aws-sdk": "^2.356.0",
     "mime": "^2.3.1",

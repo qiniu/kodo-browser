@@ -23,14 +23,17 @@ build:
 
 win64: build
 	npm run build:win64
+	npm run pkg:win64
 win32: build
 	npm run build:win32
+	npm run pkg:win32
 linux64: build
 	npm run build:linux64
 linux32: build
 	npm run build:linux32
 mac: build
 	npm run build:mac
+	npm run pkg:mac
 dmg: mac
 	npm run build:dmg
 

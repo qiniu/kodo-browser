@@ -1,24 +1,26 @@
-let gulp = require("gulp"),
+const gulp = require("gulp"),
   plugins = require("gulp-load-plugins")({
     lazy: false
   }),
   packager = require('electron-packager'),
   createDMG = require('electron-installer-dmg'),
+  archiver = require('archiver'),
   fs = require("fs"),
   path = require("path"),
   pkg = require("./package"),
   each = require("array-each");
 
-let NAME = 'Kodo Browser';
-let VERSION = pkg.version;
-let ELECTRON_VERSION = "4.2.7";
-let ROOT = __dirname;
-let ICONS = `${ROOT}/app/icons`;
-let DIST = `${ROOT}/dist`;
-let TARGET = `${ROOT}/build`;
-let RELEASE = `${ROOT}/releases`;
+const NAME = 'Kodo Browser';
+const KICK_NAME = 'kodo-browser';
+const VERSION = pkg.version;
+const ELECTRON_VERSION = "4.2.7";
+const ROOT = __dirname;
+const ICONS = `${ROOT}/app/icons`;
+const DIST = `${ROOT}/dist`;
+const TARGET = `${ROOT}/build`;
+const RELEASE = `${ROOT}/releases`;
 
-let packagerOptions = {
+const packagerOptions = {
   dir: DIST,
   name: NAME,
   asar: false,
@@ -235,6 +237,16 @@ gulp.task("mac", () => {
   });
 });
 
+gulp.task("maczip", () => {
+  console.log(`--package ${KICK_NAME}-darwin-x64-v${VERSION}.zip`);
+  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-darwin-x64-v${VERSION}.zip`);
+  var archive = archiver('zip', { zlib: { level: 9 } });
+  archive.on('error', (err) => { throw err; });
+  archive.pipe(outputZip);
+  archive.directory(`${TARGET}/${NAME}-darwin-x64/${NAME}.app`, `${NAME}.app`);
+  archive.finalize();
+});
+
 gulp.task("dmg", () => {
   console.log(`--package ${NAME}.dmg`);
 
@@ -275,6 +287,16 @@ gulp.task("win64", () => {
   });
 });
 
+gulp.task("win64zip", () => {
+  console.log(`--package ${KICK_NAME}-win32-x64-v${VERSION}.zip`);
+  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-win32-x64-v${VERSION}.zip`);
+  var archive = archiver('zip', { zlib: { level: 9 } });
+  archive.on('error', (err) => { throw err; });
+  archive.pipe(outputZip);
+  archive.directory(`${TARGET}/${NAME}-win32-x64`, false);
+  archive.finalize();
+});
+
 gulp.task("win32", () => {
   console.log(`--package ${NAME}-win32-ia32`);
 
@@ -292,6 +314,16 @@ gulp.task("win32", () => {
       console.error(errs);
     });
   });
+});
+
+gulp.task("win32zip", () => {
+  console.log(`--package ${KICK_NAME}-win32-x86-v${VERSION}.zip`);
+  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-win32-x86-v${VERSION}.zip`);
+  var archive = archiver('zip', { zlib: { level: 9 } });
+  archive.on('error', (err) => { throw err; });
+  archive.pipe(outputZip);
+  archive.directory(`${TARGET}/${NAME}-win32-ia32`, false);
+  archive.finalize();
 });
 
 gulp.task("linux64", () => {

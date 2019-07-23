@@ -46,7 +46,7 @@ angular.module("web").controller("settingsCtrl", [
     var tid;
 
     function setChange(form1, key, ttl) {
-      if (!$scope.set[key]) {
+      if (typeof $scope.set[key] === 'undefined') {
         return;
       }
 

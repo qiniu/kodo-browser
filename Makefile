@@ -23,10 +23,8 @@ build:
 
 win64: build
 	npm run build:win64
-	npm run build:msi64
 win32: build
 	npm run build:win32
-	npm run build:msi32
 linux64: build
 	npm run build:linux64
 linux32: build

@@ -4,6 +4,7 @@ const os = require("os");
 const path = require("path");
 const {
   app,
+  globalShortcut,
   dialog,
   Menu,
   ipcMain,
@@ -200,6 +201,12 @@ let createWindow = () => {
     console.log("run on macos in production");
     // Create the Application's main menu
     Menu.setApplicationMenu(Menu.buildFromTemplate(getMenuTemplate()));
+  }
+
+  if (process.env.NODE_ENV != "development") {
+    globalShortcut.register('CommandOrControl+Alt+I', () => {
+      win.webContents.openDevTools();
+    });
   }
 };
 

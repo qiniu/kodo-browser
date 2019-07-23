@@ -27,9 +27,7 @@ angular.module("web").factory("Const", [
       },
 
       bucketACL: [
-        { acl: "private", label: "私有" }, //私有
-        { acl: "public-read", label: "公共读" }, //公共读
-        { acl: "public-read-write", label: "公共读写" } //公共读写
+        { acl: "public-read", label: "公共读" }, // 目前仅支持公共读
       ],
 
       //http://7xp1d8.com1.z0.glb.clouddn.com/intro.html

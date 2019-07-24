@@ -79,6 +79,8 @@
     "jquery": "^3.3.1",
     "jquery.qrcode": "^1.0.3",
     "jshint": "^2.9.6",
+    "lodash": "^4.17.15",
+    "minimatch": "^3.0.4",
     "moment": "^2.22.2",
     "npm": "^6.4.1",
     "npm-run-all": "^4.1.3",

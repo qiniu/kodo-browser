@@ -151,7 +151,7 @@ kodo-browser/
 }
 ```
 
-可以修改配置文件示例种的 `endpoint` 来修改服务器地址。
+可以修改配置文件示例中的 `endpoint` 来修改服务器地址。
 
 ## 5. 开源 LICENSE
 

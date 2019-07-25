@@ -1073,7 +1073,9 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showFilesTable(files, isAppend) {
-      initFilesSelect();
+      if (!isAppend) {
+        initFilesSelect();
+      }
       var $list = $('#file-list').bootstrapTable({
         columns: [{
           field: 'id',
@@ -1226,7 +1228,7 @@ angular.module("web").controller("filesCtrl", [
       });
 
       if (isAppend) {
-        $list.append(files);
+        $list.bootstrapTable('append', files);
       } else {
         $list.bootstrapTable('load', files).bootstrapTable('uncheckAll');
       }

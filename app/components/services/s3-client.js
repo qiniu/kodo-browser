@@ -1088,14 +1088,8 @@ angular.module("web").factory("s3Client", [
             });
           }
 
-          var data = t_pre.concat(t);
-          if (data.length < result.MaxKeys) {
-            result.IsTruncated = false;
-            result.NextMarker = null;
-          }
-
           resolve({
-            data: data,
+            data: t_pre.concat(t),
             marker: result.NextMarker
           });
         });

@@ -17,10 +17,6 @@ angular.module("web").factory("Const", [
       AUTH_INFO_KEY: "auth-info",
       AUTH_KEEP: "auth-keep",
       AUTH_HIS: "auth-his",
-      KEY_SERVICETPL: "auth-servicetpl",
-      KEY_REGION: "auth-region",
-      KEY_REMEMBER: "auth-remember",
-      SHOW_HIS: "show-his",
 
       REG: {
         EMAIL: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/

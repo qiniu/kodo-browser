@@ -22,9 +22,6 @@ angular.module("web").controller("loginCtrl", [
     Toast
   ) {
     var DEF_EPTPL = "https://s3-{region}.qiniucs.com";
-    var KEY_REMEMBER = Const.KEY_REMEMBER;
-    var KEY_SERVICETPL = Const.KEY_SERVICETPL;
-    var KEY_REGION = Const.KEY_REGION;
     var regions = angular.copy(Config.regions);
 
     var T = $translate.instant;
@@ -38,7 +35,7 @@ angular.module("web").controller("loginCtrl", [
       item: {
         domain: Global.domain,
         eptpl: DEF_EPTPL,
-        servicetpl: (localStorage.getItem(KEY_SERVICETPL) || regions[0].endpoint)
+        servicetpl: (regions[0].endpoint)
       },
       eptplType: "default",
 
@@ -120,8 +117,6 @@ angular.module("web").controller("loginCtrl", [
     function onSubmit(form1) {
       if (!form1.$valid) return;
 
-      localStorage.setItem(KEY_REMEMBER, $scope.flags.remember);
-
       var data = angular.copy($scope.item);
 
       // append domain
@@ -153,12 +148,7 @@ angular.module("web").controller("loginCtrl", [
           if ($scope.flags.remember == "YES") {
             AuthInfo.addToHistories(data);
           }
-
-          localStorage.setItem(KEY_SERVICETPL, data.servicetpl);
-          localStorage.setItem(KEY_REGION, data.region);
-
           Toast.success(T("login.successfully"), 1000);
-
           $location.url("/");
         },
         function (err) {

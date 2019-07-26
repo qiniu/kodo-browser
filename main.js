@@ -225,6 +225,12 @@ ipcMain.on("asynchronous", (event, data) => {
     win.webContents.openDevTools();
     break;
 
+  case "clearCache":
+    win.webContents.session.clearCache(() => {
+      console.info('cache cleared');
+    });
+    break;
+
   case "installRestart":
     let version = data.version;
     let from = path.join(path.dirname(__dirname), version + "app.asar");

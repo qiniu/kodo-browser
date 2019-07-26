@@ -5,8 +5,8 @@ angular.module("web").factory("Auth", [
   "s3Client",
   "AuthInfo",
   function ($q, $location, $translate, s3Client, AuthInfo) {
-    var $http = require('request');
-    var T = $translate.instant;
+    const $http = require('request');
+    const T = $translate.instant;
 
     return {
       login: login,
@@ -95,10 +95,11 @@ angular.module("web").factory("Auth", [
     }
 
     function logout() {
+      const { ipcRenderer } = require('electron');
       var df = $q.defer();
       AuthInfo.remove();
+      ipcRenderer.send('asynchronous', { key: 'clearCache' });
       df.resolve();
-
       return df.promise;
     }
   }

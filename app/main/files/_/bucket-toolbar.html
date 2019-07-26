@@ -31,7 +31,7 @@
   <div class="col-sm-4 pd0">
 
     <div class="input-group input-group-sm mgb0">
-      <input ng-model="sch.bucketName" type="text" class="form-control" cleanable-input placeholder="{{'bucket.name'|translate}}">
+      <input ng-model="sch.bucketName" type="text" ng-change="searchBucketName()" class="form-control" cleanable-input placeholder="{{'bucket.name'|translate}}">
       <span class="input-group-addon">
         <i class="fa fa-search"></i>
         {{(buckets|filter:sch.bucketName).length}}

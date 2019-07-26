@@ -27,8 +27,9 @@ angular.module("web").controller("filesCtrl", [
     Toast,
     Dialog
   ) {
-    var deepEqual = require('fast-deep-equal');
-    var T = $translate.instant;
+    const filter = require("array-filter");
+    const deepEqual = require('fast-deep-equal');
+    const T = $translate.instant;
 
     angular.extend($scope, {
       showTab: 1,
@@ -57,6 +58,7 @@ angular.module("web").controller("filesCtrl", [
         objectName: ""
       },
       searchObjectName: searchObjectName,
+      searchBucketName: searchBucketName,
 
       // bucket selection
       bucket_sel: null,
@@ -167,6 +169,11 @@ angular.module("web").controller("filesCtrl", [
         info.key += $scope.sch.objectName;
         listFiles(info);
       }, 600);
+    }
+
+    function searchBucketName() {
+      $timeout.cancel(searchTid);
+      searchTid = $timeout(listBuckets, 600);
     }
 
     var uploadsTid;
@@ -313,29 +320,39 @@ angular.module("web").controller("filesCtrl", [
       });
 
       s3Client.listAllBuckets().then((buckets) => {
+        if ($scope.sch.bucketName) {
+          buckets = filter(buckets, (bkt) => { return bkt.name.indexOf($scope.sch.bucketName) >= 0; });
+        }
+
         $timeout(() => {
           $scope.buckets = buckets;
 
           var m = {};
           var wait = buckets.length;
-          angular.forEach(buckets, (bkt) => {
-            m[bkt.name] = bkt;
-            s3Client.getBucketLocation(bkt.name).then((regionId) => {
-              bkt.region = regionId;
-              wait -= 1;
-              if (wait == 0) {
-                $timeout(() => {
-                  $scope.isLoading = false;
-                  showBucketsTable(buckets);
-                  if (fn) fn(null);
-                });
-              }
-            }, (err) => {
-              console.error("get bucket location error", bkt.name, err);
-              wait -= 1;
-              if (fn) fn(err);
+          if (wait > 0) {
+            angular.forEach(buckets, (bkt) => {
+              m[bkt.name] = bkt;
+              s3Client.getBucketLocation(bkt.name).then((regionId) => {
+                bkt.region = regionId;
+                wait -= 1;
+                if (wait == 0) {
+                  $timeout(() => {
+                    $scope.isLoading = false;
+                    showBucketsTable(buckets);
+                    if (fn) fn(null);
+                  });
+                }
+              }, (err) => {
+                console.error("get bucket location error", bkt.name, err);
+                wait -= 1;
+                if (fn) fn(err);
+              });
             });
-          });
+          } else {
+            $scope.isLoading = false;
+            showBucketsTable([]);
+            if (fn) fn(null);
+          }
           $rootScope.bucketMap = m;
         });
       }, (err) => {

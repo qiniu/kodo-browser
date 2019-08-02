@@ -272,27 +272,21 @@ angular.module("web").factory("s3UploadMgr", [
       job.on("statuschange", (status) => {
         if (status == "stopped") {
           concurrency--;
-          trySchedJob();
+          $timeout(trySchedJob);
         }
 
         trySaveProg();
-
-        $timeout(() => {
-          $scope.calcTotalProg();
-        });
+        $timeout($scope.calcTotalProg);
       });
       job.on("speedchange", () => {
-        $timeout(() => {
-          $scope.calcTotalProg();
-        });
+        $timeout($scope.calcTotalProg);
       });
       job.on("complete", () => {
         concurrency--;
-        trySchedJob();
 
         $timeout(() => {
+          trySchedJob();
           $scope.calcTotalProg();
-
           checkNeedRefreshFileList(job.to.bucket, job.to.key);
         });
       });
@@ -302,9 +296,8 @@ angular.module("web").factory("s3UploadMgr", [
         }
 
         concurrency--;
-        trySchedJob();
-
         $timeout(() => {
+          trySchedJob();
           $scope.calcTotalProg();
         });
       });
@@ -322,9 +315,7 @@ angular.module("web").factory("s3UploadMgr", [
       if (concurrency < maxConcurrency) {
         var jobs = $scope.lists.uploadJobList;
 
-        for (var i = 0; i < jobs.length; i++) {
-          if (concurrency >= maxConcurrency) return;
-
+        for (var i = 0; i < jobs.length && concurrency < maxConcurrency; i++) {
           var job = jobs[i];
           if (isDebug) {
             console.log(`[JOB] sched ${job.status} => ${JSON.stringify(job._config)}`);

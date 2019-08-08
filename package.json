@@ -4,7 +4,7 @@
   "license": "UNLICENSED",
   "main": "dist/main.js",
   "scripts": {
-    "dev": "./node_modules/.bin/npm-run-all --parallel build watch dev:run",
+    "dev": "./node_modules/.bin/gulp build && ./node_modules/.bin/npm-run-all --parallel watch dev:run",
     "dev:run": "./node_modules/.bin/cross-env NODE_ENV=development electron .",
     "prod": "./node_modules/.bin/cross-env NODE_ENV=production cd dist && electron .",
     "watch": "./node_modules/.bin/gulp watch",
@@ -69,6 +69,7 @@
     "electron": "electron@beta",
     "electron-builder": "^20.34.0",
     "electron-packager": "12.2.0",
+    "event-stream": "3.3.4",
     "font-awesome": "^4.7.0",
     "gulp": "~3.9.1",
     "gulp-angular-templatecache": "^2.2.5",

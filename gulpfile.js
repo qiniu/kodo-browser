@@ -5,6 +5,7 @@ let gulp = require("gulp"),
   packager = require('electron-packager'),
   fs = require("fs"),
   path = require("path"),
+  each = require("array-each"),
   pkg = require("./package");
 
 let NAME = pkg.name;
@@ -56,6 +57,12 @@ let appTasks = {
       .pipe(gulp.dest(DIST));
   }
 };
+
+each([DIST, TARGET, RELEASE], (dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+})
 
 gulp.task("app.js", appTasks["app.js"]);
 gulp.task("app.css", appTasks["app.css"]);
@@ -226,9 +233,7 @@ gulp.task("mac", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });
@@ -263,9 +268,7 @@ gulp.task("win64", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });
@@ -284,9 +287,7 @@ gulp.task("win32", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });
@@ -304,9 +305,7 @@ gulp.task("linux64", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });
@@ -324,9 +323,7 @@ gulp.task("linux32", () => {
         console.log("--done");
       });
     }, (errs) => {
-      errs.forEach((err) => {
-        console.error(`\t${err}`);
-      });
+      console.error(errs);
     });
   });
 });

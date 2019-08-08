@@ -182,6 +182,10 @@ angular.module("web").factory("s3Client", [
           df.resolve([{ item: {}, error: new Error("User cancelled") }]);
           return;
         }
+        if (!items.length) {
+          callback([]);
+          return;
+        }
 
         let completed = 0;
         let errs = [];

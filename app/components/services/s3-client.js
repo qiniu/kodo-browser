@@ -9,10 +9,13 @@ angular.module("web").factory("s3Client", [
   "Config",
   "AuthInfo",
   function ($q, $rootScope, $timeout, $state, Toast, Config, AuthInfo) {
-    var path = require("path");
+    const path = require("path");
+    const each = require("array-each");
+    const map = require("array-map");
+    const async = require("async");
 
-    var NEXT_TICK = 1;
-    var DEF_ADDR = "kodo://";
+    const NEXT_TICK = 1;
+    const DEF_ADDR = "kodo://";
 
     return {
       listAllBuckets: listAllBuckets,
@@ -159,127 +162,113 @@ angular.module("web").factory("s3Client", [
     function deleteFiles(region, bucket, items, progCb) {
       stopDeleteFilesFlag = false;
 
-      var df = $q.defer();
-
-      var client = getClient({
+      const df = $q.defer();
+      const client = getClient({
         region: region,
         bucket: bucket
       });
 
-      var progress = {
+      const progress = {
+        total: items.length,
         current: 0,
-        total: 0,
         errorCount: 0
       };
+      if (progCb) {
+        progCb(progress);
+      }
 
-      progress.total += items.length;
+      const deleteItems = (items, callback) => {
+        if (stopDeleteFilesFlag) {
+          df.resolve([{ item: {}, error: new Error("User cancelled") }]);
+          return;
+        }
 
-      delArr(items, function (terr) {
-        if (terr && terr.length > 0) {
-          df.resolve(terr);
+        let completed = 0;
+        let errs = [];
+        const waitAndDeleteItems = () => {
+          const BATCH_SIZE = 1000;
+          let deleteBatchFilesFuncs = [];
+          completed += 1;
+          if (completed < items.length) {
+            return;
+          }
+          while (items.length >= BATCH_SIZE) {
+            deleteBatchFilesFuncs = deleteBatchFilesFuncs.concat(deleteBatchFiles.bind(items.splice(0, BATCH_SIZE)));
+          }
+          if (items.length > 0) {
+            deleteBatchFilesFuncs = deleteBatchFilesFuncs.concat(deleteBatchFiles.bind(items.splice(0, items.length)));
+          }
+          async.parallel(deleteBatchFilesFuncs, (errs2) => {
+            if (errs2) {
+              errs = errs.concat(errs2);
+            }
+            callback(errs);
+          });
+        }
+
+        each(items, (item) => {
+          if (item.isFolder) {
+            deleteFolder(item, (errs2) => {
+              if (errs2) {
+                errs = errs.concat(errs2);
+              }
+              waitAndDeleteItems();
+            });
+          } else {
+            waitAndDeleteItems();
+          }
+        });
+      };
+
+      const deleteFolder = (folder, callback) => {
+        const callbackWithStopFlagsChecks = (err) => {
+          if (stopDeleteFilesFlag) {
+            df.resolve([{ item: {}, error: new Error("User cancelled") }]);
+            return;
+          }
+          callback(err);
+        }
+        listAllFiles(region, bucket, folder.path).then((subItems) => {
+          progress.total += subItems.length;
+          if (progCb) {
+            progCb(progress);
+          }
+          deleteItems(subItems, callbackWithStopFlagsChecks);
+        }, callbackWithStopFlagsChecks);
+      };
+
+      function deleteBatchFiles(callback) {
+        client.deleteObjects({
+          Bucket: bucket,
+          Delete: {
+            Objects: map(this, (item) => { return { Key: item.path }; }),
+            Quiet: true
+          }
+        }, (err) => {
+          if (err) {
+            progress.errorCount += this.length;
+          } else {
+            progress.current += this.length;
+          }
+          if (progCb) {
+            progCb(progress);
+          }
+          if (err) {
+            callback(map(this, (item) => { return { item: item, error: err } }));
+          } else {
+            callback();
+          }
+        });
+      }
+
+      deleteItems(items, function (errs) {
+        if (errs && errs.length > 0) {
+          df.resolve(errs);
         } else {
           df.resolve();
         }
       });
       return df.promise;
-
-      function delArr(arr, fn) {
-        var c = 0;
-        var len = arr.length;
-        var terr = [];
-        dig();
-
-        function dig() {
-          if (c >= len) {
-            if (progCb) {
-              progCb(progress);
-            }
-
-            $timeout(function () {
-              fn(terr);
-            }, NEXT_TICK);
-            return;
-          }
-
-          if (stopDeleteFilesFlag) {
-            df.resolve([{
-              item: {},
-              error: new Error("User cancelled")
-            }]);
-            return;
-          }
-
-          if (progCb) {
-            progCb(progress);
-          }
-
-          var item = arr[c];
-
-          if (item.isFolder) {
-            listAllFiles(region, bucket, item.path).then(
-              function (subItems) {
-                progress.total += subItems.length;
-                //删除所有文件
-                delArr(subItems, function (terr2) {
-                  if (stopDeleteFilesFlag) {
-                    df.resolve([{
-                      item: {},
-                      error: new Error("User cancelled")
-                    }]);
-                    return;
-                  }
-
-                  if (terr2) {
-                    terr = terr.concat(terr2);
-                  }
-
-                  //删除目录本身
-                  delFile(item);
-                });
-              },
-              function (err) {
-                //删除目录本身
-                delFile(item);
-              }
-            );
-          } else {
-            //删除文件
-            delFile(item);
-          }
-
-          function delFile(item) {
-            if (stopDeleteFilesFlag) {
-              df.resolve([{
-                item: {},
-                error: new Error("User cancelled")
-              }]);
-              return;
-            }
-
-            client.deleteObject({
-              Bucket: bucket,
-              Key: item.path
-            }, function (
-              err
-            ) {
-              if (err) {
-                terr.push({
-                  item: item,
-                  error: err
-                });
-
-                progress.errorCount++;
-                c++;
-                $timeout(dig, NEXT_TICK);
-              } else {
-                c++;
-                progress.current++;
-                $timeout(dig, NEXT_TICK);
-              }
-            });
-          }
-        }
-      }
     }
 
     var stopCopyFilesFlag = false;

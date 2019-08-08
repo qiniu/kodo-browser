@@ -517,12 +517,12 @@ Client.prototype.downloadFile = function (params) {
   function tryGettingObject(cb) {
     if (isAborted) return;
 
-    let fileStream = fs.createWriteStream(localFile, {
+    const fileStream = fs.createWriteStream(localFile, {
       flags: 'w+',
       autoClose: true
     });
 
-    let params = {
+    const params = {
       Bucket: s3params.Bucket,
       Key: s3params.Key,
     };
@@ -537,9 +537,12 @@ Client.prototype.downloadFile = function (params) {
     s3downloader.on('end', () => {
       if (isAborted) return;
 
-      downloader.progressLoaded = downloader.progressTotal;
-      downloader.emit('progress', downloader);
+      if (downloader.progressTotal != downloader.progressLoaded) {
+        cb(new Error(`ContentLength mismatch, got ${downloader.progressLoaded}, expected ${downloader.progressTotal}`));
+        return;
+      }
 
+      downloader.emit('progress', downloader);
       cb(null);
     });
     s3downloader.on('error', (err) => {

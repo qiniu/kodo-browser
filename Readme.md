@@ -153,6 +153,13 @@ kodo-browser/
 
 可以修改配置文件示例中的 `endpoint` 来修改服务器地址。
 
-## 5. 开源 LICENSE
+## 5. OEM 定制
+
+编辑 `app/customize.js` 中的代码然后重新打包以定制部分 OEM 功能，目前支持的 OEM 定制有：
+
+* 禁止创建 Bucket
+* 禁止删除 Bucket
+
+## 6. 开源 LICENSE
 
 [Apache License 2.0](LICENSE)

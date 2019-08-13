@@ -12,6 +12,7 @@ angular.module("web").controller("filesCtrl", [
   "fileSvs",
   "Toast",
   "Dialog",
+  "Customize",
   function (
     $rootScope,
     $scope,
@@ -25,7 +26,8 @@ angular.module("web").controller("filesCtrl", [
     s3Client,
     fileSvs,
     Toast,
-    Dialog
+    Dialog,
+    Customize
   ) {
     const filter = require("array-filter");
     const deepEqual = require('fast-deep-equal');
@@ -51,6 +53,9 @@ angular.module("web").controller("filesCtrl", [
           $scope.transVisible = visible;
         });
       },
+
+      // Read OEM Customization config to disable features
+      disabledFeatures: Customize.disable,
 
       // search
       sch: {

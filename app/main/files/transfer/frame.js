@@ -20,6 +20,9 @@ angular.module("web").controller("transferFrameCtrl", [
         uploadJobList: [],
         downloadJobList: []
       },
+      overwriteUploading: {
+        enabled: false
+      },
 
       totalStat: {
         running: 0,

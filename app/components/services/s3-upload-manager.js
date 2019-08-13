@@ -34,6 +34,7 @@ angular.module("web").factory("s3UploadMgr", [
     function init(scope) {
       $scope = scope;
       $scope.lists.uploadJobList = [];
+      $scope.overwriteUploading.enabled = false;
 
       var auth = AuthInfo.get();
       var progs = tryLoadProg();
@@ -225,7 +226,8 @@ angular.module("web").factory("s3UploadMgr", [
             to: {
               bucket: bucketInfo.bucket,
               key: filePath
-            }
+            },
+            overwrite: $scope.overwriteUploading.enabled
           });
 
           if (job) {
@@ -353,7 +355,8 @@ angular.module("web").factory("s3UploadMgr", [
           status: job.status,
           message: job.message,
           uploadedId: job.uploadedId,
-          uploadedParts: job.uploadedParts
+          uploadedParts: job.uploadedParts,
+          overwrite: job.overwrite
         };
       });
 

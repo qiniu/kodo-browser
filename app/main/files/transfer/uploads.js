@@ -23,6 +23,7 @@ angular.module("web").controller("transferUploadsCtrl", [
 
     angular.extend($scope, {
       showRemoveItem: showRemoveItem,
+      triggerOverwriting: triggerOverwriting,
       clearAllCompleted: clearAllCompleted,
       clearAll: clearAll,
       stopAll: stopAll,
@@ -100,6 +101,10 @@ angular.module("web").controller("transferUploadsCtrl", [
         s3UploadMgr.trySaveProg();
         $scope.calcTotalProg();
       });
+    }
+
+    function triggerOverwriting() {
+      $scope.overwriteUploading.enabled = !$scope.overwriteUploading.enabled;
     }
 
     function clearAllCompleted() {

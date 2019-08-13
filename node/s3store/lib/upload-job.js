@@ -63,6 +63,7 @@ class UploadJob extends Base {
     this.multipartUploadSize = this._config.multipartUploadSize || 8;
     this.uploadedId = this._config.uploadedId;
     this.uploadedParts = this._config.uploadedParts;
+    this.overwrite = this._config.overwrite;
 
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
@@ -107,7 +108,7 @@ UploadJob.prototype.start = function (overwrite, prog) {
       localFile: this.from.path,
       uploadedId: prog.uploadedId,
       uploadedParts: prog.uploadedParts,
-      overwriteDup: !!overwrite,
+      overwriteDup: !!overwrite || this.overwrite,
       useElectronNode: !!this.useElectronNode,
       isDebug: this.isDebug
     }

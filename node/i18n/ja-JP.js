@@ -305,6 +305,8 @@ module.exports = {
 
   "transframe.search.placeholder": "名前またはステータスによるフィルタリング",
 
+  "upload.overwrite": "アップロードの上書きを有効にする",
+  "upload.overwrite.disabled": "アップロードの上書きを無効にする",
   "start.all": "すべて開始",
   "pause.all": "すべてを止める",
   "clear.finished": "クリア完了",

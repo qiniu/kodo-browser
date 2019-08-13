@@ -19,3 +19,7 @@
 .dropdown-menu > .disabled > a:focus{
   color:#ccc;
 }
+
+.text-overwrite-uploading-enabled {
+  color: #5299f5;
+}

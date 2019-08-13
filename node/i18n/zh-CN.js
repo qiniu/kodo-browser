@@ -305,6 +305,8 @@ module.exports = {
 
   "transframe.search.placeholder": "根据名称或状态搜索",
 
+  "upload.overwrite": "开启覆盖上传",
+  "upload.overwrite.disabled": "禁用覆盖上传",
   "start.all": "启动全部",
   "pause.all": "暂停全部",
   "clear.finished": "清空已完成",

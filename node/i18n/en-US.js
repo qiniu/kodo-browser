@@ -306,6 +306,8 @@ module.exports = {
 
   "transframe.search.placeholder": "Filter by name or status",
 
+  "upload.overwrite": "Enable overwrite for uploading",
+  "upload.overwrite.disabled": "Disable overwrite for uploading",
   "start.all": "Start All",
   "pause.all": "Stop All",
   "clear.finished": "Clear Finished",

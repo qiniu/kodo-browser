@@ -149,7 +149,7 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function getCurrentPath() {
-      return `kodo://${$scope.currentInfo.bucket}/${$scope.currentInfo.key}`;
+      return `kodo://${$scope.currentInfo.bucketName}/${$scope.currentInfo.key}`;
     }
 
     /////////////////////////////////
@@ -159,7 +159,7 @@ angular.module("web").controller("filesCtrl", [
       $timeout.cancel(refreshTid);
 
       refreshTid = $timeout(() => {
-        gotoAddress($scope.currentInfo.bucket, $scope.currentInfo.key);
+        gotoAddress($scope.currentInfo.bucketName, $scope.currentInfo.key);
       }, 600);
     });
 
@@ -275,6 +275,8 @@ angular.module("web").controller("filesCtrl", [
           var bucketInfo = $rootScope.bucketMap[info.bucket]
           if (bucketInfo) {
             $scope.currentInfo.region = bucketInfo.region;
+            info.bucketName = bucketInfo.name;
+            info.bucket = bucketInfo.id;
           } else {
             Toast.error("Forbidden");
 
@@ -283,6 +285,7 @@ angular.module("web").controller("filesCtrl", [
           }
 
           $scope.currentBucket = info.bucket;
+          $scope.currentBucketName = info.bucketName;
           $scope.ref.isBucketList = false;
 
           // try to resolve bucket perm
@@ -337,7 +340,7 @@ angular.module("web").controller("filesCtrl", [
           if (wait > 0) {
             angular.forEach(buckets, (bkt) => {
               m[bkt.name] = bkt;
-              s3Client.getBucketLocation(bkt.name).then((regionId) => {
+              s3Client.getBucketLocation(bkt.id).then((regionId) => {
                 bkt.region = regionId;
                 wait -= 1;
                 if (wait == 0) {
@@ -348,7 +351,7 @@ angular.module("web").controller("filesCtrl", [
                   });
                 }
               }, (err) => {
-                console.error("get bucket location error", bkt.name, err);
+                console.error("get bucket location error", bkt.id, err);
                 wait -= 1;
                 if (fn) fn(err);
               });
@@ -413,7 +416,7 @@ angular.module("web").controller("filesCtrl", [
         if (fn) fn(null, result.data);
 
       }, (err) => {
-        console.error(`list files: kodo://${info.bucket}/${info.key}?marker=${maker}i`, err);
+        console.error(`list files: kodo://${info.bucketName}/${info.key}?marker=${marker}`, err);
 
         clearFilesList();
 
@@ -425,7 +428,7 @@ angular.module("web").controller("filesCtrl", [
       if ($scope.nextObjectsMarker) {
         var info = $scope.currentInfo;
 
-        console.log(`loading next kodo://${info.bucket}/${info.key}?marker=${$scope.nextObjectsMarker}`);
+        console.log(`loading next kodo://${info.bucketName}/${info.key}?marker=${$scope.nextObjectsMarker}`);
 
         tryListFiles(info, $scope.nextObjectsMarker, (err, files) => {
           if (err) {
@@ -1116,7 +1119,7 @@ angular.module("web").controller("filesCtrl", [
                   $scope.total_folders = 0;
                 });
 
-                gotoAddress($scope.currentBucket, row.path);
+                gotoAddress($scope.currentBucketName, row.path);
               }
 
               return false;
@@ -1127,7 +1130,7 @@ angular.module("web").controller("filesCtrl", [
                   $scope.total_folders = 0;
                 });
 
-                gotoAddress($scope.currentBucket, row.path);
+                gotoAddress($scope.currentBucketName, row.path);
               } else {
                 showPreview(row);
               }

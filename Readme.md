@@ -147,7 +147,8 @@ kodo-browser/
                 { "value": "IA", "name": "低频访问类型" }
             ]
         }
-    ]
+    ],
+    "uc_url": "https://uc.qbox.me"
 }
 ```
 

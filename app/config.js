@@ -8,7 +8,8 @@
  *        { value: "Standard", name: "标准类型" },
  *        { value: "IA", name: "低频访问类型" }
  *      ]
- *   }]
+ *   }],
+ *   "uc_url": "https://uc.qbox.me"
  * }
  */
 
@@ -22,6 +23,7 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
               each = require('array-each');
         const T = $translate.instant;
         let regions = Const.regions;
+        let uc_url = "https://uc.qbox.me";
 
         try {
             let configFilePath = path.join(Global.config_path, 'config.json');
@@ -31,6 +33,9 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
                     config = JSON.parse(fs.readFileSync(configFilePath));
                 } catch (e) {
                     throw new ConfigParseError(e.message);
+                }
+                if (config.uc_url) {
+                    uc_url = config.uc_url;
                 }
                 if (config.regions) {
                     each(config.regions, (region) => {
@@ -72,7 +77,8 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
         }
 
         return {
-            regions: regions
+            regions: regions,
+            uc_url: uc_url
         };
     }
 ]);

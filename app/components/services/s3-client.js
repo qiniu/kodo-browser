@@ -7,8 +7,9 @@ angular.module("web").factory("s3Client", [
   "$state",
   "Toast",
   "Config",
+  "KodoClient",
   "AuthInfo",
-  function ($q, $rootScope, $timeout, $state, Toast, Config, AuthInfo) {
+  function ($q, $rootScope, $timeout, $state, Toast, Config, KodoClient, AuthInfo) {
     const path = require("path");
     const each = require("array-each");
     const map = require("array-map");
@@ -1209,36 +1210,44 @@ angular.module("web").factory("s3Client", [
         var opt = {};
 
         function _dig() {
-          client.listBuckets(opt, function (err, result) {
+          KodoClient.getBucketIdNameMapper().then((idNameMapper) => {
+            client.listBuckets(opt, function (err, result) {
+              if (err) {
+                handleError(err);
+                reject(err);
+                return;
+              }
+
+              if (result["Buckets"]) {
+                result["Buckets"].forEach(function (n) {
+                  n.creationDate = n.CreationDate;
+                  n.region = n.Location;
+                  n.id = n.Name;
+                  n.name = idNameMapper[n.id] || n.id;
+                  n.Name = n.name;
+                  n.extranetEndpoint = n.ExtranetEndpoint;
+                  n.intranetEndpoint = n.IntranetEndpoint;
+                  n.storageClass = n.StorageClass;
+                  n.lastModified = n.LastModified;
+
+                  n.isBucket = true;
+                  n.itemType = "bucket";
+                });
+                t = t.concat(result["Buckets"]);
+              }
+
+              if (result.NextMarker) {
+                opt.Marker = result.NextMarker;
+
+                $timeout(_dig, NEXT_TICK);
+              } else {
+                resolve(t);
+              }
+            });
+          }, (err) => {
             if (err) {
               handleError(err);
               reject(err);
-              return;
-            }
-
-            //bucket
-            if (result["Buckets"]) {
-              result["Buckets"].forEach(function (n) {
-                n.creationDate = n.CreationDate;
-                n.region = n.Location;
-                n.name = n.Name;
-                n.extranetEndpoint = n.ExtranetEndpoint;
-                n.intranetEndpoint = n.IntranetEndpoint;
-                n.storageClass = n.StorageClass;
-                n.lastModified = n.LastModified;
-
-                n.isBucket = true;
-                n.itemType = "bucket";
-              });
-              t = t.concat(result["Buckets"]);
-            }
-
-            if (result.NextMarker) {
-              opt.Marker = result.NextMarker;
-
-              $timeout(_dig, NEXT_TICK);
-            } else {
-              resolve(t);
             }
           });
         }

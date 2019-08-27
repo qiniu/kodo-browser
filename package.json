@@ -92,6 +92,7 @@
     "array-map": "^0.0.0",
     "async": "^1.5.2",
     "aws-sdk": "^2.499.0",
+    "qiniu": "^7.2.2",
     "mime": "^2.3.1",
     "nodemailer": "^4.6.8",
     "nodemailer-smtp-transport": "^2.7.4",

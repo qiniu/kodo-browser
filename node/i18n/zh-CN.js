@@ -202,7 +202,7 @@ module.exports = {
   move: "移动",
   paste: "粘贴",
   rename: "重命名",
-  getAddress: "获取地址",
+  getDownloadLink: "获取外链",
   genAuthToken: "生成授权码",
 
   "rename.to": "重命名",
@@ -265,9 +265,9 @@ module.exports = {
   "aclType.public-read.message": "公共读：对object写操作需要进行身份验证；可以对object进行匿名读",
   "aclType.public-read-write.message": "公共读写：所有人都可以对object进行读写操作",
 
-  "getAddress.title": "获取地址",
-  address: "地址",
-  "getAddress.message": "请输入链接有效期",
+  "getDownloadLink.title": "获取外链",
+  downloadLink: "外链地址",
+  "getDownloadLink.message": "请输入链接有效期",
   generate: "生成",
   "qrcode.download": "扫码下载",
 

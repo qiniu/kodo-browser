@@ -102,7 +102,7 @@ angular.module("web").controller("filesCtrl", [
 
       // utils
       gotoAddress: gotoAddress,
-      showAddress: showAddress,
+      showDownloadLink: showDownloadLink,
       showPreview: showPreview,
       showACL: showACL,
 
@@ -614,8 +614,8 @@ angular.module("web").controller("filesCtrl", [
               rename: () => {
                 showRename(item);
               },
-              address: () => {
-                showAddress(item);
+              downloadLink: () => {
+                showDownloadLink(item);
               },
               acl: () => {
                 showACL(item);
@@ -782,10 +782,10 @@ angular.module("web").controller("filesCtrl", [
       };
     }
 
-    function showAddress(item) {
+    function showDownloadLink(item) {
       $modal.open({
-        templateUrl: "main/files/modals/get-address.html",
-        controller: "getAddressModalCtrl",
+        templateUrl: "main/files/modals/show-download-link.html",
+        controller: "showDownloadLinkModalCtrl",
         resolve: {
           item: () => {
             return angular.copy(item);
@@ -1169,6 +1169,9 @@ angular.module("web").controller("filesCtrl", [
             var acts = ['<div class="btn-group btn-group-xs">'];
             if ($scope.currentBucketPerm.read) {
               acts.push(`<button type="button" class="btn download"><span class="fa fa-download"></span></button>`);
+              if (!row.isFolder) {
+                acts.push(`<button type="button" class="btn download-link"><span class="fa fa-link"></span></button>`);
+              }
             }
             if ($scope.currentBucketPerm.remove) {
               acts.push(`<button type="button" class="btn remove text-danger"><span class="fa fa-trash"></span></button>`);
@@ -1180,6 +1183,11 @@ angular.module("web").controller("filesCtrl", [
           events: {
             'click button.download': (evt, val, row, idx) => {
               showDownload(row);
+
+              return false;
+            },
+            'click button.download-link': (evt, val, row, idx) => {
+              showDownloadLink(row);
 
               return false;
             },

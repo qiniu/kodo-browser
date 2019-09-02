@@ -202,7 +202,7 @@ module.exports = {
   move: "移動",
   paste: "ペースト",
   rename: "名前を変更する",
-  getAddress: "アドレスを取得する",
+  getDownloadLink: "ダウンロードアドレスを取得する",
   genAuthToken: "認証トークン",
 
   "rename.to": "名前を変更する",
@@ -265,9 +265,9 @@ module.exports = {
   "aclType.public-read.message": "一般公開: オブジェクト認証の操作のために書く必要があります。オブジェクトは匿名で読み取ることができます",
   "aclType.public-read-write.message": "パブリックの読み書き: 誰もがオブジェクトを読み書きできます",
 
-  "getAddress.title": "アドレスを取得する",
-  address: "アドレス",
-  "getAddress.message": "リンクの有効期間を入力してください",
+  "getDownloadLink.title": "ダウンロードアドレスを取得する",
+  downloadLink: "ダウンロードリンク",
+  "getDownloadLink.message": "リンクの有効期間を入力してください",
   generate: "生成",
   "qrcode.download": "コードをスキャンしダウンロードする",
 

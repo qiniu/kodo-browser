@@ -1,0 +1,61 @@
+<form class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <h4 class="modal-title">
+      <i class="glyphicon glyphicon-link"></i>
+      <!-- 获取地址 -->
+      {{'getDownloadLink.title'|translate}}
+    </h4>
+  </div>
+  <div class="modal-body">
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label" for="name">{{'name'|translate}}:</label>
+      <div class="col-sm-8">
+        <input type="text" ng-model="item.name" id="name" readonly
+        placeholder="bucket" class="input-md form-control"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label" for="acl">
+        {{'downloadLink'|translate}}:
+        <!-- 地址: -->
+
+      </label>
+      <div ng-if="!info.url"  class="col-sm-10">
+        <!-- 请输入链接有效期: -->
+        {{'getDownloadLink.message'|translate}}:
+        <input type="number" ng-model="info.sec" id="sec" required min="1" max="3600"
+        placeholder="" class="input-md form-control" style="display:inline-block;width:80px"/>
+        {{'unit.second'|translate}}
+        &nbsp;&nbsp;
+        <button type="submit" class="btn btn-success btn-sm">
+          <i class="glyphicon glyphicon-ok"></i>
+          <!-- 生成 -->
+          {{'generate'|translate}}
+        </button>
+      </div>
+
+      <div ng-if="info.url" class="col-sm-8">
+        <div class="input-group">
+          <input type="text" id="genAddress2" ng-model="info.url" readonly class="input-md form-control"/>
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-info" ng-click="copyDownloadLink()">
+              <!-- 点击复制 -->
+              {{'click.copy'|translate}}
+            </a>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default btn-sm" ng-click="cancel()">
+      <i class="glyphicon glyphicon-remove"></i>
+      {{'close'|translate}}</button>
+  </div>
+</form>

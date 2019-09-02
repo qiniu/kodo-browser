@@ -203,7 +203,7 @@ module.exports = {
   move: "Move",
   paste: "Paste",
   rename: "Rename",
-  getAddress: "Address",
+  getDownloadLink: "Get Download Link",
   genAuthToken: "Authorization Token",
 
   "rename.to": "Rename To",
@@ -266,9 +266,9 @@ module.exports = {
   "aclType.public-read.message": "Public read: need to write for the operation of the object authentication; object can be anonymous read",
   "aclType.public-read-write.message": "Public read and write: Everyone can read and write objects",
 
-  "getAddress.title": "Get Address",
-  address: "Address",
-  "getAddress.message": "Please enter the validity period of the link",
+  "getDownloadLink.title": "Get Download Link",
+  downloadLink: "Download Link",
+  "getDownloadLink.message": "Please enter the validity period of the link",
   generate: "Generate",
   "qrcode.download": "Sweep code to download",
 

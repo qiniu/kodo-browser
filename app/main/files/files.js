@@ -276,7 +276,7 @@ angular.module("web").controller("filesCtrl", [
           if (bucketInfo) {
             $scope.currentInfo.region = bucketInfo.region;
             info.bucketName = bucketInfo.name;
-            info.bucket = bucketInfo.id;
+            info.bucket = bucketInfo.bucketId;
           } else {
             Toast.error("Forbidden");
 
@@ -340,7 +340,7 @@ angular.module("web").controller("filesCtrl", [
           if (wait > 0) {
             angular.forEach(buckets, (bkt) => {
               m[bkt.name] = bkt;
-              s3Client.getBucketLocation(bkt.id).then((regionId) => {
+              s3Client.getBucketLocation(bkt.bucketId).then((regionId) => {
                 bkt.region = regionId;
                 wait -= 1;
                 if (wait == 0) {
@@ -351,7 +351,7 @@ angular.module("web").controller("filesCtrl", [
                   });
                 }
               }, (err) => {
-                console.error("get bucket location error", bkt.id, err);
+                console.error("get bucket location error", bkt.bucketId, err);
                 wait -= 1;
                 if (fn) fn(err);
               });

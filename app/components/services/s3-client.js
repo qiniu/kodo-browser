@@ -1222,8 +1222,8 @@ angular.module("web").factory("s3Client", [
                 result["Buckets"].forEach(function (n) {
                   n.creationDate = n.CreationDate;
                   n.region = n.Location;
-                  n.id = n.Name;
-                  n.name = idNameMapper[n.id] || n.id;
+                  n.bucketId = n.Name;
+                  n.name = idNameMapper[n.bucketId] || n.bucketId;
                   n.Name = n.name;
                   n.extranetEndpoint = n.ExtranetEndpoint;
                   n.intranetEndpoint = n.IntranetEndpoint;

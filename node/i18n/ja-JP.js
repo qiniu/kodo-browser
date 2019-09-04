@@ -6,12 +6,7 @@ module.exports = {
   customize: "カスタマイズ",
   "public.cloud": "パブリッククラウド",
 
-  "region.cn-north-1": "中国北部",
-  "region.cn-east-1": "中国東部",
-  "region.cn-south-1": "中国南部",
-  "region.us-north-1": "北米",
-  "region.ap-southeast-1": "東南亜",
-
+  "region.unknown": "未知の地域",
   "config.parse.error": "設定ファイルの解析に失敗しました",
   "config.format.error": "設定ファイルに問題があります",
 
@@ -29,11 +24,15 @@ module.exports = {
   "auth.username.placeholder": "ユーザー名",
   "auth.password.placeholder": "パスワード",
 
+  "auth.defaultCloud": "デフォルト (パブリッククラウド)",
+  "auth.customizedCloud": "カスタム (プライベートクラウド)",
+
   "auth.eptpl": "エンドポイントテンプレート",
   "auth.eptpl.placeholder": "デフォルト: http://{region}-s3.qiniu.com",
   "auth.eptpl.popup.msg1": "パブリッククラウドの場合は、デフォルト設定をそのまま使用できます",
   "auth.eptpl.popup.msg2": "プライベートクラウドの場合は、次のようなカスタムエンドポイントを入力してください。:",
   "auth.servicetpl": "サービスアドレス",
+  "auth.service": "サービス",
 
   "auth.region.placeholder": "利用可能な地域を入力してください",
   "auth.region.popup.msg1": "パブリッククラウドは利用可能なエリアを直接選択します",
@@ -54,6 +53,12 @@ module.exports = {
   "auth.clearAKHistories.title": "AK 履歴削除",
   "auth.clearAKHistories.message": "確定ですか?",
   "auth.clearAKHistories.successMessage": "すべてのAKの歴史は削除された",
+
+  "customizeRegions.title": "地域設定",
+  "customizeRegions.addRegion": "地域を追加",
+  "customizeRegions.region": "地域",
+  "customizeRegions.regionId": "地域 ID",
+  "customizeRegions.regionName": "地域名",
 
   actions: "アクション",
   use: "利用",

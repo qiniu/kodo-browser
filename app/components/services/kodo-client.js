@@ -33,10 +33,10 @@ angular.module("web").factory("KodoClient", [
     function getBucketManager() {
       const authInfo = AuthInfo.get();
       const mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret);
-      const uc_url = Config.uc_url;
+      const ucUrl = Config.load(AuthInfo.usePublicCloud()).ucUrl;
       return {
         listBuckets: (callbackFunc) => {
-          const requestURI = `${uc_url}/v2/buckets`;
+          const requestURI = `${ucUrl}/v2/buckets`;
           const digest = Qiniu.util.generateAccessToken(mac, requestURI, null);
           Qiniu.rpc.postWithoutForm(requestURI, digest, callbackFunc)
         }

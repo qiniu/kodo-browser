@@ -6,12 +6,7 @@ module.exports = {
   customize: "自定义",
   "public.cloud": "公有云",
 
-  "region.cn-north-1": "华北",
-  "region.cn-east-1": "华东",
-  "region.cn-south-1": "华南",
-  "region.us-north-1": "北美",
-  "region.ap-southeast-1": "东南亚",
-
+  "region.unknown": "未知区域",
   "config.parse.error": "解析配置文件出错",
   "config.format.error": "配置文件格式错误",
 
@@ -29,11 +24,15 @@ module.exports = {
   "auth.username.placeholder": "请输入用户名",
   "auth.password.placeholder": "请输入密码",
 
+  "auth.defaultCloud": "默认（公有云）",
+  "auth.customizedCloud": "自定义（私有云）",
+
   "auth.eptpl": "Endpoint 模板",
   "auth.eptpl.placeholder": "默认: http://{region}-s3.qiniu.com",
   "auth.eptpl.popup.msg1": "公有云直接使用默认即可",
   "auth.eptpl.popup.msg2": "专有云请输入自定义 Endpoint, 如: ",
   "auth.servicetpl": "服务地址",
+  "auth.service": "服务",
 
   "auth.region.placeholder": "请输入可用的区域",
   "auth.region.popup.msg1": "公有云直接选择可用区域即可",
@@ -54,6 +53,12 @@ module.exports = {
   "auth.clearAKHistories.title": "清空AK历史",
   "auth.clearAKHistories.message": "确定?",
   "auth.clearAKHistories.successMessage": "已清空AK历史",
+
+  "customizeRegions.title": "区域设置",
+  "customizeRegions.addRegion": "添加区域",
+  "customizeRegions.region": "区域",
+  "customizeRegions.regionId": "区域 ID",
+  "customizeRegions.regionName": "区域名称",
 
   actions: "操作",
   use: "使用",

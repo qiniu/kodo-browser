@@ -2,6 +2,7 @@ angular.module("web").controller("loginCtrl", [
   "$scope",
   "$rootScope",
   "$translate",
+  "$uibModal",
   "Auth",
   "AuthInfo",
   "$location",
@@ -13,6 +14,7 @@ angular.module("web").controller("loginCtrl", [
     $scope,
     $rootScope,
     $translate,
+    $modal,
     Auth,
     AuthInfo,
     $location,
@@ -21,10 +23,8 @@ angular.module("web").controller("loginCtrl", [
     Dialog,
     Toast
   ) {
-    var DEF_EPTPL = "https://s3-{region}.qiniucs.com";
-    var regions = angular.copy(Config.regions);
-
-    var T = $translate.instant;
+    const DEF_EPTPL = "https://s3-{region}.qiniucs.com",
+          T = $translate.instant;
 
     angular.extend($scope, {
       flags: {
@@ -35,17 +35,24 @@ angular.module("web").controller("loginCtrl", [
       item: {
         domain: Global.domain,
         eptpl: DEF_EPTPL,
-        servicetpl: (regions[0].endpoint)
       },
       eptplType: "default",
 
-      regions: regions,
+      clouds: [{
+        name: T("auth.defaultCloud"),
+        value: "default"
+      }, {
+        name: T("auth.customizedCloud"),
+        value: "customized"
+      }],
+      selectedCloud: AuthInfo.usePublicCloud() ? 'default' : 'customized',
 
       showGuestNav: 1,
 
       onSubmit: onSubmit,
       showCleanHistories: showCleanHistories,
       useHis: useHis,
+      showCustomizedCloud: showCustomizedCloud,
       showRemoveHis: showRemoveHis,
 
       open: open,
@@ -114,10 +121,20 @@ angular.module("web").controller("loginCtrl", [
       );
     }
 
+    function showCustomizedCloud() {
+      $modal.open({
+        templateUrl: "main/auth/modals/customize-cloud-modal.html",
+        controller: "customizeCloudModalCtrl"
+      }).result.then(angular.noop, angular.noop);
+    }
+
     function onSubmit(form1) {
       if (!form1.$valid) return;
 
-      var data = angular.copy($scope.item);
+      const data = angular.copy($scope.item),
+            isPublicCloud = $scope.selectedCloud === 'default';
+
+      data.servicetpl = Config.load(isPublicCloud).regions[0].endpoint;
 
       // append domain
       if (data.id) {
@@ -127,12 +144,6 @@ angular.module("web").controller("loginCtrl", [
       if (data.secret) {
         data.secret = data.secret.trim();
       }
-
-      $scope.regions.forEach((region) => {
-        if (region.endpoint == data.servicetpl) {
-          data.region = region.id;
-        }
-      });
 
       delete data.username;
       delete data.password;
@@ -145,6 +156,12 @@ angular.module("web").controller("loginCtrl", [
 
       Auth.login(data).then(
         function () {
+          if (isPublicCloud) {
+            AuthInfo.switchToPublicCloud();
+          } else {
+            AuthInfo.switchToPrivateCloud();
+          }
+
           if ($scope.flags.remember == "YES") {
             AuthInfo.addToHistories(data);
           }

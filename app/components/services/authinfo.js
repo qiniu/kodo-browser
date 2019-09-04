@@ -4,6 +4,7 @@ angular.module("web").factory("AuthInfo", [
   "Cipher",
   function ($q, Const, Cipher) {
     var AUTH_INFO = Const.AUTH_INFO_KEY;
+    var CLOUD_CHOICE = Const.CLOUD_CHOICE_KEY;
     var AUTH_HIS = Const.AUTH_HIS;
     var AUTH_KEEP = Const.AUTH_KEEP;
 
@@ -21,6 +22,16 @@ angular.module("web").factory("AuthInfo", [
         remove(AUTH_INFO);
       },
       saveToAuthInfo: saveToAuthInfo,
+
+      usePublicCloud: function() {
+        return get(CLOUD_CHOICE) === 'default';
+      },
+      switchToPublicCloud: function() {
+        save(CLOUD_CHOICE, 'default');
+      },
+      switchToPrivateCloud: function() {
+        save(CLOUD_CHOICE, 'customized');
+      },
 
       remember: function (obj) {
         save(AUTH_KEEP, obj);

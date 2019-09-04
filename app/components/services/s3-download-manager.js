@@ -78,7 +78,7 @@ angular.module("web").factory("s3DownloadMgr", [
       options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
 
-      angular.forEach(Config.regions, (r) => {
+      angular.forEach(Config.load(AuthInfo.usePublicCloud()).regions, (r) => {
         if (r.id == region) {
           auth.servicetpl = r.endpoint;
         }

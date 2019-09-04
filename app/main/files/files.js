@@ -8,6 +8,7 @@ angular.module("web").controller("filesCtrl", [
   "$location",
   "Auth",
   "AuthInfo",
+  "Config",
   "s3Client",
   "fileSvs",
   "Toast",
@@ -23,6 +24,7 @@ angular.module("web").controller("filesCtrl", [
     $location,
     Auth,
     AuthInfo,
+    Config,
     s3Client,
     fileSvs,
     Toast,
@@ -784,7 +786,7 @@ angular.module("web").controller("filesCtrl", [
 
     function showDownloadLink(item) {
       $modal.open({
-        templateUrl: "main/files/modals/show-download-link.html",
+        templateUrl: "main/files/modals/show-download-link-modal.html",
         controller: "showDownloadLinkModalCtrl",
         resolve: {
           item: () => {
@@ -1037,6 +1039,7 @@ angular.module("web").controller("filesCtrl", [
 
     function showBucketsTable(buckets) {
       initBucketSelect();
+      const regions = Config.load(AuthInfo.usePublicCloud()).regions;
       var $list = $('#bucket-list').bootstrapTable({
         columns: [{
           field: 'id',
@@ -1059,7 +1062,13 @@ angular.module("web").controller("filesCtrl", [
           field: 'region',
           title: T('bucket.region'),
           formatter: (val) => {
-            return T(`region.${val}`);
+            let name = T('region.unknown');
+            angular.forEach(regions, (region) => {
+              if (region.id === val) {
+                name = region.label;
+              }
+            })
+            return name;
           }
         }, {
           field: 'creationDate',

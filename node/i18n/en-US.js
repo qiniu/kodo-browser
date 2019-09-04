@@ -6,12 +6,7 @@ module.exports = {
   customize: "Customize",
   "public.cloud": "Public Cloud",
 
-  "region.cn-north-1": "North China",
-  "region.cn-east-1": "East China",
-  "region.cn-south-1": "South China",
-  "region.us-north-1": "North America",
-  "region.ap-southeast-1": "Southeast Asia",
-
+  "region.unknown": "Unknown Region",
   "config.parse.error": "Failed to parse config file",
   "config.format.error": "Something is wrong in the config file",
 
@@ -29,11 +24,15 @@ module.exports = {
   "auth.username.placeholder": "Username",
   "auth.password.placeholder": "Password",
 
+  "auth.defaultCloud": "Default (Public Cloud)",
+  "auth.customizedCloud": "Customized (Private Cloud)",
+
   "auth.eptpl": "Endpoint Template",
   "auth.eptpl.placeholder": "Default: http://{region}-s3.qiniu.com",
   "auth.eptpl.popup.msg1": "For Public Cloud, you can directly use the default settings",
   "auth.eptpl.popup.msg2": "For Private Cloud, Please enter a custom Endpoint, such as:",
   "auth.servicetpl": "Service Endpoint",
+  "auth.service": "Service",
 
   "auth.region.placeholder": "Please enter available region",
   "auth.region.popup.msg1": "For Public Cloud, you can select available region from the list",
@@ -54,6 +53,12 @@ module.exports = {
   "auth.clearAKHistories.title": "Clear AK Histories",
   "auth.clearAKHistories.message": "Are you sure?",
   "auth.clearAKHistories.successMessage": "All AK Histories has been clear",
+
+  "customizeRegions.title": "Region Settings",
+  "customizeRegions.addRegion": "Add region",
+  "customizeRegions.region": "Region",
+  "customizeRegions.regionId": "Region ID",
+  "customizeRegions.regionName": "Region Name",
 
   actions: "Actions",
   use: "Use",

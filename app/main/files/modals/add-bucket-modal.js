@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'Config',
-    function ($scope, $modalInstance, $translate, callback, s3Client, Const, Config) {
+  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'Config', 'AuthInfo',
+    function ($scope, $modalInstance, $translate, callback, s3Client, Const, Config, AuthInfo) {
       var T = $translate.instant;
 
       var bucketACL = angular.copy(Const.bucketACL);
@@ -33,11 +33,7 @@ angular.module('web')
       i18nRegion();
 
       function i18nRegion() {
-        var arr = angular.copy(Const.regions);
-        angular.forEach(arr, function (n) {
-          n.label = T('region.' + n.id);
-        });
-        $scope.regions = arr;
+        $scope.regions = Config.load(AuthInfo.usePublicCloud()).regions;
       }
 
       function i18nBucketACL() {

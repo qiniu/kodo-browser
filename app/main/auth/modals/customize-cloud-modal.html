@@ -1,0 +1,65 @@
+<form class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <h4 class="modal-title">
+      <i class="glyphicon glyphicon-cog"></i>
+      <!-- 区域设置 -->
+      {{'customizeRegions.title'|translate}}
+    </h4>
+  </div>
+  <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+    <header class="form-group">
+      <div class="col-sm-2">
+        <button type="button" class="btn btn-info" ng-click="addRegion()">
+          <i class="glyphicon glyphicon-plus"></i> {{'customizeRegions.addRegion'|translate}}</button>
+      </div>
+    </header>
+    <div class="form-group">
+      <label class="col-sm-3 control-label">
+        <span class="red">*</span> UC {{'auth.service'|translate}}:</label>
+      </label>
+      <div class="col-sm-8">
+        <input type="url" ng-pattern="/^http[s]?:\/\//" name="ucUrl" ng-model="ucUrl" required class="form-control" />
+      </div>
+    </div>
+    <fieldset ng-repeat="region in regions">
+      <legend>
+        <h5 class="text col-sm-3">{{'customizeRegions.region'|translate}} {{$index+1}}</h5>
+        <div class="col-sm-8"></div>
+        <div class="col-sm-1"><button type="button" class="btn btn-sm text text-danger" ng-if="$index > 0" ng-click="removeRegion($index)">{{'delete'|translate}}</button></div>
+      </legend>
+      <div class="form-group">
+        <label class="col-sm-3 control-label">
+          <span class="red">*</span> {{'customizeRegions.regionId'|translate}}:</label>
+        </label>
+        <div class="col-sm-8">
+          <input type="text" name="region.id" ng-model="region.id" required class="form-control" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 control-label">
+          <span class="red">*</span> {{'customizeRegions.regionName'|translate}}:</label>
+        </label>
+        <div class="col-sm-8">
+          <input type="text" name="region.label" ng-model="region.label" required class="form-control" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 control-label">
+          <span class="red">*</span> Endpoint:</label>
+        </label>
+        <div class="col-sm-8">
+          <input type="url" ng-pattern="/^http[s]?:\/\//" name="region.endpoint" ng-model="region.endpoint" required class="form-control" />
+        </div>
+      </div>
+    </fieldset>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-success btn-sm" ng-disabled="!form1.$valid">
+      <i class="glyphicon glyphicon-ok"></i> {{'save'|translate}}</button>
+    <button type="button" class="btn btn-default btn-sm" ng-click="cancel()">
+      <i class="glyphicon glyphicon-remove"></i> {{'cancel'|translate}}</button>
+  </div>
+</form>

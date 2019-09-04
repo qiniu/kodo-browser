@@ -1326,7 +1326,7 @@ angular.module("web").factory("s3Client", [
       var bucket;
       if (typeof opt == "object") {
         if (opt.region) {
-          angular.forEach(Config.regions, (region) => {
+          angular.forEach(Config.load(AuthInfo.usePublicCloud()).regions, (region) => {
             if (region.id == opt.region) {
               opt.servicetpl = region.endpoint;
             }

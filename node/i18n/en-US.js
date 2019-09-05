@@ -27,11 +27,6 @@ module.exports = {
   "auth.defaultCloud": "Default (Public Cloud)",
   "auth.customizedCloud": "Customized (Private Cloud)",
 
-  "auth.eptpl": "Endpoint Template",
-  "auth.eptpl.placeholder": "Default: http://{region}-s3.qiniu.com",
-  "auth.eptpl.popup.msg1": "For Public Cloud, you can directly use the default settings",
-  "auth.eptpl.popup.msg2": "For Private Cloud, Please enter a custom Endpoint, such as:",
-  "auth.servicetpl": "Service Endpoint",
   "auth.service": "Service",
 
   "auth.region.placeholder": "Please enter available region",

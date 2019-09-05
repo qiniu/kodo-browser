@@ -57,7 +57,6 @@ angular.module("web").factory("s3Client", [
 
       getClient: getClient,
       parseKodoPath: parseKodoPath,
-      getS3Endpoint: getS3Endpoint,
       parseRestoreInfo: parseRestoreInfo,
       signatureUrl: signatureUrl,
       signaturePicUrl: signaturePicUrl
@@ -1336,16 +1335,10 @@ angular.module("web").factory("s3Client", [
         Object.assign(authInfo, opt);
       }
 
-      var endpoint = getS3Endpoint(
-        authInfo.region,
-        authInfo.bucket,
-        authInfo.servicetpl || authInfo.eptpl
-      );
-
-      var options = {
+      return options = {
         accessKeyId: authInfo.id || "ak",
         secretAccessKey: authInfo.secret || "sk",
-        endpoint: endpoint,
+        endpoint: authInfo.servicetpl,
         region: authInfo.region,
         apiVersion: "2013-10-15",
         httpOptions: {
@@ -1353,8 +1346,6 @@ angular.module("web").factory("s3Client", [
         },
         maxRetries: 10
       };
-
-      return options;
     }
 
     function parseKodoPath(s3Path) {
@@ -1419,16 +1410,6 @@ angular.module("web").factory("s3Client", [
       }
 
       return "http://" + region + ".qiniu.com" + "/" + bucket + "/" + key;
-    }
-
-    function getS3Endpoint(region, bucket, eptpl) {
-      var authInfo = AuthInfo.get();
-
-      region = region || authInfo.region;
-      eptpl = eptpl || authInfo.servicetpl || authInfo.eptpl;
-      eptpl = eptpl.replace("{region}", region);
-
-      return eptpl;
     }
   }
 ]);

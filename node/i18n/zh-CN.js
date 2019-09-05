@@ -27,11 +27,6 @@ module.exports = {
   "auth.defaultCloud": "默认（公有云）",
   "auth.customizedCloud": "自定义（私有云）",
 
-  "auth.eptpl": "Endpoint 模板",
-  "auth.eptpl.placeholder": "默认: http://{region}-s3.qiniu.com",
-  "auth.eptpl.popup.msg1": "公有云直接使用默认即可",
-  "auth.eptpl.popup.msg2": "专有云请输入自定义 Endpoint, 如: ",
-  "auth.servicetpl": "服务地址",
   "auth.service": "服务",
 
   "auth.region.placeholder": "请输入可用的区域",

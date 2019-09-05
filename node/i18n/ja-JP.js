@@ -27,11 +27,6 @@ module.exports = {
   "auth.defaultCloud": "デフォルト (パブリッククラウド)",
   "auth.customizedCloud": "カスタム (プライベートクラウド)",
 
-  "auth.eptpl": "エンドポイントテンプレート",
-  "auth.eptpl.placeholder": "デフォルト: http://{region}-s3.qiniu.com",
-  "auth.eptpl.popup.msg1": "パブリッククラウドの場合は、デフォルト設定をそのまま使用できます",
-  "auth.eptpl.popup.msg2": "プライベートクラウドの場合は、次のようなカスタムエンドポイントを入力してください。:",
-  "auth.servicetpl": "サービスアドレス",
   "auth.service": "サービス",
 
   "auth.region.placeholder": "利用可能な地域を入力してください",

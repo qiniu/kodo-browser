@@ -265,8 +265,7 @@ angular.module('web')
           secret: secret,
           desc: userName,
           region: region,
-          s3path: comments[0],
-          eptpl: AuthInfo.get().eptpl || 'http://{region}.qiniu.com'
+          s3path: comments[0]
         };
 
         var tokenStr = new Buffer(JSON.stringify(opt)).toString('base64');

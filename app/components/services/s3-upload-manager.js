@@ -87,7 +87,7 @@ angular.module("web").factory("s3UploadMgr", [
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
         },
-        endpoint: s3Client.getS3Endpoint(region, options.to.bucket, auth.servicetpl || auth.eptpl),
+        endpoint: auth.servicetpl,
         region: options.region,
         httpOptions: {
           connectTimeout: 3000, // 3s

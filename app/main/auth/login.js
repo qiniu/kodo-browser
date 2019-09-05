@@ -23,8 +23,7 @@ angular.module("web").controller("loginCtrl", [
     Dialog,
     Toast
   ) {
-    const DEF_EPTPL = "https://s3-{region}.qiniucs.com",
-          T = $translate.instant;
+    const T = $translate.instant;
 
     angular.extend($scope, {
       flags: {
@@ -34,9 +33,7 @@ angular.module("web").controller("loginCtrl", [
       },
       item: {
         domain: Global.domain,
-        eptpl: DEF_EPTPL,
       },
-      eptplType: "default",
 
       clouds: [{
         name: T("auth.defaultCloud"),
@@ -56,22 +53,7 @@ angular.module("web").controller("loginCtrl", [
       showRemoveHis: showRemoveHis,
 
       open: open,
-      eptplChange: eptplChange
     });
-
-    $scope.$watch("item.eptpl", function (v) {
-      $scope.eptplType = v == DEF_EPTPL ? "default" : "customize";
-    });
-
-    function eptplChange(t) {
-      $scope.eptplType = t;
-
-      if (t == "default") {
-        $scope.item.eptpl = DEF_EPTPL;
-      } else {
-        $scope.item.eptpl = "";
-      }
-    }
 
     function open(a) {
       openExternal(a);

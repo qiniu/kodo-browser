@@ -89,11 +89,7 @@ angular.module("web").factory("s3DownloadMgr", [
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
         },
-        endpoint: s3Client.getS3Endpoint(
-          region,
-          options.from.bucket,
-          auth.servicetpl || auth.eptpl
-        ),
+        endpoint: auth.servicetpl,
         region: region,
         httpOptions: {
           connectTimeout: 3000, // 3s

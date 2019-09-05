@@ -1,4 +1,4 @@
-VERSION=1.0.3
+VERSION=1.0.4
 NAME=kodo-browser
 
 GULP=node ./node_modules/gulp/bin/gulp.js

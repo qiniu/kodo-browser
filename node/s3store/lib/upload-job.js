@@ -253,9 +253,9 @@ UploadJob.prototype.startSpeedCounter = function () {
     if (self.speed < avgSpeed) {
       self.speed = avgSpeed;
     }
-    if (self.lastSpeed != self.speed) {
+    // if (self.lastSpeed != self.speed) {
       self.emit("speedchange", self.speed * 1.2);
-    }
+    // }
 
     self.lastLoaded = self.prog.loaded;
     self.lastSpeed = self.speed;

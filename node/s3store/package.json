@@ -8,6 +8,7 @@
     "electron": "electron@beta",
     "events": "^2.0.0",
     "mime": "^2.2.0",
-    "pend": "^1.2.0"
+    "pend": "^1.2.0",
+    "stream-throttle": "^0.1.3"
   }
 }

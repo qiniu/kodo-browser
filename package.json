@@ -97,6 +97,7 @@
     "nodemailer": "^4.6.8",
     "nodemailer-smtp-transport": "^2.7.4",
     "request": "^2.88.0",
-    "sanitize-filename": "^1.6.1"
+    "sanitize-filename": "^1.6.1",
+    "stream-throttle": "^0.1.3"
   }
 }

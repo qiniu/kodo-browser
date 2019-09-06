@@ -6,7 +6,10 @@ let AWS = require('aws-sdk'),
   mime = require('mime'),
   {
     ReadableStream
-  } = require('./stream');
+  } = require('./stream'),
+  {
+    Throttle
+  } = require('stream-throttle');
 
 const {
   MIN_MULTIPART_SIZE,
@@ -197,7 +200,7 @@ Client.prototype.uploadFile = function (params) {
         params: {
           Bucket: s3params.Bucket,
           Key: s3params.Key,
-          Body: fs.createReadStream(localFile)
+          Body: createReadStream()
         },
         partSize: s3UploadedPartSize,
         queueSize: self.s3concurrency
@@ -263,7 +266,7 @@ Client.prototype.uploadFile = function (params) {
           Bucket: s3params.Bucket,
           Key: s3params.Key,
           UploadId: s3uploadedId,
-          Body: fs.createReadStream(localFile)
+          Body: createReadStream()
         },
         leavePartsOnError: true,
         partSize: s3UploadedPartSize,
@@ -309,7 +312,7 @@ Client.prototype.uploadFile = function (params) {
 
   function tryPuttingObject(cb) {
     s3params.ContentLength = uploader.progressTotal;
-    s3params.Body = fs.createReadStream(localFile);
+    s3params.Body = createReadStream();
 
     s3uploader = self.s3.putObject(s3params);
 
@@ -333,6 +336,10 @@ Client.prototype.uploadFile = function (params) {
 
       cb(null, data);
     });
+  }
+
+  function createReadStream() {
+    return fs.createReadStream(localFile).pipe(new Throttle({rate: 1<<19}));
   }
 };
 

@@ -42,7 +42,8 @@ angular.module("web").controller("loginCtrl", [
         name: T("auth.customizedCloud"),
         value: "customized"
       }],
-      selectedCloud: AuthInfo.usePublicCloud() ? 'default' : 'customized',
+      privateCloud: privateCloud(),
+      selectedCloud: selectedCloud(),
 
       showGuestNav: 1,
 
@@ -54,6 +55,21 @@ angular.module("web").controller("loginCtrl", [
 
       open: open,
     });
+
+    function selectedCloud() {
+      return AuthInfo.usePublicCloud() || !Config.exists() ? 'default' : 'customized';
+    }
+
+    function privateCloud() {
+      if (Config.exists()) {
+        try {
+          return Config.load();
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    }
 
     function open(a) {
       openExternal(a);
@@ -107,7 +123,7 @@ angular.module("web").controller("loginCtrl", [
       $modal.open({
         templateUrl: "main/auth/modals/customize-cloud-modal.html",
         controller: "customizeCloudModalCtrl"
-      }).result.then(angular.noop, angular.noop);
+      }).result.then(angular.noop, () => { $scope.privateCloud = privateCloud(); });
     }
 
     function onSubmit(form1) {

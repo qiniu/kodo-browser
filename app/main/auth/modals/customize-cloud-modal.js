@@ -2,11 +2,19 @@ angular.module('web')
   .controller('customizeCloudModalCtrl', ['$scope', '$translate', '$uibModalInstance', 'Config',
     function ($scope, $translate, $modalInstance, Config) {
       const T = $translate.instant;
-      const config = Config.load(false);
+
+      let config = { ucUrl: '', regions: [{}] };
+      if (Config.exists()) {
+        try {
+          config = Config.load(false);
+        } catch (e) {
+          // do nothing;
+        }
+      }
 
       angular.extend($scope, {
         ucUrl: config.ucUrl,
-        regions: config.regions.length ? config.regions : [{}],
+        regions: config.regions,
         addRegion: addRegion,
         removeRegion: removeRegion,
         onSubmit: onSubmit,

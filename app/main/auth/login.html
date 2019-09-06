@@ -25,7 +25,10 @@
               </select>
             </div>
             <div class="col-sm-1">
-              <button type="button" class="btn btn-sm" ng-if="selectedCloud == 'customized'" ng-click="showCustomizedCloud()"><i class="glyphicon glyphicon-cog"></i></button>
+              <button type="button" class="btn btn-sm" ng-if="selectedCloud == 'customized'" ng-click="showCustomizedCloud()">
+                <i class="glyphicon glyphicon-cog"></i>
+                <input type="hidden" is-cloud-configured ng-model="privateCloud" />
+              </button>
             </div>
           </div>
           <div class="form-group has-feedback" ng-class="{'has-error': !form1.aid.$valid }">
@@ -47,7 +50,7 @@
 
           <div class="form-group">
             <div class="col-sm-offset-4 col-sm-8">
-              <button type="submit" class="btn btn-primary">
+              <button type="submit" class="btn btn-primary" ng-disabled="!form1.$valid">
                 {{'auth.login'|translate}}
               </button>
             </div>

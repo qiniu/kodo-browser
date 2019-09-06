@@ -29,6 +29,7 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
         return {
             save: saveConfig,
             load: loadConfig,
+            exists: configFileExists,
         };
 
         function loadConfig(loadDefault) {
@@ -46,8 +47,10 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
                         }
                         if (config.uc_url) {
                             ucUrl = config.uc_url;
+                        } else {
+                            throw new ConfigError("uc_url is missing or empty");
                         }
-                        if (config.regions) {
+                        if (config.regions && config.regions.length) {
                             each(config.regions, (region) => {
                                 if (!region.id) {
                                     throw new ConfigError('id is missing or empty in region');
@@ -72,18 +75,18 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
                                 }
                             });
                             regions = config.regions;
+                        } else {
+                            throw new ConfigError("regions is missing or empty");
                         }
                     }
                 } catch (e) {
                     if (e instanceof ConfigParseError) {
                         Toast.error(T('config.parse.error'));
-                        console.error(e);
                     } else if (e instanceof ConfigError) {
                         Toast.error(T('config.format.error'));
-                        console.error(e);
-                    } else {
-                        throw e;
                     }
+                    console.error(e);
+                    throw e;
                 }
             }
 
@@ -116,6 +119,10 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
             });
 
             fs.writeFileSync(configFilePath, JSON.stringify(new_config, null, 4), { mode: 0o600 });
+        }
+
+        function configFileExists() {
+            return fs.existsSync(configFilePath);
         }
     }
 ]);

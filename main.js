@@ -154,7 +154,7 @@ let createWindow = () => {
     // prevent if there still alive workers.
     confirmCb(dialog.showMessageBox({
       type: "warning",
-      message: `There still ${forkedWorkers.size} ${forkedWorkers.size > 1 ? "jobs" : "job"} in processing, are you sure to quit?`,
+      message: `There ${forkedWorkers.size > 1 ? "are" : "is"} still ${forkedWorkers.size} ${forkedWorkers.size > 1 ? "jobs" : "job"} in processing, are you sure to quit?`,
       buttons: btns
     }));
   };

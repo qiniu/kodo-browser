@@ -76,7 +76,8 @@ angular.module("web").controller("transferUploadsCtrl", [
             if (btn) {
               if (item.status == "running" ||
                 item.status == "waiting" ||
-                item.status == "verifying") {
+                item.status == "verifying" ||
+                item.status == "duplicated") {
                 item.stop();
               }
 
@@ -139,7 +140,8 @@ angular.module("web").controller("transferUploadsCtrl", [
               var job = jobs[i];
               if (job.status == "running" ||
                 job.status == "waiting" ||
-                job.status == "verifying") {
+                job.status == "verifying" ||
+                job.status == "duplicated") {
                 job.stop();
               }
 

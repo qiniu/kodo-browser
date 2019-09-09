@@ -1,6 +1,6 @@
 'use strict';
 
-let AWS = require('aws-sdk'),
+const AWS = require('aws-sdk'),
   EventEmitter = require('events').EventEmitter,
   fs = require('fs'),
   mime = require('mime'),
@@ -339,7 +339,16 @@ Client.prototype.uploadFile = function (params) {
   }
 
   function createReadStream() {
-    return fs.createReadStream(localFile).pipe(new Throttle({rate: 1<<19}));
+    const readStream = fs.createReadStream(localFile);
+    let streamWithThrottle = readStream.pipe(new Throttle({rate: 1<<19}), { end: false });
+    streamWithThrottle.path = readStream.path;
+    if (typeof readStream.start === 'number') {
+      streamWithThrottle.start = readStream.start;
+    }
+    if (typeof readStream.end === 'number') {
+      streamWithThrottle.end = readStream.end;
+    }
+    return streamWithThrottle;
   }
 };
 

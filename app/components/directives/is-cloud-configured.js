@@ -5,10 +5,10 @@ angular.module("web").directive("isCloudConfigured", () => {
     link: (scope, element, attributes, controller) => {
       controller.$validators.isCloudConfigured = value => {
         if (value) {
-          element.siblings('i').css({'color': ''}).removeClass('blinking');
+          element.siblings('i').removeClass('blinking');
           return true;
         } else {
-          element.siblings('i').css({'color': 'red'}).addClass('blinking');
+          element.siblings('i').addClass('blinking');
           return false;
         }
       };

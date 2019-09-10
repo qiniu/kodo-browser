@@ -66,6 +66,24 @@ angular.module("web").factory("settingsSvs", [
         }
       },
 
+      uploadSpeedLimitEnabled: {
+        get: function () {
+          return parseInt(localStorage.getItem("uploadSpeedLimitEnabled") || 0);
+        },
+        set: function (v) {
+          return localStorage.setItem("uploadSpeedLimitEnabled", v);
+        }
+      },
+
+      uploadSpeedLimitKBperSec: {
+        get: function () {
+          return parseInt(localStorage.getItem("uploadSpeedLimit") || 1024);
+        },
+        set: function (v) {
+          return localStorage.setItem("uploadSpeedLimit", v);
+        }
+      },
+
       resumeDownload: {
         get: function () {
           return parseInt(localStorage.getItem("resumeDownload") || 0);
@@ -99,6 +117,24 @@ angular.module("web").factory("settingsSvs", [
         },
         set: function (v) {
           return localStorage.setItem("multipartDownloadThreshold", v);
+        }
+      },
+
+      downloadSpeedLimitEnabled: {
+        get: function () {
+          return parseInt(localStorage.getItem("downloadSpeedLimitEnabled") || 0);
+        },
+        set: function (v) {
+          return localStorage.setItem("downloadSpeedLimitEnabled", v);
+        }
+      },
+
+      downloadSpeedLimitKBperSec: {
+        get: function () {
+          return parseInt(localStorage.getItem("downloadSpeedLimit") || 1024);
+        },
+        set: function (v) {
+          return localStorage.setItem("downloadSpeedLimit", v);
         }
       },
 

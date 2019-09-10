@@ -75,6 +75,7 @@ angular.module("web").factory("s3DownloadMgr", [
       options.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
       options.multipartDownloadThreshold = settingsSvs.multipartDownloadThreshold.get();
       options.multipartDownloadSize = settingsSvs.multipartDownloadSize.get();
+      options.downloadSpeedLimit = (settingsSvs.downloadSpeedLimitEnabled.get() == 1 && settingsSvs.downloadSpeedLimitKBperSec.get());
       options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
       options.isDebug = (settingsSvs.isDebug.get() == 1);
 

@@ -38,6 +38,9 @@ function Client(options) {
   this.multipartDownloadThreshold = options.multipartDownloadThreshold || (MIN_MULTIPART_SIZE * 10);
   this.multipartDownloadSize = options.multipartDownloadSize || (MIN_MULTIPART_SIZE * 2);
 
+  this.uploadSpeedLimit = options.uploadSpeedLimit || false;
+  this.downloadSpeedLimit = options.downloadSpeedLimit || false;
+
   if (this.multipartUploadSize < MIN_MULTIPART_SIZE) {
     throw new Error('Minimum multipartUploadSize is 4MB.');
   }
@@ -340,15 +343,19 @@ Client.prototype.uploadFile = function (params) {
 
   function createReadStream() {
     const readStream = fs.createReadStream(localFile);
-    let streamWithThrottle = readStream.pipe(new Throttle({rate: 1<<19}), { end: false });
-    streamWithThrottle.path = readStream.path;
-    if (typeof readStream.start === 'number') {
-      streamWithThrottle.start = readStream.start;
+    if (self.uploadSpeedLimit) {
+      let streamWithThrottle = readStream.pipe(new Throttle({rate: self.uploadSpeedLimit * 1024}), { end: false });
+      streamWithThrottle.path = readStream.path;
+      if (typeof readStream.start === 'number') {
+        streamWithThrottle.start = readStream.start;
+      }
+      if (typeof readStream.end === 'number') {
+        streamWithThrottle.end = readStream.end;
+      }
+      return streamWithThrottle;
+    } else {
+      return readStream;
     }
-    if (typeof readStream.end === 'number') {
-      streamWithThrottle.end = readStream.end;
-    }
-    return streamWithThrottle;
   }
 };
 
@@ -457,12 +464,12 @@ Client.prototype.downloadFile = function (params) {
       Key: s3params.Key,
     };
 
-    let s3downloader = new ReadableStream(self.s3).download(params, {
+    let s3downloader = limitReadStream(new ReadableStream(self.s3).download(params, {
       maxRetries: self.maxRetries,
       maxPartSize: self.multipartDownloadSize,
       maxConcurrentStreams: self.s3concurrency,
       totalObjectSize: downloader.progressTotal
-    });
+    }));
     s3downloader.on('progress', (prog) => {
       if (isAborted) return;
 
@@ -501,13 +508,13 @@ Client.prototype.downloadFile = function (params) {
       Key: s3params.Key,
     };
 
-    let s3downloader = new ReadableStream(self.s3).download(params, {
+    let s3downloader = limitReadStream(new ReadableStream(self.s3).download(params, {
       maxRetries: self.maxRetries,
       maxPartSize: self.multipartDownloadSize,
       maxConcurrentStreams: self.s3concurrency,
       totalObjectSize: downloader.progressTotal,
       totalBytesDownloaded: s3DownloadedBytes
-    });
+    }));
     s3downloader.on('progress', (prog) => {
       if (isAborted) return;
 
@@ -543,7 +550,7 @@ Client.prototype.downloadFile = function (params) {
       Key: s3params.Key,
     };
 
-    s3downloader = self.s3.getObject(params).createReadStream();
+    s3downloader = limitReadStream(self.s3.getObject(params).createReadStream());
     s3downloader.on('data', (chunk) => {
       if (isAborted) return;
 
@@ -568,6 +575,17 @@ Client.prototype.downloadFile = function (params) {
     });
 
     s3downloader.pipe(fileStream);
+  }
+
+  function limitReadStream(readStream) {
+    downloader.emit('debug', {a:'*********** 1'});
+    if (self.downloadSpeedLimit) {
+      downloader.emit('debug', {a:'*********** 2', downloadSpeedLimit: self.downloadSpeedLimit});
+      return readStream.pipe(new Throttle({rate: self.downloadSpeedLimit * 1024}));
+    } else {
+      downloader.emit('debug', {a:'*********** 3'});
+      return readStream;
+    }
   }
 };
 

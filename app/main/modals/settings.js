@@ -34,10 +34,14 @@ angular.module("web").controller("settingsCtrl", [
         maxUploadConcurrency: settingsSvs.maxUploadConcurrency.get(),
         multipartUploadThreshold: settingsSvs.multipartUploadThreshold.get(),
         multipartUploadSize: settingsSvs.multipartUploadSize.get(),
+        uploadSpeedLimitEnabled: settingsSvs.uploadSpeedLimitEnabled.get(),
+        uploadSpeedLimitKBperSec: settingsSvs.uploadSpeedLimitKBperSec.get(),
         resumeDownload: settingsSvs.resumeDownload.get(),
         maxDownloadConcurrency: settingsSvs.maxDownloadConcurrency.get(),
         multipartDownloadThreshold: settingsSvs.multipartDownloadThreshold.get(),
-        multipartDownloadSize: settingsSvs.multipartDownloadSize.get()
+        multipartDownloadSize: settingsSvs.multipartDownloadSize.get(),
+        downloadSpeedLimitEnabled: settingsSvs.downloadSpeedLimitEnabled.get(),
+        downloadSpeedLimitKBperSec: settingsSvs.downloadSpeedLimitKBperSec.get()
       },
       setChange: setChange,
       cancel: cancel

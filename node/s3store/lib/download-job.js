@@ -50,6 +50,7 @@ class DownloadJob extends Base {
     this.resumeDownload = this._config.resumeDownload || false;
     this.multipartDownloadThreshold = this._config.multipartDownloadThreshold || 100;
     this.multipartDownloadSize = this._config.multipartDownloadSize || 8;
+    this.downloadSpeedLimit = this._config.downloadSpeedLimit || false;
 
     this.message = this._config.message;
     this.status = this._config.status || "waiting";
@@ -86,7 +87,8 @@ DownloadJob.prototype.start = function (prog) {
       resumeDownload: this.resumeDownload,
       maxConcurrency: this.maxConcurrency,
       multipartDownloadThreshold: this.multipartDownloadThreshold * 1024 * 1024,
-      multipartDownloadSize: this.multipartDownloadSize * 1024 * 1024
+      multipartDownloadSize: this.multipartDownloadSize * 1024 * 1024,
+      downloadSpeedLimit: this.downloadSpeedLimit
     },
     params: {
       s3Params: {
@@ -255,12 +257,13 @@ DownloadJob.prototype.startSpeedCounter = function () {
     if (self.speed < avgSpeed) {
       self.speed = avgSpeed;
     }
-    if (self.lastSpeed != self.speed) {
-      self.emit("speedchange", self.speed * 1.2);
-    }
-
     self.lastLoaded = self.prog.loaded;
     self.lastSpeed = self.speed;
+
+    if (self.downloadSpeedLimit && self.speed > self.downloadSpeedLimit * 1024) {
+      self.speed = self.downloadSpeedLimit * 1024;
+    }
+    self.emit("speedchange", self.speed * 1.2);
 
     self.predictLeftTime =
       self.speed <= 0 ?

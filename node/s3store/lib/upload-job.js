@@ -61,6 +61,7 @@ class UploadJob extends Base {
     this.resumeUpload = this._config.resumeUpload || false;
     this.multipartUploadThreshold = this._config.multipartUploadThreshold || 100;
     this.multipartUploadSize = this._config.multipartUploadSize || 8;
+    this.uploadSpeedLimit = this._config.uploadSpeedLimit || false;
     this.uploadedId = this._config.uploadedId;
     this.uploadedParts = this._config.uploadedParts;
     this.overwrite = this._config.overwrite;
@@ -98,7 +99,8 @@ UploadJob.prototype.start = function (overwrite, prog) {
       resumeUpload: this.resumeUpload,
       maxConcurrency: this.maxConcurrency,
       multipartUploadThreshold: this.multipartUploadThreshold * 1024 * 1024,
-      multipartUploadSize: this.multipartUploadSize * 1024 * 1024
+      multipartUploadSize: this.multipartUploadSize * 1024 * 1024,
+      uploadSpeedLimit: this.uploadSpeedLimit
     },
     params: {
       s3Params: {
@@ -253,12 +255,13 @@ UploadJob.prototype.startSpeedCounter = function () {
     if (self.speed < avgSpeed) {
       self.speed = avgSpeed;
     }
-    // if (self.lastSpeed != self.speed) {
-      self.emit("speedchange", self.speed * 1.2);
-    // }
-
     self.lastLoaded = self.prog.loaded;
     self.lastSpeed = self.speed;
+
+    if (self.uploadSpeedLimit && self.speed > self.uploadSpeedLimit * 1024) {
+      self.speed = self.uploadSpeedLimit * 1024;
+    }
+    self.emit("speedchange", self.speed * 1.2);
 
     self.predictLeftTime =
       self.speed <= 0 ?

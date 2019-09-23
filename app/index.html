@@ -73,13 +73,6 @@
       });
     }
 
-    function gInstallAndRestart(version) {
-      ipcRenderer.send('asynchronous', {
-        key: 'installRestart',
-        version: version
-      });
-    }
-
     var pkg = require('./package');
 
     var Global = {

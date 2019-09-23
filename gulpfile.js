@@ -344,6 +344,16 @@ gulp.task("linux64", () => {
   });
 });
 
+gulp.task("linux64zip", () => {
+  console.log(`--package ${KICK_NAME}-linux-x64-v${VERSION}.zip`);
+  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-linux-x64-v${VERSION}.zip`);
+  var archive = archiver('zip', { zlib: { level: 9 } });
+  archive.on('error', (err) => { throw err; });
+  archive.pipe(outputZip);
+  archive.directory(`${TARGET}/${NAME}-linux-x64/${NAME}`, NAME);
+  archive.finalize();
+});
+
 gulp.task("linux32", () => {
   console.log(`--package ${NAME}-linux-ia32`);
 
@@ -360,6 +370,16 @@ gulp.task("linux32", () => {
       console.error(errs);
     });
   });
+});
+
+gulp.task("linux32zip", () => {
+  console.log(`--package ${KICK_NAME}-linux-x86-v${VERSION}.zip`);
+  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-linux-x86-v${VERSION}.zip`);
+  var archive = archiver('zip', { zlib: { level: 9 } });
+  archive.on('error', (err) => { throw err; });
+  archive.pipe(outputZip);
+  archive.directory(`${TARGET}/${NAME}-linux-x86/${NAME}`, NAME);
+  archive.finalize();
 });
 
 gulp.task("build", [

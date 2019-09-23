@@ -10,10 +10,12 @@
 <div class="modal-body">
   <h4 class="text-center">
     <img ng-src="{{app_logo}}" style="display:inline-block;" width="40" /> &nbsp;&nbsp;{{'app.name'|translate}}
-    <small class="text-orange">v {{app_version}}</small>
+    <small class="text-orange">v{{app_version}}</small>
 
     <div class="pd4" ng-if="custom_about_html" ng-bind-html="custom_about_html"></div>
   </h4>
+
+  <h5 class="text-center">{{'opensource.address'|translate}}: <a href="https://github.com/qiniu/kodo-browser">https://github.com/qiniu/kodo-browser</a></h5>
 
   <hr/>
 
@@ -24,7 +26,7 @@
       <span class="text-info">
         {{'foundNewVersion'|translate}}
         <!-- 发现新版本： -->
-        v {{info.lastVersion}} &nbsp;&nbsp;&nbsp;&nbsp;
+        v{{info.lastVersion}} &nbsp;&nbsp;&nbsp;&nbsp;
         <a ng-if="!info.upgradeJob||info.upgradeJob.status=='waiting'" href="" ng-click="startUpgrade()" class="btn btn-sm btn-success">
           <i class="fa fa-download"></i>
           {{'upgrade.start'|translate}}
@@ -51,14 +53,14 @@
       </div>
 
       <div ng-if="info.upgradeJob.status=='finished'" class="text-center">
-        <a href="" ng-click="installAndRestart()" class="btn btn-success btn-sm">{{'upgrade.download.success'|translate}}</a>
+        <a href="" ng-click="open('file://' + info.localPath)" class="btn btn-success btn-sm">{{'upgrade.download.success'|translate}}</a>
       </div>
 
       <h5 class="clearfix">
         <!-- 主要更新： -->
         {{'main.upgration'|translate}}:
       </h5>
-      <section class="pd4 bg-success" ng-bind-html="info.lastReleaseNote">
+      <section class="pd4 bg-info" ng-bind-html="info.lastReleaseNote">
       </section>
     </div>
 

@@ -29,8 +29,10 @@ win32: build
 	npm run pkg:win32
 linux64: build
 	npm run build:linux64
+	npm run pkg:linux64
 linux32: build
 	npm run build:linux32
+	npm run pkg:linux32
 mac: build
 	npm run build:mac
 	npm run pkg:mac

@@ -421,8 +421,8 @@ module.exports = {
 
   "upgrade.start": "更新を開始",
   "upgrade.downloading": "ダウンロード",
-  "upgrade.download.field": "自動更新に失敗しました。インストールパッケージを手動でダウンロードしてください。",
-  "upgrade.download.success": "ダウンロード、インストール、再起動",
+  "upgrade.download.failed": "自動更新に失敗しました。インストールパッケージを手動でダウンロードしてください。",
+  "upgrade.download.success": "ダウンロードに成功しました。クリックしてインストールしてください。",
 
   "Insufficient disk space": "ディスク容量不足",
 

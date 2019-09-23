@@ -2006,6 +2006,11 @@ dotenv@^6.2.0:
   version "6.2.0"
   resolved "https://registry.npm.taobao.org/dotenv/download/dotenv-6.2.0.tgz#941c0410535d942c8becf28d3f357dbd9d476064"
 
+downloads-folder@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npm.taobao.org/downloads-folder/download/downloads-folder-1.0.1.tgz#61b7b2477eb3d9937c61c5d0b90c0c709abb9ca4"
+  integrity sha1-YbeyR36z2ZN8YcXQuQwMcJq7nKQ=
+
 ds-store@^0.1.5:
   version "0.1.6"
   resolved "https://registry.npm.taobao.org/ds-store/download/ds-store-0.1.6.tgz#d1024ef746ed0c13f0f7fec85c7e858e8c4b7ca7"

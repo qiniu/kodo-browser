@@ -18,7 +18,7 @@ before_script:
 script:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux"]; then
-        make linux64 win32 win64
+        make linux32 linux64 win32 win64
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
         make dmg
     fi

@@ -55,13 +55,24 @@
 
     </div>
 
-    <form class="navbar-form navbar-right" ng-if="showGuestNav">
-      <div class="form-inline form-group">
-        <label class="control-label">{{'language'|translate}}:</label>
-        <select class="form-control input-sm" ng-model="langSettings.lang" ng-change="langSettings.changeLanguage(langSettings.lang)"
-          ng-options="a.lang as a.label for a in langSettings.langList"></select> &nbsp;
-      </div>
-    </form>
+    <div class="collapse navbar-collapse" ng-if="showGuestNav">
+      <ul class="nav navbar-nav">
+        <li>
+          <a href="" ng-click="showAbout()">
+            <i class="fa fa-info"></i> {{'about'|translate}}
+            <!-- 关于 -->
+            <small class="new-animate label label-success" ng-if="!upgradeInfo.isLastVersion">new</small>
+          </a>
+        </li>
+      </ul>
+      <form class="navbar-form navbar-right">
+        <div class="form-inline form-group">
+          <label class="control-label">{{'language'|translate}}:</label>
+          <select class="form-control input-sm" ng-model="langSettings.lang" ng-change="langSettings.changeLanguage(langSettings.lang)"
+            ng-options="a.lang as a.label for a in langSettings.langList"></select> &nbsp;
+        </div>
+      </form>
+    </div>
 
   </div>
 

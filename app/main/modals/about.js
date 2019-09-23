@@ -24,7 +24,6 @@ angular.module("web").controller("aboutCtrl", [
 
       open: open,
       startUpgrade: startUpgrade,
-      installAndRestart: installAndRestart,
       cancel: cancel
     });
 
@@ -55,10 +54,6 @@ angular.module("web").controller("aboutCtrl", [
 
     function startUpgrade() {
       autoUpgradeSvs.start();
-    }
-
-    function installAndRestart() {
-      gInstallAndRestart($scope.info.lastVersion);
     }
 
     function cancel() {

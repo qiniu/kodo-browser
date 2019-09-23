@@ -230,27 +230,6 @@ ipcMain.on("asynchronous", (event, data) => {
       console.info('cache cleared');
     });
     break;
-
-  case "installRestart":
-    let version = data.version;
-    let from = path.join(path.dirname(__dirname), version + "app.asar");
-    let to = path.join(path.dirname(__dirname), "app");
-
-    setTimeout(() => {
-      fs.rename(from, to, (e) => {
-        if (e) {
-          fs.writeFileSync(
-            path.join(os.homedir(), ".kodo-browser", "upgrade-error.txt"),
-            JSON.stringify(e)
-          );
-        } else {
-          app.relaunch();
-          app.exit(0);
-        }
-      });
-    }, 800);
-
-    break;
   }
 });
 

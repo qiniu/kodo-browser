@@ -1,6 +1,12 @@
 {
-  "version": "1.0.4-pre",
-  "package_url":
-    "https://raw.githubusercontent.com/qiniu/kodo-browser/upgrade.json",
-  "files": ["app.asar"]
+  "version": "1.0.3",
+  "downloads": {
+    "win32": {
+        "ia32": "http://prswjl9ey.bkt.clouddn.com/kodo-browser-Windows-x32-v1.0.3.zip",
+        "x64": "http://prswjl9ey.bkt.clouddn.com/kodo-browser-Windows-x64-v1.0.3.zip"
+    },
+    "darwin": {
+        "x64": "http://prswjl9ey.bkt.clouddn.com/kodo-browser-Mac%20OS-v1.0.3.zip"
+    }
+  }
 }

@@ -1,12 +1,15 @@
 angular.module("web").factory("autoUpgradeSvs", [
   function () {
-    var NAME = "kodo-browser";
-    var util = require("./node/s3store/lib/util");
+    const NAME = "kodo-browser";
+    const util = require("./node/s3store/lib/util");
+    const path = require("path");
+    const fs = require("fs");
+    const request = require("request");
+    const downloadsFolder = require("downloads-folder");
 
-    var release_notes_url = Global.release_notes_url;
-    var upgrade_url = Global.upgrade_url;
-    var gVersion = Global.app.version;
-    //var config_path = Global.config_path;
+    const release_notes_url = Global.release_notes_url;
+    const upgrade_url = Global.upgrade_url;
+    const gVersion = Global.app.version;
 
     var upgradeOpt = {
       currentVersion: gVersion,
@@ -62,10 +65,16 @@ angular.module("web").factory("autoUpgradeSvs", [
         fs.renameSync(to + ".download", to);
         this._changeStatus("finished");
       };
-      this.check = function (crc, md5, fn) {
+      this.check = function (expected, callback) {
         //crc
-        console.log("crc64 check");
-        return util.checksumFile(to + ".download", crc, md5, fn);
+        console.log("etag check");
+        return util.getEtag(to + ".download", function(actual) {
+          if (expected !== `"${actual}"`) {
+            callback(new Error(`Etag check failed, expected: ${expected}, actual: "${actual}"`));
+          } else {
+            callback();
+          }
+        });
       };
 
       this.precheck = function () {
@@ -76,20 +85,16 @@ angular.module("web").factory("autoUpgradeSvs", [
           console.log("exists, done");
           this.progress = 100;
           this._changeStatus("finished");
+          return false;
         }
+        return true;
       };
 
       this.start = function () {
-        this.progress = 0;
-        this.total = 0;
-        var that = this;
-
-        if (fs.existsSync(to)) {
-          console.log("exists, done");
-          this.progress = 100;
-          this._changeStatus("finished");
+        if (!this.precheck()) {
           return;
         }
+        let that = this;
 
         if (fs.existsSync(to + ".download")) {
           fs.unlinkSync(to + ".download");
@@ -101,37 +106,27 @@ angular.module("web").factory("autoUpgradeSvs", [
         request
           .head(from)
           .on("error", function (err) {
-            console.log(err);
+            console.error(err);
             this._changeStatus("failed", err);
           })
           .on("response", function (response) {
-            console.log(response.statusCode); // 200
-            console.log(response.headers); // 'image/png'
-
             if (response.statusCode == 200) {
               that.total = response.headers["content-length"];
               var current = 0;
               that.progress = Math.round(current * 10000 / that.total) / 100;
-              console.log(that.total);
 
-              var ws = fs.createWriteStream(to + ".download", {
-                flags: "a+"
-              });
+              var ws = fs.createWriteStream(to + ".download", { flags: "w" });
 
               request(from)
                 .on("error", function (err) {
-                  console.log(err);
+                  console.error(err);
                   that._changeStatus("failed", err);
                 })
                 .on("data", function (chunk) {
                   current += chunk.length;
                   that.progress =
                     Math.round(current * 10000 / that.total) / 100;
-                  //console.log(that.progress)
                   that._changeProgress(that.progress);
-                  // fs.appendFile(to+'.download', chunk, function(err){
-                  //    if(err)console.log(err)
-                  // });
                   return chunk;
                 })
                 .pipe(ws)
@@ -139,19 +134,19 @@ angular.module("web").factory("autoUpgradeSvs", [
                   that._changeStatus("verifying");
 
                   that.check(
-                    response.headers["x-oss-hash-crc64ecma"],
-                    response.headers["content-md5"],
+                    response.headers["etag"],
                     function (err) {
-                      console.log("check error:", err);
-                      if (err) that._changeStatus("failed", err);
-                      else {
+                      if (err) {
+                        console.error("check error:", err);
+                        that._changeStatus("failed", err);
+                      } else {
                         that.update();
                       }
                     }
                   );
                 });
             } else {
-              console.log(response);
+              console.error('download upgrade package error', response.statusCode, response.statusMessage, response.headers);
               that._changeStatus("failed", response);
             }
           });
@@ -163,7 +158,6 @@ angular.module("web").factory("autoUpgradeSvs", [
         _statusChangeFn = fn;
       };
       this._changeStatus = function (status, err) {
-        //console.log(status, err)
         this.status = status;
         this.message = err;
         if (_statusChangeFn) _statusChangeFn(status);
@@ -174,56 +168,47 @@ angular.module("web").factory("autoUpgradeSvs", [
     }
 
     function load(fn) {
+      const fallback = {
+        currentVersion: Global.app.version,
+        isLastVersion: true,
+        lastVersion: Global.app.version,
+        fileName: "",
+        link: "",
+        localPath: ""
+      };
       if (!upgrade_url) {
-        fn({
-          currentVersion: Global.app.version,
-          isLastVersion: true,
-          lastVersion: Global.app.version,
-          fileName: "",
-          link: ""
-        });
+        fn(fallback);
         return;
       }
 
-      $.getJSON(upgrade_url, function (data) {
-        var isLastVersion = compareVersion(gVersion, data.version) >= 0;
-        var lastVersion = data.version;
+      $.getJSON(upgrade_url).done(function (data) {
+        const isLastVersion = compareVersion(gVersion, data.version) >= 0;
+        const lastVersion = data.version;
+        let downloadUrl = '';
 
         upgradeOpt.isLastVersion = isLastVersion;
         upgradeOpt.lastVersion = lastVersion;
 
-        if (!isLastVersion && data.files) {
-          //暂时只支持1个文件更新
-          data.file = data.files.length > 0 ? data.files[0] : null;
+        if (!isLastVersion && data.downloads) {
+          try {
+            downloadUrl = data.downloads[process.platform][process.arch];
+          } catch (e) {
+            console.error(e);
+            fn(fallback);
+            return;
+          }
 
-          var jobs = [];
-
-          var fileName =
-            NAME + "-" + process.platform + "-" + process.arch + ".zip";
-
-          var linkPre =
-            data["package_url"].replace(/(\/*$)/g, "") + "/" + lastVersion;
-
-          var pkgLink =
-            linkPre +
-            "/" +
-            process.platform +
-            "-" +
-            process.arch +
-            "/" +
-            data.file;
+          let jobs = [];
+          let fileName = decodeURIComponent(path.basename(downloadUrl));
 
           upgradeOpt.fileName = fileName;
-          upgradeOpt.link = linkPre + "/" + fileName;
+          upgradeOpt.localPath = path.join(downloadsFolder(), fileName);
+          upgradeOpt.link = downloadUrl;
           upgradeOpt.upgradeJob.status = "waiting";
           upgradeOpt.upgradeJob.progress = 0;
-          upgradeOpt.upgradeJob.pkgLink = pkgLink;
+          upgradeOpt.upgradeJob.pkgLink = downloadUrl;
 
-          var jobsFinishedCount = 0;
-
-          var to = path.join(__dirname, "..", lastVersion + "-" + data.file);
-
-          job = new FlatDownloadJob(data.file, pkgLink, to);
+          job = new FlatDownloadJob(fileName, downloadUrl, upgradeOpt.localPath);
 
           job.onStatusChange(function (status) {
             upgradeOpt.upgradeJob.status = status;
@@ -233,30 +218,13 @@ angular.module("web").factory("autoUpgradeSvs", [
           });
           job.precheck();
 
-          //增量更新
           fn(upgradeOpt);
           return;
         }
-
-        //全量更新
-        var fileName =
-          NAME + "-" + process.platform + "-" + process.arch + ".zip";
-        var link =
-          data["package_url"].replace(/(\/*$)/g, "") +
-          "/" +
-          data["version"] +
-          "/" +
-          fileName;
-
-        console.log("download url:", link);
-
-        fn({
-          currentVersion: gVersion,
-          isLastVersion: isLastVersion,
-          lastVersion: lastVersion,
-          fileName: fileName,
-          link: link
-        });
+        fn(fallback);
+      }).fail(function(xhr, _, error) {
+        console.error(error);
+        fn(fallback);
       });
     }
 

@@ -1,14 +1,7 @@
-var path = require("path"),
-  fs = require("fs"),
-  crypto = require("crypto"),
-  Duplex = require('stream').Duplex;
-
 module.exports = {
   parseLocalPath: parseLocalPath,
   parseKodoPath: parseKodoPath,
-  md5sumFile: md5sumFile,
-  checksumFile: checksumFile,
-  printPartTimeLine: printPartTimeLine
+  getEtag: getEtag,
 };
 
 function parseLocalPath(p) {
@@ -40,84 +33,71 @@ function parseKodoPath(kodopath) {
   };
 }
 
-function printPartTimeLine(opt) {
-  var min = opt[1].start,
-    max = opt[1].end;
-  for (var k in opt) {
-    min = Math.min(opt[k].start, min);
-    max = Math.max(opt[k].end, max);
-  }
-  //console.log(min, max)
+function getEtag(buffer, callback) {
+  let mode = 'buffer';
 
-  var total = max - min;
-  var width = 600;
-
-  var t = [];
-  for (var k in opt) {
-    t.push({
-      left: (opt[k].start - min) * 600 / total,
-      width: (opt[k].end - opt[k].start) * 600 / total
-    });
+  if (typeof buffer === 'string') {
+    buffer = require('fs').createReadStream(buffer);
+    mode = 'stream';
+  } else if (buffer instanceof require('stream')){
+    mode = 'stream';
   }
 
-  //console.log(JSON.stringify(t, ' ',2));
+  const sha1 = function(content){
+    const crypto = require('crypto');
+    const sha1 = crypto.createHash('sha1');
+    sha1.update(content);
+    return sha1.digest();
+  };
 
-  //var t2=[];
-  for (var n of t) {
-    console.log(
-      "%c",
-      `background:green;margin-left:${n.left}px;padding-left:${n.width}px;`
-    );
-    //t2.push(`<div style="height:6px;background:green;width:${n.width}px;margin-left:${n.left}px;clear:both;margin-top:1px;"></div>`)
-  }
-  console.log(t.length + " parts");
-}
+  // 以4M为单位分割
+  const blockSize = 4*1024*1024;
+  const sha1String = [];
+  let prefix = 0x16;
+  let blockCount = 0;
 
-function checksumFile(filePath, fileMD5, fn) {
-  if (fileMD5) {
-    //检验MD5
-    md5sumFile(filePath, function (err, md5str) {
-      if (err) {
-        fn(new Error("Checking md5 failed: " + err.message));
-      } else if ('"' + md5str + '"' != fileMD5) {
-        fn(
-          new Error(
-            "ContentMD5 mismatch, file md5 should be:" +
-            fileMD5 +
-            ", but we got:" +
-            md5str
-          )
-        );
-      } else {
-        console.info("check md5 success: file[" + filePath + "]," + md5str);
-        fn(null);
+  switch (mode) {
+    case 'buffer':
+      var bufferSize = buffer.length;
+      blockCount = Math.ceil(bufferSize / blockSize);
+
+      for(var i = 0; i < blockCount; i++){
+        sha1String.push(sha1(buffer.slice(i * blockSize, (i + 1) * blockSize)));
       }
-    });
-  } else {
-    //没有MD5，不校验
-    console.log(filePath, ",not found content md5, just pass");
-
-    fn(null);
+      process.nextTick(function(){
+        callback(calcEtag());
+      });
+      break;
+    case 'stream':
+      var stream = buffer;
+      stream.on('readable', function() {
+        var chunk;
+        while (chunk = stream.read(blockSize)) {
+          sha1String.push(sha1(chunk));
+          blockCount++;
+        }
+      });
+      stream.on('end',function(){
+        callback(calcEtag());
+      });
+      break;
   }
 
-  return;
-}
+  function calcEtag() {
+    if (!sha1String.length) {
+      return 'Fto5o-5ea0sNMlW_75VgGJCv2AcJ';
+    }
+    let sha1Buffer = Buffer.concat(sha1String, blockCount * 20);
 
-function md5sumFile(filename, fn) {
-  var md5sum = crypto.createHash("md5");
-  var stream = fs.createReadStream(filename);
+    // 如果大于4M，则对各个块的sha1结果再次sha1
+    if (blockCount > 1){
+      prefix = 0x96;
+      sha1Buffer = sha1(sha1Buffer);
+    }
 
-  console.time("gen md5 hash for [" + filename + "]");
-  stream.on("data", function (chunk) {
-    md5sum.update(chunk);
-  });
-  stream.on("end", function () {
-    str = md5sum.digest("hex");
-    console.timeEnd("gen md5 hash for [" + filename + "]");
+    sha1Buffer = Buffer.concat([Buffer.from([prefix]), sha1Buffer], sha1Buffer.length + 1);
 
-    fn(null, str);
-  });
-  stream.on("error", function (err) {
-    fn(err);
-  });
+    return sha1Buffer.toString('base64')
+      .replace(/\//g,'_').replace(/\+/g,'-');
+  }
 }

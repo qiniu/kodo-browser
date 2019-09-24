@@ -588,6 +588,13 @@ angular.module("web").controller("filesCtrl", [
           fileType: () => {
             return fileType;
           },
+          reload: () => {
+            return () => {
+              $timeout(() => {
+                listFiles();
+              }, 300);
+            };
+          },
           showFn: () => {
             return {
               callback: (reloadStorageStatus) => {

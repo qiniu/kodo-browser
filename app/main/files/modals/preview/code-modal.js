@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('codeModalCtrl', ['$scope', '$uibModalInstance','$translate','$timeout', '$uibModal', 'bucketInfo', 'objectInfo', 'fileType', 'showFn', 'Toast', 'DiffModal', 's3Client', 'safeApply',
-    function ($scope, $modalInstance,$translate, $timeout, $modal, bucketInfo, objectInfo, fileType, showFn, Toast, DiffModal, s3Client, safeApply) {
+  .controller('codeModalCtrl', ['$scope', '$uibModalInstance','$translate','$timeout', '$uibModal', 'bucketInfo', 'objectInfo', 'fileType', 'showFn', 'reload', 'Toast', 'DiffModal', 's3Client', 'safeApply',
+    function ($scope, $modalInstance,$translate, $timeout, $modal, bucketInfo, objectInfo, fileType, showFn, reload, Toast, DiffModal, s3Client, safeApply) {
       var T = $translate.instant;
       angular.extend($scope, {
         bucketInfo: bucketInfo,
@@ -34,7 +34,6 @@ angular.module('web')
       }
 
       function saveContent() {
-
         var originalContent = $scope.originalContent;
         var v = editor.getValue();
         $scope.content = v;
@@ -46,6 +45,7 @@ angular.module('web')
             s3Client.saveContent(bucketInfo.region, bucketInfo.bucket, objectInfo.path, v).then(function (result) {
               Toast.success(T('save.successfully'));//'保存成功'
               cancel();
+              reload();
             });
           });
         } else {

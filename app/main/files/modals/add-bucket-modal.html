@@ -18,8 +18,9 @@
         <!-- 名称: -->
       </label>
       <div class="col-sm-8">
+        <i class="fa fa-question-circle" style="position: absolute; padding: 10px;" uib-tooltip="{{'bucket.name.tooltip'|translate}}" tooltip-is-open="form1.name.$invalid" tooltip-placement="top" tooltip-append-to-body="true"></i>
         <input type="text" ng-model="item.name" id="name" autocomplete="off" autofocus name="name" required="required" ng-pattern="reg"
-          placeholder="{{'bucket.name'|translate}}" class="input-md form-control" />
+          placeholder="{{'bucket.name'|translate}}" class="input-md form-control" style="padding-left: 32px;" />
       </div>
     </div>
 

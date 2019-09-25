@@ -103,6 +103,7 @@ module.exports = {
   simplePolicy: "简化Policy授权",
   more: "更多",
   "bucket.name": "Bucket 名称",
+  "bucket.name.tooltip": "1 ~ 63 个字符组成，可包含 字母、数字、中划线、下划线",
   "bucket.region": "Bucket 区域",
   creationTime: "创建时间",
 

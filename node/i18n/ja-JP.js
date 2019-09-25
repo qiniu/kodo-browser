@@ -103,6 +103,7 @@ module.exports = {
   simplePolicy: "シンプルポリシー",
   more: "さらに",
   "bucket.name": "バケット名",
+  "bucket.name.tooltip": "1〜63文字、文字、数字、アンダースコア、アンダースコアを含めることができます",
   "bucket.region": "バケット領域",
   creationTime: "作成時間",
 

@@ -4,7 +4,7 @@ angular.module('web')
       var T = $translate.instant;
 
       var bucketACL = angular.copy(Const.bucketACL);
-      var regions = angular.copy(Const.regions);
+      var regions = angular.copy(Config.load(AuthInfo.usePublicCloud()).regions);
       var storageClassesMap = {};
       angular.forEach(regions, function (n) {
         storageClassesMap[n.id] = n.storageClasses
@@ -12,7 +12,7 @@ angular.module('web')
 
       angular.extend($scope, {
         bucketACL: [], //angular.copy(Const.bucketACL),
-        regions: [],
+        regions: regions,
         cancel: cancel,
         onSubmit: onSubmit,
         storageClasses: [],
@@ -30,11 +30,6 @@ angular.module('web')
 
       i18nStorageClassesType();
       i18nBucketACL();
-      i18nRegion();
-
-      function i18nRegion() {
-        $scope.regions = Config.load(AuthInfo.usePublicCloud()).regions;
-      }
 
       function i18nBucketACL() {
         var arr = angular.copy(Const.bucketACL);

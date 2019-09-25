@@ -350,7 +350,7 @@ gulp.task("linux64zip", () => {
   var archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
-  archive.directory(`${TARGET}/${NAME}-linux-x64/${NAME}`, NAME);
+  archive.directory(`${TARGET}/${NAME}-linux-x64`, false);
   archive.finalize();
 });
 
@@ -378,7 +378,7 @@ gulp.task("linux32zip", () => {
   var archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
-  archive.directory(`${TARGET}/${NAME}-linux-x86/${NAME}`, NAME);
+  archive.directory(`${TARGET}/${NAME}-linux-ia32`, false);
   archive.finalize();
 });
 

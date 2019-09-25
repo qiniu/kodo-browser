@@ -1013,6 +1013,7 @@ angular.module("web").controller("filesCtrl", [
       angular.forEach(selectedFiles, (n) => {
         n.region = $scope.currentInfo.region;
         n.bucket = $scope.currentInfo.bucket;
+        n.bucketName = $scope.currentInfo.bucketName;
       });
 
       /**

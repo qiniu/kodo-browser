@@ -231,7 +231,7 @@ angular.module('web')
           var userName = $scope.create.UserName;
           var comments = [];
           angular.forEach($scope.items, function (n) {
-            comments.push('kodo://' + currentInfo.bucket + "/" + n.path);
+            comments.push('kodo://' + currentInfo.bucketName + "/" + n.path);
           });
           ramSvs.createUser({
             UserName: userName,

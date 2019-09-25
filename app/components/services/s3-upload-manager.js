@@ -226,6 +226,7 @@ angular.module("web").factory("s3UploadMgr", [
             },
             to: {
               bucket: bucketInfo.bucket,
+              bucketName: bucketInfo.bucketName,
               key: filePath
             },
             overwrite: $scope.overwriteUploading.enabled

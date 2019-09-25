@@ -253,6 +253,7 @@ angular.module("web").factory("s3DownloadMgr", [
               region: s3info.region,
               from: {
                 bucket: s3info.bucket,
+                bucketName: s3info.bucketName,
                 key: s3info.path
               },
               to: {

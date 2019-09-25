@@ -15,8 +15,7 @@
     <div class="pd4" ng-if="custom_about_html" ng-bind-html="custom_about_html"></div>
   </h4>
 
-  <h5 class="text-center">{{'opensource.address'|translate}}: <a href="https://github.com/qiniu/kodo-browser">https://github.com/qiniu/kodo-browser</a></h5>
-
+  <h5 class="text-center">{{'opensource.address'|translate}}: <button class="btn-link" ng-click="open('https://github.com/qiniu/kodo-browser')">https://github.com/qiniu/kodo-browser</button></h5>
   <hr/>
 
   <div ng-if="isLoading" class="pd2">{{'loading'|translate}}</div>

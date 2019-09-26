@@ -177,7 +177,7 @@ angular.module("web").factory("autoUpgradeSvs", [
         localPath: ""
       };
       if (!upgrade_url) {
-        fn(fallback);
+        fn(fallback, true);
         return;
       }
 
@@ -194,7 +194,7 @@ angular.module("web").factory("autoUpgradeSvs", [
             downloadUrl = data.downloads[process.platform][process.arch];
           } catch (e) {
             console.error(e);
-            fn(fallback);
+            fn(fallback, true);
             return;
           }
 
@@ -218,13 +218,13 @@ angular.module("web").factory("autoUpgradeSvs", [
           });
           job.precheck();
 
-          fn(upgradeOpt);
-          return;
+          fn(upgradeOpt, true);
+        } else {
+          fn(fallback, true);
         }
-        fn(fallback);
       }).fail(function(xhr, _, error) {
         console.error(error);
-        fn(fallback);
+        fn(fallback, false);
       });
     }
 

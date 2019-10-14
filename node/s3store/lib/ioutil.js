@@ -578,12 +578,9 @@ Client.prototype.downloadFile = function (params) {
   }
 
   function limitReadStream(readStream) {
-    downloader.emit('debug', {a:'*********** 1'});
     if (self.downloadSpeedLimit) {
-      downloader.emit('debug', {a:'*********** 2', downloadSpeedLimit: self.downloadSpeedLimit});
       return readStream.pipe(new Throttle({rate: self.downloadSpeedLimit * 1024}));
     } else {
-      downloader.emit('debug', {a:'*********** 3'});
       return readStream;
     }
   }

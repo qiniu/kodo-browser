@@ -376,7 +376,7 @@ angular.module("web").factory("s3DownloadMgr", [
           to: job.to,
           from: job.from,
           prog: {
-            loaded: job.prog.synced,
+            synced: job.prog.synced,
             total: job.prog.total
           },
           status: job.status,

@@ -181,50 +181,56 @@ angular.module("web").factory("autoUpgradeSvs", [
         return;
       }
 
-      $.getJSON(upgrade_url).done(function (data) {
-        const isLastVersion = compareVersion(gVersion, data.version) >= 0;
-        const lastVersion = data.version;
-        let downloadUrl = '';
+      $.ajax(upgrade_url, {
+        cache: false,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          const isLastVersion = compareVersion(gVersion, data.version) >= 0;
+          const lastVersion = data.version;
+          let downloadUrl = '';
 
-        upgradeOpt.isLastVersion = isLastVersion;
-        upgradeOpt.lastVersion = lastVersion;
+          upgradeOpt.isLastVersion = isLastVersion;
+          upgradeOpt.lastVersion = lastVersion;
 
-        if (!isLastVersion && data.downloads) {
-          try {
-            downloadUrl = data.downloads[process.platform][process.arch];
-          } catch (e) {
-            console.error(e);
+          if (!isLastVersion && data.downloads) {
+            try {
+              downloadUrl = data.downloads[process.platform][process.arch];
+            } catch (e) {
+              console.error(e);
+              fn(fallback, true);
+              return;
+            }
+
+            let jobs = [];
+            let fileName = decodeURIComponent(path.basename(downloadUrl));
+
+            upgradeOpt.fileName = fileName;
+            upgradeOpt.localPath = path.join(downloadsFolder(), fileName);
+            upgradeOpt.link = downloadUrl;
+            upgradeOpt.upgradeJob.status = "waiting";
+            upgradeOpt.upgradeJob.progress = 0;
+            upgradeOpt.upgradeJob.pkgLink = downloadUrl;
+
+            job = new FlatDownloadJob(fileName, downloadUrl, upgradeOpt.localPath);
+
+            job.onStatusChange(function (status) {
+              upgradeOpt.upgradeJob.status = status;
+            });
+            job.onProgressChange(function (progress) {
+              upgradeOpt.upgradeJob.progress = progress;
+            });
+            job.precheck();
+
+            fn(upgradeOpt, true);
+          } else {
             fn(fallback, true);
-            return;
           }
-
-          let jobs = [];
-          let fileName = decodeURIComponent(path.basename(downloadUrl));
-
-          upgradeOpt.fileName = fileName;
-          upgradeOpt.localPath = path.join(downloadsFolder(), fileName);
-          upgradeOpt.link = downloadUrl;
-          upgradeOpt.upgradeJob.status = "waiting";
-          upgradeOpt.upgradeJob.progress = 0;
-          upgradeOpt.upgradeJob.pkgLink = downloadUrl;
-
-          job = new FlatDownloadJob(fileName, downloadUrl, upgradeOpt.localPath);
-
-          job.onStatusChange(function (status) {
-            upgradeOpt.upgradeJob.status = status;
-          });
-          job.onProgressChange(function (progress) {
-            upgradeOpt.upgradeJob.progress = progress;
-          });
-          job.precheck();
-
-          fn(upgradeOpt, true);
-        } else {
-          fn(fallback, true);
-        }
-      }).fail(function(xhr, _, error) {
-        console.error(error);
-        fn(fallback, false);
+        },
+        error: function(xhr, _, error) {
+          console.error(error);
+          fn(fallback, false);
+        },
       });
     }
 

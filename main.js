@@ -270,7 +270,6 @@ ipcMain.on("asynchronous-job", (event, data) => {
     worker.on("message", function (msg) {
       if (!win) return;
 
-      console.info({upload_debug: msg});
       if (data.params.isDebug) {
         event.sender.send(data.job, {
           job: data.job,
@@ -352,6 +351,10 @@ ipcMain.on("asynchronous-job", (event, data) => {
         // ignore
         break;
 
+      case 'debug':
+        console.info({upload_debug: msg});
+        break;
+
       default:
         event.sender.send(data.job, {
           job: data.job,
@@ -423,7 +426,6 @@ ipcMain.on("asynchronous-job", (event, data) => {
     worker.on("message", function (msg) {
       if (!win) return;
 
-      console.info({download_debug: msg});
       if (data.params.isDebug) {
         event.sender.send(data.job, {
           job: data.job,
@@ -495,6 +497,10 @@ ipcMain.on("asynchronous-job", (event, data) => {
 
       case 'env':
         // ignore
+        break;
+
+      case 'debug':
+        console.info({download_debug: msg});
         break;
 
       default:

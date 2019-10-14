@@ -4,8 +4,9 @@
   "scripts": {},
   "main": "lib/index.js",
   "dependencies": {
-    "aws-sdk": "^2.307.0",
-    "electron": "electron@beta",
+    "async": "^3.1.0",
+    "aws-sdk": "^2.549.0",
+    "electron": "^4.0",
     "events": "^2.0.0",
     "mime": "^2.2.0",
     "pend": "^1.2.0",

@@ -1,6 +1,6 @@
 {
   "name": "kodo-browser",
-  "version": "1.0.4",
+  "version": "1.0.5-pre",
   "license": "Apache-2.0",
   "licenses": [
     {
@@ -56,7 +56,7 @@
     "angular-ui-bootstrap": "^2.5.6",
     "angular-ui-codemirror": "0.3.0",
     "archiver": "^3.0.3",
-    "aws-sdk": "^2.499.0",
+    "aws-sdk": "^2.549.0",
     "bootstrap": "^3.4.1",
     "bootstrap-table": "^1.12.1",
     "bower": "~1.8.4",
@@ -92,8 +92,8 @@
     "array-each": "^1.0.1",
     "array-filter": "^1.0.0",
     "array-map": "^0.0.0",
-    "async": "^1.5.2",
-    "aws-sdk": "^2.499.0",
+    "async": "^3.1.0",
+    "aws-sdk": "^2.549.0",
     "downloads-folder": "^1.0.1",
     "qiniu": "^7.2.2",
     "mime": "^2.3.1",

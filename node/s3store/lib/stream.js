@@ -1,184 +1,116 @@
-var assert = require('assert');
-var async = require('async');
-var Readable = require('stream').Readable;
+const assert = require('assert'),
+      async = require('async'),
+      fs = require('fs'),
+      Readable = require('stream').Readable;
 
 // Set the S3 client to be used for this ReadableStream.
-function ReadableStream(client) {
-  if (this instanceof ReadableStream === false) {
-    return new ReadableStream(client);
+class ReadableStream {
+  constructor(client) {
+    this.client = client;
   }
 
-  if (!ReadableStream) {
-    throw new Error('Must configure an S3 client before attempting to create an S3 download stream.');
-  }
+  download(params, config) {
+    const client = this.client;
 
-  this._client = client;
-}
+    if (!config) config = {};
 
-ReadableStream.prototype.download = function (s3params, config) {
-  var _client = this._client;
+    const maxRetries = config.maxRetries ? config.maxRetries : 3;
+    const partSize = config.partSize ? config.partSize : 1 << 22; // 4 MB
+    const maxConcurrentStreams = config.maxConcurrentStreams ? config.maxConcurrentStreams : 5;
+    const objectSize = config.totalObjectSize ? config.totalObjectSize : 0;
+    const downloaded = config.totalBytesDownloaded ? config.totalBytesDownloaded : 0;
 
-  if (!config) config = {};
+    const rs = new Readable({ highWaterMark: 1 << 22 });
+    const downloadPart = function(callback) {
+      const context = this;
+      const params = Object.assign({}, context.params);
+      params.Range = `bytes=${context.lowerBound}-${context.upperBound}`;
 
-  // variables pertaining to the download.
-  var _params = s3params;
-  var _maxRetries = config.maxRetries ? config.maxRetries : 3;
-  var _maxPartSize = config.maxPartSize ? config.maxPartSize : 4 << 20; //4MB
-  var _maxConcurrentStreams = config.maxConcurrentStreams ? config.maxConcurrentStreams : 5;
-  var _totalObjectSize = config.totalObjectSize ? config.totalObjectSize : 0;
-  var _totalBytesDownloaded = config.totalBytesDownloaded ? config.totalBytesDownloaded : 0;
+      const request = client.getObject(params);
+      request.on('httpData', (part) => {
+        rs.emit('progress', { loaded: part.length });
+      });
+      let called = false;
+      request.send((err, response) => {
+        if (called) {
+          return;
+        }
+        called = true;
+        if (!err && response.Body.length != context.size) {
+          callback(new Error(`${context.partId}: part size mismatch, expected: ${context.size}, actual: ${response.Body.length}`));
+          response.Body = null;
+          console.error(response);
+          return;
+        }
+        callback(err, Object.assign({response: response}, context));
+      });
+    };
 
-  var startSeriesDownload = function (series, offset, callback) {
-    var functionArray = [];
-    var lowerBoundArray = [];
-    var upperBoundArray = [];
-    var bytesDownloaded = 0;
+    const downloadBlock = function(blockId, offset, callback) {
+      const partDownloaders = [];
+      for (let i = 0; i < maxConcurrentStreams; i++) {
+        const lowerBound = offset + i * partSize;
+        const upperBound = Math.min(lowerBound + partSize - 1, objectSize - 1);
+        partDownloaders.push(downloadPart.bind({
+          partId: blockId * maxConcurrentStreams + i,
+          lowerBound: lowerBound, upperBound: upperBound,
+          size: upperBound - lowerBound + 1,
+          params: Object.assign({}, params)
+        }));
 
-    for (var i = 0; i < _maxConcurrentStreams; i++) {
-      lowerBoundArray.push(i * _maxPartSize + offset);
-      upperBoundArray.push(Math.min(lowerBoundArray[i] + _maxPartSize - 1, _totalObjectSize - 1));
-
-      var params = Object.assign({}, _params);
-
-      var func = function (cb) {
-        var context = this;
-
-        context.params.Range = `bytes=${context.lowerBound}-${context.upperBound}`;
-
-        var request = _client.getObject(context.params);
-        request.on('httpData', (chunk) => {
-          bytesDownloaded += chunk.length;
-
-          rs.emit('progress', {
-            loaded: chunk.length,
-            total: bytesDownloaded
-          });
-        });
-        request.send((err, data) => {
-          rs.emit('part', {
-            PartNumber: context.partNumber,
-            Size: context.upperBound - context.lowerBound
-          });
-
-          cb(err, data);
-        });
-      };
-
-      functionArray.push(async.retry(_maxRetries, func.bind({
-        partNumber: series + i,
-        lowerBound: lowerBoundArray[i],
-        upperBound: upperBoundArray[i],
-        params: params
-      })));
-
-      if (upperBoundArray[i] >= _totalObjectSize - 1) {
-        break;
-      }
-    }
-
-    async.parallel(functionArray, function (err, results) {
-      if (err) {
-        callback(err);
-        return;
+        if (upperBound >= objectSize - 1) {
+          break;
+        }
       }
 
-      for (var i = 0; i < results.length; i++) {
-        rs.push(results[i].Body);
+      async.parallel(partDownloaders, (err, results) => {
+        if (err) {
+          callback(err);
+          return;
+        }
+
+        results.forEach((result, i) => {
+          rs.push(result.response.Body);
+        });
 
         rs.emit('partDownloaded', {
-          PartNumber: series + i,
-          Size: upperBoundArray[i] - lowerBoundArray[i],
-          Done: true
+          size: results.reduce((sum, result) => { return sum + result.response.Body.length; }, 0),
         });
-      }
 
-      callback(null, "");
-    });
-  };
+        callback(null, results);
+      });
+    };
 
-  // Create the writable stream interface.
-  var rs = new Readable({
-    highWaterMark: 4194304 // 4 MB
-  });
+    let downloading = false;
+    rs._read = () => {
+      if (downloading) return;
+      downloading = true;
 
-  rs.maxRetries = function (numRetries) {
-    _maxRetries = numRetries;
-    return rs;
-  };
-  rs.getMaxRetries = function () {
-    return _maxRetries;
-  };
-  rs.maxPartSize = function (partSize) {
-    if (partSize < 4 << 20) {
-      partSize = 4 << 20;
-    }
-    _maxPartSize = partSize;
-    return rs;
-  };
-  rs.getMaxPartSize = function () {
-    return _maxPartSize;
-  };
-  rs.maxConcurrentStreams = function (numStreams) {
-    if (numStreams < 1) {
-      numStreams = 1;
-    }
-    _maxConcurrentStreams = numstreams;
-    return rs;
-  };
-  rs.getMaxConcurrentStreams = function () {
-    return _maxConcurrentStreams;
-  };
-  rs.totalObjectSize = function (size) {
-    _totalObjectSize = size;
-    return rs;
-  };
-  rs.getTotalObjectSize = function () {
-    return _totalObjectSize;
-  };
-
-  // state management
-  var downloading = false;
-
-  rs._read = function () {
-    if (downloading) return;
-
-    downloading = true;
-
-    assert.notStrictEqual(_params, null, "'s3params' parameter is required.");
-    assert.notStrictEqual(_totalObjectSize, 0, "'totalObjectSize' parameter is required.");
-
-    var seriesNumber = 0;
-    var bytesDownloaded = _totalBytesDownloaded;
-    var functionArray = [];
-    while (bytesDownloaded < _totalObjectSize) {
-      var func = function (callback) {
-        startSeriesDownload(this.series, this.offset, callback);
+      const worker = function(callback) {
+        downloadBlock(this.blockId, this.offset, callback);
       };
-
-      functionArray.push(async.retry(_maxRetries, func.bind({
-        series: seriesNumber,
-        offset: bytesDownloaded
-      })));
-
-      seriesNumber += _maxConcurrentStreams;
-      bytesDownloaded += _maxConcurrentStreams * _maxPartSize;
-    }
-
-    async.series(functionArray, function (err, results) {
-      rs.push(null);
-
-      downloading = false;
-
-      if (err) {
-        rs.emit('error', err);
-      } else {
-        rs.emit('downloaded', results);
+      const blockSize = maxConcurrentStreams * partSize;
+      const blockDownloaders = [];
+      for (let blockId = 0, bytesDownloaded = downloaded;
+           bytesDownloaded < objectSize;
+           blockId += 1, bytesDownloaded += blockSize) {
+        blockDownloaders.push(worker.bind({blockId: blockId, offset: bytesDownloaded}));
       }
-    });
-  };
 
-  return rs;
-};
+      async.series(blockDownloaders, (err, results) => {
+        rs.push(null);
+        downloading = false;
+        if (err) {
+          rs.destroy(err);
+        } else {
+          rs.destroy(null);
+        }
+      });
+    };
+
+    return rs;
+  }
+}
 
 module.exports = {
   ReadableStream: ReadableStream

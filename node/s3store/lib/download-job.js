@@ -41,10 +41,9 @@ class DownloadJob extends Base {
     this.to = util.parseLocalPath(this._config.to); //local path
     this.region = this._config.region;
 
-    this.prog = this._config.prog || {
-      total: 0,
-      loaded: 0
-    };
+    this.prog = this._config.prog || {};
+    this.prog.total = this.prog.total || 0;
+    this.prog.loaded = this.prog.loaded || this.prog.synced || 0;
 
     this.maxConcurrency = config.maxConcurrency || 10;
     this.resumeDownload = this._config.resumeDownload || false;
@@ -61,7 +60,7 @@ class DownloadJob extends Base {
   }
 }
 
-DownloadJob.prototype.start = function (prog) {
+DownloadJob.prototype.start = function (params) {
   if (this.status == "running") return;
 
   if (this.isDebug) {
@@ -69,7 +68,11 @@ DownloadJob.prototype.start = function (prog) {
   }
 
   // start
-  prog = prog || {};
+  params = params || {};
+  params.prog = params.prog || {};
+  params.prog.loaded = params.prog.loaded || 0;
+  params.prog.synced = params.prog.synced || 0;
+  params.prog.total = params.prog.total || 0;
 
   this.message = "";
   this.isStopped = false;
@@ -96,19 +99,11 @@ DownloadJob.prototype.start = function (prog) {
         Key: this.from.key
       },
       localFile: this.tmpfile,
-      downloadedBytes: (prog.prog && prog.prog.synced) ? prog.prog.synced : 0,
+      downloadedBytes: params.prog.synced,
       useElectronNode: this.useElectronNode,
       isDebug: this.isDebug
     }
   };
-  if (fs.existsSync(job.params.localFile)) {
-    if (fs.statSync(job.params.localFile).size !== job.params.downloadedBytes) {
-      job.params.downloadedBytes = 0;
-      fs.truncateSync(job.params.localFile);
-    }
-  } else {
-    job.params.downloadedBytes = 0;
-  }
   if (this.isDebug) {
     console.log(`[JOB] ${JSON.stringify(job)}`);
   }
@@ -191,7 +186,7 @@ DownloadJob.prototype.startDownload = function (event, data) {
     case 'filePartDownloaded':
       var part = data.data;
 
-      self.prog.synced += part.Size;
+      self.prog.synced = self.prog.synced + part.size || part.size;
       self.emit('partcomplete', self.prog);
       break;
 

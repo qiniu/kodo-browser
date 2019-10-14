@@ -113,7 +113,7 @@ Client.prototype.uploadFile = function (params) {
       handleAbort();
     }
 
-    uploader.emit('error', err);
+    uploader.emit('error', `${err.name}: ${err.message}`);
   }
 
   function handleAbort() {
@@ -372,7 +372,7 @@ Client.prototype.downloadFile = function (params) {
 
   let downloader = new EventEmitter();
   downloader.setMaxListeners(0);
-  downloader.progressLoaded = 0;
+  downloader.progressLoaded = s3DownloadedBytes;
   downloader.progressTotal = 0;
   downloader.progressResumable = false;
   downloader.abort = handleAbort;
@@ -398,7 +398,7 @@ Client.prototype.downloadFile = function (params) {
       handleAbort();
     }
 
-    downloader.emit('error', err);
+    downloader.emit('error', `${err.name}: ${err.message}`);
   }
 
   function handleAbort() {
@@ -421,7 +421,6 @@ Client.prototype.downloadFile = function (params) {
         return;
       }
 
-      downloader.progressLoaded = 0;
       downloader.progressTotal = metadata.ContentLength;
       downloader.progressResumable = (self.resumeDownload && s3DownloadedBytes < metadata.ContentLength);
       downloader.emit("fileStat", downloader);
@@ -431,13 +430,14 @@ Client.prototype.downloadFile = function (params) {
   }
 
   function startDownloadFile() {
-    if (false && downloader.progressTotal >= self.multipartDownloadThreshold) {
+    if (downloader.progressTotal >= self.multipartDownloadThreshold) {
       if (downloader.progressResumable) {
         resumeMultipartDownload();
       } else {
         startMultipartDownload();
       }
     } else {
+      downloader.progressLoaded = 0;
       tryGettingObject((err, data) => {
         if (isAborted) return;
 
@@ -466,7 +466,7 @@ Client.prototype.downloadFile = function (params) {
 
     let s3downloader = limitReadStream(new ReadableStream(self.s3).download(params, {
       maxRetries: self.maxRetries,
-      maxPartSize: self.multipartDownloadSize,
+      partSize: self.multipartDownloadSize,
       maxConcurrentStreams: self.s3concurrency,
       totalObjectSize: downloader.progressTotal
     }));
@@ -484,10 +484,15 @@ Client.prototype.downloadFile = function (params) {
 
       handleError(err);
     });
-    s3downloader.on('downloaded', (data) => {
+    fileStream.on('finish', () => {
       if (isAborted) return;
 
       downloader.emit('fileDownloaded');
+    });
+    fileStream.on('error', (err) => {
+      if (isAborted) return;
+
+      handleError(err);
     });
     s3downloader.pipe(fileStream);
   }
@@ -495,20 +500,26 @@ Client.prototype.downloadFile = function (params) {
   function resumeMultipartDownload() {
     if (isAborted) return;
 
-    let s3fsmode = fs.constants.O_CREAT | fs.constants.O_WRONLY | fs.constants.O_NONBLOCK | fs.constants.O_DIRECT;
+    if (fs.existsSync(localFile)) {
+      s3DownloadedBytes = Math.min(fs.statSync(localFile).size, s3DownloadedBytes);
+    } else {
+      s3DownloadedBytes = 0;
+    }
 
-    let fileStream = fs.createWriteStream(localFile, {
+    const s3fsmode = fs.constants.O_CREAT | fs.constants.O_WRONLY | fs.constants.O_NONBLOCK;
+
+    const fileStream = fs.createWriteStream(localFile, {
       flags: s3fsmode,
       start: s3DownloadedBytes,
       autoClose: true
     });
 
-    let params = {
+    const params = {
       Bucket: s3params.Bucket,
       Key: s3params.Key,
     };
 
-    let s3downloader = limitReadStream(new ReadableStream(self.s3).download(params, {
+    const s3downloader = limitReadStream(new ReadableStream(self.s3).download(params, {
       maxRetries: self.maxRetries,
       maxPartSize: self.multipartDownloadSize,
       maxConcurrentStreams: self.s3concurrency,
@@ -529,10 +540,15 @@ Client.prototype.downloadFile = function (params) {
 
       handleError(err);
     });
-    s3downloader.on('downloaded', (data) => {
+    fileStream.on('finish', () => {
       if (isAborted) return;
 
       downloader.emit('fileDownloaded');
+    });
+    fileStream.on('error', (err) => {
+      if (isAborted) return;
+
+      handleError(err);
     });
     s3downloader.pipe(fileStream);
   }

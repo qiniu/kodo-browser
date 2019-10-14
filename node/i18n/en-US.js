@@ -103,7 +103,7 @@ module.exports = {
   simplePolicy: "Simple Policy",
   more: "More",
   "bucket.name": "Bucket Name",
-  "bucket.name.tooltip": "1 ~ 63 characters, contains letters, numbers or underscores",
+  "bucket.name.tooltip": "Consists of 3 to 63 characters, can contain lowercase letters, numbers, and dashes, and must begin and end with a lowercase letter or number",
   "bucket.region": "Bucket Region",
   creationTime: "Creation Time",
 

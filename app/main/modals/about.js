@@ -23,6 +23,7 @@ angular.module("web").controller("aboutCtrl", [
       custom_about_html: Global.about_html,
 
       open: open,
+      tryToOpenUpgradePackage: tryToOpenUpgradePackage,
       startUpgrade: startUpgrade,
       cancel: cancel
     });
@@ -32,6 +33,8 @@ angular.module("web").controller("aboutCtrl", [
     }, 1000);
 
     init();
+
+    const fs = require('fs');
 
     function init() {
       $scope.info = pscope.upgradeInfo;
@@ -50,6 +53,14 @@ angular.module("web").controller("aboutCtrl", [
 
     function open(a) {
       openExternal(a);
+    }
+
+    function tryToOpenUpgradePackage(localPath) {
+      if (fs.existsSync(localPath)) {
+        open(`file://${localPath}`);
+      } else {
+        startUpgrade();
+      }
     }
 
     function startUpgrade() {

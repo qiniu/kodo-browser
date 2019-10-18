@@ -421,6 +421,8 @@ module.exports = {
   "login.endpoint.error": "请确定Endpoint是否正确",
 
   "upgrade.start": "开始更新",
+  "upgrade.pause": "暂停下载",
+  "upgrade.continue": "继续下载",
   "upgrade.downloading": "正在下载...",
   "upgrade.download.failed": "自动更新失败, 请手动下载安装包。",
   "upgrade.download.success": "已经下载成功, 请点击安装包进行安装",

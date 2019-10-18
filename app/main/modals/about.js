@@ -25,6 +25,7 @@ angular.module("web").controller("aboutCtrl", [
       open: open,
       tryToOpenUpgradePackage: tryToOpenUpgradePackage,
       startUpgrade: startUpgrade,
+      pauseUpgrade: pauseUpgrade,
       cancel: cancel
     });
 
@@ -65,6 +66,10 @@ angular.module("web").controller("aboutCtrl", [
 
     function startUpgrade() {
       autoUpgradeSvs.start();
+    }
+
+    function pauseUpgrade() {
+      autoUpgradeSvs.stop();
     }
 
     function cancel() {

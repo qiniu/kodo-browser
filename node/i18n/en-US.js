@@ -422,6 +422,8 @@ module.exports = {
   "login.endpoint.error": "Please make sure Endpoint is correct",
 
   "upgrade.start": "Upgrade",
+  "upgrade.pause": "Pause",
+  "upgrade.continue": "Continue",
   "upgrade.downloading": "Start download...",
   "upgrade.download.failed": "Automatic update failed, please manually download the installation package.",
   "upgrade.download.success": "Download successfully, please click to install.",

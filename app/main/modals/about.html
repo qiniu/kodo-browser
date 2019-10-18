@@ -22,18 +22,30 @@
 
   <div ng-if="!isLoading" class="pd2">
     <div ng-if="!info.isLastVersion">
-      <span class="text-info">
-        {{'foundNewVersion'|translate}}
-        <!-- 发现新版本： -->
-        v{{info.lastVersion}} &nbsp;&nbsp;&nbsp;&nbsp;
-        <a ng-if="!info.upgradeJob||info.upgradeJob.status=='waiting'" href="" ng-click="startUpgrade()" class="btn btn-sm btn-success">
-          <i class="fa fa-download"></i>
-          {{'upgrade.start'|translate}}
-        </a>
-      </span>
+      <div class="text-info row">
+        <div class="col-md-8">
+          {{'foundNewVersion'|translate}}
+          <!-- 发现新版本： -->
+          v{{info.lastVersion}} &nbsp;&nbsp;&nbsp;&nbsp;
+          <a ng-if="!info.upgradeJob || info.upgradeJob.status == 'waiting'" href="" ng-click="startUpgrade()" class="btn btn-sm btn-success">
+            <i class="fa fa-download"></i>
+            {{'upgrade.start'|translate}}
+          </a>
+        </div>
+        <div class="col-md-2 pull-right" style="margin-right: 20px;">
+          <a ng-if="info.upgradeJob && info.upgradeJob.status == 'running'" href="" ng-click="pauseUpgrade()" class="btn btn-sm btn-default">
+            <i class="fa fa-download"></i>
+            {{'upgrade.pause'|translate}}
+          </a>
+          <a ng-if="info.upgradeJob && info.upgradeJob.status == 'stopped'" href="" ng-click="startUpgrade()" class="btn btn-sm btn-info">
+            <i class="fa fa-download"></i>
+            {{'upgrade.continue'|translate}}
+          </a>
+        </div>
+      </div>
 
       <!-- progress -->
-      <div ng-if="info.upgradeJob.status=='running'" style="margin:4px auto;">
+      <div ng-if="info.upgradeJob.status == 'running' || info.upgradeJob.status == 'stopped'" style="margin:4px auto;">
         <!-- 正在下载... -->
         {{'upgrade.downloading'|translate}}
         <div class="progress" style="height:10px">
@@ -42,7 +54,7 @@
         </div>
       </div>
 
-      <div ng-if="info.upgradeJob.status=='failed'">
+      <div ng-if="info.upgradeJob.status == 'failed'">
         {{'upgrade.download.failed'|translate}}
         <a href="" ng-click="open(info.link)" class="btn btn-sm btn-primary">
           <i class="fa fa-download"></i>
@@ -51,7 +63,7 @@
         </a>
       </div>
 
-      <div ng-if="info.upgradeJob.status=='finished'" class="text-center">
+      <div ng-if="info.upgradeJob.status == 'finished'" class="text-center">
         <a href="" ng-click="tryToOpenUpgradePackage(info.localPath)" class="btn btn-success btn-sm">{{'upgrade.download.success'|translate}}</a>
       </div>
 

@@ -421,6 +421,8 @@ module.exports = {
   "login.endpoint.error": "エンドポイントが正しいことを確認してください",
 
   "upgrade.start": "更新を開始",
+  "upgrade.pause": "一時停止ダウンロード",
+  "upgrade.continue": "ダウンロードを続行",
   "upgrade.downloading": "ダウンロード",
   "upgrade.download.failed": "自動更新に失敗しました。インストールパッケージを手動でダウンロードしてください。",
   "upgrade.download.success": "ダウンロードに成功しました。クリックしてインストールしてください。",

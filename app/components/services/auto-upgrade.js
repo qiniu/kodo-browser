@@ -27,6 +27,7 @@ angular.module("web").factory("autoUpgradeSvs", [
     return {
       load: load,
       start: start,
+      stop: stop,
 
       compareVersion: compareVersion,
       getReleaseNote: getReleaseNote,
@@ -37,6 +38,10 @@ angular.module("web").factory("autoUpgradeSvs", [
 
     function start() {
       if (job) job.start();
+    }
+
+    function stop() {
+      if (job) job.stop();
     }
 
     function getReleaseNote(version, fn) {
@@ -56,8 +61,10 @@ angular.module("web").factory("autoUpgradeSvs", [
       this.from = from;
       this.to = to;
 
-      var _statusChangeFn;
-      var _progressChangeFn;
+      let _statusChangeFn;
+      let _progressChangeFn;
+      let _request;
+      let _stopped;
 
       this.update = function () {
         //copy
@@ -94,35 +101,57 @@ angular.module("web").factory("autoUpgradeSvs", [
         if (!this.precheck()) {
           return;
         }
-        let that = this;
+        _stopped = false;
 
-        if (fs.existsSync(to + ".download")) {
-          fs.unlinkSync(to + ".download");
-        }
+        const that = this;
 
         console.log("start download ...");
         that._changeStatus("running");
 
-        request
+        _request = request
           .head(from)
           .on("error", function (err) {
             console.error(err);
             this._changeStatus("failed", err);
           })
           .on("response", function (response) {
-            if (response.statusCode == 200) {
+            if (_stopped) {
+              return;
+            } else if (response.statusCode == 200) {
               that.total = response.headers["content-length"];
-              var current = 0;
+
+              const to_download_target = to + ".download";
+              let current = 0;
+
+              if (fs.existsSync(to_download_target)) {
+                const stat = fs.statSync(to_download_target);
+                if (stat.isFile() && stat.size <= that.total) {
+                  current = stat.size;
+                  console.log(`resume download from ${current}`);
+                } else {
+                  fs.unlinkSync(to_download_target);
+                }
+              }
+
               that.progress = Math.round(current * 10000 / that.total) / 100;
 
-              var ws = fs.createWriteStream(to + ".download", { flags: "w" });
+              var ws = fs.createWriteStream(to_download_target, {
+                flags: fs.constants.O_CREAT | fs.constants.O_WRONLY | fs.constants.O_NONBLOCK,
+                start: current
+              });
 
-              request(from)
+              _request = request({url: from, headers: { 'Range': `bytes=${current}-` }})
                 .on("error", function (err) {
+                  if (_stopped) {
+                    return;
+                  }
                   console.error(err);
                   that._changeStatus("failed", err);
                 })
                 .on("data", function (chunk) {
+                  if (_stopped) {
+                    throw new Error('Manually Stopped, Just ignore this exception');
+                  }
                   current += chunk.length;
                   that.progress =
                     Math.round(current * 10000 / that.total) / 100;
@@ -131,6 +160,9 @@ angular.module("web").factory("autoUpgradeSvs", [
                 })
                 .pipe(ws)
                 .on("finish", function () {
+                  if (_stopped) {
+                    return;
+                  }
                   that._changeStatus("verifying");
 
                   that.check(
@@ -165,6 +197,15 @@ angular.module("web").factory("autoUpgradeSvs", [
       this._changeProgress = function (prog) {
         if (_progressChangeFn) _progressChangeFn(prog);
       };
+      this.stop = function() {
+        _stopped = true;
+        this._changeStatus("stopped");
+        if (_request) {
+          _request.end();
+          _request.destroy();
+          _request = null;
+        }
+      }
     }
 
     function load(fn) {

@@ -537,7 +537,10 @@ Client.prototype.downloadFile = function (params) {
     s3downloader.on('end', () => {
       if (isAborted) return;
 
-      downloader.progressLoaded = downloader.progressTotal;
+      if (downloader.progressTotal != downloader.progressLoaded) {
+        cb(new Error(`ContentLength mismatch, got ${downloader.progressLoaded}, expected ${downloader.progressTotal}`));
+        return;
+      }
       downloader.emit('progress', downloader);
 
       cb(null);

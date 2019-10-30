@@ -353,6 +353,11 @@ ipcMain.on("asynchronous-job", (event, data) => {
 
       case 'debug':
         console.info({upload_debug: msg});
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'debug',
+          data: msg.data
+        });
         break;
 
       default:
@@ -501,6 +506,11 @@ ipcMain.on("asynchronous-job", (event, data) => {
 
       case 'debug':
         console.info({download_debug: msg});
+        event.sender.send(data.job, {
+          job: data.job,
+          key: 'debug',
+          data: msg.data
+        });
         break;
 
       default:

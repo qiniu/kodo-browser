@@ -1,7 +1,10 @@
 const assert = require('assert'),
       async = require('async'),
       fs = require('fs'),
-      Readable = require('stream').Readable;
+      Readable = require('stream').Readable,
+      {
+        ThrottleGroup
+      } = require('stream-throttle');
 
 // Set the S3 client to be used for this ReadableStream.
 class ReadableStream {
@@ -19,31 +22,57 @@ class ReadableStream {
     const maxConcurrentStreams = config.maxConcurrentStreams ? config.maxConcurrentStreams : 5;
     const objectSize = config.totalObjectSize ? config.totalObjectSize : 0;
     const downloaded = config.totalBytesDownloaded ? config.totalBytesDownloaded : 0;
+    const throttleGroup = config.speedLimit ? new ThrottleGroup({rate: config.speedLimit * 1024}) : null;
 
     const rs = new Readable({ highWaterMark: 1 << 22 });
     const downloadPart = function(callback) {
       const context = this;
       const params = Object.assign({}, context.params);
-      params.Range = `bytes=${context.lowerBound}-${context.upperBound}`;
+      const part = new Buffer(context.size);
+      let partLen = 0;
+      let haveCallbacked = false;
 
-      const request = client.getObject(params);
-      request.on('httpData', (part) => {
-        rs.emit('progress', { loaded: part.length });
-      });
-      let called = false;
-      request.send((err, response) => {
-        if (called) {
-          return;
+      const httpGet = function() {
+        const expectedSize = context.size - partLen;
+        let actualSize = 0;
+        params.Range = `bytes=${context.lowerBound + partLen}-${context.upperBound}`;
+        rs.emit('debug', { req: 'start', from: context.lowerBound + partLen, to: context.upperBound, partId: context.partId });
+        let stream = client.getObject(params).createReadStream();
+        if (throttleGroup) {
+          stream = stream.pipe(throttleGroup.throttle());
         }
-        called = true;
-        if (!err && response.Body.length != context.size) {
-          callback(new Error(`${context.partId}: part size mismatch, expected: ${context.size}, actual: ${response.Body.length}`));
-          response.Body = null;
-          console.error(response);
-          return;
-        }
-        callback(err, Object.assign({response: response}, context));
-      });
+        stream.on('data', (chunk) => {
+          rs.emit('progress', { loaded: chunk.length });
+          chunk.copy(part, partLen);
+          partLen += chunk.length;
+          actualSize += chunk.length;
+        });
+        stream.on('error', (err) => {
+          if (!haveCallbacked) {
+            haveCallbacked = true;
+            callback(err);
+          }
+        })
+        stream.on('end', () => {
+          if (!haveCallbacked) {
+            if (actualSize == 0) {
+              const err = new Error(`${context.partId}: get empty response body`);
+              rs.emit('debug', {error: err.message});
+              haveCallbacked = true;
+              callback(err);
+            } else if (partLen != context.size) {
+              const err = new Error(`${context.partId}: part size mismatch, expected: ${expectedSize}, actual: ${actualSize}`);
+              rs.emit('debug', {error: err.message});
+              httpGet();
+            } else {
+              rs.emit('debug', { req: 'done', partId: context.partId });
+              haveCallbacked = true;
+              callback(null, Object.assign({responseBody: part}, context));
+            }
+          }
+        });
+      };
+      httpGet();
     };
 
     const downloadBlock = function(blockId, offset, callback) {
@@ -70,11 +99,11 @@ class ReadableStream {
         }
 
         results.forEach((result, i) => {
-          rs.push(result.response.Body);
+          rs.push(result.responseBody);
         });
 
         rs.emit('partDownloaded', {
-          size: results.reduce((sum, result) => { return sum + result.response.Body.length; }, 0),
+          size: results.reduce((sum, result) => { return sum + result.responseBody.length; }, 0),
         });
 
         callback(null, results);

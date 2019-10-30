@@ -464,12 +464,13 @@ Client.prototype.downloadFile = function (params) {
       Key: s3params.Key,
     };
 
-    let s3downloader = limitReadStream(new ReadableStream(self.s3).download(params, {
+    s3downloader = new ReadableStream(self.s3).download(params, {
       maxRetries: self.maxRetries,
       partSize: self.multipartDownloadSize,
       maxConcurrentStreams: self.s3concurrency,
-      totalObjectSize: downloader.progressTotal
-    }));
+      totalObjectSize: downloader.progressTotal,
+      speedLimit: self.downloadSpeedLimit
+    });
     s3downloader.on('progress', (prog) => {
       if (isAborted) return;
 
@@ -479,6 +480,9 @@ Client.prototype.downloadFile = function (params) {
     s3downloader.on('partDownloaded', (part) => {
       downloader.emit('filePartDownloaded', part);
     });
+    s3downloader.on('debug', (data) => {
+      downloader.emit('debug', data);
+    })
     s3downloader.on('error', (err) => {
       if (isAborted) return;
 
@@ -519,13 +523,14 @@ Client.prototype.downloadFile = function (params) {
       Key: s3params.Key,
     };
 
-    const s3downloader = limitReadStream(new ReadableStream(self.s3).download(params, {
+    s3downloader = new ReadableStream(self.s3).download(params, {
       maxRetries: self.maxRetries,
       maxPartSize: self.multipartDownloadSize,
       maxConcurrentStreams: self.s3concurrency,
       totalObjectSize: downloader.progressTotal,
-      totalBytesDownloaded: s3DownloadedBytes
-    }));
+      totalBytesDownloaded: s3DownloadedBytes,
+      speedLimit: self.downloadSpeedLimit
+    });
     s3downloader.on('progress', (prog) => {
       if (isAborted) return;
 
@@ -535,6 +540,9 @@ Client.prototype.downloadFile = function (params) {
     s3downloader.on('partDownloaded', (part) => {
       downloader.emit('filePartDownloaded', part);
     });
+    s3downloader.on('debug', (data) => {
+      downloader.emit('debug', data);
+    })
     s3downloader.on('error', (err) => {
       if (isAborted) return;
 
@@ -566,7 +574,10 @@ Client.prototype.downloadFile = function (params) {
       Key: s3params.Key,
     };
 
-    s3downloader = limitReadStream(self.s3.getObject(params).createReadStream());
+    s3downloader = self.s3.getObject(params).createReadStream();
+    if (self.downloadSpeedLimit) {
+      s3downloader = s3downloader.pipe(new Throttle({rate: self.downloadSpeedLimit * 1024}));
+    }
     s3downloader.on('data', (chunk) => {
       if (isAborted) return;
 
@@ -591,14 +602,6 @@ Client.prototype.downloadFile = function (params) {
     });
 
     s3downloader.pipe(fileStream);
-  }
-
-  function limitReadStream(readStream) {
-    if (self.downloadSpeedLimit) {
-      return readStream.pipe(new Throttle({rate: self.downloadSpeedLimit * 1024}));
-    } else {
-      return readStream;
-    }
   }
 };
 

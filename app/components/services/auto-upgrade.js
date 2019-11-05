@@ -1,5 +1,6 @@
 angular.module("web").factory("autoUpgradeSvs", [
-  function () {
+  "Customize",
+  function (Customize) {
     const NAME = "kodo-browser";
     const util = require("./node/s3store/lib/util");
     const path = require("path");
@@ -7,8 +8,8 @@ angular.module("web").factory("autoUpgradeSvs", [
     const request = require("request");
     const downloadsFolder = require("downloads-folder");
 
-    const release_notes_url = Global.release_notes_url;
-    const upgrade_url = Global.upgrade_url;
+    const upgrade_url = Customize.upgrade.check_url;
+    const release_notes_url = Customize.upgrade.release_notes_url;
     const gVersion = Global.app.version;
 
     var upgradeOpt = {
@@ -30,7 +31,6 @@ angular.module("web").factory("autoUpgradeSvs", [
       stop: stop,
 
       compareVersion: compareVersion,
-      getReleaseNote: getReleaseNote,
       getLastestReleaseNote: getLastestReleaseNote
     };
 
@@ -44,13 +44,12 @@ angular.module("web").factory("autoUpgradeSvs", [
       if (job) job.stop();
     }
 
-    function getReleaseNote(version, fn) {
-      $.get("release-notes/" + version + ".md", fn);
-    }
-
-    //获取最新releaseNote
     function getLastestReleaseNote(version, fn) {
-      $.get(release_notes_url + version + ".md", fn);
+      if (release_notes_url) {
+        $.get(release_notes_url + version + ".md", fn);
+      } else {
+        setTimeout(() => { fn(''); }, 0);
+      }
     }
 
     function FlatDownloadJob(name, from, to) {
@@ -218,7 +217,7 @@ angular.module("web").factory("autoUpgradeSvs", [
         localPath: ""
       };
       if (!upgrade_url) {
-        fn(fallback, true);
+        setTimeout(() => { fn(fallback, true); }, 0);
         return;
       }
 

@@ -160,6 +160,7 @@ kodo-browser/
 
 * 禁止创建 Bucket
 * 禁止删除 Bucket
+* 配置升级检测地址
 
 ## 6. 开源 LICENSE
 

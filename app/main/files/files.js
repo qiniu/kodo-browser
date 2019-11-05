@@ -109,7 +109,9 @@ angular.module("web").controller("filesCtrl", [
       showACL: showACL,
 
       showPaste: showPaste,
-      cancelPaste: cancelPaste
+      cancelPaste: cancelPaste,
+
+      translateRegionName: translateRegionName
     });
 
     $scope.$watch("ref.isListView", (v) => {
@@ -1045,9 +1047,19 @@ angular.module("web").controller("filesCtrl", [
       return false;
     }
 
+    function translateRegionName(regionId) {
+      const regions = Config.load(AuthInfo.usePublicCloud()).regions;
+      let name = T('region.unknown');
+      angular.forEach(regions, (region) => {
+        if (region.id === regionId) {
+          name = region.label;
+        }
+      })
+      return name;
+    }
+
     function showBucketsTable(buckets) {
       initBucketSelect();
-      const regions = Config.load(AuthInfo.usePublicCloud()).regions;
       var $list = $('#bucket-list').bootstrapTable({
         columns: [{
           field: 'id',
@@ -1069,15 +1081,7 @@ angular.module("web").controller("filesCtrl", [
         }, {
           field: 'region',
           title: T('bucket.region'),
-          formatter: (val) => {
-            let name = T('region.unknown');
-            angular.forEach(regions, (region) => {
-              if (region.id === val) {
-                name = region.label;
-              }
-            })
-            return name;
-          }
+          formatter: translateRegionName
         }, {
           field: 'creationDate',
           title: T('creationTime'),

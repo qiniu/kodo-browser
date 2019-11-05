@@ -13,7 +13,7 @@
            ng-dblclick="gotoAddress(item.name);$event.stopPropagation()">
         <i class="fa fa-database text-warning"></i>
         <div class="item-block-name" uib-tooltip-html="'<div class=\'break\'>'+item.name+'</div>'" tooltip-append-to-body="true">{{item.name}}</div>
-        <div class="item-block-desc">{{item.region}}</div>
+        <div class="item-block-desc">{{translateRegionName(item.region)}}</div>
       </div>
 
       <div class="clearfix">&nbsp;</div>

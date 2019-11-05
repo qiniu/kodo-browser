@@ -4,21 +4,28 @@
 
   <div ng-include="'main/files/_/address-bar.html'"></div>
 
-  <div ng-if="ref.isBucketList">
+  <div ng-if="ref.mode == 'localBuckets'">
     <div ng-include="'main/files/_/bucket-toolbar.html'"></div>
   </div>
-  <div ng-if="!ref.isBucketList">
+  <div ng-if="ref.mode == 'externalPaths'">
+    <div ng-include="'main/files/_/external-path-toolbar.html'"></div>
+  </div>
+  <div ng-if="ref.mode.endsWith('Files')">
     <div ng-include="'main/files/_/file-toolbar.html'"></div>
   </div>
 
   <div auto-height="-130" class="file-list-box">
     <div ng-show="isLoading" is-loading></div>
 
-    <section ng-hide="isLoading" ng-if="ref.isBucketList" style="height:100%">
+    <section ng-hide="isLoading" ng-if="ref.mode === 'localBuckets'" style="height:100%">
       <div ng-include="'main/files/_/bucket-list.html'" style="height:100%"></div>
     </section>
 
-    <section ng-hide="isLoading" ng-if="!ref.isBucketList" drop-zone="handlerDrop" style="height:100%">
+    <section ng-hide="isLoading" ng-if="ref.mode === 'externalPaths'" style="height:100%">
+      <div ng-include="'main/files/_/external-path-list.html'" style="height:100%"></div>
+    </section>
+
+    <section ng-hide="isLoading" ng-if="ref.mode.endsWith('Files')" drop-zone="handlerDrop" style="height:100%">
       <div ng-include="'main/files/_/file-list.html'" style="height:100%"></div>
     </section>
 

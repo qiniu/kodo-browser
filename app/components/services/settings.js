@@ -138,6 +138,15 @@ angular.module("web").factory("settingsSvs", [
         }
       },
 
+      externalPathEnabled: {
+        get: function () {
+          return parseInt(localStorage.getItem("externalPathEnabled") || 0);
+        },
+        set: function (v) {
+          return localStorage.setItem("externalPathEnabled", v);
+        }
+      },
+
       historiesLength: {
         get: function () {
           return parseInt(localStorage.getItem("multipartDownloadThreshold") || 100);

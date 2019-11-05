@@ -1,24 +1,24 @@
-<header class="pd4 bucket-toolbar">
+<header class="pd4 external-path-toolbar">
 
   <div class="col-sm-6 pd0">
 
     <div class="btn-group" role="group">
 
-      <button type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()" ng-if="currentUser.isSuper && !disabledFeatures.createBucket">
+      <button type="button" class="btn btn-info btn-sm" ng-click="showAddExternalPath()" ng-if="currentUser.isSuper">
         <i class="glyphicon glyphicon-plus"></i>
-        {{'bucket.add'|translate}}
+        {{'externalPath.add'|translate}}
       </button>
 
     </div>
 
     <div class="btn-group" role="group">
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" ng-disabled="!bucket_sel" ng-if="!disabledFeatures.deleteBucket">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" ng-disabled="!external_path_sel">
         {{'more'|translate}}
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" role="menu">
         <li>
-          <a href="" ng-click="showDeleteBucket(bucket_sel)" ng-disabled="!currentUser.isSuper">
+          <a href="" ng-click="showDeleteExternalPath(external_path_sel)" ng-disabled="!currentUser.isSuper">
             <i class="fa fa-remove text-danger"></i>
             {{'delete'|translate}}
           </a>
@@ -31,10 +31,10 @@
   <div class="col-sm-4 pd0">
 
     <div class="input-group input-group-sm mgb0">
-      <input ng-model="sch.bucketName" type="text" ng-change="searchBucketName()" class="form-control" cleanable-input placeholder="{{'bucket.name'|translate}}">
+      <input ng-model="sch.externalPathName" type="text" ng-change="searchExternalPathName()" class="form-control" cleanable-input placeholder="{{'externalPath.path'|translate}}">
       <span class="input-group-addon">
         <i class="fa fa-search"></i>
-        {{(buckets|filter:sch.bucketName).length}}
+        {{(externalPaths|filter:sch.externalPathName).length}}
       </span>
     </div>
 

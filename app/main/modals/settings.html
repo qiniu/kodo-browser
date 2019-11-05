@@ -171,6 +171,28 @@
 
     <fieldset>
       <legend>
+        <h5 class="text-primary">{{'settings.ExternalPath'|translate}}</h5>
+      </legend>
+
+      <div class="form-group">
+        <label class="col-sm-4 control-label">
+          <!-- 启用外部路径: -->
+          {{'settings.ExternalPath'|translate}}:
+        </label>
+        <div class="col-sm-7">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="externalPathEnabled" ng-model="set.externalPathEnabled" ng-change="setChange(form1,'externalPathEnabled')" ng-true-value="1"
+                ng-false-value="0" />
+              ({{'settings.WhetherExternalPathEnabled.msg'|translate}})
+            </label>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>
         <h5 class="text-primary">{{'settings.system'|translate}}</h5>
       </legend>
 

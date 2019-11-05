@@ -72,6 +72,7 @@ module.exports = {
   "aclType.private": "非公開",
 
   files: "ファイル",
+  externalPath: "外部リンク",
   settings: "設定",
   about: "について",
   bookmarks: "ブックマーク",
@@ -160,6 +161,15 @@ module.exports = {
   "simplePolicy.noauth.message3": "ロールリストを取得する権限がありません",
   "simplePolicy.success": "ポリシーを正常に適用する",
 
+  //external path
+  "externalPath.add": "外部パスを追加",
+  "externalPath.path": "外部パス",
+  "externalPath.add.success": "正常に追加されました",
+  "externalPath.path.tooltip": "付与者から提供されたバケットポリシーを通じて許可されたバケットまたはバケットの下のパスを入力します",
+  "externalPath.delete.title": "外部パスを削除",
+  "externalPath.delete.message": "外部パス:<code>{{path}}</code>, リジョン:<code>{{region}}</code>, この外部パスを削除してもよろしいですか？",
+  "externalPath.delete.success": "外部パスを正常に削除しました",
+
   //settings
   "settings.WhetherResumeUpload": "ブレークポイントのアップロード",
   "settings.WhetherResumeUpload.msg": "ファイルブレークポイントアップロード機能を有効にする",
@@ -179,6 +189,8 @@ module.exports = {
   "settings.DownloadSpeedLimit": "単一のファイル速度制限をダウンロードする",
   "settings.WhetherShowThumbnail": "画像のサムネイルを表示するかどうか",
   "settings.WhetherShowThumbnail.msg": "ファイル一覧にサムネイルを表示すると一定量のトラフィックが消費されます",
+  "settings.ExternalPath": "外部リンク",
+  "settings.WhetherExternalPathEnabled.msg": "外部リンクを有効にする",
   "settings.system": "システム設定",
   "settings.isDebug": "デバッグログ",
   "settings.isDebug.msg": "デバッグログを開くかどうか",

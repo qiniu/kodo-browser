@@ -8,6 +8,7 @@
 }
 
 .bucket-toolbar,
+.external-path-toolbar,
 .file-toolbar {
   background-color: rgba(221, 221, 221, 0.3);
   border-top: 1px solid rgb(221, 221, 221, 0.5);

@@ -1,5 +1,3 @@
-const AWS = require("aws-sdk");
-
 angular.module("web").factory("s3Client", [
   "$q",
   "$rootScope",
@@ -10,13 +8,14 @@ angular.module("web").factory("s3Client", [
   "KodoClient",
   "AuthInfo",
   function ($q, $rootScope, $timeout, $state, Toast, Config, KodoClient, AuthInfo) {
-    const path = require("path");
-    const each = require("array-each");
-    const map = require("array-map");
-    const async = require("async");
+    const AWS = require("aws-sdk"),
+          path = require("path"),
+          each = require("array-each"),
+          map = require("array-map"),
+          async = require("async"),
 
-    const NEXT_TICK = 1;
-    const DEF_ADDR = "kodo://";
+          NEXT_TICK = 1,
+          KODO_ADDR_PROTOCOL = "kodo://";
 
     return {
       listAllBuckets: listAllBuckets,
@@ -1349,11 +1348,11 @@ angular.module("web").factory("s3Client", [
     }
 
     function parseKodoPath(s3Path) {
-      if (!s3Path || s3Path.indexOf(DEF_ADDR) == -1 || s3Path == DEF_ADDR) {
+      if (!s3Path || s3Path.indexOf(KODO_ADDR_PROTOCOL) == -1 || s3Path == KODO_ADDR_PROTOCOL) {
         return {};
       }
 
-      var str = s3Path.substring(DEF_ADDR.length);
+      var str = s3Path.substring(KODO_ADDR_PROTOCOL.length);
       var ind = str.indexOf("/");
       if (ind == -1) {
         var bucket = str;

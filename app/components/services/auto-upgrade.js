@@ -1,6 +1,7 @@
 angular.module("web").factory("autoUpgradeSvs", [
+  "$timeout",
   "Customize",
-  function (Customize) {
+  function ($timeout, Customize) {
     const NAME = "kodo-browser";
     const util = require("./node/s3store/lib/util");
     const path = require("path");
@@ -48,7 +49,7 @@ angular.module("web").factory("autoUpgradeSvs", [
       if (release_notes_url) {
         $.get(release_notes_url + version + ".md", fn);
       } else {
-        setTimeout(() => { fn(''); }, 0);
+        $timeout(() => { fn(''); });
       }
     }
 
@@ -217,7 +218,7 @@ angular.module("web").factory("autoUpgradeSvs", [
         localPath: ""
       };
       if (!upgrade_url) {
-        setTimeout(() => { fn(fallback, true); }, 0);
+        $timeout(() => { fn(fallback, true); });
         return;
       }
 

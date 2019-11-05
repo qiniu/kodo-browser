@@ -10,6 +10,7 @@ angular.module("web").controller("filesCtrl", [
   "AuthInfo",
   "Config",
   "s3Client",
+  "ExternalPath",
   "fileSvs",
   "Toast",
   "Dialog",
@@ -26,6 +27,7 @@ angular.module("web").controller("filesCtrl", [
     AuthInfo,
     Config,
     s3Client,
+    ExternalPath,
     fileSvs,
     Toast,
     Dialog,
@@ -38,8 +40,9 @@ angular.module("web").controller("filesCtrl", [
     angular.extend($scope, {
       showTab: 1,
 
+      // supported mode: localBuckets, localFiles, externalPaths, externalFiles
       ref: {
-        isBucketList: false,
+        mode: 'localFiles',
         isListView: true
       },
 
@@ -62,10 +65,12 @@ angular.module("web").controller("filesCtrl", [
       // search
       sch: {
         bucketName: "",
-        objectName: ""
+        objectName: "",
+        externalPathName: ""
       },
       searchObjectName: searchObjectName,
       searchBucketName: searchBucketName,
+      searchExternalPathName: searchExternalPathName,
 
       // bucket selection
       bucket_sel: null,
@@ -84,6 +89,14 @@ angular.module("web").controller("filesCtrl", [
       showUpdateBucket: showUpdateBucket,
       showBucketMultipart: showBucketMultipart,
       showDeleteBucket: showDeleteBucket,
+
+      // external links selection
+      external_path_sel: null,
+      selectExternalPath: selectExternalPath,
+
+      // bucket ops
+      showAddExternalPath: showAddExternalPath,
+      showDeleteExternalPath: showDeleteExternalPath,
 
       // object ops
       showAddFolder: showAddFolder,
@@ -104,6 +117,9 @@ angular.module("web").controller("filesCtrl", [
 
       // utils
       gotoAddress: gotoAddress,
+      gotoExternalMode: gotoExternalMode,
+      gotoLocalMode: gotoLocalMode,
+      gotoExternalPath: gotoExternalPath,
       showDownloadLink: showDownloadLink,
       showPreview: showPreview,
       showACL: showACL,
@@ -115,8 +131,10 @@ angular.module("web").controller("filesCtrl", [
     });
 
     $scope.$watch("ref.isListView", (v) => {
-      if ($scope.ref.isBucketList) {
+      if ($scope.ref.mode === 'localBuckets') {
         initBucketSelect();
+      } else if ($scope.ref.mode === 'externalPaths') {
+        initExternalPathSelect();
       } else {
         initFilesSelect();
       }
@@ -134,8 +152,10 @@ angular.module("web").controller("filesCtrl", [
           return;
         }
 
-        if ($scope.ref.isBucketList) {
+        if ($scope.ref.mode === 'localBuckets') {
           showBucketsTable($scope.buckets);
+        } else if ($scope.ref.mode === 'externalPaths') {
+          showExternalPathsTable($scope.externalPaths);
         } else {
           showFilesTable($scope.objects);
         }
@@ -144,15 +164,42 @@ angular.module("web").controller("filesCtrl", [
 
     /////////////////////////////////
     function gotoAddress(bucket, prefix) {
-      var kodopath = "kodo://";
-      if (bucket) {
-        kodopath += `${bucket}/${prefix || ""}`;
+      let kodoAddress = "kodo://";
+
+      if (bucket.startsWith(kodoAddress)) {
+        bucket = bucket.substring(kodoAddress.length);
       }
 
-      $rootScope.$broadcast("gotoKodoAddress", kodopath);
+      if (bucket) {
+        kodoAddress += `${bucket}/${prefix || ""}`;
+      }
+
+      $rootScope.$broadcast("gotoKodoAddress", kodoAddress);
+    }
+
+    function gotoExternalMode() {
+      $rootScope.$broadcast("gotoExternalMode");
+    }
+
+    function gotoLocalMode() {
+      $rootScope.$broadcast("gotoLocalMode");
     }
 
     function getCurrentPath() {
+      return `kodo://${$scope.currentInfo.bucketName}/${$scope.currentInfo.key}`;
+    }
+
+    function gotoExternalPath(bucketId, prefix) {
+      let externalPath = "kodo://";
+
+      if (bucketId) {
+        externalPath += `${bucketId}/${prefix || ""}`;
+      }
+
+      $rootScope.$broadcast("gotoExternalPath", externalPath);
+    }
+
+    function getCurrentExternalPath() {
       return `kodo://${$scope.currentInfo.bucketName}/${$scope.currentInfo.key}`;
     }
 
@@ -183,6 +230,11 @@ angular.module("web").controller("filesCtrl", [
     function searchBucketName() {
       $timeout.cancel(searchTid);
       searchTid = $timeout(listBuckets, 600);
+    }
+
+    function searchExternalPathName() {
+      $timeout.cancel(searchTid);
+      searchTid = $timeout(listExternalPaths, 600);
     }
 
     var uploadsTid;
@@ -224,76 +276,62 @@ angular.module("web").controller("filesCtrl", [
       }
 
       $rootScope.currentUser = user;
-
-      if (user.s3path) {
-        $scope.ref.isBucketList = false;
-
-        var bucket = s3Client.parseKodoPath(user.s3path).bucket;
-
-        $rootScope.bucketMap = {};
-        s3Client.getBucketLocation(bucket).then((regionId) => {
-          $rootScope.bucketMap[bucket] = { region: regionId };
-          $timeout(() => {
-            addEvents();
-            $scope.$broadcast("filesViewReady");
-          });
-        }, (err) => {
-          console.error("Failed to get bucket location, go away!", err);
-          Auth.logout().then(() => {
-            $location.url("/login");
-          });
-        });
-      } else {
-        $scope.ref.isBucketList = true;
-        $timeout(() => {
-          addEvents();
-          $scope.$broadcast("filesViewReady");
-        });
-      }
+      $scope.ref.mode = 'localBuckets';
+      $timeout(() => {
+        addEvents();
+        $scope.$broadcast("filesViewReady");
+      });
     }
 
     function addEvents() {
-      $scope.$on("kodoAddressChange", (evt, addr, forceRefresh) => {
+      const KODO_ADDR_PROTOCOL = 'kodo://';
+
+      $scope.$on("kodoAddressChange", (evt, addr) => {
         evt.stopPropagation();
 
-        console.log(`on:kodoAddressChange: ${addr}, forceRefresh: ${!!forceRefresh}`);
+        console.log(`on:kodoAddressChange: ${addr}`);
 
-        var info = s3Client.parseKodoPath(addr);
+        const info = s3Client.parseKodoPath(addr);
+        let fileName;
 
         $scope.currentInfo = info;
 
         if (info.key) {
-          var lastGan = info.key.lastIndexOf("/");
+          const lastGan = info.key.lastIndexOf("/");
 
           // if not endswith /
           if (lastGan != info.key.length - 1) {
-            var fileKey = info.key,
-              fileName = info.key.substring(lastGan + 1);
-
+            fileName = info.key.substring(lastGan + 1);
             info.key = info.key.substring(0, lastGan + 1);
           }
         }
 
         if (info.bucket) {
           // list objects
-          var bucketInfo = $rootScope.bucketMap[info.bucket]
+          const bucketInfo = $rootScope.bucketMap[info.bucket]
           if (bucketInfo) {
             $scope.currentInfo.region = bucketInfo.region;
             info.bucketName = bucketInfo.name;
             info.bucket = bucketInfo.bucketId;
           } else {
-            Toast.error("Forbidden");
+            const region = ExternalPath.getRegionByBucketSync(info.bucket);
 
-            clearFilesList();
-            return;
+            if (region) {
+              $scope.currentInfo.region = region;
+              info.bucketName = info.bucket; // TODO: Use bucket name here
+            } else {
+              Toast.error("Forbidden");
+
+              clearFilesList();
+              return;
+            }
           }
 
           $scope.currentBucket = info.bucket;
           $scope.currentBucketName = info.bucketName;
-          $scope.ref.isBucketList = false;
 
           // try to resolve bucket perm
-          var user = $rootScope.currentUser;
+          const user = $rootScope.currentUser;
           if (user.perm) {
             if (user.isSuper) {
               $scope.currentBucketPerm = user.perm;
@@ -302,24 +340,35 @@ angular.module("web").controller("filesCtrl", [
             }
           }
 
+          if ($scope.ref.mode.startsWith('local')) {
+            $scope.ref.mode = 'localFiles';
+          } else if ($scope.ref.mode.startsWith('external')) {
+            $scope.ref.mode = 'externalFiles';
+          } else {
+            throw new Error('Unrecognized mode');
+          }
+
           // search
           if (fileName) {
             $scope.sch.objectName = fileName;
 
             searchObjectName();
           } else {
-            $timeout(() => {
-              listFiles();
-            }, 100);
+            $timeout(listFiles, 100);
           }
         } else {
           // list buckets
           $scope.currentBucket = null;
-          $scope.ref.isBucketList = true;
 
-          $timeout(() => {
-            listBuckets();
-          }, 100);
+          if ($scope.ref.mode.startsWith('local')) {
+            $scope.ref.mode = 'localBuckets';
+            $timeout(listBuckets, 100);
+          } else if ($scope.ref.mode.startsWith('external')) {
+            $scope.ref.mode = 'externalPaths';
+            $timeout(listExternalPaths, 100);
+          } else {
+            throw new Error('Unrecognized mode');
+          }
         }
       });
     }
@@ -445,6 +494,33 @@ angular.module("web").controller("filesCtrl", [
       }
     }
 
+    function listExternalPaths(fn) {
+      clearFilesList();
+
+      $timeout(() => {
+        $scope.isLoading = true;
+      });
+
+      ExternalPath.list().then((externalPaths) => {
+        if ($scope.sch.externalPathName) {
+          externalPaths = filter(externalPaths, (ep) => { return ep.shortPath.indexOf($scope.sch.externalPathName) >= 0; });
+        }
+
+        $timeout(() => {
+          $scope.externalPaths = externalPaths;
+          $scope.isLoading = false;
+          showExternalPathsTable(externalPaths);
+          if (fn) fn(null);
+        });
+      }, (err) => {
+        console.error("list external paths error", err);
+        $timeout(() => {
+          $scope.isLoading = false;
+          if (fn) fn(err);
+        });
+      });
+    }
+
     /////////////////////////////////
     function showAddBucket() {
       $modal.open({
@@ -460,6 +536,27 @@ angular.module("web").controller("filesCtrl", [
 
               $timeout(() => {
                 listBuckets();
+              }, 500);
+            };
+          }
+        }
+      }).result.then(angular.noop, angular.noop);
+    }
+
+    function showAddExternalPath() {
+      $modal.open({
+        templateUrl: "main/files/modals/add-external-path-modal.html",
+        controller: "addExternalPathModalCtrl",
+        resolve: {
+          item: () => {
+            return null;
+          },
+          callback: () => {
+            return () => {
+              Toast.success(T("externalPath.add.success"));
+
+              $timeout(() => {
+                listExternalPaths();
               }, 500);
             };
           }
@@ -503,11 +600,11 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showDeleteBucket(item) {
-      var title = T("bucket.delete.title"),
-        message = T("bucket.delete.message", {
-          name: item.name,
-          region: item.region
-        });
+      const title = T("bucket.delete.title"),
+          message = T("bucket.delete.message", {
+            name: item.name,
+            region: item.region
+          });
 
       Dialog.confirm(
         title,
@@ -517,9 +614,30 @@ angular.module("web").controller("filesCtrl", [
             s3Client.deleteBucket(item.region, item.name).then(() => {
               Toast.success(T("bucket.delete.success")); //删除Bucket成功
 
-              $timeout(() => {
-                listBuckets();
-              }, 1000);
+              $timeout(listBuckets, 1000);
+            });
+          }
+        },
+        1
+      );
+    }
+
+    function showDeleteExternalPath(item) {
+      const title = T("externalPath.delete.title"),
+          message = T("externalPath.delete.message", {
+            path: item.fullPath,
+            region: item.regionId
+          });
+
+      Dialog.confirm(
+        title,
+        message,
+        (btn) => {
+          if (btn) {
+            ExternalPath.remove(item.fullPath, item.regionId).then(() => {
+              Toast.success(T("externalPath.delete.success")); //删除外部路径成功
+
+              $timeout(listExternalPaths, 1000);
             });
           }
         },
@@ -539,9 +657,7 @@ angular.module("web").controller("filesCtrl", [
             return () => {
               Toast.success(T("folder.create.success"));
 
-              $timeout(() => {
-                listFiles();
-              }, 300);
+              $timeout(listFiles, 300);
             };
           }
         }
@@ -592,9 +708,7 @@ angular.module("web").controller("filesCtrl", [
           },
           reload: () => {
             return () => {
-              $timeout(() => {
-                listFiles();
-              }, 300);
+              $timeout(listFiles, 300);
             };
           },
           showFn: () => {
@@ -647,21 +761,6 @@ angular.module("web").controller("filesCtrl", [
         resolve: {
           items: () => {
             return items;
-          },
-          currentInfo: () => {
-            return angular.copy($scope.currentInfo);
-          }
-        }
-      }).result.then(angular.noop, angular.noop);
-    }
-
-    function showGrantToken(item) {
-      $modal.open({
-        templateUrl: "main/files/modals/grant-token-modal.html",
-        controller: "grantTokenModalCtrl",
-        resolve: {
-          item: () => {
-            return item;
           },
           currentInfo: () => {
             return angular.copy($scope.currentInfo);
@@ -943,6 +1042,16 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
+    function selectExternalPath(item) {
+      $timeout(() => {
+        if ($scope.external_path_sel == item) {
+          $scope.external_path_sel = null;
+        } else {
+          $scope.external_path_sel = item;
+        }
+      });
+    }
+
     function initBucketSelect() {
       $timeout(() => {
         $scope.bucket_sel = null;
@@ -954,6 +1063,12 @@ angular.module("web").controller("filesCtrl", [
         $scope.sel.all = false;
         $scope.sel.has = [];
         $scope.sel.x = {};
+      });
+    }
+
+    function initExternalPathSelect() {
+      $timeout(() => {
+        $scope.external_path_sel = null;
       });
     }
 
@@ -1116,6 +1231,60 @@ angular.module("web").controller("filesCtrl", [
       });
 
       $list.bootstrapTable('load', buckets).bootstrapTable('uncheckAll');
+    }
+
+    function showExternalPathsTable(externalPaths) {
+      initExternalPathSelect();
+      var $list = $('#external-path-list').bootstrapTable({
+        columns: [{
+          field: 'id',
+          title: '-',
+          radio: true
+        }, {
+          field: 'fullPath',
+          title: T('externalPath.path'),
+          formatter: (val, row, idx, field) => {
+            return `<i class="fa fa-map-signs text-warning"></i> <a href=""><span>${val}</span></a>`;
+          },
+          events: {
+            'click a': (evt, val, row, idx) => {
+              gotoAddress(val);
+
+              return false;
+            }
+          }
+        }, {
+          field: 'regionId',
+          title: T('region'),
+          formatter: translateRegionName
+        }],
+        clickToSelect: true,
+        onCheck: (row, $row) => {
+          if (row === $scope.external_path_sel) {
+            $row.parents('tr').removeClass('info');
+
+            $list.bootstrapTable('uncheckBy', {
+              field: 'fullPath',
+              values: [row.fullPath],
+            });
+
+            $timeout(() => {
+              $scope.external_path_sel = null;
+            });
+          } else {
+            $list.find('tr').removeClass('info');
+            $row.parents('tr').addClass('info');
+
+            $timeout(() => {
+              $scope.external_path_sel = row;
+            });
+          }
+
+          return false;
+        }
+      });
+
+      $list.bootstrapTable('load', externalPaths).bootstrapTable('uncheckAll');
     }
 
     function showFilesTable(files, isAppend) {

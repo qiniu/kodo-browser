@@ -41,7 +41,8 @@ angular.module("web").controller("settingsCtrl", [
         multipartDownloadThreshold: settingsSvs.multipartDownloadThreshold.get(),
         multipartDownloadSize: settingsSvs.multipartDownloadSize.get(),
         downloadSpeedLimitEnabled: settingsSvs.downloadSpeedLimitEnabled.get(),
-        downloadSpeedLimitKBperSec: settingsSvs.downloadSpeedLimitKBperSec.get()
+        downloadSpeedLimitKBperSec: settingsSvs.downloadSpeedLimitKBperSec.get(),
+        externalPathEnabled: settingsSvs.externalPathEnabled.get()
       },
       setChange: setChange,
       cancel: cancel

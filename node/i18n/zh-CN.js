@@ -72,6 +72,7 @@ module.exports = {
   "aclType.private": "私有",
 
   files: "文件",
+  externalPath: "外部路径",
   settings: "设置",
   about: "关于",
   bookmarks: "书签管理",
@@ -160,6 +161,15 @@ module.exports = {
   "simplePolicy.noauth.message3": "没有权限获取角色列表",
   "simplePolicy.success": "应用policy成功",
 
+  //external path
+  "externalPath.add": "添加外部路径",
+  "externalPath.path": "外部路径",
+  "externalPath.path.tooltip": "填写通过 Bucket Policy 被授予权限的某个 Bucket 或 Bucket 下的某个路径，需由授权者提供",
+  "externalPath.add.success": "添加外部路径成功",
+  "externalPath.delete.title": "删除外部路径",
+  "externalPath.delete.message": "外部路径:<code>{{path}}</code>, 确定删除？",
+  "externalPath.delete.success": "删除外部路径成功",
+
   //settings
   "settings.WhetherResumeUpload": "断点上传",
   "settings.WhetherResumeUpload.msg": "启用断点上传功能",
@@ -179,6 +189,8 @@ module.exports = {
   "settings.DownloadSpeedLimit": "单个文件下载限速（单位：KB/s，范围：1 KB/s - 102400 KB/s）",
   "settings.WhetherShowThumbnail": "是否显示图片缩略",
   "settings.WhetherShowThumbnail.msg": "在文件列表中显示图片缩略, 会消耗一定的流量",
+  "settings.ExternalPath": "外部路径",
+  "settings.WhetherExternalPathEnabled.msg": "启用外部路径功能",
   "settings.system": "系统设置",
   "settings.isDebug": "调试日志",
   "settings.isDebug.msg": "是否开启调试日志",

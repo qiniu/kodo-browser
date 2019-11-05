@@ -72,6 +72,7 @@ module.exports = {
   "aclType.private": "Private",
 
   files: "Files",
+  externalPath: "External Link",
   settings: "Settings",
   about: "About",
   bookmarks: "Bookmarks",
@@ -160,6 +161,15 @@ module.exports = {
   "simplePolicy.noauth.message3": "You are not authorized to get role list",
   "simplePolicy.success": "Apply policy successfully",
 
+  //external path
+  "externalPath.add": "Add External Path",
+  "externalPath.path": "External Path",
+  "externalPath.path.tooltip": "Fill in a bucket or a path under a bucket that is granted permission through Bucket Policy, provided by the grantor",
+  "externalPath.add.success": "Added successfully",
+  "externalPath.delete.title": "Delete External Path",
+  "externalPath.delete.message": "External Path:<code>{{path}}</code>, Region:<code>{{region}}</code>, Are you sure you want to delete this external path?",
+  "externalPath.delete.success": "Deleted External Path Successfully",
+
   //settings
   "settings.WhetherResumeUpload": "Resume upload",
   "settings.WhetherResumeUpload.msg": "Enable resume upload",
@@ -179,6 +189,8 @@ module.exports = {
   "settings.DownloadSpeedLimit": "Download single file speed limit（Unit: KB/s，Range: 1 KB/s - 102400 KB/s）",
   "settings.WhetherShowThumbnail": "Whether to show the image thumbnail",
   "settings.WhetherShowThumbnail.msg": "Displaying thumbnails in the list of files will consume a certain amount of traffic",
+  "settings.ExternalPath": "External link",
+  "settings.WhetherExternalPathEnabled.msg": "Enable external link",
   "settings.system": "System Settings",
   "settings.isDebug": "Debug",
   "settings.isDebug.msg": "Enable debug log",

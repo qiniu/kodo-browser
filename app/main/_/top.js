@@ -32,6 +32,9 @@ angular.module("web").controller("topCtrl", [
       showFavList: showFavList,
       showAbout: showAbout,
       showReleaseNote: showReleaseNote,
+      showBucketsOrFiles: showBucketsOrFiles,
+      showExternalPaths: showExternalPaths,
+      isExternalPathEnabled: isExternalPathEnabled,
       click10: click10
     });
 
@@ -133,6 +136,22 @@ angular.module("web").controller("topCtrl", [
           }
         }
       }).result.then(angular.noop, angular.noop);
+    }
+
+    function isExternalPathEnabled() {
+      return settingsSvs.externalPathEnabled.get() > 0
+    }
+
+    function showBucketsOrFiles() {
+      if ($scope.ref.mode.startsWith('external')) {
+        $scope.gotoLocalMode();
+      }
+    }
+
+    function showExternalPaths() {
+      if ($scope.ref.mode.startsWith('local')) {
+        $scope.gotoExternalMode();
+      }
     }
   }
 ]);

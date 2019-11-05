@@ -1,11 +1,10 @@
 angular.module('web')
   .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'Config', 'AuthInfo',
     function ($scope, $modalInstance, $translate, callback, s3Client, Const, Config, AuthInfo) {
-      var T = $translate.instant;
-
-      var bucketACL = angular.copy(Const.bucketACL);
-      var regions = angular.copy(Config.load(AuthInfo.usePublicCloud()).regions);
-      var storageClassesMap = {};
+      const T = $translate.instant,
+            bucketACL = angular.copy(Const.bucketACL),
+            regions = angular.copy(Config.load(AuthInfo.usePublicCloud()).regions),
+            storageClassesMap = {};
       angular.forEach(regions, function (n) {
         storageClassesMap[n.id] = n.storageClasses
       });
@@ -32,19 +31,19 @@ angular.module('web')
       i18nBucketACL();
 
       function i18nBucketACL() {
-        var arr = angular.copy(Const.bucketACL);
-        angular.forEach(arr, function (n) {
+        const acls = angular.copy(Const.bucketACL);
+        angular.forEach(acls, function (n) {
           n.label = T('aclType.' + n.acl);
         });
-        $scope.bucketACL = arr;
+        $scope.bucketACL = acls;
       }
 
       function i18nStorageClassesType() {
-        var arr = angular.copy(storageClassesMap[$scope.item.region]);
-        angular.forEach(arr, function (n) {
+        const acls = angular.copy(storageClassesMap[$scope.item.region]);
+        angular.forEach(acls, function (n) {
           n.name = T('storageClassesType.' + n.value.toLowerCase())
         });
-        $scope.storageClasses = arr;
+        $scope.storageClasses = acls;
       }
 
       function onRegionChanged() {

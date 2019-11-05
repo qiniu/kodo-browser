@@ -15,21 +15,21 @@ function parseLocalPath(p) {
   };
 }
 
-function parseKodoPath(kodopath) {
-  if (typeof kodopath != "string") {
-    return kodopath;
+function parseKodoPath(kodoPath) {
+  if (typeof kodoPath !== "string") {
+    return kodoPath;
   }
 
-  if (!kodopath.startsWith("kodo://")) {
+  if (!kodoPath.startsWith("kodo://")) {
     throw Error("Invalid kodo path");
   }
 
-  var a = kodopath.substring("kodo://".length);
-  var bucket = a.split("/", 1)[0];
-  var key = a.substring(bucket.length + 1);
+  const splits = kodoPath.substring("kodo://".length).split('/', 2);
+  var bucket = splits[0];
+  var key = splits[1];
   return {
     bucket: bucket,
-    key: key.replace(/\\/g, "/")
+    key: key.replace(/\\/g, '/')
   };
 }
 

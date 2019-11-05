@@ -11,11 +11,18 @@
 
     <div class="collapse navbar-collapse" id="collapse-1" ng-if="!showGuestNav">
       <ul class="nav navbar-nav">
-        <li ng-class="{active:showTab==1}">
-          <a href="#">
+        <li ng-class="{active: showTab === 1 && ref.mode.startsWith('local')}">
+          <a href="#" ng-click="showBucketsOrFiles()">
             <i class="glyphicon glyphicon-folder-close"></i>
             {{'files'|translate}}
             <!-- 文件 -->
+          </a>
+        </li>
+        <li ng-class="{active: showTab === 1 && ref.mode.startsWith('external')}" ng-if="isExternalPathEnabled()">
+          <a href="#" ng-click="showExternalPaths()">
+            <i class="fa fa-map-signs"></i>
+            {{'externalPath'|translate}}
+            <!-- 外部路径 -->
           </a>
         </li>
         <li>

@@ -2,11 +2,11 @@ angular.module('web')
   .controller('addressBarCtrl', ['$scope', '$translate', 'Fav', 'AuthInfo', 'Toast', 'settingsSvs',
     function ($scope, $translate, Fav, AuthInfo, Toast, settingsSvs) {
 
-      var DEF_ADDR = 'kodo://';
-      var T = $translate.instant;
+      const KODO_ADDR_PROTOCOL = 'kodo://',
+            T = $translate.instant;
 
       angular.extend($scope, {
-        address: AuthInfo.get().s3path || DEF_ADDR,
+        address: KODO_ADDR_PROTOCOL,
         goUp: goUp,
         go: go,
         goHome: goHome,
@@ -41,18 +41,20 @@ angular.module('web')
       }
 
       /************ 历史记录前进后退 start **************/
-      var His = new function () {
-        var arr = [];
-        var index = -1;
-        this.add = function (url) {
-          if (index > -1 && url == arr[index].url) return;
-
-          if (index < arr.length - 1) arr.splice(index + 1, arr.length - index);
-
-          arr.push({ url: url, time: new Date().getTime() });
+      const His = new function () {
+        const arr = [];
+        let index = -1;
+        this.add = function (url, mode) {
+          if (index > -1 && url === arr[index].url && mode === arr[index].mode) {
+            return;
+          }
+          if (index < arr.length - 1) {
+            arr.splice(index + 1, arr.length - index);
+          }
+          arr.push({ url: url, mode: mode, time: new Date().getTime() });
           index++;
 
-          var MAX = settingsSvs.historiesLength.get();
+          const MAX = settingsSvs.historiesLength.get();
           if (arr.length > MAX) {
             arr.splice(MAX, arr.length - MAX);
             index = arr.length - 1;
@@ -106,12 +108,14 @@ angular.module('web')
         var addr = His.goBack();
         //console.log('-->',addr);
         $scope.address = addr.url;
+        $scope.ref.mode = addr.mode;
         $scope.$emit('kodoAddressChange', addr.url);
       }
       function goAhead() {
         var addr = His.goAhead();
         //console.log('-->',addr);
         $scope.address = addr.url;
+        $scope.ref.mode = addr.mode;
         $scope.$emit('kodoAddressChange', addr.url);
       }
       /************ 历史记录前进后退 end **************/
@@ -121,6 +125,20 @@ angular.module('web')
 
         goHome();
 
+        $scope.$on('gotoLocalMode', function (e) {
+          console.log('on:gotoLocalMode');
+          $scope.address = KODO_ADDR_PROTOCOL;
+          $scope.ref.mode = 'localBuckets';
+          go();
+        });
+
+        $scope.$on('gotoExternalMode', function (e) {
+          console.log('on:gotoExternalMode');
+          $scope.address = KODO_ADDR_PROTOCOL;
+          $scope.ref.mode = 'externalPaths';
+          go();
+        });
+
         $scope.$on('gotoKodoAddress', function (e, addr) {
           console.log('on:gotoKodoAddress', addr);
           $scope.address = addr;
@@ -129,71 +147,66 @@ angular.module('web')
       });
 
       function goHome() {
-        $scope.address = getDefaultAddress();
-
-        go(true);
+        const addressAndMode = getDefaultAddress();
+        $scope.address = addressAndMode.address;
+        $scope.ref.mode = addressAndMode.mode;
+        go();
       }
 
       //保存默认地址
       function saveDefaultAddress() {
-        AuthInfo.saveToAuthInfo({ address: $scope.address });
+        AuthInfo.saveToAuthInfo(getCurrentAddressAndMode());
         Toast.success(T('saveAsHome.success'), 1000); //'设置默认地址成功'
       }
       function getDefaultAddress() {
-        var info = AuthInfo.get();
-        return info['s3path'] || info['address'] || DEF_ADDR;
+        const info = AuthInfo.get();
+        if (info.address && info.mode) {
+          return { address: info.address, mode: info.mode };
+        } else {
+          return { address: KODO_ADDR_PROTOCOL, mode: 'localBuckets' };
+        }
       }
 
-      //修正 address
-      function getAddress() {
-        var addr = $scope.address;
+      //修正并获取 address
+      function getCurrentAddressAndMode() {
+        let addr = $scope.address;
         if (!addr) {
-          $scope.address = DEF_ADDR;
-          return DEF_ADDR;
-        }
-
-        if (addr == DEF_ADDR) {
-          return addr;
-        }
-
-        if (addr.indexOf(DEF_ADDR) !== 0) {
+          $scope.address = KODO_ADDR_PROTOCOL;
+        } else if (addr == KODO_ADDR_PROTOCOL) {
+          // do nothing
+        } else if (addr.indexOf(KODO_ADDR_PROTOCOL) !== 0) {
           addr = addr.replace(/(^\/*)|(\/*$)/g, '');
-          $scope.address = addr ? (DEF_ADDR + addr + '/') : DEF_ADDR;
+          $scope.address = addr ? (KODO_ADDR_PROTOCOL + addr + '/') : KODO_ADDR_PROTOCOL;
         }
-        else {
-          //$scope.address = $scope.address.replace(/(\/*$)/g,'') + '/';
-        }
-        return $scope.address;
+        return { address: $scope.address, mode: $scope.ref.mode };
       }
 
       //浏览
-      function go(force) {
-        var addr = getAddress();
-        His.add(addr); //历史记录
-        $scope.$emit('kodoAddressChange', addr, force);
+      function go() {
+        const addressAndMode = getCurrentAddressAndMode();
+        His.add(addressAndMode.address, addressAndMode.mode); //历史记录
+        $scope.$emit('kodoAddressChange', addressAndMode.address);
       }
       //向上
       function goUp() {
-        var addr = getAddress();
-        if (addr == DEF_ADDR) {
+        const addressAndMode = getCurrentAddressAndMode();
+        if (addressAndMode.address == KODO_ADDR_PROTOCOL) {
           return go();
         }
 
-        addr = addr.substring(DEF_ADDR.length);
-        addr = addr.replace(/(^\/*)|(\/*$)/g, '');
+        addressAndMode.address = addressAndMode.address.substring(KODO_ADDR_PROTOCOL.length);
+        addressAndMode.address = addressAndMode.address.replace(/(^\/*)|(\/*$)/g, '');
 
-        var arr = addr.split('/');
+        const splits = addressAndMode.address.split('/');
 
-        arr.pop();
-        if (arr.length === 0) {
-          addr = DEF_ADDR;
+        splits.pop();
+
+        if (splits.length === 0) {
+          addressAndMode.address = KODO_ADDR_PROTOCOL;
+        } else {
+          addressAndMode.address = KODO_ADDR_PROTOCOL + splits.join('/') + '/';
         }
-        else {
-          addr = DEF_ADDR + arr.join('/') + '/';
-        }
-        $scope.address = addr;
+        $scope.address = addressAndMode.address;
         go();
       }
-
-
     }]);

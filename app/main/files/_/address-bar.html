@@ -20,7 +20,7 @@
           <i class="fa fa-arrow-up text-info"></i>
         </button>
 
-        <button class="btn btn-default" ng-click="go(true)" type="button" uib-tooltip="{{'refresh'|translate}}"
+        <button class="btn btn-default" ng-click="go()" type="button" uib-tooltip="{{'refresh'|translate}}"
           tooltip-placement="bottom" tooltip-append-to-body="true">
           <i class="fa fa-refresh text-success"></i>
         </button>
@@ -36,8 +36,7 @@
       <span class="input-group-btn">
 
         <button class="btn btn-default" ng-disabled="address == getDefaultAddress()" ng-click="saveDefaultAddress()"
-          type="button" uib-tooltip="{{'saveAsHome'|translate}}" tooltip-placement="bottom"
-          tooltip-append-to-body="true">
+          type="button" uib-tooltip="{{'saveAsHome'|translate}}" tooltip-placement="bottom" tooltip-append-to-body="true">
           <i class="fa fa-bookmark"></i>
         </button>
 

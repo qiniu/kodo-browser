@@ -25,8 +25,9 @@ angular.module("web").factory("ExternalPath", [
             list: list,
             listSync: listSync,
             getRegionByBucketSync: getRegionByBucketSync,
-            update: update,
+            create: create,
             remove: remove,
+            new: newExternalPath,
         };
 
         function list() {
@@ -71,24 +72,20 @@ angular.module("web").factory("ExternalPath", [
             return null;
         }
 
-        function update(externalPath, regionId) {
+        function create(externalPath, regionId) {
             const df = $q.defer(),
                   filePath = getFilePath();
 
             list().then((paths) => {
-                let done = false;
                 const newOne = newExternalPath(externalPath, regionId);
                 for (let i = 0; i < paths.length; i++) {
                     const path = paths[i];
                     if (newOne.bucketId === path.bucketId && newOne.objectPrefix === path.objectPrefix) {
-                        paths[i] = newOne;
-                        done = true;
-                        break;
+                        df.reject(new Error("Duplicated external path"));
+                        return;
                     }
                 }
-                if (!done) {
-                    paths.push(newOne);
-                }
+                paths.push(newOne);
                 fs.writeFile(filePath, JSON.stringify(paths), 'utf8', (err) => {
                     if (err) {
                         df.reject(err);

@@ -3,10 +3,10 @@ angular.module("web").factory("Fav", [
   "AuthInfo",
   "Toast",
   function($q, AuthInfo, Toast) {
-    var MAX = 100;
-    var fs = require("fs");
-    var path = require("path");
-    var os = require("os");
+    const MAX = 100,
+          fs = require("fs"),
+          path = require("path"),
+          os = require("os");
 
     return {
       add: add,
@@ -15,44 +15,45 @@ angular.module("web").factory("Fav", [
       has: has
     };
 
-    function has(addr) {
-      var arr = list();
-      for (var i = 0; i < arr.length; i++) {
-        if (arr[i].url == addr) {
+    function has(addr, mode) {
+      const arr = list();
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].url === addr && arr[i].mode === mode) {
           return true;
         }
       }
       return false;
     }
 
-    function add(addr) {
-      var arr = list();
+    function add(addr, mode) {
+      const arr = list();
 
-      if (arr.length >= MAX) return false;
-      for (var i = 0; i < arr.length; i++) {
-        if (arr[i].url == addr) {
+      if (arr.length >= MAX) {
+        return false;
+      }
+
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].url === addr && arr[i].mode === mode) {
           arr.splice(i, 1);
           i--;
         }
       }
-      arr.push({ url: addr, time: new Date().getTime() });
+      arr.push({ url: addr, mode: mode, time: new Date().getTime() });
       if (arr.length > MAX) {
         arr.splice(MAX, arr.length - MAX);
       }
-      //localStorage.setItem('favs',JSON.stringify(arr));
       save(arr);
       return true;
     }
 
-    function remove(addr) {
-      var arr = list();
-      for (var i = 0; i < arr.length; i++) {
-        if (arr[i].url == addr) {
+    function remove(addr, mode) {
+      const arr = list();
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].url === addr && arr[i].mode === mode) {
           arr.splice(i, 1);
           i--;
         }
       }
-      //localStorage.setItem('favs',JSON.stringify(arr));
       save(arr);
     }
 
@@ -66,7 +67,7 @@ angular.module("web").factory("Fav", [
 
     function list() {
       try {
-        var data = fs.readFileSync(getFavFilePath());
+        const data = fs.readFileSync(getFavFilePath());
         return JSON.parse(data ? data.toString() : "[]");
       } catch (e) {
         return [];
@@ -75,11 +76,11 @@ angular.module("web").factory("Fav", [
 
     //下载进度保存路径
     function getFavFilePath() {
-      var folder = Global.config_path;
+      const folder = Global.config_path;
       if (!fs.existsSync(folder)) {
         fs.mkdirSync(folder);
       }
-      var username = AuthInfo.get().id || "";
+      const username = AuthInfo.get().id || 'kodo-browser';
       return path.join(folder, "fav_" + username + ".json");
     }
   }

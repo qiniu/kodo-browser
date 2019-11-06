@@ -9,7 +9,7 @@ angular.module("web").controller("favListCtrl", [
   "Fav",
   "Toast",
   function ($scope, $rootScope, $translate, $state, $modalInstance, Fav, Toast) {
-    var T = $translate.instant;
+    const T = $translate.instant;
 
     angular.extend($scope, {
       goTo: goTo,
@@ -26,12 +26,11 @@ angular.module("web").controller("favListCtrl", [
     }
 
     function refresh() {
-      var arr = Fav.list();
-      $scope.items = arr;
+      $scope.items = Fav.list();
     }
 
     function removeFav(item) {
-      Fav.remove(item.url);
+      Fav.remove(item.url, item.mode);
       Toast.warning(T("bookmarks.delete.success")); //删除书签成功
       refresh();
     }

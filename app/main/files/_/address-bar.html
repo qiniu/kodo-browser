@@ -40,10 +40,10 @@
           <i class="fa fa-bookmark"></i>
         </button>
 
-        <button class="btn btn-default" ng-click="toggleFav(address)" type="button"
+        <button class="btn btn-default" ng-click="toggleFav()" type="button"
           uib-tooltip="{{'saveToFav'|translate}}" tooltip-placement="left" tooltip-append-to-body="true">
-          <i ng-if="isFav(address)" class="fa fa-star text-orange"></i>
-          <i ng-if="!isFav(address)" class="fa fa-star-o"></i>
+          <i ng-if="isFav()" class="fa fa-star text-orange"></i>
+          <i ng-if="!isFav()" class="fa fa-star-o"></i>
         </button>
 
       </span>

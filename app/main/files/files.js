@@ -308,7 +308,10 @@ angular.module("web").controller("filesCtrl", [
 
         if (info.bucket) {
           // list objects
-          const bucketInfo = $rootScope.bucketMap[info.bucket]
+          let bucketInfo;
+          if ($rootScope.bucketMap) {
+            bucketInfo = $rootScope.bucketMap[info.bucket];
+          }
           if (bucketInfo) {
             $scope.currentInfo.region = bucketInfo.region;
             info.bucketName = bucketInfo.name;

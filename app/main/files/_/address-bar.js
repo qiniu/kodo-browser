@@ -24,19 +24,23 @@ angular.module('web')
       });
 
 
-      function isFav(addr) {
-        return Fav.has(addr);
+      function isFav() {
+        const addressAndMode = getCurrentAddressAndMode();
+        return Fav.has(addressAndMode.address, addressAndMode.mode);
       }
 
-      function toggleFav(addr) {
-        if (isFav(addr)) {
-          Fav.remove(addr);
+      function toggleFav() {
+        const addressAndMode = getCurrentAddressAndMode();
+        if (Fav.has(addressAndMode.address, addressAndMode.mode)) {
+          Fav.remove(addressAndMode.address, addressAndMode.mode);
           Toast.warn(T('bookmark.remove.success')); //'已删除书签'
         }
         else {
-          var f = Fav.add(addr);
-          if (f) Toast.success(T('bookmark.add.success'));//'添加书签成功'
-          else Toast.warn(T('bookmark.add.error1'));//'添加书签失败: 超过最大限制'
+          if (Fav.add(addressAndMode.address, addressAndMode.mode)) {
+            Toast.success(T('bookmark.add.success'));//'添加书签成功'
+          } else {
+            Toast.warn(T('bookmark.add.error1'));//'添加书签失败: 超过最大限制'
+          }
         }
       }
 

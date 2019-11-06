@@ -10,6 +10,7 @@ angular.module("web").controller("filesCtrl", [
   "AuthInfo",
   "Config",
   "s3Client",
+  "bucketMap",
   "ExternalPath",
   "fileSvs",
   "Toast",
@@ -27,6 +28,7 @@ angular.module("web").controller("filesCtrl", [
     AuthInfo,
     Config,
     s3Client,
+    bucketMap,
     ExternalPath,
     fileSvs,
     Toast,
@@ -277,6 +279,7 @@ angular.module("web").controller("filesCtrl", [
 
       $rootScope.currentUser = user;
       $scope.ref.mode = 'localBuckets';
+
       $timeout(() => {
         addEvents();
         $scope.$broadcast("filesViewReady");
@@ -284,36 +287,28 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function addEvents() {
-      const KODO_ADDR_PROTOCOL = 'kodo://';
-
-      $scope.$on("kodoAddressChange", (evt, addr) => {
-        evt.stopPropagation();
-
-        console.log(`on:kodoAddressChange: ${addr}`);
-
-        const info = s3Client.parseKodoPath(addr);
+      const KODO_ADDR_PROTOCOL = 'kodo://',
+            onKodoAddressChange = (addr) => {
         let fileName;
 
+        const info = s3Client.parseKodoPath(addr);
         $scope.currentInfo = info;
 
         if (info.key) {
-          const lastGan = info.key.lastIndexOf("/");
-
+          const lastSlash = info.key.lastIndexOf("/");
           // if not endswith /
-          if (lastGan != info.key.length - 1) {
-            fileName = info.key.substring(lastGan + 1);
-            info.key = info.key.substring(0, lastGan + 1);
+          if (lastSlash != info.key.length - 1) {
+            fileName = info.key.substring(lastSlash + 1);
+            info.key = info.key.substring(0, lastSlash + 1);
           }
         }
 
         if (info.bucket) {
           // list objects
-          let bucketInfo;
-          if ($rootScope.bucketMap) {
-            bucketInfo = $rootScope.bucketMap[info.bucket];
-          }
+          const bucketInfo = $rootScope.bucketMap[info.bucket];
           if (bucketInfo) {
             $scope.currentInfo.region = bucketInfo.region;
+            $scope.ref.mode = 'localFiles';
             info.bucketName = bucketInfo.name;
             info.bucket = bucketInfo.bucketId;
           } else {
@@ -321,6 +316,7 @@ angular.module("web").controller("filesCtrl", [
 
             if (region) {
               $scope.currentInfo.region = region;
+              $scope.ref.mode = 'externalFiles';
               info.bucketName = info.bucket; // TODO: Use bucket name here
             } else {
               Toast.error("Forbidden");
@@ -341,14 +337,6 @@ angular.module("web").controller("filesCtrl", [
             } else {
               $scope.currentBucketPerm = user.perm[info.bucket];
             }
-          }
-
-          if ($scope.ref.mode.startsWith('local')) {
-            $scope.ref.mode = 'localFiles';
-          } else if ($scope.ref.mode.startsWith('external')) {
-            $scope.ref.mode = 'externalFiles';
-          } else {
-            throw new Error('Unrecognized mode');
           }
 
           // search
@@ -373,6 +361,25 @@ angular.module("web").controller("filesCtrl", [
             throw new Error('Unrecognized mode');
           }
         }
+      };
+
+      $scope.$on("kodoAddressChange", (evt, addr) => {
+        evt.stopPropagation();
+
+        console.log(`on:kodoAddressChange: ${addr}`);
+        if ($rootScope.bucketMap) {
+          onKodoAddressChange(addr);
+        } else {
+          $scope.isLoading = true;
+          bucketMap.load().then((map) => {
+            $rootScope.bucketMap = map;
+            $scope.isLoading = false;
+            onKodoAddressChange(addr);
+          }, (err) => {
+            $scope.isLoading = false;
+            throw new Error(err);
+          });
+        }
       });
     }
 
@@ -383,49 +390,22 @@ angular.module("web").controller("filesCtrl", [
         $scope.isLoading = true;
       });
 
-      s3Client.listAllBuckets().then((buckets) => {
-        if ($scope.sch.bucketName) {
-          buckets = filter(buckets, (bkt) => { return bkt.name.indexOf($scope.sch.bucketName) >= 0; });
-        }
+      bucketMap.load().then((bucketMap) => {
+        $rootScope.bucketMap = bucketMap;
 
-        $timeout(() => {
-          $scope.buckets = buckets;
-
-          var m = {};
-          var wait = buckets.length;
-          if (wait > 0) {
-            angular.forEach(buckets, (bkt) => {
-              m[bkt.name] = bkt;
-              s3Client.getBucketLocation(bkt.bucketId).then((regionId) => {
-                bkt.region = regionId;
-                wait -= 1;
-                if (wait == 0) {
-                  $timeout(() => {
-                    $scope.isLoading = false;
-                    showBucketsTable(buckets);
-                    if (fn) fn(null);
-                  });
-                }
-              }, (err) => {
-                console.error("get bucket location error", bkt.bucketId, err);
-                wait -= 1;
-                if (fn) fn(err);
-              });
-            });
-          } else {
-            $scope.isLoading = false;
-            showBucketsTable([]);
-            if (fn) fn(null);
+        const buckets = [];
+        for (const bucketName in bucketMap) {
+          if ($scope.sch.bucketName && bucketName.indexOf($scope.sch.bucketName) < 0) {
+            continue;
           }
-          $rootScope.bucketMap = m;
-        });
+          buckets.push(bucketMap[bucketName]);
+        }
+        $scope.buckets = buckets;
+        $scope.isLoading = false;
+        showBucketsTable(buckets);
+        if (fn) fn(null);
       }, (err) => {
-        console.error("list buckets error", err);
-
-        $timeout(() => {
-          $scope.isLoading = false;
-        });
-
+        $scope.isLoading = false;
         if (fn) fn(err);
       });
     }

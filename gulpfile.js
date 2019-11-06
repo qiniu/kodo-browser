@@ -26,6 +26,9 @@ const packagerOptions = {
   asar: false,
   out: TARGET,
   overwrite: true,
+  download: {
+    mirrorOptions: 'https://npm.taobao.org/mirrors/electron/'
+  },
   appVersion: VERSION,
   appCopyright: "",
   electronVersion: ELECTRON_VERSION,

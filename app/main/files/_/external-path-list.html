@@ -9,8 +9,9 @@
     <div class="pd10" style="height:100%">
       <div ng-repeat="item in externalPaths|filter:sch.externalPathName" class="item-block"
            ng-class="{'active':external_path_sel.externalPath==item.shortPath}"
-           ng-click="selectExternalPath(item);$event.stopPropagation()">
-        <i class="fa fa-database text-warning"></i>
+           ng-click="selectExternalPath(item);$event.stopPropagation()"
+           ng-dblclick="gotoAddress(item.fullPath);$event.stopPropagation()">
+        <i class="fa fa-map-signs text-warning"></i>
         <div class="item-block-name" uib-tooltip-html="'<div class=\'break\'>'+item.shortPath+'</div>'" tooltip-append-to-body="true">{{item.shortPath}}</div>
         <div class="item-block-desc">{{translateRegionName(item.regionId)}}</div>
       </div>

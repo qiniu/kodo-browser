@@ -2,15 +2,10 @@ angular.module("web").factory("Customize", [
   function() {
     return {
       disable: {
-        createBucket: false,
-        deleteBucket: false
+        createBucket: true,
+        deleteBucket: true
       },
       upgrade: {
-        // Release Notes 目录后缀，里面有 ${version}.md, 如 1.0.0.md
-        release_notes_url: "https://kodo-toolbox.qiniu.com/kodobrowser/release-notes/",
-
-        // 升级检测链接
-        check_url: "https://kodo-toolbox.qiniu.com/kodobrowser/update.json"
       }
     }
   }

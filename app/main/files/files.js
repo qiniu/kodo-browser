@@ -377,7 +377,7 @@ angular.module("web").controller("filesCtrl", [
             onKodoAddressChange(addr);
           }, (err) => {
             $scope.isLoading = false;
-            throw new Error(err);
+            throw err;
           });
         }
       });

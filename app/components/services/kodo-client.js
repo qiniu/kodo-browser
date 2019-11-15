@@ -16,7 +16,7 @@ angular.module("web").factory("KodoClient", [
       getBucketManager().listBuckets((err, body) => {
         if (err) {
           df.reject(err);
-        } else if (body.error) {
+        } else if (body && body.error) {
           df.reject({message: body.error});
         } else {
           let m = {};

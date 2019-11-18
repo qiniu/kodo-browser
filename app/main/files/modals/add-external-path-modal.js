@@ -6,6 +6,9 @@ angular.module('web')
 
       angular.extend($scope, {
         regions: regions,
+        item: {
+            regionId: regions[0].id
+        },
         cancel: cancel,
         onSubmit: onSubmit,
       });

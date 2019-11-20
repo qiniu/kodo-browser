@@ -49,7 +49,7 @@
     "@babel/core": "^7.1.6",
     "@babel/preset-env": "^7.1.6",
     "@uirouter/angularjs": "^1.0.20",
-    "angular": "1.7.5",
+    "angular": "1.7.9",
     "angular-bootstrap-contextmenu": "^1.2.0",
     "angular-sanitize": "1.7.5",
     "angular-translate": "^2.18.1",

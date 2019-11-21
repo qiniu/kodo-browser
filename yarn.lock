@@ -680,13 +680,10 @@ angular-ui-codemirror@0.3.0:
   version "0.3.0"
   resolved "https://registry.npm.taobao.org/angular-ui-codemirror/download/angular-ui-codemirror-0.3.0.tgz#e4286fc50f393f2a6e697c1bf3170424e12cbb60"
 
-angular@1.7.5:
-  version "1.7.5"
-  resolved "https://registry.npm.taobao.org/angular/download/angular-1.7.5.tgz#d1c1c01c6f5dc835638f3f9aa51012857bdac49e"
-
-"angular@>=1.2.26 <=1.7":
-  version "1.7.8"
-  resolved "https://registry.npm.taobao.org/angular/download/angular-1.7.8.tgz#b77ede272ce1b261e3be30c1451a0b346905a3c9"
+angular@1.7.9, "angular@>=1.2.26 <=1.7":
+  version "1.7.9"
+  resolved "https://registry.yarnpkg.com/angular/-/angular-1.7.9.tgz#e52616e8701c17724c3c238cfe4f9446fd570bc4"
+  integrity sha512-5se7ZpcOtu0MBFlzGv5dsM1quQDoDeUTwZrWjGtTNA7O88cD8TEk5IEKCTDa3uECV9XnvKREVUr7du1ACiWGFQ==
 
 ansi-align@^2.0.0:
   version "2.0.0"

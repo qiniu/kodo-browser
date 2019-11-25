@@ -418,14 +418,14 @@ angular.module("web").controller("filesCtrl", [
       });
 
       tryListFiles((info || $scope.currentInfo), marker, (err, files) => {
+        $timeout(() => {
+          $scope.isLoading = false;
+        });
+
         if (err) {
           Toast.error(JSON.stringify(err));
           return;
         }
-
-        $timeout(() => {
-          $scope.isLoading = false;
-        });
 
         showFilesTable(files);
       });

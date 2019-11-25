@@ -249,17 +249,28 @@ angular.module("web").factory("s3Client", [
             Objects: map(this, (item) => { return { Key: item.path }; }),
             Quiet: true
           }
-        }, (err) => {
+        }, (err, data) => {
           if (err) {
             progress.errorCount += this.length;
           } else {
-            progress.current += this.length;
+            progress.current += data.Deleted.length;
+            progress.errorCount += data.Errors.length;
           }
           if (progCb) {
             progCb(progress);
           }
           if (err) {
             callback(map(this, (item) => { return { item: item, error: err } }));
+          } else if (data.Errors.length > 0) {
+            const errors = [];
+            each(data.Errors, (errItem) => {
+              each(this, (item) => {
+                if (errItem.Key === item.Key) {
+                  errors.push({ item: item, error: new Error(errItem.Message) });
+                }
+              });
+            });
+            callback(errors);
           } else {
             callback();
           }
@@ -590,6 +601,9 @@ angular.module("web").factory("s3Client", [
                   item: item,
                   error: err
                 });
+
+                $timeout(_, NEXT_TICK);
+                return;
               }
 
               progress.current++;

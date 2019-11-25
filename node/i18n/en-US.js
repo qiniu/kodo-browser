@@ -14,6 +14,8 @@ module.exports = {
   default: "Default",
   region: "Region",
 
+  "permission.denied": "Permission denied",
+
   "auth.accessLogin": "Access Key Login",
   "auth.id.placeholder": "AccessKeyId",
   "auth.secret.placeholder": "AccessKeySecret",

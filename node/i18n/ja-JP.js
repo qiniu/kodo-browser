@@ -14,6 +14,8 @@ module.exports = {
   default: "デフォルト",
   region: "リージョン",
 
+  "permission.denied": "アクセス拒否",
+
   "auth.accessLogin": "Access Key ログイン",
   "auth.id.placeholder": "AccessKeyId",
   "auth.secret.placeholder": "AccessKeySecret",

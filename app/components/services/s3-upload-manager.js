@@ -1,20 +1,23 @@
 angular.module("web").factory("s3UploadMgr", [
   "$timeout",
+  "$translate",
   "s3Client",
   "AuthInfo",
   "Config",
   "settingsSvs",
   function (
     $timeout,
+    $translate,
     s3Client,
     AuthInfo,
     Config,
     settingsSvs
   ) {
-    var fs = require("fs"),
-      path = require("path"),
-      os = require("os"),
-      S3Store = require("./node/s3store");
+    const fs = require("fs"),
+          path = require("path"),
+          os = require("os"),
+          S3Store = require("./node/s3store"),
+          T = $translate.instant;
 
     var $scope;
     var concurrency = 0;
@@ -296,7 +299,13 @@ angular.module("web").factory("s3UploadMgr", [
       });
       job.on("error", (err) => {
         if (err) {
-          console.error(`upload kodo://${job.to.bucket}/${job.to.key} error: ${err.message}`);
+          console.error(`upload kodo://${job.to.bucket}/${job.to.key} error: ${err}`);
+        }
+        if (job.message) {
+          switch (job.message.error) {
+          case 'Forbidden':
+            job.message.i18n = T('permission.denied');
+          }
         }
 
         concurrency--;

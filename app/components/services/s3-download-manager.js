@@ -316,7 +316,7 @@ angular.module("web").factory("s3DownloadMgr", [
       });
       job.on("error", (err) => {
         if (err) {
-          console.error(`download kodo://${job.from.bucket}/${job.from.key} error: ${err.message}`);
+          console.error(`download kodo://${job.from.bucket}/${job.from.key} error: ${err}`);
         }
 
         concurrency--;

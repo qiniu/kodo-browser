@@ -113,7 +113,11 @@ Client.prototype.uploadFile = function (params) {
       handleAbort();
     }
 
-    uploader.emit('error', `${err.name}: ${err.message}`);
+    if (err.message) {
+      uploader.emit('error', `${err.name}: ${err.message}`);
+    } else {
+      uploader.emit('error', err.name);
+    }
   }
 
   function handleAbort() {
@@ -398,7 +402,11 @@ Client.prototype.downloadFile = function (params) {
       handleAbort();
     }
 
-    downloader.emit('error', `${err.name}: ${err.message}`);
+    if (err.message) {
+      downloader.emit('error', `${err.name}: ${err.message}`);
+    } else {
+      downloader.emit('error', err.name);
+    }
   }
 
   function handleAbort() {

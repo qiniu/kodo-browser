@@ -14,6 +14,8 @@ module.exports = {
   default: "默认",
   region: "区域",
 
+  "permission.denied": "没有权限",
+
   "auth.accessLogin": "Access Key 登录",
   "auth.id.placeholder": "请输入 AccessKeyId",
   "auth.secret.placeholder": "请输入 SecretAccessKey",

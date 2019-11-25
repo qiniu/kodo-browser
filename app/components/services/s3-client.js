@@ -1,18 +1,20 @@
 angular.module("web").factory("s3Client", [
   "$q",
   "$rootScope",
+  "$translate",
   "$timeout",
   "$state",
   "Toast",
   "Config",
   "KodoClient",
   "AuthInfo",
-  function ($q, $rootScope, $timeout, $state, Toast, Config, KodoClient, AuthInfo) {
+  function ($q, $rootScope, $translate, $timeout, $state, Toast, Config, KodoClient, AuthInfo) {
     const AWS = require("aws-sdk"),
           path = require("path"),
           each = require("array-each"),
           map = require("array-map"),
           async = require("async"),
+          T = $translate.instant,
 
           NEXT_TICK = 1,
           KODO_ADDR_PROTOCOL = "kodo://";
@@ -1265,7 +1267,7 @@ angular.module("web").factory("s3Client", [
     }
 
     function handleError(err) {
-      if (err.code == "InvalidAccessKeyId") {
+      if (err.code === "InvalidAccessKeyId") {
         $state.go("login");
       } else {
         if (!err.code) {
@@ -1282,10 +1284,12 @@ angular.module("web").factory("s3Client", [
         }
 
         if (
-          err.code == "NetworkingError" &&
+          err.code === "NetworkingError" &&
           err.message.indexOf("ENOTFOUND") != -1
         ) {
           console.error(err);
+        } else if (err.code === 'Forbidden') {
+          Toast.error(T('permission.denied'));
         } else {
           Toast.error(err.code + ": " + err.message);
         }

@@ -1320,6 +1320,8 @@ angular.module("web").factory("s3Client", [
       var client = new AWS.S3({
         apiVersion: "2006-03-01",
         customUserAgent: `QiniuKodoBrowser/${Global.app.version}`,
+        computeChecksums: true,
+        logger: console,
         endpoint: options.endpoint,
         region: options.region,
         accessKeyId: options.accessKeyId,

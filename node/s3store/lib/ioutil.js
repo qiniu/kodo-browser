@@ -348,14 +348,8 @@ Client.prototype.uploadFile = function (params) {
   function createReadStream() {
     const readStream = fs.createReadStream(localFile);
     if (self.uploadSpeedLimit) {
-      let streamWithThrottle = readStream.pipe(new Throttle({rate: self.uploadSpeedLimit * 1024}), { end: false });
+      const streamWithThrottle = readStream.pipe(new Throttle({rate: self.uploadSpeedLimit * 1024}));
       streamWithThrottle.path = readStream.path;
-      if (typeof readStream.start === 'number') {
-        streamWithThrottle.start = readStream.start;
-      }
-      if (typeof readStream.end === 'number') {
-        streamWithThrottle.end = readStream.end;
-      }
       return streamWithThrottle;
     } else {
       return readStream;

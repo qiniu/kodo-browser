@@ -42,6 +42,7 @@ function S3Store(config) {
   this._s3options = {
     apiVersion: "2006-03-01",
     customUserAgent: `QiniuKodoBrowser/${Global.app.version}/Worker`,
+    computeChecksums: true,
     endpoint: this._config.endpoint.protocol + "://" + this._config.endpoint.host,
     region: this._config.region,
     accessKeyId: this._config.credential.accessKeyId,

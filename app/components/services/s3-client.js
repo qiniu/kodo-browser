@@ -246,8 +246,7 @@ angular.module("web").factory("s3Client", [
         client.deleteObjects({
           Bucket: bucket,
           Delete: {
-            Objects: map(this, (item) => { return { Key: item.path }; }),
-            Quiet: true
+            Objects: map(this, (item) => { return { Key: item.path }; })
           }
         }, (err, data) => {
           if (err) {

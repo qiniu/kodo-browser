@@ -37,7 +37,6 @@ angular.module("web").factory("s3UploadMgr", [
     function init(scope) {
       $scope = scope;
       $scope.lists.uploadJobList = [];
-      $scope.overwriteUploading.enabled = false;
 
       var auth = AuthInfo.get();
       var progs = tryLoadProg();

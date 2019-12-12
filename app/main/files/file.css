@@ -20,6 +20,6 @@
   color:#ccc;
 }
 
-.text-overwrite-uploading-enabled {
+.text-overwrite-uploading-enabled, .text-overwrite-downloading-enabled {
   color: #5299f5;
 }

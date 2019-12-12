@@ -8,6 +8,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
   "s3DownloadMgr",
   "DelayDone",
   "Toast",
+  "Const",
   "Dialog",
   function (
     $scope,
@@ -17,11 +18,13 @@ angular.module("web").controller("transferDownloadsCtrl", [
     s3DownloadMgr,
     DelayDone,
     Toast,
+    Const,
     Dialog
   ) {
     var T = $translate.instant;
 
     angular.extend($scope, {
+      triggerOverwriting: triggerOverwriting,
       showRemoveItem: showRemoveItem,
       clearAllCompleted: clearAllCompleted,
       clearAll: clearAll,
@@ -50,6 +53,11 @@ angular.module("web").controller("transferDownloadsCtrl", [
       if ($scope.limitToNum < len) {
         $scope.limitToNum += Math.min(100, len - $scope.limitToNum);
       }
+    }
+
+    function triggerOverwriting() {
+      $scope.overwriteDownloading.enabled = !$scope.overwriteDownloading.enabled;
+      localStorage.setItem(Const.OVERWRITE_DOWNLOADING, $scope.overwriteDownloading.enabled);
     }
 
     function checkStartJob(item) {

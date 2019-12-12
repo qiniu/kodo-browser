@@ -8,6 +8,7 @@ angular.module("web").controller("transferUploadsCtrl", [
   "DelayDone",
   "s3UploadMgr",
   "Toast",
+  "Const",
   "Dialog",
   function (
     $scope,
@@ -17,13 +18,14 @@ angular.module("web").controller("transferUploadsCtrl", [
     DelayDone,
     s3UploadMgr,
     Toast,
+    Const,
     Dialog
   ) {
     var T = $translate.instant;
 
     angular.extend($scope, {
-      showRemoveItem: showRemoveItem,
       triggerOverwriting: triggerOverwriting,
+      showRemoveItem: showRemoveItem,
       clearAllCompleted: clearAllCompleted,
       clearAll: clearAll,
       stopAll: stopAll,
@@ -51,6 +53,11 @@ angular.module("web").controller("transferUploadsCtrl", [
       if ($scope.limitToNum < len) {
         $scope.limitToNum += Math.min(100, len - $scope.limitToNum);
       }
+    }
+
+    function triggerOverwriting() {
+      $scope.overwriteUploading.enabled = !$scope.overwriteUploading.enabled;
+      localStorage.setItem(Const.OVERWRITE_UPLOADING, $scope.overwriteUploading.enabled);
     }
 
     function checkStartJob(item, force) {
@@ -102,10 +109,6 @@ angular.module("web").controller("transferUploadsCtrl", [
         s3UploadMgr.trySaveProg();
         $scope.calcTotalProg();
       });
-    }
-
-    function triggerOverwriting() {
-      $scope.overwriteUploading.enabled = !$scope.overwriteUploading.enabled;
     }
 
     function clearAllCompleted() {

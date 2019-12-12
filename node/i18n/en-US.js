@@ -329,6 +329,8 @@ module.exports = {
 
   "upload.overwrite": "Enable overwrite for uploading",
   "upload.overwrite.disabled": "Disable overwrite for uploading",
+  "download.overwrite": "Enable overwrite for downloading",
+  "download.overwrite.disabled": "Disable overwrite for downloading",
   "start.all": "Start All",
   "pause.all": "Stop All",
   "clear.finished": "Clear Finished",

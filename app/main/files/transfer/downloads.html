@@ -21,6 +21,18 @@
       </a>
     </div>
 
+    <!-- 开启全局覆盖 -->
+    <button type="button" ng-if="!overwriteDownloading.enabled" class="btn btn-default btn-sm" ng-click="triggerOverwriting()" uib-tooltip="{{'download.overwrite'|translate}}" tooltip-append-to-body="true">
+      <span class="">
+        <i class="text-muted glyphicon glyphicon-save-file"></i>
+      </span>
+    </button>
+    <button type="button" ng-if="overwriteDownloading.enabled" class="btn btn-default btn-sm" ng-click="triggerOverwriting()" uib-tooltip="{{'download.overwrite.disabled'|translate}}" tooltip-append-to-body="true">
+      <span class="" style="color: blue;">
+        <i class="text-overwrite-downloading-enabled glyphicon glyphicon-save-file"></i>
+      </span>
+    </button>
+
     <!-- 启动全部 -->
     <button ng-disabled="allActionBtnDisabled" type="button" class="btn btn-default btn-sm" ng-click="startAll()"
       uib-tooltip="{{'start.all'|translate}}" tooltip-append-to-body="true">

@@ -4,12 +4,14 @@ angular.module("web").controller("transferFrameCtrl", [
   "s3UploadMgr",
   "s3DownloadMgr",
   "Toast",
+  "Const",
   function (
     $scope,
     $translate,
     s3UploadMgr,
     s3DownloadMgr,
-    Toast
+    Toast,
+    Const
   ) {
     var T = $translate.instant;
 
@@ -21,7 +23,10 @@ angular.module("web").controller("transferFrameCtrl", [
         downloadJobList: []
       },
       overwriteUploading: {
-        enabled: false
+        enabled: localStorage.getItem(Const.OVERWRITE_UPLOADING) || false,
+      },
+      overwriteDownloading: {
+        enabled: localStorage.getItem(Const.OVERWRITE_DOWNLOADING) || false,
       },
 
       totalStat: {

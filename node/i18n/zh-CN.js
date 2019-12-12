@@ -328,6 +328,8 @@ module.exports = {
 
   "upload.overwrite": "开启覆盖上传",
   "upload.overwrite.disabled": "禁用覆盖上传",
+  "download.overwrite": "开启覆盖下载",
+  "download.overwrite.disabled": "禁用覆盖下载",
   "start.all": "启动全部",
   "pause.all": "暂停全部",
   "clear.finished": "清空已完成",

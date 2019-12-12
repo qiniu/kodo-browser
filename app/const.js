@@ -18,6 +18,8 @@ angular.module("web").factory("Const", [
       CLOUD_CHOICE_KEY: "cloud-choice",
       AUTH_KEEP: "auth-keep",
       AUTH_HIS: "auth-his",
+      OVERWRITE_UPLOADING: "overwrite-uploading",
+      OVERWRITE_DOWNLOADING: "overwrite-downloading",
 
       REG: {
         EMAIL: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/

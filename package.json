@@ -2,6 +2,10 @@
   "name": "kodo-browser",
   "version": "1.0.6",
   "license": "Apache-2.0",
+  "author": {
+      "name": "Rong Zhou",
+      "email": "zhourong@qiniu.com"
+  },
   "licenses": [
     {
       "type": "Apache-2.0",

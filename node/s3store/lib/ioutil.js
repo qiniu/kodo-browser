@@ -207,6 +207,7 @@ Client.prototype.uploadFile = function (params) {
         params: {
           Bucket: s3params.Bucket,
           Key: s3params.Key,
+          ContentType: s3params.ContentType,
           Body: createReadStream()
         },
         partSize: s3UploadedPartSize,
@@ -272,6 +273,7 @@ Client.prototype.uploadFile = function (params) {
         params: {
           Bucket: s3params.Bucket,
           Key: s3params.Key,
+          ContentType: s3params.ContentType,
           UploadId: s3uploadedId,
           Body: createReadStream()
         },

@@ -3,8 +3,8 @@
   "version": "1.0.7",
   "license": "Apache-2.0",
   "author": {
-      "name": "Rong Zhou",
-      "email": "zhourong@qiniu.com"
+    "name": "Rong Zhou",
+    "email": "zhourong@qiniu.com"
   },
   "licenses": [
     {
@@ -99,10 +99,10 @@
     "async": "^3.1.0",
     "aws-sdk": "^2.549.0",
     "downloads-folder": "^1.0.1",
-    "qiniu": "^7.2.2",
     "mime": "^2.3.1",
     "nodemailer": "^4.6.8",
     "nodemailer-smtp-transport": "^2.7.4",
+    "qiniu": "^7.2.2",
     "request": "^2.88.0",
     "sanitize-filename": "^1.6.1",
     "stream-throttle": "^0.1.3"

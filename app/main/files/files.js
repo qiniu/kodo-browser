@@ -211,8 +211,13 @@ angular.module("web").controller("filesCtrl", [
     $scope.$on("refreshFilesList", (e) => {
       $timeout.cancel(refreshTid);
 
+      const bucketName = $scope.currentInfo.bucketName,
+            key = $scope.currentInfo.key;
       refreshTid = $timeout(() => {
-        gotoAddress($scope.currentInfo.bucketName, $scope.currentInfo.key);
+        if (bucketName === $scope.currentInfo.bucketName &&
+            key === $scope.currentInfo.key) {
+          gotoAddress(bucketName, key);
+        }
       }, 600);
     });
 
@@ -221,11 +226,13 @@ angular.module("web").controller("filesCtrl", [
     function searchObjectName() {
       $timeout.cancel(searchTid);
 
+      var info = angular.copy($scope.currentInfo);
       searchTid = $timeout(() => {
-        var info = angular.copy($scope.currentInfo);
-
-        info.key += $scope.sch.objectName;
-        listFiles(info);
+        if (info.bucketName === $scope.currentInfo.bucketName &&
+            info.key === $scope.currentInfo.key) {
+          info.key += $scope.sch.objectName;
+          listFiles(info);
+        }
       }, 600);
     }
 
@@ -345,6 +352,7 @@ angular.module("web").controller("filesCtrl", [
 
             searchObjectName();
           } else {
+            $scope.sch.objectName = '';
             $timeout(listFiles, 100);
           }
         } else {
@@ -438,14 +446,24 @@ angular.module("web").controller("filesCtrl", [
 
       s3Client.listFiles(info.region, info.bucket, info.key, marker || "").then((result) => {
         $timeout(() => {
-          if ($scope.info && !deepEqual($scope.info, info)) {
+          if (info.bucketName !== $scope.currentInfo.bucketName ||
+              info.key !== $scope.currentInfo.key + $scope.sch.objectName) {
             return;
           }
+
+          const nextObjectsMarker = result.marker || null;
+          if (nextObjectsMarker && !nextObjectsMarker.startsWith(info.key)) {
+            return;
+          } else {
+            $scope.nextObjectsMarker = nextObjectsMarker;
+          }
+
           $scope.objects = $scope.objects.concat(result.data);
-          $scope.nextObjectsMarker = result.marker || null;
 
           if ($scope.nextObjectsMarker) {
-            $timeout(tryLoadMore, 100);
+            $timeout(function() {
+              tryLoadMore(info, nextObjectsMarker);
+            }, 100);
           }
         });
 
@@ -460,21 +478,22 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    function tryLoadMore() {
-      if ($scope.nextObjectsMarker) {
-        var info = $scope.currentInfo;
-
-        console.log(`loading next kodo://${info.bucketName}/${info.key}?marker=${$scope.nextObjectsMarker}`);
-
-        tryListFiles(info, $scope.nextObjectsMarker, (err, files) => {
-          if (err) {
-            Toast.error(JSON.stringify(err));
-            return;
-          }
-
-          showFilesTable(files, true);
-        });
+    function tryLoadMore(info, nextObjectsMarker) {
+      if (info.bucketName !== $scope.currentInfo.bucketName ||
+          info.key !== $scope.currentInfo.key + $scope.sch.objectName ||
+          $scope.nextObjectsMarker !== nextObjectsMarker) {
+        return;
       }
+      console.log(`loading next kodo://${info.bucketName}/${info.key}?marker=${nextObjectsMarker}`);
+
+      tryListFiles(info, nextObjectsMarker, (err, files) => {
+        if (err) {
+          Toast.error(JSON.stringify(err));
+          return;
+        }
+
+        showFilesTable(files, true);
+      });
     }
 
     function listExternalPaths(fn) {
@@ -1060,7 +1079,6 @@ angular.module("web").controller("filesCtrl", [
 
       $timeout(() => {
         $scope.objects = [];
-        $scope.info = null;
         $scope.nextObjectsMarker = null;
       });
     }

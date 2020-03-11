@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'Config', 'AuthInfo',
-    function ($scope, $modalInstance, $translate, callback, s3Client, Const, Config, AuthInfo) {
+  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'Config', 'AuthInfo', 'AuditLog',
+    function ($scope, $modalInstance, $translate, callback, s3Client, Const, Config, AuthInfo, AuditLog) {
       const T = $translate.instant,
             bucketACL = angular.copy(Const.bucketACL),
             regions = angular.copy(Config.load(AuthInfo.usePublicCloud()).regions),
@@ -59,8 +59,13 @@ angular.module('web')
         if (!form.$valid) return;
 
         var item = angular.copy($scope.item);
-
         s3Client.createBucket(item.region, item.name, item.acl, item.storageClass).then(function (result) {
+          AuditLog.log('addBucket', {
+            regionId: item.region,
+            name: item.name,
+            acl: item.acl,
+            storageClass: item.storageClass,
+          });
           callback();
           cancel();
         });

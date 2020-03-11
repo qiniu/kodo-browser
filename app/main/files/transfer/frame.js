@@ -5,15 +5,18 @@ angular.module("web").controller("transferFrameCtrl", [
   "s3DownloadMgr",
   "Toast",
   "Const",
+  "AuditLog",
   function (
     $scope,
     $translate,
     s3UploadMgr,
     s3DownloadMgr,
     Toast,
-    Const
+    Const,
+    AuditLog
   ) {
-    var T = $translate.instant;
+    const T = $translate.instant,
+          map = require('array-map');
 
     angular.extend($scope, {
       transTab: 1,
@@ -57,12 +60,18 @@ angular.module("web").controller("transferFrameCtrl", [
      */
     function uploadFilesHandler(filePaths, bucketInfo) {
       Toast.info(T("upload.addtolist.on"));
-
       s3UploadMgr.createUploadJobs(filePaths, bucketInfo, function (isCancelled) {
         Toast.info(T("upload.addtolist.success"));
 
         $scope.transTab = 1;
         $scope.toggleTransVisible(true);
+
+        AuditLog.log('uploadFilesStart', {
+          regionId: bucketInfo.region,
+          bucket: bucketInfo.bucketName,
+          to: bucketInfo.key,
+          from: filePaths
+        });
       });
     }
 
@@ -73,9 +82,15 @@ angular.module("web").controller("transferFrameCtrl", [
      */
     function downloadFilesHandler(fromS3Path, toLocalPath) {
       Toast.info(T("download.addtolist.on"));
-
       s3DownloadMgr.createDownloadJobs(fromS3Path, toLocalPath, function (isCancelled) {
         Toast.info(T("download.addtolist.success"));
+
+        AuditLog.log('downloadFilesStart', {
+          from: map(fromS3Path, (entry) => {
+            return { regionId: entry.region, bucket: entry.bucketName, path: entry.path };
+          }),
+          to: toLocalPath
+        });
 
         $scope.transTab = 2;
         $scope.toggleTransVisible(true);

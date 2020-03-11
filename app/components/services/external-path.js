@@ -137,7 +137,7 @@ angular.module("web").factory("ExternalPath", [
                   folder = Global.config_path;
 
             if (!fs.existsSync(folder)) {
-                fs.mkdirSync(folder);
+                fs.mkdirSync(folder, { recursive: true });
             }
 
             return path.join(folder, `external_paths_${username}.json`);

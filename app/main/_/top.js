@@ -12,6 +12,7 @@ angular.module("web").controller("topCtrl", [
   "Toast",
   "Config",
   "autoUpgradeSvs",
+  "AuditLog",
   function(
     $scope,
     $rootScope,
@@ -25,7 +26,8 @@ angular.module("web").controller("topCtrl", [
     settingsSvs,
     Toast,
     Config,
-    autoUpgradeSvs
+    autoUpgradeSvs,
+    AuditLog
   ) {
     var fs = require("fs");
     var path = require("path");
@@ -96,7 +98,9 @@ angular.module("web").controller("topCtrl", [
         message,
         function(b) {
           if (b) {
+            const originalAccessKeyId = AuthInfo.get().id;
             Auth.logout().then(function() {
+              AuditLog.log('logout', { from: originalAccessKeyId });
               $location.url("/login");
             });
           }
@@ -113,6 +117,7 @@ angular.module("web").controller("topCtrl", [
         resolve: {
           choose: function() {
             return function(history) {
+              const originalAccessKeyId = AuthInfo.get().id;
               Auth.logout().then(
                 function () {
                   const isPublicCloud = history.isPublicCloud;
@@ -128,6 +133,7 @@ angular.module("web").controller("topCtrl", [
                       } else {
                         AuthInfo.switchToPrivateCloud();
                       }
+                      AuditLog.log('switchAccount', { from: originalAccessKeyId });
                       Toast.success(T("login.successfully"), 1000);
                       $rootScope.$broadcast("gotoKodoAddress", "kodo://");
                     },

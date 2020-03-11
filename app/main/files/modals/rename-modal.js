@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('renameModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$uibModal', 'item', 'isCopy', 'currentInfo', 'moveTo', 'callback', 's3Client', 'Dialog', 'Toast',
-    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, callback, s3Client, Dialog, Toast) {
+  .controller('renameModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$uibModal', 'item', 'isCopy', 'currentInfo', 'moveTo', 'callback', 's3Client', 'Dialog', 'Toast', 'AuditLog',
+    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, callback, s3Client, Dialog, Toast, AuditLog) {
       var T = $translate.instant;
       //console.log(item)
       angular.extend($scope, {
@@ -88,6 +88,15 @@ angular.module('web')
         Toast.info(onMsg);
         s3Client.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy).then(function () {
           Toast.success(successMsg);
+
+          AuditLog.log('moveOrCopyFile', {
+            regionId: currentInfo.region,
+            bucket: currentInfo.bucketName,
+            from: item.path,
+            to: newPath,
+            type: isCopy ? 'copy' : 'move'
+          });
+
           $scope.isLoading = false;
           callback();
           cancel();

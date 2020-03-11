@@ -8,6 +8,7 @@ angular.module("web").controller("filesCtrl", [
   "$location",
   "Auth",
   "AuthInfo",
+  "AuditLog",
   "Config",
   "s3Client",
   "bucketMap",
@@ -26,6 +27,7 @@ angular.module("web").controller("filesCtrl", [
     $location,
     Auth,
     AuthInfo,
+    AuditLog,
     Config,
     s3Client,
     bucketMap,
@@ -88,8 +90,6 @@ angular.module("web").controller("filesCtrl", [
 
       // bucket ops
       showAddBucket: showAddBucket,
-      showUpdateBucket: showUpdateBucket,
-      showBucketMultipart: showBucketMultipart,
       showDeleteBucket: showDeleteBucket,
 
       // external links selection
@@ -244,31 +244,6 @@ angular.module("web").controller("filesCtrl", [
     function searchExternalPathName() {
       $timeout.cancel(searchTid);
       searchTid = $timeout(listExternalPaths, 600);
-    }
-
-    var uploadsTid;
-
-    function uploadsChange() {
-      $timeout.cancel(uploadsTid);
-
-      uploadsTid = $timeout(() => {
-        if ($scope.mock.uploads) {
-          var uploads = $scope.mock.uploads.split(",");
-          $scope.handlers.uploadFilesHandler(uploads, $scope.currentInfo);
-        }
-      }, 600);
-    }
-
-    var downloadsTid;
-
-    function downloadsChange() {
-      $timeout.cancel(downloadsTid);
-
-      downloadsTid = $timeout(() => {
-        if ($scope.mock.downloads) {
-          tryDownloadFiles($scope.mock.downloads);
-        }
-      }, 600);
     }
 
     /////////////////////////////////
@@ -566,41 +541,6 @@ angular.module("web").controller("filesCtrl", [
       }).result.then(angular.noop, angular.noop);
     }
 
-    function showUpdateBucket(item) {
-      $modal.open({
-        templateUrl: "main/files/modals/update-bucket-modal.html",
-        controller: "updateBucketModalCtrl",
-        resolve: {
-          item: () => {
-            return item;
-          },
-          callback: () => {
-            return () => {
-              Toast.success(T("bucketACL.update.success"));
-
-              $timeout(() => {
-                listBuckets();
-              }, 300);
-            };
-          }
-        }
-      }).result.then(angular.noop, angular.noop);
-    }
-
-    function showBucketMultipart(item) {
-      $modal.open({
-        templateUrl: "main/files/modals/bucket-multipart-modal.html",
-        controller: "bucketMultipartModalCtrl",
-        size: "lg",
-        backdrop: "static",
-        resolve: {
-          bucketInfo: () => {
-            return item;
-          }
-        }
-      }).result.then(angular.noop, angular.noop);
-    }
-
     function showDeleteBucket(item) {
       const title = T("bucket.delete.title"),
           message = T("bucket.delete.message", {
@@ -614,8 +554,11 @@ angular.module("web").controller("filesCtrl", [
         (btn) => {
           if (btn) {
             s3Client.deleteBucket(item.region, item.name).then(() => {
+              AuditLog.log('deleteBucket', {
+                regionId: item.region,
+                name: item.name,
+              });
               Toast.success(T("bucket.delete.success")); //删除Bucket成功
-
               $timeout(listBuckets, 1000);
             });
           }
@@ -627,8 +570,8 @@ angular.module("web").controller("filesCtrl", [
     function showDeleteExternalPath(item) {
       const title = T("externalPath.delete.title"),
           message = T("externalPath.delete.message", {
-            path: item.fullPath,
-            region: item.regionId
+            region: item.regionId,
+            path: item.fullPath
           });
 
       Dialog.confirm(
@@ -639,6 +582,10 @@ angular.module("web").controller("filesCtrl", [
             ExternalPath.remove(item.fullPath, item.regionId).then(() => {
               Toast.success(T("externalPath.delete.success")); //删除外部路径成功
 
+              AuditLog.log('deleteExternalPath', {
+                regionId: item.regionId,
+                fullPath: item.fullPath
+              });
               $timeout(listExternalPaths, 1000);
             });
           }
@@ -729,9 +676,6 @@ angular.module("web").controller("filesCtrl", [
               download: () => {
                 showDownload(item);
               },
-              grant: () => {
-                showGrant([item]);
-              },
               move: (isCopy) => {
                 showMove([item], isCopy);
               },
@@ -751,21 +695,6 @@ angular.module("web").controller("filesCtrl", [
                 showCRC(item);
               }
             };
-          }
-        }
-      }).result.then(angular.noop, angular.noop);
-    }
-
-    function showGrant(items) {
-      $modal.open({
-        templateUrl: "main/files/modals/grant-modal.html",
-        controller: "grantModalCtrl",
-        resolve: {
-          items: () => {
-            return items;
-          },
-          currentInfo: () => {
-            return angular.copy($scope.currentInfo);
           }
         }
       }).result.then(angular.noop, angular.noop);

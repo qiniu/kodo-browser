@@ -66,7 +66,7 @@ angular.module("web").factory("AkHistory", [function() {
         const folder = Global.config_path;
 
         if (!fs.existsSync(folder)) {
-            fs.mkdirSync(folder);
+            fs.mkdirSync(folder, { recursive: true });
         }
 
         return path.join(folder, 'ak_histories.json');

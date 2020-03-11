@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addExternalPathModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'ExternalPath', 's3Client', 'Const', 'Config', 'AuthInfo', 'Toast',
-    function ($scope, $modalInstance, $translate, callback, ExternalPath, s3Client, Const, Config, AuthInfo, Toast) {
+  .controller('addExternalPathModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'ExternalPath', 's3Client', 'Const', 'Config', 'AuthInfo', 'AuditLog', 'Toast',
+    function ($scope, $modalInstance, $translate, callback, ExternalPath, s3Client, Const, Config, AuthInfo, AuditLog, Toast) {
       const T = $translate.instant,
            regions = angular.copy(Config.load(AuthInfo.usePublicCloud()).regions);
 
@@ -25,6 +25,10 @@ angular.module('web')
         const newExternalPath = ExternalPath.new(item.path, item.regionId);
         s3Client.listFiles(newExternalPath.regionId, newExternalPath.bucketId, newExternalPath.objectPrefix, '').then(() => {
           ExternalPath.create(item.path, item.regionId).then(() => {
+            AuditLog.log('addExternalPath', {
+              path: item.path,
+              regionId: item.regionId
+            });
             callback();
             cancel();
           }, (err) => {

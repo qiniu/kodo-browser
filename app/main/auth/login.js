@@ -11,6 +11,7 @@ angular.module("web").controller("loginCtrl", [
   "Dialog",
   "Toast",
   "AkHistory",
+  "AuditLog",
   function (
     $scope,
     $rootScope,
@@ -23,7 +24,8 @@ angular.module("web").controller("loginCtrl", [
     Config,
     Dialog,
     Toast,
-    AkHistory
+    AkHistory,
+    AuditLog
   ) {
     const T = $translate.instant;
 
@@ -122,6 +124,7 @@ angular.module("web").controller("loginCtrl", [
           if (data.remember) {
             AkHistory.add(isPublicCloud, data.id, data.secret, data.description);
           }
+          AuditLog.log('login');
           Toast.success(T("login.successfully"), 1000);
           $location.url("/");
         },

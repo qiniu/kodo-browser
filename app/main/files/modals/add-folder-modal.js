@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addFolderModalCtrl', ['$scope', '$uibModalInstance', 'currentInfo', 'callback', 's3Client',
-    function ($scope, $modalInstance, currentInfo, callback, s3Client) {
+  .controller('addFolderModalCtrl', ['$scope', '$uibModalInstance', 'currentInfo', 'callback', 's3Client', 'AuditLog',
+    function ($scope, $modalInstance, currentInfo, callback, s3Client, AuditLog) {
 
       angular.extend($scope, {
         currentInfo: currentInfo,
@@ -19,13 +19,17 @@ angular.module('web')
       function onSubmit(form) {
         if (!form.$valid) return;
 
-        var folderName = $scope.item.name;
-
-        s3Client.createFolder(currentInfo.region, currentInfo.bucket, currentInfo.key + folderName + '/').then(function () {
+        const folderName = $scope.item.name;
+        const fullPath = currentInfo.key + folderName + '/';
+        s3Client.createFolder(currentInfo.region, currentInfo.bucket, fullPath).then(function () {
+          AuditLog.log('addFolder', {
+            regionId: currentInfo.region,
+            bucket: currentInfo.bucketName,
+            path: fullPath
+          });
           callback();
           cancel();
         });
-
       }
     }
   ]);

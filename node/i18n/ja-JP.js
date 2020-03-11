@@ -5,6 +5,7 @@ module.exports = {
   type: "タイプ",
   customize: "カスタマイズ",
   "public.cloud": "パブリッククラウド",
+  "private.cloud": "プライベートクラウド",
 
   "region.unknown": "未知の地域",
   "config.parse.error": "設定ファイルの解析に失敗しました",
@@ -38,7 +39,7 @@ module.exports = {
   "auth.remember.popup.msg1": "AKキーを保存するには、 「覚えている」ボタンをチェックします。ログインするときは、AK Historyをクリックしてログインするキーを選択します.AKを手動で入力する必要はありません。 一時的な使用のためにコンピュータをチェックしないでください！",
 
   "auth.description": "説明",
-  "auth.description.placeholder": "オプション、最大30単語",
+  "auth.description.placeholder": "オプション、最大20単語",
   "auth.remember": "覚えている",
   "auth.login": "ログイン",
 
@@ -80,6 +81,7 @@ module.exports = {
   bookmarks: "ブックマーク",
   logout: "ログアウト",
   "logout.message": "ログアウトしてもよろしいですか?",
+  switch: "アカウントを切り替える",
   "main.upgration": "リリースノート",
   tempCert: "Temp Cert",
   "setup.success": "セットアップに成功しました",

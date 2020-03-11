@@ -5,6 +5,7 @@ module.exports = {
   type: "Type",
   customize: "Customize",
   "public.cloud": "Public Cloud",
+  "private.cloud": "Private Cloud",
 
   "region.unknown": "Unknown Region",
   "config.parse.error": "Failed to parse config file",
@@ -38,7 +39,7 @@ module.exports = {
   "auth.remember.popup.msg1": 'Check "Remember" to save the AK. When you login again, click AK History to select the key to log in. You do not need to enter AK manually. Please do not check it on a temporary computer!',
 
   "auth.description": "Description",
-  "auth.description.placeholder": "Optional, Up to 30 words",
+  "auth.description.placeholder": "Optional, Up to 20 words",
   "auth.remember": "Remember",
   "auth.login": "Login",
 
@@ -80,6 +81,7 @@ module.exports = {
   bookmarks: "Bookmarks",
   logout: "Logout",
   "logout.message": "Are you sure you want to logout?",
+  switch: "Switch account",
   "main.upgration": "Release Notes",
   tempCert: "Temp Cert",
   "setup.success": "Set up successfully",

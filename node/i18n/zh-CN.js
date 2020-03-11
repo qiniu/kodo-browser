@@ -5,6 +5,7 @@ module.exports = {
   type: "类型",
   customize: "自定义",
   "public.cloud": "公有云",
+  "private.cloud": "私有云",
 
   "region.unknown": "未知区域",
   "config.parse.error": "解析配置文件出错",
@@ -35,21 +36,21 @@ module.exports = {
   "auth.region.popup.msg1": "公有云直接选择可用区域即可",
   "auth.region.popup.msg2": "专有云请输入指定的区域，如：cn-east-1",
 
-  "auth.remember.popup.msg1": '勾选"记住秘钥"可保存AK秘钥，再次登录时，单击AK历史，可选择该秘钥登录，不需要手动输入AK。请不要再临时使用的电脑上勾选！',
+  "auth.remember.popup.msg1": '勾选"记住密钥"可保存 AK 密钥，再次登录时，单击AK历史，可选择该密钥登录，不需要手动输入 AK。请不要在临时使用的电脑上勾选！',
 
   "auth.description": "备注",
-  "auth.description.placeholder": "可以为空，最多30个字",
-  "auth.remember": "记住秘钥",
+  "auth.description.placeholder": "可以为空，最多 20 个字",
+  "auth.remember": "记住密钥",
   "auth.login": "登入",
 
-  "auth.removeAK.title": "删除AK",
-  "auth.removeAK.message": "ID：<code>{{id}}</code>, 确定删除?",
+  "auth.removeAK.title": "删除 AK",
+  "auth.removeAK.message": "AK <code>{{id}}</code> 备注 <code>{{description}}</code>将被删除，确认操作?",
 
-  "auth.akHistories": "AK历史",
+  "auth.akHistories": "AK 历史",
   "auth.clearHistories": "清空历史",
-  "auth.clearAKHistories.title": "清空AK历史",
-  "auth.clearAKHistories.message": "确定?",
-  "auth.clearAKHistories.successMessage": "已清空AK历史",
+  "auth.clearAKHistories.title": "清空 AK 历史",
+  "auth.clearAKHistories.message": "清空 AK 历史，所有已记录 AK 都将被删除，确认操作？",
+  "auth.clearAKHistories.successMessage": "已清空 AK 历史",
 
   "customizeRegions.title": "区域设置",
   "customizeRegions.addRegion": "添加区域",
@@ -80,6 +81,7 @@ module.exports = {
   bookmarks: "书签管理",
   logout: "退出",
   "logout.message": "确定要退出?",
+  switch: "切换账号",
   "main.upgration": "主要更新",
   tempCert: "临时凭证",
   "setup.success": "已经设置成功",

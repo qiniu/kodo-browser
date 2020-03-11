@@ -9,6 +9,8 @@ angular.module("web").controller("topCtrl", [
   "Auth",
   "AuthInfo",
   "settingsSvs",
+  "Toast",
+  "Config",
   "autoUpgradeSvs",
   function(
     $scope,
@@ -21,6 +23,8 @@ angular.module("web").controller("topCtrl", [
     Auth,
     AuthInfo,
     settingsSvs,
+    Toast,
+    Config,
     autoUpgradeSvs
   ) {
     var fs = require("fs");
@@ -29,6 +33,7 @@ angular.module("web").controller("topCtrl", [
 
     angular.extend($scope, {
       logout: logout,
+      switchAccount: switchAccount,
       showFavList: showFavList,
       showAbout: showAbout,
       showReleaseNote: showReleaseNote,
@@ -98,6 +103,45 @@ angular.module("web").controller("topCtrl", [
         },
         1
       );
+    }
+
+    function switchAccount() {
+      $modal.open({
+        templateUrl: "main/auth/modals/ak-histories-modal.html",
+        controller: "akHistoriesModalCtrl",
+        size: 'lg',
+        resolve: {
+          choose: function() {
+            return function(history) {
+              Auth.logout().then(
+                function () {
+                  const isPublicCloud = history.isPublicCloud;
+                  const data = {
+                    servicetpl: Config.load(isPublicCloud).regions[0].endpoint,
+                    id: history.accessKeyId,
+                    secret: history.accessKeySecret,
+                  };
+                  Auth.login(data).then(
+                    function () {
+                      if (isPublicCloud) {
+                        AuthInfo.switchToPublicCloud();
+                      } else {
+                        AuthInfo.switchToPrivateCloud();
+                      }
+                      Toast.success(T("login.successfully"), 1000);
+                      $rootScope.$broadcast("gotoKodoAddress", "kodo://");
+                    },
+                    function (err) {
+                      Toast.error(err.message)
+                    });
+                },
+                function (err) {
+                  Toast.error(err.message)
+                });
+            }
+          }
+        }
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showReleaseNote() {

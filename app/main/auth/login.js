@@ -10,6 +10,7 @@ angular.module("web").controller("loginCtrl", [
   "Config",
   "Dialog",
   "Toast",
+  "AkHistory",
   function (
     $scope,
     $rootScope,
@@ -21,20 +22,13 @@ angular.module("web").controller("loginCtrl", [
     Const,
     Config,
     Dialog,
-    Toast
+    Toast,
+    AkHistory
   ) {
     const T = $translate.instant;
 
     angular.extend($scope, {
-      flags: {
-        showMore: 0,
-        remember: "NO",
-        showHis: "NO"
-      },
-      item: {
-        domain: Global.domain,
-      },
-
+      item: {},
       clouds: [{
         name: T("auth.defaultCloud"),
         value: "default"
@@ -48,10 +42,8 @@ angular.module("web").controller("loginCtrl", [
       showGuestNav: 1,
 
       onSubmit: onSubmit,
-      showCleanHistories: showCleanHistories,
-      useHis: useHis,
       showCustomizedCloud: showCustomizedCloud,
-      showRemoveHis: showRemoveHis,
+      showAkHistories: showAkHistories,
 
       open: open,
     });
@@ -75,48 +67,27 @@ angular.module("web").controller("loginCtrl", [
       openExternal(a);
     }
 
-    function useHis(h) {
-      angular.extend($scope.item, h);
-    }
-
-    function showRemoveHis(h) {
-      var title = T("auth.removeAK.title");
-      var message = T("auth.removeAK.message", {
-        id: h.id
-      });
-      Dialog.confirm(
-        title,
-        message,
-        function (b) {
-          if (b) {
-            AuthInfo.removeFromHistories(h.id);
-            listHistories();
+    function showAkHistories() {
+      $modal.open({
+        templateUrl: "main/auth/modals/ak-histories-modal.html",
+        controller: "akHistoriesModalCtrl",
+        size: 'lg',
+        resolve: {
+          choose: function() {
+            return function(history) {
+              if (history.isPublicCloud) {
+                $scope.selectedCloud = 'default';
+              } else {
+                $scope.selectedCloud = 'customized';
+              }
+              $scope.item.id = history.accessKeyId;
+              $scope.item.secret = history.accessKeySecret;
+              $scope.item.description = history.description;
+              $scope.item.remember = true;
+            }
           }
-        },
-        1
-      );
-    }
-
-    function listHistories() {
-      $scope.his = AuthInfo.listHistories();
-    }
-
-    function showCleanHistories() {
-      var title = T("auth.clearAKHistories.title"); //清空AK历史
-      var message = T("auth.clearAKHistories.message"); //确定?
-      var successMessage = T("auth.clearAKHistories.successMessage"); //已清空AK历史
-      Dialog.confirm(
-        title,
-        message,
-        function (b) {
-          if (b) {
-            AuthInfo.cleanHistories();
-            listHistories();
-            Toast.success(successMessage);
-          }
-        },
-        1
-      );
+        }
+      }).result.then(angular.noop, angular.noop);
     }
 
     function showCustomizedCloud() {
@@ -134,20 +105,8 @@ angular.module("web").controller("loginCtrl", [
 
       data.servicetpl = Config.load(isPublicCloud).regions[0].endpoint;
 
-      // append domain
-      if (data.id) {
-        data.username = data.id + Global.domain;
-      }
-      // trim password
       if (data.secret) {
         data.secret = data.secret.trim();
-      }
-
-      delete data.username;
-      delete data.password;
-
-      if ($scope.flags.remember == "YES") {
-        AuthInfo.remember(data);
       }
 
       Toast.info(T("logining"), 1000);
@@ -160,8 +119,8 @@ angular.module("web").controller("loginCtrl", [
             AuthInfo.switchToPrivateCloud();
           }
 
-          if ($scope.flags.remember == "YES") {
-            AuthInfo.addToHistories(data);
+          if (data.remember) {
+            AkHistory.add(isPublicCloud, data.id, data.secret, data.description);
           }
           Toast.success(T("login.successfully"), 1000);
           $location.url("/");

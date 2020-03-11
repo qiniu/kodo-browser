@@ -1,0 +1,47 @@
+<form class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <h4 class="modal-title">
+      <i class="glyphicon glyphicon-time"></i>
+      <!-- AK 历史 -->
+      {{'auth.akHistories'|translate}}
+    </h4>
+  </div>
+  <div class="modal-body" style="overflow-x: auto;">
+    <header class="form-group">
+      <div class="col-sm-2">
+        <button type="button" class="btn btn-danger" ng-click="cleanAll()">
+          <i class="glyphicon glyphicon-trash"></i> {{'auth.clearHistories'|translate}}
+        </button>
+      </div>
+    </header>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Endpoint</th>
+          <th>AccessKeyId</th>
+          <th>AccessKeySecret</th>
+          <th>{{'auth.description'|translate}}</th>
+          <th>{{'actions'|translate}}</th>
+        </tr>
+      </thead>
+      <tbody class="table-hover">
+        <tr ng-repeat="history in histories">
+          <td style="font-size: 0.8em; vertical-align: middle;" ng-if="history.isPublicCloud">{{'public.cloud'|translate}}</td>
+          <td style="font-size: 0.8em; vertical-align: middle;" ng-if="!history.isPublicCloud">{{'private.cloud'|translate}}</td>
+          <td style="font-size: 0.8em; vertical-align: middle;">{{history.accessKeyId}}</td>
+          <td style="font-size: 0.8em; vertical-align: middle;">{{history.accessKeySecret}}</td>
+          <td style="font-size: 0.8em; vertical-align: middle; max-width: 100px;">{{history.description}}</td>
+          <td style="width: 130px;">
+            <button type="button" class="btn btn-primary" ng-click="chooseIt(history)">使用</button>
+            <button type="button" class="btn btn-warning" ng-click="removeIt(history)">删除</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="modal-footer">
+  </div>
+</form>

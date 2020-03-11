@@ -5,8 +5,6 @@ angular.module("web").factory("AuthInfo", [
   function ($q, Const, Cipher) {
     var AUTH_INFO = Const.AUTH_INFO_KEY;
     var CLOUD_CHOICE = Const.CLOUD_CHOICE_KEY;
-    var AUTH_HIS = Const.AUTH_HIS;
-    var AUTH_KEEP = Const.AUTH_KEEP;
 
     return {
       get: function () {
@@ -32,49 +30,7 @@ angular.module("web").factory("AuthInfo", [
       switchToPrivateCloud: function() {
         save(CLOUD_CHOICE, 'customized');
       },
-
-      remember: function (obj) {
-        save(AUTH_KEEP, obj);
-      },
-      unremember: function () {
-        remove(AUTH_KEEP);
-      },
-      getRemember: function () {
-        return get(AUTH_KEEP);
-      },
-
-      listHistories: function () {
-        return get(AUTH_HIS);
-      },
-      cleanHistories: function () {
-        remove(AUTH_HIS);
-      },
-      removeFromHistories: removeFromHistories,
-      addToHistories: addToHistories
     };
-
-    function addToHistories(obj) {
-      var arr = get(AUTH_HIS, []);
-      for (var i = 0; i < arr.length; i++) {
-        if (arr[i].id == obj.id) {
-          arr.splice(i, 1);
-          i--;
-        }
-      }
-      arr.unshift(obj);
-      save(AUTH_HIS, arr, []);
-    }
-
-    function removeFromHistories(id) {
-      var arr = get(AUTH_HIS, []);
-      for (var i = 0; i < arr.length; i++) {
-        if (arr[i].id == id) {
-          arr.splice(i, 1);
-          i--;
-        }
-      }
-      save(AUTH_HIS, arr, []);
-    }
 
     function saveToAuthInfo(opt) {
       var obj = get(AUTH_INFO);

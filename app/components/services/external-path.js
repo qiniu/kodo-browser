@@ -73,8 +73,7 @@ angular.module("web").factory("ExternalPath", [
         }
 
         function create(externalPath, regionId) {
-            const df = $q.defer(),
-                  filePath = getFilePath();
+            const df = $q.defer();
 
             list().then((paths) => {
                 const newOne = newExternalPath(externalPath, regionId);
@@ -86,7 +85,7 @@ angular.module("web").factory("ExternalPath", [
                     }
                 }
                 paths.push(newOne);
-                fs.writeFile(filePath, JSON.stringify(paths), 'utf8', (err) => {
+                writeExternalPaths(paths, (err) => {
                     if (err) {
                         df.reject(err);
                     } else {
@@ -112,7 +111,7 @@ angular.module("web").factory("ExternalPath", [
                         break;
                     }
                 }
-                fs.writeFile(filePath, JSON.stringify(paths), 'utf8', (err) => {
+                writeExternalPaths(paths, (err) => {
                     if (err) {
                         df.reject(err);
                     } else {
@@ -142,6 +141,10 @@ angular.module("web").factory("ExternalPath", [
             }
 
             return path.join(folder, `external_paths_${username}.json`);
+        }
+
+        function writeExternalPaths(paths, fn) {
+            fs.writeFile(getFilePath(), JSON.stringify(paths), 'utf8', fn);
         }
     }
 ]);

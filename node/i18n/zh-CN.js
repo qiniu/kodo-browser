@@ -93,7 +93,7 @@ module.exports = {
   refresh: "刷新",
   home: "首页",
   saveAsHome: "保存为首页",
-  saveToFav: "保存书签",
+  saveToBookmarks: "保存书签",
   "saveAsHome.success": "设置默认地址成功",
 
   "bookmark.remove.success": "已删除书签",
@@ -205,6 +205,7 @@ module.exports = {
   "settings.success": "已经保存设置",
 
   //bookmark
+  bookmarks: "书签管理",
   "bookmarks.title": "书签管理",
   time: "时间",
   "bookmarks.delete.success": "删除书签成功",

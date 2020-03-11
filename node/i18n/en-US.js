@@ -93,7 +93,7 @@ module.exports = {
   refresh: "Refresh",
   home: "Home",
   saveAsHome: "Set Home Page",
-  saveToFav: "Save To Bookmarks",
+  saveToBookmarks: "Save To Bookmarks",
   "saveAsHome.success": "Set home page success",
 
   "bookmark.remove.success": "Remove Bookmark success",

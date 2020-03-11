@@ -93,7 +93,7 @@ module.exports = {
   refresh: "リフレッシュ",
   home: "ホーム",
   saveAsHome: "ホームページを設定する",
-  saveToFav: "ブックマークに保存",
+  saveToBookmarks: "ブックマークに保存",
   "saveAsHome.success": "ホームページの設定は成功",
 
   "bookmark.remove.success": "ブックマークの削除は成功",

@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addressBarCtrl', ['$scope', '$translate', 'Fav', 'AuthInfo', 'Toast', 'settingsSvs',
-    function ($scope, $translate, Fav, AuthInfo, Toast, settingsSvs) {
+  .controller('addressBarCtrl', ['$scope', '$translate', 'Bookmark', 'AuthInfo', 'Toast', 'settingsSvs',
+    function ($scope, $translate, Bookmark, AuthInfo, Toast, settingsSvs) {
 
       const KODO_ADDR_PROTOCOL = 'kodo://',
             T = $translate.instant;
@@ -13,8 +13,8 @@ angular.module('web')
         saveDefaultAddress: saveDefaultAddress,
         getDefaultAddress: getDefaultAddress,
 
-        isFav: isFav,
-        toggleFav: toggleFav,
+        marked: marked,
+        toggleMark: toggleMark,
 
         //历史，前进，后退
         canGoAhead: false,
@@ -24,23 +24,19 @@ angular.module('web')
       });
 
 
-      function isFav() {
+      function marked() {
         const addressAndMode = getCurrentAddressAndMode();
-        return Fav.has(addressAndMode.address, addressAndMode.mode);
+        return Bookmark.marked(addressAndMode.address, addressAndMode.mode);
       }
 
-      function toggleFav() {
+      function toggleMark() {
         const addressAndMode = getCurrentAddressAndMode();
-        if (Fav.has(addressAndMode.address, addressAndMode.mode)) {
-          Fav.remove(addressAndMode.address, addressAndMode.mode);
+        if (Bookmark.marked(addressAndMode.address, addressAndMode.mode)) {
+          Bookmark.remove(addressAndMode.address, addressAndMode.mode);
           Toast.warn(T('bookmark.remove.success')); //'已删除书签'
-        }
-        else {
-          if (Fav.add(addressAndMode.address, addressAndMode.mode)) {
-            Toast.success(T('bookmark.add.success'));//'添加书签成功'
-          } else {
-            Toast.warn(T('bookmark.add.error1'));//'添加书签失败: 超过最大限制'
-          }
+        } else {
+          Bookmark.add(addressAndMode.address, addressAndMode.mode);
+          Toast.success(T('bookmark.add.success'));//'添加书签成功'
         }
       }
 

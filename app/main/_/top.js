@@ -36,7 +36,7 @@ angular.module("web").controller("topCtrl", [
     angular.extend($scope, {
       logout: logout,
       switchAccount: switchAccount,
-      showFavList: showFavList,
+      showBookmarks: showBookmarks,
       showAbout: showAbout,
       showReleaseNote: showReleaseNote,
       showBucketsOrFiles: showBucketsOrFiles,
@@ -167,10 +167,10 @@ angular.module("web").controller("topCtrl", [
       );
     }
 
-    function showFavList() {
+    function showBookmarks() {
       $modal.open({
-        templateUrl: "main/modals/fav-list.html",
-        controller: "favListCtrl",
+        templateUrl: "main/modals/bookmarks.html",
+        controller: "bookmarksCtrl",
         size: "lg"
       }).result.then(angular.noop, angular.noop);
     }
@@ -193,15 +193,23 @@ angular.module("web").controller("topCtrl", [
     }
 
     function showBucketsOrFiles() {
-      if ($scope.ref.mode.startsWith('external')) {
+      if (isExternalPathsView()) {
         $scope.gotoLocalMode();
       }
     }
 
     function showExternalPaths() {
-      if ($scope.ref.mode.startsWith('local')) {
+      if (isBucketsOrFilesView()) {
         $scope.gotoExternalMode();
       }
+    }
+
+    function isBucketsOrFilesView() {
+      return $scope.ref.mode.startsWith('local');
+    }
+
+    function isExternalPathsView() {
+      return $scope.ref.mode.startsWith('external');
     }
   }
 ]);

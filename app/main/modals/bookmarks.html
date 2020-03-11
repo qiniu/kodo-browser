@@ -9,21 +9,22 @@
 </div>
 
 <div class="modal-body">
-  <div no-data ng-if="!items || items.length==0"> </div>
+  <div no-data ng-if="!bookmarks || bookmarks.length == 0">
 
-  <table ng-if="items.length>0" class="mg0 table table-bordered table-striped table-condensed">
+  </div>
+  <table ng-if="bookmarks.length > 0" class="mg0 table table-bordered table-striped table-condensed">
     <tr>
       <th>URL</th>
       <th>{{'time'|translate}}</th>
       <th>{{'actions'|translate}}</th>
     </tr>
-    <tr ng-repeat="item in items">
+    <tr ng-repeat="bookmark in bookmarks">
       <td>
-        <a href="" ng-click="goTo(item.url)">{{item.url}}</a>
+        <a href="#" ng-click="goTo(bookmark)">{{bookmark.fullPath}}</a>
       </td>
-      <td>{{item.time|timeFormat}}</td>
+      <td>{{bookmark.time|timeFormat}}</td>
       <td>
-        <a href="" class="text-danger" ng-click="removeFav(item)">{{'delete'|translate}}</a>
+        <a href="" class="text-danger" ng-click="remove(bookmark)">{{'delete'|translate}}</a>
       </td>
     </tr>
   </table>

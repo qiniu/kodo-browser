@@ -49,7 +49,7 @@ angular.module('web')
         });
         each(items, (item) => {
           const url = s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, lifetime);
-          csvStringifier.write([currentInfo.bucket, item.path, url]);
+          csvStringifier.write([currentInfo.bucketName, item.path, url]);
         });
         csvStringifier.end();
       }

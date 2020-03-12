@@ -226,7 +226,10 @@ module.exports = {
   paste: "ペースト",
   rename: "名前を変更する",
   getDownloadLink: "ダウンロードアドレスを取得する",
+  exportDownloadLinks: "ダウンロードリンクのエクスポート",
   genAuthToken: "認証トークン",
+
+  "exportDownloadLinks.message": "ダウンロードリンクがエクスポートされます",
 
   "rename.to": "名前を変更する",
   "whetherCover.title": "カバーするかどうか",
@@ -289,9 +292,11 @@ module.exports = {
   "aclType.public-read-write.message": "パブリックの読み書き: 誰もがオブジェクトを読み書きできます",
 
   "getDownloadLink.title": "ダウンロードアドレスを取得する",
+  "exportDownloadLinks.title": "ダウンロードリンクのエクスポート",
   downloadLink: "ダウンロードリンク",
   "getDownloadLink.message": "リンクの有効期間を入力してください",
   generate: "生成",
+  generateAndExport: "生成およびエクスポート",
   "qrcode.download": "コードをスキャンしダウンロードする",
 
   "restore.checker.message1": "プレビューまたはダウンロードするためにアーカイブを復元する必要があります。",

@@ -227,7 +227,10 @@ module.exports = {
   paste: "Paste",
   rename: "Rename",
   getDownloadLink: "Get Download Link",
+  exportDownloadLinks: "Export Download Links",
   genAuthToken: "Authorization Token",
+
+  "exportDownloadLinks.message": "Download links are exported，please open {{path}} to view",
 
   "rename.to": "Rename To",
   "whetherCover.title": "Whether cover",
@@ -290,9 +293,11 @@ module.exports = {
   "aclType.public-read-write.message": "Public read and write: Everyone can read and write objects",
 
   "getDownloadLink.title": "Get Download Link",
+  "exportDownloadLinks.title": "Export Download Links",
   downloadLink: "Download Link",
   "getDownloadLink.message": "Please enter the validity period of the link",
   generate: "Generate",
+  generateAndExport: "Generate and export",
   "qrcode.download": "Sweep code to download",
 
   "restore.checker.message1": "Archive need to be restored in order to preview or download.",

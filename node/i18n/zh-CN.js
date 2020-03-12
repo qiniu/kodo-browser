@@ -227,7 +227,10 @@ module.exports = {
   paste: "粘贴",
   rename: "重命名",
   getDownloadLink: "获取外链",
+  exportDownloadLinks: "导出外链",
   genAuthToken: "生成授权码",
+
+  "exportDownloadLinks.message": "导出外链成功，请打开 {{path}} 查看",
 
   "rename.to": "重命名",
   "whetherCover.title": "是否覆盖",
@@ -290,9 +293,11 @@ module.exports = {
   "aclType.public-read-write.message": "公共读写：所有人都可以对object进行读写操作",
 
   "getDownloadLink.title": "获取外链",
+  "exportDownloadLinks.title": "导出外链",
   downloadLink: "外链地址",
   "getDownloadLink.message": "请输入链接有效期",
   generate: "生成",
+  generateAndExport: "生成并导出",
   "qrcode.download": "扫码下载",
 
   "restore.checker.message1": "归档文件，需要恢复才能预览或下载。",

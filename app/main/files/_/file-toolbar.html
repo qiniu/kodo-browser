@@ -1,6 +1,6 @@
-<header class="pd4 file-toolbar">
+<header class="pd4 file-toolbar" style="min-width: 915px;">
 
-  <div class="col-sm-7 pd0">
+  <div class="col-sm-8 pd0" style="min-width: 600px;">
 
     <div class="btn-group" role="group" ng-disabled="!currentBucketPerm || !currentBucketPerm.write">
       <span class="btn btn-info btn-sm" ng-if="total_folders>0">
@@ -45,6 +45,11 @@
         {{'delete'|translate}}
       </button>
 
+      <button type="button" class="btn btn-default btn-sm" ng-click="showDownloadLinkOfFilesSelected()" ng-disabled="sel.has.length==0 || !currentBucketPerm || !currentBucketPerm.read">
+        <i class="fa fa-link text-primary"></i>
+        {{'exportDownloadLinks'|translate}}
+      </button>
+
     </div>
 
     <div class="btn-group" role="toolbar" ng-if="keepMoveOptions">
@@ -64,7 +69,7 @@
 
   </div>
 
-  <div class="col-sm-2 pd0">
+  <div class="col-sm-3 pd0">
     <div class="input-group input-group-sm">
       <input type="text" ng-model="sch.objectName" ng-change="searchObjectName()" class="form-control" cleanable-input placeholder="{{'search.files.placeholder'|translate}}">
       <span class="input-group-addon">
@@ -74,7 +79,7 @@
     </div>
 
   </div>
-  <div class="col-sm-3 pd0">
+  <div class="col-sm-1 pd0">
     <span ng-include="'main/files/_/list-view-options.html'"></span>
   </div>
 

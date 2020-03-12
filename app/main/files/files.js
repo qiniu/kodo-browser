@@ -37,9 +37,9 @@ angular.module("web").controller("filesCtrl", [
     Dialog,
     Customize
   ) {
-    const filter = require("array-filter");
-    const deepEqual = require('fast-deep-equal');
-    const T = $translate.instant;
+    const filter = require("array-filter"),
+          deepEqual = require('fast-deep-equal'),
+          T = $translate.instant;
 
     angular.extend($scope, {
       showTab: 1,
@@ -123,6 +123,7 @@ angular.module("web").controller("filesCtrl", [
       gotoLocalMode: gotoLocalMode,
       gotoExternalPath: gotoExternalPath,
       showDownloadLink: showDownloadLink,
+      showDownloadLinkOfFilesSelected: showDownloadLinkOfFilesSelected,
       showPreview: showPreview,
       showACL: showACL,
 
@@ -830,6 +831,25 @@ angular.module("web").controller("filesCtrl", [
         resolve: {
           item: () => {
             return angular.copy(item);
+          },
+          currentInfo: () => {
+            return angular.copy($scope.currentInfo);
+          }
+        }
+      }).result.then(angular.noop, angular.noop);
+    }
+
+    function showDownloadLinkOfFilesSelected() {
+      showDownloadLinks($scope.sel.has);
+    }
+
+    function showDownloadLinks(items) {
+      $modal.open({
+        templateUrl: "main/files/modals/show-download-links-modal.html",
+        controller: "showDownloadLinksModalCtrl",
+        resolve: {
+          items: () => {
+            return angular.copy(items);
           },
           currentInfo: () => {
             return angular.copy($scope.currentInfo);

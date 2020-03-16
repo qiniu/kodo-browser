@@ -39,7 +39,7 @@ module.exports = {
   "auth.remember.popup.msg1": '勾选“记住密钥”可保存 AK 密钥，再次登录时可直接从 AK 历史中选择该密钥登录。请不要在临时使用的电脑上勾选！',
 
   "auth.description": "备注",
-  "auth.description.placeholder": "可以为空，最多 20 个字",
+  "auth.description.placeholder": "可以为空，最多 20 个字或字符",
   "auth.remember": "记住密钥",
   "auth.login": "登入",
   "auth.login.error.title": "登录失败",

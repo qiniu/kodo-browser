@@ -36,7 +36,7 @@ module.exports = {
   "auth.region.popup.msg1": "For Public Cloud, you can select available region from the list",
   "auth.region.popup.msg2": "For Private Cloud, Please enter a custom Region, such as:",
 
-  "auth.remember.popup.msg1": 'Check "Remember" to save the AK. When you login again, click AK History to select the key to log in. You do not need to enter AK manually. Please do not check it on a temporary computer!',
+  "auth.remember.popup.msg1": 'Check "Remember" to save the AK. When you login again, click AK History to select the key to log in. You do not need to enter AK / SK manually. Please do not check it on a temporary computer!',
 
   "auth.description": "Description",
   "auth.description.placeholder": "Optional, Up to 20 words",

@@ -50,7 +50,8 @@
           <div class="form-group has-feedback" ng-if="item.remember" ng-class="{'has-error': !form1.ades.$valid }">
             <label for="ades" class="col-sm-4 control-label">{{'auth.description'|translate}}:</label>
             <div class="col-sm-7">
-              <input type="text" ng-maxlength="20" ng-model="item.description" class="form-control" id="ades" name="ades" placeholder="{{'auth.description.placeholder'|translate}}">
+              <i class="fa fa-question-circle" style="position: absolute; padding: 10px;" uib-tooltip="{{'auth.description.placeholder'|translate}}" tooltip-is-open="form1.ades.$invalid" tooltip-placement="top" tooltip-append-to-body="true"></i>
+              <input type="text" ng-maxlength="20" ng-model="item.description" class="form-control" id="ades" name="ades" placeholder="{{'auth.description.placeholder'|translate}}" style="padding-left: 32px;">
             </div>
             <div class="col-sm-1"></div>
           </div>

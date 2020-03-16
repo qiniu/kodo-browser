@@ -36,7 +36,7 @@ module.exports = {
   "auth.region.popup.msg1": "公有云直接选择可用区域即可",
   "auth.region.popup.msg2": "专有云请输入指定的区域，如：cn-east-1",
 
-  "auth.remember.popup.msg1": '勾选"记住密钥"可保存 AK 密钥，再次登录时，单击AK历史，可选择该密钥登录，不需要手动输入 AK。请不要在临时使用的电脑上勾选！',
+  "auth.remember.popup.msg1": '勾选“记住密钥”可保存 AK 密钥，再次登录时可直接从 AK 历史中选择该密钥登录。请不要在临时使用的电脑上勾选！',
 
   "auth.description": "备注",
   "auth.description.placeholder": "可以为空，最多 20 个字",

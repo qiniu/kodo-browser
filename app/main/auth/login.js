@@ -32,10 +32,10 @@ angular.module("web").controller("loginCtrl", [
     angular.extend($scope, {
       item: {},
       clouds: [{
-        name: T("auth.defaultCloud"),
+        name: "auth.defaultCloud",
         value: "default"
       }, {
-        name: T("auth.customizedCloud"),
+        name: "auth.customizedCloud",
         value: "customized"
       }],
       privateCloud: privateCloud(),

@@ -21,7 +21,8 @@
             <label for="aid" class="col-sm-4 control-label">
               <span class="red">*</span> Endpoint:</label>
             <div class="col-sm-7">
-              <select required ng-model="selectedCloud" class="form-control" id="endpoint" name="endpoint" ng-options="cloud.value as cloud.name for cloud in clouds">
+              <select required ng-model="selectedCloud" class="form-control" id="endpoint" name="endpoint">
+                <option ng-repeat="cloud in clouds" value="{{cloud.value}}">{{cloud.name|translate}}</option>
               </select>
             </div>
             <div class="col-sm-1">

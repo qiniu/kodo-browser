@@ -42,6 +42,12 @@ module.exports = {
   "auth.description.placeholder": "Optional, Up to 20 words",
   "auth.remember": "Remember",
   "auth.login": "Login",
+  "auth.login.error.title": "Login failed",
+  "auth.login.error.description": "Please check your network, AK / SK pair, private cloud configuration or contact your network administrator",
+  "auth.logout.error.title": "Logout failed",
+  "auth.logout.error.description": "Please check your network, private cloud configuration or contact your network administrator",
+  "auth.switch.error.title": "Account switching failed",
+  "auth.switch.error.description": "Please check your network, private cloud configuration or contact your network administrator",
 
   "auth.removeAK.title": "Remove AK",
   "auth.removeAK.message": "Remove AK：<code>{{id}}</code>, Are you sure?",

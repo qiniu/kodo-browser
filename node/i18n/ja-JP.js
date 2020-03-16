@@ -42,6 +42,12 @@ module.exports = {
   "auth.description.placeholder": "オプション、最大20単語",
   "auth.remember": "覚えている",
   "auth.login": "ログイン",
+  "auth.login.error.title": "ログインに失敗しました",
+  "auth.login.error.description": "ネットワーク、AK / SKペア、プライベートクラウドの設定を確認するか、ネットワーク管理者に連絡してください",
+  "auth.logout.error.title": "ログアウトに失敗しました",
+  "auth.logout.error.description": "ネットワーク、プライベートクラウドの構成を確認するか、ネットワーク管理者に連絡してください",
+  "auth.switch.error.title": "アカウントの切り替えに失敗しました",
+  "auth.switch.error.description": "ネットワーク、プライベートクラウドの構成を確認するか、ネットワーク管理者に連絡してください",
 
   "auth.removeAK.title": "AK削除",
   "auth.removeAK.message": "本当にAKを削除しますか：<code>{{id}}</code>？",

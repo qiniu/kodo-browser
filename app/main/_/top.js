@@ -99,10 +99,15 @@ angular.module("web").controller("topCtrl", [
         function(b) {
           if (b) {
             const originalAccessKeyId = AuthInfo.get().id;
-            Auth.logout().then(function() {
-              AuditLog.log('logout', { from: originalAccessKeyId });
-              $location.url("/login");
-            });
+            Auth.logout().then(
+              function() {
+                AuditLog.log('logout', { from: originalAccessKeyId });
+                $location.url("/login");
+              },
+              function (err) {
+                Toast.error(err.message, 5000);
+                Dialog.alert(T('auth.logout.error.title'), T('auth.logout.error.description'), null, 1);
+              });
           }
         },
         1
@@ -138,11 +143,13 @@ angular.module("web").controller("topCtrl", [
                       $rootScope.$broadcast("gotoKodoAddress", "kodo://");
                     },
                     function (err) {
-                      Toast.error(err.message)
+                      Toast.error(err.message, 5000);
+                      Dialog.alert(T('auth.switch.error.title'), T('auth.switch.error.description'), null, 1);
                     });
                 },
                 function (err) {
-                  Toast.error(err.message)
+                  Toast.error(err.message, 5000);
+                  Dialog.alert(T('auth.logout.error.title'), T('auth.logout.error.description'), null, 1);
                 });
             }
           }

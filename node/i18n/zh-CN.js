@@ -42,6 +42,12 @@ module.exports = {
   "auth.description.placeholder": "可以为空，最多 20 个字",
   "auth.remember": "记住密钥",
   "auth.login": "登入",
+  "auth.login.error.title": "登录失败",
+  "auth.login.error.description": "请检查您的网络，AK / SK 密钥，私有云配置或联系网络管理员",
+  "auth.logout.error.title": "注销失败",
+  "auth.logout.error.description": "请检查您的网络，私有云配置或联系网络管理员",
+  "auth.switch.error.title": "切换账号失败",
+  "auth.switch.error.description": "请检查您的网络，私有云配置或联系网络管理员",
 
   "auth.removeAK.title": "删除 AK",
   "auth.removeAK.message": "AK <code>{{id}}</code> 备注 <code>{{description}}</code>将被删除，确认操作?",

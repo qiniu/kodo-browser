@@ -47,6 +47,7 @@ angular.module('web')
           Toast.success(T('exportDownloadLinks.message', {path: filePath}), 5000);
           cancel();
         });
+        csvStringifier.write(['BucketName', 'ObjectName', 'URL']);
         each(items, (item) => {
           const url = s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, lifetime);
           csvStringifier.write([currentInfo.bucketName, item.path, url]);

@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('showDownloadLinksModalCtrl', ['$scope', '$q','$translate', '$uibModalInstance', 'items', 'currentInfo', 's3Client', 'Toast',
-    function ($scope, $q, $translate, $modalInstance, items, currentInfo, s3Client, Toast) {
+  .controller('showDownloadLinksModalCtrl', ['$scope', '$timeout', '$translate', '$uibModalInstance', 'items', 'currentInfo', 's3Client', 'Toast',
+    function ($scope, $timeout, $translate, $modalInstance, items, currentInfo, s3Client, Toast) {
       const T = $translate.instant,
             fs = require('fs'),
             path = require('path'),
@@ -48,11 +48,55 @@ angular.module('web')
           cancel();
         });
         csvStringifier.write(['BucketName', 'ObjectName', 'URL']);
-        each(items, (item) => {
-          const url = s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, lifetime);
-          csvStringifier.write([currentInfo.bucketName, item.path, url]);
-        });
-        csvStringifier.end();
+        loopItems(currentInfo.region, currentInfo.bucket, items,
+          (item) => {
+            const url = s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, lifetime);
+            csvStringifier.write([currentInfo.bucketName, item.path, url]);
+          }, () => {
+            csvStringifier.end();
+          });
+      }
+
+      function loopItems(region, bucket, items, eachCallback, doneCallback) {
+        let waitForDirs = 0;
+        loopItemsInDirectory(items, eachCallback, doneCallback);
+
+        function loopItemsInDirectory(items, eachCallback, doneCallback) {
+          each(items, (item) => {
+            if (item.isFolder) {
+              waitForDirs += 1;
+              loadFilesFromDirectory(
+                item,
+                (items) => {
+                  loopItemsInDirectory(items, eachCallback, doneCallback);
+                },
+                () => {
+                  waitForDirs--;
+                  if (waitForDirs == 0) {
+                    doneCallback();
+                  }
+                })
+            } else {
+              eachCallback(item);
+            }
+          });
+          if (waitForDirs == 0) {
+            doneCallback();
+          }
+        }
+
+        function loadFilesFromDirectory(item, handleItems, doneCallback, marker) {
+          s3Client
+            .listFiles(region, bucket, item.path, marker)
+            .then((result) => {
+                handleItems(result.data || []);
+                if (result.marker) {
+                  loadFilesFromDirectory(item, handleItems, doneCallback, result.marker);
+                } else {
+                  doneCallback();
+                }
+            });
+        }
       }
     }
   ]);

@@ -85,7 +85,6 @@ angular.module("web").controller("loginCtrl", [
               $scope.item.id = history.accessKeyId;
               $scope.item.secret = history.accessKeySecret;
               $scope.item.description = history.description;
-              $scope.item.remember = true;
             }
           }
         }

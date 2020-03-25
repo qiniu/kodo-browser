@@ -28,7 +28,7 @@ function Client(options) {
   options = options ? options : {};
 
   this.s3 = options.s3Client || new AWS.S3(options.s3Options);
-  this.s3concurrency = options.maxConcurrency || 10; // multipart io limitation!
+  this.s3concurrency = options.maxConcurrency || 1; // multipart io limitation!
 
   this.resumeUpload = options.resumeUpload === true;
   this.multipartUploadThreshold = options.multipartUploadThreshold || (MIN_MULTIPART_SIZE * 10);

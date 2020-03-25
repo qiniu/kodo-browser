@@ -39,7 +39,7 @@ angular.module("web").factory("settingsSvs", [
 
       maxUploadConcurrency: {
         get: function () {
-          return parseInt(localStorage.getItem("maxUploadConcurrency") || 10);
+          return parseInt(localStorage.getItem("maxUploadConcurrency") || 1);
         },
         set: function (v) {
           return localStorage.setItem("maxUploadConcurrency", v);
@@ -95,7 +95,7 @@ angular.module("web").factory("settingsSvs", [
 
       maxDownloadConcurrency: {
         get: function () {
-          return parseInt(localStorage.getItem("maxDownloadConcurrency") || 10);
+          return parseInt(localStorage.getItem("maxDownloadConcurrency") || 1);
         },
         set: function (v) {
           return localStorage.setItem("maxDownloadConcurrency", v);

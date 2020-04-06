@@ -13,12 +13,13 @@ angular.module("web").factory("s3DownloadMgr", [
     Toast,
     settingsSvs
   ) {
-    var fs = require("fs"),
-      pfs = fs.promises,
-      path = require("path"),
-      os = require("os"),
-      sanitize = require("sanitize-filename"),
-      S3Store = require("./node/s3store");
+    const fs = require("fs"),
+          http = require("http"),
+          pfs = fs.promises,
+          path = require("path"),
+          os = require("os"),
+          sanitize = require("sanitize-filename"),
+          S3Store = require("./node/s3store");
 
     var $scope;
     var concurrency = 0;
@@ -94,7 +95,8 @@ angular.module("web").factory("s3DownloadMgr", [
         region: region,
         httpOptions: {
           connectTimeout: 3000, // 3s
-          timeout: 300000 // 5m
+          timeout: 300000, // 5m
+          agent: new http.Agent({keepAlive: true})
         }
       });
 

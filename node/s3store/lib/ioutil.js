@@ -1,15 +1,15 @@
 'use strict';
 
 const AWS = require('aws-sdk'),
-  EventEmitter = require('events').EventEmitter,
-  fs = require('fs'),
-  mime = require('mime'),
-  {
-    ReadableStream
-  } = require('./stream'),
-  {
-    Throttle
-  } = require('stream-throttle');
+      EventEmitter = require('events').EventEmitter,
+      fs = require('fs'),
+      mime = require('mime'),
+      {
+        ReadableStream
+      } = require('./stream'),
+      {
+        Throttle
+      } = require('stream-throttle');
 
 const {
   MIN_MULTIPART_SIZE,

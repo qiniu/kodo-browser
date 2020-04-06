@@ -10,6 +10,7 @@ angular.module("web").factory("s3Client", [
   "AuthInfo",
   function ($q, $rootScope, $translate, $timeout, $state, Toast, Config, KodoClient, AuthInfo) {
     const AWS = require("aws-sdk"),
+          http = require("http"),
           path = require("path"),
           each = require("array-each"),
           map = require("array-map"),
@@ -1330,7 +1331,8 @@ angular.module("web").factory("s3Client", [
         signatureVersion: "v4",
         httpOptions: {
           connectTimeout: 3000, // 3s
-          timeout: 300000 // 5m
+          timeout: 300000, // 5m
+          agent: new http.Agent({keepAlive: true})
         }
       });
 

@@ -14,6 +14,7 @@ angular.module("web").factory("s3UploadMgr", [
     settingsSvs
   ) {
     const fs = require("fs"),
+          http = require("http"),
           path = require("path"),
           os = require("os"),
           S3Store = require("./node/s3store"),
@@ -94,7 +95,8 @@ angular.module("web").factory("s3UploadMgr", [
         region: options.region,
         httpOptions: {
           connectTimeout: 3000, // 3s
-          timeout: 300000 // 5m
+          timeout: 300000, // 5m
+          agent: new http.Agent({keepAlive: true})
         }
       });
 

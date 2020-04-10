@@ -11,6 +11,7 @@ angular.module("web").factory("s3Client", [
   function ($q, $rootScope, $translate, $timeout, $state, Toast, Config, KodoClient, AuthInfo) {
     const AWS = require("aws-sdk"),
           http = require("http"),
+          https = require("https"),
           path = require("path"),
           each = require("array-each"),
           map = require("array-map"),
@@ -1315,9 +1316,10 @@ angular.module("web").factory("s3Client", [
      *    object = {id, secret, region, bucket}
      */
     function getClient(opt) {
-      var options = prepareOptions(opt);
+      const options = prepareOptions(opt);
 
-      var client = new AWS.S3({
+      const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
+      const client = new AWS.S3({
         apiVersion: "2006-03-01",
         customUserAgent: `QiniuKodoBrowser/${Global.app.version}`,
         computeChecksums: true,
@@ -1332,7 +1334,7 @@ angular.module("web").factory("s3Client", [
         httpOptions: {
           connectTimeout: 3000, // 3s
           timeout: 300000, // 5m
-          agent: new http.Agent({keepAlive: true})
+          agent: options.endpoint.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
         }
       });
 

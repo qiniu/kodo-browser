@@ -15,6 +15,7 @@ angular.module("web").factory("s3DownloadMgr", [
   ) {
     const fs = require("fs"),
           http = require("http"),
+          https = require("https"),
           pfs = fs.promises,
           path = require("path"),
           os = require("os"),
@@ -61,7 +62,7 @@ angular.module("web").factory("s3DownloadMgr", [
      * @return job  { start(), stop(), status, progress }
      */
     function createJob(auth, options) {
-      var region = options.region || auth.region;
+      const region = options.region || auth.region;
       console.info(
         "GET",
         "::",
@@ -86,7 +87,8 @@ angular.module("web").factory("s3DownloadMgr", [
         }
       });
 
-      var store = new S3Store({
+      const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
+      const store = new S3Store({
         credential: {
           accessKeyId: auth.id,
           secretAccessKey: auth.secret
@@ -96,7 +98,7 @@ angular.module("web").factory("s3DownloadMgr", [
         httpOptions: {
           connectTimeout: 3000, // 3s
           timeout: 300000, // 5m
-          agent: new http.Agent({keepAlive: true})
+          agent: auth.servicetpl.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
         }
       });
 

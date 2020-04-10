@@ -339,7 +339,7 @@ angular.module("web").factory("s3Client", [
           Bucket: to.bucket,
           Key: toKey,
           CopySource: fromKey,
-          MetadataDirective: "REPLACE"
+          MetadataDirective: 'COPY'
         };
 
         client.copyObject(params,
@@ -649,7 +649,7 @@ angular.module("web").factory("s3Client", [
         Bucket: bucket,
         Key: newKey,
         CopySource: "/" + bucket + "/" + encodeURIComponent(oldKey),
-        MetadataDirective: "REPLACE" // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
+        MetadataDirective: 'COPY' // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
       };
 
       client.copyObject(params, function (err) {

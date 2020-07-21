@@ -333,14 +333,16 @@ angular.module("web").factory("s3Client", [
           "::",
           from.bucket + "/" + from.key,
           "==>",
-          to.bucket + "/" + toKey
+          to.bucket + "/" + toKey,
+          from.storageClass
         );
 
         var params = {
           Bucket: to.bucket,
           Key: toKey,
           CopySource: fromKey,
-          MetadataDirective: 'COPY'
+          MetadataDirective: 'COPY',
+          StorageClass: from.storageClass
         };
 
         client.copyObject(params,
@@ -398,7 +400,8 @@ angular.module("web").factory("s3Client", [
           copyFile(
             client, {
               bucket: bucket,
-              key: item.path
+              key: item.path,
+              storageClass: item.StorageClass
             }, {
               bucket: target.bucket,
               key: toKey
@@ -533,7 +536,8 @@ angular.module("web").factory("s3Client", [
         copyFile(
           client, {
             bucket: source.bucket,
-            key: source.path
+            key: source.path,
+            storageClass: source.StorageClass,
           }, {
             bucket: target.bucket,
             key: target.key
@@ -638,7 +642,7 @@ angular.module("web").factory("s3Client", [
     }
 
     //移动文件，重命名文件
-    function moveFile(region, bucket, oldKey, newKey, isCopy) {
+    function moveFile(region, bucket, oldKey, newKey, isCopy, storageClass) {
       var df = $q.defer();
 
       var client = getClient({
@@ -650,7 +654,8 @@ angular.module("web").factory("s3Client", [
         Bucket: bucket,
         Key: newKey,
         CopySource: "/" + bucket + "/" + encodeURIComponent(oldKey),
-        MetadataDirective: 'COPY' // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
+        MetadataDirective: 'COPY', // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
+        StorageClass: storageClass,
       };
 
       client.copyObject(params, function (err) {

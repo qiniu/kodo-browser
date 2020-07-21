@@ -86,7 +86,7 @@ angular.module('web')
         var successMsg = T('rename.success'); //重命名成功
 
         Toast.info(onMsg);
-        s3Client.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy).then(function () {
+        s3Client.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy, item.StorageClass).then(function () {
           Toast.success(successMsg);
 
           AuditLog.log('moveOrCopyFile', {
@@ -94,7 +94,8 @@ angular.module('web')
             bucket: currentInfo.bucketName,
             from: item.path,
             to: newPath,
-            type: isCopy ? 'copy' : 'move'
+            type: isCopy ? 'copy' : 'move',
+            storageClass: item.StorageClass
           });
 
           $scope.isLoading = false;

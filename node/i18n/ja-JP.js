@@ -71,9 +71,10 @@ module.exports = {
   cancel: "キャンセル",
   close: "クローズ",
 
+  "storageClassesType": "保管タイプ",
   "storageClassesType.standard": "標準",
-  "storageClassesType.ia": "IA",
-  "storageClassesType.archive": "アーカイブ",
+  "storageClassesType.line": "IA",
+  "storageClassesType.glacier": "アーカイブ",
 
   "aclType.default": "バケツからの継承",
   "aclType.public-read-write": "公開可読は書く",

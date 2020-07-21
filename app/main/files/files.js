@@ -1289,6 +1289,18 @@ angular.module("web").controller("filesCtrl", [
             return $filter('sizeFormat')(val);
           }
         }, {
+          field: 'storageClass',
+          title: T('storageClassesType'),
+          formatter: (val, row, idx, field) => {
+            if (row.isFolder) {
+              return `<span class="text-muted">${T('folder')}</span>`;
+            } else if (row.storageClass) {
+              return T(`storageClassesType.${row.storageClass.toLowerCase()}`);
+            } else {
+              return '-';
+            }
+          }
+        }, {
           field: 'lastModified',
           title: T('lastModifyTime'),
           formatter: (val, row, idx, field) => {

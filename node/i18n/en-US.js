@@ -71,9 +71,10 @@ module.exports = {
   cancel: "Cancel",
   close: "Close",
 
+  "storageClassesType": "Storage Type",
   "storageClassesType.standard": "Standard",
-  "storageClassesType.ia": "IA",
-  "storageClassesType.archive": "Archive",
+  "storageClassesType.line": "IA",
+  "storageClassesType.glacier": "Archive",
 
   "aclType.default": "Inherit From Bucket",
   "aclType.public-read-write": "Public Read and Write",

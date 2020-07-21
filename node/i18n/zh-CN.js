@@ -71,9 +71,10 @@ module.exports = {
   cancel: "取消",
   close: "关闭",
 
+  "storageClassesType": "存储类型",
   "storageClassesType.standard": "标准类型",
-  "storageClassesType.ia": "低频访问类型",
-  "storageClassesType.archive": "归档存储",
+  "storageClassesType.line": "低频访问类型",
+  "storageClassesType.glacier": "归档存储",
 
   "aclType.default": "继承Bucket",
   "aclType.public-read-write": "公共读写",

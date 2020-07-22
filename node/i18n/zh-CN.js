@@ -202,6 +202,8 @@ module.exports = {
   "settings.WhetherShowThumbnail.msg": "在文件列表中显示图片缩略, 会消耗一定的流量",
   "settings.ExternalPath": "外部路径",
   "settings.WhetherExternalPathEnabled.msg": "启用外部路径功能",
+  "settings.StepByStepLoadingFiles": "文件列表分步加载",
+  "settings.WhetherStepByStepLoadingFiles.msg": "开启文件列表分步加载模式",
   "settings.system": "系统设置",
   "settings.isDebug": "调试日志",
   "settings.isDebug.msg": "是否开启调试日志",
@@ -330,6 +332,7 @@ module.exports = {
   "download.file": "下载文件",
 
   lastModifyTime: "最后修改时间",
+  "to.load.more": "加载更多...",
   "loading.more": "正在加载更多...",
 
   "download.addtolist.on": "正在添加到下载队列",

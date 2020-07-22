@@ -202,6 +202,8 @@ module.exports = {
   "settings.WhetherShowThumbnail.msg": "Displaying thumbnails in the list of files will consume a certain amount of traffic",
   "settings.ExternalPath": "External link",
   "settings.WhetherExternalPathEnabled.msg": "Enable external link",
+  "settings.StepByStepLoadingFiles": "File list loading step by step",
+  "settings.WhetherStepByStepLoadingFiles.msg": "Enable file list loading step by step mode",
   "settings.system": "System Settings",
   "settings.isDebug": "Debug",
   "settings.isDebug.msg": "Enable debug log",
@@ -330,6 +332,7 @@ module.exports = {
   "download.file": "Download File",
 
   lastModifyTime: "Last Modified",
+  "to.load.more": "Load more...",
   "loading.more": "Loading more...",
 
   "download.addtolist.on": "Being added to the download queue",

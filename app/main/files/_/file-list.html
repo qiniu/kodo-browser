@@ -3,6 +3,10 @@
     <table id="file-list" class="table table-condensed table-hover table-striped">
       <!-- bootstrap table -->
     </table>
+
+    <div class="text-left clearfix pd2" ng-if="stepByStepLoadingFiles() && nextObjectsMarker">
+      <button type="button" class="btn btn-sm btn-link" ng-click="toLoadMore();">{{'to.load.more'|translate}}</button>
+    </div>
   </section>
 
   <section ng-if="!ref.isListView">
@@ -21,11 +25,13 @@
 
       <div class="clearfix"></div>
 
-      <div class="text-center clearfix pd2" ng-if="nextObjectsMarker">
+      <div class="text-left clearfix pd2" ng-if="stepByStepLoadingFiles() && nextObjectsMarker">
+        <button type="button" class="btn btn-sm btn-link" ng-click="toLoadMore();">{{'to.load.more'|translate}}</button>
+      </div>
+      <div class="text-center clearfix pd2" ng-if="!stepByStepLoadingFiles() && nextObjectsMarker">
         {{'loading.more'|translate}}
       </div>
     </div>
   </section>
-
 
 </div>

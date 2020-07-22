@@ -147,6 +147,15 @@ angular.module("web").factory("settingsSvs", [
         }
       },
 
+      stepByStepLoadingFiles: {
+        get: function () {
+          return parseInt(localStorage.getItem("stepByStepLoadingFiles") || 0);
+        },
+        set: function (v) {
+          return localStorage.setItem("stepByStepLoadingFiles", v);
+        }
+      },
+
       historiesLength: {
         get: function () {
           return parseInt(localStorage.getItem("multipartDownloadThreshold") || 100);

@@ -12,6 +12,7 @@ angular.module("web").controller("filesCtrl", [
   "Config",
   "s3Client",
   "bucketMap",
+  "settingsSvs",
   "ExternalPath",
   "fileSvs",
   "Toast",
@@ -31,6 +32,7 @@ angular.module("web").controller("filesCtrl", [
     Config,
     s3Client,
     bucketMap,
+    settingsSvs,
     ExternalPath,
     fileSvs,
     Toast,
@@ -87,6 +89,9 @@ angular.module("web").controller("filesCtrl", [
         x: {} //{} {'i_'+$index, true|false}
       },
       selectFile: selectFile,
+      toLoadMore: toLoadMore,
+
+      stepByStepLoadingFiles: stepByStepLoadingFiles,
 
       // bucket ops
       showAddBucket: showAddBucket,
@@ -204,6 +209,12 @@ angular.module("web").controller("filesCtrl", [
 
     function getCurrentExternalPath() {
       return `kodo://${$scope.currentInfo.bucketName}/${$scope.currentInfo.key}`;
+    }
+
+    /////////////////////////////////
+
+    function stepByStepLoadingFiles() {
+      return settingsSvs.stepByStepLoadingFiles.get() == 1;
     }
 
     /////////////////////////////////
@@ -432,14 +443,17 @@ angular.module("web").controller("filesCtrl", [
             return;
           } else {
             $scope.nextObjectsMarker = nextObjectsMarker;
+            $scope.nextObjectsMarkerInfo = info;
           }
 
           $scope.objects = $scope.objects.concat(result.data);
 
           if ($scope.nextObjectsMarker) {
-            $timeout(function() {
-              tryLoadMore(info, nextObjectsMarker);
-            }, 100);
+            if (!$scope.stepByStepLoadingFiles()) {
+              $timeout(function() {
+                tryLoadMore(info, nextObjectsMarker);
+              }, 100);
+            }
           }
         });
 
@@ -452,6 +466,16 @@ angular.module("web").controller("filesCtrl", [
 
         if (fn) fn(err);
       });
+    }
+
+    var lastObjectsMarkerForLoadMore = null; // 最近一次点击 Load More 时的 nextObjectsMarker
+    function toLoadMore() {
+      if (lastObjectsMarkerForLoadMore !== $scope.nextObjectsMarker) {
+        $timeout(function() {
+          tryLoadMore($scope.nextObjectsMarkerInfo, $scope.nextObjectsMarker);
+          lastObjectsMarkerForLoadMore = $scope.nextObjectsMarker;
+        }, 100);
+      }
     }
 
     function tryLoadMore(info, nextObjectsMarker) {

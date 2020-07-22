@@ -1038,14 +1038,14 @@ angular.module("web").factory("s3Client", [
 
     function _listFilesOrigion(region, bucket, key, marker) {
       return new Promise(function (resolve, reject) {
-        var client = getClient({
+        const client = getClient({
           region: region,
           bucket: bucket
         });
 
-        var t = [];
-        var t_pre = [];
-        var opt = {
+        const t = [];
+        const t_pre = [];
+        const opt = {
           Bucket: bucket,
           Prefix: key,
           Delimiter: "/",
@@ -1053,60 +1053,69 @@ angular.module("web").factory("s3Client", [
           MaxKeys: 1000
         };
 
-        client.listObjects(opt, function (err, result) {
-          if (err) {
-            handleError(err);
-            reject(err);
-            return;
-          }
+        function listOnePage() {
+          client.listObjects(opt, function (err, result) {
+            if (err) {
+              handleError(err);
+              reject(err);
+              return;
+            }
 
-          var prefix = opt.Prefix;
-          if (!prefix.endsWith("/")) {
-            prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
-          }
+            let prefix = opt.Prefix;
+            if (!prefix.endsWith("/")) {
+              prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
+            }
 
-          //目录
-          if (result.CommonPrefixes) {
-            result.CommonPrefixes.forEach(function (n) {
-              n = n.Prefix;
-              t_pre.push({
-                name: n.substring(prefix.length).replace(/(\/$)/, ""),
-                path: n,
-                isFolder: true,
-                itemType: "folder"
+            //目录
+            if (result.CommonPrefixes) {
+              result.CommonPrefixes.forEach(function (n) {
+                n = n.Prefix;
+                t_pre.push({
+                  name: n.substring(prefix.length).replace(/(\/$)/, ""),
+                  path: n,
+                  isFolder: true,
+                  itemType: "folder"
+                });
               });
-            });
-          }
+            }
 
-          //文件
-          if (result["Contents"]) {
-            var ONE_HOUR = 60 * 60 * 1000; // ms
+            //文件
+            if (result["Contents"]) {
+              const ONE_HOUR = 60 * 60 * 1000; // ms
 
-            result["Contents"].forEach(function (n) {
-              n.Prefix = n.Prefix || "";
+              result["Contents"].forEach(function (n) {
+                n.Prefix = n.Prefix || "";
 
-              if (!opt.Prefix.endsWith("/") || n.Key != opt.Prefix) {
-                n.isFile = true;
-                n.itemType = "file";
-                n.path = n.Key;
-                n.name = n.Key.substring(prefix.length);
-                n.size = n.Size;
-                n.storageClass = n.StorageClass;
-                n.type = n.Type;
-                n.lastModified = n.LastModified;
-                n.url = getS3Url(region, opt.Bucket, n.Key);
-                n.WithinFourHours = (((new Date()) - n.LastModified) <= 4 * ONE_HOUR);
+                if (!opt.Prefix.endsWith("/") || n.Key != opt.Prefix) {
+                  n.isFile = true;
+                  n.itemType = "file";
+                  n.path = n.Key;
+                  n.name = n.Key.substring(prefix.length);
+                  n.size = n.Size;
+                  n.storageClass = n.StorageClass;
+                  n.type = n.Type;
+                  n.lastModified = n.LastModified;
+                  n.url = getS3Url(region, opt.Bucket, n.Key);
+                  n.WithinFourHours = (((new Date()) - n.LastModified) <= 4 * ONE_HOUR);
 
-                t.push(n);
-              }
-            });
-          }
+                  t.push(n);
+                }
+              });
+            }
 
-          resolve({
-            data: t_pre.concat(t),
-            marker: result.NextMarker
+            if (t_pre.length + t.length >= 1000 || !result.NextMarker) {
+              resolve({
+                data: t_pre.concat(t),
+                marker: result.NextMarker
+              });
+            } else {
+              opt.Marker = result.NextMarker;
+              listOnePage();
+            }
           });
-        });
+        }
+
+        listOnePage();
       });
     }
 

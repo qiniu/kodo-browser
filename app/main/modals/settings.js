@@ -42,7 +42,8 @@ angular.module("web").controller("settingsCtrl", [
         multipartDownloadSize: settingsSvs.multipartDownloadSize.get(),
         downloadSpeedLimitEnabled: settingsSvs.downloadSpeedLimitEnabled.get(),
         downloadSpeedLimitKBperSec: settingsSvs.downloadSpeedLimitKBperSec.get(),
-        externalPathEnabled: settingsSvs.externalPathEnabled.get()
+        externalPathEnabled: settingsSvs.externalPathEnabled.get(),
+        stepByStepLoadingFiles: settingsSvs.stepByStepLoadingFiles.get()
       },
       setChange: setChange,
       cancel: cancel

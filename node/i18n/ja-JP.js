@@ -202,6 +202,8 @@ module.exports = {
   "settings.WhetherShowThumbnail.msg": "ファイル一覧にサムネイルを表示すると一定量のトラフィックが消費されます",
   "settings.ExternalPath": "外部リンク",
   "settings.WhetherExternalPathEnabled.msg": "外部リンクを有効にする",
+  "settings.StepByStepLoadingFiles": "ステップごとのファイルリストのロード",
+  "settings.WhetherStepByStepLoadingFiles.msg": "ステップバイステップモードでファイルリストの読み込みを有効にする",
   "settings.system": "システム設定",
   "settings.isDebug": "デバッグログ",
   "settings.isDebug.msg": "デバッグログを開くかどうか",
@@ -329,6 +331,7 @@ module.exports = {
   "download.file": "ダウンロードファイル",
 
   lastModifyTime: "最終更新日",
+  "to.load.more": "もっと読み込む...",
   "loading.more": "もっと読み込んでいます...",
 
   "download.addtolist.on": "ダウンロードキューに追加中",

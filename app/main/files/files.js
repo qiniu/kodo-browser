@@ -407,15 +407,17 @@ angular.module("web").controller("filesCtrl", [
 
     function listFiles(info, marker, fn) {
       clearFilesList();
+      $scope.isLoading = true;
 
-      $timeout(() => {
-        $scope.isLoading = true;
-      });
+      info = info || $scope.currentInfo;
 
-      tryListFiles((info || $scope.currentInfo), marker, (err, files) => {
-        $timeout(() => {
-          $scope.isLoading = false;
-        });
+      tryListFiles(info, marker, (err, files) => {
+        $scope.isLoading = false;
+
+        if (info.bucketName !== $scope.currentInfo.bucketName ||
+            info.key !== $scope.currentInfo.key + $scope.sch.objectName) {
+          return;
+        }
 
         if (err) {
           Toast.error(JSON.stringify(err));
@@ -471,20 +473,31 @@ angular.module("web").controller("filesCtrl", [
     var lastObjectsMarkerForLoadMore = null; // 最近一次点击 Load More 时的 nextObjectsMarker
     function toLoadMore() {
       if (lastObjectsMarkerForLoadMore !== $scope.nextObjectsMarker) {
-        $timeout(function() {
-          tryLoadMore($scope.nextObjectsMarkerInfo, $scope.nextObjectsMarker);
+        $timeout(() => {
+          tryLoadMore($scope.nextObjectsMarkerInfo, $scope.nextObjectsMarker, {
+            starting: () => {
+              $scope.isLoading = true;
+            },
+            completed: () => {
+              $scope.isLoading = false;
+            }
+          });
           lastObjectsMarkerForLoadMore = $scope.nextObjectsMarker;
         }, 100);
       }
     }
 
-    function tryLoadMore(info, nextObjectsMarker) {
+    function tryLoadMore(info, nextObjectsMarker, callback) {
+      callback = callback || {};
+
       if (info.bucketName !== $scope.currentInfo.bucketName ||
           info.key !== $scope.currentInfo.key + $scope.sch.objectName ||
           $scope.nextObjectsMarker !== nextObjectsMarker) {
         return;
       }
       console.log(`loading next kodo://${info.bucketName}/${info.key}?marker=${nextObjectsMarker}`);
+
+      if (callback.starting) callback.starting();
 
       tryListFiles(info, nextObjectsMarker, (err, files) => {
         if (err) {
@@ -493,6 +506,7 @@ angular.module("web").controller("filesCtrl", [
         }
 
         showFilesTable(files, true);
+        if (callback.completed) callback.completed();
       });
     }
 

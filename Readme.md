@@ -105,47 +105,27 @@ kodo-browser/
         {
             "id": "cn-east-1",
             "label": "华东",
-            "endpoint": "https://s3-cn-east-1.qiniucs.com",
-            "storageClasses": [
-                { "value": "Standard", "name": "标准类型" },
-                { "value": "IA", "name": "低频访问类型" }
-            ]
+            "endpoint": "https://s3-cn-east-1.qiniucs.com"
         },
         {
             "id": "cn-north-1",
             "label": "华北",
-            "endpoint": "https://s3-cn-north-1.qiniucs.com",
-            "storageClasses": [
-                { "value": "Standard", "name": "标准类型" },
-                { "value": "IA", "name": "低频访问类型" }
-            ]
+            "endpoint": "https://s3-cn-north-1.qiniucs.com"
         },
         {
             "id": "cn-south-1",
             "label": "华南",
-            "endpoint": "https://s3-cn-south-1.qiniucs.com",
-            "storageClasses": [
-                { "value": "Standard", "name": "标准类型" },
-                { "value": "IA", "name": "低频访问类型" }
-            ]
+            "endpoint": "https://s3-cn-south-1.qiniucs.com"
         },
         {
             "id": "us-north-1",
             "label": "北美",
-            "endpoint": "https://s3-us-north-1.qiniucs.com",
-            "storageClasses": [
-                { "value": "Standard", "name": "标准类型" },
-                { "value": "IA", "name": "低频访问类型" }
-            ]
+            "endpoint": "https://s3-us-north-1.qiniucs.com"
         },
         {
             "id": "ap-southeast-1",
             "label": "东南亚",
-            "endpoint": "https://s3-ap-southeast-1.qiniucs.com",
-            "storageClasses": [
-                { "value": "Standard", "name": "标准类型" },
-                { "value": "IA", "name": "低频访问类型" }
-            ]
+            "endpoint": "https://s3-ap-southeast-1.qiniucs.com"
         }
     ],
     "uc_url": "https://uc.qbox.me"

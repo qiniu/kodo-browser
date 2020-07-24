@@ -3,11 +3,7 @@
  *   "regions": [{
  *      id: "regionA",
  *      label: "区域 A",
- *      endpoint: "https://s3-region-1.localhost.com",
- *      storageClasses: [
- *        { value: "Standard", name: "标准类型" },
- *        { value: "IA", name: "低频访问类型" }
- *      ]
+ *      endpoint: "https://s3-region-1.localhost.com"
  *   }],
  *   "uc_url": "https://uc.qbox.me"
  * }
@@ -61,18 +57,6 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
                                 if (!region.endpoint) {
                                     throw new ConfigError('endpoint is missing or empty in region');
                                 }
-                                if (!region.storageClasses) {
-                                    throw new ConfigError('storageClasses is missing or empty in region');
-                                } else {
-                                    each(region.storageClasses, (storageClass) => {
-                                        if (!storageClass.name) {
-                                            throw new ConfigError('name is missing or empty in storageClass');
-                                        }
-                                        if (!storageClass.value) {
-                                            throw new ConfigError('value is missing or empty in storageClass');
-                                        }
-                                    });
-                                }
                             });
                             regions = config.regions;
                         } else {
@@ -109,12 +93,6 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
                 }
                 if (!region.endpoint) {
                     throw new ConfigError('endpoint is missing or empty in region');
-                }
-                if (!region.storageClasses || !region.storageClasses.length) {
-                    region.storageClasses = [
-                        { value: 'Standard', name: '标准类型' },
-                        { value: 'IA', name: '低频访问类型' }
-                    ];
                 }
             });
 

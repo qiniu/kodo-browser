@@ -906,7 +906,7 @@ angular.module("web").factory("s3Client", [
       });
     }
 
-    function createBucket(region, bucket, acl, storageClass) {
+    function createBucket(region, bucket, acl) {
       return new Promise(function (resolve, reject) {
         var client = getClient({
           region: region,

@@ -1,5 +1,9 @@
 # KODO Browser
 
+[![LICENSE](https://img.shields.io/github/license/qiniu/kodo-browser.svg)](https://github.com/qiniu/kodo-browser/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/qiniu/kodo-browser.svg?branch=master)](https://travis-ci.org/qiniu/kodo-browser)
+[![GitHub release](https://img.shields.io/github/v/tag/qiniu/kodo-browser.svg?label=release)](https://github.com/qiniu/kodo-browser/releases)
+
 KODO Browser 参考 [OSS Browser](https://github.com/aliyun/oss-browser.git) 设计，提供类似 Windows 资源管理器功能。用户可以很方便的浏览文件，上传下载文件，支持断点续传等。
 
 本工具使用开源框架 Angular 1.x + [Electron](http://electron.atom.io/)制作。

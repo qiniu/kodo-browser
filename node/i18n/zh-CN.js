@@ -72,8 +72,8 @@ module.exports = {
   close: "关闭",
 
   "storageClassesType": "存储类型",
-  "storageClassesType.standard": "标准类型",
-  "storageClassesType.line": "低频访问类型",
+  "storageClassesType.standard": "标准存储",
+  "storageClassesType.line": "低频存储",
   "storageClassesType.glacier": "归档存储",
 
   "aclType.default": "继承Bucket",

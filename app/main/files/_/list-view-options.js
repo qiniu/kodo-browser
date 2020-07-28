@@ -8,7 +8,7 @@ angular.module('web')
     $scope.ref.isListView = getListView();
 
     function getListView(){
-      return !localStorage.getItem('is-list-view') == 'false';
+      return localStorage.getItem('is-list-view') !== 'false';
     }
 
     function setListView(f) {

@@ -480,6 +480,7 @@ angular.module("web").controller("filesCtrl", [
             },
             completed: () => {
               $scope.isLoading = false;
+              lastObjectsMarkerForLoadMore = null;
             }
           });
           lastObjectsMarkerForLoadMore = $scope.nextObjectsMarker;

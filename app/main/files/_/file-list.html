@@ -4,8 +4,8 @@
       <!-- bootstrap table -->
     </table>
 
-    <div class="text-left clearfix pd2" ng-if="stepByStepLoadingFiles() && nextObjectsMarker">
-      <button type="button" class="btn btn-sm btn-link" ng-click="toLoadMore();">{{'to.load.more'|translate}}</button>
+    <div class="text-center clearfix pd2" ng-if="stepByStepLoadingFiles() && nextObjectsMarker">
+      <button type="button" class="btn btn-sm btn-link to-load-more" ng-click="toLoadMore();">{{'to.load.more'|translate}}</button>
     </div>
   </section>
 
@@ -25,8 +25,8 @@
 
       <div class="clearfix"></div>
 
-      <div class="text-left clearfix pd2" ng-if="stepByStepLoadingFiles() && nextObjectsMarker">
-        <button type="button" class="btn btn-sm btn-link" ng-click="toLoadMore();">{{'to.load.more'|translate}}</button>
+      <div class="text-center clearfix pd2" ng-if="stepByStepLoadingFiles() && nextObjectsMarker">
+        <button type="button" class="btn btn-sm btn-link to-load-more" ng-click="toLoadMore();">{{'to.load.more'|translate}}</button>
       </div>
       <div class="text-center clearfix pd2" ng-if="!stepByStepLoadingFiles() && nextObjectsMarker">
         {{'loading.more'|translate}}

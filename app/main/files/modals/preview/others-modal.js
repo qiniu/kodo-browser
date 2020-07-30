@@ -29,12 +29,11 @@ angular.module('web')
       function shouldShowAsCodeBtn(){
         var name = objectInfo.name;
 
-        if(endswith(name, '.tar.gz') || endswith(name, '.tar') || endswith(name, '.zip') || endswith(name, '.bz') || endswith(name, '.xz')
-         || endswith(name, '.dmg') || endswith(name, '.pkg') || endswith(name, '.apk')
-         || endswith(name, '.exe') || endswith(name, '.msi') || endswith(name, '.dll')|| endswith(name, '.chm')
-         || endswith(name, '.iso') || endswith(name, '.img') || endswith(name, '.img')
-         || endswith(name, '.pdf') || endswith(name, '.doc') || endswith(name, '.docx')
-       ){
+        if(name.endsWith('.tar.gz') || name.endsWith('.tar') || name.endsWith('.zip') || name.endsWith('.bz') || name.endsWith('.xz')
+         || name.endsWith('.dmg') || name.endsWith('.pkg') || name.endsWith('.apk')
+         || name.endsWith('.exe') || name.endsWith('.msi') || name.endsWith('.dll')|| name.endsWith('.chm')
+         || name.endsWith('.iso') || name.endsWith('.img') || name.endsWith('.img')
+         || name.endsWith('.pdf') || name.endsWith('.doc') || name.endsWith('.docx')) {
           return false;
         }
         return true;
@@ -47,16 +46,6 @@ angular.module('web')
       function showAs(type){
         showFn.preview(objectInfo, type);
         cancel();
-      }
-
-      // function showDownload(){
-      //   showFn.download(bucketInfo, objectInfo);
-      //   cancel();
-      // }
-
-
-      function endswith(s, ext){
-        return s.lastIndexOf(ext)== s.length-ext.length;
       }
     }])
 ;

@@ -1084,7 +1084,7 @@ angular.module("web").controller("filesCtrl", [
 
       Dialog.showUploadDialog((filePaths) => {
         if (!filePaths || filePaths.length == 0) {
-          Toast.info(T('choosenone'));
+          Toast.info(T('chooseone'));
 
           return;
         }
@@ -1103,7 +1103,7 @@ angular.module("web").controller("filesCtrl", [
 
       Dialog.showDownloadDialog((folderPaths) => {
         if (!folderPaths || folderPaths.length == 0 || $scope.sel.has.length == 0) {
-          Toast.info(T('choosenone'));
+          Toast.info(T('chooseone'));
 
           return;
         }

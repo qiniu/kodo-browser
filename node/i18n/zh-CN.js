@@ -164,8 +164,6 @@ module.exports = {
   usergroups: "用户组",
   roles: "角色",
 
-  chooseone: "请选择",
-
   "simplePolicy.ok": "确定授权",
   "simplePolicy.noauth.message1": "没有权限获取用户列表",
   "simplePolicy.noauth.message2": "没有权限获取用户组列表",

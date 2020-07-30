@@ -164,8 +164,6 @@ module.exports = {
   usergroups: "ユーザー・グループ",
   roles: "ロール",
 
-  chooseone: "一つを選んでください",
-
   "simplePolicy.ok": "OK",
   "simplePolicy.noauth.message1": "ユーザーリストを取得する権限がありません",
   "simplePolicy.noauth.message2": "使用グループリストを取得する権限がありません",

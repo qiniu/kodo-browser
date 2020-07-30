@@ -164,8 +164,6 @@ module.exports = {
   usergroups: "User Group",
   roles: "Role",
 
-  chooseone: "Choose one",
-
   "simplePolicy.ok": "OK",
   "simplePolicy.noauth.message1": "You are not authorized to get user list",
   "simplePolicy.noauth.message2": "You are not authorized to get use group list",

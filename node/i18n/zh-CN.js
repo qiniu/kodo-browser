@@ -300,6 +300,7 @@ module.exports = {
   "aclType.public-read-write.message": "公共读写：所有人都可以对object进行读写操作",
 
   "getDownloadLink.title": "获取外链",
+  "getDownloadLink.warning": "归档存储文件，只有解冻状态时才能访问",
   "exportDownloadLinks.title": "导出外链",
   downloadLink: "外链地址",
   "getDownloadLink.message": "请输入链接有效期",

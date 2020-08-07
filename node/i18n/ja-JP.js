@@ -299,6 +299,7 @@ module.exports = {
   "aclType.public-read-write.message": "パブリックの読み書き: 誰もがオブジェクトを読み書きできます",
 
   "getDownloadLink.title": "ダウンロードアドレスを取得する",
+  "getDownloadLink.warning": "アーカイブされたストレージファイルは、復元されたときにのみアクセスできます",
   "exportDownloadLinks.title": "ダウンロードリンクのエクスポート",
   downloadLink: "ダウンロードリンク",
   "getDownloadLink.message": "リンクの有効期間を入力してください",

@@ -300,6 +300,7 @@ module.exports = {
   "aclType.public-read-write.message": "Public read and write: Everyone can read and write objects",
 
   "getDownloadLink.title": "Get Download Link",
+  "getDownloadLink.warning": "An archived storage file can only be accessed when they are restored",
   "exportDownloadLinks.title": "Export Download Links",
   downloadLink: "Download Link",
   "getDownloadLink.message": "Please enter the validity period of the link",

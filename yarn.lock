@@ -4628,10 +4628,15 @@ jquery.qrcode@^1.0.3:
   resolved "https://registry.npm.taobao.org/jquery.qrcode/download/jquery.qrcode-1.0.3.tgz#98ad34deb7f401d72981c6769790cbd38aaa39f0"
   integrity sha1-mK003rf0AdcpgcZ2l5DL04qqOfA=
 
-jquery@^3.3.1:
-  version "3.5.0"
-  resolved "https://registry.npm.taobao.org/jquery/download/jquery-3.5.0.tgz#9980b97d9e4194611c36530e7dc46a58d7340fc9"
-  integrity sha1-mYC5fZ5BlGEcNlMOfcRqWNc0D8k=
+jquery@^3.5.1:
+  version "3.5.1"
+  resolved "https://registry.npm.taobao.org/jquery/download/jquery-3.5.1.tgz#d7b4d08e1bfdb86ad2f1a3d039ea17304717abb5"
+  integrity sha1-17TQjhv9uGrS8aPQOeoXMEcXq7U=
+
+js-base64@^3.4.5:
+  version "3.4.5"
+  resolved "https://registry.npm.taobao.org/js-base64/download/js-base64-3.4.5.tgz#6d1921e65a172cfd924604e1416dfaff45752c3e"
+  integrity sha1-bRkh5loXLP2SRgThQW36/0V1LD4=
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"

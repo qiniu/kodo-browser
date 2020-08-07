@@ -42,6 +42,7 @@ angular.module("web").factory("s3Client", [
 
       checkFileExists: checkFileExists,
       checkFolderExists: checkFolderExists,
+      isFrozenOrNot: isFrozenOrNot,
 
       getContent: getContent,
       saveContent: saveContent,
@@ -54,13 +55,15 @@ angular.module("web").factory("s3Client", [
       copyFiles: copyFiles,
       stopCopyFiles: stopCopyFiles,
 
+      //解冻
+      restoreFile: restoreFile,
+
       //删除
       deleteFiles: deleteFiles,
       stopDeleteFiles: stopDeleteFiles,
 
       getClient: getClient,
       parseKodoPath: parseKodoPath,
-      parseRestoreInfo: parseRestoreInfo,
       signatureUrl: signatureUrl,
       signaturePicUrl: signaturePicUrl
     };
@@ -129,12 +132,12 @@ angular.module("web").factory("s3Client", [
 
     function checkFileExists(region, bucket, key) {
       return new Promise(function (resolve, reject) {
-        var client = getClient({
+        const client = getClient({
           region: region,
           bucket: bucket
         });
 
-        var params = {
+        const params = {
           Bucket: bucket,
           Key: key
         };
@@ -145,6 +148,33 @@ angular.module("web").factory("s3Client", [
           } else {
             resolve(data);
           }
+        });
+      });
+    }
+
+    function isFrozenOrNot(region, bucket, key) {
+      return new Promise(function (resolve, reject) {
+        getMeta(region, bucket, key).then((data) => {
+          if (data.StorageClass && data.StorageClass.toLowerCase() === 'glacier') {
+            if (data.Restore) {
+              const info = parseRestoreInfo(data.Restore);
+              if (info['ongoing-request'] === 'true') {
+                resolve({ status: 'unfreezing' });
+              } else {
+                const returnBody = { status: 'unfrozen' };
+                if (info['expiry-date']) {
+                  returnBody['expiry_date'] = new Date(info['expiry-date']);
+                }
+                resolve(returnBody);
+              }
+            } else {
+              resolve({ status: 'frozen' });
+            }
+          } else {
+            resolve({ status: 'normal' });
+          }
+        }, (err) => {
+          reject(err);
         });
       });
     }
@@ -643,14 +673,14 @@ angular.module("web").factory("s3Client", [
 
     //移动文件，重命名文件
     function moveFile(region, bucket, oldKey, newKey, isCopy, storageClass) {
-      var df = $q.defer();
+      const df = $q.defer();
 
-      var client = getClient({
+      const client = getClient({
         region: region,
         bucket: bucket
       });
 
-      var params = {
+      const params = {
         Bucket: bucket,
         Key: newKey,
         CopySource: "/" + bucket + "/" + encodeURIComponent(oldKey),
@@ -675,6 +705,37 @@ angular.module("web").factory("s3Client", [
           });
         }
       });
+      return df.promise;
+    }
+
+    function restoreFile(region, bucket, key, days) {
+      const df = $q.defer();
+
+      const client = getClient({
+        region: region,
+        bucket: bucket
+      });
+
+      const params = {
+        Bucket: bucket,
+        Key: key,
+        RestoreRequest: {
+          Days: days,
+          GlacierJobParameters: {
+            Tier: "Standard"
+          }
+        }
+      };
+
+      client.restoreObject(params, function(err, data) {
+        if (err) {
+          handleError(err);
+          df.reject(err);
+        } else {
+          df.resolve(data);
+        }
+      });
+
       return df.promise;
     }
 
@@ -747,17 +808,15 @@ angular.module("web").factory("s3Client", [
     function getBucketLocation(bucket) {
       var df = $q.defer();
 
-      getClient().getBucketLocation({
-        Bucket: bucket
-      }, function (err, data) {
-        if (err) {
-          handleError(err);
-
-          df.reject(err);
-        } else {
-          df.resolve(data.LocationConstraint.replace(/<[^>]+>/, ''));
-        }
-      });
+      getClient().headBucket({
+        Bucket: bucket,
+      }).on('success', (response) => {
+        const region = response.httpResponse.headers['x-amz-bucket-region'];
+        df.resolve(region.replace(/<[^>]+>/, ''));
+      }).on('error', (err) => {
+        handleError(err);
+        df.reject(err);
+      }).send();
 
       return df.promise;
     }

@@ -310,7 +310,7 @@ module.exports = {
 
   "restore.checker.message1": "Archive need to be restored in order to preview or download.",
   "restore.immediately": "Restore immediately",
-  "restore.checker.message2": "The archive has been restored, the expiration time",
+  "restore.checker.message2": "The archive has been restored",
   "restore.onprogress": "Archive file is recovering, please be patient ...",
   "restore.on": "Sending...",
   "restore.success": "Restore request has been send successfully",
@@ -318,6 +318,12 @@ module.exports = {
   "restore.message2": "The expiration time",
   "restore.title": "Restore",
   restore: "Restore",
+  "restore.tooltip.frozen": "Frozen",
+  "restore.tooltip.unfreezing": "Unfreezing",
+  "restore.tooltip.unfrozen": "Unfrozen",
+  "restore.message.unfreezing": "Archived storage file is being restored",
+  "restore.message.unfrozen": "Archived storage file has been restored",
+  "restore.message.head_error": "Failed to get status of the archived storage file",
 
   preview: "Preview",
   "cannot.preview": "Can not preview",

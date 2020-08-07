@@ -309,7 +309,7 @@ module.exports = {
 
   "restore.checker.message1": "プレビューまたはダウンロードするためにアーカイブを復元する必要があります。",
   "restore.immediately": "すぐに復元する",
-  "restore.checker.message2": "アーカイブが復元されました。有効期限",
+  "restore.checker.message2": "アーカイブが復元されました",
   "restore.onprogress": "アーカイブファイルが回復しています、しばらくお待ちください ...",
   "restore.on": "送信...",
   "restore.success": "復元要求が正常に送信されました",
@@ -317,6 +317,12 @@ module.exports = {
   "restore.message2": "有効期限",
   "restore.title": "リストア",
   restore: "リストア",
+  "restore.tooltip.frozen": "フローズン",
+  "restore.tooltip.unfreezing": "不凍",
+  "restore.tooltip.unfrozen": "凍結されていない",
+  "restore.message.unfreezing": "アーカイブされたストレージファイルを復元しています",
+  "restore.message.unfrozen": "アーカイブされたストレージファイルが復元されました",
+  "restore.message.head_error": "アーカイブされたストレージファイルのステータスを取得できませんでした",
 
   preview: "プレビュー",
   "cannot.preview": "プレビューできません",

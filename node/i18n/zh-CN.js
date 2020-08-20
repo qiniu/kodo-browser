@@ -8,6 +8,7 @@ module.exports = {
   "private.cloud": "私有云",
 
   "region.unknown": "未知区域",
+  "region.get.error": "获取失败",
   "config.parse.error": "解析配置文件出错",
   "config.format.error": "配置文件格式错误",
 

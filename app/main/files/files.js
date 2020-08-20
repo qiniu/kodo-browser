@@ -302,20 +302,23 @@ angular.module("web").controller("filesCtrl", [
           // list objects
           const bucketInfo = $rootScope.bucketMap[info.bucket];
           if (bucketInfo) {
+            if (!bucketInfo.region) {
+              Toast.error("Forbidden");
+              clearFilesList();
+              return;
+            }
             $scope.currentInfo.region = bucketInfo.region;
             $scope.ref.mode = 'localFiles';
             info.bucketName = bucketInfo.name;
             info.bucket = bucketInfo.bucketId;
           } else {
             const region = ExternalPath.getRegionByBucketSync(info.bucket);
-
             if (region) {
               $scope.currentInfo.region = region;
               $scope.ref.mode = 'externalFiles';
               info.bucketName = info.bucket; // TODO: Use bucket name here
             } else {
               Toast.error("Forbidden");
-
               clearFilesList();
               return;
             }
@@ -1160,6 +1163,9 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function translateRegionName(regionId) {
+      if (regionId === null) {
+        return T('region.get.error');
+      }
       const regions = Config.load(AuthInfo.usePublicCloud()).regions;
       let name = T('region.unknown');
       angular.forEach(regions, (region) => {

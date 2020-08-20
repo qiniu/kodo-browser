@@ -8,6 +8,7 @@ module.exports = {
   "private.cloud": "Private Cloud",
 
   "region.unknown": "Unknown Region",
+  "region.get.error": "Failed to Get",
   "config.parse.error": "Failed to parse config file",
   "config.format.error": "Something is wrong in the config file",
 

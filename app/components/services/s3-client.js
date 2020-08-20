@@ -1292,10 +1292,10 @@ angular.module("web").factory("s3Client", [
 
     function listAllBuckets() {
       return new Promise(function (resolve, reject) {
-        var client = getClient();
+        const client = getClient();
 
-        var t = [];
-        var opt = {};
+        let t = [];
+        const opt = {};
 
         function _dig() {
           KodoClient.getBucketIdNameMapper().then((idNameMapper) => {

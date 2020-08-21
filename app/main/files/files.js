@@ -1502,6 +1502,7 @@ angular.module("web").controller("filesCtrl", [
         $list.bootstrapTable('load', files).bootstrapTable('uncheckAll');
       }
       angular.forEach($('#file-list tbody tr [data-storage-class="glacier"]'), (row) => {
+        let isMouseOver = true;
         const region = $(row).attr('data-region'),
               bucket = $(row).attr('data-bucket'),
               key = Base64.decode($(row).attr('data-key')),
@@ -1509,18 +1510,23 @@ angular.module("web").controller("filesCtrl", [
               addTooltip = (status) => {
                 span.tooltip('destroy');
                 $timeout(() => {
-                  span.attr('data-toggle', 'tooltip');
-                  span.attr('data-placement', 'right');
-                  span.tooltip({ delay: 0, container: 'body', title: T(`restore.tooltip.${status}`), trigger: 'hover' });
-                  span.tooltip('show');
-                }, 500);
+                  if (isMouseOver) {
+                    span.attr('data-toggle', 'tooltip');
+                    span.attr('data-placement', 'right');
+                    span.tooltip({ delay: 0, title: T(`restore.tooltip.${status}`), trigger: 'hover' });
+                    span.tooltip('show');
+                  }
+                }, 100);
               };
         $(span).off('mouseover').on('mouseover', () => {
+          isMouseOver = true;
           isFrozenOrNot(region, bucket, key, {
             frozen: () => { addTooltip('frozen'); },
             unfreezing: () => { addTooltip('unfreezing'); },
             unfrozen: () => { addTooltip('unfrozen'); },
           });
+        }).off('mouseleave').on('mouseleave', () => {
+          isMouseOver = false;
         });
       });
 

@@ -18,8 +18,7 @@ angular.module('web')
       function ctrlFn($scope, $timeout, $modal, s3Client, safeApply){
         angular.extend($scope, {
           info: {
-            msg: null,
-            needRestore: false,
+            msg: null
           },
           _Loading: false,
           showRestore: showRestore,
@@ -35,14 +34,12 @@ angular.module('web')
         }
         function check(successCallback){
           $scope._Loading = true;
-          $scope.info.needRestore = false;
 
           s3Client.isFrozenOrNot($scope.bucketInfo.region, $scope.bucketInfo.bucket, $scope.objectInfo.path)
                   .then(function (data) {
             switch (data.status) {
             case 'normal':
               $scope.info.type = 0;
-              $scope.info.showContent = true;
               if (successCallback) {
                 successCallback()
               }
@@ -50,7 +47,6 @@ angular.module('web')
             case 'frozen':
               $scope.info.type = 1; //归档文件，需要恢复才能预览或下载
               $scope.info.showContent = false;
-              $scope.info.needRestore = true;
               break;
             case 'unfreezing':
               $scope.info.type = 2; // 归档文件正在恢复中，请耐心等待...;
@@ -59,7 +55,6 @@ angular.module('web')
             case 'unfrozen':
               $scope.info.type = 3; // '归档文件，已恢复'
               $scope.info.showContent = true;
-              $scope.info.needRestore = true;
               if (successCallback) {
                 successCallback()
               }

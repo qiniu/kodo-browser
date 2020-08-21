@@ -378,10 +378,16 @@ angular.module("web").factory("s3Client", [
         client.copyObject(params,
           function (err) {
             if (err) {
+              err.stage = 'copy';
+              err.fromKey = from.key;
+              err.toKey = to.key;
               fn(err);
             } else if (removeAfterCopy) {
               client.deleteObject({Bucket: from.bucket, Key: from.key}, function (err) {
                 if (err) {
+                  err.stage = 'delete';
+                  err.fromKey = from.key;
+                  err.toKey = to.key;
                   fn(err);
                 } else {
                   fn();
@@ -691,6 +697,7 @@ angular.module("web").factory("s3Client", [
       client.copyObject(params, function (err) {
         if (err) {
           handleError(err);
+          err.stage = 'copy';
           df.reject(err);
         } else if (isCopy) {
           df.resolve();
@@ -698,6 +705,7 @@ angular.module("web").factory("s3Client", [
           client.deleteObject({ Bucket: bucket, Key: oldKey }, function (err) {
             if (err) {
               handleError(err);
+              err.stage = 'delete';
               df.reject(err);
             } else {
               df.resolve();

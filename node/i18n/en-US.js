@@ -17,6 +17,7 @@ module.exports = {
   region: "Region",
 
   "permission.denied": "Permission denied",
+  "permission.denied.move.error_when_delete": "Insufficient permissions, source file {{fromKey}} deletion failed, new file {{toKey}} has been generated",
 
   "auth.accessLogin": "Access Key Login",
   "auth.id.placeholder": "AccessKeyId",

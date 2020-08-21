@@ -17,6 +17,7 @@ module.exports = {
   region: "区域",
 
   "permission.denied": "没有权限",
+  "permission.denied.move.error_when_delete": "权限不足，源文件 {{fromKey}} 删除失败。新文件 {{toKey}} 已生成",
 
   "auth.accessLogin": "Access Key 登录",
   "auth.id.placeholder": "请输入 AccessKeyId",

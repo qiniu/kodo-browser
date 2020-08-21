@@ -1,11 +1,10 @@
 angular.module('web')
-  .controller('moveModalCtrl', ['$scope', '$uibModalInstance', '$timeout', 'items', 'isCopy', 'renamePath', 'fromInfo', 'moveTo', 'callback', 's3Client', 'Toast', 'AuthInfo', 'safeApply', 'AuditLog',
-    function ($scope, $modalInstance, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, s3Client, Toast, AuthInfo, safeApply, AuditLog) {
-      const path = require("path");
-      const filter = require("array-filter");
-      const map = require("array-map");
-
-      var authInfo = AuthInfo.get();
+  .controller('moveModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$timeout', 'items', 'isCopy', 'renamePath', 'fromInfo', 'moveTo', 'callback', 's3Client', 'Toast', 'safeApply', 'AuditLog',
+    function ($scope, $modalInstance, $translate, $timeout, items, isCopy, renamePath, fromInfo, moveTo, callback, s3Client, Toast, safeApply, AuditLog) {
+      const path = require("path"),
+            filter = require("array-filter"),
+            map = require("array-map"),
+            T = $translate.instant;
 
       angular.extend($scope, {
         renamePath: renamePath,
@@ -18,16 +17,6 @@ angular.module('web')
         start: start,
         stop: stop,
 
-        // reg: {
-        //   folderName: /^[^\/]+$/
-        // },
-        // s3FileConfig: {
-        //   id: authInfo.id,
-        //   secret: authInfo.secret,
-        //   region: currentInfo.region,
-        //   bucket: currentInfo.bucket,
-        //   key: currentInfo.key
-        // },
         moveTo: {
           region: moveTo.region,
           bucket: moveTo.bucket,
@@ -100,6 +89,21 @@ angular.module('web')
           //结果
           $scope.step = 3;
           $scope.terr = terr;
+          angular.forEach(terr, (terr1) => {
+            switch (terr1.error.stage) {
+              case 'copy':
+                if (terr1.error.code === 'AccessDenied') {
+                  Toast.error(T('permission.denied'));
+                }
+                break;
+              case 'delete':
+                if (terr1.error.code === 'AccessDenied') {
+                  terr1.error.translated_message = T('permission.denied.move.error_when_delete', terr1.error);
+                  Toast.error(terr1.error.translated_message);
+                }
+                break;
+            }
+          });
           AuditLog.log('moveOrCopyFilesDone');
           callback();
         });

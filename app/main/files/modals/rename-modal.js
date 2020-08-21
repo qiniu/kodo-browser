@@ -16,7 +16,8 @@ angular.module('web')
         reg: {
           folderName: /^[^\/]+$/
         },
-        isLoading: false
+        isLoading: false,
+        error_message: null
       });
 
       function cancel() {
@@ -101,8 +102,22 @@ angular.module('web')
           $scope.isLoading = false;
           callback();
           cancel();
-        }, function () {
+        }, function (err) {
           $scope.isLoading = false;
+          switch (err.stage) {
+            case 'copy':
+              if (err.code === 'AccessDenied') {
+                Toast.error(T('permission.denied'));
+              }
+              break;
+            case 'delete':
+              if (err.code === 'AccessDenied') {
+                callback();
+                $scope.error_message = T('permission.denied.move.error_when_delete', { fromKey: item.path, toKey: newPath });
+                Toast.error($scope.error_message);
+              }
+              break;
+          }
         });
       }
 

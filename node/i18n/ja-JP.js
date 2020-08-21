@@ -17,6 +17,7 @@ module.exports = {
   region: "リージョン",
 
   "permission.denied": "アクセス拒否",
+  "permission.denied.move.error_when_delete": "権限が不十分で、ソースファイル {{fromKey}} の削除に失敗し、新しいファイル {{toKey}} が生成されました",
 
   "auth.accessLogin": "Access Key ログイン",
   "auth.id.placeholder": "AccessKeyId",

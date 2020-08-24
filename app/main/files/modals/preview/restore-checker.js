@@ -40,6 +40,7 @@ angular.module('web')
             switch (data.status) {
             case 'normal':
               $scope.info.type = 0;
+              $scope.info.showContent = true;
               if (successCallback) {
                 successCallback()
               }

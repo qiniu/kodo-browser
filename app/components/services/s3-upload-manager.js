@@ -1,4 +1,5 @@
 angular.module("web").factory("s3UploadMgr", [
+  "$q",
   "$timeout",
   "$translate",
   "s3Client",
@@ -6,6 +7,7 @@ angular.module("web").factory("s3UploadMgr", [
   "Config",
   "settingsSvs",
   function (
+    $q,
     $timeout,
     $translate,
     s3Client,
@@ -40,69 +42,69 @@ angular.module("web").factory("s3UploadMgr", [
       $scope = scope;
       $scope.lists.uploadJobList = [];
 
-      var auth = AuthInfo.get();
-      var progs = tryLoadProg();
-
+      const progs = tryLoadProg();
       angular.forEach(progs, function (prog) {
-        var job = createJob(auth, prog);
-        if (job.status == "waiting" || job.status == "running") {
-          job.stop();
-        }
-
-        addEvents(job);
+        createJob(prog).then((job) => {
+          if (job.status == "waiting" || job.status == "running") {
+            job.stop();
+          }
+          addEvents(job);
+        });
       });
     }
 
     /**
-      * @param  auth { id, secret}
       * @param  options   { region, from, to, progress, checkPoints, ...}
       * @param  options.from {name, path}
       * @param  options.to   {bucket, key}
       * @return job  { start(), stop(), status, progress }
                 job.events: statuschange, progress
       */
-    function createJob(auth, options) {
-      const region = options.region || auth.region;
-      console.info(
-        "PUT",
-        "::",
-        region,
-        "::",
-        options.from.path + "/" + options.from.name,
-        "=>",
-        options.to.bucket + "/" + options.to.key
-      );
+    function createJob(options) {
+      const df = $q.defer(),
+            auth = AuthInfo.get(),
+            bucket = options.to.bucket,
+            region = options.region || auth.region;
 
-      options.region = region;
-      options.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
-      options.multipartUploadSize = settingsSvs.multipartUploadSize.get();
-      options.multipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
-      options.uploadSpeedLimit = (settingsSvs.uploadSpeedLimitEnabled.get() == 1 && settingsSvs.uploadSpeedLimitKBperSec.get());
-      options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
-      options.isDebug = (settingsSvs.isDebug.get() == 1);
+      s3Client.getClient({ bucket: bucket, region: region }).then((client) => {
+        console.info(
+          "PUT",
+          "::",
+          region,
+          "::",
+          options.from.path + "/" + options.from.name,
+          "=>",
+          options.to.bucket + "/" + options.to.key
+        );
 
-      angular.forEach(Config.load(AuthInfo.usePublicCloud()).regions, (r) => {
-        if (r.id == region) {
-          auth.servicetpl = r.endpoint;
-        }
+        options.region = region;
+        options.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
+        options.multipartUploadSize = settingsSvs.multipartUploadSize.get();
+        options.multipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
+        options.uploadSpeedLimit = (settingsSvs.uploadSpeedLimitEnabled.get() == 1 && settingsSvs.uploadSpeedLimitKBperSec.get());
+        options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
+        options.isDebug = (settingsSvs.isDebug.get() == 1);
+
+        const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
+        const store = new S3Store({
+          credential: {
+            accessKeyId: auth.id,
+            secretAccessKey: auth.secret
+          },
+          endpoint: client.config.endpoint,
+          region: region,
+          httpOptions: {
+            connectTimeout: 3000, // 3s
+            timeout: 300000, // 5m
+            agent: client.config.endpoint.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
+          }
+        });
+        df.resolve(store.createUploadJob(options));
+      }, (err) => {
+        df.reject(err);
       });
 
-      const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
-      const store = new S3Store({
-        credential: {
-          accessKeyId: auth.id,
-          secretAccessKey: auth.secret
-        },
-        endpoint: auth.servicetpl,
-        region: options.region,
-        httpOptions: {
-          connectTimeout: 3000, // 3s
-          timeout: 300000, // 5m
-          agent: auth.servicetpl.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
-        }
-      });
-
-      return store.createUploadJob(options);
+      return df.promise;
     }
 
     /**
@@ -114,8 +116,6 @@ angular.module("web").factory("s3UploadMgr", [
      */
     function createUploadJobs(filePaths, bucketInfo, jobsAddingFn) {
       stopCreatingFlag = false;
-
-      var authInfo = AuthInfo.get();
 
       _kdig(filePaths, () => {
         if (jobsAddingFn) {
@@ -224,7 +224,7 @@ angular.module("web").factory("s3UploadMgr", [
             filePath = filePath.replace(/\\/g, "/");
           }
 
-          var job = createJob(authInfo, {
+          createJob({
             region: bucketInfo.region,
             from: {
               name: fileName,
@@ -236,15 +236,10 @@ angular.module("web").factory("s3UploadMgr", [
               key: filePath
             },
             overwrite: $scope.overwriteUploading.enabled
-          });
-
-          if (job) {
+          }).then((job) => {
             addEvents(job);
-
-            $timeout(() => {
-              callFn([job]);
-            }, 1);
-          }
+            $timeout(() => { callFn([job]); }, 1);
+          });
         }
       }
     }

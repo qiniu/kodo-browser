@@ -1,9 +1,9 @@
 angular.module('web')
-  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'AuthInfo', 'AuditLog', 'KodoClient',
-    function ($scope, $modalInstance, $translate, callback, s3Client, Const, AuthInfo, AuditLog, KodoClient) {
+  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'AuditLog', 'KodoClient',
+    function ($scope, $modalInstance, $translate, callback, s3Client, Const, AuditLog, KodoClient) {
       const T = $translate.instant,
             bucketACL = angular.copy(Const.bucketACL),
-            regions = KodoClient.getRegions(AuthInfo.usePublicCloud());
+            regions = KodoClient.getRegions();
       angular.extend($scope, {
         bucketACL: [], //angular.copy(Const.bucketACL),
         regions: regions,

@@ -10,7 +10,7 @@
     </h4>
   </div>
   <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
-    <header class="form-group">
+    <header class="form-group" ng-if="editRegions()">
       <div class="col-sm-2">
         <button type="button" class="btn btn-info" ng-click="addRegion()">
           <i class="glyphicon glyphicon-plus"></i> {{'customizeRegions.addRegion'|translate}}
@@ -25,11 +25,11 @@
         <input type="url" ng-pattern="/^http[s]?:\/\//" name="ucUrl" ng-model="ucUrl" required class="form-control" />
       </div>
     </div>
-    <fieldset ng-repeat="region in regions">
+    <fieldset ng-if="editRegions()" ng-repeat="region in regions">
       <legend>
         <h5 class="text col-sm-3">{{'customizeRegions.region'|translate}} {{$index+1}}</h5>
         <div class="col-sm-8"></div>
-        <div class="col-sm-1"><button type="button" class="btn btn-sm text text-danger" ng-if="$index > 0" ng-click="removeRegion($index)">{{'delete'|translate}}</button></div>
+        <div class="col-sm-1"><button type="button" class="btn btn-sm text text-danger" ng-if="$index > 0 || queryAvailable" ng-click="removeRegion($index)">{{'delete'|translate}}</button></div>
       </legend>
       <div class="form-group">
         <label class="col-sm-3 control-label">

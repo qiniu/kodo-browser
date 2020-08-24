@@ -1,8 +1,8 @@
 angular.module('web')
-  .controller('addExternalPathModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'ExternalPath', 's3Client', 'Const', 'KodoClient', 'AuthInfo', 'AuditLog', 'Toast',
-    function ($scope, $modalInstance, $translate, callback, ExternalPath, s3Client, Const, KodoClient, AuthInfo, AuditLog, Toast) {
+  .controller('addExternalPathModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'ExternalPath', 's3Client', 'Const', 'KodoClient', 'AuditLog', 'Toast',
+    function ($scope, $modalInstance, $translate, callback, ExternalPath, s3Client, Const, KodoClient, AuditLog, Toast) {
       const T = $translate.instant,
-           regions = KodoClient.getRegions(AuthInfo.usePublicCloud());
+           regions = KodoClient.getRegions();
 
       angular.extend($scope, {
         regions: regions,

@@ -126,12 +126,11 @@ angular.module("web").controller("topCtrl", [
               Auth.logout().then(
                 function () {
                   const isPublicCloud = history.isPublicCloud;
-                  const data = {
-                    servicetpl: Config.load(isPublicCloud).regions[0].endpoint,
+                  Auth.login({
                     id: history.accessKeyId,
                     secret: history.accessKeySecret,
-                  };
-                  Auth.login(data).then(
+                    isPublicCloud: isPublicCloud
+                  }).then(
                     function () {
                       if (isPublicCloud) {
                         AuthInfo.switchToPublicCloud();

@@ -14,41 +14,46 @@ angular.module("web").factory("Auth", [
     };
 
     function login(data) {
-      var df = $q.defer();
-      var client = s3Client.getClient(data);
+      const df = $q.defer();
 
-      data.httpOptions = {
-        timeout: 5000
-      };
+      s3Client.getClient(data).then((client) => {
+        data.httpOptions = {
+          timeout: 5000
+        };
+        client.listBuckets(function (err, result) {
+          if (err) {
+            df.reject({
+              code: err.code,
+              message: err.message
+            });
+          } else if (result.Buckets) {
+            data.region = client.config.region;
+            data.isAuthed = true;
+            data.isSuper = true;
+            data.perm = {
+              read: true,
+              write: true,
+              copy: true,
+              move: true,
+              rename: true,
+              remove: true
+            };
 
-      client.listBuckets(function (err, result) {
-        if (err) {
-          df.reject({
-            code: err.code,
-            message: err.message
-          });
-        } else if (result.Buckets) {
-          data.region = client.config.region;
-          data.isAuthed = true;
-          data.isSuper = true;
-          data.perm = {
-            read: true,
-            write: true,
-            copy: true,
-            move: true,
-            rename: true,
-            remove: true
-          };
-
-          AuthInfo.save(data);
-          df.resolve();
-        } else {
-          df.reject({
-            code: "Error",
-            message: T("login.endpoint.error")
-          });
-        }
-      });
+            AuthInfo.save(data);
+            df.resolve();
+          } else {
+            df.reject({
+              code: "Error",
+              message: T("login.endpoint.error")
+            });
+          }
+        });
+      }, (err) => {
+        df.reject({
+          code: "Error",
+          message: T("login.endpoint.error")
+        });
+      })
 
       return df.promise;
     }

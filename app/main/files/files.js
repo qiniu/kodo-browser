@@ -1162,7 +1162,7 @@ angular.module("web").controller("filesCtrl", [
 
     function showBucketsTable(buckets) {
       initBucketSelect();
-      KodoClient.getRegions(AuthInfo.usePublicCloud()).then((regions) => {
+      KodoClient.getRegionLabels().then((regions) => {
         var $list = $('#bucket-list').bootstrapTable({
           columns: [{
             field: 'id',
@@ -1188,13 +1188,13 @@ angular.module("web").controller("filesCtrl", [
               if (id === null) {
                 return T('region.get.error');
               }
-              let regionName = T('region.unknown');
+              let regionLabel = T('region.unknown');
               each(regions, (region) => {
                 if (region.id === id && region.label) {
-                  regionName = region.label;
+                  regionLabel = region.label;
                 }
               })
-              return regionName;
+              return regionLabel;
             }
           }, {
             field: 'creationDate',
@@ -1238,7 +1238,7 @@ angular.module("web").controller("filesCtrl", [
 
     function showExternalPathsTable(externalPaths) {
       initExternalPathSelect();
-      KodoClient.getRegions(AuthInfo.usePublicCloud()).then((regions) => {
+      KodoClient.getRegionLabels().then((regions) => {
         var $list = $('#external-path-list').bootstrapTable({
           columns: [{
             field: 'id',
@@ -1264,13 +1264,13 @@ angular.module("web").controller("filesCtrl", [
               if (id === null) {
                 return T('region.get.error');
               }
-              let regionName = T('region.unknown');
+              let regionLabel = T('region.unknown');
               each(regions, (region) => {
                 if (region.id === id && region.label) {
-                  regionName = region.label;
+                  regionLabel = region.label;
                 }
               })
-              return regionName;
+              return regionLabel;
             }
           }],
           clickToSelect: true,

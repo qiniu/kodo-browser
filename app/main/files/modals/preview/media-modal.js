@@ -30,22 +30,18 @@ angular.module('web')
       }
 
       function genURL() {
-        var url = s3Client.signatureUrl(bucketInfo.region, bucketInfo.bucket, objectInfo.path, 3600);
-        $timeout(function () {
-
+        s3Client.signatureUrl(bucketInfo.region, bucketInfo.bucket, objectInfo.path, 3600).then((url) => {
           $scope.src_origin = url;
           $scope.src = $sce.trustAsResourceUrl(url);
 
           $timeout(function(){
-            var ele  = $('#video-player');
-            if( parseInt(ele.css('height')) > parseInt(ele.css('width')) ){
+            const ele = $('#video-player');
+            if(parseInt(ele.css('height')) > parseInt(ele.css('width'))){
                ele.css('height', $(document).height()-240);
                ele.css('width', 'auto');
             }
-          },1000);
-        }, 300);
+          }, 1000);
+        });
       }
-
-
     }
   ]);

@@ -32,23 +32,9 @@ angular.module('web')
       }
 
       function getContent() {
-        var info  = AuthInfo.get();
-        if(info.id.indexOf('STS.')==0){
-          s3Client.getImageBase64Url(bucketInfo.region, bucketInfo.bucket, objectInfo.path).then(function(data){
-            if(data.ContentType.indexOf('image/')==0){
-              var base64str = new Buffer(data.Body).toString('base64');
-              $scope.imgsrc = 'data:'+data.ContentType+';base64,'+base64str;
-            }
-          })
-        }
-        else{
-          var url = s3Client.signatureUrl(bucketInfo.region, bucketInfo.bucket, objectInfo.path);
-          $timeout(function () {
-            $scope.imgsrc = url;
-          }, 300);
-        }
-
+        s3Client.signatureUrl(bucketInfo.region, bucketInfo.bucket, objectInfo.path).then((url) => {
+          $scope.imgsrc = url;
+        });
       }
-
     }
   ]);

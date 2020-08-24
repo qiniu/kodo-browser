@@ -1,4 +1,6 @@
 angular.module("web").controller("loginCtrl", [
+  "$q",
+  "$timeout",
   "$scope",
   "$rootScope",
   "$translate",
@@ -12,7 +14,10 @@ angular.module("web").controller("loginCtrl", [
   "Toast",
   "AkHistory",
   "AuditLog",
+  "KodoClient",
   function (
+    $q,
+    $timeout,
     $scope,
     $rootScope,
     $translate,
@@ -25,7 +30,8 @@ angular.module("web").controller("loginCtrl", [
     Dialog,
     Toast,
     AkHistory,
-    AuditLog
+    AuditLog,
+    KodoClient
   ) {
     const T = $translate.instant;
 
@@ -38,7 +44,7 @@ angular.module("web").controller("loginCtrl", [
         name: "auth.customizedCloud",
         value: "customized"
       }],
-      privateCloud: privateCloud(),
+      isPrivateCloudConfigured: isPrivateCloudConfigured(),
       selectedCloud: selectedCloud(),
 
       showGuestNav: 1,
@@ -54,15 +60,36 @@ angular.module("web").controller("loginCtrl", [
       return AuthInfo.usePublicCloud() || !Config.exists() ? 'default' : 'customized';
     }
 
-    function privateCloud() {
-      if (Config.exists()) {
-        try {
-          return Config.load();
-        } catch (e) {
-          return null;
+    function isPrivateCloudConfigured() {
+      const df = $q.defer();
+
+      $timeout(() => {
+        if (Config.exists()) {
+          try {
+            const config = Config.load(false);
+            if (config) {
+              if (config.regions && config.regions.length) {
+                df.resolve(true);
+              } else {
+                KodoClient.isQueryRegionAPIAvaiable(config.ucUrl).then((queryAvailable) => {
+                  df.resolve(queryAvailable);
+                }, (err) => {
+                  Toast.error(err);
+                  df.reject(err);
+                });
+              }
+            } else {
+              df.resolve(false);
+            }
+          } catch (e) {
+            df.resolve(false);
+          }
+        } else {
+          df.resolve(false);
         }
-      }
-      return null;
+      });
+
+      return df.promise;
     }
 
     function open(a) {
@@ -94,8 +121,13 @@ angular.module("web").controller("loginCtrl", [
     function showCustomizedCloud() {
       $modal.open({
         templateUrl: "main/auth/modals/customize-cloud-modal.html",
-        controller: "customizeCloudModalCtrl"
-      }).result.then(angular.noop, () => { $scope.privateCloud = privateCloud(); });
+        controller: "customizeCloudModalCtrl",
+        resolve: {
+          queryAvailable: function() {
+            return KodoClient.isQueryRegionAPIAvaiable();
+          }
+        }
+      }).result.then(angular.noop, () => { $scope.isPrivateCloudConfigured = isPrivateCloudConfigured(); });
     }
 
     function onSubmit(form1) {
@@ -104,11 +136,13 @@ angular.module("web").controller("loginCtrl", [
       const data = angular.copy($scope.item),
             isPublicCloud = $scope.selectedCloud === 'default';
 
-      data.servicetpl = Config.load(isPublicCloud).regions[0].endpoint;
-
+      if (data.id) {
+        data.id = data.id.trim();
+      }
       if (data.secret) {
         data.secret = data.secret.trim();
       }
+      data.isPublicCloud = isPublicCloud;
 
       Toast.info(T("logining"), 1000);
 

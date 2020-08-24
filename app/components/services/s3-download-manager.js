@@ -1,4 +1,5 @@
 angular.module("web").factory("s3DownloadMgr", [
+  "$q",
   "$timeout",
   "AuthInfo",
   "s3Client",
@@ -6,6 +7,7 @@ angular.module("web").factory("s3DownloadMgr", [
   "Toast",
   "settingsSvs",
   function (
+    $q,
     $timeout,
     AuthInfo,
     s3Client,
@@ -41,68 +43,67 @@ angular.module("web").factory("s3DownloadMgr", [
       $scope = scope;
       $scope.lists.downloadJobList = [];
 
-      var auth = AuthInfo.get();
-      var progs = tryLoadProg();
-
+      const progs = tryLoadProg();
       angular.forEach(progs, (prog) => {
-        var job = createJob(auth, prog);
-        if (job.status == "waiting" || job.status == "running") {
-          job.stop();
-        }
-
-        addEvents(job);
+        createJob(prog).then((job) => {
+          if (job.status == "waiting" || job.status == "running") {
+            job.stop();
+          }
+          addEvents(job);
+        });
       });
     }
 
     /**
-     * @param  auth {id, secret}
      * @param  opt { region, from, to, ...}
      * @param  opt.from {bucket, key}
      * @param  opt.to   {name, path}
      * @return job  { start(), stop(), status, progress }
      */
-    function createJob(auth, options) {
-      const region = options.region || auth.region;
-      console.info(
-        "GET",
-        "::",
-        region,
-        "::",
-        options.from.bucket + "/" + options.from.key,
-        "==>",
-        options.to.path + "/" + options.to.name
-      );
+    function createJob(options) {
+      const df = $q.defer(),
+            auth = AuthInfo.get(),
+            bucket = options.from.bucket,
+            region = options.region || auth.region;
 
-      options.region = region;
-      options.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
-      options.multipartDownloadThreshold = settingsSvs.multipartDownloadThreshold.get();
-      options.multipartDownloadSize = settingsSvs.multipartDownloadSize.get();
-      options.downloadSpeedLimit = (settingsSvs.downloadSpeedLimitEnabled.get() == 1 && settingsSvs.downloadSpeedLimitKBperSec.get());
-      options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
-      options.isDebug = (settingsSvs.isDebug.get() == 1);
+      s3Client.getClient({ bucket: bucket, region: region }).then((client) => {
+        console.info(
+          "GET",
+          "::",
+          region,
+          "::",
+          options.from.bucket + "/" + options.from.key,
+          "==>",
+          options.to.path + "/" + options.to.name
+        );
+        options.region = region;
+        options.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
+        options.multipartDownloadThreshold = settingsSvs.multipartDownloadThreshold.get();
+        options.multipartDownloadSize = settingsSvs.multipartDownloadSize.get();
+        options.downloadSpeedLimit = (settingsSvs.downloadSpeedLimitEnabled.get() == 1 && settingsSvs.downloadSpeedLimitKBperSec.get());
+        options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
+        options.isDebug = (settingsSvs.isDebug.get() == 1);
 
-      angular.forEach(Config.load(AuthInfo.usePublicCloud()).regions, (r) => {
-        if (r.id == region) {
-          auth.servicetpl = r.endpoint;
-        }
+        const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
+        const store = new S3Store({
+          credential: {
+            accessKeyId: auth.id,
+            secretAccessKey: auth.secret
+          },
+          endpoint: client.config.endpoint,
+          region: region,
+          httpOptions: {
+            connectTimeout: 3000, // 3s
+            timeout: 300000, // 5m
+            agent: client.config.endpoint.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
+          }
+        });
+        df.resolve(store.createDownloadJob(options));
+      }, (err) => {
+        df.reject(err);
       });
 
-      const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
-      const store = new S3Store({
-        credential: {
-          accessKeyId: auth.id,
-          secretAccessKey: auth.secret
-        },
-        endpoint: auth.servicetpl,
-        region: region,
-        httpOptions: {
-          connectTimeout: 3000, // 3s
-          timeout: 300000, // 5m
-          agent: auth.servicetpl.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
-        }
-      });
-
-      return store.createDownloadJob(options);
+      return df.promise;
     }
 
     /**
@@ -114,7 +115,6 @@ angular.module("web").factory("s3DownloadMgr", [
     function createDownloadJobs(bucketInfos, toLocalPath, jobsAddedFn) {
       stopCreatingFlag = false;
 
-      var authInfo = AuthInfo.get();
       var dirPath = path.dirname(bucketInfos[0].path);
 
       loop(bucketInfos, (jobs) => {}, () => {
@@ -251,7 +251,8 @@ angular.module("web").factory("s3DownloadMgr", [
                 fileLocalPathWithSuffixWithoutExt = `${fileLocalPathWithoutExt}.${i}`;
               }
             }
-            const job = createJob(authInfo, {
+
+            createJob({
               region: s3info.region,
               from: {
                 bucket: s3info.bucket,
@@ -262,13 +263,13 @@ angular.module("web").factory("s3DownloadMgr", [
                 name: fileName,
                 path: fileLocalPathWithSuffixWithoutExt + ext
               }
+            }).then((job) => {
+              addEvents(job);
+              t.push(job);
+
+              if (callFn) callFn();
+              if (callFn2) callFn2();
             });
-
-            addEvents(job);
-            t.push(job);
-
-            if (callFn) callFn();
-            if (callFn2) callFn2();
           });
         }
       }

@@ -48,12 +48,19 @@ angular.module('web')
           cancel();
         });
         csvStringifier.write(['BucketName', 'ObjectName', 'URL']);
+        const promises = [];
         loopItems(currentInfo.region, currentInfo.bucket, items,
           (item) => {
-            const url = s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, lifetime);
-            csvStringifier.write([currentInfo.bucketName, item.path, url]);
+            promises.push(new Promise((resolve, reject) => {
+              s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, lifetime).then((url) => {
+                csvStringifier.write([currentInfo.bucketName, item.path, url]);
+                resolve();
+              });
+            }));
           }, () => {
-            csvStringifier.end();
+            Promise.all(promises).then(() => {
+              csvStringifier.end();
+            })
           });
       }
 

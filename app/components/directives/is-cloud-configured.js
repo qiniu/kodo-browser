@@ -3,14 +3,16 @@ angular.module("web").directive("isCloudConfigured", () => {
     restrict: 'A',
     require: 'ngModel',
     link: (scope, element, attributes, controller) => {
-      controller.$validators.isCloudConfigured = value => {
-        if (value) {
-          element.siblings('i').removeClass('blinking');
-          return true;
-        } else {
-          element.siblings('i').addClass('blinking');
-          return false;
-        }
+      controller.$validators.isCloudConfigured = promise => {
+        promise.then((value) => {
+          if (value) {
+            element.siblings('i').removeClass('blinking');
+            controller.$setValidity('isCloudConfigured', true);
+          } else {
+            element.siblings('i').addClass('blinking');
+            controller.$setValidity('isCloudConfigured', false);
+          }
+        });
       };
     }
   };

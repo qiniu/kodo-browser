@@ -25,10 +25,7 @@ angular.module("web").factory("s3Client", [
       listAllBuckets: listAllBuckets,
       createBucket: createBucket,
       deleteBucket: deleteBucket,
-
       getBucketLocation: getBucketLocation,
-      getBucketACL: getBucketACL,
-      updateBucketACL: updateBucketACL,
 
       listAllFiles: listAllFiles,
       listFiles: listFiles,
@@ -46,7 +43,6 @@ angular.module("web").factory("s3Client", [
 
       getContent: getContent,
       saveContent: saveContent,
-      getImageBase64Url: getImageBase64Url,
 
       //重命名
       moveFile: moveFile,
@@ -64,79 +60,42 @@ angular.module("web").factory("s3Client", [
 
       getClient: getClient,
       parseKodoPath: parseKodoPath,
-      signatureUrl: signatureUrl,
-      signaturePicUrl: signaturePicUrl
+      signatureUrl: signatureUrl
     };
 
-    function signaturePicUrl(region, bucket, key, expires, formatter) {
-      return new Promise(function (resolve, reject) {
-        var client = getClient({
-          region: region,
-          bucket: bucket
-        });
-
-        var params = {
-          Bucket: bucket,
-          Key: key,
-          Expires: expires
-        };
-
-        client.getSignedUrl(
-          "getObject", params,
-          function (err, url) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(url);
-            }
-          }
-        );
-      });
-    }
-
     function checkFolderExists(region, bucket, prefix) {
-      var df = $q.defer();
+      const df = $q.defer();
 
-      var client = getClient({
-        region: region,
-        bucket: bucket
-      });
-
-      var params = {
-        Bucket: bucket,
-        Prefix: prefix,
-        MaxKeys: 1
-      };
-
-      client.listObjects(params,
-        function (err, data) {
+      getClient({ region: region, bucket: bucket }).then((client) => {
+        const params = {
+          Bucket: bucket,
+          Prefix: prefix,
+          MaxKeys: 1
+        };
+        client.listObjects(params, function (err, data) {
           if (err) {
             handleError(err);
-
             df.reject(err);
           } else {
-            if (
-              data.Contents.length > 0 &&
-              data.Contents[0].Key.indexOf(prefix) == 0
-            ) {
+            if (data.Contents.length > 0 && data.Contents[0].Key.indexOf(prefix) == 0) {
               df.resolve(true);
             } else {
               df.resolve(false);
             }
           }
-        }
-      );
+        });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
+      });
 
       return df.promise;
     }
 
     function checkFileExists(region, bucket, key) {
-      return new Promise(function (resolve, reject) {
-        const client = getClient({
-          region: region,
-          bucket: bucket
-        });
+      const df = $q.defer();
 
+      getClient({ region: region, bucket: bucket }).then((client) => {
         const params = {
           Bucket: bucket,
           Key: key
@@ -144,39 +103,46 @@ angular.module("web").factory("s3Client", [
 
         client.headObject(params, function (err, data) {
           if (err) {
-            reject(err);
+            df.reject(err);
           } else {
-            resolve(data);
+            df.resolve(data);
           }
         });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function isFrozenOrNot(region, bucket, key) {
-      return new Promise(function (resolve, reject) {
-        getMeta(region, bucket, key).then((data) => {
-          if (data.StorageClass && data.StorageClass.toLowerCase() === 'glacier') {
-            if (data.Restore) {
-              const info = parseRestoreInfo(data.Restore);
-              if (info['ongoing-request'] === 'true') {
-                resolve({ status: 'unfreezing' });
-              } else {
-                const returnBody = { status: 'unfrozen' };
-                if (info['expiry-date']) {
-                  returnBody['expiry_date'] = new Date(info['expiry-date']);
-                }
-                resolve(returnBody);
-              }
+      const df = $q.defer();
+
+      getMeta(region, bucket, key).then((data) => {
+        if (data.StorageClass && data.StorageClass.toLowerCase() === 'glacier') {
+          if (data.Restore) {
+            const info = parseRestoreInfo(data.Restore);
+            if (info['ongoing-request'] === 'true') {
+              df.resolve({ status: 'unfreezing' });
             } else {
-              resolve({ status: 'frozen' });
+              const returnBody = { status: 'unfrozen' };
+              if (info['expiry-date']) {
+                returnBody['expiry_date'] = new Date(info['expiry-date']);
+              }
+              df.resolve(returnBody);
             }
           } else {
-            resolve({ status: 'normal' });
+            df.resolve({ status: 'frozen' });
           }
-        }, (err) => {
-          reject(err);
-        });
+        } else {
+          df.resolve({ status: 'normal' });
+        }
+      }, (err) => {
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     var stopDeleteFilesFlag = false;
@@ -196,125 +162,127 @@ angular.module("web").factory("s3Client", [
       stopDeleteFilesFlag = false;
 
       const df = $q.defer();
-      const client = getClient({
-        region: region,
-        bucket: bucket
-      });
+      getClient({ region: region, bucket: bucket }).then((client) => {
+        const progress = {
+          total: items.length,
+          current: 0,
+          errorCount: 0
+        };
 
-      const progress = {
-        total: items.length,
-        current: 0,
-        errorCount: 0
-      };
-      if (progCb) {
-        progCb(progress);
-      }
-
-      const deleteItems = (items, callback) => {
-        if (stopDeleteFilesFlag) {
-          df.resolve([{ item: {}, error: new Error("User cancelled") }]);
-          return;
-        }
-        if (!items.length) {
-          callback([]);
-          return;
+        if (progCb) {
+          progCb(progress);
         }
 
-        let completed = 0;
-        let errs = [];
-        const waitAndDeleteItems = () => {
-          const BATCH_SIZE = 1000;
-          let deleteBatchFilesFuncs = [];
-          completed += 1;
-          if (completed < items.length) {
-            return;
-          }
-          while (items.length >= BATCH_SIZE) {
-            deleteBatchFilesFuncs = deleteBatchFilesFuncs.concat(deleteBatchFiles.bind(items.splice(0, BATCH_SIZE)));
-          }
-          if (items.length > 0) {
-            deleteBatchFilesFuncs = deleteBatchFilesFuncs.concat(deleteBatchFiles.bind(items.splice(0, items.length)));
-          }
-          async.parallel(deleteBatchFilesFuncs, (errs2) => {
-            if (errs2) {
-              errs = errs.concat(errs2);
-            }
-            callback(errs);
-          });
-        }
-
-        each(items, (item) => {
-          if (item.isFolder) {
-            deleteFolder(item, (errs2) => {
-              if (errs2) {
-                errs = errs.concat(errs2);
-              }
-              waitAndDeleteItems();
-            });
+        deleteItems(items, function (errs) {
+          if (errs && errs.length > 0) {
+            df.resolve(errs);
           } else {
-            waitAndDeleteItems();
+            df.resolve();
           }
         });
-      };
 
-      const deleteFolder = (folder, callback) => {
-        const callbackWithStopFlagsChecks = (err) => {
+        function deleteItems(items, callback) {
           if (stopDeleteFilesFlag) {
             df.resolve([{ item: {}, error: new Error("User cancelled") }]);
             return;
           }
-          callback(err);
-        }
-        listAllFiles(region, bucket, folder.path).then((subItems) => {
-          progress.total += subItems.length;
-          if (progCb) {
-            progCb(progress);
+          if (!items.length) {
+            callback([]);
+            return;
           }
-          deleteItems(subItems, callbackWithStopFlagsChecks);
-        }, callbackWithStopFlagsChecks);
-      };
 
-      function deleteBatchFiles(callback) {
-        client.deleteObjects({
-          Bucket: bucket,
-          Delete: {
-            Objects: map(this, (item) => { return { Key: item.path }; })
-          }
-        }, (err, data) => {
-          if (err) {
-            progress.errorCount += this.length;
-          } else {
-            progress.current += data.Deleted.length;
-            progress.errorCount += data.Errors.length;
-          }
-          if (progCb) {
-            progCb(progress);
-          }
-          if (err) {
-            callback(map(this, (item) => { return { item: item, error: err } }));
-          } else if (data.Errors.length > 0) {
-            const errors = [];
-            each(data.Errors, (errItem) => {
-              each(this, (item) => {
-                if (errItem.Key === item.Key) {
-                  errors.push({ item: item, error: new Error(errItem.Message) });
-                }
-              });
+          let completed = 0;
+          let errs = [];
+          const waitAndDeleteItems = () => {
+            const BATCH_SIZE = 1000;
+            let deleteBatchFilesFuncs = [];
+            completed += 1;
+            if (completed < items.length) {
+              return;
+            }
+            while (items.length >= BATCH_SIZE) {
+              deleteBatchFilesFuncs = deleteBatchFilesFuncs.concat(deleteBatchFiles.bind(items.splice(0, BATCH_SIZE)));
+            }
+            if (items.length > 0) {
+              deleteBatchFilesFuncs = deleteBatchFilesFuncs.concat(deleteBatchFiles.bind(items.splice(0, items.length)));
+            }
+            async.parallel(deleteBatchFilesFuncs, (errs2) => {
+              if (errs2) {
+                errs = errs.concat(errs2);
+              }
+              callback(errs);
             });
-            callback(errors);
-          } else {
-            callback();
           }
-        });
-      }
 
-      deleteItems(items, function (errs) {
-        if (errs && errs.length > 0) {
-          df.resolve(errs);
-        } else {
-          df.resolve();
+          each(items, (item) => {
+            if (item.isFolder) {
+              deleteFolder(item, (errs2) => {
+                if (errs2) {
+                  errs = errs.concat(errs2);
+                }
+                waitAndDeleteItems();
+              });
+            } else {
+              waitAndDeleteItems();
+            }
+          });
+        };
+
+        function deleteFolder(folder, callback) {
+          const callbackWithStopFlagsChecks = (err) => {
+            if (stopDeleteFilesFlag) {
+              df.resolve([{ item: {}, error: new Error("User cancelled") }]);
+              return;
+            }
+            callback(err);
+          }
+          listAllFiles(region, bucket, folder.path).then((subItems) => {
+            progress.total += subItems.length;
+            if (progCb) {
+              progCb(progress);
+            }
+            deleteItems(subItems, callbackWithStopFlagsChecks);
+          }, callbackWithStopFlagsChecks);
+        };
+
+        function deleteBatchFiles(callback) {
+          client.deleteObjects({
+            Bucket: bucket,
+            Delete: {
+              Objects: map(this, (item) => { return { Key: item.path }; })
+            }
+          }, (err, data) => {
+            if (err) {
+              progress.errorCount += this.length;
+            } else {
+              progress.current += data.Deleted.length;
+              progress.errorCount += data.Errors.length;
+            }
+            if (progCb) {
+              progCb(progress);
+            }
+            if (err) {
+              callback(map(this, (item) => { return { item: item, error: err } }));
+            } else if (data.Errors.length > 0) {
+              const errors = [];
+              each(data.Errors, (errItem) => {
+                each(this, (item) => {
+                  if (errItem.Key === item.Key) {
+                    errors.push({ item: item, error: new Error(errItem.Message) });
+                  }
+                });
+              });
+              callback(errors);
+            } else {
+              callback();
+            }
+          });
         }
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
       return df.promise;
     }
 
@@ -340,7 +308,7 @@ angular.module("web").factory("s3Client", [
       removeAfterCopy,
       renameKey
     ) {
-      var progress = {
+      const progress = {
         total: 0,
         current: 0,
         errorCount: 0
@@ -348,7 +316,7 @@ angular.module("web").factory("s3Client", [
       stopCopyFilesFlag = false;
 
       //入口
-      var df = $q.defer();
+      const df = $q.defer();
       digArr(items, target, renameKey, function (terr) {
         df.resolve(terr);
       });
@@ -356,8 +324,8 @@ angular.module("web").factory("s3Client", [
 
       //copy file
       function copyFile(client, from, to, fn) {
-        var toKey = to.key;
-        var fromKey = "/" + from.bucket + "/" + encodeURIComponent(from.key);
+        const toKey = to.key,
+              fromKey = "/" + from.bucket + "/" + encodeURIComponent(from.key);
         console.info(
           removeAfterCopy ? "move" : "copy",
           "::",
@@ -367,7 +335,7 @@ angular.module("web").factory("s3Client", [
           from.storageClass
         );
 
-        var params = {
+        const params = {
           Bucket: to.bucket,
           Key: toKey,
           CopySource: fromKey,
@@ -375,202 +343,181 @@ angular.module("web").factory("s3Client", [
           StorageClass: from.storageClass
         };
 
-        client.copyObject(params,
-          function (err) {
-            if (err) {
-              err.stage = 'copy';
-              err.fromKey = from.key;
-              err.toKey = to.key;
-              fn(err);
-            } else if (removeAfterCopy) {
-              client.deleteObject({Bucket: from.bucket, Key: from.key}, function (err) {
-                if (err) {
-                  err.stage = 'delete';
-                  err.fromKey = from.key;
-                  err.toKey = to.key;
-                  fn(err);
-                } else {
-                  fn();
-                }
-              });
-            } else {
-              fn();
-            }
+        client.copyObject(params, function (err) {
+          if (err) {
+            err.stage = 'copy';
+            err.fromKey = from.key;
+            err.toKey = to.key;
+            fn(err);
+          } else if (removeAfterCopy) {
+            client.deleteObject({Bucket: from.bucket, Key: from.key}, function (err) {
+              if (err) {
+                err.stage = 'delete';
+                err.fromKey = from.key;
+                err.toKey = to.key;
+                fn(err);
+              } else {
+                fn();
+              }
+            });
+          } else {
+            fn();
           }
-        );
+        });
       }
 
       //打平，一条一条 copy
       function doCopyFiles(bucket, pkey, arr, target, fn) {
-        var len = arr.length;
-        var c = 0;
-        var t = [];
+        const len = arr.length;
+              t = [];
+        let c = 0;
 
         progress.total += len;
 
-        var client = getClient({
-          region: region,
-          bucket: target.bucket
-        });
+        getClient({ region: region, bucket: target.bucket }).then((client) => {
+          _dig();
 
-        function _dig() {
-          if (c >= len) {
-            $timeout(function () {
-              fn(t);
-            }, NEXT_TICK);
-            return;
-          }
+          function _dig() {
+            if (c >= len) {
+              $timeout(function () { fn(t); }, NEXT_TICK);
+              return;
+            }
 
-          if (stopCopyFilesFlag) {
-            df.resolve([{
-              item: {},
-              error: new Error("User cancelled")
-            }]);
-            return;
-          }
+            if (stopCopyFilesFlag) {
+              df.resolve([{
+                item: {},
+                error: new Error("User cancelled")
+              }]);
+              return;
+            }
 
-          var item = arr[c];
-          var toKey = target.key.replace(/\/$/, "");
-          toKey = (toKey ? toKey + "/" : "") + item.path.substring(pkey.length);
+            var item = arr[c];
+            var toKey = target.key.replace(/\/$/, "");
+            toKey = (toKey ? toKey + "/" : "") + item.path.substring(pkey.length);
 
-          copyFile(
-            client, {
-              bucket: bucket,
-              key: item.path,
-              storageClass: item.StorageClass
-            }, {
-              bucket: target.bucket,
-              key: toKey
-            },
-            function (err) {
-              if (err) {
-                progress.errorCount++;
+            copyFile(client, {
+                bucket: bucket,
+                key: item.path,
+                storageClass: item.StorageClass
+              }, {
+                bucket: target.bucket,
+                key: toKey
+              },
+              function (err) {
+                if (err) {
+                  progress.errorCount++;
 
+                  if (progFn) {
+                    try {
+                      progFn(progress);
+                    } catch (e) {}
+                  }
+
+                  t.push({
+                    item: item,
+                    error: err
+                  });
+                }
+
+                progress.current++;
                 if (progFn) {
                   try {
                     progFn(progress);
                   } catch (e) {}
                 }
+                c++;
 
-                t.push({
-                  item: item,
-                  error: err
-                });
+                //fix ubuntu
+                $timeout(_dig, NEXT_TICK);
               }
-
-              progress.current++;
-              if (progFn) {
-                try {
-                  progFn(progress);
-                } catch (e) {}
-              }
-              c++;
-
-              //fix ubuntu
-              $timeout(_dig, NEXT_TICK);
-            }
-          );
-        }
-        _dig();
+            );
+          }
+        }, (err) => {
+          df.resolve([{ item: {}, error: err }]);
+        });
       }
 
       function doCopyFolder(source, target, fn) {
-        var t = [];
-        var client = getClient({
-          region: region,
-          bucket: source.bucket
-        });
+        let t = [];
 
-        function next(marker) {
-          var opt = {
-            Bucket: source.bucket,
-            Prefix: source.path
-          };
-          if (marker) {
-            opt.Marker = marker;
-          }
+        getClient({ region: region, bucket: source.bucket }).then((client) => {
+          next();
 
-          client.listObjects(opt, function (err, result) {
-            if (err) {
-              t.push({
-                item: source,
-                error: err
+          function next(marker) {
+            const opt = { Bucket: source.bucket, Prefix: source.path };
+            if (marker) {
+              opt.Marker = marker;
+            }
+
+            client.listObjects(opt, function (err, result) {
+              if (err) {
+                t.push({ item: source, error: err });
+                $timeout(function () { fn(t); }, NEXT_TICK);
+                return;
+              }
+
+              const newTarget = { bucket: target.bucket, key: target.key };
+              let prefix = opt.Prefix;
+              if (!prefix.endsWith("/")) {
+                prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
+              }
+
+              const objs = [];
+              result["Contents"].forEach(function (n) {
+                n.Prefix = n.Prefix || "";
+
+                n.isFile = true;
+                n.itemType = "file";
+                n.path = n.Key;
+                n.name = n.Key.substring(prefix.length);
+                n.size = n.Size;
+                n.storageClass = n.StorageClass;
+                n.type = n.Type;
+                n.lastModified = n.LastModified;
+                n.url = getS3Url(region, opt.Bucket, n.Key);
+
+                objs.push(n);
               });
 
-              $timeout(function () {
-                fn(t);
-              }, NEXT_TICK);
-              return;
-            }
+              doCopyFiles(
+                source.bucket,
+                source.path,
+                objs,
+                newTarget,
+                function (terr) {
+                  if (stopCopyFilesFlag) {
+                    df.resolve([{
+                      item: {},
+                      error: new Error("User cancelled")
+                    }]);
+                    return;
+                  }
 
-            var newTarget = {
-              bucket: target.bucket,
-              key: target.key
-            };
+                  if (terr) {
+                    t = t.concat(terr);
+                  }
 
-            var prefix = opt.Prefix;
-            if (!prefix.endsWith("/")) {
-              prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
-            }
-
-            var objs = [];
-            result["Contents"].forEach(function (n) {
-              n.Prefix = n.Prefix || "";
-
-              n.isFile = true;
-              n.itemType = "file";
-              n.path = n.Key;
-              n.name = n.Key.substring(prefix.length);
-              n.size = n.Size;
-              n.storageClass = n.StorageClass;
-              n.type = n.Type;
-              n.lastModified = n.LastModified;
-              n.url = getS3Url(region, opt.Bucket, n.Key);
-
-              objs.push(n);
+                  if (result.NextMarker) {
+                    $timeout(function () {
+                      next(result.NextMarker);
+                    }, NEXT_TICK);
+                  } else {
+                    $timeout(function () {
+                      fn(t);
+                    }, NEXT_TICK);
+                  }
+                }
+              );
             });
-
-            doCopyFiles(
-              source.bucket,
-              source.path,
-              objs,
-              newTarget,
-              function (terr) {
-                if (stopCopyFilesFlag) {
-                  df.resolve([{
-                    item: {},
-                    error: new Error("User cancelled")
-                  }]);
-                  return;
-                }
-
-                if (terr) {
-                  t = t.concat(terr);
-                }
-
-                if (result.NextMarker) {
-                  $timeout(function () {
-                    next(result.NextMarker);
-                  }, NEXT_TICK);
-                } else {
-                  $timeout(function () {
-                    fn(t);
-                  }, NEXT_TICK);
-                }
-              }
-            );
-          });
-        }
-        next();
+          }
+        }, (err) => {
+          df.resolve([{ item: {}, error: err }]);
+        });
       }
 
       function doCopyFile(source, target, fn) {
-        var client = getClient({
-          region: region,
-          bucket: target.bucket
-        });
-        copyFile(
-          client, {
+        getClient({ region: region, bucket: target.bucket }).then((client) => {
+          copyFile(client, {
             bucket: source.bucket,
             key: source.path,
             storageClass: source.StorageClass,
@@ -584,14 +531,16 @@ angular.module("web").factory("s3Client", [
             } else {
               fn();
             }
-          }
-        );
+          });
+        }, (err) => {
+          fn(err);
+        });
       }
 
       function digArr(items, target, renameKey, fn) {
-        var len = items.length;
-        var c = 0;
-        var terr = [];
+        const len = items.length;
+        let c = 0;
+        let terr = [];
 
         progress.total += len;
         if (progFn) {
@@ -681,67 +630,68 @@ angular.module("web").factory("s3Client", [
     function moveFile(region, bucket, oldKey, newKey, isCopy, storageClass) {
       const df = $q.defer();
 
-      const client = getClient({
-        region: region,
-        bucket: bucket
+      getClient({ region: region, bucket: bucket }).then((client) => {
+        const params = {
+          Bucket: bucket,
+          Key: newKey,
+          CopySource: "/" + bucket + "/" + encodeURIComponent(oldKey),
+          MetadataDirective: 'COPY', // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
+          StorageClass: storageClass,
+        };
+
+        client.copyObject(params, function (err) {
+          if (err) {
+            handleError(err);
+            err.stage = 'copy';
+            df.reject(err);
+          } else if (isCopy) {
+            df.resolve();
+          } else {
+            client.deleteObject({ Bucket: bucket, Key: oldKey }, function (err) {
+              if (err) {
+                handleError(err);
+                err.stage = 'delete';
+                df.reject(err);
+              } else {
+                df.resolve();
+              }
+            });
+          }
+        });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
 
-      const params = {
-        Bucket: bucket,
-        Key: newKey,
-        CopySource: "/" + bucket + "/" + encodeURIComponent(oldKey),
-        MetadataDirective: 'COPY', // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
-        StorageClass: storageClass,
-      };
-
-      client.copyObject(params, function (err) {
-        if (err) {
-          handleError(err);
-          err.stage = 'copy';
-          df.reject(err);
-        } else if (isCopy) {
-          df.resolve();
-        } else {
-          client.deleteObject({ Bucket: bucket, Key: oldKey }, function (err) {
-            if (err) {
-              handleError(err);
-              err.stage = 'delete';
-              df.reject(err);
-            } else {
-              df.resolve();
-            }
-          });
-        }
-      });
       return df.promise;
     }
 
     function restoreFile(region, bucket, key, days) {
       const df = $q.defer();
 
-      const client = getClient({
-        region: region,
-        bucket: bucket
-      });
-
-      const params = {
-        Bucket: bucket,
-        Key: key,
-        RestoreRequest: {
-          Days: days,
-          GlacierJobParameters: {
-            Tier: "Standard"
+      getClient({ region: region, bucket: bucket }).then((client) => {
+        const params = {
+          Bucket: bucket,
+          Key: key,
+          RestoreRequest: {
+            Days: days,
+            GlacierJobParameters: {
+              Tier: "Standard"
+            }
           }
-        }
-      };
+        };
 
-      client.restoreObject(params, function(err, data) {
-        if (err) {
-          handleError(err);
-          df.reject(err);
-        } else {
-          df.resolve(data);
-        }
+        client.restoreObject(params, function(err, data) {
+          if (err) {
+            handleError(err);
+            df.reject(err);
+          } else {
+            df.resolve(data);
+          }
+        });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
 
       return df.promise;
@@ -755,12 +705,9 @@ angular.module("web").factory("s3Client", [
         prefix = prefix.replace(/\\/g, "/");
       }
 
-      return new Promise(function (resolve, reject) {
-        var client = getClient({
-          region: region,
-          bucket: bucket
-        });
+      const df = $q.defer();
 
+      getClient({ region: region, bucket: bucket }).then((client) => {
         client.putObject({
           Bucket: bucket,
           Key: prefix,
@@ -768,183 +715,106 @@ angular.module("web").factory("s3Client", [
         }, function (err, data) {
           if (err) {
             handleError(err);
-
-            reject(err);
+            df.reject(err);
           } else {
-            resolve(data);
+            df.resolve(data);
           }
         });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function deleteBucket(region, bucket) {
-      return new Promise(function (resolve, reject) {
-        var client = getClient({
-          region: region,
-          bucket: bucket
-        });
+      const df = $q.defer();
 
+      getClient({ region: region, bucket: bucket }).then((client) => {
         client.deleteBucket({
           Bucket: bucket
         }, function (err, data) {
           if (err) {
             handleError(err);
-
-            reject(err);
+            df.reject(err);
           } else {
-            resolve(data);
+            df.resolve(data);
           }
         });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function signatureUrl(region, bucket, key, expires) {
-      var client = getClient({
-        region: region,
-        bucket: bucket
+      const df = $q.defer();
+
+      getClient({ region: region, bucket: bucket }).then((client) => {
+        df.resolve(client.getSignedUrl("getObject", { Bucket: bucket, Key: key, Expires: expires || 60 }));
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
 
-      var url = client.getSignedUrl("getObject", {
-        Bucket: bucket,
-        Key: key,
-        Expires: expires || 60
-      });
-
-      return url;
+      return df.promise;
     }
 
     function getBucketLocation(bucket) {
       const df = $q.defer();
 
-      getClient().getBucketLocation({ Bucket: bucket }, function (err, data) {
-        if (err) {
-          handleError(err);
-          df.reject(err);
-        } else {
-          const locationConstraint = data.LocationConstraint;
-          df.resolve(locationConstraint.replace(/<[^>]+>/, ''));
-        }
-      });
-
-      return df.promise;
-    }
-
-    function getBucketACL(region, bucket) {
-      var df = $q.defer();
-
-      var client = getClient({
-        region: region,
-        bucket: bucket
-      });
-
-      client.getBucketAcl({
-        Bucket: bucket
-      }, function (err, data) {
-        if (err) {
-          handleError(err);
-
-          df.reject(err);
-        } else {
-          if (data.Grants && data.Grants.length == 1) {
-            var t = [];
-            for (var k in data.Grants[0]) {
-              t.push(data.Grants[0][k]);
-            }
-            data.acl = t.join("");
-          } else {
-            data.acl = "default";
-          }
-
-          df.resolve(data);
-        }
-      });
-
-      return df.promise;
-    }
-
-    function updateBucketACL(region, bucket, acl) {
-      var df = $q.defer();
-
-      var client = getClient({
-        region: region,
-        bucket: bucket
-      });
-
-      client.putBucketAcl({
-        Bucket: bucket,
-        ACL: acl
-      }, function (err, data) {
-        if (err) {
-          handleError(err);
-
-          df.reject(err);
-        } else {
-          df.resolve(data);
-        }
-      });
-
-      return df.promise;
-    }
-
-    function getImageBase64Url(region, bucket, key) {
-      return new Promise(function (resolve, reject) {
-        var client = getClient({
-          region: region,
-          bucket: bucket
-        });
-
-        client.getObject({
-          Bucket: bucket,
-          Key: key
-        }, function (err, data) {
+      getClient().then((client) => {
+        client.getBucketLocation({ Bucket: bucket }, function (err, data) {
           if (err) {
             handleError(err);
-
-            reject(err);
+            df.reject(err);
           } else {
-            resolve(data);
+            const locationConstraint = data.LocationConstraint;
+            df.resolve(locationConstraint.replace(/<[^>]+>/, ''));
           }
         });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function getContent(region, bucket, key) {
-      return new Promise(function (resolve, reject) {
-        var client = getClient({
-          region: region,
-          bucket: bucket
-        });
+      const df = $q.defer();
 
-        client.getObject({
-          Bucket: bucket,
-          Key: key
-        }, function (err, data) {
+      getClient({ region: region, bucket: bucket }).then((client) => {
+        client.getObject({ Bucket: bucket, Key: key }, function (err, data) {
           if (err) {
             handleError(err);
-
-            reject(err);
+            df.reject(err);
           } else {
-            resolve(data);
+            df.resolve(data);
           }
         });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function saveContent(region, bucket, key, content) {
-      return new Promise(function (resolve, reject) {
-        var client = getClient({
-          region: region,
-          bucket: bucket
-        });
+      const df = $q.defer();
 
+      getClient({ region: region, bucket: bucket }).then((client) => {
         client.headObject({
           Bucket: bucket,
           Key: key
         }, function (err, result) {
           if (err) {
             handleError(err);
-
-            reject(err);
+            df.reject(err);
           } else {
             client.putObject({
               Bucket: bucket,
@@ -962,24 +832,25 @@ angular.module("web").factory("s3Client", [
             }, function (err) {
               if (err) {
                 handleError(err);
-
-                reject(err);
+                df.reject(err);
               } else {
-                resolve();
+                df.resolve();
               }
             });
           }
         });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function createBucket(region, bucket, acl) {
-      return new Promise(function (resolve, reject) {
-        var client = getClient({
-          region: region,
-          bucket: bucket
-        });
+      const df = $q.defer();
 
+      getClient({ region: region, bucket: bucket }).then((client) => {
         client.createBucket({
           Bucket: bucket,
           CreateBucketConfiguration: {
@@ -988,45 +859,44 @@ angular.module("web").factory("s3Client", [
         }, function (err, data) {
           if (err) {
             handleError(err);
-            reject(err);
+            df.reject(err);
           } else {
-            resolve(data);
+            df.resolve(data);
           }
         });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function getMeta(region, bucket, key) {
-      return new Promise(function (resolve, reject) {
-        var client = getClient({
-          region: region,
-          bucket: bucket
-        });
+      const df = $q.defer();
 
-        var opt = {
-          Bucket: bucket,
-          Key: key
-        };
-
-        client.headObject(opt, function (err, data) {
+      getClient({ region: region, bucket: bucket }).then((client) => {
+        client.headObject({ Bucket: bucket, Key: key }, function (err, data) {
           if (err) {
             handleError(err);
-            reject(err);
+            df.reject(err);
           } else {
-            resolve(data);
+            df.resolve(data);
           }
         });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function setMeta(region, bucket, key, headers, metas) {
-      return new Promise(function (resolve, reject) {
-        var client = getClient({
-          region: region,
-          bucket: bucket
-        });
+      const df = $q.defer();
 
-        var opt = {
+      getClient({ region: region, bucket: bucket }).then((client) => {
+        const opt = {
           Bucket: bucket,
           Key: key,
           CopySource: "/" + bucket + "/" + encodeURIComponent(key),
@@ -1044,87 +914,88 @@ angular.module("web").factory("s3Client", [
         client.copyObject(opt, function (err, data) {
           if (err) {
             handleError(err);
-            reject(err);
+            df.reject(err);
           } else {
-            resolve(data);
+            df.resolve(data);
           }
         });
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function listFiles(region, bucket, key, marker) {
-      return new Promise(function (resolve, reject) {
-        _listFilesOrigion(region, bucket, key, marker).then(function (result) {
-          var arr = result.data;
-          if (arr && arr.length) {
-            $timeout(() => {
-              loadStorageStatus(region, bucket, arr);
-            }, NEXT_TICK);
-          }
-          resolve(result);
-        }, function (err) {
-          reject(err);
-        });
+      const df = $q.defer();
+
+      _listFilesOrigion(region, bucket, key, marker).then(function (result) {
+        const arr = result.data;
+        if (arr && arr.length) {
+          $timeout(() => { loadStorageStatus(region, bucket, arr); }, NEXT_TICK);
+        }
+        df.resolve(result);
+      }, function (err) {
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function loadStorageStatus(region, bucket, arr) {
-      return new Promise(function (resolve, reject) {
-        var len = arr.length;
-        var c = 0;
-        _dig();
+      const df = $q.defer();
+      const len = arr.length;
+      let c = 0;
+      _dig();
 
-        function _dig() {
-          if (c >= len) {
-            resolve();
-            return;
-          }
-
-          var item = arr[c];
-          c++;
-
-          if (!item.isFile || item.storageClass != "Archive") {
-            $timeout(_dig, NEXT_TICK);
-            return;
-          }
-
-          getMeta(region, bucket, item.path).then(
-            function (data) {
-              item.storageStatus = 1;
-
-              $timeout(_dig, NEXT_TICK);
-            },
-            function (err) {
-              reject(err);
-              $timeout(_dig, NEXT_TICK);
-            }
-          );
+      function _dig() {
+        if (c >= len) {
+          df.resolve();
+          return;
         }
-      });
+
+        const item = arr[c];
+        c++;
+
+        if (!item.isFile || item.storageClass != "Archive") {
+          $timeout(_dig, NEXT_TICK);
+          return;
+        }
+
+        getMeta(region, bucket, item.path).then((data) => {
+          item.storageStatus = 1;
+          $timeout(_dig, NEXT_TICK);
+        }, (err) => {
+          df.reject(err);
+          $timeout(_dig, NEXT_TICK);
+        });
+      }
+
+      return df.promise;
     }
 
     function _listFilesOrigion(region, bucket, key, marker) {
-      return new Promise(function (resolve, reject) {
-        const client = getClient({
-          region: region,
-          bucket: bucket
-        });
+      const df = $q.defer();
 
-        const t = [];
-        const t_pre = [];
-        const opt = {
-          Bucket: bucket,
-          Prefix: key,
-          Delimiter: "/",
-          Marker: marker || "",
-          MaxKeys: 1000
-        };
+      getClient({ region: region, bucket: bucket }).then((client) => {
+        const t = [],
+              t_pre = [],
+              opt = {
+                Bucket: bucket,
+                Prefix: key,
+                Delimiter: "/",
+                Marker: marker || "",
+                MaxKeys: 1000
+              };
+
+        listOnePage();
 
         function listOnePage() {
           client.listObjects(opt, function (err, result) {
             if (err) {
               handleError(err);
-              reject(err);
+              df.reject(err);
               return;
             }
 
@@ -1171,7 +1042,7 @@ angular.module("web").factory("s3Client", [
             }
 
             if (t_pre.length + t.length >= 1000 || !result.NextMarker) {
-              resolve({
+              df.resolve({
                 data: t_pre.concat(t),
                 marker: result.NextMarker
               });
@@ -1181,136 +1052,135 @@ angular.module("web").factory("s3Client", [
             }
           });
         }
-
-        listOnePage();
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     //同一时间只能有一个查询，上一个查询如果没有完成，则会被abort
-    var keepListFilesJob;
+    var keepListFilesJob = null;
 
     function listAllFiles(region, bucket, key, folderOnly) {
-      return new Promise(function (resolve, reject) {
-        keepListFilesJob = new DeepListJob(
-          region,
-          bucket,
-          key,
-          folderOnly,
-          function (data) {
-            resolve(data);
-          },
-          function (err) {
-            handleError(err);
-            reject(err);
-          }
-        );
-      });
-    }
+      const df = $q.defer();
 
-    function DeepListJob(region, bucket, key, folderOnly, succFn, errFn) {
-      var stopFlag = false;
-
-      var client = getClient({
-        region: region,
-        bucket: bucket
+      keepListFilesJob = new DeepListJob(region, bucket, key, folderOnly, function (data) {
+        df.resolve(data);
+      }, function (err) {
+        handleError(err);
+        df.reject(err);
       });
 
-      var t = [];
-      var t_pre = [];
-      var opt = {
-        Bucket: bucket,
-        Prefix: key,
-        Delimiter: "/"
-      };
+      return df.promise;
 
-      function _dig() {
-        if (stopFlag) {
-          return;
-        }
+      function DeepListJob(region, bucket, key, folderOnly, succFn, errFn) {
+        let stopFlag = false;
+        const t = [],
+              t_pre = [],
+              opt = {
+                Bucket: bucket,
+                Prefix: key,
+                Delimiter: "/"
+              };
 
-        client.listObjects(opt, function (err, result) {
-          if (stopFlag) {
-            return;
-          }
+        getClient({ region: region, bucket: bucket }).then((client) => {
+          _dig();
 
-          if (err) {
-            errFn(err);
-            return;
-          }
-
-          var prefix = opt.Prefix;
-          if (!prefix.endsWith("/")) {
-            prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
-          }
-
-          //目录
-          if (result.CommonPrefixes) {
-            result.CommonPrefixes.forEach(function (n) {
-              n = n.Prefix;
-              t_pre.push({
-                name: n.substring(prefix.length).replace(/(\/$)/, ""),
-                path: n,
-                isFolder: true,
-                itemType: "folder"
-              });
-            });
-          }
-
-          //文件
-          if (!folderOnly && result["Contents"]) {
-            result["Contents"].forEach(function (n) {
-              n.Prefix = n.Prefix || "";
-
-              if (!opt.Prefix.endsWith("/") || n.Key != opt.Prefix) {
-                n.isFile = true;
-                n.itemType = "file";
-                n.path = n.Key;
-                n.name = n.Key.substring(prefix.length);
-                n.size = n.Size;
-                n.storageClass = n.StorageClass;
-                n.type = n.Type;
-                n.lastModified = n.LastModified;
-                n.url = getS3Url(region, opt.Bucket, n.Key);
-
-                t.push(n);
-              }
-            });
-          }
-
-          if (result.NextMarker) {
-            opt.Marker = result.NextMarker;
-
-            $timeout(_dig, NEXT_TICK);
-          } else {
+          function _dig() {
             if (stopFlag) {
               return;
             }
 
-            succFn(t_pre.concat(t));
-          }
-        });
-      }
-      _dig();
+            client.listObjects(opt, function (err, result) {
+              if (stopFlag) {
+                return;
+              }
 
-      //////////////////////////
-      this.abort = function () {
-        stopFlag = true;
-      };
+              if (err) {
+                errFn(err);
+                return;
+              }
+
+              let prefix = opt.Prefix;
+              if (!prefix.endsWith("/")) {
+                prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
+              }
+
+              //目录
+              if (result.CommonPrefixes) {
+                result.CommonPrefixes.forEach(function (n) {
+                  n = n.Prefix;
+                  t_pre.push({
+                    name: n.substring(prefix.length).replace(/(\/$)/, ""),
+                    path: n,
+                    isFolder: true,
+                    itemType: "folder"
+                  });
+                });
+              }
+
+              //文件
+              if (!folderOnly && result["Contents"]) {
+                result["Contents"].forEach(function (n) {
+                  n.Prefix = n.Prefix || "";
+
+                  if (!opt.Prefix.endsWith("/") || n.Key != opt.Prefix) {
+                    n.isFile = true;
+                    n.itemType = "file";
+                    n.path = n.Key;
+                    n.name = n.Key.substring(prefix.length);
+                    n.size = n.Size;
+                    n.storageClass = n.StorageClass;
+                    n.type = n.Type;
+                    n.lastModified = n.LastModified;
+                    n.url = getS3Url(region, opt.Bucket, n.Key);
+
+                    t.push(n);
+                  }
+                });
+              }
+
+              if (result.NextMarker) {
+                opt.Marker = result.NextMarker;
+
+                $timeout(_dig, NEXT_TICK);
+              } else {
+                if (stopFlag) {
+                  return;
+                }
+
+                succFn(t_pre.concat(t));
+              }
+            });
+          }
+        }, (err) => {
+          errFn(err);
+        });
+
+        //////////////////////////
+        this.abort = function () {
+          stopFlag = true;
+        };
+      }
     }
 
     function listAllBuckets() {
-      return new Promise(function (resolve, reject) {
-        const client = getClient();
+      const df = $q.defer();
 
+      getClient().then((client) => {
         let t = [];
         const opt = {};
+
+        _dig();
 
         function _dig() {
           KodoClient.getBucketIdNameMapper().then((idNameMapper) => {
             client.listBuckets(opt, function (err, result) {
               if (err) {
                 handleError(err);
-                reject(err);
+                df.reject(err);
                 return;
               }
 
@@ -1337,18 +1207,22 @@ angular.module("web").factory("s3Client", [
 
                 $timeout(_dig, NEXT_TICK);
               } else {
-                resolve(t);
+                df.resolve(t);
               }
             });
           }, (err) => {
             if (err) {
               handleError(err);
-              reject(err);
+              df.reject(err);
             }
           });
         }
-        _dig();
+      }, (err) => {
+        handleError(err);
+        df.reject(err);
       });
+
+      return df.promise;
     }
 
     function parseRestoreInfo(s) {
@@ -1393,62 +1267,65 @@ angular.module("web").factory("s3Client", [
     }
 
     /**
-     * @param opt   {object|string}
-     *    object = {id, secret, region, bucket}
+     * @param opt   {object|null}
+     *    object = {id, secret, servicetpl, region, bucket}
      */
     function getClient(opt) {
-      const options = prepareOptions(opt);
+      const df = $q.defer();
+      let authInfo = null, regions = null;
 
-      const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
-      const client = new AWS.S3({
-        apiVersion: "2006-03-01",
-        customUserAgent: `QiniuKodoBrowser/${Global.app.version}`,
-        computeChecksums: true,
-        logger: console,
-        endpoint: options.endpoint,
-        region: options.region,
-        accessKeyId: options.accessKeyId,
-        secretAccessKey: options.secretAccessKey,
-        maxRetries: options.maxRetries,
-        s3ForcePathStyle: true,
-        signatureVersion: "v4",
-        httpOptions: {
-          connectTimeout: 3000, // 3s
-          timeout: 300000, // 5m
-          agent: options.endpoint.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
-        }
-      });
-
-      return client;
-    }
-
-    function prepareOptions(opt) {
-      var authInfo = AuthInfo.get();
-
-      var bucket;
-      if (typeof opt == "object") {
-        if (opt.region) {
-          angular.forEach(Config.load(AuthInfo.usePublicCloud()).regions, (region) => {
-            if (region.id == opt.region) {
-              opt.servicetpl = region.endpoint;
-            }
-          });
-        }
-        bucket = opt.bucket;
-        Object.assign(authInfo, opt);
+      if (typeof opt === 'object' && opt.id && opt.secret) {
+        authInfo = { id: opt.id, secret: opt.secret };
+        regions = angular.copy(Config.load(opt.isPublicCloud).regions);
+      } else {
+        authInfo = AuthInfo.get();
+        regions = angular.copy(Config.load(AuthInfo.usePublicCloud()).regions);
       }
 
-      return options = {
-        accessKeyId: authInfo.id || "ak",
-        secretAccessKey: authInfo.secret || "sk",
-        endpoint: authInfo.servicetpl,
-        region: authInfo.region,
-        apiVersion: "2013-10-15",
-        httpOptions: {
-          timeout: authInfo.httpOptions ? authInfo.httpOptions.timeout : 0
-        },
-        maxRetries: 10
-      };
+      if (typeof opt === 'object' && opt.bucket && opt.region) {
+        createClientByBucketAndRegion(opt.bucket, opt.region);
+      } else if (regions && regions.length) {
+        const region = regions[0];
+        createClientByEndpointAndRegion(region.endpoint, region.id);
+      } else {
+        KodoClient.getAnyBucketInfo(authInfo).then((info) => {
+          createClientByBucketAndRegion(info.bucket, info.region, authInfo);
+        }, (err) => {
+          df.reject(err);
+        });
+      }
+
+      return df.promise;
+
+      function createClientByEndpointAndRegion(endpointURL, region) {
+        const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
+        df.resolve(new AWS.S3({
+          apiVersion: "2006-03-01",
+          customUserAgent: `QiniuKodoBrowser/${Global.app.version}`,
+          computeChecksums: true,
+          logger: console,
+          endpoint: endpointURL,
+          region: region,
+          accessKeyId: authInfo.id,
+          secretAccessKey: authInfo.secret,
+          maxRetries: 10,
+          s3ForcePathStyle: true,
+          signatureVersion: "v4",
+          httpOptions: {
+            connectTimeout: 3000, // 3s
+            timeout: 300000, // 5m
+            agent: endpointURL.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
+          }
+        }));
+      }
+
+      function createClientByBucketAndRegion(bucket, region, authInfo) {
+        KodoClient.getRegionEndpointURL(bucket, region, authInfo).then((endpointURL) => {
+          createClientByEndpointAndRegion(endpointURL, region);
+        }, (err) => {
+          df.reject(err);
+        });
+      }
     }
 
     function parseKodoPath(s3Path) {

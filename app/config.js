@@ -9,8 +9,8 @@
  * }
  */
 
-angular.module("web").factory("Config", ["$translate", "Const", "Toast",
-    ($translate, Const, Toast) => {
+angular.module("web").factory("Config", ["$translate", "$timeout", "$q", "AuthInfo", "Const", "Toast",
+    ($translate, $timeout, $q, AuthInfo, Const, Toast) => {
         class ConfigError extends Error { }
         class ConfigParseError extends Error { }
 
@@ -23,14 +23,23 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
               configFilePath = path.join(Global.config_path, 'config.json');
 
         return {
-            save: saveConfig,
+            getUcURL: getUcURL,
             load: loadConfig,
+            save: saveConfig,
             exists: configFileExists,
         };
+
+        function getUcURL() {
+            return loadConfig().ucUrl;
+        }
 
         function loadConfig(loadDefault) {
             let ucUrl = defaultUcUrl,
                 regions = defaultRegions;
+
+            if (loadDefault === undefined) {
+                loadDefault = AuthInfo.usePublicCloud();
+            }
 
             if (!loadDefault) {
                 try {
@@ -58,7 +67,7 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
                             });
                             regions = config.regions;
                         } else {
-                            throw new ConfigError("regions is missing or empty");
+                            regions = null;
                         }
                     }
                 } catch (e) {
@@ -79,18 +88,21 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
                 throw new ConfigError('ucUrl is missing or empty');
             }
 
-            const new_config = { uc_url: ucUrl, regions: regions };
+            const newConfig = { uc_url: ucUrl };
 
-            each(regions, (region) => {
-                if (!region.id) {
-                    throw new ConfigError('id is missing or empty in region');
-                }
-                if (!region.endpoint) {
-                    throw new ConfigError('endpoint is missing or empty in region');
-                }
-            });
+            if (regions && regions.length) {
+                each(regions, (region) => {
+                    if (!region.id) {
+                        throw new ConfigError('id is missing or empty in region');
+                    }
+                    if (!region.endpoint) {
+                        throw new ConfigError('endpoint is missing or empty in region');
+                    }
+                });
+                newConfig.regions = regions;
+            }
 
-            fs.writeFileSync(configFilePath, JSON.stringify(new_config, null, 4), { mode: 0o600 });
+            fs.writeFileSync(configFilePath, JSON.stringify(newConfig, null, 4), { mode: 0o600 });
         }
 
         function configFileExists() {

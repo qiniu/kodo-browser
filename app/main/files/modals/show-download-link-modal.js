@@ -23,9 +23,9 @@ angular.module('web')
       function onSubmit(form1){
         if(!form1.$valid) return;
 
-        var v = $scope.info.sec;
-        var url = s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, v);
-        $scope.info.url = url;
+        s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, $scope.info.sec).then((url) => {
+          $scope.info.url = url;
+        });
       }
 
       function copyDownloadLink() {

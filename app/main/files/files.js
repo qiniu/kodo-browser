@@ -1382,16 +1382,16 @@ angular.module("web").controller("filesCtrl", [
 
             var acts = ['<div class="btn-group btn-group-xs">'];
             if (row.StorageClass && row.StorageClass.toLowerCase() == 'glacier') {
-              acts.push(`<button type="button" class="btn unfreeze text-warning"><span class="fa fa-fire"></span></button>`);
+              acts.push(`<button type="button" class="btn unfreeze text-warning" data-toggle="tooltip" data-toggle-i18n="restore"><span class="fa fa-fire"></span></button>`);
             }
             if ($scope.currentBucketPerm.read) {
-              acts.push(`<button type="button" class="btn download"><span class="fa fa-download"></span></button>`);
+              acts.push(`<button type="button" class="btn download" data-toggle="tooltip" data-toggle-i18n="download"><span class="fa fa-download"></span></button>`);
               if (!row.isFolder) {
-                acts.push(`<button type="button" class="btn download-link"><span class="fa fa-link"></span></button>`);
+                acts.push(`<button type="button" class="btn download-link" data-toggle="tooltip" data-toggle-i18n="exportDownloadLinks"><span class="fa fa-link"></span></button>`);
               }
             }
             if ($scope.currentBucketPerm.remove) {
-              acts.push(`<button type="button" class="btn remove text-danger"><span class="fa fa-trash"></span></button>`);
+              acts.push(`<button type="button" class="btn remove text-danger" data-toggle="tooltip" data-toggle-i18n="delete"><span class="fa fa-trash"></span></button>`);
             }
             acts.push('</div>');
             return acts.join("");
@@ -1528,6 +1528,12 @@ angular.module("web").controller("filesCtrl", [
         }).off('mouseleave').on('mouseleave', () => {
           isMouseOver = false;
         });
+      });
+      angular.forEach($('#file-list tbody tr .btn-group button[type="button"][data-toggle="tooltip"]'), (button) => {
+        $(button).tooltip('destroy');
+        $(button).attr('data-placement', 'top');
+        const i18nKey = $(button).attr('data-toggle-i18n');
+        $(button).tooltip({ container: 'body', title: T(i18nKey), trigger: 'hover' });
       });
 
       $timeout(() => {

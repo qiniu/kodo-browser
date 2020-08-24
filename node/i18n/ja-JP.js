@@ -8,6 +8,11 @@ module.exports = {
   "private.cloud": "プライベートクラウド",
 
   "region.unknown": "未知の地域",
+  "cn-east-1": "華東",
+  "cn-north-1": "華北",
+  "cn-south-1": "華南",
+  "us-north-1": "北米",
+  "ap-southeast-1": "東南アジア",
   "region.get.error": "取得できませんでした",
   "config.parse.error": "設定ファイルの解析に失敗しました",
   "config.format.error": "設定ファイルに問題があります",

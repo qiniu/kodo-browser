@@ -8,6 +8,11 @@ module.exports = {
   "private.cloud": "Private Cloud",
 
   "region.unknown": "Unknown Region",
+  "cn-east-1": "East China",
+  "cn-north-1": "North China",
+  "cn-south-1": "South China",
+  "us-north-1": "North America",
+  "ap-southeast-1": "Southeast Asia",
   "region.get.error": "Failed to Get",
   "config.parse.error": "Failed to parse config file",
   "config.format.error": "Something is wrong in the config file",

@@ -9,8 +9,8 @@ angular.module("web").controller("filesCtrl", [
   "Auth",
   "AuthInfo",
   "AuditLog",
-  "Config",
   "s3Client",
+  "KodoClient",
   "bucketMap",
   "settingsSvs",
   "ExternalPath",
@@ -29,8 +29,8 @@ angular.module("web").controller("filesCtrl", [
     Auth,
     AuthInfo,
     AuditLog,
-    Config,
     s3Client,
+    KodoClient,
     bucketMap,
     settingsSvs,
     ExternalPath,
@@ -134,9 +134,7 @@ angular.module("web").controller("filesCtrl", [
       showACL: showACL,
 
       showPaste: showPaste,
-      cancelPaste: cancelPaste,
-
-      translateRegionName: translateRegionName
+      cancelPaste: cancelPaste
     });
 
     $scope.$watch("ref.isListView", (v) => {
@@ -1162,132 +1160,150 @@ angular.module("web").controller("filesCtrl", [
       return false;
     }
 
-    function translateRegionName(regionId) {
-      if (regionId === null) {
-        return T('region.get.error');
-      }
-      const regions = Config.load(AuthInfo.usePublicCloud()).regions;
-      let name = T('region.unknown');
-      angular.forEach(regions, (region) => {
-        if (region.id === regionId) {
-          name = region.label;
-        }
-      })
-      return name;
-    }
-
     function showBucketsTable(buckets) {
       initBucketSelect();
-      var $list = $('#bucket-list').bootstrapTable({
-        columns: [{
-          field: 'id',
-          title: '-',
-          radio: true
-        }, {
-          field: 'name',
-          title: T('bucket.name'),
-          formatter: (val, row, idx, field) => {
-            return `<i class="fa fa-database text-warning"></i> <a href=""><span>${val}</span></a>`;
-          },
-          events: {
-            'click a': (evt, val, row, idx) => {
-              gotoAddress(val);
+      KodoClient.getRegions(AuthInfo.usePublicCloud()).then((regions) => {
+        var $list = $('#bucket-list').bootstrapTable({
+          columns: [{
+            field: 'id',
+            title: '-',
+            radio: true
+          }, {
+            field: 'name',
+            title: T('bucket.name'),
+            formatter: (val, row, idx, field) => {
+              return `<i class="fa fa-database text-warning"></i> <a href=""><span>${val}</span></a>`;
+            },
+            events: {
+              'click a': (evt, val, row, idx) => {
+                gotoAddress(val);
 
-              return false;
+                return false;
+              }
             }
+          }, {
+            field: 'region',
+            title: T('bucket.region'),
+            formatter: (id) => {
+              if (id === null) {
+                return T('region.get.error');
+              }
+              let regionName = T('region.unknown');
+              each(regions, (region) => {
+                if (region.id === id && region.label) {
+                  regionName = region.label;
+                }
+              })
+              return regionName;
+            }
+          }, {
+            field: 'creationDate',
+            title: T('creationTime'),
+            formatter: (val) => {
+              return $filter('timeFormat')(val);
+            }
+          }],
+          clickToSelect: true,
+          onCheck: (row, $row) => {
+            if (row == $scope.bucket_sel) {
+              $row.parents('tr').removeClass('info');
+
+              $list.bootstrapTable('uncheckBy', {
+                field: 'name',
+                values: [row.name],
+              });
+
+              $timeout(() => {
+                $scope.bucket_sel = null;
+              });
+            } else {
+              $list.find('tr').removeClass('info');
+              $row.parents('tr').addClass('info');
+
+              $timeout(() => {
+                $scope.bucket_sel = row;
+              });
+            }
+
+            return false;
           }
-        }, {
-          field: 'region',
-          title: T('bucket.region'),
-          formatter: translateRegionName
-        }, {
-          field: 'creationDate',
-          title: T('creationTime'),
-          formatter: (val) => {
-            return $filter('timeFormat')(val);
-          }
-        }],
-        clickToSelect: true,
-        onCheck: (row, $row) => {
-          if (row == $scope.bucket_sel) {
-            $row.parents('tr').removeClass('info');
+        });
 
-            $list.bootstrapTable('uncheckBy', {
-              field: 'name',
-              values: [row.name],
-            });
-
-            $timeout(() => {
-              $scope.bucket_sel = null;
-            });
-          } else {
-            $list.find('tr').removeClass('info');
-            $row.parents('tr').addClass('info');
-
-            $timeout(() => {
-              $scope.bucket_sel = row;
-            });
-          }
-
-          return false;
-        }
-      });
-
-      $list.bootstrapTable('load', buckets).bootstrapTable('uncheckAll');
+        $list.bootstrapTable('load', buckets).bootstrapTable('uncheckAll');
+      }, (err) => {
+        console.error(err);
+        Toast.error(err);
+      })
     }
 
     function showExternalPathsTable(externalPaths) {
       initExternalPathSelect();
-      var $list = $('#external-path-list').bootstrapTable({
-        columns: [{
-          field: 'id',
-          title: '-',
-          radio: true
-        }, {
-          field: 'fullPath',
-          title: T('externalPath.path'),
-          formatter: (val, row, idx, field) => {
-            return `<i class="fa fa-map-signs text-warning"></i> <a href=""><span>${val}</span></a>`;
-          },
-          events: {
-            'click a': (evt, val, row, idx) => {
-              gotoAddress(val);
+      KodoClient.getRegions(AuthInfo.usePublicCloud()).then((regions) => {
+        var $list = $('#external-path-list').bootstrapTable({
+          columns: [{
+            field: 'id',
+            title: '-',
+            radio: true
+          }, {
+            field: 'fullPath',
+            title: T('externalPath.path'),
+            formatter: (val, row, idx, field) => {
+              return `<i class="fa fa-map-signs text-warning"></i> <a href=""><span>${val}</span></a>`;
+            },
+            events: {
+              'click a': (evt, val, row, idx) => {
+                gotoAddress(val);
 
-              return false;
+                return false;
+              }
             }
+          }, {
+            field: 'regionId',
+            title: T('region'),
+            formatter: (id) => {
+              if (id === null) {
+                return T('region.get.error');
+              }
+              let regionName = T('region.unknown');
+              each(regions, (region) => {
+                if (region.id === id && region.label) {
+                  regionName = region.label;
+                }
+              })
+              return regionName;
+            }
+          }],
+          clickToSelect: true,
+          onCheck: (row, $row) => {
+            if (row === $scope.external_path_sel) {
+              $row.parents('tr').removeClass('info');
+
+              $list.bootstrapTable('uncheckBy', {
+                field: 'fullPath',
+                values: [row.fullPath],
+              });
+
+              $timeout(() => {
+                $scope.external_path_sel = null;
+              });
+            } else {
+              $list.find('tr').removeClass('info');
+              $row.parents('tr').addClass('info');
+
+              $timeout(() => {
+                $scope.external_path_sel = row;
+              });
+            }
+
+            return false;
           }
-        }, {
-          field: 'regionId',
-          title: T('region'),
-          formatter: translateRegionName
-        }],
-        clickToSelect: true,
-        onCheck: (row, $row) => {
-          if (row === $scope.external_path_sel) {
-            $row.parents('tr').removeClass('info');
+        });
 
-            $list.bootstrapTable('uncheckBy', {
-              field: 'fullPath',
-              values: [row.fullPath],
-            });
-
-            $timeout(() => {
-              $scope.external_path_sel = null;
-            });
-          } else {
-            $list.find('tr').removeClass('info');
-            $row.parents('tr').addClass('info');
-
-            $timeout(() => {
-              $scope.external_path_sel = row;
-            });
-          }
-
-          return false;
-        }
+        $list.bootstrapTable('load', externalPaths).bootstrapTable('uncheckAll');
+      }, (err) => {
+        console.error(err);
+        Toast.error(err);
       });
-
-      $list.bootstrapTable('load', externalPaths).bootstrapTable('uncheckAll');
     }
 
     function showFilesTable(files, isAppend) {

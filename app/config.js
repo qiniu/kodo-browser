@@ -2,7 +2,7 @@
  * {
  *   "regions": [{
  *      id: "regionA",
- *      label: "区域 A",
+ *      label: "区域 A", // Optional
  *      endpoint: "https://s3-region-1.localhost.com"
  *   }],
  *   "uc_url": "https://uc.qbox.me"
@@ -19,7 +19,7 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
               each = require('array-each'),
               T = $translate.instant,
               defaultUcUrl = "https://uc.qbox.me",
-              default_regions = Const.regions,
+              defaultRegions = Const.regions,
               configFilePath = path.join(Global.config_path, 'config.json');
 
         return {
@@ -29,7 +29,8 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
         };
 
         function loadConfig(loadDefault) {
-            let ucUrl = defaultUcUrl, regions = default_regions;
+            let ucUrl = defaultUcUrl,
+                regions = defaultRegions;
 
             if (!loadDefault) {
                 try {
@@ -51,9 +52,6 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
                                 if (!region.id) {
                                     throw new ConfigError('id is missing or empty in region');
                                 }
-                                if (!region.label) {
-                                    throw new ConfigError('label is missing or empty in region');
-                                }
                                 if (!region.endpoint) {
                                     throw new ConfigError('endpoint is missing or empty in region');
                                 }
@@ -69,7 +67,6 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
                     } else if (e instanceof ConfigError) {
                         Toast.error(T('config.format.error'));
                     }
-                    console.error(e);
                     throw e;
                 }
             }
@@ -87,9 +84,6 @@ angular.module("web").factory("Config", ["$translate", "Const", "Toast",
             each(regions, (region) => {
                 if (!region.id) {
                     throw new ConfigError('id is missing or empty in region');
-                }
-                if (!region.label) {
-                    throw new ConfigError('label is missing or empty in region');
                 }
                 if (!region.endpoint) {
                     throw new ConfigError('endpoint is missing or empty in region');

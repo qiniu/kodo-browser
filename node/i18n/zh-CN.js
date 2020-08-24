@@ -8,6 +8,11 @@ module.exports = {
   "private.cloud": "私有云",
 
   "region.unknown": "未知区域",
+  "cn-east-1": "华东",
+  "cn-north-1": "华北",
+  "cn-south-1": "华南",
+  "us-north-1": "北美",
+  "ap-southeast-1": "东南亚",
   "region.get.error": "获取失败",
   "config.parse.error": "解析配置文件出错",
   "config.format.error": "配置文件格式错误",

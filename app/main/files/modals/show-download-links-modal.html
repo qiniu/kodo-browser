@@ -6,10 +6,21 @@
     <h4 class="modal-title">
       <i class="glyphicon glyphicon-link"></i>
       <!-- 导出外链 -->
-      {{'exportDownloadLinks.title'|translate}}
+      {{'getDownloadLink.title'|translate}}
     </h4>
   </div>
   <div class="modal-body">
+    <div class="form-group">
+      <label class="col-sm-2 control-label" for="domain">{{'domain'|translate}}:</label>
+      <div class="col-sm-8">
+        <select ng-disabled="info.url" ng-model="current.domain" ng-options="domain.name() for domain in domains" id="domain" class="input-md form-control"></select>
+      </div>
+      <div class="col-sm-2">
+        <button class="btn btn-default btn-md" type="button" uib-tooltip="{{'refresh.domain'|translate}}" tooltip-placement="bottom" tooltip-append-to-body="true" ng-click="refreshDomains()" ng-disabled="info.url">
+          <i class="fa fa-refresh"></i>
+        </button>
+      </div>
+    </div>
     <div class="form-group">
       <label class="col-sm-2 control-label" for="acl">
         {{'downloadLink'|translate}}:
@@ -19,8 +30,8 @@
       <div class="col-sm-10">
         <!-- 请输入链接有效期: -->
         {{'getDownloadLink.message'|translate}}:
-        <input type="number" ng-model="sec" id="sec" required min="1" max="604800"
-        placeholder="" class="input-md form-control" style="display:inline-block;width:80px"/>
+        <input type="number" ng-disabled="!current.domain.deadlineRequired()" ng-model="sec" id="sec" required min="1" ng-max="{{current.domain.maxLifetime()}}"
+          class="input-md form-control" style="display:inline-block;width:150px"/>
         {{'unit.second'|translate}}
         &nbsp;&nbsp;
         <button type="submit" class="btn btn-success btn-sm">

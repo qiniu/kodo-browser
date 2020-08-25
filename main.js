@@ -70,9 +70,9 @@ app.releaseSingleInstanceLock();
 
 let createWindow = () => {
   let opt = {
-    width: 1024,
-    height: 768,
-    minWidth: 800,
+    width: 1280,
+    height: 800,
+    minWidth: 1280,
     minHeight: 600,
     title: "Kodo Browser",
     icon: path.join(root, "app", "icons", "icon.ico"),

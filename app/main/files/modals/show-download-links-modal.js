@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('showDownloadLinksModalCtrl', ['$scope', '$timeout', '$translate', '$uibModalInstance', 'items', 'currentInfo', 's3Client', 'Toast',
-    function ($scope, $timeout, $translate, $modalInstance, items, currentInfo, s3Client, Toast) {
+  .controller('showDownloadLinksModalCtrl', ['$scope', '$timeout', '$translate', '$uibModalInstance', 'items', 'current', 'domains', 'Toast', 'Domains',
+    function ($scope, $timeout, $translate, $modalInstance, items, current, domains, Toast, Domains) {
       const T = $translate.instant,
             fs = require('fs'),
             path = require('path'),
@@ -8,9 +8,12 @@ angular.module('web')
             csvStringify = require('csv-stringify'),
             downloadsFolder = require("downloads-folder");
 
+      initCurrentDomain(domains);
+
       angular.extend($scope, {
         items: items,
-        currentInfo: currentInfo,
+        current: current,
+        domains: domains,
         sec: 600,
         cancel: cancel,
         onSubmit: onSubmit,
@@ -18,6 +21,25 @@ angular.module('web')
 
       function cancel() {
         $modalInstance.dismiss('close');
+      }
+
+      function initCurrentDomain(domains) {
+        let found = false;
+        if (current.domain !== null) {
+          each(domains, (domain) => {
+            if (current.domain.name() === domain.name()) {
+              current.domain = domain;
+              found = true;
+            }
+          });
+        }
+        if (!found) {
+          each(domains, (domain) => {
+            if (domain.default()) {
+              current.domain = domain;
+            }
+          });
+        }
       }
 
       function onSubmit(form1){
@@ -49,19 +71,29 @@ angular.module('web')
         });
         csvStringifier.write(['BucketName', 'ObjectName', 'URL']);
         const promises = [];
-        loopItems(currentInfo.region, currentInfo.bucket, items,
+        loopItems(current.info.region, current.info.bucket, items,
           (item) => {
             promises.push(new Promise((resolve, reject) => {
-              s3Client.signatureUrl(currentInfo.region, currentInfo.bucket, item.path, lifetime).then((url) => {
-                csvStringifier.write([currentInfo.bucketName, item.path, url]);
+              $scope.current.domain.signatureUrl(item.path, lifetime).then((url) => {
+                csvStringifier.write([current.info.bucketName, item.path, url]);
                 resolve();
               });
             }));
           }, () => {
-            Promise.all(promises).then(() => {
-              csvStringifier.end();
-            })
+            Promise.all(promises).then(() => { csvStringifier.end(); });
           });
+      }
+
+      function refreshDomains() {
+        const info = $scope.current.info;
+        Domains.list(info.region, info.bucketName).
+                then((domains) => {
+                  $scope.domains = domains;
+                  initCurrentDomain(domains);
+                }, (err) => {
+                  console.error(err);
+                  Toast.error(err);
+                });
       }
 
       function loopItems(region, bucket, items, eachCallback, doneCallback) {

@@ -1268,7 +1268,7 @@ angular.module("web").factory("s3Client", [
 
     /**
      * @param opt   {object|null}
-     *    object = {id, secret, servicetpl, region, bucket}
+     *    object = {id, secret, isPublicCloud, region, bucket}
      */
     function getClient(opt) {
       const df = $q.defer();

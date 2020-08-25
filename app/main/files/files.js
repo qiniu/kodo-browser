@@ -18,6 +18,7 @@ angular.module("web").controller("filesCtrl", [
   "Toast",
   "Dialog",
   "Customize",
+  "Domains",
   function (
     $rootScope,
     $scope,
@@ -37,7 +38,8 @@ angular.module("web").controller("filesCtrl", [
     fileSvs,
     Toast,
     Dialog,
-    Customize
+    Customize,
+    Domains
   ) {
     const filter = require("array-filter"),
           deepEqual = require('fast-deep-equal'),
@@ -75,6 +77,12 @@ angular.module("web").controller("filesCtrl", [
         objectName: "",
         externalPathName: ""
       },
+      selectedDomain: {
+        bucketName: null,
+        domain: null,
+      },
+      domains: [],
+      refreshDomains: refreshDomains,
       searchObjectName: searchObjectName,
       searchBucketName: searchBucketName,
       searchExternalPathName: searchExternalPathName,
@@ -217,6 +225,35 @@ angular.module("web").controller("filesCtrl", [
     }
 
     /////////////////////////////////
+
+    function refreshDomains() {
+      const info = $scope.currentInfo;
+      Domains.list(info.region, info.bucketName).
+              then((domains) => {
+                $scope.domains = domains;
+                let found = false;
+                if ($scope.selectedDomain.domain !== null) {
+                  angular.forEach(domains, (domain) => {
+                    if (domain.name() === $scope.selectedDomain.domain.name()) {
+                      $scope.selectedDomain.domain = domain;
+                      found = true;
+                    }
+                  })
+                }
+                if (!found) {
+                  angular.forEach(domains, (domain) => {
+                    if (domain.default()) {
+                      $scope.selectedDomain.domain = domain;
+                    }
+                  });
+                }
+              }, (err) => {
+                console.error(err);
+                Toast.error(err);
+              });
+    }
+
+    /////////////////////////////////
     var refreshTid;
 
     $scope.$on("refreshFilesList", (e) => {
@@ -286,6 +323,11 @@ angular.module("web").controller("filesCtrl", [
 
         const info = s3Client.parseKodoPath(addr);
         $scope.currentInfo = info;
+        if (!info.bucket || info.bucket !== $scope.selectedDomain.bucketName) {
+          $scope.selectedDomain.bucketName = info.bucket;
+          $scope.selectedDomain.domain = null;
+          $scope.domains = [];
+        }
 
         if (info.key) {
           const lastSlash = info.key.lastIndexOf("/");
@@ -335,6 +377,7 @@ angular.module("web").controller("filesCtrl", [
             }
           }
 
+          refreshDomains();
           // search
           if (fileName) {
             $scope.sch.objectName = fileName;
@@ -886,8 +929,14 @@ angular.module("web").controller("filesCtrl", [
           item: () => {
             return angular.copy(item);
           },
-          currentInfo: () => {
-            return angular.copy($scope.currentInfo);
+          current: () => {
+            return {
+              info: angular.copy($scope.currentInfo),
+              domain: angular.copy($scope.selectedDomain.domain),
+            };
+          },
+          domains: () => {
+            return angular.copy($scope.domains);
           }
         }
       }).result.then(angular.noop, angular.noop);
@@ -905,8 +954,14 @@ angular.module("web").controller("filesCtrl", [
           items: () => {
             return angular.copy(items);
           },
-          currentInfo: () => {
-            return angular.copy($scope.currentInfo);
+          current: () => {
+            return {
+              info: angular.copy($scope.currentInfo),
+              domain: angular.copy($scope.selectedDomain.domain),
+            };
+          },
+          domains: () => {
+            return angular.copy($scope.domains);
           }
         }
       }).result.then(angular.noop, angular.noop);

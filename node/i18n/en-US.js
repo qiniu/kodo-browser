@@ -126,9 +126,10 @@ module.exports = {
   "bucket.region": "Bucket Region",
   creationTime: "Creation Time",
 
-  "multipart.management": "Multipart",
-  "multipart.description": "Manage events and fragments that are generated during the multipipart (upload) process.",
-  "multipart.description.tooltip": "That is, the Multipart Upload that has been initialized but not the Complete or Abort's Multipart Upload event",
+  //domain
+  "domain": "Domain name",
+  "no.owned.domain": "No owned domain name",
+  "refresh.domain": "Refresh domain name",
 
   "select.all": "Select All",
   "delete.selected": "Delete selected",
@@ -383,75 +384,23 @@ module.exports = {
   "status.waiting": "Waiting",
   "status.verifying": "Verifying",
 
-  users: "Sub Users",
-  "users.title": "Sub Users",
-  "user.id": "UserId",
-  displayName: "Dislpay Name",
-  comments: "Comments",
-  update: "Update",
-  username: "User Name",
-  details: "Details",
-  add: "Add",
-  mobilePhone: "Mobile Phone",
-  ak: "AccessKey",
-  aks: "AccessKeys",
-  email: "Email",
-
-  "user.delete.title": "Delete User",
-  "user.delete.message": "Are you sure you want to delete this user: {{name}}?",
-  "user.delete.on": "Deleting...",
-  "user.delete.success": "Delete user successfully",
-
-  status: "Status",
-  accessKeySecret: "AccessKeySecret",
-  createTime: "Create Time",
-
-  "ak.status.update.title.Active": "Disable AccessKey",
-  "ak.status.update.title.Inactive": "Enable AccessKey",
-  "ak.status.update.message.Active": "Are you sure you want to <code>Disable</code> this AccessKey？",
-  "ak.status.update.message.Inactive": 'Are you sure you want to <code class="text-success">Enable</code> this AccessKey？',
-  "ak.delete.title": "Delete AccessKey",
-  "ak.delete.message": "Are you sure you want to <code>Delete</code> this AccessKey",
-
-  "user.update.message.tip": "Please make sure you have got AliyunRAMFullAccess permissions",
-  "user.list.message.tip": "Here we only provide the necessary user management functions, for further enhancements, please go to the RAM Console to operate:",
-
-  "status.Active": "Active",
-  "status.Inactive": "Inactive",
   enable: "Enable",
   disable: "Disable",
   show: "Show",
-  "can.not.get.accessKeySecret": "Can not get AccessKeySecret",
 
   user: "UserName",
   pass: "Password",
   test: "Test",
-
-  "mail.test.title": "Test mail",
-  "mail.test.message": 'It will send the test message to: <span class="text-primary">{{from}}</span>',
-  "mail.test.success": "Sending successfully",
-  "mail.send.on": "Sending...",
-
-  "new.user": "[ Create One ]",
-  "new.user.name": "New User Name",
-  "new.user.random.gen": "Generate",
-  "new.user.email.send": "Email (to)",
-  "new.user.email.noset": "You need to set up mail sending configuration first",
-  "new.user.email.noset.open": "Open Settings Dialog",
 
   "click.copy": "Copy",
 
   "http.headers": "Http Headers",
   key: "Key",
   value: "Value",
-  userMetaData: "User-defined Metadata",
 
   "setting.on": "Setting..",
   "setting.success": "Setting successfully",
 
-  "send.to": "Mail to",
-  "send.email": "Mail it",
-  "send.now": "Send",
   "file.download.address": "file download address",
 
   "copy.successfully": "It has been copied to the clipboard",
@@ -472,9 +421,4 @@ module.exports = {
   "upgrade.downloading": "Start download...",
   "upgrade.download.failed": "Automatic update failed, please manually download the installation package.",
   "upgrade.download.success": "Download successfully, please click to install.",
-
-  "Insufficient disk space": "Insufficient disk space",
-
-  "grant.email.title": "KODO Browser Authorization",
-  "grant.email.body.title": "KODO Browser currently supports 2 ways to login, you can choose any one:"
 };

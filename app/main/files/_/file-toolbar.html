@@ -1,7 +1,5 @@
-<header class="pd4 file-toolbar" style="min-width: 915px;">
-
-  <div class="col-sm-8 pd0" style="min-width: 600px;">
-
+<header class="pd4 file-toolbar" style="min-width: 1280px;">
+  <div class="col-sm-7 pd0" style="min-width: 700px;">
     <div class="btn-group" role="group" ng-disabled="!currentBucketPerm || !currentBucketPerm.write">
       <span class="btn btn-info btn-sm" ng-if="total_folders>0">
         <i class="fa fa-folder" style="color:orange"></i> {{total_folders}}
@@ -15,7 +13,6 @@
     &nbsp;
 
     <div class="btn-group" role="group" ng-if="!copy.pwd">
-
       <button type="button" class="btn btn-default btn-sm" ng-click="showUploadDialog()" ng-disabled="!currentBucketPerm || !currentBucketPerm.write">
         <i class="glyphicon glyphicon-cloud-upload text-info"></i>
         {{'upload'|translate}}
@@ -49,8 +46,9 @@
         <i class="fa fa-link text-primary"></i>
         {{'exportDownloadLinks'|translate}}
       </button>
-
     </div>
+
+    &nbsp;
 
     <div class="btn-group" role="toolbar" ng-if="keepMoveOptions">
       <button class="btn btn-default btn-sm" type="button"
@@ -66,10 +64,21 @@
         </span>
       </button>
     </div>
-
   </div>
 
-  <div class="col-sm-3 pd0">
+  <div class="col-sm-2 pd0" style="width: 210px;">
+    <div class="input-group input-group-sm pull-left" role="group">
+      <select ng-model="selectedDomain.domain" ng-options="domain.name() for domain in domains" name="domain" class="input-md form-control" style="width: 175px;"></select>
+    </div>
+    <div class="btn-group btn-group-sm" role="group">
+      <button class="btn btn-default btn-sm" type="button" uib-tooltip="{{'refresh.domain'|translate}}" tooltip-placement="bottom" tooltip-append-to-body="true" ng-click="refreshDomains()">
+        <i class="fa fa-refresh"></i>
+      </button>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+
+  <div class="col-sm-2 pd0">
     <div class="input-group input-group-sm">
       <input type="text" ng-model="sch.objectName" ng-change="searchObjectName()" class="form-control" cleanable-input placeholder="{{'search.files.placeholder'|translate}}">
       <span class="input-group-addon">

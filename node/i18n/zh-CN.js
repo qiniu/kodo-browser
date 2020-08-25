@@ -126,9 +126,10 @@ module.exports = {
   "bucket.region": "Bucket 区域",
   creationTime: "创建时间",
 
-  "multipart.management": "Multipart管理",
-  "multipart.description": "管理通过Mutipart（分块）方式上传过程中产生的事件与碎片。",
-  "multipart.description.tooltip": "即已经被初始化的Multipart Upload但是未被Complete或者Abort的Multipart Upload事件",
+  //domain
+  "domain": "域名",
+  "no.owned.domain": "不使用自有域名",
+  "refresh.domain": "刷新域名",
 
   "select.all": "全选",
   "delete.selected": "删除所选",
@@ -383,75 +384,23 @@ module.exports = {
   "status.waiting": "等待",
   "status.verifying": "正在校验",
 
-  users: "子用户",
-  "users.title": "子用户管理",
-  "user.id": "用户ID",
-  displayName: "显示名",
-  comments: "描述",
-  update: "修改",
-  username: "用户名",
-  details: "详情",
-  add: "添加",
-  mobilePhone: "手机号",
-  ak: "AccessKey",
-  aks: "AccessKeys",
-  email: "邮箱",
-
-  "user.delete.title": "删除用户",
-  "user.delete.message": "确定要删除[{{name}}]这个用户？",
-  "user.delete.on": "正在删除...",
-  "user.delete.success": "删除用户成功",
-
-  status: "状态",
-  accessKeySecret: "AccessKeySecret",
-  createTime: "创建时间",
-
-  "ak.status.update.title.Active": "禁用AccessKey",
-  "ak.status.update.title.Inactive": "启用AccessKey",
-  "ak.status.update.message.Active": "确定要禁用该AccessKey？",
-  "ak.status.update.message.Inactive": "确定要启用该AccessKey？",
-  "ak.delete.title": "删除AccessKey",
-  "ak.delete.message": "确定要删除该AccessKey？",
-
-  "user.update.message.tip": "请自行确保当前操作登录用户需要有 AliyunRAMFullAccess 权限。",
-  "user.list.message.tip": "这里只提供必要的用户管理功能，更进一步的增强功能，请到RAM控制台操作:",
-
-  "status.Active": "已启用",
-  "status.Inactive": "已禁用",
   enable: "启用",
   disable: "禁用",
   show: "显示",
-  "can.not.get.accessKeySecret": "无法获取 AccessKeySecret",
 
   user: "用户名",
   pass: "密码",
   test: "测试一下",
-
-  "mail.test.title": "测试邮件",
-  "mail.test.message": "将发送测试邮件到: {{from}}",
-  "mail.test.success": "邮件发送成功",
-  "mail.send.on": "正在发送...",
-
-  "new.user": "[ 新建一个 ]",
-  "new.user.name": "新用户名",
-  "new.user.random.gen": "随机生成",
-  "new.user.email.send": "AK发送到邮件",
-  "new.user.email.noset": "还没设置邮件发送配置，需要先设置",
-  "new.user.email.noset.open": "打开设置",
 
   "click.copy": "点击复制",
 
   "http.headers": "HTTP头",
   key: "参数",
   value: "值",
-  userMetaData: "用户自定义元数据",
 
   "setting.on": "正在设置..",
   "setting.success": "设置成功",
 
-  "send.to": "发送到",
-  "send.email": "发送邮件",
-  "send.now": "立即发送",
   "file.download.address": "文件下载地址",
 
   "copy.successfully": "已复制到剪贴板",
@@ -472,9 +421,4 @@ module.exports = {
   "upgrade.downloading": "正在下载...",
   "upgrade.download.failed": "自动更新失败, 请手动下载安装包。",
   "upgrade.download.success": "已经下载成功, 请点击安装包进行安装",
-
-  "Insufficient disk space": "磁盘空间不足",
-
-  "grant.email.title": "KODO Browser 授权",
-  "grant.email.body.title": "KODO Browser 目前支持2种方式登录, 您可以选择任意一种:"
 };

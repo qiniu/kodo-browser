@@ -126,9 +126,10 @@ module.exports = {
   "bucket.region": "バケット領域",
   creationTime: "作成時間",
 
-  "multipart.management": "マルチパート",
-  "multipart.description": "マルチパート（アップロード）プロセス中に生成されたイベントやフラグメントを管理する",
-  "multipart.description.tooltip": "つまり、初期化されたマルチパートアップロードではなく、完全またはアボートのマルチパートアップロードイベントではない",
+  //domain
+  "domain": "ドメイン名",
+  "no.owned.domain": "所有ドメイン名はありません",
+  "refresh.domain": "ドメイン名を更新",
 
   "select.all": "すべて選択",
   "delete.selected": "選択を削除します",
@@ -382,75 +383,23 @@ module.exports = {
   "status.waiting": "待っている",
   "status.verifying": "検証中",
 
-  users: "サブユーザ",
-  "users.title": "サブユーザ",
-  "user.id": "ユーザーID",
-  displayName: "表示名",
-  comments: "コメント",
-  update: "更新",
-  username: "ユーザー名",
-  details: "詳細",
-  add: "追加",
-  mobilePhone: "携帯電話",
-  ak: "AccessKey",
-  aks: "AccessKeys",
-  email: "Email",
-
-  "user.delete.title": "ユーザーを削除する",
-  "user.delete.message": "このユーザーを削除してもよろしいですか: {{name}}?",
-  "user.delete.on": "削除中...",
-  "user.delete.success": "ユーザーを削除された",
-
-  status: "状態",
-  accessKeySecret: "AccessKeySecret",
-  createTime: "作成時間",
-
-  "ak.status.update.title.Active": "AccessKey無効化",
-  "ak.status.update.title.Inactive": "AccessKey有効化",
-  "ak.status.update.message.Active": "このアクセスキーを<code>無効化</code>しますか？",
-  "ak.status.update.message.Inactive": 'このアクセスキーを<code class="text-success">有効化</code>しますか？',
-  "ak.delete.title": "AccessKey削除",
-  "ak.delete.message": "このアクセスキーを<code>削除</code>しますか？",
-
-  "user.update.message.tip": "AliyunRAMFullAccess権限を持っていることを確認してください",
-  "user.list.message.tip": "ここでは、必要なユーザー管理機能のみを提供しています。さらに拡張するために、RAMコンソールを操作してください:",
-
-  "status.Active": "アクティブ",
-  "status.Inactive": "非アクティブ",
   enable: "有効にする",
   disable: "無効にする",
   show: "表示",
-  "can.not.get.accessKeySecret": "AccessKeySecret取得できません",
 
   user: "ユーザ名前",
   pass: "パスワード",
   test: "テスト",
-
-  "mail.test.title": "テストメール",
-  "mail.test.message": 'テストメッセージを: <span class="text-primary">{{from}}</span>へ送信する',
-  "mail.test.success": "正常に送信されました",
-  "mail.send.on": "送信中...",
-
-  "new.user": "[ 一つ作る ]",
-  "new.user.name": "新しいユーザーネーム",
-  "new.user.random.gen": "生成",
-  "new.user.email.send": "Email (to)",
-  "new.user.email.noset": "メール送信の設定を最初に設定する必要があります",
-  "new.user.email.noset.open": "設定を開く",
 
   "click.copy": "コピー",
 
   "http.headers": "Http ヘッダー",
   key: "Key",
   value: "Value",
-  userMetaData: "ユーザー定義のメタデータ",
 
   "setting.on": "設定中..",
   "setting.success": "設定完了",
 
-  "send.to": "送信先",
-  "send.email": "メールする",
-  "send.now": "送信",
   "file.download.address": "ファイルダウンロードアドレス",
 
   "copy.successfully": "もうクリップボードにコピー",
@@ -471,9 +420,4 @@ module.exports = {
   "upgrade.downloading": "ダウンロード",
   "upgrade.download.failed": "自動更新に失敗しました。インストールパッケージを手動でダウンロードしてください。",
   "upgrade.download.success": "ダウンロードに成功しました。クリックしてインストールしてください。",
-
-  "Insufficient disk space": "ディスク容量不足",
-
-  "grant.email.title": "S3ブラウザ認証",
-  "grant.email.body.title": "S3ブラウザは現在2つのログイン方法をサポートしていますが、いずれかを選択できます:"
 };

@@ -8,7 +8,6 @@ angular.module("web").controller("settingsCtrl", [
   "$translate",
   "callback",
   "settingsSvs",
-  "Mailer",
   "Toast",
   "Dialog",
   function (
@@ -19,7 +18,6 @@ angular.module("web").controller("settingsCtrl", [
     $translate,
     callback,
     settingsSvs,
-    Mailer,
     Toast,
     Dialog
   ) {

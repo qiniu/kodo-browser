@@ -33,15 +33,15 @@ angular.module("web").factory("KodoClient", [
       getRegionEndpointURL: getRegionEndpointURL,
       isQueryRegionAPIAvaiable: isQueryRegionAPIAvaiable,
       getAnyBucketInfo: getAnyBucketInfo,
+      getDomainsManager: getDomainsManager,
+      getBucketManager: getBucketManager
     };
 
     function getBucketIdNameMapper(opts) {
       const df = $q.defer();
 
-      getBucketManager(opts).listBuckets((err, body) => {
-        if (err) {
-          df.reject(err);
-        } else if (body && body.error) {
+      getBucketManager(opts).listBuckets().then((body) => {
+        if (body && body.error) {
           df.reject(new Error(body.error));
         } else {
           const m = {};
@@ -50,6 +50,8 @@ angular.module("web").factory("KodoClient", [
           });
           df.resolve(m);
         }
+      }, (err) => {
+        df.reject(err);
       });
 
       return df.promise;
@@ -98,17 +100,15 @@ angular.module("web").factory("KodoClient", [
     function getRegionIdDescriptionMapper(opts) {
       const df = $q.defer();
 
-      getBucketManager(opts).listRegions((err, body) => {
-        if (err) {
-          df.reject(err);
-        } else {
-          const m = {};
-          each(body.regions, (region) => {
-            m[region.id] = region.description;
-          });
-          df.resolve(m);
-        }
-      });
+      getBucketManager(opts).listRegions().then((body) => {
+        const m = {};
+        each(body.regions, (region) => {
+          m[region.id] = region.description;
+        });
+        df.resolve(m);
+      }, (err) => {
+        df.reject(err);
+      })
 
       return df.promise;
     }
@@ -162,6 +162,18 @@ angular.module("web").factory("KodoClient", [
     function queryForAWSDomain(bucketId, authInfo) {
       const df = $q.defer();
 
+      queryForDomains(bucketId, authInfo).then((host) => {
+        df.resolve({ id: host.s3.region_alias, domain: host.s3.domains[0] });
+      }, (err) => {
+        df.reject(err);
+      })
+
+      return df.promise;
+    }
+
+    function queryForDomains(bucketId, authInfo) {
+      const df = $q.defer();
+
       if (typeof authInfo !== 'object' || !authInfo.id || !authInfo.secret) {
         authInfo = AuthInfo.get();
       }
@@ -172,13 +184,12 @@ angular.module("web").factory("KodoClient", [
       getBucketIdNameMapper(authInfo).then((mapper) => {
         const bucketName = mapper[bucketId] || bucketId;
         urllib.request(`${ucUrl}/v4/query`, {
-          data: { ak: authInfo.id, bucket: bucketName }, dataAsQueryString: true, dataType: 'json'
+          data: { ak: authInfo.id, bucket: bucketName }, dataAsQueryString: true, dataType: 'json', gzip: true
         }, (err, data) => {
           if (err) {
             df.reject(err);
           } else {
-            const s3Info = data.hosts[0].s3;
-            df.resolve({ id: s3Info.region_alias, domain: s3Info.domains[0] });
+            df.resolve(data.hosts[0]);
           }
         });
       }, (err) => {
@@ -191,10 +202,8 @@ angular.module("web").factory("KodoClient", [
     function getAnyBucketInfo(opts) {
       const df = $q.defer();
 
-      getBucketManager(opts).listBuckets((err, body) => {
-        if (err) {
-          df.reject(err);
-        } else if (body && body.error) {
+      getBucketManager(opts).listBuckets().then((body) => {
+        if (body && body.error) {
           df.reject(new Error(body.error));
         } else {
           const bucket = body[0];
@@ -203,9 +212,53 @@ angular.module("web").factory("KodoClient", [
             region: KodoRegionID2AWSRegionID[bucket.region]
           });
         }
+      }, (err) => {
+        df.reject(err);
       });
 
       return df.promise;
+    }
+
+    function getDomainsManager(opts) {
+      let authInfo = opts || {};
+      if (!authInfo.id || !authInfo.secret) {
+        authInfo = AuthInfo.get();
+      }
+      const mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret);
+      const ucUrl = Config.getUcURL();
+
+      return {
+        listDomains: (bucketId) => {
+          const df = $q.defer();
+          queryForDomains(bucketId, authInfo).then((host) => {
+            const apiHost = host.api.domains[0];
+            let apiUrl = 'https://' + apiHost;
+            if (ucUrl.startsWith('http://')) {
+              apiUrl = 'http://' + apiHost;
+            }
+            getBucketIdNameMapper(authInfo).then((mapper) => {
+              const bucketName = mapper[bucketId] || bucketId;
+              const requestURI = `${apiUrl}/domain?sourceTypes=qiniuBucket&sourceQiniuBucket=${bucketName}&operatingState=success&limit=50`;
+              const digest = Qiniu.util.generateAccessToken(mac, requestURI, null);
+              const headers = { 'Authorization': digest };
+              urllib.request(requestURI, {
+                method: 'GET', dataType: 'json', contentType: 'application/x-www-form-urlencoded', headers: headers, gzip: true
+              }, (err, body) => {
+                if (err) {
+                  df.reject(err);
+                } else {
+                  df.resolve(body.domains);
+                }
+              });
+            }, (err) => {
+              df.reject(err);
+            });
+          }, (err) => {
+            df.reject(err);
+          });
+          return df.promise;
+        }
+      }
     }
 
     function getBucketManager(opts) {
@@ -216,15 +269,40 @@ angular.module("web").factory("KodoClient", [
       const mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret);
       const ucUrl = Config.getUcURL();
       return {
-        listRegions: (callbackFunc) => {
+        listRegions: () => {
+          const df = $q.defer();
           const requestURI = `${ucUrl}/regions`;
           const digest = Qiniu.util.generateAccessToken(mac, requestURI, null);
-          Qiniu.rpc.postWithoutForm(requestURI, digest, callbackFunc)
+          Qiniu.rpc.postWithoutForm(requestURI, digest, (err, body) => {
+            if (err) {
+              df.reject(err);
+            } else {
+              df.resolve(body);
+            }
+          });
+          return df.promise;
         },
-        listBuckets: (callbackFunc) => {
+        listBuckets: () => {
+          const df = $q.defer();
           const requestURI = `${ucUrl}/v2/buckets`;
           const digest = Qiniu.util.generateAccessToken(mac, requestURI, null);
-          Qiniu.rpc.postWithoutForm(requestURI, digest, callbackFunc)
+          Qiniu.rpc.postWithoutForm(requestURI, digest, (err, body) => {
+            if (err) {
+              df.reject(err);
+            } else {
+              df.resolve(body);
+            }
+          });
+          return df.promise;
+        },
+        signatureUrl: (protocol, domain, key, isPrivate, expires) => {
+          const bucketManager = new Qiniu.rs.BucketManager(mac);
+          const baseUrl = `${protocol}://${domain}`;
+          if (isPrivate) {
+            return bucketManager.privateDownloadUrl(baseUrl, key, parseInt(Date.now() / 1000) + expires);
+          } else {
+            return bucketManager.publicDownloadUrl(baseUrl, key);
+          }
         }
       };
     }

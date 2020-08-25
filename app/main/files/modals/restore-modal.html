@@ -38,8 +38,7 @@
         {{'restore.days'|translate}}:
       </label>
       <div class="col-sm-8">
-        <input type="number" max="7" step="1" min="1" ng-model="info.days" id="days" autocomplete="off" pattern="[0-9]+"
-          autofocus name="days" required="required" class="input-md form-control" />
+        <select class="form-control" style="width: 50%;" id="days" name="days" ng-model="info.days" autocomplete="off" autofocus ng-options="day for day in [1,2,3,4,5,6,7]"></select>
       </div>
 
       <div class="clearfix"></div>

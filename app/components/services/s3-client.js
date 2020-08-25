@@ -814,17 +814,17 @@ angular.module("web").factory("s3Client", [
     }
 
     function getBucketLocation(bucket) {
-      var df = $q.defer();
+      const df = $q.defer();
 
-      getClient().headBucket({
-        Bucket: bucket,
-      }).on('success', (response) => {
-        const region = response.httpResponse.headers['x-amz-bucket-region'];
-        df.resolve(region.replace(/<[^>]+>/, ''));
-      }).on('error', (err) => {
-        handleError(err);
-        df.reject(err);
-      }).send();
+      getClient().getBucketLocation({ Bucket: bucket }, function (err, data) {
+        if (err) {
+          handleError(err);
+          df.reject(err);
+        } else {
+          const locationConstraint = data.LocationConstraint;
+          df.resolve(locationConstraint.replace(/<[^>]+>/, ''));
+        }
+      });
 
       return df.promise;
     }

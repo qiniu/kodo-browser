@@ -19,7 +19,7 @@
       <div class="col-sm-10">
         <!-- 请输入链接有效期: -->
         {{'getDownloadLink.message'|translate}}:
-        <input type="number" ng-model="sec" id="sec" required min="1" max="604800"
+        <input type="number" ng-model="sec" id="sec" required min="1" max="604800" pattern="[0-9]+"
         placeholder="" class="input-md form-control" style="display:inline-block;width:80px"/>
         {{'unit.second'|translate}}
         &nbsp;&nbsp;

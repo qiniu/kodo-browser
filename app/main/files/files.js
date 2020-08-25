@@ -1387,7 +1387,7 @@ angular.module("web").controller("filesCtrl", [
             if ($scope.currentBucketPerm.read) {
               acts.push(`<button type="button" class="btn download" data-toggle="tooltip" data-toggle-i18n="download"><span class="fa fa-download"></span></button>`);
               if (!row.isFolder) {
-                acts.push(`<button type="button" class="btn download-link" data-toggle="tooltip" data-toggle-i18n="exportDownloadLinks"><span class="fa fa-link"></span></button>`);
+                acts.push(`<button type="button" class="btn download-link" data-toggle="tooltip" data-toggle-i18n="getDownloadLink"><span class="fa fa-link"></span></button>`);
               }
             }
             if ($scope.currentBucketPerm.remove) {

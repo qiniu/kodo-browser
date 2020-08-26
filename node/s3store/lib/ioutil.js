@@ -3,13 +3,10 @@
 const AWS = require('aws-sdk'),
       EventEmitter = require('events').EventEmitter,
       fs = require('fs'),
+      urllib = require('urllib'),
       mime = require('mime'),
-      {
-        ReadableStream
-      } = require('./stream'),
-      {
-        Throttle
-      } = require('stream-throttle');
+      { Throttle } = require('stream-throttle'),
+      dnscache = require('dnscache')({ enable: true, ttl: 86400 });
 
 const {
   MIN_MULTIPART_SIZE,
@@ -58,10 +55,9 @@ function Client(options) {
 Client.prototype.uploadFile = function (params) {
   let self = this;
 
-  let localFile = params.localFile;
-  let isOverwrite = params.overwriteDup;
+  const localFile = params.localFile;
+  const isOverwrite = params.overwriteDup;
   let isAborted = false;
-  let isDebug = params.isDebug;
 
   let s3uploader = null;
   let s3uploadedId = params.uploadedId || null;
@@ -360,25 +356,23 @@ Client.prototype.uploadFile = function (params) {
 };
 
 Client.prototype.downloadFile = function (params) {
-  let self = this;
+  const self = this;
 
-  let localFile = params.localFile;
+  const RETRIES = 10;
+  const localFile = params.localFile;
+  const url = params.url;
   let isAborted = false;
-  let isDebug = params.isDebug;
 
   let s3downloader = null;
   let s3DownloadedBytes = params.downloadedBytes || 0;
   let s3DownloadedPartSize = params.downloadedPartSize || self.multipartDownloadSize;
 
-  let downloader = new EventEmitter();
+  const downloader = new EventEmitter();
   downloader.setMaxListeners(0);
   downloader.progressLoaded = s3DownloadedBytes;
   downloader.progressTotal = 0;
   downloader.progressResumable = false;
   downloader.abort = handleAbort;
-
-  let s3params = {};
-  Object.assign(s3params, params.s3Params);
 
   tryOpenFile();
 
@@ -414,198 +408,168 @@ Client.prototype.downloadFile = function (params) {
 
     downloader.emit('abort', {
       downloadedBytes: s3DownloadedBytes,
-      downloadedPartSize: s3DownloadedPartSize
     });
   }
 
   function tryOpenFile() {
-    self.s3.headObject(s3params, (err, metadata) => {
-      if (err) {
-        handleError(err);
-        return;
-      }
+    _tryOpenFile(0);
 
-      downloader.progressTotal = metadata.ContentLength;
-      downloader.progressResumable = (self.resumeDownload && s3DownloadedBytes < metadata.ContentLength);
-      downloader.emit("fileStat", downloader);
+    function _tryOpenFile(retried) {
+      const options = { method: 'GET', timeout: 5000, followRedirect: true, enableProxy: true, streaming: true, lookup: dnscache.lookup };
 
-      startDownloadFile();
-    });
-  }
-
-  function startDownloadFile() {
-    if (downloader.progressTotal >= self.multipartDownloadThreshold) {
-      if (downloader.progressResumable) {
-        resumeMultipartDownload();
-      } else {
-        startMultipartDownload();
-      }
-    } else {
-      downloader.progressLoaded = 0;
-      tryGettingObject((err, data) => {
-        if (isAborted) return;
-
+      urllib.request(url, options, (err, _, resp) => {
         if (err) {
-          handleError(err);
+          retry(err, retried);
+          return;
+        } else if (resp.statusCode < 0) {
+          retry(new Error(`GET: ${resp.statusCode}`), retried);
+          return;
+        } else if (resp.statusCode < 200 || resp.statusCode >= 300) {
+          handleError(new Error(`GET: ${resp.statusCode}`));
           return;
         }
 
-        downloader.emit('fileDownloaded', data);
+        const contentLength = parseInt(resp.headers['content-length']);
+        resp.destroy(null);
+
+        downloader.progressTotal = contentLength;
+        downloader.progressResumable = (self.resumeDownload && s3DownloadedBytes < contentLength);
+        downloader.emit("fileStat", downloader);
+
+        startDownloadFile();
       });
+    }
+
+    function retry(err, retried) {
+      retried += 1;
+      if (retried > RETRIES) {
+        downloader.emit('debug', { type: 'error', error: err.message, retried: retried });
+        handleError(err);
+      } else {
+        downloader.emit('debug', { type: 'retry', error: err.message, retried: retried });
+        setTimeout(() => {
+          _tryOpenFile(retried);
+        }, 500*retried);
+      }
     }
   }
 
-  function startMultipartDownload() {
+  function startDownloadFile() {
     if (isAborted) return;
 
-    let fileStream = fs.createWriteStream(localFile, {
-      flags: 'w+',
-      autoClose: true
-    });
-
-    let params = {
-      Bucket: s3params.Bucket,
-      Key: s3params.Key,
-    };
-
-    s3downloader = new ReadableStream(self.s3).download(params, {
-      maxRetries: self.maxRetries,
-      partSize: self.multipartDownloadSize,
-      maxConcurrentStreams: self.s3concurrency,
-      totalObjectSize: downloader.progressTotal,
-      speedLimit: self.downloadSpeedLimit
-    });
-    s3downloader.on('progress', (prog) => {
-      if (isAborted) return;
-
-      downloader.progressLoaded += prog.loaded;
-      downloader.emit('progress', downloader);
-    });
-    s3downloader.on('partDownloaded', (part) => {
-      downloader.emit('filePartDownloaded', part);
-    });
-    s3downloader.on('debug', (data) => {
-      downloader.emit('debug', data);
-    })
-    s3downloader.on('error', (err) => {
-      if (isAborted) return;
-
-      handleError(err);
-    });
-    fileStream.on('finish', () => {
-      if (isAborted) return;
-
-      downloader.emit('fileDownloaded');
-    });
-    fileStream.on('error', (err) => {
-      if (isAborted) return;
-
-      handleError(err);
-    });
-    s3downloader.pipe(fileStream);
-  }
-
-  function resumeMultipartDownload() {
-    if (isAborted) return;
-
-    if (fs.existsSync(localFile)) {
+    if (downloader.progressResumable && fs.existsSync(localFile)) {
       s3DownloadedBytes = Math.min(fs.statSync(localFile).size, s3DownloadedBytes);
     } else {
       s3DownloadedBytes = 0;
     }
 
-    const s3fsmode = fs.constants.O_CREAT | fs.constants.O_WRONLY | fs.constants.O_NONBLOCK;
+    downloadFile(s3DownloadedBytes, 0, 0);
 
-    const fileStream = fs.createWriteStream(localFile, {
-      flags: s3fsmode,
-      start: s3DownloadedBytes,
-      autoClose: true
-    });
+    function downloadFile(startFrom, retried) {
+      const s3fsmode = fs.constants.O_CREAT | fs.constants.O_WRONLY | fs.constants.O_NONBLOCK;
+      const lastStartFrom = startFrom;
+      let lastError = null;
+      const fileStream = fs.createWriteStream(localFile, {
+        flags: s3fsmode,
+        start: startFrom,
+        autoClose: true
+      });
+      isAborted = false;
+      downloader.progressLoaded = startFrom;
 
-    const params = {
-      Bucket: s3params.Bucket,
-      Key: s3params.Key,
-    };
-
-    s3downloader = new ReadableStream(self.s3).download(params, {
-      maxRetries: self.maxRetries,
-      maxPartSize: self.multipartDownloadSize,
-      maxConcurrentStreams: self.s3concurrency,
-      totalObjectSize: downloader.progressTotal,
-      totalBytesDownloaded: s3DownloadedBytes,
-      speedLimit: self.downloadSpeedLimit
-    });
-    s3downloader.on('progress', (prog) => {
-      if (isAborted) return;
-
-      downloader.progressLoaded += prog.loaded;
-      downloader.emit('progress', downloader);
-    });
-    s3downloader.on('partDownloaded', (part) => {
-      downloader.emit('filePartDownloaded', part);
-    });
-    s3downloader.on('debug', (data) => {
-      downloader.emit('debug', data);
-    })
-    s3downloader.on('error', (err) => {
-      if (isAborted) return;
-
-      handleError(err);
-    });
-    fileStream.on('finish', () => {
-      if (isAborted) return;
-
-      downloader.emit('fileDownloaded');
-    });
-    fileStream.on('error', (err) => {
-      if (isAborted) return;
-
-      handleError(err);
-    });
-    s3downloader.pipe(fileStream);
-  }
-
-  function tryGettingObject(cb) {
-    if (isAborted) return;
-
-    const fileStream = fs.createWriteStream(localFile, {
-      flags: 'w+',
-      autoClose: true
-    });
-
-    const params = {
-      Bucket: s3params.Bucket,
-      Key: s3params.Key,
-    };
-
-    s3downloader = self.s3.getObject(params).createReadStream();
-    if (self.downloadSpeedLimit) {
-      s3downloader = s3downloader.pipe(new Throttle({rate: self.downloadSpeedLimit * 1024}));
-    }
-    s3downloader.on('data', (chunk) => {
-      if (isAborted) return;
-
-      downloader.progressLoaded += chunk.length;
-      downloader.emit('progress', downloader);
-    });
-    s3downloader.on('end', () => {
-      if (isAborted) return;
-
-      if (downloader.progressTotal != downloader.progressLoaded) {
-        cb(new Error(`ContentLength mismatch, got ${downloader.progressLoaded}, expected ${downloader.progressTotal}`));
-        return;
+      const headers = {};
+      if (startFrom > 0) {
+        headers['Range'] = `bytes=${startFrom}-`;
       }
+      downloader.emit('debug', { type: 'request', url: url, headers: JSON.stringify(headers) });
 
-      downloader.emit('progress', downloader);
-      cb(null);
-    });
-    s3downloader.on('error', (err) => {
-      if (isAborted) return;
+      const options = { timeout: 30000, followRedirect: true, enableProxy: true, streaming: true, headers: headers, lookup: dnscache.lookup };
+      urllib.request(url, options, (err, _, resp) => {
+        if (err) {
+          lastError = err;
+          retry();
+          return;
+        } else if (resp.statusCode < 0) {
+          lastError = new Error(`GET: ${resp.statusCode}`);
+          retry();
+          return;
+        } else if (resp.statusCode < 200 || resp.statusCode >= 300) {
+          handleError(new Error(`GET: ${resp.statusCode}`));
+          return;
+        }
+        if (self.downloadSpeedLimit) {
+          resp = resp.pipe(new Throttle({rate: self.downloadSpeedLimit * 1024}));
+        }
 
-      cb(err);
-    });
+        let thisPartSize = 0, tid = null;
 
-    s3downloader.pipe(fileStream);
+        resp.on('data', (data) => {
+          if (isAborted) return;
+
+          if (tid) {
+            clearTimeout(tid);
+            tid = null;
+          }
+          tid = setTimeout(() => {
+            resp.destroy(new Error('Timeout'));
+          }, 30000);
+
+          startFrom += data.byteLength;
+
+          downloader.progressLoaded += data.byteLength;
+          downloader.emit('progress', downloader);
+
+          thisPartSize += data.byteLength;
+          if (thisPartSize >= s3DownloadedPartSize) {
+            downloader.emit('filePartDownloaded', { size: thisPartSize });
+            thisPartSize = 0;
+          }
+        });
+        resp.on('error', (err) => {
+          if (isAborted) return;
+          lastError = err;
+          downloader.emit('debug', { type: 'error', error: err.message });
+        });
+        resp.on('aborted', () => {
+          if (isAborted) return;
+          downloader.emit('debug', { type: 'aborted' });
+          isAborted = true;
+          retry();
+        });
+        resp.on('end', () => {
+          if (isAborted) return;
+          downloader.emit('debug', { type: 'end' });
+
+          if (downloader.progressTotal != downloader.progressLoaded) {
+            handleError(new Error(`ContentLength mismatch, got ${downloader.progressLoaded}, expected ${downloader.progressTotal}`));
+            return;
+          }
+
+          downloader.emit('fileDownloaded');
+        }).pipe(fileStream);
+      }).on('error', (err) => {
+        if (isAborted) return;
+        lastError = err;
+        downloader.emit('debug', { type: 'request_error', error: err.message });
+      });
+
+      function retry() {
+        if (startFrom != lastStartFrom) {
+          retried = -1;
+        }
+        retried += 1;
+        lastError = lastError || {};
+        if (retried > RETRIES) {
+          downloader.emit('debug', { type: 'error', error: lastError.message, retried: retried });
+          handleError(lastError);
+        } else {
+          downloader.emit('debug', { type: 'retry', error: lastError.message, startFrom: startFrom, retried: retried });
+          setTimeout(() => {
+            downloadFile(startFrom, retried);
+          }, 500*retried);
+        }
+      }
+    }
   }
 };
 

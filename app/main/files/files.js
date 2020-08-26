@@ -228,7 +228,7 @@ angular.module("web").controller("filesCtrl", [
 
     function refreshDomains() {
       const info = $scope.currentInfo;
-      Domains.list(info.region, info.bucketName).
+      Domains.list(info.region, info.bucket).
               then((domains) => {
                 $scope.domains = domains;
                 let found = false;
@@ -1023,19 +1023,18 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showDownload(item) {
-      var bucketInfo = angular.copy($scope.currentInfo),
-        fromInfo = angular.copy(item);
+      const bucketInfo = angular.copy($scope.currentInfo),
+            fromInfo = angular.copy(item),
+            domain = angular.copy($scope.selectedDomain.domain);
 
       fromInfo.region = bucketInfo.region;
       fromInfo.bucket = bucketInfo.bucket;
-
+      fromInfo.domain = domain;
       Dialog.showDownloadDialog((folderPaths) => {
         if (!folderPaths || folderPaths.length == 0) {
           return;
         }
-
-        var to = folderPaths[0].replace(/(\/*$)/g, "");
-
+        const to = folderPaths[0].replace(/(\/*$)/g, "");
         $scope.handlers.downloadFilesHandler([fromInfo], to);
       });
     }
@@ -1179,13 +1178,12 @@ angular.module("web").controller("filesCtrl", [
     function tryDownloadFiles(to) {
       to = to.replace(/(\/*$)/g, "");
 
-      var selectedFiles = angular.copy($scope.sel.has);
+      const selectedFiles = angular.copy($scope.sel.has);
       angular.forEach(selectedFiles, (n) => {
         n.region = $scope.currentInfo.region;
         n.bucket = $scope.currentInfo.bucket;
-        n.bucketName = $scope.currentInfo.bucketName;
+        n.domain = angular.copy($scope.selectedDomain.domain);
       });
-
       /**
        * @param fromS3Path {array}  item={region, bucket, path, name, size }
        * @param toLocalPath {string}

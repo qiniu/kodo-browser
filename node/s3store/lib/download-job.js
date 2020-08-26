@@ -37,7 +37,7 @@ class DownloadJob extends Base {
 
     this.s3options = s3options;
 
-    this.from = util.parseKodoPath(this._config.from); //s3 path
+    this.from = this._config.from; //s3 path
     this.to = util.parseLocalPath(this._config.to); //local path
     this.region = this._config.region;
 
@@ -94,10 +94,7 @@ DownloadJob.prototype.start = function (params) {
       downloadSpeedLimit: this.downloadSpeedLimit
     },
     params: {
-      s3Params: {
-        Bucket: this.from.bucket,
-        Key: this.from.key
-      },
+      url: this.from.url,
       localFile: this.tmpfile,
       downloadedBytes: params.prog.synced,
       useElectronNode: this.useElectronNode,

@@ -29,6 +29,7 @@ angular.module("web").factory("Domains", [
       }
 
       signatureUrl(key, expires) {
+        expires = expires || this.maxLifetime();
         return s3Client.signatureUrl(this.region, this.bucket, key, expires);
       }
 
@@ -61,6 +62,7 @@ angular.module("web").factory("Domains", [
         const protocol = this.protocol,
               domain = this.domain,
               isPrivate = this.isPrivate;
+        expires = expires || this.maxLifetime();
 
         $timeout(() => {
           const url = KodoClient.getBucketManager().

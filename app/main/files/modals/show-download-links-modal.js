@@ -86,7 +86,7 @@ angular.module('web')
 
       function refreshDomains() {
         const info = $scope.current.info;
-        Domains.list(info.region, info.bucketName).
+        Domains.list(info.region, info.bucket).
                 then((domains) => {
                   $scope.domains = domains;
                   initCurrentDomain(domains);

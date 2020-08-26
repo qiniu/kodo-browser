@@ -64,6 +64,7 @@ angular.module("web").factory("s3DownloadMgr", [
       const df = $q.defer(),
             auth = AuthInfo.get(),
             bucket = options.from.bucket,
+            key = options.from.key,
             region = options.region || auth.region;
 
       s3Client.getClient({ bucket: bucket, region: region }).then((client) => {
@@ -72,7 +73,7 @@ angular.module("web").factory("s3DownloadMgr", [
           "::",
           region,
           "::",
-          options.from.bucket + "/" + options.from.key,
+          bucket + "/" + key,
           "==>",
           options.to.path + "/" + options.to.name
         );
@@ -83,6 +84,9 @@ angular.module("web").factory("s3DownloadMgr", [
         options.downloadSpeedLimit = (settingsSvs.downloadSpeedLimitEnabled.get() == 1 && settingsSvs.downloadSpeedLimitKBperSec.get());
         options.useElectronNode = (settingsSvs.useElectronNode.get() == 1);
         options.isDebug = (settingsSvs.isDebug.get() == 1);
+        if (!options.url) {
+          options.url = client.getSignedUrl("getObject", { Bucket: bucket, Key: key, Expires: 24 * 60 * 60 * 7 });
+        }
 
         const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
         const store = new S3Store({
@@ -187,6 +191,7 @@ angular.module("web").factory("s3DownloadMgr", [
                 files.forEach((f) => {
                   f.region = s3info.region;
                   f.bucket = s3info.bucket;
+                  f.domain = s3info.domain;
                 });
 
                 loop(files, (jobs) => {
@@ -252,23 +257,25 @@ angular.module("web").factory("s3DownloadMgr", [
               }
             }
 
-            createJob({
-              region: s3info.region,
-              from: {
-                bucket: s3info.bucket,
-                bucketName: s3info.bucketName,
-                key: s3info.path
-              },
-              to: {
-                name: fileName,
-                path: fileLocalPathWithSuffixWithoutExt + ext
-              }
-            }).then((job) => {
-              addEvents(job);
-              t.push(job);
+            s3info.domain.signatureUrl(s3info.path).then((url) => {
+              createJob({
+                region: s3info.region,
+                from: {
+                  bucket: s3info.bucket,
+                  key: s3info.path,
+                  url: url
+                },
+                to: {
+                  name: fileName,
+                  path: fileLocalPathWithSuffixWithoutExt + ext
+                }
+              }).then((job) => {
+                addEvents(job);
+                t.push(job);
 
-              if (callFn) callFn();
-              if (callFn2) callFn2();
+                if (callFn) callFn();
+                if (callFn2) callFn2();
+              });
             });
           });
         }

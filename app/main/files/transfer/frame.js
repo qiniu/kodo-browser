@@ -77,7 +77,7 @@ angular.module("web").controller("transferFrameCtrl", [
 
     /**
      * download
-     * @param fromS3Path {array}  item={region, bucket, path, name, size=0, isFolder=false}, create folder if required
+     * @param fromS3Path {array}  item={region, bucket, path, name, domain, size=0, isFolder=false}, create folder if required
      * @param toLocalPath {string}
      */
     function downloadFilesHandler(fromS3Path, toLocalPath) {

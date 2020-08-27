@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="showDomains">
       <label class="col-sm-2 control-label" for="domain">{{'domain'|translate}}:</label>
       <div class="col-sm-8">
         <select ng-disabled="info.url" ng-model="current.domain" ng-options="domain.name() for domain in domains" id="domain" class="input-md form-control"></select>

@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('showDownloadLinksModalCtrl', ['$scope', '$timeout', '$translate', '$uibModalInstance', 'items', 'current', 'domains', 'Toast', 'Domains',
-    function ($scope, $timeout, $translate, $modalInstance, items, current, domains, Toast, Domains) {
+  .controller('showDownloadLinksModalCtrl', ['$scope', '$timeout', '$translate', '$uibModalInstance', 'items', 'current', 'domains', 'showDomains', 'Toast', 'Domains',
+    function ($scope, $timeout, $translate, $modalInstance, items, current, domains, showDomains, Toast, Domains) {
       const T = $translate.instant,
             fs = require('fs'),
             path = require('path'),
@@ -14,6 +14,7 @@ angular.module('web')
         items: items,
         current: current,
         domains: domains,
+        showDomains: showDomains,
         sec: 600,
         cancel: cancel,
         onSubmit: onSubmit,

@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('showDownloadLinkModalCtrl', ['$scope', '$q','$translate', '$uibModalInstance', 'item', 'current', 'domains', 'Toast', 'Domains',
-    function ($scope, $q, $translate, $modalInstance, item, current, domains, Toast, Domains) {
+  .controller('showDownloadLinkModalCtrl', ['$scope', '$q','$translate', '$uibModalInstance', 'item', 'current', 'domains', 'showDomains', 'Toast', 'Domains',
+    function ($scope, $q, $translate, $modalInstance, item, current, domains, showDomains, Toast, Domains) {
       const { clipboard } = require('electron'),
                      each = require('array-each'),
                         T = $translate.instant;
@@ -11,6 +11,7 @@ angular.module('web')
         item: item,
         current: current,
         domains: domains,
+        showDomains: showDomains,
         info: {
           sec: 600,
           url: null,

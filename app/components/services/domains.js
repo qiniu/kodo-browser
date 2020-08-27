@@ -2,12 +2,14 @@ angular.module("web").factory("Domains", [
   "$q",
   "$timeout",
   "$translate",
+  "AuthInfo",
   "s3Client",
   "KodoClient",
   function(
     $q,
     $timeout,
     $translate,
+    AuthInfo,
     s3Client,
     KodoClient
     ) {
@@ -90,20 +92,25 @@ angular.module("web").factory("Domains", [
       const df = $q.defer();
       const domains = [new S3Domain(region, bucket)];
 
-      KodoClient.getDomainsManager().listDomains(bucket).then((domainInfos) => {
-        each(domainInfos, (domainInfo) => {
-          switch(domainInfo.type) {
-          case 'normal':
-          case 'pan':
-          case 'test':
-            domains.push(new KodoDomain(domainInfo.name, domainInfo.protocol, domainInfo.qiniuPrivate));
-            break;
-          }
+      if (AuthInfo.usePublicCloud()) {
+        KodoClient.getDomainsManager().listDomains(bucket).then((domainInfos) => {
+          each(domainInfos, (domainInfo) => {
+            switch(domainInfo.type) {
+            case 'normal':
+            case 'pan':
+            case 'test':
+              domains.push(new KodoDomain(domainInfo.name, domainInfo.protocol, domainInfo.qiniuPrivate));
+              break;
+            }
+          });
+          df.resolve(domains);
+        }, (err) => {
+          df.reject(err);
         });
-        df.resolve(domains);
-      }, (err) => {
-        df.reject(err);
-      });
+      } else {
+        $timeout(() => { df.resolve(domains); });
+      }
+
       return df.promise;
     }
   }

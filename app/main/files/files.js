@@ -82,6 +82,7 @@ angular.module("web").controller("filesCtrl", [
         domain: null,
       },
       domains: [],
+      showDomains: showDomains(),
       refreshDomains: refreshDomains,
       searchObjectName: searchObjectName,
       searchBucketName: searchBucketName,
@@ -225,6 +226,10 @@ angular.module("web").controller("filesCtrl", [
     }
 
     /////////////////////////////////
+
+    function showDomains() {
+      return AuthInfo.usePublicCloud();
+    }
 
     function refreshDomains() {
       const info = $scope.currentInfo;
@@ -937,6 +942,9 @@ angular.module("web").controller("filesCtrl", [
           },
           domains: () => {
             return angular.copy($scope.domains);
+          },
+          showDomains: () => {
+            return showDomains();
           }
         }
       }).result.then(angular.noop, angular.noop);
@@ -962,6 +970,9 @@ angular.module("web").controller("filesCtrl", [
           },
           domains: () => {
             return angular.copy($scope.domains);
+          },
+          showDomains: () => {
+            return showDomains();
           }
         }
       }).result.then(angular.noop, angular.noop);

@@ -8,10 +8,11 @@ angular.module('web')
     $scope.ref.isListView = getListView();
 
     function getListView(){
-      return localStorage.getItem('is-list-view')=='false'?false:true;
+      return localStorage.getItem('is-list-view') !== 'false';
     }
+
     function setListView(f) {
       $scope.ref.isListView = f;
-      localStorage.setItem('is-list-view' ,f);
+      localStorage.setItem('is-list-view', f);
     }
   }]);

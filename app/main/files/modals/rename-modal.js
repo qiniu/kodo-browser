@@ -16,7 +16,8 @@ angular.module('web')
         reg: {
           folderName: /^[^\/]+$/
         },
-        isLoading: false
+        isLoading: false,
+        error_message: null
       });
 
       function cancel() {
@@ -86,7 +87,7 @@ angular.module('web')
         var successMsg = T('rename.success'); //重命名成功
 
         Toast.info(onMsg);
-        s3Client.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy).then(function () {
+        s3Client.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy, item.StorageClass).then(function () {
           Toast.success(successMsg);
 
           AuditLog.log('moveOrCopyFile', {
@@ -94,14 +95,29 @@ angular.module('web')
             bucket: currentInfo.bucketName,
             from: item.path,
             to: newPath,
-            type: isCopy ? 'copy' : 'move'
+            type: isCopy ? 'copy' : 'move',
+            storageClass: item.StorageClass
           });
 
           $scope.isLoading = false;
           callback();
           cancel();
-        }, function () {
+        }, function (err) {
           $scope.isLoading = false;
+          switch (err.stage) {
+            case 'copy':
+              if (err.code === 'AccessDenied') {
+                Toast.error(T('permission.denied'));
+              }
+              break;
+            case 'delete':
+              if (err.code === 'AccessDenied') {
+                callback();
+                $scope.error_message = T('permission.denied.move.error_when_delete', { fromKey: item.path, toKey: newPath });
+                Toast.error($scope.error_message);
+              }
+              break;
+          }
         });
       }
 

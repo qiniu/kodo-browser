@@ -15,38 +15,27 @@ angular.module('web')
 
       init();
       function init(){
-        $scope.isLoading =true;
-        s3Client.getFileInfo(currentInfo.region, currentInfo.bucket, item.path).then(function(data){
-          if(data.Restore){
-            var info = parseRestoreInfo(data.Restore);
-            if(info['ongoing-request']=='true'){
-              $scope.info.type = 2;
-              //$scope.info.msg = '正在恢复中，请耐心等待！';
-            }else{
-              $scope.info.type = 3;
-              $scope.info.expiry_date = info['expiry-date'];
-              //$scope.info.msg = '可读截止时间：'+ info['expiry-date']
-            }
-          }
-          else{
+        $scope.isLoading = true;
+        s3Client.isFrozenOrNot(currentInfo.region, currentInfo.bucket, item.path).then(function(data){
+          switch (data.status) {
+          case 'frozen':
             $scope.info.type = 1;
             // $scope.info.msg = null;
+            break;
+          case 'unfreezing':
+            $scope.info.type = 2;
+            //$scope.info.msg = '正在恢复中，请耐心等待！';
+            break;
+          case 'unfrozen':
+            $scope.info.type = 3;
+            $scope.info.expiry_date = data['expiry-date'];
+            //$scope.info.msg = '可读截止时间：'+ info['expiry-date']
+            break;
           }
 
           $scope.isLoading = false;
           safeApply($scope);
         });
-      }
-
-      function parseRestoreInfo(s){
-        //"ongoing-request="true"
-        var arr = s.match(/([\w\-]+)=\"([^\"]+)\"/g);
-        var m={};
-        angular.forEach(arr, function(n){
-          var kv = n.match(/([\w\-]+)=\"([^\"]+)\"/);
-          m[kv[1]] = kv[2];
-        });
-        return m;
       }
 
       function cancel() {
@@ -56,7 +45,7 @@ angular.module('web')
       function onSubmit(form1) {
         if(!form1.$valid)return;
 
-        var days = $scope.info.days;
+        const days = $scope.info.days;
 
         Toast.info(T('restore.on'));//'提交中...'
         s3Client.restoreFile(currentInfo.region, currentInfo.bucket, item.path, days).then(function(){
@@ -64,7 +53,6 @@ angular.module('web')
           callback();
           cancel();
         });
-
       }
     }])
 ;

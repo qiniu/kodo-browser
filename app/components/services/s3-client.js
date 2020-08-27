@@ -42,6 +42,7 @@ angular.module("web").factory("s3Client", [
 
       checkFileExists: checkFileExists,
       checkFolderExists: checkFolderExists,
+      isFrozenOrNot: isFrozenOrNot,
 
       getContent: getContent,
       saveContent: saveContent,
@@ -54,13 +55,15 @@ angular.module("web").factory("s3Client", [
       copyFiles: copyFiles,
       stopCopyFiles: stopCopyFiles,
 
+      //解冻
+      restoreFile: restoreFile,
+
       //删除
       deleteFiles: deleteFiles,
       stopDeleteFiles: stopDeleteFiles,
 
       getClient: getClient,
       parseKodoPath: parseKodoPath,
-      parseRestoreInfo: parseRestoreInfo,
       signatureUrl: signatureUrl,
       signaturePicUrl: signaturePicUrl
     };
@@ -129,12 +132,12 @@ angular.module("web").factory("s3Client", [
 
     function checkFileExists(region, bucket, key) {
       return new Promise(function (resolve, reject) {
-        var client = getClient({
+        const client = getClient({
           region: region,
           bucket: bucket
         });
 
-        var params = {
+        const params = {
           Bucket: bucket,
           Key: key
         };
@@ -145,6 +148,33 @@ angular.module("web").factory("s3Client", [
           } else {
             resolve(data);
           }
+        });
+      });
+    }
+
+    function isFrozenOrNot(region, bucket, key) {
+      return new Promise(function (resolve, reject) {
+        getMeta(region, bucket, key).then((data) => {
+          if (data.StorageClass && data.StorageClass.toLowerCase() === 'glacier') {
+            if (data.Restore) {
+              const info = parseRestoreInfo(data.Restore);
+              if (info['ongoing-request'] === 'true') {
+                resolve({ status: 'unfreezing' });
+              } else {
+                const returnBody = { status: 'unfrozen' };
+                if (info['expiry-date']) {
+                  returnBody['expiry_date'] = new Date(info['expiry-date']);
+                }
+                resolve(returnBody);
+              }
+            } else {
+              resolve({ status: 'frozen' });
+            }
+          } else {
+            resolve({ status: 'normal' });
+          }
+        }, (err) => {
+          reject(err);
         });
       });
     }
@@ -333,23 +363,31 @@ angular.module("web").factory("s3Client", [
           "::",
           from.bucket + "/" + from.key,
           "==>",
-          to.bucket + "/" + toKey
+          to.bucket + "/" + toKey,
+          from.storageClass
         );
 
         var params = {
           Bucket: to.bucket,
           Key: toKey,
           CopySource: fromKey,
-          MetadataDirective: 'COPY'
+          MetadataDirective: 'COPY',
+          StorageClass: from.storageClass
         };
 
         client.copyObject(params,
           function (err) {
             if (err) {
+              err.stage = 'copy';
+              err.fromKey = from.key;
+              err.toKey = to.key;
               fn(err);
             } else if (removeAfterCopy) {
               client.deleteObject({Bucket: from.bucket, Key: from.key}, function (err) {
                 if (err) {
+                  err.stage = 'delete';
+                  err.fromKey = from.key;
+                  err.toKey = to.key;
                   fn(err);
                 } else {
                   fn();
@@ -398,7 +436,8 @@ angular.module("web").factory("s3Client", [
           copyFile(
             client, {
               bucket: bucket,
-              key: item.path
+              key: item.path,
+              storageClass: item.StorageClass
             }, {
               bucket: target.bucket,
               key: toKey
@@ -533,7 +572,8 @@ angular.module("web").factory("s3Client", [
         copyFile(
           client, {
             bucket: source.bucket,
-            key: source.path
+            key: source.path,
+            storageClass: source.StorageClass,
           }, {
             bucket: target.bucket,
             key: target.key
@@ -638,24 +678,26 @@ angular.module("web").factory("s3Client", [
     }
 
     //移动文件，重命名文件
-    function moveFile(region, bucket, oldKey, newKey, isCopy) {
-      var df = $q.defer();
+    function moveFile(region, bucket, oldKey, newKey, isCopy, storageClass) {
+      const df = $q.defer();
 
-      var client = getClient({
+      const client = getClient({
         region: region,
         bucket: bucket
       });
 
-      var params = {
+      const params = {
         Bucket: bucket,
         Key: newKey,
         CopySource: "/" + bucket + "/" + encodeURIComponent(oldKey),
-        MetadataDirective: 'COPY' // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
+        MetadataDirective: 'COPY', // 'REPLACE' 表示覆盖 meta 信息，'COPY' 表示不覆盖，只拷贝
+        StorageClass: storageClass,
       };
 
       client.copyObject(params, function (err) {
         if (err) {
           handleError(err);
+          err.stage = 'copy';
           df.reject(err);
         } else if (isCopy) {
           df.resolve();
@@ -663,6 +705,7 @@ angular.module("web").factory("s3Client", [
           client.deleteObject({ Bucket: bucket, Key: oldKey }, function (err) {
             if (err) {
               handleError(err);
+              err.stage = 'delete';
               df.reject(err);
             } else {
               df.resolve();
@@ -670,6 +713,37 @@ angular.module("web").factory("s3Client", [
           });
         }
       });
+      return df.promise;
+    }
+
+    function restoreFile(region, bucket, key, days) {
+      const df = $q.defer();
+
+      const client = getClient({
+        region: region,
+        bucket: bucket
+      });
+
+      const params = {
+        Bucket: bucket,
+        Key: key,
+        RestoreRequest: {
+          Days: days,
+          GlacierJobParameters: {
+            Tier: "Standard"
+          }
+        }
+      };
+
+      client.restoreObject(params, function(err, data) {
+        if (err) {
+          handleError(err);
+          df.reject(err);
+        } else {
+          df.resolve(data);
+        }
+      });
+
       return df.promise;
     }
 
@@ -740,17 +814,15 @@ angular.module("web").factory("s3Client", [
     }
 
     function getBucketLocation(bucket) {
-      var df = $q.defer();
+      const df = $q.defer();
 
-      getClient().getBucketLocation({
-        Bucket: bucket
-      }, function (err, data) {
+      getClient().getBucketLocation({ Bucket: bucket }, function (err, data) {
         if (err) {
           handleError(err);
-
           df.reject(err);
         } else {
-          df.resolve(data.LocationConstraint.replace(/<[^>]+>/, ''));
+          const locationConstraint = data.LocationConstraint;
+          df.resolve(locationConstraint.replace(/<[^>]+>/, ''));
         }
       });
 
@@ -901,7 +973,7 @@ angular.module("web").factory("s3Client", [
       });
     }
 
-    function createBucket(region, bucket, acl, storageClass) {
+    function createBucket(region, bucket, acl) {
       return new Promise(function (resolve, reject) {
         var client = getClient({
           region: region,
@@ -1033,14 +1105,14 @@ angular.module("web").factory("s3Client", [
 
     function _listFilesOrigion(region, bucket, key, marker) {
       return new Promise(function (resolve, reject) {
-        var client = getClient({
+        const client = getClient({
           region: region,
           bucket: bucket
         });
 
-        var t = [];
-        var t_pre = [];
-        var opt = {
+        const t = [];
+        const t_pre = [];
+        const opt = {
           Bucket: bucket,
           Prefix: key,
           Delimiter: "/",
@@ -1048,60 +1120,69 @@ angular.module("web").factory("s3Client", [
           MaxKeys: 1000
         };
 
-        client.listObjects(opt, function (err, result) {
-          if (err) {
-            handleError(err);
-            reject(err);
-            return;
-          }
+        function listOnePage() {
+          client.listObjects(opt, function (err, result) {
+            if (err) {
+              handleError(err);
+              reject(err);
+              return;
+            }
 
-          var prefix = opt.Prefix;
-          if (!prefix.endsWith("/")) {
-            prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
-          }
+            let prefix = opt.Prefix;
+            if (!prefix.endsWith("/")) {
+              prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
+            }
 
-          //目录
-          if (result.CommonPrefixes) {
-            result.CommonPrefixes.forEach(function (n) {
-              n = n.Prefix;
-              t_pre.push({
-                name: n.substring(prefix.length).replace(/(\/$)/, ""),
-                path: n,
-                isFolder: true,
-                itemType: "folder"
+            //目录
+            if (result.CommonPrefixes) {
+              result.CommonPrefixes.forEach(function (n) {
+                n = n.Prefix;
+                t_pre.push({
+                  name: n.substring(prefix.length).replace(/(\/$)/, ""),
+                  path: n,
+                  isFolder: true,
+                  itemType: "folder"
+                });
               });
-            });
-          }
+            }
 
-          //文件
-          if (result["Contents"]) {
-            var ONE_HOUR = 60 * 60 * 1000; // ms
+            //文件
+            if (result["Contents"]) {
+              const ONE_HOUR = 60 * 60 * 1000; // ms
 
-            result["Contents"].forEach(function (n) {
-              n.Prefix = n.Prefix || "";
+              result["Contents"].forEach(function (n) {
+                n.Prefix = n.Prefix || "";
 
-              if (!opt.Prefix.endsWith("/") || n.Key != opt.Prefix) {
-                n.isFile = true;
-                n.itemType = "file";
-                n.path = n.Key;
-                n.name = n.Key.substring(prefix.length);
-                n.size = n.Size;
-                n.storageClass = n.StorageClass;
-                n.type = n.Type;
-                n.lastModified = n.LastModified;
-                n.url = getS3Url(region, opt.Bucket, n.Key);
-                n.WithinFourHours = (((new Date()) - n.LastModified) <= 4 * ONE_HOUR);
+                if (!opt.Prefix.endsWith("/") || n.Key != opt.Prefix) {
+                  n.isFile = true;
+                  n.itemType = "file";
+                  n.path = n.Key;
+                  n.name = n.Key.substring(prefix.length);
+                  n.size = n.Size;
+                  n.storageClass = n.StorageClass;
+                  n.type = n.Type;
+                  n.lastModified = n.LastModified;
+                  n.url = getS3Url(region, opt.Bucket, n.Key);
+                  n.WithinFourHours = (((new Date()) - n.LastModified) <= 4 * ONE_HOUR);
 
-                t.push(n);
-              }
-            });
-          }
+                  t.push(n);
+                }
+              });
+            }
 
-          resolve({
-            data: t_pre.concat(t),
-            marker: result.NextMarker
+            if (t_pre.length + t.length >= 1000 || !result.NextMarker) {
+              resolve({
+                data: t_pre.concat(t),
+                marker: result.NextMarker
+              });
+            } else {
+              opt.Marker = result.NextMarker;
+              listOnePage();
+            }
           });
-        });
+        }
+
+        listOnePage();
       });
     }
 
@@ -1219,10 +1300,10 @@ angular.module("web").factory("s3Client", [
 
     function listAllBuckets() {
       return new Promise(function (resolve, reject) {
-        var client = getClient();
+        const client = getClient();
 
-        var t = [];
-        var opt = {};
+        let t = [];
+        const opt = {};
 
         function _dig() {
           KodoClient.getBucketIdNameMapper().then((idNameMapper) => {

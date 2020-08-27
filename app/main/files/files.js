@@ -12,6 +12,7 @@ angular.module("web").controller("filesCtrl", [
   "Config",
   "s3Client",
   "bucketMap",
+  "settingsSvs",
   "ExternalPath",
   "fileSvs",
   "Toast",
@@ -31,6 +32,7 @@ angular.module("web").controller("filesCtrl", [
     Config,
     s3Client,
     bucketMap,
+    settingsSvs,
     ExternalPath,
     fileSvs,
     Toast,
@@ -39,6 +41,7 @@ angular.module("web").controller("filesCtrl", [
   ) {
     const filter = require("array-filter"),
           deepEqual = require('fast-deep-equal'),
+          { Base64 } = require('js-base64'),
           T = $translate.instant;
 
     angular.extend($scope, {
@@ -87,6 +90,9 @@ angular.module("web").controller("filesCtrl", [
         x: {} //{} {'i_'+$index, true|false}
       },
       selectFile: selectFile,
+      toLoadMore: toLoadMore,
+
+      stepByStepLoadingFiles: stepByStepLoadingFiles,
 
       // bucket ops
       showAddBucket: showAddBucket,
@@ -207,6 +213,12 @@ angular.module("web").controller("filesCtrl", [
     }
 
     /////////////////////////////////
+
+    function stepByStepLoadingFiles() {
+      return settingsSvs.stepByStepLoadingFiles.get() == 1;
+    }
+
+    /////////////////////////////////
     var refreshTid;
 
     $scope.$on("refreshFilesList", (e) => {
@@ -290,20 +302,23 @@ angular.module("web").controller("filesCtrl", [
           // list objects
           const bucketInfo = $rootScope.bucketMap[info.bucket];
           if (bucketInfo) {
+            if (!bucketInfo.region) {
+              Toast.error("Forbidden");
+              clearFilesList();
+              return;
+            }
             $scope.currentInfo.region = bucketInfo.region;
             $scope.ref.mode = 'localFiles';
             info.bucketName = bucketInfo.name;
             info.bucket = bucketInfo.bucketId;
           } else {
             const region = ExternalPath.getRegionByBucketSync(info.bucket);
-
             if (region) {
               $scope.currentInfo.region = region;
               $scope.ref.mode = 'externalFiles';
               info.bucketName = info.bucket; // TODO: Use bucket name here
             } else {
               Toast.error("Forbidden");
-
               clearFilesList();
               return;
             }
@@ -396,15 +411,17 @@ angular.module("web").controller("filesCtrl", [
 
     function listFiles(info, marker, fn) {
       clearFilesList();
+      $scope.isLoading = true;
 
-      $timeout(() => {
-        $scope.isLoading = true;
-      });
+      info = info || $scope.currentInfo;
 
-      tryListFiles((info || $scope.currentInfo), marker, (err, files) => {
-        $timeout(() => {
-          $scope.isLoading = false;
-        });
+      tryListFiles(info, marker, (err, files) => {
+        $scope.isLoading = false;
+
+        if (info.bucketName !== $scope.currentInfo.bucketName ||
+            info.key !== $scope.currentInfo.key + $scope.sch.objectName) {
+          return;
+        }
 
         if (err) {
           Toast.error(JSON.stringify(err));
@@ -432,14 +449,17 @@ angular.module("web").controller("filesCtrl", [
             return;
           } else {
             $scope.nextObjectsMarker = nextObjectsMarker;
+            $scope.nextObjectsMarkerInfo = info;
           }
 
           $scope.objects = $scope.objects.concat(result.data);
 
           if ($scope.nextObjectsMarker) {
-            $timeout(function() {
-              tryLoadMore(info, nextObjectsMarker);
-            }, 100);
+            if (!$scope.stepByStepLoadingFiles()) {
+              $timeout(function() {
+                tryLoadMore(info, nextObjectsMarker);
+              }, 100);
+            }
           }
         });
 
@@ -454,13 +474,35 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    function tryLoadMore(info, nextObjectsMarker) {
+    var lastObjectsMarkerForLoadMore = null; // 最近一次点击 Load More 时的 nextObjectsMarker
+    function toLoadMore() {
+      if (lastObjectsMarkerForLoadMore !== $scope.nextObjectsMarker) {
+        $timeout(() => {
+          tryLoadMore($scope.nextObjectsMarkerInfo, $scope.nextObjectsMarker, {
+            starting: () => {
+              $scope.isLoading = true;
+            },
+            completed: () => {
+              $scope.isLoading = false;
+              lastObjectsMarkerForLoadMore = null;
+            }
+          });
+          lastObjectsMarkerForLoadMore = $scope.nextObjectsMarker;
+        }, 100);
+      }
+    }
+
+    function tryLoadMore(info, nextObjectsMarker, callback) {
+      callback = callback || {};
+
       if (info.bucketName !== $scope.currentInfo.bucketName ||
           info.key !== $scope.currentInfo.key + $scope.sch.objectName ||
           $scope.nextObjectsMarker !== nextObjectsMarker) {
         return;
       }
       console.log(`loading next kodo://${info.bucketName}/${info.key}?marker=${nextObjectsMarker}`);
+
+      if (callback.starting) callback.starting();
 
       tryListFiles(info, nextObjectsMarker, (err, files) => {
         if (err) {
@@ -469,6 +511,7 @@ angular.module("web").controller("filesCtrl", [
         }
 
         showFilesTable(files, true);
+        if (callback.completed) callback.completed();
       });
     }
 
@@ -496,6 +539,19 @@ angular.module("web").controller("filesCtrl", [
           $scope.isLoading = false;
           if (fn) fn(err);
         });
+      });
+    }
+
+    function isFrozenOrNot(region, bucket, key, callbacks) {
+      s3Client.isFrozenOrNot(region, bucket, key).then((data) => {
+        if (callbacks[data.status]) {
+          callbacks[data.status]();
+        }
+      }, (err) => {
+        Toast.error(JSON.stringify(err));
+        if (callbacks['error']) {
+          callbacks['error'](err);
+        }
       });
     }
 
@@ -922,8 +978,6 @@ angular.module("web").controller("filesCtrl", [
 
       Dialog.showDownloadDialog((folderPaths) => {
         if (!folderPaths || folderPaths.length == 0) {
-          Toast.info(T('chooseone'));
-
           return;
         }
 
@@ -1045,8 +1099,6 @@ angular.module("web").controller("filesCtrl", [
 
       Dialog.showUploadDialog((filePaths) => {
         if (!filePaths || filePaths.length == 0) {
-          Toast.info(T('choosenone'));
-
           return;
         }
 
@@ -1064,8 +1116,6 @@ angular.module("web").controller("filesCtrl", [
 
       Dialog.showDownloadDialog((folderPaths) => {
         if (!folderPaths || folderPaths.length == 0 || $scope.sel.has.length == 0) {
-          Toast.info(T('choosenone'));
-
           return;
         }
 
@@ -1113,6 +1163,9 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function translateRegionName(regionId) {
+      if (regionId === null) {
+        return T('region.get.error');
+      }
       const regions = Config.load(AuthInfo.usePublicCloud()).regions;
       let name = T('region.unknown');
       angular.forEach(regions, (region) => {
@@ -1250,7 +1303,16 @@ angular.module("web").controller("filesCtrl", [
           field: 'name',
           title: T('name'),
           formatter: (val, row, idx, field) => {
-            return `<div class="text-overflow file-item-name" style="cursor:pointer; ${row.isFolder?'color:orange':''}"><i class="fa fa-${$filter('fileIcon')(row)}"></i> <a href=""><span>${$filter('htmlEscape')(val)}</span></a></div>`;
+            let htmlAttributes = '';
+            if (row.StorageClass) {
+              htmlAttributes = `data-storage-class="${row.StorageClass.toLowerCase()}" data-key="${Base64.encode(row.Key)}" data-region="${$scope.currentInfo.region}" data-bucket="${$scope.currentInfo.bucket}"`;
+            }
+            return `
+              <div class="text-overflow file-item-name" style="cursor:pointer; ${row.isFolder?'color:orange':''}" ${htmlAttributes}>
+                <i class="fa fa-${$filter('fileIcon')(row)}"></i>
+                <a href=""><span>${$filter('htmlEscape')(val)}</span></a>
+              </div>
+            `;
           },
           events: {
             'click a': (evt, val, row, idx) => {
@@ -1289,6 +1351,18 @@ angular.module("web").controller("filesCtrl", [
             return $filter('sizeFormat')(val);
           }
         }, {
+          field: 'storageClass',
+          title: T('storageClassesType'),
+          formatter: (val, row, idx, field) => {
+            if (row.isFolder) {
+              return `<span class="text-muted">${T('folder')}</span>`;
+            } else if (row.storageClass) {
+              return T(`storageClassesType.${row.storageClass.toLowerCase()}`);
+            } else {
+              return '-';
+            }
+          }
+        }, {
           field: 'lastModified',
           title: T('lastModifyTime'),
           formatter: (val, row, idx, field) => {
@@ -1307,17 +1381,19 @@ angular.module("web").controller("filesCtrl", [
             }
 
             var acts = ['<div class="btn-group btn-group-xs">'];
+            if (row.StorageClass && row.StorageClass.toLowerCase() == 'glacier') {
+              acts.push(`<button type="button" class="btn unfreeze text-warning" data-toggle="tooltip" data-toggle-i18n="restore"><span class="fa fa-fire"></span></button>`);
+            }
             if ($scope.currentBucketPerm.read) {
-              acts.push(`<button type="button" class="btn download"><span class="fa fa-download"></span></button>`);
+              acts.push(`<button type="button" class="btn download" data-toggle="tooltip" data-toggle-i18n="download"><span class="fa fa-download"></span></button>`);
               if (!row.isFolder) {
-                acts.push(`<button type="button" class="btn download-link"><span class="fa fa-link"></span></button>`);
+                acts.push(`<button type="button" class="btn download-link" data-toggle="tooltip" data-toggle-i18n="getDownloadLink"><span class="fa fa-link"></span></button>`);
               }
             }
             if ($scope.currentBucketPerm.remove) {
-              acts.push(`<button type="button" class="btn remove text-danger"><span class="fa fa-trash"></span></button>`);
+              acts.push(`<button type="button" class="btn remove text-danger" data-toggle="tooltip" data-toggle-i18n="delete"><span class="fa fa-trash"></span></button>`);
             }
             acts.push('</div>');
-
             return acts.join("");
           },
           events: {
@@ -1338,6 +1414,26 @@ angular.module("web").controller("filesCtrl", [
                 $scope.total_folders = $list.find('i.fa-folder').length;
               });
 
+              return false;
+            },
+            'click button.unfreeze': (evt, val, row, idx) => {
+              const region = $scope.currentInfo.region,
+                    bucket = $scope.currentInfo.bucket,
+                    key = row.Key;
+              isFrozenOrNot(region, bucket, key, {
+                'frozen': () => {
+                  showRestore(row);
+                },
+                'unfreezing': () => {
+                  Dialog.alert(T('restore.title'), T('restore.message.unfreezing'));
+                },
+                'unfrozen': () => {
+                  Dialog.alert(T('restore.title'), T('restore.message.unfrozen'));
+                },
+                'error': (err) => {
+                  Dialog.alert(T('restore.title'), T('restore.message.head_error'));
+                },
+              });
               return false;
             }
           }
@@ -1405,6 +1501,40 @@ angular.module("web").controller("filesCtrl", [
       } else {
         $list.bootstrapTable('load', files).bootstrapTable('uncheckAll');
       }
+      angular.forEach($('#file-list tbody tr [data-storage-class="glacier"]'), (row) => {
+        let isMouseOver = true;
+        const region = $(row).attr('data-region'),
+              bucket = $(row).attr('data-bucket'),
+              key = Base64.decode($(row).attr('data-key')),
+              span = $(row).find('a span'),
+              addTooltip = (status) => {
+                span.tooltip('destroy');
+                $timeout(() => {
+                  if (isMouseOver) {
+                    span.attr('data-toggle', 'tooltip');
+                    span.attr('data-placement', 'right');
+                    span.tooltip({ delay: 0, title: T(`restore.tooltip.${status}`), trigger: 'hover' });
+                    span.tooltip('show');
+                  }
+                }, 100);
+              };
+        $(span).off('mouseover').on('mouseover', () => {
+          isMouseOver = true;
+          isFrozenOrNot(region, bucket, key, {
+            frozen: () => { addTooltip('frozen'); },
+            unfreezing: () => { addTooltip('unfreezing'); },
+            unfrozen: () => { addTooltip('unfrozen'); },
+          });
+        }).off('mouseleave').on('mouseleave', () => {
+          isMouseOver = false;
+        });
+      });
+      angular.forEach($('#file-list tbody tr .btn-group button[type="button"][data-toggle="tooltip"]'), (button) => {
+        $(button).tooltip('destroy');
+        $(button).attr('data-placement', 'top');
+        const i18nKey = $(button).attr('data-toggle-i18n');
+        $(button).tooltip({ container: 'body', title: T(i18nKey), trigger: 'hover' });
+      });
 
       $timeout(() => {
         $scope.total_folders = $list.find('i.fa-folder').length;

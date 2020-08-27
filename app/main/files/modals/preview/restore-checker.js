@@ -18,8 +18,7 @@ angular.module('web')
       function ctrlFn($scope, $timeout, $modal, s3Client, safeApply){
         angular.extend($scope, {
           info: {
-            msg: null,
-            needRestore: false,
+            msg: null
           },
           _Loading: false,
           showRestore: showRestore,
@@ -35,36 +34,34 @@ angular.module('web')
         }
         function check(successCallback){
           $scope._Loading = true;
-          $scope.info.needRestore = false;
 
-          s3Client.getFileInfo($scope.bucketInfo.region, $scope.bucketInfo.bucket, $scope.objectInfo.path)
+          s3Client.isFrozenOrNot($scope.bucketInfo.region, $scope.bucketInfo.bucket, $scope.objectInfo.path)
                   .then(function (data) {
-            if (data.Restore) {
-              var info = s3Client.parseRestoreInfo(data.Restore);
-              if (info['ongoing-request'] === 'true'){
-                $scope.info.type = 2;// '归档文件正在恢复中，请耐心等待...';
-                $scope.info.showContent = false;
-              } else {
-                $scope.info.expired_time = info['expiry-date'];
-                $scope.info.type = 3;// '归档文件，已恢复，可读截止时间：'+ moment(new Date(info['expiry-date'])).format('YYYY-MM-DD HH:mm:ss');
-                $scope.info.showContent = true;
-                $scope.info.needRestore = true;
-                if (successCallback) {
-                  successCallback()
-                }
+            switch (data.status) {
+            case 'normal':
+              $scope.info.type = 0;
+              $scope.info.showContent = true;
+              if (successCallback) {
+                successCallback()
               }
-            } else {
-              if ($scope.objectInfo.storageClass == 'Archive'){
-                $scope.info.type = 1; //归档文件，需要恢复才能预览或下载
-                $scope.info.showContent = false;
-                $scope.info.needRestore = true;
-              } else {
-                $scope.info.type = 0;
-                $scope.info.showContent = true;
-                if (successCallback) {
-                  successCallback()
-                }
+              break;
+            case 'frozen':
+              $scope.info.type = 1; //归档文件，需要恢复才能预览或下载
+              $scope.info.showContent = false;
+              break;
+            case 'unfreezing':
+              $scope.info.type = 2; // 归档文件正在恢复中，请耐心等待...;
+              $scope.info.showContent = false;
+              break;
+            case 'unfrozen':
+              $scope.info.type = 3; // '归档文件，已恢复'
+              $scope.info.showContent = true;
+              if (successCallback) {
+                successCallback()
               }
+              break;
+            default:
+              console.error("Unrecognized status from s3Client.isFrozenOrNot(): ", data.status);
             }
             $scope._Loading = false;
             safeApply($scope);

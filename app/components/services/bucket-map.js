@@ -26,8 +26,11 @@ angular.module("web").factory("bucketMap", [
                                 df.resolve(m);
                             }
                         }, (err) => {
+                            bkt.region = null;
                             wait -= 1;
-                            df.reject(err);
+                            if (wait == 0) {
+                                df.resolve(m);
+                            }
                         });
                     });
                 } else {

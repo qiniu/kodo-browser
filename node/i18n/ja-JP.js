@@ -8,6 +8,7 @@ module.exports = {
   "private.cloud": "プライベートクラウド",
 
   "region.unknown": "未知の地域",
+  "region.get.error": "取得できませんでした",
   "config.parse.error": "設定ファイルの解析に失敗しました",
   "config.format.error": "設定ファイルに問題があります",
 
@@ -16,6 +17,7 @@ module.exports = {
   region: "リージョン",
 
   "permission.denied": "アクセス拒否",
+  "permission.denied.move.error_when_delete": "権限が不十分で、ソースファイル {{fromKey}} の削除に失敗し、新しいファイル {{toKey}} が生成されました",
 
   "auth.accessLogin": "Access Key ログイン",
   "auth.id.placeholder": "AccessKeyId",
@@ -71,9 +73,10 @@ module.exports = {
   cancel: "キャンセル",
   close: "クローズ",
 
+  "storageClassesType": "保管タイプ",
   "storageClassesType.standard": "標準",
-  "storageClassesType.ia": "IA",
-  "storageClassesType.archive": "アーカイブ",
+  "storageClassesType.line": "IA",
+  "storageClassesType.glacier": "アーカイブ",
 
   "aclType.default": "バケツからの継承",
   "aclType.public-read-write": "公開可読は書く",
@@ -163,8 +166,6 @@ module.exports = {
   usergroups: "ユーザー・グループ",
   roles: "ロール",
 
-  chooseone: "一つを選んでください",
-
   "simplePolicy.ok": "OK",
   "simplePolicy.noauth.message1": "ユーザーリストを取得する権限がありません",
   "simplePolicy.noauth.message2": "使用グループリストを取得する権限がありません",
@@ -201,6 +202,8 @@ module.exports = {
   "settings.WhetherShowThumbnail.msg": "ファイル一覧にサムネイルを表示すると一定量のトラフィックが消費されます",
   "settings.ExternalPath": "外部リンク",
   "settings.WhetherExternalPathEnabled.msg": "外部リンクを有効にする",
+  "settings.StepByStepLoadingFiles": "ステップごとのファイルリストのロード",
+  "settings.WhetherStepByStepLoadingFiles.msg": "ステップバイステップモードでファイルリストの読み込みを有効にする",
   "settings.system": "システム設定",
   "settings.isDebug": "デバッグログ",
   "settings.isDebug.msg": "デバッグログを開くかどうか",
@@ -298,6 +301,7 @@ module.exports = {
   "aclType.public-read-write.message": "パブリックの読み書き: 誰もがオブジェクトを読み書きできます",
 
   "getDownloadLink.title": "ダウンロードアドレスを取得する",
+  "getDownloadLink.warning": "アーカイブされたストレージファイルは、復元されたときにのみアクセスできます",
   "exportDownloadLinks.title": "ダウンロードリンクのエクスポート",
   downloadLink: "ダウンロードリンク",
   "getDownloadLink.message": "リンクの有効期間を入力してください",
@@ -307,7 +311,7 @@ module.exports = {
 
   "restore.checker.message1": "プレビューまたはダウンロードするためにアーカイブを復元する必要があります。",
   "restore.immediately": "すぐに復元する",
-  "restore.checker.message2": "アーカイブが復元されました。有効期限",
+  "restore.checker.message2": "アーカイブが復元されました",
   "restore.onprogress": "アーカイブファイルが回復しています、しばらくお待ちください ...",
   "restore.on": "送信...",
   "restore.success": "復元要求が正常に送信されました",
@@ -315,6 +319,12 @@ module.exports = {
   "restore.message2": "有効期限",
   "restore.title": "リストア",
   restore: "リストア",
+  "restore.tooltip.frozen": "フローズン",
+  "restore.tooltip.unfreezing": "不凍",
+  "restore.tooltip.unfrozen": "凍結されていない",
+  "restore.message.unfreezing": "アーカイブされたストレージファイルを復元しています",
+  "restore.message.unfrozen": "アーカイブされたストレージファイルが復元されました",
+  "restore.message.head_error": "アーカイブされたストレージファイルのステータスを取得できませんでした",
 
   preview: "プレビュー",
   "cannot.preview": "プレビューできません",
@@ -328,6 +338,7 @@ module.exports = {
   "download.file": "ダウンロードファイル",
 
   lastModifyTime: "最終更新日",
+  "to.load.more": "もっと読み込む...",
   "loading.more": "もっと読み込んでいます...",
 
   "download.addtolist.on": "ダウンロードキューに追加中",

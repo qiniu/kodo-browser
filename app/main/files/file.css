@@ -23,3 +23,7 @@
 .text-overwrite-uploading-enabled, .text-overwrite-downloading-enabled {
   color: #5299f5;
 }
+
+.btn.btn-link.to-load-more:hover {
+  text-decoration: inherit;
+}

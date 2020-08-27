@@ -1,6 +1,6 @@
 {
   "name": "kodo-browser",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "license": "Apache-2.0",
   "author": {
     "name": "Rong Zhou",
@@ -82,7 +82,7 @@
     "gulp-jshint": "~2.1.0",
     "gulp-load-plugins": "~1.5.0",
     "gulp-run": "^1.7.1",
-    "jquery": "^3.3.1",
+    "jquery": "^3.5.1",
     "jquery.qrcode": "^1.0.3",
     "jshint": "^2.9.6",
     "lodash": "^4.17.15",
@@ -96,6 +96,7 @@
     "array-filter": "^1.0.0",
     "array-map": "^0.0.0",
     "async": "^3.1.0",
+    "js-base64": "^3.4.5",
     "aws-sdk": "^2.549.0",
     "csv-stringify": "^5.3.6",
     "downloads-folder": "^1.0.1",

@@ -8,6 +8,7 @@ module.exports = {
   "private.cloud": "Private Cloud",
 
   "region.unknown": "Unknown Region",
+  "region.get.error": "Failed to Get",
   "config.parse.error": "Failed to parse config file",
   "config.format.error": "Something is wrong in the config file",
 
@@ -16,6 +17,7 @@ module.exports = {
   region: "Region",
 
   "permission.denied": "Permission denied",
+  "permission.denied.move.error_when_delete": "Insufficient permissions, source file {{fromKey}} deletion failed, new file {{toKey}} has been generated",
 
   "auth.accessLogin": "Access Key Login",
   "auth.id.placeholder": "AccessKeyId",
@@ -71,9 +73,10 @@ module.exports = {
   cancel: "Cancel",
   close: "Close",
 
+  "storageClassesType": "Storage Type",
   "storageClassesType.standard": "Standard",
-  "storageClassesType.ia": "IA",
-  "storageClassesType.archive": "Archive",
+  "storageClassesType.line": "IA",
+  "storageClassesType.glacier": "Archive",
 
   "aclType.default": "Inherit From Bucket",
   "aclType.public-read-write": "Public Read and Write",
@@ -163,8 +166,6 @@ module.exports = {
   usergroups: "User Group",
   roles: "Role",
 
-  chooseone: "Choose one",
-
   "simplePolicy.ok": "OK",
   "simplePolicy.noauth.message1": "You are not authorized to get user list",
   "simplePolicy.noauth.message2": "You are not authorized to get use group list",
@@ -201,6 +202,8 @@ module.exports = {
   "settings.WhetherShowThumbnail.msg": "Displaying thumbnails in the list of files will consume a certain amount of traffic",
   "settings.ExternalPath": "External link",
   "settings.WhetherExternalPathEnabled.msg": "Enable external link",
+  "settings.StepByStepLoadingFiles": "File list loading step by step",
+  "settings.WhetherStepByStepLoadingFiles.msg": "Enable file list loading step by step mode",
   "settings.system": "System Settings",
   "settings.isDebug": "Debug",
   "settings.isDebug.msg": "Enable debug log",
@@ -299,6 +302,7 @@ module.exports = {
   "aclType.public-read-write.message": "Public read and write: Everyone can read and write objects",
 
   "getDownloadLink.title": "Get Download Link",
+  "getDownloadLink.warning": "An archived storage file can only be accessed when they are restored",
   "exportDownloadLinks.title": "Export Download Links",
   downloadLink: "Download Link",
   "getDownloadLink.message": "Please enter the validity period of the link",
@@ -308,7 +312,7 @@ module.exports = {
 
   "restore.checker.message1": "Archive need to be restored in order to preview or download.",
   "restore.immediately": "Restore immediately",
-  "restore.checker.message2": "The archive has been restored, the expiration time",
+  "restore.checker.message2": "The archive has been restored",
   "restore.onprogress": "Archive file is recovering, please be patient ...",
   "restore.on": "Sending...",
   "restore.success": "Restore request has been send successfully",
@@ -316,6 +320,12 @@ module.exports = {
   "restore.message2": "The expiration time",
   "restore.title": "Restore",
   restore: "Restore",
+  "restore.tooltip.frozen": "Frozen",
+  "restore.tooltip.unfreezing": "Unfreezing",
+  "restore.tooltip.unfrozen": "Unfrozen",
+  "restore.message.unfreezing": "Archived storage file is being restored",
+  "restore.message.unfrozen": "Archived storage file has been restored",
+  "restore.message.head_error": "Failed to get status of the archived storage file",
 
   preview: "Preview",
   "cannot.preview": "Can not preview",
@@ -329,6 +339,7 @@ module.exports = {
   "download.file": "Download File",
 
   lastModifyTime: "Last Modified",
+  "to.load.more": "Load more...",
   "loading.more": "Loading more...",
 
   "download.addtolist.on": "Being added to the download queue",

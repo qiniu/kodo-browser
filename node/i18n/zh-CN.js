@@ -8,6 +8,7 @@ module.exports = {
   "private.cloud": "私有云",
 
   "region.unknown": "未知区域",
+  "region.get.error": "获取失败",
   "config.parse.error": "解析配置文件出错",
   "config.format.error": "配置文件格式错误",
 
@@ -16,6 +17,7 @@ module.exports = {
   region: "区域",
 
   "permission.denied": "没有权限",
+  "permission.denied.move.error_when_delete": "权限不足，源文件 {{fromKey}} 删除失败。新文件 {{toKey}} 已生成",
 
   "auth.accessLogin": "Access Key 登录",
   "auth.id.placeholder": "请输入 AccessKeyId",
@@ -71,9 +73,10 @@ module.exports = {
   cancel: "取消",
   close: "关闭",
 
-  "storageClassesType.standard": "标准类型",
-  "storageClassesType.ia": "低频访问类型",
-  "storageClassesType.archive": "归档存储",
+  "storageClassesType": "存储类型",
+  "storageClassesType.standard": "标准存储",
+  "storageClassesType.line": "低频存储",
+  "storageClassesType.glacier": "归档存储",
 
   "aclType.default": "继承Bucket",
   "aclType.public-read-write": "公共读写",
@@ -163,8 +166,6 @@ module.exports = {
   usergroups: "用户组",
   roles: "角色",
 
-  chooseone: "请选择",
-
   "simplePolicy.ok": "确定授权",
   "simplePolicy.noauth.message1": "没有权限获取用户列表",
   "simplePolicy.noauth.message2": "没有权限获取用户组列表",
@@ -201,6 +202,8 @@ module.exports = {
   "settings.WhetherShowThumbnail.msg": "在文件列表中显示图片缩略, 会消耗一定的流量",
   "settings.ExternalPath": "外部路径",
   "settings.WhetherExternalPathEnabled.msg": "启用外部路径功能",
+  "settings.StepByStepLoadingFiles": "文件列表分步加载",
+  "settings.WhetherStepByStepLoadingFiles.msg": "开启文件列表分步加载模式",
   "settings.system": "系统设置",
   "settings.isDebug": "调试日志",
   "settings.isDebug.msg": "是否开启调试日志",
@@ -299,6 +302,7 @@ module.exports = {
   "aclType.public-read-write.message": "公共读写：所有人都可以对object进行读写操作",
 
   "getDownloadLink.title": "获取外链",
+  "getDownloadLink.warning": "归档存储文件，只有解冻状态时才能访问",
   "exportDownloadLinks.title": "导出外链",
   downloadLink: "外链地址",
   "getDownloadLink.message": "请输入链接有效期",
@@ -306,16 +310,22 @@ module.exports = {
   generateAndExport: "生成并导出",
   "qrcode.download": "扫码下载",
 
-  "restore.checker.message1": "归档文件，需要恢复才能预览或下载。",
-  "restore.immediately": "立即恢复",
-  "restore.checker.message2": "归档文件已恢复，可读截止时间",
-  "restore.onprogress": "归档文件正在恢复中，请耐心等待...",
+  "restore.checker.message1": "归档文件，需要解冻才能预览或下载。",
+  "restore.immediately": "立即解冻",
+  "restore.checker.message2": "归档文件已解冻",
+  "restore.onprogress": "归档文件正在解冻中，请耐心等待...",
   "restore.on": "提交中...",
-  "restore.success": "恢复请求已经提交",
-  "restore.days": "恢复天数",
+  "restore.success": "解冻请求已经提交",
+  "restore.days": "解冻天数",
   "restore.message2": "可读截止时间",
-  "restore.title": "恢复",
-  restore: "恢复",
+  "restore.title": "解冻",
+  restore: "解冻",
+  "restore.tooltip.frozen": "冻结",
+  "restore.tooltip.unfreezing": "解冻中",
+  "restore.tooltip.unfrozen": "已解冻",
+  "restore.message.unfreezing": "归档存储文件正在解冻中",
+  "restore.message.unfrozen": "归档存储文件已解冻",
+  "restore.message.head_error": "获取归档存储文件状态失败",
 
   preview: "预览",
   "cannot.preview": "无法预览",
@@ -329,6 +339,7 @@ module.exports = {
   "download.file": "下载文件",
 
   lastModifyTime: "最后修改时间",
+  "to.load.more": "加载更多...",
   "loading.more": "正在加载更多...",
 
   "download.addtolist.on": "正在添加到下载队列",

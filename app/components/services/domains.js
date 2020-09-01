@@ -94,14 +94,18 @@ angular.module("web").factory("Domains", [
 
       if (AuthInfo.usePublicCloud()) {
         KodoClient.getDomainsManager().listDomains(bucket).then((domainInfos) => {
-          each(domainInfos, (domainInfo) => {
-            switch(domainInfo.type) {
-            case 'normal':
-            case 'pan':
-            case 'test':
-              domains.push(new KodoDomain(domainInfo.name, domainInfo.protocol, domainInfo.qiniuPrivate));
-              break;
-            }
+          KodoClient.isBucketPrivate(bucket).then((isPrivate) => {
+            each(domainInfos, (domainInfo) => {
+              switch(domainInfo.type) {
+              case 'normal':
+              case 'pan':
+              case 'test':
+                domains.push(new KodoDomain(domainInfo.name, domainInfo.protocol, isPrivate));
+                break;
+              }
+            });
+          }, (err) => {
+            df.reject(err);
           });
           df.resolve(domains);
         }, (err) => {

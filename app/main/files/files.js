@@ -618,6 +618,9 @@ angular.module("web").controller("filesCtrl", [
                 listBuckets();
               }, 500);
             };
+          },
+          regions: () => {
+            return KodoClient.getRegionLabels();
           }
         }
       }).result.then(angular.noop, angular.noop);
@@ -639,6 +642,9 @@ angular.module("web").controller("filesCtrl", [
                 listExternalPaths();
               }, 500);
             };
+          },
+          regions: () => {
+            return KodoClient.getRegionLabels();
           }
         }
       }).result.then(angular.noop, angular.noop);

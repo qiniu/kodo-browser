@@ -1,12 +1,11 @@
 angular.module('web')
-  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'AuditLog', 'KodoClient',
-    function ($scope, $modalInstance, $translate, callback, s3Client, Const, AuditLog, KodoClient) {
+  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'AuditLog', 'regions',
+    function ($scope, $modalInstance, $translate, callback, s3Client, Const, AuditLog, regions) {
       const T = $translate.instant,
-            bucketACL = angular.copy(Const.bucketACL),
-            regions = KodoClient.getRegions();
+            bucketACL = angular.copy(Const.bucketACL);
       angular.extend($scope, {
-        bucketACL: [], //angular.copy(Const.bucketACL),
         regions: regions,
+        bucketACL: [], //angular.copy(Const.bucketACL),
         cancel: cancel,
         onSubmit: onSubmit,
         item: {

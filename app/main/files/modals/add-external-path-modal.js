@@ -1,8 +1,7 @@
 angular.module('web')
-  .controller('addExternalPathModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'ExternalPath', 's3Client', 'Const', 'KodoClient', 'AuditLog', 'Toast',
-    function ($scope, $modalInstance, $translate, callback, ExternalPath, s3Client, Const, KodoClient, AuditLog, Toast) {
-      const T = $translate.instant,
-           regions = KodoClient.getRegions();
+  .controller('addExternalPathModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'ExternalPath', 's3Client', 'Const', 'regions', 'AuditLog', 'Toast',
+    function ($scope, $modalInstance, $translate, callback, ExternalPath, s3Client, Const, regions, AuditLog, Toast) {
+      const T = $translate.instant;
 
       angular.extend($scope, {
         regions: regions,

@@ -189,6 +189,8 @@ angular.module("web").factory("KodoClient", [
         }, (err, data) => {
           if (err) {
             df.reject(err);
+          } else if (data.error) {
+            df.reject(new Error(data.error));
           } else {
             df.resolve(data.hosts[0]);
           }
@@ -264,6 +266,8 @@ angular.module("web").factory("KodoClient", [
               }, (err, body) => {
                 if (err) {
                   df.reject(err);
+                } else if (body.error) {
+                  df.reject(new Error(body.error));
                 } else {
                   df.resolve(body.domains);
                 }

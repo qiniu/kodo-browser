@@ -67,10 +67,10 @@
   </div>
 
   <div class="col-sm-2 pd0" style="width: 210px;">
-    <div class="input-group input-group-sm pull-left" role="group" ng-if="showDomains">
+    <div class="input-group input-group-sm pull-left" role="group" ng-if="showDomains()">
       <select ng-model="selectedDomain.domain" ng-options="domain.name() for domain in domains" name="domain" class="input-md form-control" style="width: 175px;"></select>
     </div>
-    <div class="btn-group btn-group-sm" role="group" ng-if="showDomains">
+    <div class="btn-group btn-group-sm" role="group" ng-if="showDomains()">
       <button class="btn btn-default btn-sm" type="button" uib-tooltip="{{'refresh.domain'|translate}}" tooltip-placement="bottom" tooltip-append-to-body="true" ng-click="refreshDomains()">
         <i class="fa fa-refresh"></i>
       </button>

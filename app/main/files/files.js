@@ -82,7 +82,7 @@ angular.module("web").controller("filesCtrl", [
         domain: null,
       },
       domains: [],
-      showDomains: showDomains(),
+      showDomains: showDomains,
       refreshDomains: refreshDomains,
       searchObjectName: searchObjectName,
       searchBucketName: searchBucketName,
@@ -228,7 +228,7 @@ angular.module("web").controller("filesCtrl", [
     /////////////////////////////////
 
     function showDomains() {
-      return AuthInfo.usePublicCloud();
+      return AuthInfo.usePublicCloud() && $scope.ref.mode.startsWith('local');
     }
 
     function refreshDomains() {
@@ -328,10 +328,10 @@ angular.module("web").controller("filesCtrl", [
 
         const info = s3Client.parseKodoPath(addr);
         $scope.currentInfo = info;
-        if (!info.bucket || info.bucket !== $scope.selectedDomain.bucketName) {
-          $scope.selectedDomain.bucketName = info.bucket;
-          $scope.selectedDomain.domain = null;
+        if (!info.bucket) {
           $scope.domains = [];
+          $scope.selectedDomain.bucketName = null;
+          $scope.selectedDomain.domain = null;
         }
 
         if (info.key) {
@@ -369,6 +369,12 @@ angular.module("web").controller("filesCtrl", [
             }
           }
 
+          if (info.bucketName !== $scope.selectedDomain.bucketName) {
+            $scope.domains = [Domains.s3(info.region, info.bucketName)];
+            $scope.selectedDomain.bucketName = info.bucketName;
+            $scope.selectedDomain.domain = $scope.domains[0];
+          }
+
           $scope.currentBucket = info.bucket;
           $scope.currentBucketName = info.bucketName;
 
@@ -382,7 +388,9 @@ angular.module("web").controller("filesCtrl", [
             }
           }
 
-          refreshDomains();
+          if (showDomains()) {
+            refreshDomains();
+          }
           // search
           if (fileName) {
             $scope.sch.objectName = fileName;

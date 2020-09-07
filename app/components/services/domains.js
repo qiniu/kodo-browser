@@ -85,8 +85,13 @@ angular.module("web").factory("Domains", [
     }
 
     return {
+      s3: s3,
       list: list
     };
+
+    function s3(region, bucket) {
+      return new S3Domain(region, bucket);
+    }
 
     function list(region, bucket) {
       const df = $q.defer();

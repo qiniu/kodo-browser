@@ -10,22 +10,29 @@ angular.module("web").factory("KodoClient", [
   "AuthInfo",
   function ($translate, $timeout, $q, Config, AuthInfo) {
     const T = $translate.instant;
-
-    // TODO: 改用接口查询，不要写死
-    const KodoRegionID2AWSRegionID = {
-      'z0': 'cn-east-1',
-      'z1': 'cn-north-1',
-      'z2': 'cn-south-1',
-      'na0': 'us-north-1',
-      'as0': 'ap-southeast-1',
-    };
-    const AWSRegionID2KodoRegionID = {
-      'cn-east-1': 'z0',
-      'cn-north-1': 'z1',
-      'cn-south-1': 'z2',
-      'us-north-1': 'na0',
-      'ap-southeast-1': 'as0',
-    };
+    let regionsMapGot = {},
+        kodoRegionID2AWSRegionID = {
+          'z0': 'cn-east-1',
+          'z1': 'cn-north-1',
+          'z2': 'cn-south-1',
+          'na0': 'us-north-1',
+          'as0': 'ap-southeast-1',
+        },
+        awsRegionID2KodoRegionID = {
+          'cn-east-1': 'z0',
+          'cn-north-1': 'z1',
+          'cn-south-1': 'z2',
+          'us-north-1': 'na0',
+          'ap-southeast-1': 'as0',
+        },
+        awsRegionID2RegionLabel = {
+          'cn-east-1': 'East China',
+          'cn-north-1': 'North China',
+          'cn-south-1': 'South China',
+          'us-north-1': 'North America',
+          'ap-southeast-1': 'Southeast Asia',
+        },
+        cachedBucketIdNameMapper = {};
 
     return {
       getBucketIdNameMapper: getBucketIdNameMapper,
@@ -45,11 +52,12 @@ angular.module("web").factory("KodoClient", [
         if (body && body.error) {
           df.reject(new Error(body.error));
         } else {
-          const m = {};
+          const cacheKey = makeCacheKey(opts);
+          cachedBucketIdNameMapper[cacheKey] = {};
           each(body, (bucket) => {
-            m[bucket.id] = bucket.tbl;
+            cachedBucketIdNameMapper[cacheKey][bucket.id] = bucket.tbl;
           });
-          df.resolve(m);
+          df.resolve(cachedBucketIdNameMapper[cacheKey]);
         }
       }, (err) => {
         df.reject(err);
@@ -58,6 +66,25 @@ angular.module("web").factory("KodoClient", [
       return df.promise;
     }
 
+    function getBucketNameById(id, opts) {
+      const df = $q.defer();
+            cacheKey = makeCacheKey(opts);
+      let name = null;
+      if (cachedBucketIdNameMapper[cacheKey]) {
+        name = cachedBucketIdNameMapper[cacheKey][id];
+      }
+      if (name) {
+        $timeout(() => { df.resolve(name); });
+      } else {
+        getBucketIdNameMapper(opts).then((mapper) => {
+          name = mapper[id] || id;
+          df.resolve(name);
+        }, (err) => {
+          df.reject(err);
+        })
+      }
+      return df.promise;
+    }
 
     function getRegionLabels() {
       const df = $q.defer(),
@@ -75,41 +102,23 @@ angular.module("web").factory("KodoClient", [
         });
         $timeout(() => { df.resolve(idLabels); });
       } else {
-        getRegionIdDescriptionMapper().then((mapper) => {
+        getRegionsMap().then((maps) => {
           if (regions === null) {
-            each(Object.entries(mapper), (regionInfo) => {
-              idLabels.push({id: KodoRegionID2AWSRegionID[regionInfo[0]], label: regionInfo[1]});
+            each(Object.entries(maps.awsRegionID2RegionLabel), (regionInfo) => {
+              idLabels.push({id: regionInfo[0], label: regionInfo[1]});
             });
           } else {
             each(regions, (region) => {
               const idLabel = {id: region.id, label: region.label};
               if (!idLabel.label) {
-                idLabel.label = mapper[AWSRegionID2KodoRegionID[region.id]];
+                idLabel.label = maps.awsRegionID2RegionLabel[region.id];
               }
               idLabels.push(idLabel);
             });
           }
           df.resolve(idLabels);
-        }, (err) => {
-          df.reject(err);
         });
       }
-
-      return df.promise;
-    }
-
-    function getRegionIdDescriptionMapper(opts) {
-      const df = $q.defer();
-
-      getBucketManager(opts).listRegions().then((body) => {
-        const m = {};
-        each(body.regions, (region) => {
-          m[region.id] = region.description;
-        });
-        df.resolve(m);
-      }, (err) => {
-        df.reject(err);
-      })
 
       return df.promise;
     }
@@ -182,8 +191,7 @@ angular.module("web").factory("KodoClient", [
       const mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret),
             ucUrl = Config.getUcURL();
 
-      getBucketIdNameMapper(authInfo).then((mapper) => {
-        const bucketName = mapper[bucketId] || bucketId;
+      getBucketNameById(bucketId, authInfo).then((bucketName) => {
         urllib.request(`${ucUrl}/v4/query`, {
           data: { ak: authInfo.id, bucket: bucketName }, dataAsQueryString: true, dataType: 'json', gzip: true
         }, (err, data) => {
@@ -210,9 +218,11 @@ angular.module("web").factory("KodoClient", [
           df.reject(new Error(body.error));
         } else {
           const bucket = body[0];
-          df.resolve({
-            bucket: bucket.id,
-            region: KodoRegionID2AWSRegionID[bucket.region]
+          getRegionsMap(opts).then((maps) => {
+            df.resolve({
+              bucket: bucket.id,
+              region: maps.kodoRegionID2AWSRegionID[bucket.region]
+            });
           });
         }
       }, (err) => {
@@ -225,8 +235,7 @@ angular.module("web").factory("KodoClient", [
     function isBucketPrivate(bucketId, authInfo) {
       const df = $q.defer();
 
-      getBucketIdNameMapper(authInfo).then((mapper) => {
-        const bucketName = mapper[bucketId] || bucketId;
+      getBucketNameById(bucketId, authInfo).then((bucketName) => {
         getBucketManager(bucketId).getBucketInfo(bucketName).then((bucketInfo) => {
           df.resolve(bucketInfo.private != 0);
         }, (err) => {
@@ -235,6 +244,42 @@ angular.module("web").factory("KodoClient", [
       }, (err) => {
         df.reject(err);
       });
+
+      return df.promise;
+    }
+
+    function getRegionsMap(opts) {
+      const df = $q.defer(),
+            resolve = () => {
+              df.resolve({
+                kodoRegionID2AWSRegionID: kodoRegionID2AWSRegionID,
+                awsRegionID2KodoRegionID: awsRegionID2KodoRegionID,
+                awsRegionID2RegionLabel: awsRegionID2RegionLabel
+              });
+            };
+
+      if (regionsMapGot[Config.getUcURL()]) {
+        $timeout(resolve);
+      } else {
+        getBucketManager(opts).listRegions().then((body) => {
+          regionsMapGot[Config.getUcURL()] = true;
+          if (body.regions.find((region) => !region.s3)) {
+            resolve();
+            return;
+          }
+          kodoRegionID2AWSRegionID = {};
+          awsRegionID2KodoRegionID = {};
+          awsRegionID2RegionLabel = {};
+          each(body.regions, (region) => {
+            kodoRegionID2AWSRegionID[region.id] = region.s3;
+            awsRegionID2KodoRegionID[region.s3] = region.id;
+            awsRegionID2RegionLabel[region.s3] = region.description;
+          });
+          resolve();
+        }, () => {
+          resolve();
+        });
+      }
 
       return df.promise;
     }
@@ -256,8 +301,7 @@ angular.module("web").factory("KodoClient", [
             if (ucUrl.startsWith('http://')) {
               apiUrl = 'http://' + apiHost;
             }
-            getBucketIdNameMapper(authInfo).then((mapper) => {
-              const bucketName = mapper[bucketId] || bucketId;
+            getBucketNameById(bucketId, authInfo).then((bucketName) => {
               const requestURI = `${apiUrl}/domain?sourceTypes=qiniuBucket&sourceQiniuBucket=${bucketName}&operatingState=success&limit=50`;
               const digest = Qiniu.util.generateAccessToken(mac, requestURI, null);
               const headers = { 'Authorization': digest };
@@ -339,6 +383,15 @@ angular.module("web").factory("KodoClient", [
           }
         }
       };
+    }
+
+    function makeCacheKey(opts) {
+      let authInfo = opts || {};
+      if (!authInfo.id || !authInfo.secret) {
+        authInfo = AuthInfo.get();
+      }
+      const ucUrl = Config.getUcURL();
+      return `${authInfo.id}${authInfo.secret}${ucUrl}`;
     }
   }
 ]);

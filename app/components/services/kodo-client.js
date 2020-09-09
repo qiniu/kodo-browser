@@ -125,7 +125,7 @@ angular.module("web").factory("KodoClient", [
 
     function getRegionEndpointURL(bucketId, regionId, authInfo) {
         const df = $q.defer();
-        const config = Config.load();
+        const config = Config.load(authInfo.public);
 
         if (config.regions !== null) {
             $timeout(() => {
@@ -152,10 +152,11 @@ angular.module("web").factory("KodoClient", [
         return df.promise;
     }
 
-    function isQueryRegionAPIAvaiable(ucUrl) {
+    function isQueryRegionAPIAvaiable(ucUrl, opts) {
       const df = $q.defer();
       if (!ucUrl) {
-        ucUrl = Config.getUcURL();
+        opts = opts || {};
+        ucUrl = Config.getUcURL(opts.public);
       }
       urllib.request(`${ucUrl}/v4/query`, {}, (err, _, resp) => {
         if (err) {
@@ -189,7 +190,7 @@ angular.module("web").factory("KodoClient", [
       }
 
       const mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret),
-            ucUrl = Config.getUcURL();
+            ucUrl = Config.getUcURL(authInfo.public);
 
       getBucketNameById(bucketId, authInfo).then((bucketName) => {
         urllib.request(`${ucUrl}/v4/query`, {
@@ -258,11 +259,12 @@ angular.module("web").factory("KodoClient", [
               });
             };
 
-      if (regionsMapGot[Config.getUcURL()]) {
+      opts = opts || {};
+      if (regionsMapGot[Config.getUcURL(opts.public)]) {
         $timeout(resolve);
       } else {
         getBucketManager(opts).listRegions().then((body) => {
-          regionsMapGot[Config.getUcURL()] = true;
+          regionsMapGot[Config.getUcURL(opts.public)] = true;
           if (body.regions.find((region) => !region.s3)) {
             resolve();
             return;
@@ -290,7 +292,7 @@ angular.module("web").factory("KodoClient", [
         authInfo = AuthInfo.get();
       }
       const mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret);
-      const ucUrl = Config.getUcURL();
+      const ucUrl = Config.getUcURL(authInfo.public);
 
       return {
         listDomains: (bucketId) => {
@@ -333,7 +335,7 @@ angular.module("web").factory("KodoClient", [
         authInfo = AuthInfo.get();
       }
       const mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret);
-      const ucUrl = Config.getUcURL();
+      const ucUrl = Config.getUcURL(authInfo.public);
       return {
         listRegions: () => {
           const df = $q.defer();
@@ -390,7 +392,7 @@ angular.module("web").factory("KodoClient", [
       if (!authInfo.id || !authInfo.secret) {
         authInfo = AuthInfo.get();
       }
-      const ucUrl = Config.getUcURL();
+      const ucUrl = Config.getUcURL(authInfo.public);
       return `${authInfo.id}${authInfo.secret}${ucUrl}`;
     }
   }

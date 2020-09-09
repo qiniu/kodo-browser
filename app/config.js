@@ -29,15 +29,15 @@ angular.module("web").factory("Config", ["$translate", "$timeout", "$q", "AuthIn
             exists: configFileExists,
         };
 
-        function getUcURL() {
-            return loadConfig().ucUrl;
+        function getUcURL(loadDefault) {
+            return loadConfig(loadDefault).ucUrl;
         }
 
         function loadConfig(loadDefault) {
             let ucUrl = defaultUcUrl,
                 regions = defaultRegions;
 
-            if (loadDefault === undefined) {
+            if (loadDefault === undefined || loadDefault === null) {
                 loadDefault = AuthInfo.usePublicCloud();
             }
 

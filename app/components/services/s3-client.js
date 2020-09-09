@@ -1275,10 +1275,10 @@ angular.module("web").factory("s3Client", [
       let authInfo = null, regions = null;
 
       if (typeof opt === 'object' && opt.id && opt.secret) {
-        authInfo = { id: opt.id, secret: opt.secret };
+        authInfo = { id: opt.id, secret: opt.secret, public: opt.isPublicCloud };
         regions = angular.copy(Config.load(opt.isPublicCloud).regions);
       } else {
-        authInfo = AuthInfo.get();
+        authInfo = angular.extend({ public: AuthInfo.usePublicCloud() }, AuthInfo.get());
         regions = angular.copy(Config.load(AuthInfo.usePublicCloud()).regions);
       }
 

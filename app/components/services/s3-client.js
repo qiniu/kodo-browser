@@ -1291,7 +1291,7 @@ angular.module("web").factory("s3Client", [
           createClientByBucketAndRegion(opt.bucket, opt.region, null, cacheKey);
         }
       } else if (config.regions && config.regions.length) {
-        const region = regions[0],
+        const region = config.regions[0],
               cacheKey = makeCacheKey(authInfo, config.ucUrl, region.endpoint, region.id),
               cache = clientCache[cacheKey];
         if (cache) {

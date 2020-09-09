@@ -167,7 +167,7 @@ angular.module("web").factory("KodoClient", [
       if (cache === undefined || cache === null) {
         urllib.request(`${ucUrl}/v4/query`, {}, (err, _, resp) => {
           if (err) {
-            df.reject(err);
+            df.resolve(false);
           } else if (resp.status === 404) {
             queryRegionAPIAvailabilityCache[ucUrl] = false;
             df.resolve(false);

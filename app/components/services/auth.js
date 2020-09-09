@@ -17,9 +17,6 @@ angular.module("web").factory("Auth", [
       const df = $q.defer();
 
       s3Client.getClient(data).then((client) => {
-        data.httpOptions = {
-          timeout: 5000
-        };
         client.listBuckets(function (err, result) {
           if (err) {
             df.reject({

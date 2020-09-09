@@ -850,7 +850,7 @@ angular.module("web").factory("s3Client", [
     function createBucket(region, bucket, acl) {
       const df = $q.defer();
 
-      getClient({ region: region, bucket: bucket }).then((client) => {
+      getClient({ region: region }).then((client) => {
         client.createBucket({
           Bucket: bucket,
           CreateBucketConfiguration: {

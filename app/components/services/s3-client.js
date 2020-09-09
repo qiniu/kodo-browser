@@ -17,9 +17,9 @@ angular.module("web").factory("s3Client", [
           map = require("array-map"),
           async = require("async"),
           T = $translate.instant,
-
           NEXT_TICK = 1,
-          KODO_ADDR_PROTOCOL = "kodo://";
+          KODO_ADDR_PROTOCOL = "kodo://",
+          clientCache = {};
 
     return {
       listAllBuckets: listAllBuckets,
@@ -1272,56 +1272,80 @@ angular.module("web").factory("s3Client", [
      */
     function getClient(opt) {
       const df = $q.defer();
-      let authInfo = null, regions = null;
+      let authInfo = null, config = null;
 
       if (typeof opt === 'object' && opt.id && opt.secret) {
         authInfo = { id: opt.id, secret: opt.secret, public: opt.isPublicCloud };
-        regions = angular.copy(Config.load(opt.isPublicCloud).regions);
+        config = Config.load(opt.isPublicCloud);
       } else {
         authInfo = angular.extend({ public: AuthInfo.usePublicCloud() }, AuthInfo.get());
-        regions = angular.copy(Config.load(AuthInfo.usePublicCloud()).regions);
+        config = Config.load(AuthInfo.usePublicCloud());
       }
 
       if (typeof opt === 'object' && opt.bucket && opt.region) {
-        createClientByBucketAndRegion(opt.bucket, opt.region);
-      } else if (regions && regions.length) {
-        const region = regions[0];
-        createClientByEndpointAndRegion(region.endpoint, region.id);
+        const cacheKey = makeCacheKey(authInfo, config.ucUrl, opt.bucket, opt.region),
+              cache = clientCache[cacheKey];
+        if (cache) {
+          $timeout(() => df.resolve(cache));
+        } else {
+          createClientByBucketAndRegion(opt.bucket, opt.region, null, cacheKey);
+        }
+      } else if (config.regions && config.regions.length) {
+        const region = regions[0],
+              cacheKey = makeCacheKey(authInfo, config.ucUrl, region.endpoint, region.id),
+              cache = clientCache[cacheKey];
+        if (cache) {
+          $timeout(() => df.resolve(cache));
+        } else {
+          createClientByEndpointAndRegion(region.endpoint, region.id, cacheKey);
+        }
       } else {
-        KodoClient.getAnyBucketInfo(authInfo).then((info) => {
-          createClientByBucketAndRegion(info.bucket, info.region, authInfo);
-        }, (err) => {
-          df.reject(err);
-        });
+        const cacheKey = makeCacheKey(authInfo, config.ucUrl),
+              cache = clientCache[cacheKey];
+        if (cache) {
+          $timeout(() => df.resolve(cache));
+        } else {
+          KodoClient.getAnyBucketInfo(authInfo).then((info) => {
+            createClientByBucketAndRegion(info.bucket, info.region, authInfo, cacheKey);
+          }, (err) => {
+            df.reject(err);
+          });
+        }
       }
 
       return df.promise;
 
-      function createClientByEndpointAndRegion(endpointURL, region) {
-        const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 };
-        df.resolve(new AWS.S3({
-          apiVersion: "2006-03-01",
-          customUserAgent: `QiniuKodoBrowser/${Global.app.version}`,
-          computeChecksums: true,
-          logger: console,
-          endpoint: endpointURL,
-          region: region,
-          accessKeyId: authInfo.id,
-          secretAccessKey: authInfo.secret,
-          maxRetries: 10,
-          s3ForcePathStyle: true,
-          signatureVersion: "v4",
-          httpOptions: {
-            connectTimeout: 3000, // 3s
-            timeout: 300000, // 5m
-            agent: endpointURL.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
-          }
-        }));
+      function makeCacheKey(authInfo, ucUrl, bucketId, region) {
+        return `${authInfo.id}${authInfo.secret}${ucUrl}${bucketId}${region}`;
       }
 
-      function createClientByBucketAndRegion(bucket, region, authInfo) {
+      function createClientByEndpointAndRegion(endpointURL, region, cacheKey) {
+        const agentOptions = { keepAlive: true, keepAliveMsecs: 30000 },
+              client = new AWS.S3({
+                apiVersion: "2006-03-01",
+                customUserAgent: `QiniuKodoBrowser/${Global.app.version}`,
+                computeChecksums: true,
+                logger: console,
+                endpoint: endpointURL,
+                region: region,
+                accessKeyId: authInfo.id,
+                secretAccessKey: authInfo.secret,
+                maxRetries: 10,
+                s3ForcePathStyle: true,
+                signatureVersion: "v4",
+                httpOptions: {
+                  connectTimeout: 3000, // 3s
+                  timeout: 300000, // 5m
+                  agent: endpointURL.startsWith('https://') ? new https.Agent(agentOptions) : new http.Agent(agentOptions)
+                }
+              });
+        clientCache[cacheKey] = client;
+        df.resolve(client);
+      }
+
+      function createClientByBucketAndRegion(bucket, region, authInfo, cacheKey) {
         KodoClient.getRegionEndpointURL(bucket, region, authInfo).then((endpointURL) => {
-          createClientByEndpointAndRegion(endpointURL, region);
+          createClientByEndpointAndRegion(endpointURL, region, cacheKey);
         }, (err) => {
           df.reject(err);
         });

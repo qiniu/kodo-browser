@@ -67,20 +67,7 @@ angular.module("web").controller("loginCtrl", [
         if (Config.exists()) {
           try {
             const config = Config.load(false);
-            if (config) {
-              if (config.regions && config.regions.length) {
-                df.resolve(true);
-              } else {
-                KodoClient.isQueryRegionAPIAvaiable(config.ucUrl).then((queryAvailable) => {
-                  df.resolve(queryAvailable);
-                }, (err) => {
-                  Toast.error(err);
-                  df.reject(err);
-                });
-              }
-            } else {
-              df.resolve(false);
-            }
+            df.resolve(config && config.ucUrl);
           } catch (e) {
             df.resolve(false);
           }

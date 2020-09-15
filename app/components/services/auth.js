@@ -19,6 +19,7 @@ angular.module("web").factory("Auth", [
       s3Client.getClient(data).then((client) => {
         client.listBuckets(function (err, result) {
           if (err) {
+            console.error(err);
             df.reject({
               code: err.code,
               message: err.message
@@ -46,6 +47,7 @@ angular.module("web").factory("Auth", [
           }
         });
       }, (err) => {
+        console.error(err);
         df.reject({
           code: "Error",
           message: T("login.endpoint.error")

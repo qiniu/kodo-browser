@@ -1282,13 +1282,13 @@ angular.module("web").factory("s3Client", [
         config = Config.load(AuthInfo.usePublicCloud());
       }
 
-      if (typeof opt === 'object' && opt.bucket && opt.region) {
-        const cacheKey = makeCacheKey(authInfo, config.ucUrl, opt.bucket, opt.region),
+      if (typeof opt === 'object' && opt.region) {
+        const cacheKey = makeCacheKey(authInfo, config.ucUrl, opt.region),
               cache = clientCache[cacheKey];
         if (cache) {
           $timeout(() => df.resolve(cache));
         } else {
-          createClientByBucketAndRegion(opt.bucket, opt.region, null, cacheKey);
+          createClientByRegion(opt.region, authInfo, cacheKey);
         }
       } else if (config.regions && config.regions.length) {
         const region = config.regions[0],
@@ -1305,11 +1305,7 @@ angular.module("web").factory("s3Client", [
         if (cache) {
           $timeout(() => df.resolve(cache));
         } else {
-          KodoClient.getAnyBucketInfo(authInfo).then((info) => {
-            createClientByBucketAndRegion(info.bucket, info.region, authInfo, cacheKey);
-          }, (err) => {
-            df.reject(err);
-          });
+          createClientOfAnyRegion(authInfo, cacheKey);
         }
       }
 
@@ -1343,9 +1339,17 @@ angular.module("web").factory("s3Client", [
         df.resolve(client);
       }
 
-      function createClientByBucketAndRegion(bucket, region, authInfo, cacheKey) {
-        KodoClient.getRegionEndpointURL(bucket, region, authInfo).then((endpointURL) => {
+      function createClientByRegion(region, authInfo, cacheKey) {
+        KodoClient.getRegionEndpointURL(region, authInfo).then((endpointURL) => {
           createClientByEndpointAndRegion(endpointURL, region, cacheKey);
+        }, (err) => {
+          df.reject(err);
+        });
+      }
+
+      function createClientOfAnyRegion(authInfo, cacheKey) {
+        KodoClient.getAnyS3EndpointInfo(authInfo).then((info) => {
+          createClientByEndpointAndRegion(info.endpointURL, info.region, cacheKey)
         }, (err) => {
           df.reject(err);
         });

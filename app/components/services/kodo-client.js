@@ -12,8 +12,9 @@ angular.module("web").factory("KodoClient", [
     const T = $translate.instant;
           cachedBucketIdNameMapper = {},
           queryRegionAPIAvailabilityCache = {},
-          awsDomainCache = {};
-          domainsCache = {};
+          domainsCache = {},
+          anyS3EndpointInfoCache = {},
+          regionEndpointURLCache = {};
     let regionsMapGot = {},
         kodoRegionID2AWSRegionID = {
           'z0': 'cn-east-1',
@@ -40,11 +41,11 @@ angular.module("web").factory("KodoClient", [
     return {
       getBucketIdNameMapper: getBucketIdNameMapper,
       getRegionLabels: getRegionLabels,
+      getAnyS3EndpointInfo: getAnyS3EndpointInfo,
       getRegionEndpointURL: getRegionEndpointURL,
       isQueryRegionAPIAvaiable: isQueryRegionAPIAvaiable,
-      getAnyBucketInfo: getAnyBucketInfo,
       isBucketPrivate: isBucketPrivate,
-      getDomainsManager: getDomainsManager,
+      listDomains: listDomains,
       getBucketManager: getBucketManager
     };
 
@@ -126,11 +127,48 @@ angular.module("web").factory("KodoClient", [
       return df.promise;
     }
 
-    function getRegionEndpointURL(bucketId, regionId, authInfo) {
+    function getAnyS3EndpointInfo(authInfo) {
         authInfo = authInfo || {};
 
         const config = Config.load(authInfo.public),
-              df = $q.defer();
+              df = $q.defer(),
+              cacheKey = makeCacheKey(authInfo),
+              cache = anyS3EndpointInfoCache[cacheKey];
+
+        if (config.regions) {
+            $timeout(() => { df.resolve({ endpointURL: config.regions[0].endpoint, region: config.regions[0].id }); });
+        } else if (cache) {
+            $timeout(() => { df.resolve(cache); });
+        } else {
+            getBucketManager(authInfo).listRegions().then((body) => {
+                let scheme = "https://";
+                if (config.ucUrl.startsWith("http://")) {
+                    scheme = "http://";
+                }
+                const index = body.regions.findIndex((region) => region.s3 && region.s3.region_alias && region.s3.domains && region.s3.domains.length);
+                if (index > -1) {
+                    const region = body.regions[index],
+                          result = { endpointURL: scheme + region.s3.domains[0], region: region.s3.region_alias };
+                    anyS3EndpointInfoCache[cacheKey] = result;
+                    df.resolve(result);
+                } else {
+                    df.reject(new Error("Cannot find any region endpoint url"));
+                }
+            }, (err) => {
+                df.reject(err);
+            });
+        }
+
+        return df.promise;
+    }
+
+    function getRegionEndpointURL(regionId, authInfo) {
+        authInfo = authInfo || {};
+
+        const config = Config.load(authInfo.public),
+              df = $q.defer(),
+              cacheKey = makeCacheKey(authInfo, regionId),
+              cache = regionEndpointURLCache[cacheKey];
 
         if (config.regions !== null) {
             $timeout(() => {
@@ -142,13 +180,23 @@ angular.module("web").factory("KodoClient", [
                 });
                 df.resolve(endpointURL);
             });
+        } else if (cache) {
+            $timeout(() => { df.resolve(cache); });
         } else {
-            queryForAWSDomain(bucketId, authInfo).then((regionInfo) => {
+            getBucketManager(authInfo).listRegions().then((body) => {
                 let scheme = "https://";
                 if (config.ucUrl.startsWith("http://")) {
                     scheme = "http://";
                 }
-                df.resolve(scheme + regionInfo.domain);
+                const index = body.regions.findIndex((region) => region.s3 && region.s3.region_alias && region.s3.region_alias === regionId && region.s3.domains && region.s3.domains.length);
+                if (index > -1) {
+                    const region = body.regions[index],
+                          endpointURL = scheme + region.s3.domains[0];
+                    regionEndpointURLCache[cacheKey] = endpointURL;
+                    df.resolve(endpointURL);
+                } else {
+                    df.reject(new Error(`Cannot find region endpoint url of ${regionId}`));
+                }
             }, (err) => {
                 df.reject(err);
             });
@@ -165,10 +213,10 @@ angular.module("web").factory("KodoClient", [
       const df = $q.defer(),
             cache = queryRegionAPIAvailabilityCache[ucUrl];
       if (cache === undefined || cache === null) {
-        urllib.request(`${ucUrl}/v4/query`, {}, (err, _, resp) => {
+        urllib.request(`${ucUrl}/v4/query`, {}, (err, body, resp) => {
           if (err) {
             df.resolve(false);
-          } else if (resp.status === 404) {
+          } else if (resp.status === 404 || body.error) {
             queryRegionAPIAvailabilityCache[ucUrl] = false;
             df.resolve(false);
           } else {
@@ -182,90 +230,12 @@ angular.module("web").factory("KodoClient", [
       return df.promise;
     }
 
-    function queryForAWSDomain(bucketId, authInfo) {
-      const df = $q.defer(),
-            cacheKey = makeCacheKey(authInfo, bucketId),
-            cache = awsDomainCache[cacheKey];
-
-      if (cache) {
-        $timeout(() => { df.resolve(cache); });
-      } else {
-        queryForDomains(bucketId, authInfo).then((host) => {
-          awsDomainCache[cacheKey] = { id: host.s3.region_alias, domain: host.s3.domains[0] };
-          df.resolve(awsDomainCache[cacheKey]);
-        }, (err) => {
-          df.reject(err);
-        })
-      }
-
-      return df.promise;
-    }
-
-    function queryForDomains(bucketId, authInfo) {
-      const df = $q.defer();
-
-      if (typeof authInfo !== 'object' || !authInfo.id || !authInfo.secret) {
-        authInfo = AuthInfo.get();
-      }
-
-      const cacheKey = makeCacheKey(authInfo, bucketId),
-            cache = domainsCache[cacheKey];
-
-      if (cache) {
-        $timeout(() => { df.resolve(cache); });
-      } else {
-        const mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret),
-              ucUrl = Config.getUcURL(authInfo.public);
-
-        getBucketNameById(bucketId, authInfo).then((bucketName) => {
-          urllib.request(`${ucUrl}/v4/query`, {
-            data: { ak: authInfo.id, bucket: bucketName }, dataAsQueryString: true, dataType: 'json', gzip: true
-          }, (err, data) => {
-            if (err) {
-              df.reject(err);
-            } else if (data.error) {
-              df.reject(new Error(data.error));
-            } else {
-              domainsCache[cacheKey] = data.hosts[0];
-              df.resolve(data.hosts[0]);
-            }
-          });
-        }, (err) => {
-          df.reject(err);
-        });
-      }
-
-      return df.promise;
-    }
-
-    function getAnyBucketInfo(opts) {
-      const df = $q.defer();
-
-      getBucketManager(opts).listBuckets().then((body) => {
-        if (body && body.error) {
-          df.reject(new Error(body.error));
-        } else {
-          const bucket = body[0];
-          getRegionsMap(opts).then((maps) => {
-            df.resolve({
-              bucket: bucket.id,
-              region: maps.kodoRegionID2AWSRegionID[bucket.region]
-            });
-          });
-        }
-      }, (err) => {
-        df.reject(err);
-      });
-
-      return df.promise;
-    }
-
     function isBucketPrivate(bucketId, authInfo) {
       const df = $q.defer();
 
       getBucketNameById(bucketId, authInfo).then((bucketName) => {
         getBucketManager(bucketId).getBucketInfo(bucketName).then((bucketInfo) => {
-          df.resolve(bucketInfo.private != 0);
+          df.resolve(bucketInfo.private !== 0);
         }, (err) => {
           df.reject(err);
         })
@@ -292,7 +262,7 @@ angular.module("web").factory("KodoClient", [
       } else {
         getBucketManager(opts).listRegions().then((body) => {
           regionsMapGot[Config.getUcURL(opts.public)] = true;
-          if (body.regions.find((region) => !region.s3)) {
+          if (body.regions.find((region) => !region.s3 || !region.s3.region_alias)) {
             resolve();
             return;
           }
@@ -300,9 +270,9 @@ angular.module("web").factory("KodoClient", [
           awsRegionID2KodoRegionID = {};
           awsRegionID2RegionLabel = {};
           each(body.regions, (region) => {
-            kodoRegionID2AWSRegionID[region.id] = region.s3;
-            awsRegionID2KodoRegionID[region.s3] = region.id;
-            awsRegionID2RegionLabel[region.s3] = region.description;
+            kodoRegionID2AWSRegionID[region.id] = region.s3.region_alias;
+            awsRegionID2KodoRegionID[region.s3.region_alias] = region.id;
+            awsRegionID2RegionLabel[region.s3.region_alias] = region.description;
           });
           resolve();
         }, () => {
@@ -313,47 +283,52 @@ angular.module("web").factory("KodoClient", [
       return df.promise;
     }
 
-    function getDomainsManager(opts) {
-      let authInfo = opts || {};
-      if (!authInfo.id || !authInfo.secret) {
+    function listDomains(regionId, bucketId, authInfo) {
+      if (typeof authInfo !== 'object' || !authInfo.id || !authInfo.secret) {
         authInfo = AuthInfo.get();
       }
-      const mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret),
-            ucUrl = Config.getUcURL(authInfo.public);
 
-      return {
-        listDomains: (bucketId) => {
-          const df = $q.defer();
-          queryForDomains(bucketId, authInfo).then((host) => {
-            const apiHost = host.api.domains[0];
-            let apiUrl = 'https://' + apiHost;
-            if (ucUrl.startsWith('http://')) {
-              apiUrl = 'http://' + apiHost;
-            }
-            getBucketNameById(bucketId, authInfo).then((bucketName) => {
-              const requestURI = `${apiUrl}/domain?sourceTypes=qiniuBucket&sourceQiniuBucket=${bucketName}&operatingState=success&limit=50`,
-                    digest = Qiniu.util.generateAccessToken(mac, requestURI, null),
-                    headers = { 'Authorization': digest };
-              urllib.request(requestURI, {
-                method: 'GET', dataType: 'json', contentType: 'application/x-www-form-urlencoded', headers: headers, gzip: true
-              }, (err, body) => {
-                if (err) {
-                  df.reject(err);
-                } else if (body.error) {
-                  df.reject(new Error(body.error));
-                } else {
-                  df.resolve(body.domains);
-                }
-              });
-            }, (err) => {
-              df.reject(err);
+      const df = $q.defer(),
+            cacheKey = makeCacheKey(authInfo, bucketId),
+            cache = domainsCache[cacheKey];
+
+      if (cache) {
+        $timeout(() => { df.resolve(cache); });
+      } else {
+        getBucketManager(authInfo).listRegions().then((body) => {
+          const index = body.regions.findIndex((region) => region.s3 && region.s3.region_alias === regionId && region.api && region.api.domains && region.api.domains.length);
+                region = body.regions[index],
+                apiHost = region.api.domains[0],
+                ucUrl = Config.getUcURL(authInfo.public);
+          let apiUrl = 'https://' + apiHost;
+          if (ucUrl.startsWith('http://')) {
+            apiUrl = 'http://' + apiHost;
+          }
+          getBucketNameById(bucketId, authInfo).then((bucketName) => {
+            const requestURI = `${apiUrl}/domain?sourceTypes=qiniuBucket&sourceQiniuBucket=${bucketName}&operatingState=success&limit=50`,
+                  mac = new Qiniu.auth.digest.Mac(authInfo.id, authInfo.secret),
+                  digest = Qiniu.util.generateAccessToken(mac, requestURI, null),
+                  headers = { 'Authorization': digest };
+            urllib.request(requestURI, {
+              method: 'GET', dataType: 'json', contentType: 'application/x-www-form-urlencoded', headers: headers, gzip: true
+            }, (err, body) => {
+              if (err) {
+                df.reject(err);
+              } else if (body.error) {
+                df.reject(new Error(body.error));
+              } else {
+                domainsCache[cacheKey] = body.domains;
+                df.resolve(body.domains);
+              }
             });
           }, (err) => {
             df.reject(err);
           });
-          return df.promise;
-        }
+        }, (err) => {
+          df.reject(err);
+        });
       }
+      return df.promise;
     }
 
     function getBucketManager(opts) {

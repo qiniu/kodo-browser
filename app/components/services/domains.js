@@ -98,7 +98,7 @@ angular.module("web").factory("Domains", [
       const domains = [new S3Domain(region, bucket)];
 
       if (AuthInfo.usePublicCloud()) {
-        KodoClient.getDomainsManager().listDomains(bucket).then((domainInfos) => {
+        KodoClient.listDomains(region, bucket).then((domainInfos) => {
           KodoClient.isBucketPrivate(bucket).then((isPrivate) => {
             each(domainInfos, (domainInfo) => {
               switch(domainInfo.type) {

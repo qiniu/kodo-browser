@@ -472,7 +472,8 @@ Client.prototype.downloadFile = function (params) {
       const fileStream = fs.createWriteStream(localFile, {
         flags: s3fsmode,
         start: startFrom,
-        autoClose: true
+        autoClose: true,
+        encoding: 'binary'
       });
       isAborted = false;
       downloader.progressLoaded = startFrom;
@@ -536,17 +537,18 @@ Client.prototype.downloadFile = function (params) {
           isAborted = true;
           retry();
         });
-        resp.on('end', () => {
-          if (isAborted) return;
-          downloader.emit('debug', { type: 'end' });
+        resp.pipe(fileStream).
+             on('finish', () => {
+              if (isAborted) return;
+              downloader.emit('debug', { type: 'finish' });
 
-          if (downloader.progressTotal != downloader.progressLoaded) {
-            handleError(new Error(`ContentLength mismatch, got ${downloader.progressLoaded}, expected ${downloader.progressTotal}`));
-            return;
-          }
+              if (downloader.progressTotal != downloader.progressLoaded) {
+                handleError(new Error(`ContentLength mismatch, got ${downloader.progressLoaded}, expected ${downloader.progressTotal}`));
+                return;
+              }
 
-          downloader.emit('fileDownloaded');
-        }).pipe(fileStream);
+              downloader.emit('fileDownloaded');
+            });
       }).on('error', (err) => {
         if (isAborted) return;
         lastError = err;

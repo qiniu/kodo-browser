@@ -178,7 +178,11 @@ angular.module("web").factory("KodoClient", [
                         endpointURL = region.endpoint;
                     }
                 });
-                df.resolve(endpointURL);
+                if (endpointURL) {
+                    df.resolve(endpointURL);
+                } else {
+                    df.reject(new Error(`Cannot find region endpoint url of ${regionId}`));
+                }
             });
         } else if (cache) {
             $timeout(() => { df.resolve(cache); });

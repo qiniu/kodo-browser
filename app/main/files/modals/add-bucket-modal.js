@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'AuditLog', 'regions',
-    function ($scope, $modalInstance, $translate, callback, s3Client, Const, AuditLog, regions) {
+  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'Toast', 'AuditLog', 'regions',
+    function ($scope, $modalInstance, $translate, callback, s3Client, Const, Toast, AuditLog, regions) {
       const T = $translate.instant,
             bucketACL = angular.copy(Const.bucketACL);
       angular.extend($scope, {
@@ -36,7 +36,7 @@ angular.module('web')
         if (!form.$valid) return;
 
         var item = angular.copy($scope.item);
-        s3Client.createBucket(item.region, item.name, item.acl).then(function (result) {
+        s3Client.createBucket(item.region, item.name, item.acl).then((result) => {
           AuditLog.log('addBucket', {
             regionId: item.region,
             name: item.name,
@@ -44,6 +44,9 @@ angular.module('web')
           });
           callback();
           cancel();
+        }, (err) => {
+          console.error(err);
+          Toast.error(err);
         });
       }
     }

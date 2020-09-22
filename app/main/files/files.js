@@ -1404,7 +1404,7 @@ angular.module("web").controller("filesCtrl", [
             return `
               <div class="text-overflow file-item-name" style="cursor:pointer; ${row.isFolder?'color:orange':''}" ${htmlAttributes}>
                 <i class="fa fa-${$filter('fileIcon')(row)}"></i>
-                <a href=""><span>${$filter('htmlEscape')(val)}</span></a>
+                <a href="" style="width: 800px; display: inline-block;"><span>${$filter('htmlEscape')(val)}</span></a>
               </div>
             `;
           },

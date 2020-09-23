@@ -6,7 +6,8 @@ const AWS = require('aws-sdk'),
       urllib = require('urllib'),
       mime = require('mime'),
       { Throttle } = require('stream-throttle'),
-      dnscache = require('dnscache')({ enable: true, ttl: 86400 });
+      dnscache = require('dnscache')({ enable: true, ttl: 86400 }),
+      XMLParser = require('fast-xml-parser');
 
 const {
   MIN_MULTIPART_SIZE,
@@ -425,6 +426,36 @@ Client.prototype.downloadFile = function (params) {
           retry(new Error(`GET: ${resp.statusCode}`), retried);
           return;
         } else if (resp.statusCode < 200 || resp.statusCode >= 300) {
+          if (resp.statusCode >= 400) { // Should be given error message
+            let bodyText = '';
+            resp.on('data', (chunk) => {
+              bodyText = bodyText.concat(chunk);
+            });
+            resp.on('end', () => {
+              try {
+                if (XMLParser.validate(bodyText) === true) { // S3 Error
+                  const result = XMLParser.parse(bodyText);
+                  const message = result.Error.Message;
+                  handleError(new Error(`GET: ${message}(${resp.statusCode})`));
+                  return;
+                } else { // Kodo Error
+                  try {
+                    const result = JSON.parse(bodyText);
+                    const message = result.error;
+                    handleError(new Error(`GET: ${message}(${resp.statusCode})`));
+                    return;
+                  } catch (e) {
+                    downloader.emit('debug', { type: 'error', error: `Failed to parse response body as JSON: ${e.message}` });
+                  }
+                }
+              } catch (e) {
+                downloader.emit('debug', { type: 'error', error: `Failed to parse response body as XML: ${e.message}` });
+              }
+              handleError(new Error(`GET: ${resp.statusCode}`));
+            });
+            return;
+          }
+
           handleError(new Error(`GET: ${resp.statusCode}`));
           return;
         }

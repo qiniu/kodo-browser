@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('showDownloadLinksModalCtrl', ['$scope', '$timeout', '$translate', '$uibModalInstance', 'items', 'current', 'domains', 'showDomains', 'Toast', 'Domains',
-    function ($scope, $timeout, $translate, $modalInstance, items, current, domains, showDomains, Toast, Domains) {
+  .controller('showDownloadLinksModalCtrl', ['$scope', '$timeout', '$translate', '$uibModalInstance', 's3Client', 'items', 'current', 'domains', 'showDomains', 'Toast', 'Domains',
+    function ($scope, $timeout, $translate, $modalInstance, s3Client, items, current, domains, showDomains, Toast, Domains) {
       const T = $translate.instant,
             fs = require('fs'),
             path = require('path'),
@@ -135,6 +135,9 @@ angular.module('web')
                 } else {
                   doneCallback();
                 }
+            }, (err) => {
+              console.error(err);
+              Toast.error(err);
             });
         }
       }

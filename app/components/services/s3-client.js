@@ -267,7 +267,7 @@ angular.module("web").factory("s3Client", [
               const errors = [];
               each(data.Errors, (errItem) => {
                 each(this, (item) => {
-                  if (errItem.Key === item.Key) {
+                  if (errItem.Key === item.path) {
                     errors.push({ item: item, error: new Error(errItem.Message) });
                   }
                 });

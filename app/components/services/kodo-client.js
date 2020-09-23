@@ -141,6 +141,10 @@ angular.module("web").factory("KodoClient", [
             $timeout(() => { df.resolve(cache); });
         } else {
             getBucketManager(authInfo).listRegions().then((body) => {
+                if (body && body.error) {
+                    df.reject(new Error(body.error));
+                    return;
+                }
                 let scheme = "https://";
                 if (config.ucUrl.startsWith("http://")) {
                     scheme = "http://";
@@ -188,6 +192,10 @@ angular.module("web").factory("KodoClient", [
             $timeout(() => { df.resolve(cache); });
         } else {
             getBucketManager(authInfo).listRegions().then((body) => {
+                if (body && body.error) {
+                    df.reject(new Error(body.error));
+                    return;
+                }
                 let scheme = "https://";
                 if (config.ucUrl.startsWith("http://")) {
                     scheme = "http://";
@@ -265,6 +273,10 @@ angular.module("web").factory("KodoClient", [
         $timeout(resolve);
       } else {
         getBucketManager(opts).listRegions().then((body) => {
+          if (body && body.error) {
+            resolve();
+            return;
+          }
           regionsMapGot[Config.getUcURL(opts.public)] = true;
           if (body.regions.find((region) => !region.s3 || !region.s3.region_alias)) {
             resolve();
@@ -300,6 +312,10 @@ angular.module("web").factory("KodoClient", [
         $timeout(() => { df.resolve(cache); });
       } else {
         getBucketManager(authInfo).listRegions().then((body) => {
+          if (body && body.error) {
+              df.reject(new Error(body.error));
+              return;
+          }
           const index = body.regions.findIndex((region) => region.s3 && region.s3.region_alias === regionId && region.api && region.api.domains && region.api.domains.length);
                 region = body.regions[index],
                 apiHost = region.api.domains[0],

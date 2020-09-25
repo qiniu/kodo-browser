@@ -6,7 +6,7 @@
     <h4 class="modal-title">
       <i class="glyphicon glyphicon-link"></i>
       <!-- 导出外链 -->
-      {{'getDownloadLink.title'|translate}}
+      {{'exportDownloadLinks.title'|translate}}
     </h4>
   </div>
   <div class="modal-body">
@@ -29,12 +29,12 @@
       </label>
       <div class="col-sm-10">
         <!-- 请输入链接有效期: -->
-        {{'getDownloadLink.message'|translate}}:
-        <input type="number" ng-disabled="!current.domain.deadlineRequired()" ng-model="sec" id="sec" required min="1" max="31536000" ng-if="current.domain.maxLifetime() === 31536000"
+        <span ng-if="current.domain.deadlineRequired()">{{'getDownloadLink.message'|translate}}:</span>
+        <input type="number" ng-model="sec" id="sec" required min="1" max="31536000" ng-if="current.domain.maxLifetime() === 31536000 && current.domain.deadlineRequired()"
           class="input-md form-control" style="display:inline-block;width:150px"/>
-        <input type="number" ng-disabled="!current.domain.deadlineRequired()" ng-model="sec" id="sec" required min="1" max="604800" ng-if="current.domain.maxLifetime() === 604800"
+        <input type="number" ng-model="sec" id="sec" required min="1" max="604800" ng-if="current.domain.maxLifetime() === 604800 && current.domain.deadlineRequired()"
           class="input-md form-control" style="display:inline-block;width:150px"/>
-        {{'unit.second'|translate}}
+        <span ng-if="current.domain.deadlineRequired()">{{'unit.second'|translate}}</span>
         &nbsp;&nbsp;
         <button type="submit" class="btn btn-success btn-sm">
           <i class="glyphicon glyphicon-ok"></i>

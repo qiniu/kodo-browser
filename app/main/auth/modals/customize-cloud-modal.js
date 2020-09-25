@@ -1,15 +1,12 @@
 angular.module('web')
-  .controller('customizeCloudModalCtrl', ['$scope', '$translate', '$uibModalInstance', 'Config', 'queryAvailable',
-    function ($scope, $translate, $modalInstance, Config, queryAvailable) {
+  .controller('customizeCloudModalCtrl', ['$scope', '$translate', '$uibModalInstance', 'Config', 'KodoClient', 'queryAvailable',
+    function ($scope, $translate, $modalInstance, Config, KodoClient, queryAvailable) {
       const T = $translate.instant;
 
       let config = { ucUrl: '', regions: [{}] };
       if (Config.exists()) {
         try {
           config = Config.load(false);
-          if (config.regions === null && !queryAvailable) {
-            config.regions = [{}];
-          }
         } catch (e) {
           // do nothing;
         }
@@ -24,10 +21,34 @@ angular.module('web')
         removeRegion: removeRegion,
         onSubmit: onSubmit,
         cancel: cancel,
+        onUcUrlUpdate: onUcUrlUpdate,
       });
+      normalizeRegions();
+      onUcUrlUpdate();
 
       function editRegions() {
-        return $scope.regions && $scope.regions.length || !queryAvailable;
+        return $scope.regions && $scope.regions.length || !$scope.queryAvailable;
+      }
+
+      function onUcUrlUpdate() {
+        if ($scope.ucUrl == "") {
+          $scope.queryAvailable = false;
+          normalizeRegions();
+          return;
+        }
+        KodoClient.isQueryRegionAPIAvaiable($scope.ucUrl).then((result) => {
+          $scope.queryAvailable = result;
+          normalizeRegions();
+        }, (err) => {
+          $scope.queryAvailable = false;
+          normalizeRegions();
+        });
+      }
+
+      function normalizeRegions() {
+        if (($scope.regions === null || $scope.regions.length === 0) && !$scope.queryAvailable) {
+          $scope.regions = [{}];
+        }
       }
 
       function addRegion() {

@@ -22,7 +22,7 @@
         <span class="red">*</span> UC {{'auth.service'|translate}}:</label>
       </label>
       <div class="col-sm-8">
-        <input type="url" ng-pattern="/^http[s]?:\/\//" name="ucUrl" ng-model="ucUrl" required class="form-control" />
+        <input type="url" ng-pattern="/^http[s]?:\/\//" name="ucUrl" ng-model="ucUrl" ng-change="onUcUrlUpdate()" required class="form-control" />
       </div>
     </div>
     <fieldset ng-if="editRegions()" ng-repeat="region in regions">

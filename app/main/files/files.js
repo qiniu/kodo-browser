@@ -1219,15 +1219,17 @@ angular.module("web").controller("filesCtrl", [
       e.preventDefault();
       e.stopPropagation();
 
-      var files = e.originalEvent.dataTransfer.files;
-      var filePaths = [];
+      const files = e.originalEvent.dataTransfer.files;
+      const filePaths = [];
       if (files) {
         angular.forEach(files, (n) => {
           filePaths.push(n.path);
         });
       }
 
-      $scope.handlers.uploadFilesHandler(filePaths, angular.copy($scope.currentInfo));
+      if (filePaths.length) {
+        $scope.handlers.uploadFilesHandler(filePaths, angular.copy($scope.currentInfo));
+      }
 
       return false;
     }

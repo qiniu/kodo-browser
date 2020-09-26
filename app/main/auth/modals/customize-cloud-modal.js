@@ -36,12 +36,17 @@ angular.module('web')
           normalizeRegions();
           return;
         }
+        const ucUrl = $scope.ucUrl;
         KodoClient.isQueryRegionAPIAvaiable($scope.ucUrl).then((result) => {
-          $scope.queryAvailable = result;
-          normalizeRegions();
+          if (ucUrl === $scope.ucUrl) {
+            $scope.queryAvailable = result;
+            normalizeRegions();
+          }
         }, (err) => {
-          $scope.queryAvailable = false;
-          normalizeRegions();
+          if (ucUrl === $scope.ucUrl) {
+            $scope.queryAvailable = false;
+            normalizeRegions();
+          }
         });
       }
 

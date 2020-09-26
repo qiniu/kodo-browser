@@ -232,7 +232,7 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function refreshDomains() {
-      const info = $scope.currentInfo;
+      const info = angular.copy($scope.currentInfo);
       Domains.list(info.region, info.bucket).
               then((domains) => {
                 $scope.domains = domains;
@@ -467,7 +467,7 @@ angular.module("web").controller("filesCtrl", [
       clearFilesList();
       $scope.isLoading = true;
 
-      info = info || $scope.currentInfo;
+      info = info || angular.copy($scope.currentInfo);
 
       tryListFiles(info, marker, (err, files) => {
         $scope.isLoading = false;
@@ -621,10 +621,7 @@ angular.module("web").controller("filesCtrl", [
           callback: () => {
             return () => {
               Toast.success(T("bucket.add.success"));
-
-              $timeout(() => {
-                listBuckets();
-              }, 500);
+              $timeout(listBuckets, 500);
             };
           },
           regions: () => {
@@ -645,10 +642,7 @@ angular.module("web").controller("filesCtrl", [
           callback: () => {
             return () => {
               Toast.success(T("externalPath.add.success"));
-
-              $timeout(() => {
-                listExternalPaths();
-              }, 500);
+              $timeout(listExternalPaths, 500);
             };
           },
           regions: () => {
@@ -1179,7 +1173,7 @@ angular.module("web").controller("filesCtrl", [
           return;
         }
 
-        $scope.handlers.uploadFilesHandler(filePaths, $scope.currentInfo);
+        $scope.handlers.uploadFilesHandler(filePaths, angular.copy($scope.currentInfo));
       });
     }
 
@@ -1233,7 +1227,7 @@ angular.module("web").controller("filesCtrl", [
         });
       }
 
-      $scope.handlers.uploadFilesHandler(filePaths, $scope.currentInfo);
+      $scope.handlers.uploadFilesHandler(filePaths, angular.copy($scope.currentInfo));
 
       return false;
     }

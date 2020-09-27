@@ -220,7 +220,11 @@ angular.module("web").factory("KodoClient", [
     function isQueryRegionAPIAvaiable(ucUrl, opts) {
       if (!ucUrl) {
         opts = opts || {};
-        ucUrl = Config.getUcURL(opts.public);
+        try {
+          ucUrl = Config.getUcURL(opts.public);
+        } catch (e) {
+          // Do nothing
+        }
       }
       const df = $q.defer(),
             cache = queryRegionAPIAvailabilityCache[ucUrl];

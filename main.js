@@ -170,6 +170,20 @@ let createWindow = () => {
 
   // Emitted before window reload
   win.on("beforeunload", confirmForWorkers);
+
+  let focused = true, shown = true;
+  win.on("blur", function() {
+    focused = false;
+  });
+  win.on("focus", function() {
+    focused = true;
+  });
+  win.on("show", function() {
+    shown = true;
+  });
+  win.on("hide", function() {
+    shown = false;
+  });
   win.on("close", confirmForWorkers);
 
   // Emitted when the window is closed.
@@ -205,7 +219,9 @@ let createWindow = () => {
 
   if (process.env.NODE_ENV != "development") {
     globalShortcut.register('CommandOrControl+Alt+I', () => {
-      win.webContents.openDevTools();
+      if (shown && focused) {
+        win.webContents.openDevTools();
+      }
     });
   }
 };

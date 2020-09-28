@@ -99,29 +99,37 @@ angular.module("web").factory("KodoClient", [
       if (loadDefault) {
         each(regions, (region) => {
           const idLabel = {id: region.id, label: region.label};
-          if (!idLabel.label) {
+          if (idLabel.label === null) {
             idLabel.label = T(region.id);
           }
           idLabels.push(idLabel);
         });
         $timeout(() => { df.resolve(idLabels); });
       } else {
-        getRegionsMap().then((maps) => {
-          if (regions === null) {
-            each(Object.entries(maps.awsRegionID2RegionLabel), (regionInfo) => {
-              idLabels.push({id: regionInfo[0], label: regionInfo[1]});
-            });
-          } else {
-            each(regions, (region) => {
-              const idLabel = {id: region.id, label: region.label};
-              if (!idLabel.label) {
-                idLabel.label = maps.awsRegionID2RegionLabel[region.id];
-              }
-              idLabels.push(idLabel);
-            });
-          }
-          df.resolve(idLabels);
-        });
+        if (regions !== null && regions.every((region) => region.label !== null)) {
+          each(regions, (region) => {
+            const idLabel = {id: region.id, label: region.label};
+            idLabels.push(idLabel);
+          });
+          $timeout(() => { df.resolve(idLabels); });
+        } else {
+          getRegionsMap().then((maps) => {
+            if (regions === null) {
+              each(Object.entries(maps.awsRegionID2RegionLabel), (regionInfo) => {
+                idLabels.push({id: regionInfo[0], label: regionInfo[1]});
+              });
+            } else {
+              each(regions, (region) => {
+                const idLabel = {id: region.id, label: region.label};
+                if (idLabel.label === null) {
+                  idLabel.label = maps.awsRegionID2RegionLabel[region.id];
+                }
+                idLabels.push(idLabel);
+              });
+            }
+            df.resolve(idLabels);
+          });
+        }
       }
 
       return df.promise;
@@ -140,18 +148,14 @@ angular.module("web").factory("KodoClient", [
         } else if (cache) {
             $timeout(() => { df.resolve(cache); });
         } else {
-            getBucketManager(authInfo).listRegions().then((body) => {
-                if (body && body.error) {
-                    df.reject(new Error(body.error));
-                    return;
-                }
+            listRegions(authInfo).then((regions) => {
                 let scheme = "https://";
                 if (config.ucUrl.startsWith("http://")) {
                     scheme = "http://";
                 }
-                const index = body.regions.findIndex((region) => region.s3 && region.s3.region_alias && region.s3.domains && region.s3.domains.length);
+                const index = regions.findIndex((region) => region.s3 && region.s3.region_alias && region.s3.domains && region.s3.domains.length);
                 if (index > -1) {
-                    const region = body.regions[index],
+                    const region = regions[index],
                           result = { endpointURL: scheme + region.s3.domains[0], region: region.s3.region_alias };
                     anyS3EndpointInfoCache[cacheKey] = result;
                     df.resolve(result);
@@ -191,18 +195,14 @@ angular.module("web").factory("KodoClient", [
         } else if (cache) {
             $timeout(() => { df.resolve(cache); });
         } else {
-            getBucketManager(authInfo).listRegions().then((body) => {
-                if (body && body.error) {
-                    df.reject(new Error(body.error));
-                    return;
-                }
+            listRegions(authInfo).then((regions) => {
                 let scheme = "https://";
                 if (config.ucUrl.startsWith("http://")) {
                     scheme = "http://";
                 }
-                const index = body.regions.findIndex((region) => region.s3 && region.s3.region_alias && region.s3.region_alias === regionId && region.s3.domains && region.s3.domains.length);
+                const index = regions.findIndex((region) => region.s3 && region.s3.region_alias && region.s3.region_alias === regionId && region.s3.domains && region.s3.domains.length);
                 if (index > -1) {
-                    const region = body.regions[index],
+                    const region = regions[index],
                           endpointURL = scheme + region.s3.domains[0];
                     regionEndpointURLCache[cacheKey] = endpointURL;
                     df.resolve(endpointURL);
@@ -262,6 +262,7 @@ angular.module("web").factory("KodoClient", [
       return df.promise;
     }
 
+
     function getRegionsMap(opts) {
       const df = $q.defer(),
             resolve = () => {
@@ -276,20 +277,16 @@ angular.module("web").factory("KodoClient", [
       if (regionsMapGot[Config.getUcURL(opts.public)]) {
         $timeout(resolve);
       } else {
-        getBucketManager(opts).listRegions().then((body) => {
-          if (body && body.error) {
-            resolve();
-            return;
-          }
+        listRegions(opts).then((regions) => {
           regionsMapGot[Config.getUcURL(opts.public)] = true;
-          if (body.regions.find((region) => !region.s3 || !region.s3.region_alias)) {
+          if (regions.find((region) => !region.s3 || !region.s3.region_alias)) {
             resolve();
             return;
           }
           kodoRegionID2AWSRegionID = {};
           awsRegionID2KodoRegionID = {};
           awsRegionID2RegionLabel = {};
-          each(body.regions, (region) => {
+          each(regions, (region) => {
             kodoRegionID2AWSRegionID[region.id] = region.s3.region_alias;
             awsRegionID2KodoRegionID[region.s3.region_alias] = region.id;
             awsRegionID2RegionLabel[region.s3.region_alias] = region.description;
@@ -315,13 +312,9 @@ angular.module("web").factory("KodoClient", [
       if (cache) {
         $timeout(() => { df.resolve(cache); });
       } else {
-        getBucketManager(authInfo).listRegions().then((body) => {
-          if (body && body.error) {
-              df.reject(new Error(body.error));
-              return;
-          }
-          const index = body.regions.findIndex((region) => region.s3 && region.s3.region_alias === regionId && region.api && region.api.domains && region.api.domains.length);
-                region = body.regions[index],
+        listRegions(authInfo).then((regions) => {
+          const index = regions.findIndex((region) => region.s3 && region.s3.region_alias === regionId && region.api && region.api.domains && region.api.domains.length);
+                region = regions[index],
                 apiHost = region.api.domains[0],
                 ucUrl = Config.getUcURL(authInfo.public);
           let apiUrl = 'https://' + apiHost;
@@ -352,6 +345,33 @@ angular.module("web").factory("KodoClient", [
           df.reject(err);
         });
       }
+      return df.promise;
+    }
+
+    function listRegions(opts) {
+      const df = $q.defer();
+
+      opts = opts || {};
+      isQueryRegionAPIAvaiable(null, opts).then((result) => {
+        if (!result) {
+          df.reject(new Error("UC /regions API is not available"));
+        } else {
+          getBucketManager(opts).listRegions().then((body) => {
+            if (body && body.error) {
+              df.reject(new Error(body.error));
+            } else if (body && !body.regions) {
+              df.reject(new Error('UC /regions API returns nothing'));
+            } else {
+              df.resolve(body.regions);
+            }
+          }, (err) => {
+              df.reject(err);
+          });
+        }
+      }, (err) => {
+        df.reject(err);
+      });
+
       return df.promise;
     }
 

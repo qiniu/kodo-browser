@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('customizeCloudModalCtrl', ['$scope', '$translate', '$uibModalInstance', 'Config', 'KodoClient', 'queryAvailable',
-    function ($scope, $translate, $modalInstance, Config, KodoClient, queryAvailable) {
+  .controller('customizeCloudModalCtrl', ['$scope', '$translate', '$uibModalInstance', 'Config', 'KodoClient',
+    function ($scope, $translate, $modalInstance, Config, KodoClient) {
       const T = $translate.instant;
 
       let config = { ucUrl: '', regions: [{}] };
@@ -14,7 +14,7 @@ angular.module('web')
 
       angular.extend($scope, {
         editRegions: editRegions,
-        queryAvailable: queryAvailable,
+        queryAvailable: false,
         ucUrl: config.ucUrl,
         regions: config.regions,
         addRegion: addRegion,

@@ -108,12 +108,7 @@ angular.module("web").controller("loginCtrl", [
     function showCustomizedCloud() {
       $modal.open({
         templateUrl: "main/auth/modals/customize-cloud-modal.html",
-        controller: "customizeCloudModalCtrl",
-        resolve: {
-          queryAvailable: function() {
-            return KodoClient.isQueryRegionAPIAvaiable();
-          }
-        }
+        controller: "customizeCloudModalCtrl"
       }).result.then(angular.noop, () => { $scope.isPrivateCloudConfigured = isPrivateCloudConfigured(); });
     }
 

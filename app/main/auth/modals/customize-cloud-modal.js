@@ -31,7 +31,7 @@ angular.module('web')
       }
 
       function onUcUrlUpdate() {
-        if ($scope.ucUrl == "") {
+        if (!$scope.ucUrl) {
           $scope.queryAvailable = false;
           normalizeRegions();
           return;

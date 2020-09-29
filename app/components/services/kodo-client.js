@@ -99,14 +99,14 @@ angular.module("web").factory("KodoClient", [
       if (loadDefault) {
         each(regions, (region) => {
           const idLabel = {id: region.id, label: region.label};
-          if (idLabel.label === null) {
+          if (idLabel.label === null || idLabel.label === undefined) {
             idLabel.label = T(region.id);
           }
           idLabels.push(idLabel);
         });
         $timeout(() => { df.resolve(idLabels); });
       } else {
-        if (regions !== null && regions.every((region) => region.label !== null)) {
+        if (regions !== null && regions.every((region) => region.label !== null && region.label !== undefined)) {
           each(regions, (region) => {
             const idLabel = {id: region.id, label: region.label};
             idLabels.push(idLabel);
@@ -121,7 +121,7 @@ angular.module("web").factory("KodoClient", [
             } else {
               each(regions, (region) => {
                 const idLabel = {id: region.id, label: region.label};
-                if (idLabel.label === null) {
+                if (idLabel.label === null && idLabel.label === undefined) {
                   idLabel.label = maps.awsRegionID2RegionLabel[region.id];
                 }
                 idLabels.push(idLabel);

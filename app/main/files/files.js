@@ -284,7 +284,7 @@ angular.module("web").controller("filesCtrl", [
         if (info.bucketName === $scope.currentInfo.bucketName &&
             info.key === $scope.currentInfo.key) {
           info.key += $scope.sch.objectName;
-          listFiles(info);
+          listFiles(info, true);
         }
       }, 600);
     }
@@ -397,7 +397,6 @@ angular.module("web").controller("filesCtrl", [
 
             searchObjectName();
           } else {
-            $scope.sch.objectName = '';
             $timeout(listFiles, 100);
           }
         } else {
@@ -463,13 +462,16 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    function listFiles(info, marker, fn) {
+    function listFiles(info, keepObjectSearchName) {
       clearFilesList();
+      if (!keepObjectSearchName) {
+        $scope.sch.objectName = '';
+      }
       $scope.isLoading = true;
 
       info = info || angular.copy($scope.currentInfo);
 
-      tryListFiles(info, marker, (err, files) => {
+      tryListFiles(info, null, (err, files) => {
         $scope.isLoading = false;
 
         if (info.bucketName !== $scope.currentInfo.bucketName ||

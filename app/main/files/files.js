@@ -279,14 +279,7 @@ angular.module("web").controller("filesCtrl", [
     function searchObjectName() {
       $timeout.cancel(searchTid);
 
-      var info = angular.copy($scope.currentInfo);
-      searchTid = $timeout(() => {
-        if (info.bucketName === $scope.currentInfo.bucketName &&
-            info.key === $scope.currentInfo.key) {
-          info.key += $scope.sch.objectName;
-          listFiles(info, true);
-        }
-      }, 600);
+      searchTid = $timeout(listFiles, 600);
     }
 
     function searchBucketName() {
@@ -462,22 +455,24 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
-    function listFiles(info, keepObjectSearchName) {
+    var listFilesCurId = 0;
+    function listFiles() {
       clearFilesList();
-      if (!keepObjectSearchName) {
-        $scope.sch.objectName = '';
-      }
       $scope.isLoading = true;
+      listFilesCurId += 1;
 
-      info = info || angular.copy($scope.currentInfo);
+      const info = angular.copy($scope.currentInfo),
+            listFilesId = listFilesCurId;
 
+      info.key += $scope.sch.objectName;
       tryListFiles(info, null, (err, files) => {
-        $scope.isLoading = false;
-
-        if (info.bucketName !== $scope.currentInfo.bucketName ||
-            info.key !== $scope.currentInfo.key + $scope.sch.objectName) {
+        if (listFilesId !== listFilesCurId) {
+          console.info('listFilesId', listFilesId, '!==', 'listFilesCurId', listFilesCurId);
           return;
         }
+        console.info('listFilesId', listFilesId, '===', 'listFilesCurId', listFilesCurId);
+
+        $scope.isLoading = false;
 
         if (err) {
           Toast.error(JSON.stringify(err));
@@ -488,17 +483,21 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
+    var tryListFilesCurId = 0;
     function tryListFiles(info, marker, fn) {
       if (!info || !info.bucket) {
         return;
       }
 
+      tryListFilesCurId += 1;
+      const tryListFilesId = tryListFilesCurId;
       s3Client.listFiles(info.region, info.bucket, info.key, marker || "").then((result) => {
         $timeout(() => {
-          if (info.bucketName !== $scope.currentInfo.bucketName ||
-              info.key !== $scope.currentInfo.key + $scope.sch.objectName) {
+          if (tryListFilesId !== tryListFilesCurId) {
+            console.info('tryListFilesId', tryListFilesId, '!==', 'tryListFilesCurId', tryListFilesCurId);
             return;
           }
+          console.info('tryListFilesId', tryListFilesId, '===', 'tryListFilesCurId', tryListFilesCurId);
 
           const nextObjectsMarker = result.marker || null;
           if (nextObjectsMarker && !nextObjectsMarker.startsWith(info.key)) {
@@ -512,9 +511,16 @@ angular.module("web").controller("filesCtrl", [
 
           if ($scope.nextObjectsMarker) {
             if (!$scope.stepByStepLoadingFiles()) {
-              $timeout(function() {
-                tryLoadMore(info, nextObjectsMarker);
-              }, 100);
+              tryLoadMore(info, nextObjectsMarker, {
+                validating: () => {
+                  if (tryListFilesId !== tryListFilesCurId) {
+                    console.info('2', 'tryListFilesId', tryListFilesId, '!==', 'tryListFilesCurId', tryListFilesCurId);
+                    return false;
+                  }
+                  console.info('2', 'tryListFilesId', tryListFilesId, '===', 'tryListFilesCurId', tryListFilesCurId);
+                  return true;
+                }
+              });
             }
           }
         });
@@ -530,10 +536,19 @@ angular.module("web").controller("filesCtrl", [
       });
     }
 
+    var toLoadMoreCurId = 0;
     var lastObjectsMarkerForLoadMore = null; // 最近一次点击 Load More 时的 nextObjectsMarker
     function toLoadMore() {
       if (lastObjectsMarkerForLoadMore !== $scope.nextObjectsMarker) {
+        toLoadMoreCurId += 1;
+        const toLoadMoreId = toLoadMoreCurId;
         $timeout(() => {
+          if (toLoadMoreId !== toLoadMoreCurId) {
+            console.info('toLoadMoreId', toLoadMoreId, '!==', 'toLoadMoreCurId', toLoadMoreCurId);
+            return;
+          }
+          console.info('toLoadMoreId', toLoadMoreId, '===', 'toLoadMoreCurId', toLoadMoreCurId);
+
           tryLoadMore($scope.nextObjectsMarkerInfo, $scope.nextObjectsMarker, {
             starting: () => {
               $scope.isLoading = true;
@@ -551,16 +566,19 @@ angular.module("web").controller("filesCtrl", [
     function tryLoadMore(info, nextObjectsMarker, callback) {
       callback = callback || {};
 
-      if (info.bucketName !== $scope.currentInfo.bucketName ||
-          info.key !== $scope.currentInfo.key + $scope.sch.objectName ||
-          $scope.nextObjectsMarker !== nextObjectsMarker) {
+      if (callback.validating && !callback.validating()) {
         return;
       }
+
       console.log(`loading next kodo://${info.bucketName}/${info.key}?marker=${nextObjectsMarker}`);
 
       if (callback.starting) callback.starting();
 
       tryListFiles(info, nextObjectsMarker, (err, files) => {
+        if (callback.validating && !callback.validating()) {
+          return;
+        }
+
         if (err) {
           Toast.error(JSON.stringify(err));
           return;
@@ -718,7 +736,6 @@ angular.module("web").controller("filesCtrl", [
           callback: () => {
             return () => {
               Toast.success(T("folder.create.success"));
-
               $timeout(listFiles, 300);
             };
           }
@@ -833,9 +850,7 @@ angular.module("web").controller("filesCtrl", [
           },
           callback: () => {
             return () => {
-              $timeout(() => {
-                listFiles();
-              }, 300);
+              $timeout(listFiles, 300);
             };
           }
         }
@@ -868,9 +883,7 @@ angular.module("web").controller("filesCtrl", [
               return () => {
                 $scope.keepMoveOptions = null;
 
-                $timeout(() => {
-                  listFiles();
-                }, 100);
+                $timeout(listFiles, 100);
               };
             }
           }
@@ -909,10 +922,7 @@ angular.module("web").controller("filesCtrl", [
               callback: () => {
                 return () => {
                   $scope.keepMoveOptions = null;
-
-                  $timeout(() => {
-                    listFiles();
-                  }, 100);
+                  $timeout(listFiles, 100);
                 };
               }
             }
@@ -1078,9 +1088,7 @@ angular.module("web").controller("filesCtrl", [
           },
           callback: () => {
             return () => {
-              $timeout(() => {
-                listFiles();
-              }, 300);
+              $timeout(listFiles, 300);
             };
           }
         }

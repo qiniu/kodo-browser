@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('pictureModalCtrl', ['$scope', '$uibModalInstance', '$timeout', '$uibModal', 's3Client', 'safeApply', 'showFn', 'bucketInfo', 'objectInfo','AuthInfo', 'fileType',
-    function ($scope, $modalInstance, $timeout, $modal, s3Client, safeApply, showFn, bucketInfo, objectInfo, AuthInfo, fileType) {
+  .controller('pictureModalCtrl', ['$scope', '$uibModalInstance', '$timeout', '$uibModal', 's3Client', 'showFn', 'downloadUrl', 'bucketInfo', 'objectInfo','AuthInfo', 'fileType',
+    function ($scope, $modalInstance, $timeout, $modal, s3Client, showFn, downloadUrl, bucketInfo, objectInfo, AuthInfo, fileType) {
 
       angular.extend($scope, {
         bucketInfo: bucketInfo,
@@ -32,9 +32,7 @@ angular.module('web')
       }
 
       function getContent() {
-        s3Client.signatureUrl(bucketInfo.region, bucketInfo.bucket, objectInfo.path).then((url) => {
-          $scope.imgsrc = url;
-        });
+        $scope.imgsrc = downloadUrl;
       }
     }
   ]);

@@ -773,6 +773,9 @@ angular.module("web").controller("filesCtrl", [
               $timeout(listFiles, 300);
             };
           },
+          downloadUrl: () => {
+            return $scope.selectedDomain.domain.signatureUrl(item.path, 600);
+          },
           showFn: () => {
             return {
               callback: (reloadStorageStatus) => {

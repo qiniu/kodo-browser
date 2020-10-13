@@ -1,7 +1,8 @@
 angular.module('web')
-  .controller('codeModalCtrl', ['$scope', '$uibModalInstance','$translate','$timeout', '$uibModal', 'bucketInfo', 'objectInfo', 'fileType', 'showFn', 'reload', 'Toast', 'DiffModal', 's3Client', 'safeApply',
-    function ($scope, $modalInstance,$translate, $timeout, $modal, bucketInfo, objectInfo, fileType, showFn, reload, Toast, DiffModal, s3Client, safeApply) {
-      var T = $translate.instant;
+  .controller('codeModalCtrl', ['$scope', '$uibModalInstance','$translate','$timeout', '$uibModal', 'bucketInfo', 'objectInfo', 'fileType', 'showFn', 'reload', 'Toast', 'DiffModal', 's3Client', 'downloadUrl',
+    function ($scope, $modalInstance,$translate, $timeout, $modal, bucketInfo, objectInfo, fileType, showFn, reload, Toast, DiffModal, s3Client, downloadUrl) {
+      const T = $translate.instant,
+            urllib = require('urllib');
       angular.extend($scope, {
         bucketInfo: bucketInfo,
         objectInfo: objectInfo,
@@ -22,10 +23,8 @@ angular.module('web')
       function afterCheckSuccess() {
         $scope.previewBarVisible = true;
         if (objectInfo.size < $scope.MAX_SIZE) {
-          //修复ubuntu下无法获取的bug
-          $timeout(function(){
-            getContent();
-          },100);
+          // 修复ubuntu下无法获取的bug
+          $timeout(getContent, 100);
         }
       }
 
@@ -55,10 +54,14 @@ angular.module('web')
 
       function getContent() {
         $scope.isLoading = true;
-        s3Client.getContent(bucketInfo.region, bucketInfo.bucket, objectInfo.path).then(function (result) {
+        urllib.request(downloadUrl, { method: 'GET' }, (err, body) => {
           $scope.isLoading = false;
+          if (err) {
+            Toast.error(err);
+            return;
+          }
 
-          var data = result.Body.toString();
+          const data = body.toString();
           $scope.originalContent = data;
           $scope.content = data;
           editor.setValue(data);

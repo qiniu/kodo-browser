@@ -109,10 +109,10 @@ angular.module("web").factory("Domains", [
                 break;
               }
             });
+            df.resolve(domains);
           }, (err) => {
             df.reject(err);
           });
-          df.resolve(domains);
         }, (err) => {
           df.reject(err);
         });

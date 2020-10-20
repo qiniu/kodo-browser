@@ -22,7 +22,4 @@ RUN mkdir -p /root/.cache && \
     wget -q --tries=0 -c -O /tmp/electron-cache-v4.2.7.tar.xz http://mirrors.qiniu-solutions.com/electron-cache-v4.2.7.tar.xz && \
     tar xf /tmp/electron-cache-v4.2.7.tar.xz -C /root/.cache && \
     rm /tmp/electron-cache-v4.2.7.tar.xz
-
-ADD archive.tar.gz /kodo-browser
 WORKDIR /kodo-browser
-CMD make i

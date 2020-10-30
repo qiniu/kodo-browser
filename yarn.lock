@@ -2523,7 +2523,7 @@ dotenv@^6.2.0:
   resolved "https://registry.npm.taobao.org/dotenv/download/dotenv-6.2.0.tgz#941c0410535d942c8becf28d3f357dbd9d476064"
   integrity sha1-lBwEEFNdlCyL7PKNPzV9vZ1HYGQ=
 
-downloads-folder@^1.0.1:
+downloads-folder@1.0.3:
   version "1.0.3"
   resolved "https://registry.npm.taobao.org/downloads-folder/download/downloads-folder-1.0.3.tgz#5c1d0b4814ab4e408e2dc9a5b381c6a5081c5eaa"
   integrity sha1-XB0LSBSrTkCOLcmls4HGpQgcXqo=
@@ -3068,6 +3068,11 @@ fast-levenshtein@~2.0.6:
   version "2.0.6"
   resolved "https://registry.npm.taobao.org/fast-levenshtein/download/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
+
+fast-xml-parser@^3.17.4:
+  version "3.17.4"
+  resolved "https://registry.npm.taobao.org/fast-xml-parser/download/fast-xml-parser-3.17.4.tgz#d668495fb3e4bbcf7970f3c24ac0019d82e76477"
+  integrity sha1-1mhJX7Pku895cPPCSsABnYLnZHc=
 
 faye-websocket@~0.10.0:
   version "0.10.0"

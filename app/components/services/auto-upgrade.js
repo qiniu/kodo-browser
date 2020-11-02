@@ -282,8 +282,8 @@ angular.module("web").factory("autoUpgradeSvs", [
       var len = Math.max(arr.length, arr2.length);
 
       for (var i = 0; i < len; i++) {
-        var a = parseInt(arr[i]);
-        var b = parseInt(arr2[i]);
+        var a = parseInt(arr[i]) || 0;
+        var b = parseInt(arr2[i]) || 0;
 
         if (a > b) {
           return 1;

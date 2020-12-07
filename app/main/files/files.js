@@ -1624,11 +1624,18 @@ angular.module("web").controller("filesCtrl", [
           isMouseOver = false;
         });
       });
-      angular.forEach($('#file-list tbody tr .btn-group button[type="button"][data-toggle="tooltip"]'), (button) => {
+      angular.forEach($('#file-list tbody tr .btn-group button[type="button"][data-toggle="tooltip"][data-toggle-i18n]'), (button) => {
+        let mouseOverEventSetup = false;
         $(button).tooltip('destroy');
-        $(button).attr('data-placement', 'top');
-        const i18nKey = $(button).attr('data-toggle-i18n');
-        $(button).tooltip({ container: 'body', title: T(i18nKey), trigger: 'hover' });
+        $(button).off('mouseover').on('mouseover', () => {
+          if (!mouseOverEventSetup) {
+            mouseOverEventSetup = true;
+            $(button).attr('data-placement', 'top');
+            const i18nKey = $(button).attr('data-toggle-i18n');
+            $(button).tooltip({ container: 'body', title: T(i18nKey), trigger: 'hover' });
+            $(button).tooltip('show');
+          }
+        });
       });
 
       $timeout(() => {

@@ -20,7 +20,7 @@ jobs:
           release_name: Release ${{ github.ref }}
           body: |
             Release Notes
-          draft: false
+          draft: true
           prerelease: false
   release-linux-amd64:
     name: release for linux/amd64

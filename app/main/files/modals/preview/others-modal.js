@@ -1,12 +1,12 @@
 angular.module('web')
-  .controller('othersModalCtrl', ['$scope','$uibModalInstance','$uibModal','bucketInfo','objectInfo','fileType','showFn','safeApply',
-    function ($scope, $modalInstance,$modal, bucketInfo, objectInfo, fileType, showFn, safeApply) {
+  .controller('othersModalCtrl', ['$scope', '$uibModalInstance', '$uibModal', 'bucketInfo', 'objectInfo', 'fileType', 'qiniuClientOpt', 'showFn', 'safeApply',
+    function ($scope, $modalInstance, $modal, bucketInfo, objectInfo, fileType, qiniuClientOpt, showFn, safeApply) {
 
       angular.extend($scope, {
         bucketInfo: bucketInfo,
         objectInfo: objectInfo,
         fileType: fileType,
-        afterRestoreSubmit:afterRestoreSubmit,
+        qiniuClientOpt: qiniuClientOpt,
         afterCheckSuccess:afterCheckSuccess,
 
         previewBarVisible: false,
@@ -18,12 +18,9 @@ angular.module('web')
 
         showAsCodeBtn: shouldShowAsCodeBtn()
       });
-      function afterRestoreSubmit(){
-        showFn.callback(true);
-      }
+
       function afterCheckSuccess() {
         $scope.previewBarVisible = true;
-
       }
 
       function shouldShowAsCodeBtn(){

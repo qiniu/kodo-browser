@@ -8,12 +8,6 @@ module.exports = {
   "private.cloud": "プライベートクラウド",
 
   "region.unknown": "未知の地域",
-  "cn-east-1": "華東",
-  "cn-north-1": "華北",
-  "cn-south-1": "華南",
-  "us-north-1": "北米",
-  "ap-southeast-1": "東南アジア",
-  "fog-cn-east-1": "フォグストレージ-華東",
   "region.get.error": "取得できませんでした",
   "config.parse.error": "設定ファイルの解析に失敗しました",
   "config.format.error": "設定ファイルに問題があります",
@@ -81,7 +75,7 @@ module.exports = {
 
   "storageClassesType": "保管タイプ",
   "storageClassesType.standard": "標準",
-  "storageClassesType.line": "IA",
+  "storageClassesType.infrequentaccess": "IA",
   "storageClassesType.glacier": "アーカイブ",
 
   "aclType.default": "バケツからの継承",
@@ -215,8 +209,6 @@ module.exports = {
   "settings.system": "システム設定",
   "settings.isDebug": "デバッグログ",
   "settings.isDebug.msg": "デバッグログを開くかどうか",
-  "settings.useElectronNode": "Electron Node",
-  "settings.useElectronNode.msg": "Enable Electron Node",
   "settings.autoUpgrade": "自動更新",
   "settings.autoUpgrade.msg": "自動ダウンロードパッケージ",
   "settings.success": "正常に保存",

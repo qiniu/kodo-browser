@@ -15,7 +15,7 @@
 
   <div ng-show="isLoading" is-loading style="width:100%;position:absolute;z-index:9999;"></div>
 
-  <restore-checker  bucket-info="bucketInfo" object-info='objectInfo' file-type="fileType" after-check-success="afterCheckSuccess()" after-restore-submit="afterRestoreSubmit()">
+  <restore-checker  bucket-info="bucketInfo" object-info='objectInfo' file-type="fileType" qiniu-client-opt="qiniuClientOpt" after-check-success="afterCheckSuccess()">
 
     <div ng-if="objectInfo.size > MAX_SIZE" style="margin:40px auto 0" class="text-center">
       {{'filesize'|translate}}

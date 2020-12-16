@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addFolderModalCtrl', ['$scope', '$uibModalInstance', 'currentInfo', 'callback', 's3Client', 'AuditLog',
-    function ($scope, $modalInstance, currentInfo, callback, s3Client, AuditLog) {
+  .controller('addFolderModalCtrl', ['$scope', '$uibModalInstance', 'currentInfo', 'qiniuClientOpt', 'callback', 'QiniuClient', 'AuditLog',
+    function ($scope, $modalInstance, currentInfo, qiniuClientOpt, callback, QiniuClient, AuditLog) {
 
       angular.extend($scope, {
         currentInfo: currentInfo,
@@ -21,9 +21,9 @@ angular.module('web')
 
         const folderName = $scope.item.name;
         const fullPath = currentInfo.key + folderName + '/';
-        s3Client.createFolder(currentInfo.region, currentInfo.bucket, fullPath).then(function () {
+        QiniuClient.createFolder(currentInfo.regionId, currentInfo.bucketName, fullPath, qiniuClientOpt).then(function () {
           AuditLog.log('addFolder', {
-            regionId: currentInfo.region,
+            regionId: currentInfo.regionId,
             bucket: currentInfo.bucketName,
             path: fullPath
           });

@@ -9,7 +9,7 @@ angular.module("web").factory("fileSvs", [
        *     type: [picture|code|others|doc|video|audio]
        */
       getFileType: function (item) {
-        if (item.isFolder) {
+        if (item.itemType === 'folder') {
           return {
             type: "folder",
             ext: []

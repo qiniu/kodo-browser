@@ -88,7 +88,7 @@ make win64  # 打包 win64 程序，可选: mac, dmg, linux64, linux32, win32, w
 kodo-browser/
  |-- app/                 # 前端代码, 采用angular1.x + bootstrap3.x
  |-- node/                # 前端调用的 node 模块
-     |-- s3store/         # 上传下载 job 类
+     |-- qiniu-store/     # 上传下载 job 类
      |-- i18n/            # 国际化
  |-- vendor/              # 前端第三方库依赖
  |-- node_modules         # node 端依赖的模块

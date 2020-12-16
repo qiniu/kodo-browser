@@ -6,7 +6,7 @@ angular.module("web").controller("transferUploadsCtrl", [
   "$translate",
   "jobUtil",
   "DelayDone",
-  "s3UploadMgr",
+  "UploadMgr",
   "Toast",
   "Const",
   "Dialog",
@@ -16,7 +16,7 @@ angular.module("web").controller("transferUploadsCtrl", [
     $translate,
     jobUtil,
     DelayDone,
-    s3UploadMgr,
+    UploadMgr,
     Toast,
     Const,
     Dialog
@@ -67,7 +67,7 @@ angular.module("web").controller("transferUploadsCtrl", [
         item.wait();
       }
 
-      s3UploadMgr.trySchedJob();
+      UploadMgr.trySchedJob();
     }
 
     function showRemoveItem(item) {
@@ -106,7 +106,7 @@ angular.module("web").controller("transferUploadsCtrl", [
       }
 
       $timeout(() => {
-        s3UploadMgr.trySaveProg();
+        UploadMgr.trySaveProg();
         $scope.calcTotalProg();
       });
     }
@@ -153,7 +153,7 @@ angular.module("web").controller("transferUploadsCtrl", [
             }
 
             $timeout(() => {
-              s3UploadMgr.trySaveProg();
+              UploadMgr.trySaveProg();
               $scope.calcTotalProg();
             });
           }
@@ -169,7 +169,7 @@ angular.module("web").controller("transferUploadsCtrl", [
       if (arr && arr.length > 0) {
         stopFlag = true;
 
-        s3UploadMgr.stopCreatingJobs();
+        UploadMgr.stopCreatingJobs();
 
         Toast.info(T("pause.on")); //'正在暂停...'
         $scope.allActionBtnDisabled = true;
@@ -185,7 +185,7 @@ angular.module("web").controller("transferUploadsCtrl", [
         Toast.info(T("pause.success"));
 
         $timeout(function () {
-          s3UploadMgr.trySaveProg();
+          UploadMgr.trySaveProg();
           $scope.allActionBtnDisabled = false;
         }, 100);
       }
@@ -208,7 +208,7 @@ angular.module("web").controller("transferUploadsCtrl", [
               n.wait();
             }
 
-            s3UploadMgr.trySchedJob();
+            UploadMgr.trySchedJob();
 
             fn();
           },

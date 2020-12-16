@@ -4,7 +4,7 @@
 
     <div class="btn-group" role="group">
 
-      <button type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()" ng-if="currentUser.isSuper && !disabledFeatures.createBucket">
+      <button type="button" class="btn btn-info btn-sm" ng-click="showAddBucket()" ng-if="!disabledFeatures.createBucket">
         <i class="glyphicon glyphicon-plus"></i>
         {{'bucket.add'|translate}}
       </button>
@@ -12,13 +12,13 @@
     </div>
 
     <div class="btn-group" role="group">
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" ng-disabled="!bucket_sel" ng-if="!disabledFeatures.deleteBucket">
+      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" ng-disabled="!bucket_sel || bucket_sel.grantedPermission" ng-if="!disabledFeatures.deleteBucket">
         {{'more'|translate}}
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" role="menu">
         <li>
-          <a href="" ng-click="showDeleteBucket(bucket_sel)" ng-disabled="!currentUser.isSuper">
+          <a href="" ng-click="showDeleteBucket(bucket_sel)">
             <i class="fa fa-remove text-danger"></i>
             {{'delete'|translate}}
           </a>

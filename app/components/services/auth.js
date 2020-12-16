@@ -2,10 +2,9 @@ angular.module("web").factory("Auth", [
   "$q",
   "$location",
   "$translate",
-  "s3Client",
+  "QiniuClient",
   "AuthInfo",
-  function ($q, $location, $translate, s3Client, AuthInfo) {
-    const $http = require('request');
+  function ($q, $location, $translate, QiniuClient, AuthInfo) {
     const T = $translate.instant;
 
     return {
@@ -14,56 +13,21 @@ angular.module("web").factory("Auth", [
     };
 
     function login(data) {
-      const df = $q.defer();
-
-      s3Client.getClient(data).then((client) => {
-        client.listBuckets(function (err, result) {
-          if (err) {
-            console.error(err);
-            df.reject({
-              code: err.code,
-              message: err.message
-            });
-          } else if (result.Buckets) {
-            data.region = client.config.region;
-            data.isAuthed = true;
-            data.isSuper = true;
-            data.perm = {
-              read: true,
-              write: true,
-              copy: true,
-              move: true,
-              rename: true,
-              remove: true
-            };
-
-            AuthInfo.save(data);
-            df.resolve();
-          } else {
-            df.reject({
-              code: "Error",
-              message: T("login.endpoint.error")
-            });
-          }
-        });
-      }, (err) => {
-        console.error(err);
-        df.reject({
-          code: "Error",
-          message: T("login.endpoint.error")
-        });
-      })
-
-      return df.promise;
+      return QiniuClient.listAllBuckets(data).then(() => {
+        data.isAuthed = true;
+        AuthInfo.save(data);
+      }, () => {
+        data.isAuthed = false;
+      });
     }
 
     function logout() {
-      const { ipcRenderer } = require('electron');
-      var df = $q.defer();
-      AuthInfo.remove();
-      ipcRenderer.send('asynchronous', { key: 'clearCache' });
-      df.resolve();
-      return df.promise;
+      return new Promise((resolve) => {
+        const { ipcRenderer } = require('electron');
+        AuthInfo.remove();
+        ipcRenderer.send('asynchronous', { key: 'clearCache' });
+        resolve();
+      });
     }
   }
 ]);

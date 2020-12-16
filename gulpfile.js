@@ -7,8 +7,7 @@ const gulp = require("gulp"),
   archiver = require('archiver'),
   fs = require("fs"),
   path = require("path"),
-  pkg = require("./package"),
-  each = require("array-each");
+  pkg = require("./package");
 
 const NAME = 'Kodo Browser';
 const KICK_NAME = 'kodo-browser';
@@ -61,11 +60,11 @@ let appTasks = {
   }
 };
 
-each([ICONS, DIST, TARGET, RELEASE], (dir) => {
+[ICONS, DIST, TARGET, RELEASE].forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-})
+});
 
 gulp.task("app.js", appTasks["app.js"]);
 gulp.task("app.css", appTasks["app.css"]);
@@ -231,9 +230,7 @@ gulp.task("mac", () => {
     options.icon = `${ICONS}/icon.icns`;
 
     packager(options).then((paths) => {
-      plugins.run(`rm -rf ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.exe ${paths[0]}/${NAME}.app/Contents/Resources/app/node/bin/node.bin`).exec(() => {
-        console.log("--done");
-      });
+      console.log("--done");
     }, (errs) => {
       console.error(errs);
     });
@@ -281,9 +278,7 @@ gulp.task("win64", () => {
     options.icon = `${ICONS}/icon.png`;
 
     packager(options).then((paths) => {
-      plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {
-        console.log("--done");
-      });
+      console.log("--done");
     }, (errs) => {
       console.error(errs);
     });
@@ -310,9 +305,7 @@ gulp.task("win32", () => {
     options.icon = `${ICONS}/icon.png`;
 
     packager(options).then((paths) => {
-      plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.bin`).exec(() => {
-        console.log("--done");
-      });
+      console.log("--done");
     }, (errs) => {
       console.error(errs);
     });
@@ -338,9 +331,7 @@ gulp.task("linux64", () => {
     options.arch = "x64";
 
     packager(options).then((paths) => {
-      plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.exe`).exec(() => {
-        console.log("--done");
-      });
+      console.log("--done");
     }, (errs) => {
       console.error(errs);
     });
@@ -366,9 +357,7 @@ gulp.task("linux32", () => {
     options.arch = "ia32";
 
     packager(options).then((paths) => {
-      plugins.run(`rm -rf ${paths[0]}/resources/app/node/bin/node ${paths[0]}/resources/app/node/bin/node.exe`).exec(() => {
-        console.log("--done");
-      });
+      console.log("--done");
     }, (errs) => {
       console.error(errs);
     });

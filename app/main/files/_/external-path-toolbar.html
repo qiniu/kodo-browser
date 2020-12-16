@@ -4,7 +4,7 @@
 
     <div class="btn-group" role="group">
 
-      <button type="button" class="btn btn-info btn-sm" ng-click="showAddExternalPath()" ng-if="currentUser.isSuper">
+      <button type="button" class="btn btn-info btn-sm" ng-click="showAddExternalPath()">
         <i class="glyphicon glyphicon-plus"></i>
         {{'externalPath.add'|translate}}
       </button>
@@ -18,7 +18,7 @@
       </button>
       <ul class="dropdown-menu" role="menu">
         <li>
-          <a href="" ng-click="showDeleteExternalPath(external_path_sel)" ng-disabled="!currentUser.isSuper">
+          <a href="" ng-click="showDeleteExternalPath(external_path_sel)">
             <i class="fa fa-remove text-danger"></i>
             {{'delete'|translate}}
           </a>

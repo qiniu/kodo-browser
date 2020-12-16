@@ -4,8 +4,6 @@ angular.module("web").factory("AuditLog", [
         const fs = require('fs'),
               path = require('path'),
               moment = require('moment'),
-              each = require('array-each'),
-              filter = require('array-filter'),
               expirationMonths = 3;
 
         return {
@@ -43,10 +41,10 @@ angular.module("web").factory("AuditLog", [
             const now = moment();
             let entries = fs.readdirSync(folderPath, { withFileTypes: true });
 
-            entries = filter(entries, (entry) => {
+            entries = entries.filter((entry) => {
                 return entry.isFile() && entry.name.startsWith('audit_log_');
-            })
-            each(entries, (entry) => {
+            });
+            entries.forEach((entry) => {
                 const momentRegexp = /^audit_log_(\d{4}\-\d{2})\.json$/;
                 const matchResult = entry.name.match(momentRegexp);
                 if (matchResult) {

@@ -3,7 +3,6 @@ angular.module("web").factory("Bookmark", [
   function(AuthInfo) {
     const fs = require("fs"),
           path = require("path"),
-          map = require("array-map"),
           moment = require("moment");
 
     class Bookmark {
@@ -79,7 +78,7 @@ angular.module("web").factory("Bookmark", [
         const data = fs.readFileSync(filePath, 'utf8');
         let bookmarks = JSON.parse(data).bookmarks || [];
 
-        bookmarks = map(bookmarks, (bookmark) => {
+        bookmarks = bookmarks.map((bookmark) => {
           return new Bookmark(bookmark.fullPath, bookmark.mode, bookmark.timestamp);
         });
 

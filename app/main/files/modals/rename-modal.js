@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('renameModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$uibModal', 'item', 'isCopy', 'currentInfo', 'moveTo', 'callback', 's3Client', 'Dialog', 'Toast', 'AuditLog',
-    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, callback, s3Client, Dialog, Toast, AuditLog) {
+  .controller('renameModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$uibModal', 'item', 'isCopy', 'currentInfo', 'moveTo', 'qiniuClientOpt', 'callback', 'QiniuClient', 'Dialog', 'Toast', 'AuditLog',
+    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, qiniuClientOpt, callback, QiniuClient, Dialog, Toast, AuditLog) {
       var T = $translate.instant;
       //console.log(item)
       angular.extend($scope, {
@@ -25,21 +25,18 @@ angular.module('web')
       }
 
       function onSubmit(form) {
-        if (!form.$valid) return;
+      if (!form.$valid) return;
 
-        var title = T('whetherCover.title'); //是否覆盖
-        var msg1 = T('whetherCover.message1'); //已经有同名目录，是否覆盖?
-        var msg2 = T('whetherCover.message2'); //已经有同名文件，是否覆盖?
-        //console.log(title, msg1,msg2)
+        const title = T('whetherCover.title'); //是否覆盖
+        const msg1 = T('whetherCover.message1'); //已经有同名目录，是否覆盖?
+        const msg2 = T('whetherCover.message2'); //已经有同名文件，是否覆盖?
 
-        if ($scope.item.isFolder) {
-          var newPath = moveTo.key == '' ? item.name : (moveTo.key.replace(/(\/$)/, '') + '/' + item.name);
-          newPath += '/';
-          //console.log(item.path, newPath)
+        if ($scope.item.itemType === 'folder') {
+          const newPath = `${moveTo.key == '' ? item.name : (moveTo.key.replace(/(\/$)/, '') + '/' + item.name)}/`;
           if (item.path == newPath) return;
 
           $scope.isLoading = true;
-          s3Client.checkFolderExists(moveTo.region, moveTo.bucket, newPath).then(function (has) {
+          QiniuClient.checkFolderExists(moveTo.regionId, moveTo.bucketName, newPath, qiniuClientOpt).then(function (has) {
             if (has) {
               Dialog.confirm(title, msg1, function (b) {
                 if (b) {
@@ -55,31 +52,24 @@ angular.module('web')
             $scope.isLoading = false;
           });
         } else {
-          var newPath = moveTo.key == '' ? item.name : (moveTo.key.replace(/(\/$)/, '') + '/' + item.name);
+          const newPath = moveTo.key == '' ? item.name : (moveTo.key.replace(/(\/$)/, '') + '/' + item.name);
           if (item.path == newPath) return;
 
-          //suffix
-          // if(path.extname(item.path)!=path.extname(newPath)){
-          //   if(!confirm('确定要修改后缀名吗?')){
-          //     return;
-          //   }
-          // }
-
           $scope.isLoading = true;
-
-          s3Client.checkFileExists(moveTo.region, moveTo.bucket, newPath).then(function (data) {
-            Dialog.confirm(title, msg2, function (b) {
-              if (b) {
-                renameFile(newPath);
-              } else {
-                $scope.isLoading = false;
-              }
-            });
-          }, function (err) {
-            renameFile(newPath);
+          QiniuClient.checkFileExists(moveTo.regionId, moveTo.bucketName, newPath, qiniuClientOpt).then((exists) => {
+            if (exists) {
+              Dialog.confirm(title, msg2, (b) => {
+                if (b) {
+                  renameFile(newPath);
+                } else {
+                  $scope.isLoading = false;
+                }
+              });
+            } else {
+              renameFile(newPath);
+            }
           });
         }
-
       }
 
       function renameFile(newPath) {
@@ -87,11 +77,11 @@ angular.module('web')
         var successMsg = T('rename.success'); //重命名成功
 
         Toast.info(onMsg);
-        s3Client.moveFile(currentInfo.region, currentInfo.bucket, item.path, newPath, isCopy, item.StorageClass).then(function () {
+        QiniuClient.moveOrCopyFile(currentInfo.regionId, currentInfo.bucketName, item.path, newPath, isCopy, qiniuClientOpt).then(() => {
           Toast.success(successMsg);
 
           AuditLog.log('moveOrCopyFile', {
-            regionId: currentInfo.region,
+            regionId: currentInfo.regionId,
             bucket: currentInfo.bucketName,
             from: item.path,
             to: newPath,
@@ -99,25 +89,10 @@ angular.module('web')
             storageClass: item.StorageClass
           });
 
-          $scope.isLoading = false;
           callback();
           cancel();
-        }, function (err) {
+        }).finally(() => {
           $scope.isLoading = false;
-          switch (err.stage) {
-            case 'copy':
-              if (err.code === 'AccessDenied') {
-                Toast.error(T('permission.denied'));
-              }
-              break;
-            case 'delete':
-              if (err.code === 'AccessDenied') {
-                callback();
-                $scope.error_message = T('permission.denied.move.error_when_delete', { fromKey: item.path, toKey: newPath });
-                Toast.error($scope.error_message);
-              }
-              break;
-          }
         });
       }
 
@@ -142,6 +117,9 @@ angular.module('web')
             },
             fromInfo: function () {
               return angular.copy(currentInfo);
+            },
+            qiniuClientOpt: () => {
+              return angular.copy(qiniuClientOpt);
             },
             callback: function () {
               return function () {

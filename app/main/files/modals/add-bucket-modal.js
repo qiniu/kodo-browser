@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 's3Client', 'Const', 'Toast', 'AuditLog', 'regions',
-    function ($scope, $modalInstance, $translate, callback, s3Client, Const, Toast, AuditLog, regions) {
+  .controller('addBucketModalCtrl', ['$scope', '$uibModalInstance', '$translate', 'callback', 'QiniuClient', 'qiniuClientOpt', 'Const', 'Toast', 'AuditLog', 'regions',
+    function ($scope, $modalInstance, $translate, callback, QiniuClient, qiniuClientOpt, Const, Toast, AuditLog, regions) {
       const T = $translate.instant,
             bucketACL = angular.copy(Const.bucketACL);
       angular.extend($scope, {
@@ -10,7 +10,7 @@ angular.module('web')
         onSubmit: onSubmit,
         item: {
           acl: bucketACL[0].acl,
-          region: regions[0].id,
+          region: regions[0].s3Id,
         },
         reg: /^[a-z0-9][a-z0-9\-]{1,61}[a-z0-9]$/i,
         openURL: function (v) {
@@ -36,7 +36,7 @@ angular.module('web')
         if (!form.$valid) return;
 
         var item = angular.copy($scope.item);
-        s3Client.createBucket(item.region, item.name, item.acl).then((result) => {
+        QiniuClient.createBucket(item.region, item.name, qiniuClientOpt).then((result) => {
           AuditLog.log('addBucket', {
             regionId: item.region,
             name: item.name,
@@ -44,9 +44,6 @@ angular.module('web')
           });
           callback();
           cancel();
-        }, (err) => {
-          console.error(err);
-          Toast.error(err);
         });
       }
     }

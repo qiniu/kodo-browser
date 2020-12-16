@@ -1,7 +1,7 @@
 angular.module('web')
-  .controller('restoreModalCtrl', ['$scope','$uibModalInstance', '$translate','s3Client','item','currentInfo', 'callback','Toast','safeApply',
-    function ($scope, $modalInstance, $translate, s3Client,  item, currentInfo, callback, Toast, safeApply) {
-      var T = $translate.instant;
+  .controller('restoreModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$timeout', 'QiniuClient', 'item', 'currentInfo', 'qiniuClientOpt', 'Toast', 'safeApply',
+    function($scope, $modalInstance, $translate, $timeout, QiniuClient, item, currentInfo, qiniuClientOpt, Toast, safeApply) {
+      const T = $translate.instant;
       angular.extend($scope, {
         currentInfo: currentInfo,
         item: item,
@@ -13,26 +13,27 @@ angular.module('web')
         onSubmit: onSubmit
       });
 
-      init();
+      $timeout(init);
+
       function init(){
         $scope.isLoading = true;
-        s3Client.isFrozenOrNot(currentInfo.region, currentInfo.bucket, item.path).then(function(data){
-          switch (data.status) {
+        QiniuClient.getFrozenInfo(currentInfo.regionId, currentInfo.bucketName, item.path, qiniuClientOpt).then((data) => {
+          switch (data.status.toLowerCase()) {
           case 'frozen':
             $scope.info.type = 1;
             // $scope.info.msg = null;
             break;
           case 'unfreezing':
             $scope.info.type = 2;
-            //$scope.info.msg = '正在恢复中，请耐心等待！';
+            // $scope.info.msg = '正在恢复中，请耐心等待！';
             break;
           case 'unfrozen':
             $scope.info.type = 3;
             $scope.info.expiry_date = data['expiry-date'];
-            //$scope.info.msg = '可读截止时间：'+ info['expiry-date']
+            // $scope.info.msg = '可读截止时间：'+ info['expiry-date']
             break;
           }
-
+        }).finally(() => {
           $scope.isLoading = false;
           safeApply($scope);
         });
@@ -43,14 +44,13 @@ angular.module('web')
       }
 
       function onSubmit(form1) {
-        if(!form1.$valid)return;
+        if(!form1.$valid) return;
 
         const days = $scope.info.days;
 
-        Toast.info(T('restore.on'));//'提交中...'
-        s3Client.restoreFile(currentInfo.region, currentInfo.bucket, item.path, days).then(function(){
+        Toast.info(T('restore.on')); //'提交中...'
+        QiniuClient.restoreFile(currentInfo.regionId, currentInfo.bucketName, item.path, days, qiniuClientOpt).then(() => {
           Toast.success(T('restore.success')); //'恢复请求已经提交'
-          callback();
           cancel();
         });
       }

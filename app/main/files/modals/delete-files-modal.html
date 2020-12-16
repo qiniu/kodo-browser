@@ -17,8 +17,8 @@
     </div>
     <ul>
       <li ng-repeat="item in items" class="break">
-        <i class="fa fa-folder" style="color:orange" ng-if="item.isFolder"></i>
-        <i class="fa fa-file" ng-if="!item.isFolder"></i>
+        <i class="fa fa-folder" style="color:orange" ng-if="item.itemType === 'folder'"></i>
+        <i class="fa fa-file" ng-if="item.itemType !== 'folder'"></i>
         {{item.name}}
       </li>
     </ul>
@@ -56,9 +56,9 @@
       <ul>
         <li ng-repeat="terrItem in terr" ng-if="$index<10">
 
-          <i class="fa fa-folder" style="color:orange" ng-if="terrItem.item.isFolder"></i>
+          <i class="fa fa-folder" style="color:orange" ng-if="terrItem.item.itemType === 'folder'"></i>
 
-          <i class="fa fa-file-o" ng-if="!terrItem.item.isFolder"></i>
+          <i class="fa fa-file-o" ng-if="terrItem.item.itemType !== 'folder'"></i>
 
           {{terrItem.item.path.substring(currentInfo.key.length)}}
 

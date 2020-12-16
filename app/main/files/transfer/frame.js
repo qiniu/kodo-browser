@@ -1,22 +1,21 @@
 angular.module("web").controller("transferFrameCtrl", [
   "$scope",
   "$translate",
-  "s3UploadMgr",
-  "s3DownloadMgr",
+  "UploadMgr",
+  "DownloadMgr",
   "Toast",
   "Const",
   "AuditLog",
   function (
     $scope,
     $translate,
-    s3UploadMgr,
-    s3DownloadMgr,
+    UploadMgr,
+    DownloadMgr,
     Toast,
     Const,
     AuditLog
   ) {
-    const T = $translate.instant,
-          map = require('array-map');
+    const T = $translate.instant;
 
     angular.extend($scope, {
       transTab: 1,
@@ -50,8 +49,8 @@ angular.module("web").controller("transferFrameCtrl", [
     $scope.handlers.uploadFilesHandler = uploadFilesHandler;
     $scope.handlers.downloadFilesHandler = downloadFilesHandler;
 
-    s3UploadMgr.init($scope);
-    s3DownloadMgr.init($scope);
+    UploadMgr.init($scope);
+    DownloadMgr.init($scope);
 
     /**
      * upload
@@ -60,7 +59,7 @@ angular.module("web").controller("transferFrameCtrl", [
      */
     function uploadFilesHandler(filePaths, bucketInfo) {
       Toast.info(T("upload.addtolist.on"));
-      s3UploadMgr.createUploadJobs(filePaths, bucketInfo, function (isCancelled) {
+      UploadMgr.createUploadJobs(filePaths, bucketInfo, function (isCancelled) {
         Toast.info(T("upload.addtolist.success"));
 
         $scope.transTab = 1;
@@ -77,16 +76,16 @@ angular.module("web").controller("transferFrameCtrl", [
 
     /**
      * download
-     * @param fromS3Path {array}  item={region, bucket, path, name, domain, size=0, isFolder=false}, create folder if required
+     * @param fromRemotePath {array}  item={region, bucket, path, name, domain, size=0, itemType='file'}, create folder if required
      * @param toLocalPath {string}
      */
-    function downloadFilesHandler(fromS3Path, toLocalPath) {
+    function downloadFilesHandler(fromRemotePath, toLocalPath) {
       Toast.info(T("download.addtolist.on"));
-      s3DownloadMgr.createDownloadJobs(fromS3Path, toLocalPath, function (isCancelled) {
+      DownloadMgr.createDownloadJobs(fromRemotePath, toLocalPath, function (isCancelled) {
         Toast.info(T("download.addtolist.success"));
 
         AuditLog.log('downloadFilesStart', {
-          from: map(fromS3Path, (entry) => {
+          from: fromRemotePath.map((entry) => {
             return { regionId: entry.region, bucket: entry.bucketName, path: entry.path };
           }),
           to: toLocalPath
@@ -98,41 +97,37 @@ angular.module("web").controller("transferFrameCtrl", [
     }
 
     function calcTotalProg() {
-      var c = 0,
-        c2 = 0,
-        cf = 0,
-        cf2 = 0,
-        cs = 0,
-        cs2 = 0;
+      let c = 0, c2 = 0, cf = 0, cf2 = 0, cs = 0, cs2 = 0;
+
       angular.forEach($scope.lists.uploadJobList, function (n) {
-        if (n.status == "running") {
+        if (n.status === 'running') {
           c++;
         }
-        if (n.status == "waiting") {
+        if (n.status === 'waiting') {
           c++;
         }
-        if (n.status == "verifying") {
+        if (n.status === 'verifying') {
           c++;
         }
-        if (n.status == "failed") {
+        if (n.status === 'failed') {
           cf++;
         }
-        if (n.status == "stopped") {
+        if (n.status === 'stopped') {
           c++;
           cs++;
         }
       });
       angular.forEach($scope.lists.downloadJobList, function (n) {
-        if (n.status == "running") {
+        if (n.status === 'running') {
           c2++;
         }
-        if (n.status == "waiting") {
+        if (n.status === 'waiting') {
           c2++;
         }
-        if (n.status == "failed") {
+        if (n.status === 'failed') {
           cf2++;
         }
-        if (n.status == "stopped") {
+        if (n.status === 'stopped') {
           c2++;
           cs2++;
         }

@@ -5,7 +5,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
   "$timeout",
   "$translate",
   "jobUtil",
-  "s3DownloadMgr",
+  "DownloadMgr",
   "DelayDone",
   "Toast",
   "Const",
@@ -15,7 +15,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
     $timeout,
     $translate,
     jobUtil,
-    s3DownloadMgr,
+    DownloadMgr,
     DelayDone,
     Toast,
     Const,
@@ -63,7 +63,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
     function checkStartJob(item) {
       item.wait();
 
-      s3DownloadMgr.trySchedJob();
+      DownloadMgr.trySchedJob();
     }
 
     function showRemoveItem(item) {
@@ -101,7 +101,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
       }
 
       $timeout(() => {
-        s3DownloadMgr.trySaveProg();
+        DownloadMgr.trySaveProg();
         $scope.calcTotalProg();
       });
     }
@@ -147,7 +147,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
             }
 
             $timeout(() => {
-              s3DownloadMgr.trySaveProg();
+              DownloadMgr.trySaveProg();
               $scope.calcTotalProg();
             });
           }
@@ -163,7 +163,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
       if (jobs && jobs.length > 0) {
         stopFlag = true;
 
-        s3DownloadMgr.stopCreatingJobs();
+        DownloadMgr.stopCreatingJobs();
 
         Toast.info(T("pause.on")); //'正在暂停...'
         $scope.allActionBtnDisabled = true;
@@ -179,7 +179,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
         Toast.success(T("pause.success")); //'暂停成功'
 
         $timeout(() => {
-          s3DownloadMgr.trySaveProg();
+          DownloadMgr.trySaveProg();
           $scope.allActionBtnDisabled = false;
         });
       }
@@ -201,7 +201,7 @@ angular.module("web").controller("transferDownloadsCtrl", [
               job.wait();
             }
 
-            s3DownloadMgr.trySchedJob();
+            DownloadMgr.trySchedJob();
 
             fn();
           },

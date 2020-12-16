@@ -26,7 +26,6 @@ angular.module("web").controller("settingsCtrl", [
     angular.extend($scope, {
       set: {
         isDebug: settingsSvs.isDebug.get(),
-        useElectronNode: settingsSvs.useElectronNode.get(),
         autoUpgrade: settingsSvs.autoUpgrade.get(),
         resumeUpload: settingsSvs.resumeUpload.get(),
         maxUploadConcurrency: settingsSvs.maxUploadConcurrency.get(),

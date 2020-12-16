@@ -13,7 +13,5 @@ angular.module('web')
       function cancel() {
         $modalInstance.dismiss('close');
       }
-
-
     }])
 ;

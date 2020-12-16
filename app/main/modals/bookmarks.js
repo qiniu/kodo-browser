@@ -9,8 +9,7 @@ angular.module("web").controller("bookmarksCtrl", [
   "Bookmark",
   "Toast",
   function ($scope, $rootScope, $translate, $state, $modalInstance, Bookmark, Toast) {
-    const T = $translate.instant,
-          map = require('array-map');
+    const T = $translate.instant;
 
     angular.extend($scope, {
       goTo: goTo,
@@ -24,7 +23,7 @@ angular.module("web").controller("bookmarksCtrl", [
     }
 
     function refresh() {
-      $scope.bookmarks = map(Bookmark.list(), (bookmark) => {
+      $scope.bookmarks = Bookmark.list().map((bookmark) => {
         bookmark.time = new Date(moment.unix(bookmark.timestamp));
         return bookmark;
       });

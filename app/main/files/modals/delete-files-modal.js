@@ -1,7 +1,6 @@
 angular.module('web')
-  .controller('deleteFilesModalCtrl', ['$scope', '$q', '$uibModalInstance', '$timeout', 'items', 'currentInfo', 'callback', 's3Client', 'safeApply', 'AuditLog',
-    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, s3Client, safeApply, AuditLog) {
-      const map = require("array-map");
+  .controller('deleteFilesModalCtrl', ['$scope', '$q', '$uibModalInstance', '$timeout', 'items', 'currentInfo', 'callback', 'QiniuClient', 'qiniuClientOpt', 'safeApply', 'AuditLog',
+    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, QiniuClient, qiniuClientOpt, safeApply, AuditLog) {
       angular.extend($scope, {
         items: items,
 
@@ -14,32 +13,32 @@ angular.module('web')
 
       function stop() {
         //$modalInstance.dismiss('cancel');
-        $scope.isStop=true;
-        s3Client.stopDeleteFiles();
+        $scope.isStop = true;
+        QiniuClient.stopDeleteFiles();
       }
       function close(){
         $modalInstance.dismiss('cancel');
       }
 
       function start(){
-        $scope.isStop=false;
+        $scope.isStop = false;
         $scope.step = 2;
 
         AuditLog.log('deleteFiles', {
-          regionId: currentInfo.region,
+          regionId: currentInfo.regionId,
           bucket: currentInfo.bucketName,
-          paths: map(items, (item) => item.path),
+          paths: items.map((item) => item.path),
         });
 
-        s3Client.deleteFiles(currentInfo.region, currentInfo.bucket, items, function(prog){
+        QiniuClient.deleteFiles(currentInfo.regionId, currentInfo.bucketName, items, (prog) => {
           //进度
           $scope.progress = angular.copy(prog);
           safeApply($scope);
-        }).then(function(terr){
+        }, qiniuClientOpt).then((terr) => {
           //结果
           $scope.step = 3;
           $scope.terr = terr;
-          if (!terr) {
+          if (!terr || terr.length === 0) {
             AuditLog.log('deleteFilesDone');
           }
           callback();

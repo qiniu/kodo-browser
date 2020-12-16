@@ -1,13 +1,13 @@
 angular.module('web')
-  .controller('mediaModalCtrl', ['$scope', '$uibModalInstance', '$timeout','$sce', '$uibModal', 's3Client', 'downloadUrl', 'showFn', 'bucketInfo', 'objectInfo', 'fileType',
-    function ($scope, $modalInstance, $timeout, $sce, $modal, s3Client, downloadUrl, showFn, bucketInfo, objectInfo, fileType) {
+  .controller('mediaModalCtrl', ['$scope', '$uibModalInstance', '$timeout','$sce', '$uibModal', 'selectedDomain', 'showFn', 'bucketInfo', 'objectInfo', 'fileType', 'qiniuClientOpt',
+    function ($scope, $modalInstance, $timeout, $sce, $modal, selectedDomain, showFn, bucketInfo, objectInfo, fileType, qiniuClientOpt) {
 
       angular.extend($scope, {
         bucketInfo: bucketInfo,
         objectInfo: objectInfo,
         fileType: fileType,
+        qiniuClientOpt: qiniuClientOpt,
         afterCheckSuccess: afterCheckSuccess,
-        afterRestoreSubmit: afterRestoreSubmit,
 
         previewBarVisible: false,
         showFn: showFn,
@@ -15,10 +15,6 @@ angular.module('web')
 
         MAX_SIZE: 5 * 1024 * 1024 //5MB
       });
-
-      function afterRestoreSubmit() {
-        showFn.callback(true);
-      }
 
       function afterCheckSuccess() {
         $scope.previewBarVisible = true;
@@ -30,16 +26,18 @@ angular.module('web')
       }
 
       function genURL() {
-        $scope.src_origin = downloadUrl;
-        $scope.src = $sce.trustAsResourceUrl(downloadUrl);
+        selectedDomain.domain.signatureUrl(objectInfo.path).then((url) => {
+          $scope.src_origin = url.toString();
+          $scope.src = $sce.trustAsResourceUrl(url.toString());
 
-        $timeout(function(){
-          const ele = $('#video-player');
-          if(parseInt(ele.css('height')) > parseInt(ele.css('width'))){
-             ele.css('height', $(document).height()-240);
-             ele.css('width', 'auto');
-          }
-        }, 1000);
+          $timeout(() => {
+            const ele = $('#video-player');
+            if(parseInt(ele.css('height')) > parseInt(ele.css('width'))){
+               ele.css('height', $(document).height()-240);
+               ele.css('width', 'auto');
+            }
+          }, 1000);
+        });
       }
     }
   ]);

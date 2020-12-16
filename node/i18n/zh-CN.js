@@ -8,12 +8,6 @@ module.exports = {
   "private.cloud": "私有云",
 
   "region.unknown": "未知区域",
-  "cn-east-1": "华东",
-  "cn-north-1": "华北",
-  "cn-south-1": "华南",
-  "us-north-1": "北美",
-  "ap-southeast-1": "东南亚",
-  "fog-cn-east-1": "雾存储-华东",
   "region.get.error": "获取失败",
   "config.parse.error": "解析配置文件出错",
   "config.format.error": "配置文件格式错误",
@@ -81,7 +75,7 @@ module.exports = {
 
   "storageClassesType": "存储类型",
   "storageClassesType.standard": "标准存储",
-  "storageClassesType.line": "低频存储",
+  "storageClassesType.infrequentaccess": "低频存储",
   "storageClassesType.glacier": "归档存储",
 
   "aclType.default": "继承Bucket",
@@ -215,8 +209,6 @@ module.exports = {
   "settings.system": "系统设置",
   "settings.isDebug": "调试日志",
   "settings.isDebug.msg": "是否开启调试日志",
-  "settings.useElectronNode": "启用 Electron Node",
-  "settings.useElectronNode.msg": "是否启用 Electron Node",
   "settings.autoUpgrade": "自动更新",
   "settings.autoUpgrade.msg": "自动下载更新包",
   "settings.success": "已经保存设置",

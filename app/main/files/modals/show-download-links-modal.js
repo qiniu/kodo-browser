@@ -1,12 +1,10 @@
 angular.module('web')
-  .controller('showDownloadLinksModalCtrl', ['$scope', '$timeout', '$translate', '$uibModalInstance', 's3Client', 'items', 'current', 'domains', 'showDomains', 'Toast', 'Domains',
-    function ($scope, $timeout, $translate, $modalInstance, s3Client, items, current, domains, showDomains, Toast, Domains) {
+  .controller('showDownloadLinksModalCtrl', ['$scope', '$timeout', '$translate', '$uibModalInstance', 'safeApply', 'QiniuClient', 'items', 'current', 'domains', 'showDomains', 'Dialog', 'Toast', 'Domains', 'qiniuClientOpt',
+    function($scope, $timeout, $translate, $modalInstance, safeApply, QiniuClient, items, current, domains, showDomains, Dialog, Toast, Domains, qiniuClientOpt) {
       const T = $translate.instant,
             fs = require('fs'),
             path = require('path'),
-            each = require('array-each'),
-            csvStringify = require('csv-stringify'),
-            downloadsFolder = require("downloads-folder");
+            csvStringify = require('csv-stringify');
 
       initCurrentDomain(domains);
 
@@ -27,7 +25,7 @@ angular.module('web')
       function initCurrentDomain(domains) {
         let found = false;
         if (current.domain !== null) {
-          each(domains, (domain) => {
+          domains.forEach((domain) => {
             if (current.domain.name() === domain.name()) {
               current.domain = domain;
               found = true;
@@ -35,11 +33,15 @@ angular.module('web')
           });
         }
         if (!found) {
-          each(domains, (domain) => {
+          domains.forEach((domain) => {
             if (domain.default()) {
               current.domain = domain;
+              found = true;
             }
           });
+        }
+        if (!found) {
+          current.domain = domains[0];
         }
       }
 
@@ -47,53 +49,54 @@ angular.module('web')
         if(!form1.$valid) return;
         const lifetime = $scope.sec;
 
-        const fileName = `kodo-browser-download-links-${moment().utc().format('YYYYMMDDHHmmSS')}`;
-        let filePath = path.join(downloadsFolder(), `${fileName}.csv`);
-        for (let i = 1; fs.existsSync(filePath); i++) {
-          filePath = path.join(downloadsFolder(), `${fileName}.${i}.csv`);
-        }
-        const csvFile = fs.createWriteStream(filePath);
-        const csvStringifier = csvStringify();
-
-        csvStringifier.on('readable', function() {
-          let row;
-          while(row = csvStringifier.read()) {
-            csvFile.write(row);
+        Dialog.showDownloadDialog((folderPaths) => {
+          if (!folderPaths || folderPaths.length == 0) {
+            return;
           }
-        });
-        csvStringifier.on('error', function(err) {
-          Toast.error(err.message)
+          const targetDirectory = folderPaths[0].replace(/(\/*$)/g, '');
           cancel();
-        });
-        csvStringifier.on('finish', function() {
-          csvFile.end();
-          Toast.success(T('exportDownloadLinks.message', {path: filePath}), 5000);
-          cancel();
-        });
-        csvStringifier.write(['BucketName', 'ObjectName', 'URL']);
-        const promises = [];
-        loopItems(current.info.region, current.info.bucket, items,
-          (item) => {
-            promises.push(new Promise((resolve, reject) => {
-              $scope.current.domain.signatureUrl(item.path, lifetime).then((url) => {
-                csvStringifier.write([current.info.bucketName, item.path, url]);
-                resolve();
-              });
-            }));
-          }, () => {
-            Promise.all(promises).then(() => { csvStringifier.end(); });
+
+          const fileName = `kodo-browser-download-links-${moment().utc().format('YYYYMMDDHHmmSS')}`;
+          let filePath = path.join(targetDirectory, `${fileName}.csv`);
+          for (let i = 1; fs.existsSync(filePath); i++) {
+            filePath = path.join(targetDirectory, `${fileName}.${i}.csv`);
+          }
+          const csvFile = fs.createWriteStream(filePath);
+          const csvStringifier = csvStringify();
+
+          csvStringifier.on('readable', function() {
+            let row;
+            while(row = csvStringifier.read()) {
+              csvFile.write(row);
+            }
           });
+          csvStringifier.on('error', function(err) {
+            Toast.error(err.message)
+          });
+          csvStringifier.on('finish', function() {
+            csvFile.end();
+            Toast.success(T('exportDownloadLinks.message', {path: filePath}), 5000);
+          });
+          csvStringifier.write(['BucketName', 'ObjectName', 'URL']);
+          const promises = [];
+          loopItems(current.info.regionId, current.info.bucketName, items,
+            (item) => {
+              promises.push($scope.current.domain.signatureUrl(item.path, lifetime).then((url) => {
+                              csvStringifier.write([current.info.bucketName, item.path, url.toString()]);
+                            }));
+            }, () => {
+              Promise.all(promises).then(() => { csvStringifier.end(); });
+            });
+        });
       }
 
       function refreshDomains() {
         const info = $scope.current.info;
-        Domains.list(info.region, info.bucket).
+        Domains.list(info.regionId, info.bucketName, info.bucketGrantedPermission).
                 then((domains) => {
                   $scope.domains = domains;
                   initCurrentDomain(domains);
-                }, (err) => {
-                  console.error(err);
-                  Toast.error(err);
+                  safeApply($scope);
                 });
       }
 
@@ -102,8 +105,8 @@ angular.module('web')
         loopItemsInDirectory(items, eachCallback, doneCallback);
 
         function loopItemsInDirectory(items, eachCallback, doneCallback) {
-          each(items, (item) => {
-            if (item.isFolder) {
+          items.forEach((item) => {
+            if (item.itemType === 'folder') {
               waitForDirs += 1;
               loadFilesFromDirectory(
                 item,
@@ -126,8 +129,11 @@ angular.module('web')
         }
 
         function loadFilesFromDirectory(item, handleItems, doneCallback, marker) {
-          s3Client
-            .listFiles(region, bucket, item.path, 1000, 0, marker)
+          QiniuClient
+            .listFiles(
+              region, bucket, item.path, marker,
+              angular.extend(qiniuClientOpt, { maxKeys: 1000, minKeys: 0 }),
+            )
             .then((result) => {
                 handleItems(result.data || []);
                 if (result.marker) {
@@ -135,9 +141,6 @@ angular.module('web')
                 } else {
                   doneCallback();
                 }
-            }, (err) => {
-              console.error(err);
-              Toast.error(err);
             });
         }
       }

@@ -1,8 +1,7 @@
 angular.module('web')
-  .controller('showDownloadLinkModalCtrl', ['$scope', '$q','$translate', '$uibModalInstance', 'item', 'current', 'domains', 'showDomains', 'Toast', 'Domains',
-    function ($scope, $q, $translate, $modalInstance, item, current, domains, showDomains, Toast, Domains) {
+  .controller('showDownloadLinkModalCtrl', ['$scope', '$q', '$translate', '$uibModalInstance', 'safeApply', 'item', 'current', 'domains', 'showDomains', 'Toast', 'Domains',
+    function($scope, $q, $translate, $modalInstance, safeApply, item, current, domains, showDomains, Toast, Domains) {
       const { clipboard } = require('electron'),
-                     each = require('array-each'),
                         T = $translate.instant;
 
       initCurrentDomain(domains);
@@ -29,7 +28,7 @@ angular.module('web')
       function initCurrentDomain(domains) {
         let found = false;
         if (current.domain !== null) {
-          each(domains, (domain) => {
+          domains.forEach((domain) => {
             if (current.domain.name() === domain.name()) {
               current.domain = domain;
               found = true;
@@ -37,11 +36,15 @@ angular.module('web')
           });
         }
         if (!found) {
-          each(domains, (domain) => {
+          domains.forEach((domain) => {
             if (domain.default()) {
               current.domain = domain;
+              found = true;
             }
           });
+        }
+        if (!found) {
+          current.domain = domains[0];
         }
       }
 
@@ -49,7 +52,8 @@ angular.module('web')
         if(!form1.$valid) return;
 
         $scope.current.domain.signatureUrl(item.path, $scope.info.sec).then((url) => {
-          $scope.info.url = url;
+          $scope.info.url = url.toString();
+          safeApply($scope);
         });
       }
 
@@ -60,13 +64,11 @@ angular.module('web')
 
       function refreshDomains() {
         const info = $scope.current.info;
-        Domains.list(info.region, info.bucket).
+        Domains.list(info.regionId, info.bucketName, info.bucketGrantedPermission).
                 then((domains) => {
                   $scope.domains = domains;
                   initCurrentDomain(domains);
-                }, (err) => {
-                  console.error(err);
-                  Toast.error(err);
+                  safeApply($scope);
                 });
       }
     }

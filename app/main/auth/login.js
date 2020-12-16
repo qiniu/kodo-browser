@@ -14,7 +14,6 @@ angular.module("web").controller("loginCtrl", [
   "Toast",
   "AkHistory",
   "AuditLog",
-  "KodoClient",
   function (
     $q,
     $timeout,
@@ -31,7 +30,6 @@ angular.module("web").controller("loginCtrl", [
     Toast,
     AkHistory,
     AuditLog,
-    KodoClient
   ) {
     const T = $translate.instant;
 

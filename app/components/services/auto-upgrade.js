@@ -3,7 +3,7 @@ angular.module("web").factory("autoUpgradeSvs", [
   "Customize",
   function ($timeout, Customize) {
     const NAME = "kodo-browser";
-    const util = require("./node/s3store/lib/util");
+    const util = require("./node/qiniu-store/lib/util");
     const path = require("path");
     const fs = require("fs");
     const request = require("request");

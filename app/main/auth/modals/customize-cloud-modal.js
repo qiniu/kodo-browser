@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('customizeCloudModalCtrl', ['$scope', '$translate', '$uibModalInstance', 'Config', 'KodoClient',
-    function ($scope, $translate, $modalInstance, Config, KodoClient) {
+  .controller('customizeCloudModalCtrl', ['$scope', '$translate', '$uibModalInstance', '$timeout', 'Config', 'QiniuClient',
+    function ($scope, $translate, $modalInstance, $timeout, Config, QiniuClient) {
       const T = $translate.instant;
 
       let config = { ucUrl: '', regions: [{}] };
@@ -10,6 +10,15 @@ angular.module('web')
         } catch (e) {
           // do nothing;
         }
+      }
+      if (config.regions && config.regions.length > 0) {
+        config.regions.forEach((region) => {
+          if (region.s3Urls && region.s3Urls.length > 0) {
+            region.endpoint = region.s3Urls[0];
+          }
+        });
+      } else {
+        config.regions = [];
       }
 
       angular.extend($scope, {
@@ -32,20 +41,26 @@ angular.module('web')
 
       function onUcUrlUpdate() {
         if (!$scope.ucUrl) {
-          $scope.queryAvailable = false;
-          normalizeRegions();
+          $timeout(() => {
+            $scope.queryAvailable = false;
+            normalizeRegions();
+          });
           return;
         }
         const ucUrl = $scope.ucUrl;
-        KodoClient.isQueryRegionAPIAvaiable($scope.ucUrl).then((result) => {
+        QiniuClient.isQueryRegionAPIAvaiable($scope.ucUrl).then((result) => {
           if (ucUrl === $scope.ucUrl) {
-            $scope.queryAvailable = result;
-            normalizeRegions();
+            $timeout(() => {
+              $scope.queryAvailable = result;
+              normalizeRegions();
+            });
           }
         }, (err) => {
           if (ucUrl === $scope.ucUrl) {
-            $scope.queryAvailable = false;
-            normalizeRegions();
+            $timeout(() => {
+              $scope.queryAvailable = false;
+              normalizeRegions();
+            });
           }
         });
       }
@@ -77,6 +92,11 @@ angular.module('web')
         let regions = null;
         if (editRegions()) {
           regions = angular.copy($scope.regions);
+          regions.forEach((region) => {
+            if (region.endpoint) {
+              region.s3Urls = [region.endpoint];
+            }
+          });
         }
         Config.save(ucUrl, regions);
         cancel();

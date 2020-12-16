@@ -14,13 +14,13 @@
       <div ng-repeat="item in objects"
            class="item-block"
            ng-class="{'active':sel.x['i_'+$index]==true}"
-           ng-click="selectFile(item);$event.stopPropagation()"
-           ng-dblclick="item.isFolder?gotoAddress(currentBucket,item.path):showPreview(item);$event.stopPropagation()">
-        <i class="fa fa-{{item|fileIcon}}" ng-style="item.isFolder?{'color':'orange'}:{}"></i>
+           ng-click="selectFileAndStopEventPropagation(item, $event)"
+           ng-dblclick="openFileAndStopEventPropagation(item, $event)">
+        <i class="fa fa-{{item|fileIcon}}" ng-style="item.itemType === 'folder' ? {'color':'orange'} : {}"></i>
 
         <div class="item-block-name">{{item.name}}</div>
-        <div class="item-block-desc" ng-if="item.isFolder">{{'folder'|translate}}</div>
-        <div class="item-block-desc" ng-if="!item.isFolder">{{item.size|sizeFormat}}</div>
+        <div class="item-block-desc" ng-if="item.itemType === 'folder'">{{'folder'|translate}}</div>
+        <div class="item-block-desc" ng-if="item.itemType !== 'folder'">{{item.size|sizeFormat}}</div>
       </div>
 
       <div class="clearfix"></div>

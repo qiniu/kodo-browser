@@ -1,13 +1,13 @@
 angular.module('web')
-  .controller('pictureModalCtrl', ['$scope', '$uibModalInstance', '$timeout', '$uibModal', 's3Client', 'showFn', 'downloadUrl', 'bucketInfo', 'objectInfo','AuthInfo', 'fileType',
-    function ($scope, $modalInstance, $timeout, $modal, s3Client, showFn, downloadUrl, bucketInfo, objectInfo, AuthInfo, fileType) {
+  .controller('pictureModalCtrl', ['$scope', '$uibModalInstance', '$timeout', '$uibModal', 'showFn', 'selectedDomain', 'bucketInfo', 'objectInfo', 'qiniuClientOpt', 'AuthInfo', 'fileType',
+    function ($scope, $modalInstance, $timeout, $modal, showFn, selectedDomain, bucketInfo, objectInfo, qiniuClientOpt, AuthInfo, fileType) {
 
       angular.extend($scope, {
         bucketInfo: bucketInfo,
         objectInfo: objectInfo,
         fileType: fileType,
+        qiniuClientOpt: qiniuClientOpt,
         afterCheckSuccess: afterCheckSuccess,
-        afterRestoreSubmit: afterRestoreSubmit,
 
         previewBarVisible: false,
         showFn: showFn,
@@ -15,10 +15,6 @@ angular.module('web')
 
         MAX_SIZE: 5 * 1024 * 1024 //5MB
       });
-
-      function afterRestoreSubmit() {
-        showFn.callback(true);
-      }
 
       function afterCheckSuccess() {
         $scope.previewBarVisible = true;
@@ -32,7 +28,11 @@ angular.module('web')
       }
 
       function getContent() {
-        $scope.imgsrc = downloadUrl;
+        selectedDomain.domain.signatureUrl(objectInfo.path).then((url) => {
+          $timeout(() => {
+            $scope.imgsrc = url.toString();
+          });
+        });
       }
     }
   ]);

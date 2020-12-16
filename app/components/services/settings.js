@@ -10,15 +10,6 @@ angular.module("web").factory("settingsSvs", [
         }
       },
 
-      useElectronNode: {
-        get: function () {
-          return parseInt(localStorage.getItem("useElectronNode") || 0);
-        },
-        set: function (v) {
-          return localStorage.setItem("useElectronNode", v);
-        }
-      },
-
       autoUpgrade: {
         get: function () {
           return parseInt(localStorage.getItem("autoUpgrade") || 0);

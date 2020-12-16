@@ -17,31 +17,6 @@
 
 <div class="modal-body">
 
-  <!-- <div ng-if="step==1">
-     <div class="text-warning">将以下目录或文件 (共 {{items.length}} 个):</div>
-     <ul>
-       <li ng-repeat="item in items" ng-if="$index<5">
-         <i class="fa fa-folder" style="color:orange" ng-if="item.isFolder"></i>
-         <i class="fa fa-file" ng-if="!item.isFolder"></i>
-         {{item.name}}
-       </li>
-       <li ng-if="items.length>5">......</li>
-     </ul>
-
-    <div class="clearfix"></div>
-
-    <div ng-if="isCopy" class="text-warning">复制到:</div>
-    <div ng-if="!isCopy" class="text-warning">移动到:</div>
-
-
-    <div class="clearfix"></div>
-
-    <div s3-file-selector config="s3FileConfig"
-        selected-item="moveTo" height="220"
-        show-buckets="false" folder-only="true"></div>
-</div>
- -->
-
   <div ng-if="step==2">
     <div class="text-info">{{isCopy? ('copy.on'|translate): ('move.on'|translate)}}...</div>
   </div>
@@ -69,8 +44,8 @@
       </div>
       <ul>
         <li ng-repeat="item in terr" ng-if="$index<10">
-          <i class="fa fa-folder" style="color:orange" ng-if="item.item.isFolder"></i>
-          <i class="fa fa-file-o" ng-if="!item.item.isFolder"></i> {{item.item.Key}}
+          <i class="fa fa-folder" style="color:orange" ng-if="item.item.itemType === 'folder'"></i>
+          <i class="fa fa-file-o" ng-if="item.item.itemType !== 'folder'"></i> {{item.item.name}}
           <i class="fa fa-exclamation-circle text-danger" uib-tooltip="{{item.error.translated_message||item.error.message}}" tooltip-placement="right" tooltip-append-to-body="true"></i>
         </li>
         <li ng-if="terr.length > 10">...</li>

@@ -3,18 +3,16 @@ angular.module("web").factory("Domains", [
   "$timeout",
   "$translate",
   "AuthInfo",
-  "s3Client",
-  "KodoClient",
+  "QiniuClient",
   function(
     $q,
     $timeout,
     $translate,
     AuthInfo,
-    s3Client,
-    KodoClient
+    QiniuClient,
     ) {
-    const each = require('array-each'),
-          T = $translate.instant;
+    const T = $translate.instant,
+          { KODO_MODE, S3_MODE } = require('kodo-s3-adapter-sdk');
 
     class S3Domain {
       constructor(region, bucket) {
@@ -30,9 +28,17 @@ angular.module("web").factory("Domains", [
         return T('no.owned.domain');
       }
 
+      toQiniuDomain() {
+        return undefined;
+      }
+
+      qiniuBackendMode() {
+        return S3_MODE;
+      }
+
       signatureUrl(key, expires) {
         expires = expires || this.maxLifetime();
-        return s3Client.signatureUrl(this.region, this.bucket, key, expires);
+        return QiniuClient.signatureUrl(this.region, this.bucket, key, undefined, expires, { preferS3Adapter: true });
       }
 
       deadlineRequired() {
@@ -45,10 +51,10 @@ angular.module("web").factory("Domains", [
     }
 
     class KodoDomain {
-      constructor(domain, protocol, isPrivate) {
+      constructor(region, bucket, domain) {
+        this.region = region;
+        this.bucket = bucket;
         this.domain = domain;
-        this.protocol = protocol;
-        this.isPrivate = isPrivate;
       }
 
       default() {
@@ -56,23 +62,20 @@ angular.module("web").factory("Domains", [
       }
 
       name() {
+        return this.domain.name;
+      }
+
+      toQiniuDomain() {
         return this.domain;
       }
 
+      qiniuBackendMode() {
+        return KODO_MODE;
+      }
+
       signatureUrl(key, expires) {
-        const df = $q.defer();
-        const protocol = this.protocol,
-              domain = this.domain,
-              isPrivate = this.isPrivate;
         expires = expires || this.maxLifetime();
-
-        $timeout(() => {
-          const url = KodoClient.getBucketManager().
-                                 signatureUrl(protocol, domain, key, isPrivate, expires);
-          df.resolve(url);
-        });
-
-        return df.promise;
+        return QiniuClient.signatureUrl(this.region, this.bucket, key, this.domain, expires, { preferKodoAdapter: true });
       }
 
       deadlineRequired() {
@@ -93,34 +96,25 @@ angular.module("web").factory("Domains", [
       return new S3Domain(region, bucket);
     }
 
-    function list(region, bucket) {
-      const df = $q.defer();
-      const domains = [new S3Domain(region, bucket)];
+    function list(region, bucket, grantedPermissions) {
+      return new Promise((resolve, reject) => {
+        let allDomains = [];
 
-      if (AuthInfo.usePublicCloud()) {
-        KodoClient.listDomains(region, bucket).then((domainInfos) => {
-          KodoClient.isBucketPrivate(bucket).then((isPrivate) => {
-            each(domainInfos, (domainInfo) => {
-              switch(domainInfo.type) {
-              case 'normal':
-              case 'pan':
-              case 'test':
-                domains.push(new KodoDomain(domainInfo.name, domainInfo.protocol, isPrivate));
-                break;
-              }
-            });
-            df.resolve(domains);
-          }, (err) => {
-            df.reject(err);
+        if (!grantedPermissions) {
+          allDomains.push(new S3Domain(region, bucket));
+        }
+
+        if (AuthInfo.usePublicCloud()) {
+          QiniuClient.listDomains(region, bucket).then((domains) => {
+            allDomains = allDomains.concat(domains.map((domain) => new KodoDomain(region, bucket, domain)));
+            resolve(allDomains);
+          }, () => {
+            resolve(allDomains);
           });
-        }, (err) => {
-          df.reject(err);
-        });
-      } else {
-        $timeout(() => { df.resolve(domains); });
-      }
-
-      return df.promise;
+        } else {
+          resolve(allDomains);
+        }
+      });
     }
   }
 ]);

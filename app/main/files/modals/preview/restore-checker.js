@@ -9,13 +9,13 @@ angular.module('web')
           bucketInfo: '=',
           objectInfo: '=',
           fileType: '=',
+          qiniuClientOpt: '=',
           afterCheckSuccess: '&',
-          afterRestoreSubmit: '&'
         },
-        controller: ['$scope', '$timeout','$uibModal','s3Client','safeApply', ctrlFn]
+        controller: ['$scope', '$timeout','$uibModal','QiniuClient','safeApply', ctrlFn]
       }
 
-      function ctrlFn($scope, $timeout, $modal, s3Client, safeApply){
+      function ctrlFn($scope, $timeout, $modal, QiniuClient, safeApply){
         angular.extend($scope, {
           info: {
             msg: null
@@ -35,25 +35,25 @@ angular.module('web')
         function check(successCallback){
           $scope._Loading = true;
 
-          s3Client.isFrozenOrNot($scope.bucketInfo.region, $scope.bucketInfo.bucket, $scope.objectInfo.path)
+          QiniuClient.getFrozenInfo($scope.bucketInfo.regionId, $scope.bucketInfo.bucketName, $scope.objectInfo.path, $scope.qiniuClientOpt)
                   .then(function (data) {
             switch (data.status) {
-            case 'normal':
+            case 'Normal':
               $scope.info.type = 0;
               $scope.info.showContent = true;
               if (successCallback) {
                 successCallback()
               }
               break;
-            case 'frozen':
+            case 'Frozen':
               $scope.info.type = 1; //归档文件，需要恢复才能预览或下载
               $scope.info.showContent = false;
               break;
-            case 'unfreezing':
+            case 'Unfreezing':
               $scope.info.type = 2; // 归档文件正在恢复中，请耐心等待...;
               $scope.info.showContent = false;
               break;
-            case 'unfrozen':
+            case 'Unfrozen':
               $scope.info.type = 3; // '归档文件，已恢复'
               $scope.info.showContent = true;
               if (successCallback) {
@@ -61,11 +61,9 @@ angular.module('web')
               }
               break;
             default:
-              console.error("Unrecognized status from s3Client.isFrozenOrNot(): ", data.status);
+              console.error("Unrecognized status from QiniuClient.getFrozenInfo(): ", data.status);
             }
-            $scope._Loading = false;
-            safeApply($scope);
-          }, function (err) {
+          }).finally(() => {
             $scope._Loading = false;
             safeApply($scope);
           });
@@ -82,13 +80,11 @@ angular.module('web')
               currentInfo: function(){
                 return angular.copy($scope.bucketInfo);
               },
+              qiniuClientOpt: () => {
+                return angular.copy($scope.qiniuClientOpt);
+              },
               callback: function(){
-                return function(){
-                  if($scope.afterRestoreSubmit){
-                      $scope.afterRestoreSubmit();
-                  }
-                  init();
-                };
+                return init;
               }
             }
           });

@@ -8,12 +8,6 @@ module.exports = {
   "private.cloud": "Private Cloud",
 
   "region.unknown": "Unknown Region",
-  "cn-east-1": "East China",
-  "cn-north-1": "North China",
-  "cn-south-1": "South China",
-  "us-north-1": "North America",
-  "ap-southeast-1": "Southeast Asia",
-  "fog-cn-east-1": "Fog Storage - East China",
   "region.get.error": "Failed to Get",
   "config.parse.error": "Failed to parse config file",
   "config.format.error": "Something is wrong in the config file",
@@ -81,7 +75,7 @@ module.exports = {
 
   "storageClassesType": "Storage Type",
   "storageClassesType.standard": "Standard",
-  "storageClassesType.line": "IA",
+  "storageClassesType.infrequentaccess": "IA",
   "storageClassesType.glacier": "Archive",
 
   "aclType.default": "Inherit From Bucket",
@@ -215,8 +209,6 @@ module.exports = {
   "settings.system": "System Settings",
   "settings.isDebug": "Debug",
   "settings.isDebug.msg": "Enable debug log",
-  "settings.useElectronNode": "Electron Node",
-  "settings.useElectronNode.msg": "Enable Electron Node",
   "settings.autoUpgrade": "Auto update",
   "settings.autoUpgrade.msg": "Download update package automatically",
   "settings.success": "Saved successfully",

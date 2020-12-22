@@ -927,10 +927,10 @@ angular.module("web").factory("s3Client", [
       return df.promise;
     }
 
-    function listFiles(region, bucket, key, marker) {
+    function listFiles(region, bucket, key, maxKeys, minKeys, marker) {
       const df = $q.defer();
 
-      _listFilesOrigion(region, bucket, key, marker).then(function (result) {
+      _listFilesOrigion(region, bucket, key, maxKeys, minKeys, marker).then(function (result) {
         const arr = result.data;
         if (arr && arr.length) {
           $timeout(() => { loadStorageStatus(region, bucket, arr); }, NEXT_TICK);
@@ -975,18 +975,17 @@ angular.module("web").factory("s3Client", [
       return df.promise;
     }
 
-    function _listFilesOrigion(region, bucket, key, marker) {
+    function _listFilesOrigion(region, bucket, key, maxKeys, minKeys, marker) {
       const df = $q.defer();
 
       getClient({ region: region, bucket: bucket }).then((client) => {
-        const t = [],
-              t_pre = [],
+        const t = [], t_pre = [],
               opt = {
                 Bucket: bucket,
                 Prefix: key,
                 Delimiter: "/",
                 Marker: marker || "",
-                MaxKeys: 1000
+                MaxKeys: maxKeys,
               };
 
         listOnePage();
@@ -1041,13 +1040,14 @@ angular.module("web").factory("s3Client", [
               });
             }
 
-            if (t_pre.length + t.length >= 1000 || !result.NextMarker) {
+            if (t_pre.length + t.length >= minKeys || !result.NextMarker) {
               df.resolve({
                 data: t_pre.concat(t),
                 marker: result.NextMarker
               });
             } else {
               opt.Marker = result.NextMarker;
+              opt.MaxKeys = minKeys - t_pre.length - t.length;
               listOnePage();
             }
           });

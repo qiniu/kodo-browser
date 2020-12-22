@@ -211,6 +211,7 @@ module.exports = {
   "settings.WhetherExternalPathEnabled.msg": "Enable external link",
   "settings.StepByStepLoadingFiles": "File list loading step by step",
   "settings.WhetherStepByStepLoadingFiles.msg": "Enable file list loading step by step mode",
+  "settings.FilesLoadingSize": "Files loading count（Range: 1 - 1000）",
   "settings.system": "System Settings",
   "settings.isDebug": "Debug",
   "settings.isDebug.msg": "Enable debug log",

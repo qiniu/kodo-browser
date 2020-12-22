@@ -493,7 +493,9 @@ angular.module("web").controller("filesCtrl", [
         return;
       }
 
-      s3Client.listFiles(info.region, info.bucket, info.key, marker || "").then((result) => {
+      const filesLoadingSize = settingsSvs.filesLoadingSize.get();
+
+      s3Client.listFiles(info.region, info.bucket, info.key, filesLoadingSize, filesLoadingSize, marker || "").then((result) => {
         $timeout(() => {
           if (info.bucketName !== $scope.currentInfo.bucketName ||
               info.key !== $scope.currentInfo.key + $scope.sch.objectName) {

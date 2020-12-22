@@ -211,6 +211,7 @@ module.exports = {
   "settings.WhetherExternalPathEnabled.msg": "启用外部路径功能",
   "settings.StepByStepLoadingFiles": "文件列表分步加载",
   "settings.WhetherStepByStepLoadingFiles.msg": "开启文件列表分步加载模式",
+  "settings.FilesLoadingSize": "文件列表单次加载条数（范围：1 - 1000）",
   "settings.system": "系统设置",
   "settings.isDebug": "调试日志",
   "settings.isDebug.msg": "是否开启调试日志",

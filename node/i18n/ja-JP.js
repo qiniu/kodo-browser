@@ -211,6 +211,7 @@ module.exports = {
   "settings.WhetherExternalPathEnabled.msg": "外部リンクを有効にする",
   "settings.StepByStepLoadingFiles": "ステップごとのファイルリストのロード",
   "settings.WhetherStepByStepLoadingFiles.msg": "ステップバイステップモードでファイルリストの読み込みを有効にする",
+  "settings.FilesLoadingSize": "一度にロードされるファイルの数",
   "settings.system": "システム設定",
   "settings.isDebug": "デバッグログ",
   "settings.isDebug.msg": "デバッグログを開くかどうか",

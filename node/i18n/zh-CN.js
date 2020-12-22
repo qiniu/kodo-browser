@@ -13,6 +13,7 @@ module.exports = {
   "cn-south-1": "华南",
   "us-north-1": "北美",
   "ap-southeast-1": "东南亚",
+  "fog-cn-east-1": "雾存储-华东",
   "region.get.error": "获取失败",
   "config.parse.error": "解析配置文件出错",
   "config.format.error": "配置文件格式错误",

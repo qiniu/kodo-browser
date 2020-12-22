@@ -13,6 +13,7 @@ module.exports = {
   "cn-south-1": "華南",
   "us-north-1": "北米",
   "ap-southeast-1": "東南アジア",
+  "fog-cn-east-1": "フォグストレージ-華東",
   "region.get.error": "取得できませんでした",
   "config.parse.error": "設定ファイルの解析に失敗しました",
   "config.format.error": "設定ファイルに問題があります",

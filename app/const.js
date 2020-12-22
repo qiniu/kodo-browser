@@ -34,6 +34,11 @@ angular.module("web").factory("Const", [
         {
           id: "ap-southeast-1",
           endpoint: "https://s3-ap-southeast-1.qiniucs.com"
+        },
+        {
+          id: "fog-cn-east-1",
+          endpoint: "https://s3-fog-cn-east-1.qiniucs.com",
+          cannotCreateBucket: true,
         }
       ]
     };

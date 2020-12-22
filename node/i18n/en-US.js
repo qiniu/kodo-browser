@@ -13,6 +13,7 @@ module.exports = {
   "cn-south-1": "South China",
   "us-north-1": "North America",
   "ap-southeast-1": "Southeast Asia",
+  "fog-cn-east-1": "Fog Storage - East China",
   "region.get.error": "Failed to Get",
   "config.parse.error": "Failed to parse config file",
   "config.format.error": "Something is wrong in the config file",

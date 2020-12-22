@@ -4,7 +4,7 @@ angular.module('web')
       const T = $translate.instant,
             bucketACL = angular.copy(Const.bucketACL);
       angular.extend($scope, {
-        regions: regions,
+        regions: regions.filter((region) => !region.cannotCreateBucket),
         bucketACL: [], //angular.copy(Const.bucketACL),
         cancel: cancel,
         onSubmit: onSubmit,

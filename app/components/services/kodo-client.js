@@ -22,6 +22,7 @@ angular.module("web").factory("KodoClient", [
           'z2': 'cn-south-1',
           'na0': 'us-north-1',
           'as0': 'ap-southeast-1',
+          'fog-cn-east-1': 'fog-cn-east-1',
         },
         awsRegionID2KodoRegionID = {
           'cn-east-1': 'z0',
@@ -29,6 +30,7 @@ angular.module("web").factory("KodoClient", [
           'cn-south-1': 'z2',
           'us-north-1': 'na0',
           'ap-southeast-1': 'as0',
+          'fog-cn-east-1': 'fog-cn-east-1',
         },
         awsRegionID2RegionLabel = {
           'cn-east-1': 'East China',
@@ -36,6 +38,7 @@ angular.module("web").factory("KodoClient", [
           'cn-south-1': 'South China',
           'us-north-1': 'North America',
           'ap-southeast-1': 'Southeast Asia',
+          'fog-cn-east-1': 'Fog Storage - East China',
         };
 
     return {
@@ -101,6 +104,9 @@ angular.module("web").factory("KodoClient", [
           const idLabel = {id: region.id, label: region.label};
           if (idLabel.label === null || idLabel.label === undefined) {
             idLabel.label = T(region.id);
+          }
+          if (region.cannotCreateBucket) {
+            idLabel.cannotCreateBucket = region.cannotCreateBucket;
           }
           idLabels.push(idLabel);
         });

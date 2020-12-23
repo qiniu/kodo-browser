@@ -1,0 +1,30 @@
+on: [push]
+name: Test Build
+jobs:
+  build-on-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '11.x'
+      - name: install wine
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -yqq
+          sudo apt-get install -yqq wine32 wine64
+      - name: test
+        run: make i linux32 linux64 win32 win64
+  build-on-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '11.x'
+      - name: test
+        run: make i mac

@@ -22,7 +22,7 @@ angular.module('web')
         const item = angular.copy($scope.item);
 
         const newExternalPath = ExternalPath.new(item.path, item.regionId);
-        s3Client.listFiles(newExternalPath.regionId, newExternalPath.bucketId, newExternalPath.objectPrefix, 1, 0, '').then(() => {
+        s3Client.listFiles(newExternalPath.regionId, newExternalPath.bucketId, newExternalPath.objectPrefix, 1, '').then(() => {
           ExternalPath.create(item.path, item.regionId).then(() => {
             AuditLog.log('addExternalPath', {
               path: item.path,

@@ -471,20 +471,20 @@ angular.module("web").controller("filesCtrl", [
 
       info = info || angular.copy($scope.currentInfo);
 
-      tryListFiles(info, null, (err, files) => {
-        $scope.isLoading = false;
-
+      tryListFiles(info, null, (err, files, append) => {
         if (info.bucketName !== $scope.currentInfo.bucketName ||
             info.key !== $scope.currentInfo.key + $scope.sch.objectName) {
           return;
         }
+
+        $scope.isLoading = false;
 
         if (err) {
           Toast.error(JSON.stringify(err));
           return;
         }
 
-        showFilesTable(files);
+        showFilesTable(files, append);
       });
     }
 
@@ -494,42 +494,52 @@ angular.module("web").controller("filesCtrl", [
       }
 
       const filesLoadingSize = settingsSvs.filesLoadingSize.get();
+      let loadedCountInThisPage = 0, loadedCount = 0;
 
-      s3Client.listFiles(info.region, info.bucket, info.key, filesLoadingSize, filesLoadingSize, marker || "").then((result) => {
-        $timeout(() => {
-          if (info.bucketName !== $scope.currentInfo.bucketName ||
-              info.key !== $scope.currentInfo.key + $scope.sch.objectName) {
-            return;
-          }
-
-          const nextObjectsMarker = result.marker || null;
-          if (nextObjectsMarker && !nextObjectsMarker.startsWith(info.key)) {
-            return;
-          } else {
-            $scope.nextObjectsMarker = nextObjectsMarker;
-            $scope.nextObjectsMarkerInfo = info;
-          }
-
-          $scope.objects = $scope.objects.concat(result.data);
-
-          if ($scope.nextObjectsMarker) {
-            if (!$scope.stepByStepLoadingFiles()) {
-              $timeout(function() {
-                tryLoadMore(info, nextObjectsMarker);
-              }, 100);
+      function tryListFilesForThisPage(maxKeys, marker, fn) {
+        s3Client.listFiles(info.region, info.bucket, info.key, maxKeys, marker || '').then((result) => {
+          $timeout(() => {
+            if (info.bucketName !== $scope.currentInfo.bucketName ||
+                info.key !== $scope.currentInfo.key + $scope.sch.objectName) {
+              return;
             }
-          }
+
+            const nextObjectsMarker = result.marker || null;
+            if (nextObjectsMarker && !nextObjectsMarker.startsWith(info.key)) {
+              return;
+            }
+
+            $scope.objects = $scope.objects.concat(result.data);
+            loadedCountInThisPage += result.data.length;
+
+            if (nextObjectsMarker) {
+              if (filesLoadingSize > loadedCountInThisPage) {
+                tryListFilesForThisPage(filesLoadingSize - loadedCountInThisPage, nextObjectsMarker, fn);
+                return;
+              }
+
+              $scope.nextObjectsMarker = nextObjectsMarker;
+              $scope.nextObjectsMarkerInfo = info;
+
+              if (!$scope.stepByStepLoadingFiles()) {
+                $timeout(function() {
+                  tryLoadMore(info, nextObjectsMarker);
+                }, 100);
+              }
+            }
+          });
+
+          if (fn) fn(null, result.data, loadedCount > 0);
+          loadedCount += 1;
+        }, (err) => {
+          console.error(`list files: kodo://${info.bucketName}/${info.key}?marker=${marker}`, err);
+
+          clearFilesList();
+          if (fn) fn(err);
         });
+      }
 
-        if (fn) fn(null, result.data);
-
-      }, (err) => {
-        console.error(`list files: kodo://${info.bucketName}/${info.key}?marker=${marker}`, err);
-
-        clearFilesList();
-
-        if (fn) fn(err);
-      });
+      tryListFilesForThisPage(filesLoadingSize, marker, fn);
     }
 
     var lastObjectsMarkerForLoadMore = null; // 最近一次点击 Load More 时的 nextObjectsMarker
@@ -539,6 +549,7 @@ angular.module("web").controller("filesCtrl", [
           tryLoadMore($scope.nextObjectsMarkerInfo, $scope.nextObjectsMarker, {
             starting: () => {
               $scope.isLoading = true;
+              $scope.nextObjectsMarker = null;
             },
             completed: () => {
               $scope.isLoading = false;

@@ -927,10 +927,10 @@ angular.module("web").factory("s3Client", [
       return df.promise;
     }
 
-    function listFiles(region, bucket, key, maxKeys, minKeys, marker) {
+    function listFiles(region, bucket, key, maxKeys, marker) {
       const df = $q.defer();
 
-      _listFilesOrigion(region, bucket, key, maxKeys, minKeys, marker).then(function (result) {
+      _listFilesOrigion(region, bucket, key, maxKeys, marker).then(function (result) {
         const arr = result.data;
         if (arr && arr.length) {
           $timeout(() => { loadStorageStatus(region, bucket, arr); }, NEXT_TICK);
@@ -975,7 +975,7 @@ angular.module("web").factory("s3Client", [
       return df.promise;
     }
 
-    function _listFilesOrigion(region, bucket, key, maxKeys, minKeys, marker) {
+    function _listFilesOrigion(region, bucket, key, maxKeys, marker) {
       const df = $q.defer();
 
       getClient({ region: region, bucket: bucket }).then((client) => {
@@ -988,70 +988,60 @@ angular.module("web").factory("s3Client", [
                 MaxKeys: maxKeys,
               };
 
-        listOnePage();
+        client.listObjects(opt, function (err, result) {
+          if (err) {
+            handleError(err);
+            df.reject(err);
+            return;
+          }
 
-        function listOnePage() {
-          client.listObjects(opt, function (err, result) {
-            if (err) {
-              handleError(err);
-              df.reject(err);
-              return;
-            }
+          let prefix = opt.Prefix;
+          if (!prefix.endsWith("/")) {
+            prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
+          }
 
-            let prefix = opt.Prefix;
-            if (!prefix.endsWith("/")) {
-              prefix = prefix.substring(0, prefix.lastIndexOf("/") + 1);
-            }
-
-            //目录
-            if (result.CommonPrefixes) {
-              result.CommonPrefixes.forEach(function (n) {
-                n = n.Prefix;
-                t_pre.push({
-                  name: n.substring(prefix.length).replace(/(\/$)/, ""),
-                  path: n,
-                  isFolder: true,
-                  itemType: "folder"
-                });
+          //目录
+          if (result.CommonPrefixes) {
+            result.CommonPrefixes.forEach(function (n) {
+              n = n.Prefix;
+              t_pre.push({
+                name: n.substring(prefix.length).replace(/(\/$)/, ""),
+                path: n,
+                isFolder: true,
+                itemType: "folder"
               });
-            }
+            });
+          }
 
-            //文件
-            if (result["Contents"]) {
-              const ONE_HOUR = 60 * 60 * 1000; // ms
+          //文件
+          if (result["Contents"]) {
+            const ONE_HOUR = 60 * 60 * 1000; // ms
 
-              result["Contents"].forEach(function (n) {
-                n.Prefix = n.Prefix || "";
+            result["Contents"].forEach(function (n) {
+              n.Prefix = n.Prefix || "";
 
-                if (!opt.Prefix.endsWith("/") || n.Key != opt.Prefix) {
-                  n.isFile = true;
-                  n.itemType = "file";
-                  n.path = n.Key;
-                  n.name = n.Key.substring(prefix.length);
-                  n.size = n.Size;
-                  n.storageClass = n.StorageClass;
-                  n.type = n.Type;
-                  n.lastModified = n.LastModified;
-                  n.url = getS3Url(region, opt.Bucket, n.Key);
-                  n.WithinFourHours = (((new Date()) - n.LastModified) <= 4 * ONE_HOUR);
+              if (!opt.Prefix.endsWith("/") || n.Key != opt.Prefix) {
+                n.isFile = true;
+                n.itemType = "file";
+                n.path = n.Key;
+                n.name = n.Key.substring(prefix.length);
+                n.size = n.Size;
+                n.storageClass = n.StorageClass;
+                n.type = n.Type;
+                n.lastModified = n.LastModified;
+                n.url = getS3Url(region, opt.Bucket, n.Key);
+                n.WithinFourHours = (((new Date()) - n.LastModified) <= 4 * ONE_HOUR);
 
-                  t.push(n);
-                }
-              });
-            }
+                t.push(n);
+              }
+            });
+          }
 
-            if (t_pre.length + t.length >= minKeys || !result.NextMarker) {
-              df.resolve({
-                data: t_pre.concat(t),
-                marker: result.NextMarker
-              });
-            } else {
-              opt.Marker = result.NextMarker;
-              opt.MaxKeys = minKeys - t_pre.length - t.length;
-              listOnePage();
-            }
+          df.resolve({
+            data: t_pre.concat(t),
+            marker: result.NextMarker
           });
-        }
+        });
       }, (err) => {
         handleError(err);
         df.reject(err);

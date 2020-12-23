@@ -185,7 +185,7 @@ angular.module("web").factory("s3DownloadMgr", [
           // list all files under s3info.path
           function tryLoadFiles(marker) {
             s3Client
-              .listFiles(s3info.region, s3info.bucket, s3info.path, 1000, 0, marker)
+              .listFiles(s3info.region, s3info.bucket, s3info.path, 1000, marker)
               .then((result) => {
                 var files = result.data;
                 files.forEach((f) => {

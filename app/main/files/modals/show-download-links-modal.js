@@ -127,7 +127,7 @@ angular.module('web')
 
         function loadFilesFromDirectory(item, handleItems, doneCallback, marker) {
           s3Client
-            .listFiles(region, bucket, item.path, 1000, 0, marker)
+            .listFiles(region, bucket, item.path, 1000, marker)
             .then((result) => {
                 handleItems(result.data || []);
                 if (result.marker) {

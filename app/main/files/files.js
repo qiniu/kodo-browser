@@ -1300,7 +1300,11 @@ angular.module("web").controller("filesCtrl", [
             field: 'name',
             title: T('bucket.name'),
             formatter: (val, row, idx, field) => {
-              return `<i class="fa fa-database text-warning"></i> <a href=""><span>${val}</span></a>`;
+              let className = '';
+              if (row.grantedPermission) {
+                className = `bucket-${row.grantedPermission}`;
+              }
+              return `<i class="fa fa-database text-warning"></i>&nbsp;<a href=""><span class="bucket-name ${className}">${val}</span></a>`;
             },
             events: {
               'click a': (evt, val, row, idx) => {
@@ -1360,6 +1364,14 @@ angular.module("web").controller("filesCtrl", [
         });
 
         $list.bootstrapTable('load', buckets).bootstrapTable('uncheckAll');
+        angular.forEach($('#bucket-list tbody tr .bucket-name.bucket-readonly'), (row) => {
+          $(row).tooltip('destroy');
+          $(row).tooltip({ delay: 0, title: T('privilege.readonly'), trigger: 'hover' });
+        });
+        angular.forEach($('#bucket-list tbody tr .bucket-name.bucket-readwrite'), (row) => {
+          $(row).tooltip('destroy');
+          $(row).tooltip({ delay: 0, title: T('privilege.readwrite'), trigger: 'hover' });
+        });
       }, (err) => {
         console.error(err);
         Toast.error(err);

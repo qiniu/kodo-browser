@@ -730,7 +730,7 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showAddFolder() {
-      if ($scope.currentInfo.bucketGrantedPermission) {
+      if ($scope.currentInfo.bucketGrantedPermission === 'readonly') {
         Toast.error(T('permission.denied'));
         return;
       }
@@ -836,7 +836,7 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showRename(item) {
-      if ($scope.currentInfo.bucketGrantedPermission) {
+      if ($scope.currentInfo.bucketGrantedPermission === 'readonly') {
         Toast.error(T('permission.denied'));
         return;
       }
@@ -962,7 +962,7 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showMove(items, isCopy) {
-      if ($scope.currentInfo.bucketGrantedPermission) {
+      if ($scope.currentInfo.bucketGrantedPermission === 'readonly') {
         Toast.error(T('permission.denied'));
         return;
       }
@@ -1086,7 +1086,7 @@ angular.module("web").controller("filesCtrl", [
     }
 
     function showDeleteFiles(items) {
-      if ($scope.currentInfo.bucketGrantedPermission) {
+      if ($scope.currentInfo.bucketGrantedPermission === 'readonly') {
         Toast.error(T('permission.denied'));
         return;
       }
@@ -1210,7 +1210,7 @@ angular.module("web").controller("filesCtrl", [
     function showUploadDialog() {
       if (uploadDialog) return;
 
-      if ($scope.currentInfo.bucketGrantedPermission) {
+      if ($scope.currentInfo.bucketGrantedPermission === 'readonly') {
         Toast.error(T('permission.denied'));
         return;
       }
@@ -1231,11 +1231,6 @@ angular.module("web").controller("filesCtrl", [
 
     function showDownloadDialog() {
       if (downloadDialog) return;
-
-      if ($scope.currentInfo.bucketGrantedPermission) {
-        Toast.error(T('permission.denied'));
-        return;
-      }
 
       downloadDialog = true;
       $timeout(() => {

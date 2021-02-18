@@ -65,7 +65,7 @@ angular.module("web").factory("Config", ["$translate", "$timeout", "$q", "AuthIn
                             });
                             result.regions = config.regions.map((r) => {
                                 const region = new Region('', r.id, r.label);
-                                region.upUrls = [config.uc_url];
+                                region.ucUrls = [config.uc_url];
                                 region.s3Urls = [r.endpoint];
                                 return region;
                             });

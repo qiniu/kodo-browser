@@ -517,12 +517,8 @@ angular.module("web").controller("filesCtrl", [
           }
 
           const nextObjectsMarker = result.marker || null;
-          if (nextObjectsMarker && !nextObjectsMarker.startsWith(info.key)) {
-            return;
-          } else {
-            $scope.nextObjectsMarker = nextObjectsMarker;
-            $scope.nextObjectsMarkerInfo = info;
-          }
+          $scope.nextObjectsMarker = nextObjectsMarker;
+          $scope.nextObjectsMarkerInfo = info;
 
           $scope.objects = $scope.objects.concat(result.data);
 

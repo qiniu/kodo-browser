@@ -23,6 +23,7 @@ angular.module("web").factory("Auth", [
 
     function logout() {
       return new Promise((resolve) => {
+        QiniuClient.clearAllCache();
         const { ipcRenderer } = require('electron');
         AuthInfo.remove();
         ipcRenderer.send('asynchronous', { key: 'clearCache' });

@@ -52,6 +52,7 @@ angular.module('web').factory('QiniuClient', [
       signatureUrl: signatureUrl,
       getRegions: getRegions,
       clientBackendMode: clientBackendMode,
+      clearAllCache: clearAllCache,
     };
 
     function isQueryRegionAPIAvaiable(ucUrl) {
@@ -546,6 +547,21 @@ angular.module('web').factory('QiniuClient', [
         s3AdaptersCache[cacheKey] = s3Client;
         return s3Client;
       }
+    }
+
+    function clearAllCache() {
+        Object.keys(s3AdaptersCache).forEach((key) => {
+          s3AdaptersCache[key].clearCache();
+          delete s3AdaptersCache[key];
+        });
+        Object.keys(kodoAdaptersCache).forEach((key) => {
+          kodoAdaptersCache[key].clearCache();
+          delete kodoAdaptersCache[key];
+        });
+        Object.keys(regionServicesCache).forEach((key) => {
+          regionServicesCache[key].clearCache();
+          delete regionServicesCache[key];
+        });
     }
 
     function debugRequest(mode) {

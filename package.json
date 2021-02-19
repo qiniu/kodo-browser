@@ -95,7 +95,7 @@
     "downloads-folder": "^1.0.3",
     "js-base64": "^3.4.5",
     "js-md5": "^0.7.3",
-    "kodo-s3-adapter-sdk": "^0.1.40",
+    "kodo-s3-adapter-sdk": "^0.1.41",
     "mime": "^2.3.1",
     "moment": "^2.22.2",
     "request": "^2.88.0",

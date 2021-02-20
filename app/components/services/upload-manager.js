@@ -371,7 +371,9 @@ angular.module("web").factory("UploadMgr", [
         if (!job.uploadedParts) {
           job.uploadedParts = [];
         }
-        job.uploadedParts = job.uploadedParts.map((part) => {
+        job.uploadedParts = job.uploadedParts.
+          filter(part => part && part.PartNumber && part.ETag).
+          map((part) => {
           return { partNumber: part.PartNumber, etag: part.ETag };
         });
       });

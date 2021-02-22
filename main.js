@@ -160,17 +160,35 @@ let createWindow = () => {
   win.on("beforeunload", confirmForWorkers);
 
   let focused = true, shown = true;
+
+  const registerOrUnregisterShortcutForDevTools = () => {
+    if (process.env.NODE_ENV != "development") {
+      const shortcut = 'CommandOrControl+Alt+I';
+      if (shown && focused && !globalShortcut.isRegistered(shortcut)) {
+        globalShortcut.register(shortcut, () => {
+          win.webContents.toggleDevTools();
+        });
+      } else if (globalShortcut.isRegistered(shortcut)) {
+        globalShortcut.unregister(shortcut);
+      }
+    }
+  };
+
   win.on("blur", function() {
     focused = false;
+    registerOrUnregisterShortcutForDevTools();
   });
   win.on("focus", function() {
     focused = true;
+    registerOrUnregisterShortcutForDevTools();
   });
   win.on("show", function() {
     shown = true;
+    registerOrUnregisterShortcutForDevTools();
   });
   win.on("hide", function() {
     shown = false;
+    registerOrUnregisterShortcutForDevTools();
   });
   win.on("close", confirmForWorkers);
 
@@ -203,14 +221,6 @@ let createWindow = () => {
     console.log("run on macos in production");
     // Create the Application's main menu
     Menu.setApplicationMenu(Menu.buildFromTemplate(getMenuTemplate()));
-  }
-
-  if (process.env.NODE_ENV != "development") {
-    globalShortcut.register('CommandOrControl+Alt+I', () => {
-      if (shown && focused) {
-        win.webContents.openDevTools();
-      }
-    });
   }
 };
 

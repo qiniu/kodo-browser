@@ -139,7 +139,8 @@ angular.module("web").controller("topCtrl", [
                       }
                       AuditLog.log('switchAccount', { from: originalAccessKeyId });
                       Toast.success(T("login.successfully"), 1000);
-                      $rootScope.$broadcast("gotoKodoAddress", "kodo://");
+                      const { ipcRenderer } = require('electron');
+                      ipcRenderer.send('asynchronous', { key: 'reloadWindow' });
                     },
                     function (err) {
                       Toast.error(err.message, 5000);

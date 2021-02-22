@@ -239,6 +239,10 @@ ipcMain.on("asynchronous", (event, data) => {
     win.webContents.openDevTools();
     break;
 
+  case "reloadWindow":
+    win.webContents.reload();
+    break;
+
   case "clearCache":
     win.webContents.session.clearCache(() => {
       console.info('cache cleared');

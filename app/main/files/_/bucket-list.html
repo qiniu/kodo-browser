@@ -11,7 +11,9 @@
            ng-class="{'active':bucket_sel.name==item.name}"
            ng-click="selectBucket(item);$event.stopPropagation()"
            ng-dblclick="gotoAddress(item.name);$event.stopPropagation()">
-        <i class="fa fa-database text-warning"></i>
+        <i class="fa fa-database text-warning" ng-if="!item.grantedPermission"></i>
+        <i class="text-warning pull-left" ng-if="item.grantedPermission==='readonly'"><img style="display: block; height: 32px; margin: 4px 7px;" src="icons/buckets/zhidu.png" /></i>
+        <i class="text-warning pull-left" ng-if="item.grantedPermission==='readwrite'"><img style="display: block; height: 32px; margin: 4px 7px;" src="icons/buckets/duxie.png" /></i>
         <div class="item-block-name" uib-tooltip-html="'<div class=\'break\'>'+item.name+'</div>'" tooltip-append-to-body="true">{{item.name}}</div>
         <div class="item-block-desc">{{translateRegionName(item.region)}}</div>
       </div>

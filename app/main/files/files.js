@@ -1296,11 +1296,13 @@ angular.module("web").controller("filesCtrl", [
             field: 'name',
             title: T('bucket.name'),
             formatter: (val, row, idx, field) => {
-              let className = '';
-              if (row.grantedPermission) {
-                className = `bucket-${row.grantedPermission}`;
+              if (row.grantedPermission === 'readonly') {
+                return `<i class="text-warning"><img src="icons/buckets/zhidu.png" style="display: inline-block; height: 15px;" /></i>&nbsp;<a href=""><span class="bucket-name bucket-readonly">${val}</span></a>`;
+              } else if (row.grantedPermission === 'readwrite') {
+                return `<i class="text-warning"><img src="icons/buckets/duxie.png" style="display: inline-block; height: 15px;" /></i>&nbsp;<a href=""><span class="bucket-name bucket-readwrite">${val}</span></a>`;
+              } else {
+                return `<i class="fa fa-database text-warning"></i>&nbsp;<a href=""><span class="bucket-name">${val}</span></a>`;
               }
-              return `<i class="fa fa-database text-warning"></i>&nbsp;<a href=""><span class="bucket-name ${className}">${val}</span></a>`;
             },
             events: {
               'click a': (evt, val, row, idx) => {

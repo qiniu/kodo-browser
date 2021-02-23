@@ -341,26 +341,28 @@ angular.module("web").factory("UploadMgr", [
         if (!job.uploadedParts) {
           job.uploadedParts = [];
         }
-        const fileStat = fs.statSync(job.from.path, { throwIfNoEntry: false });
-        if (!fileStat) return;
 
-        job.from.size = fileStat.size;
-        job.from.mtime = fileStat.mtimeMs;
+        if (fs.existsSync(job.from.path)) {
+          const fileStat = fs.statSync(job.from.path);
 
-        t[job.id] = {
-          region: job.region,
-          to: job.to,
-          from: job.from,
-          prog: job.prog,
-          status: job.status,
-          message: job.message,
-          uploadedId: job.uploadedId,
-          uploadedParts: job.uploadedParts.map((part) => {
-            return { PartNumber: part.partNumber, ETag: part.etag };
-          }),
-          overwrite: job.overwrite,
-          backendMode: job.backendMode,
-        };
+          job.from.size = fileStat.size;
+          job.from.mtime = fileStat.mtimeMs;
+
+          t[job.id] = {
+            region: job.region,
+            to: job.to,
+            from: job.from,
+            prog: job.prog,
+            status: job.status,
+            message: job.message,
+            uploadedId: job.uploadedId,
+            uploadedParts: job.uploadedParts.map((part) => {
+              return { PartNumber: part.partNumber, ETag: part.etag };
+            }),
+            overwrite: job.overwrite,
+            backendMode: job.backendMode,
+          };
+        }
       });
 
       fs.writeFileSync(getProgFilePath(), JSON.stringify(t));
@@ -383,9 +385,11 @@ angular.module("web").factory("UploadMgr", [
           return { partNumber: part.PartNumber, etag: part.ETag };
         });
         if (job.from && job.from.size && job.from.mtime) {
-          const fileStat = fs.statSync(job.from.path, { throwIfNoEntry: false });
-          if (fileStat && fileStat.size === job.from.size && job.from.mtime === fileStat.mtimeMs) {
-            return;
+          if (fs.existsSync(job.from.path)) {
+            const fileStat = fs.statSync(job.from.path);
+            if (fileStat.size === job.from.size && job.from.mtime === fileStat.mtimeMs) {
+              return;
+            }
           }
         }
         job.uploadedParts = [];

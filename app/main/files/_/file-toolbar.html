@@ -17,7 +17,7 @@
         <i class="glyphicon glyphicon-cloud-upload text-info"></i>
         {{'upload'|translate}}
       </button>
-      <button type="button" class="btn btn-default btn-sm" ng-click="showDownloadDialog()" ng-disabled=" currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0 || !domains || domains.length === 0">
+      <button type="button" class="btn btn-default btn-sm" ng-click="showDownloadDialog()" ng-disabled="sel.has.length === 0 || !domains || domains.length === 0">
         <i class="glyphicon glyphicon-cloud-download text-primary"></i>
         {{'download'|translate}}
       </button>

@@ -171,9 +171,13 @@ angular.module('web').factory('QiniuClient', [
     }
 
     function headFile(region, bucket, key, opt) {
-      return getDefaultClient(opt)
-                .getObjectInfo(region, { bucket: bucket, key: key })
-                .catch(handleError);
+      let promise = getDefaultClient(opt)
+                      .getObjectInfo(region, { bucket: bucket, key: key });
+      if (!opt.ignoreError) {
+        promise = promise.catch(handleError);
+      }
+      delete opt.ignoreError;
+      return promise;
     }
 
     function getContent(region, bucket, key, domain, opt) {

@@ -164,12 +164,16 @@ let createWindow = () => {
   const registerOrUnregisterShortcutForDevTools = () => {
     if (process.env.NODE_ENV != "development") {
       const shortcut = 'CommandOrControl+Alt+I';
-      if (shown && focused && !globalShortcut.isRegistered(shortcut)) {
-        globalShortcut.register(shortcut, () => {
-          win.webContents.toggleDevTools();
-        });
-      } else if (globalShortcut.isRegistered(shortcut)) {
-        globalShortcut.unregister(shortcut);
+      if (shown && focused) {
+        if (!globalShortcut.isRegistered(shortcut)) {
+          globalShortcut.register(shortcut, () => {
+            win.webContents.toggleDevTools();
+          });
+        }
+      } else {
+        if (globalShortcut.isRegistered(shortcut)) {
+          globalShortcut.unregister(shortcut);
+        }
       }
     }
   };

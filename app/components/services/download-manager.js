@@ -401,7 +401,7 @@ angular.module("web").factory("DownloadMgr", [
 
       const promises = Object.entries(progs).map(([jobId, job]) => {
         return new Promise((resolve) => {
-          QiniuClient.headFile(job.region, job.from.bucket, job.from.key).then((info) => {
+          QiniuClient.headFile(job.region, job.from.bucket, job.from.key, { ignoreError: true }).then((info) => {
             if (info.size !== job.from.size || info.lastModified.toISOString() !== job.from.mtime) {
               if (job.prog) {
                 delete job.prog.synced;

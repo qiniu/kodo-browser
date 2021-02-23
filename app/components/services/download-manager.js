@@ -43,12 +43,14 @@ angular.module("web").factory("DownloadMgr", [
       $scope = scope;
       $scope.lists.downloadJobList = [];
 
-      angular.forEach(tryLoadProg(), (prog) => {
-        const job = createJob(prog);
-        if (job.status === "waiting" || job.status === "running") {
-          job.stop();
-        }
-        addEvents(job);
+      tryLoadProg().then((progs) => {
+        angular.forEach(progs, (prog) => {
+          const job = createJob(prog);
+          if (job.status === "waiting" || job.status === "running") {
+            job.stop();
+          }
+          addEvents(job);
+        });
       });
     }
 
@@ -248,6 +250,8 @@ angular.module("web").factory("DownloadMgr", [
               from: {
                 bucket: qiniuInfo.bucket,
                 key: qiniuInfo.path,
+                size: qiniuInfo.size,
+                mtime: qiniuInfo.lastModified.toISOString(),
               },
               to: {
                 name: fileName,
@@ -346,12 +350,13 @@ angular.module("web").factory("DownloadMgr", [
             concurrency++;
 
             if (job.prog.resumable) {
-              var progs = tryLoadProg();
-              if (progs && progs[job.id]) {
-                job.start(progs[job.id]);
-              } else {
-                job.start();
-              }
+              tryLoadProg().then((progs) => {
+                if (progs && progs[job.id]) {
+                  job.start(progs[job.id]);
+                } else {
+                  job.start();
+                }
+              });
             } else {
               job.start();
             }
@@ -388,13 +393,33 @@ angular.module("web").factory("DownloadMgr", [
      * resolve prog saved
      */
     function tryLoadProg() {
+      let progs = {};
       try {
-        var data = fs.readFileSync(getDownProgFilePath());
-
-        return JSON.parse(data ? data.toString() : "[]");
+        const data = fs.readFileSync(getDownProgFilePath());
+        progs = JSON.parse(data);
       } catch (e) {}
 
-      return [];
+      const promises = Object.entries(progs).map(([jobId, job]) => {
+        return new Promise((resolve) => {
+          QiniuClient.headFile(job.region, job.from.bucket, job.from.key).then((info) => {
+            if (info.size !== job.from.size || info.lastModified.toISOString() !== job.from.mtime) {
+              if (job.prog) {
+                delete job.prog.synced;
+              }
+            }
+            resolve();
+          }).catch(() => {
+            if (job.prog) {
+              delete job.prog.synced;
+            }
+            resolve();
+          });
+        });
+      });
+
+      return new Promise((resolve) => {
+        Promise.all(promises).then(() => { resolve(progs); });
+      });
     }
 
     // prog save path

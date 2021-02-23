@@ -173,8 +173,9 @@ angular.module("web").factory("UploadMgr", [
         var filePath = path.relative(dirPath, absPath);
 
         filePath = bucketInfo.key ? bucketInfo.key + "/" + filePath : filePath;
+        const fileStat = fs.statSync(absPath);
 
-        if (fs.statSync(absPath).isDirectory()) {
+        if (fileStat.isDirectory()) {
           //创建目录
           var subDirPath = path.normalize(filePath + "/");
           if (path.sep == "\\") {
@@ -340,6 +341,11 @@ angular.module("web").factory("UploadMgr", [
         if (!job.uploadedParts) {
           job.uploadedParts = [];
         }
+        const fileStat = fs.statSync(job.from.path, { throwIfNoEntry: false });
+        if (!fileStat) return;
+
+        job.from.size = fileStat.size;
+        job.from.mtime = fileStat.mtimeMs;
 
         t[job.id] = {
           region: job.region,
@@ -376,6 +382,16 @@ angular.module("web").factory("UploadMgr", [
           map((part) => {
           return { partNumber: part.PartNumber, etag: part.ETag };
         });
+        if (job.from && job.from.size && job.from.mtime) {
+          const fileStat = fs.statSync(job.from.path, { throwIfNoEntry: false });
+          if (fileStat && fileStat.size === job.from.size && job.from.mtime === fileStat.mtimeMs) {
+            return;
+          }
+        }
+        job.uploadedParts = [];
+        if (job.prog) {
+          delete job.prog.loaded;
+        }
       });
 
       return progs;

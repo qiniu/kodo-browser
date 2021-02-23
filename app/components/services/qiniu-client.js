@@ -30,6 +30,7 @@ angular.module('web').factory('QiniuClient', [
       checkFileExists: checkFileExists,
       checkFolderExists: checkFolderExists,
       getFrozenInfo: getFrozenInfo,
+      headFile: headFile,
 
       getContent: getContent,
       saveContent: saveContent,
@@ -166,6 +167,12 @@ angular.module('web').factory('QiniuClient', [
     function getFrozenInfo(region, bucket, key, opt) {
       return getDefaultClient(opt)
                 .getFrozenInfo(region, { bucket: bucket, key: key })
+                .catch(handleError);
+    }
+
+    function headFile(region, bucket, key, opt) {
+      return getDefaultClient(opt)
+                .getObjectInfo(region, { bucket: bucket, key: key })
                 .catch(handleError);
     }
 

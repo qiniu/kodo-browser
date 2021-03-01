@@ -73,15 +73,30 @@ angular.module('web').factory('QiniuClient', [
     }
 
     function listAllBuckets(opt) {
-      return getDefaultClient(opt).listBuckets().catch(handleError);
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt).listBuckets().then(resolve).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function createBucket(region, bucket, opt) {
-      return getDefaultClient(opt).createBucket(region, bucket).catch(handleError);
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt).createBucket(region, bucket).then(resolve).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function deleteBucket(region, bucket, opt) {
-      return getDefaultClient(opt).deleteBucket(region, bucket).catch(handleError);
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt).deleteBucket(region, bucket).then(resolve).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function listFiles(region, bucket, key, marker, opt) {
@@ -126,12 +141,20 @@ angular.module('web').factory('QiniuClient', [
             });
           }
           resolve({ data: items, marker: listedObjects.nextContinuationToken });
-        }, reject).catch(handleError);
+        }).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
       });
     }
 
     function listDomains(region, bucket, opt) {
-      return getDefaultClient(opt).listDomains(region, bucket).catch(handleError);
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt).listDomains(region, bucket).then(resolve).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function createFolder(region, bucket, prefix, opt) {
@@ -141,15 +164,24 @@ angular.module('web').factory('QiniuClient', [
         prefix = prefix.replace(/\\/g, '/');
       }
 
-      return getDefaultClient(opt)
-                .putObject(region, { bucket: bucket, key: prefix }, Buffer.alloc(0), basename)
-                .catch(handleError);
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt)
+          .putObject(region, { bucket: bucket, key: prefix }, Buffer.alloc(0), basename)
+          .then(resolve)
+          .catch((err) => {
+            handleError(err);
+            reject(err);
+          });
+      });
     }
 
     function checkFileExists(region, bucket, key, opt) {
-      return getDefaultClient(opt)
-                .isExists(region, { bucket: bucket, key: key })
-                .catch(handleError);
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt).isExists(region, { bucket: bucket, key: key }).then(resolve).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function checkFolderExists(region, bucket, prefix, opt) {
@@ -160,21 +192,30 @@ angular.module('web').factory('QiniuClient', [
           } else {
             resolve(false);
           }
-        }, reject);
-      }).catch(handleError);
+        }).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function getFrozenInfo(region, bucket, key, opt) {
-      return getDefaultClient(opt)
-                .getFrozenInfo(region, { bucket: bucket, key: key })
-                .catch(handleError);
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt).getFrozenInfo(region, { bucket: bucket, key: key }).then(resolve).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function headFile(region, bucket, key, opt) {
       let promise = getDefaultClient(opt)
                       .getObjectInfo(region, { bucket: bucket, key: key });
       if (!opt.ignoreError) {
-        promise = promise.catch(handleError);
+        promise = promise.catch((err) => {
+          handleError(err);
+          reject(err);
+        });
       }
       delete opt.ignoreError;
       return promise;
@@ -184,8 +225,11 @@ angular.module('web').factory('QiniuClient', [
       return new Promise((resolve, reject) => {
         getDefaultClient(opt).getObject(region, { bucket: bucket, key: key }, domain).then((result) => {
           resolve(result.data);
-        }, reject);
-      }).catch(handleError);
+        }).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function saveContent(region, bucket, key, content, opt) {
@@ -194,9 +238,15 @@ angular.module('web').factory('QiniuClient', [
         client.getObjectHeader(region, { bucket: bucket, key: key }).then((headers) => {
           client.putObject(region, { bucket: bucket, key: key },
             Buffer.from(content), { metadata: headers.metadata },
-          ).then(() => { resolve(); }, reject);
-        }, reject);
-      }).catch(handleError);
+          ).then(() => { resolve(); }).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
+        }).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function moveOrCopyFile(region, bucket, oldKey, newKey, isCopy, opt) {
@@ -206,19 +256,26 @@ angular.module('web').factory('QiniuClient', [
         to: { bucket: bucket, key: newKey },
       };
 
-      if (isCopy) {
-        return client.copyObject(region, transferObject).catch(handleError);
-      } else {
-        return client.moveObject(region, transferObject).catch((err) => {
-          if (err.code === 'AccessDenied' && err.stage === 'delete') {
-            Toast.error(T('permission.denied.move.error_when_delete', {
-              fromKey: oldKey, toKey: newKey,
-            }));
-            return;
-          }
-          handleError(err);
-        });
-      }
+      return new Promise((resolve, reject) => {
+        if (isCopy) {
+          return client.copyObject(region, transferObject).then(resolve).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
+        } else {
+          return client.moveObject(region, transferObject).then(resolve).catch((err) => {
+            if (err.code === 'AccessDenied' && err.stage === 'delete') {
+              Toast.error(T('permission.denied.move.error_when_delete', {
+                fromKey: oldKey, toKey: newKey,
+              }));
+              reject(err);
+              return;
+            }
+            handleError(err);
+            reject(err);
+          });
+        }
+      });
     }
 
     var stopCopyFilesFlag = false;
@@ -241,8 +298,11 @@ angular.module('web').factory('QiniuClient', [
         newProgressFn(progress);
 
         deepForEachItem(client, region, items, target, progress, newProgressFn, isCopy, renamePrefix, new Semaphore(3))
-          .then(resolve, reject)
-          .catch(handleError);
+          .then(resolve)
+          .catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
 
       function deepForEachItem(client, region, items, target, progress, progressFn, isCopy, renamePrefix, semaphore) {
@@ -305,7 +365,7 @@ angular.module('web').factory('QiniuClient', [
           return doCopyFolder(client, region, transferObject, progress, progressFn, isCopy, semaphore, moveOrCopyFileCallback);
         }));
         return new Promise((resolve, reject) => {
-          Promise.all(promises).then(() => { resolve(errorItems); }, reject);
+          Promise.all(promises).then(() => { resolve(errorItems); }).catch(reject);
         });
       }
 
@@ -358,8 +418,8 @@ angular.module('web').factory('QiniuClient', [
                 } else {
                   resolve();
                 }
-              }, reject);
-            }, reject);
+              }).catch(reject);
+            }).catch(reject);
           });
         }
       }
@@ -370,7 +430,12 @@ angular.module('web').factory('QiniuClient', [
     }
 
     function restoreFile(region, bucket, key, days, opt) {
-      return getDefaultClient(opt).unfreeze(region, { bucket: bucket, key: key }, days).catch(handleError);
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt).unfreeze(region, { bucket: bucket, key: key }, days).then(resolve).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     var stopDeleteFilesFlag = false;
@@ -456,8 +521,8 @@ angular.module('web').factory('QiniuClient', [
                 } else {
                   resolve();
                 }
-              }, reject);
-            }, reject);
+              }).catch(reject);
+            }).catch(reject);
           });
         }
       }
@@ -491,9 +556,15 @@ angular.module('web').factory('QiniuClient', [
       const deadline = new Date();
       deadline.setSeconds(deadline.getSeconds() + expires || 60);
 
-      return getDefaultClient(opt)
-              .getObjectURL(region, { bucket: bucket, key: key }, domain, deadline)
-              .catch(handleError);
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt)
+          .getObjectURL(region, { bucket: bucket, key: key }, domain, deadline)
+          .then(resolve)
+          .catch((err) => {
+            handleError(err);
+            reject(err);
+          });
+      });
     }
 
     function getRegions(opt) {

@@ -22,7 +22,8 @@ angular.module("web").factory("DownloadMgr", [
           path = require("path"),
           os = require("os"),
           sanitize = require("sanitize-filename"),
-          QiniuStore = require("./node/qiniu-store");
+          QiniuStore = require("./node/qiniu-store"),
+          { KODO_MODE } = require('kodo-s3-adapter-sdk');
 
     var $scope;
     var concurrency = 0;
@@ -401,7 +402,13 @@ angular.module("web").factory("DownloadMgr", [
 
       const promises = Object.entries(progs).map(([jobId, job]) => {
         return new Promise((resolve) => {
-          QiniuClient.headFile(job.region, job.from.bucket, job.from.key, { ignoreError: true }).then((info) => {
+          const options = { ignoreError: true };
+          if (job.backendMode == KODO_MODE) {
+            options.preferKodoAdapter = true;
+          } else {
+            options.preferS3Adapter = true;
+          }
+          QiniuClient.headFile(job.region, job.from.bucket, job.from.key, options).then((info) => {
             if (info.size !== job.from.size || info.lastModified.toISOString() !== job.from.mtime) {
               if (job.prog) {
                 delete job.prog.synced;

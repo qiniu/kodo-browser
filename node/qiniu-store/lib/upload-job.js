@@ -72,7 +72,7 @@ class UploadJob extends Base {
 }
 
 UploadJob.prototype.start = function (overwrite, prog) {
-  if (this.status === 'running') {
+  if (this.status === "running" || this.status === "finished") {
     return;
   }
 

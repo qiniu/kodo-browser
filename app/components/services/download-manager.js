@@ -337,32 +337,41 @@ angular.module("web").factory("DownloadMgr", [
       }
 
       if (concurrency < maxConcurrency) {
-        var jobs = $scope.lists.downloadJobList;
+        const jobs = $scope.lists.downloadJobList;
 
-        for (var i = 0; i < jobs.length; i++) {
-          if (concurrency >= maxConcurrency) return;
-
-          var job = jobs[i];
-          if (isDebug) {
-            console.log(`[JOB] sched ${job.status} => ${JSON.stringify(job._config)}`);
+        const startAllJobsFrom = (i) => {
+          if (i >= jobs.length) {
+            return;
+          }
+          if (concurrency >= maxConcurrency) {
+            return;
           }
 
-          if (job.status == "waiting") {
+          const job = jobs[i];
+          if (isDebug) {
+            console.log('[JOB] sched ', job.status, ' => ', job._config);
+          }
+          if (job.status === "waiting") {
             concurrency++;
 
             if (job.prog.resumable) {
-              tryLoadProg().then((progs) => {
-                if (progs && progs[job.id]) {
-                  job.start(progs[job.id]);
+              tryLoadProgForJob(job).then((prog) => {
+                if (prog) {
+                  job.start(prog);
                 } else {
                   job.start();
                 }
+              }).finally(() => {
+                startAllJobsFrom(i + 1);
               });
+              return;
             } else {
               job.start();
             }
           }
-        }
+          $timeout(() => { startAllJobsFrom(i + 1); });
+        };
+        startAllJobsFrom(0);
       }
     }
 
@@ -400,32 +409,35 @@ angular.module("web").factory("DownloadMgr", [
         progs = JSON.parse(data);
       } catch (e) {}
 
-      const promises = Object.entries(progs).map(([jobId, job]) => {
-        return new Promise((resolve) => {
-          const options = { ignoreError: true };
-          if (job.backendMode == KODO_MODE) {
-            options.preferKodoAdapter = true;
-          } else {
-            options.preferS3Adapter = true;
-          }
-          QiniuClient.headFile(job.region, job.from.bucket, job.from.key, options).then((info) => {
-            if (info.size !== job.from.size || info.lastModified.toISOString() !== job.from.mtime) {
-              if (job.prog) {
-                delete job.prog.synced;
-              }
-            }
-            resolve();
-          }).catch(() => {
+      if (!progs) {
+        return Promise.resolve([]);
+      }
+
+      const promises = Object.values(progs).map((job) => tryLoadProgForJob(job));
+      return Promise.all(promises);
+    }
+
+    function tryLoadProgForJob(job) {
+      return new Promise((resolve) => {
+        const options = { ignoreError: true };
+        if (job.backendMode == KODO_MODE) {
+          options.preferKodoAdapter = true;
+        } else {
+          options.preferS3Adapter = true;
+        }
+        QiniuClient.headFile(job.region, job.from.bucket, job.from.key, options).then((info) => {
+          if (info.size !== job.from.size || info.lastModified.toISOString() !== job.from.mtime) {
             if (job.prog) {
               delete job.prog.synced;
             }
-            resolve();
-          });
+          }
+          resolve(job);
+        }).catch(() => {
+          if (job.prog) {
+            delete job.prog.synced;
+          }
+          resolve(job);
         });
-      });
-
-      return new Promise((resolve) => {
-        Promise.all(promises).then(() => { resolve(progs); });
       });
     }
 

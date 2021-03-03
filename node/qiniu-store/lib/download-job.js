@@ -63,7 +63,7 @@ class DownloadJob extends Base {
 }
 
 DownloadJob.prototype.start = function (params) {
-  if (this.status == "running") return;
+  if (this.status === "running" || this.status === "finished") return;
 
   if (this.isDebug) {
     console.log(`Try downloading kodo://${this.from.bucket}/${this.from.key} to ${this.to.path}`);

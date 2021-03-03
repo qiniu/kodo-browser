@@ -1319,13 +1319,9 @@ angular.module("web").controller("filesCtrl", [
                 return T('region.get.error');
               }
               let regionLabel = undefined;
-              const region = regions.find((region) => region.s3Id === id && region.label);
+              const region = regions.find((region) => region.s3Id === id && region.translatedLabel);
               if (region) {
-                regionLabel = region.label;
-                const lang = $rootScope.langSettings.lang.replace('-', '_');
-                if (region.translatedLabels && region.translatedLabels[lang]) {
-                  regionLabel = region.translatedLabels[lang];
-                }
+                regionLabel = region.translatedLabel;
               }
               return regionLabel || T('region.unknown');
             }
@@ -1406,9 +1402,9 @@ angular.module("web").controller("filesCtrl", [
                 return T('region.get.error');
               }
               let regionLabel = undefined;
-              const region = regions.find((region) => region.s3Id === id && region.label);
+              const region = regions.find((region) => region.s3Id === id && region.translatedLabel);
               if (region) {
-                regionLabel = region.label;
+                regionLabel = region.translatedLabel;
               }
               return regionLabel || T('region.unknown');
             }

@@ -568,7 +568,24 @@ angular.module('web').factory('QiniuClient', [
     }
 
     function getRegions(opt) {
-      return getRegionService(opt).getAllRegions();
+      return new Promise((resolve, reject) => {
+        getRegionService(opt).getAllRegions().then((regions) => {
+          if (regions && regions.length > 0) {
+            const lang = $rootScope.langSettings.lang.replace('-', '_');
+            regions.forEach((region) => {
+              if (region.translatedLabels && region.translatedLabels[lang]) {
+                region.translatedLabel = region.translatedLabels[lang];
+              } else {
+                region.translatedLabel = region.label;
+              }
+            });
+          }
+          resolve(regions);
+        }).catch((err) => {
+          handleError(err);
+          reject(err);
+        });
+      });
     }
 
     function clientBackendMode(opt) {

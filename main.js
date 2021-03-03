@@ -576,6 +576,18 @@ ipcMain.on("asynchronous-job", (event, data) => {
 
     break;
 
+  case "job-stopall":
+    forkedWorkers.forEach((worker) => {
+      worker.send({
+        key: "stop"
+      });
+      worker.kill();
+    });
+
+    forkedWorkers = new Map();
+
+    break;
+
   default:
     event.sender.send(data.job, {
       job: data.job,

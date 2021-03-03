@@ -466,7 +466,7 @@ angular.module("web").controller("filesCtrl", [
         $scope.buckets = buckets;
         showBucketsTable(buckets);
         if (fn) fn(null);
-      }, (err) => {
+      }).catch((err) => {
         if (fn) fn(err);
       }).finally(() => {
         $scope.isLoading = false;
@@ -532,7 +532,7 @@ angular.module("web").controller("filesCtrl", [
         });
 
         if (fn) fn(null, result.data);
-      }, (err) => {
+      }).catch((err) => {
         console.error(`list files: kodo://${info.bucketName}/${info.key}?marker=${marker}`, err);
 
         clearFilesList();
@@ -600,7 +600,7 @@ angular.module("web").controller("filesCtrl", [
           showExternalPathsTable(externalPaths);
           if (fn) fn(null);
         });
-      }, (err) => {
+      }).catch((err) => {
         console.error("list external paths error", err);
         $timeout(() => {
           $scope.isLoading = false;
@@ -615,7 +615,7 @@ angular.module("web").controller("filesCtrl", [
         if (callback) {
           callback();
         }
-      }, (err) => {
+      }).catch((err) => {
         const callback = callbacks.error;
         if (callback) {
           callback(err);
@@ -1370,7 +1370,7 @@ angular.module("web").controller("filesCtrl", [
           $(row).tooltip('destroy');
           $(row).tooltip({ delay: 0, title: T('privilege.readwrite'), trigger: 'hover' });
         });
-      }, (err) => {
+      }).catch((err) => {
         console.error(err);
         Toast.error(err);
       })
@@ -1440,7 +1440,7 @@ angular.module("web").controller("filesCtrl", [
         });
 
         $list.bootstrapTable('load', externalPaths).bootstrapTable('uncheckAll');
-      }, (err) => {
+      }).catch((err) => {
         console.error(err);
         Toast.error(err);
       });

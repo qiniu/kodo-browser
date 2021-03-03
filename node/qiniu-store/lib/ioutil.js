@@ -181,12 +181,12 @@ class Client {
             eventEmitter.progressLoaded = eventEmitter.progressTotal;
             eventEmitter.emit('progress', eventEmitter);
             eventEmitter.emit('fileUploaded', eventEmitter);
-          }, handleError);
-        }, (err) => {
+          }).catch(handleError);
+        }).catch((err) => {
           err.retryable = false;
           handleError(err);
         });
-      }, (err) => {
+      }).catch((err) => {
         err.retryable = false;
         handleError(err);
       });
@@ -312,9 +312,7 @@ class Client {
         eventEmitter.progressLoaded = eventEmitter.progressTotal;
         eventEmitter.emit('progress', eventEmitter);
         eventEmitter.emit('fileDownloaded', eventEmitter);
-      }, (err) => {
-        handleError(err);
-      });
+      }).catch(handleError);
     }
 
     function handleError(err) {

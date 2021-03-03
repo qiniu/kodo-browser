@@ -126,26 +126,23 @@ angular.module("web").controller("loginCtrl", [
 
       Toast.info(T("logining"), 1000);
 
-      Auth.login(data).then(
-        function () {
-          if (isPublicCloud) {
-            AuthInfo.switchToPublicCloud();
-          } else {
-            AuthInfo.switchToPrivateCloud();
-          }
-
-          if (data.remember) {
-            AkHistory.add(isPublicCloud, data.id, data.secret, data.description);
-          }
-          AuditLog.log('login');
-          Toast.success(T("login.successfully"), 1000);
-          $location.url("/");
-        },
-        function (err) {
-          Toast.error(err.code + ":" + err.message, 5000);
-          Dialog.alert(T('auth.login.error.title'), T('auth.login.error.description'), null, 1);
+      Auth.login(data).then(() => {
+        if (isPublicCloud) {
+          AuthInfo.switchToPublicCloud();
+        } else {
+          AuthInfo.switchToPrivateCloud();
         }
-      );
+
+        if (data.remember) {
+          AkHistory.add(isPublicCloud, data.id, data.secret, data.description);
+        }
+        AuditLog.log('login');
+        Toast.success(T("login.successfully"), 1000);
+        $location.url("/");
+      }).catch((err) => {
+        Toast.error(err.code + ":" + err.message, 5000);
+        Dialog.alert(T('auth.login.error.title'), T('auth.login.error.description'), null, 1);
+      });
 
       return false;
     }

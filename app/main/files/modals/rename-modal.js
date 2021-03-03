@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('renameModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$uibModal', 'item', 'isCopy', 'currentInfo', 'moveTo', 'qiniuClientOpt', 'callback', 'QiniuClient', 'Dialog', 'Toast', 'AuditLog',
-    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, qiniuClientOpt, callback, QiniuClient, Dialog, Toast, AuditLog) {
+  .controller('renameModalCtrl', ['$scope', '$uibModalInstance', '$translate', '$uibModal', 'item', 'isCopy', 'currentInfo', 'moveTo', 'qiniuClientOpt', 'callback', 'QiniuClient', 'Dialog', 'Toast', 'AuditLog', 'safeApply',
+    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, qiniuClientOpt, callback, QiniuClient, Dialog, Toast, AuditLog, safeApply) {
       var T = $translate.instant;
       //console.log(item)
       angular.extend($scope, {
@@ -36,20 +36,22 @@ angular.module('web')
           if (item.path == newPath) return;
 
           $scope.isLoading = true;
-          QiniuClient.checkFolderExists(moveTo.regionId, moveTo.bucketName, newPath, qiniuClientOpt).then(function (has) {
+          QiniuClient.checkFolderExists(moveTo.regionId, moveTo.bucketName, newPath, qiniuClientOpt).then((has) => {
             if (has) {
               Dialog.confirm(title, msg1, function (b) {
                 if (b) {
                   showMoveFolder(newPath);
                 } else {
                   $scope.isLoading = false;
+                  safeApply($scope);
                 }
               });
             } else {
               showMoveFolder(newPath);
             }
-          }, function (err) {
+          }).catch((err) => {
             $scope.isLoading = false;
+            safeApply($scope);
           });
         } else {
           const newPath = moveTo.key == '' ? item.name : (moveTo.key.replace(/(\/$)/, '') + '/' + item.name);
@@ -63,6 +65,7 @@ angular.module('web')
                   renameFile(newPath);
                 } else {
                   $scope.isLoading = false;
+                  safeApply($scope);
                 }
               });
             } else {
@@ -93,6 +96,7 @@ angular.module('web')
           cancel();
         }).finally(() => {
           $scope.isLoading = false;
+          safeApply($scope);
         });
       }
 
@@ -125,6 +129,7 @@ angular.module('web')
               return function () {
                 Toast.success(successMsg);
                 $scope.isLoading = false;
+                safeApply($scope);
                 callback();
                 cancel();
               };

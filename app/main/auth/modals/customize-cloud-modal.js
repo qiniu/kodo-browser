@@ -55,7 +55,7 @@ angular.module('web')
               normalizeRegions();
             });
           }
-        }, (err) => {
+        }).catch((err) => {
           if (ucUrl === $scope.ucUrl) {
             $timeout(() => {
               $scope.queryAvailable = false;

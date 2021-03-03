@@ -33,11 +33,11 @@ angular.module('web')
             });
             callback();
             cancel();
-          }, (err) => {
+          }).catch((err) => {
             Toast.error(err);
             cancel();
           });
-        }, (err) => {
+        }).catch((err) => {
           Toast.error(err);
           cancel();
         })

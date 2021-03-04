@@ -201,11 +201,10 @@ angular.module("web").controller("transferDownloadsCtrl", [
               job.wait();
             }
 
-            DownloadMgr.trySchedJob();
-
             fn();
           },
           () => {
+            DownloadMgr.trySchedJob();
             $scope.allActionBtnDisabled = false;
           }
         );

@@ -79,7 +79,7 @@ angular.module("web").factory("Domains", [
       }
 
       deadlineRequired() {
-        return this.isPrivate;
+        return this.domain.private;
       }
 
       maxLifetime() {

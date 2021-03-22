@@ -1588,7 +1588,8 @@ angular.module("web").controller("filesCtrl", [
           }
         }],
         rowStyle: (row, idx) => {
-          if (row.WithinFourHours) {
+          const ONE_HOUR = 60 * 60 * 1000;
+          if (row.lastModified && ((new Date()) - row.lastModified) <= 4*ONE_HOUR) {
             return {
               classes: 'warning'
             };

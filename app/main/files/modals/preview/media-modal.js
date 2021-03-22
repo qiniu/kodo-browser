@@ -26,7 +26,7 @@ angular.module('web')
       }
 
       function genURL() {
-        selectedDomain.domain.signatureUrl(objectInfo.path).then((url) => {
+        selectedDomain.domain.signatureUrl(objectInfo.path, qiniuClientOpt).then((url) => {
           $scope.src_origin = url.toString();
           $scope.src = $sce.trustAsResourceUrl(url.toString());
 

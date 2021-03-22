@@ -990,6 +990,9 @@ angular.module("web").controller("filesCtrl", [
               domain: angular.copy($scope.selectedDomain.domain),
             };
           },
+          qiniuClientOpt: () => {
+            return getQiniuClientOpt();
+          },
           domains: () => {
             return angular.copy($scope.domains);
           },

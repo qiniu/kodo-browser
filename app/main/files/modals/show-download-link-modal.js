@@ -1,6 +1,6 @@
 angular.module('web')
-  .controller('showDownloadLinkModalCtrl', ['$scope', '$q', '$translate', '$uibModalInstance', 'safeApply', 'item', 'current', 'domains', 'showDomains', 'Toast', 'Domains',
-    function($scope, $q, $translate, $modalInstance, safeApply, item, current, domains, showDomains, Toast, Domains) {
+  .controller('showDownloadLinkModalCtrl', ['$scope', '$q', '$translate', '$uibModalInstance', 'safeApply', 'item', 'current', 'domains', 'showDomains', 'Toast', 'Domains', 'qiniuClientOpt',
+    function($scope, $q, $translate, $modalInstance, safeApply, item, current, domains, showDomains, Toast, Domains, qiniuClientOpt) {
       const { clipboard } = require('electron'),
                         T = $translate.instant;
 
@@ -51,7 +51,7 @@ angular.module('web')
       function onSubmit(form1){
         if(!form1.$valid) return;
 
-        $scope.current.domain.signatureUrl(item.path, $scope.info.sec).then((url) => {
+        $scope.current.domain.signatureUrl(item.path, $scope.info.sec, qiniuClientOpt).then((url) => {
           $scope.info.url = url.toString();
           safeApply($scope);
         });

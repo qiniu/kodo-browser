@@ -28,7 +28,7 @@ angular.module('web')
       }
 
       function getContent() {
-        selectedDomain.domain.signatureUrl(objectInfo.path).then((url) => {
+        selectedDomain.domain.signatureUrl(objectInfo.path, qiniuClientOpt).then((url) => {
           $timeout(() => {
             $scope.imgsrc = url.toString();
           });

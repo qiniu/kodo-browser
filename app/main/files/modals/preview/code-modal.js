@@ -51,7 +51,7 @@ angular.module('web')
 
       function getContent() {
         $scope.isLoading = true;
-        QiniuClient.getContent(bucketInfo.regionId, bucketInfo.bucketName, objectInfo.path, selectedDomain.domain.toQiniuDomain(), qiniuClientOpt).then((data) => {
+        selectedDomain.domain.getContent(objectInfo.path, qiniuClientOpt).then((data) => {
           const dataString = data.toString();
           $scope.originalContent = dataString;
           $scope.content = dataString;

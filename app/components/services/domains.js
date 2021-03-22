@@ -36,9 +36,15 @@ angular.module("web").factory("Domains", [
         return S3_MODE;
       }
 
-      signatureUrl(key, expires) {
+      signatureUrl(key, expires, opt) {
         expires = expires || this.maxLifetime();
-        return QiniuClient.signatureUrl(this.region, this.bucket, key, undefined, expires, { preferS3Adapter: true });
+        const newOpt = Object.assign(opt || {}, { preferS3Adapter: true });
+        return QiniuClient.signatureUrl(this.region, this.bucket, key, undefined, expires, newOpt);
+      }
+
+      getContent(key, opt) {
+        const newOpt = Object.assign(opt || {}, { preferS3Adapter: true });
+        return QiniuClient.getContent(this.region, this.bucket, key, this.toQiniuDomain(), newOpt);
       }
 
       deadlineRequired() {
@@ -73,9 +79,15 @@ angular.module("web").factory("Domains", [
         return KODO_MODE;
       }
 
-      signatureUrl(key, expires) {
+      signatureUrl(key, expires, opt) {
         expires = expires || this.maxLifetime();
-        return QiniuClient.signatureUrl(this.region, this.bucket, key, this.domain, expires, { preferKodoAdapter: true });
+        const newOpt = Object.assign(opt || {}, { preferKodoAdapter: true });
+        return QiniuClient.signatureUrl(this.region, this.bucket, key, this.domain, expires, newOpt);
+      }
+
+      getContent(key, opt) {
+        const newOpt = Object.assign(opt || {}, { preferKodoAdapter: true });
+        return QiniuClient.getContent(this.region, this.bucket, key, this.toQiniuDomain(), newOpt);
       }
 
       deadlineRequired() {

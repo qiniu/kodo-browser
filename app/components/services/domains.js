@@ -38,17 +38,17 @@ angular.module("web").factory("Domains", [
 
       signatureUrl(key, expires, opt) {
         expires = expires || this.maxLifetime();
-        const newOpt = Object.assign(opt || {}, { preferS3Adapter: true });
+        const newOpt = Object.assign({}, opt, { preferS3Adapter: true });
         return QiniuClient.signatureUrl(this.region, this.bucket, key, undefined, expires, newOpt);
       }
 
       getContent(key, opt) {
-        const newOpt = Object.assign(opt || {}, { preferS3Adapter: true });
+        const newOpt = Object.assign({}, opt, { preferS3Adapter: true });
         return QiniuClient.getContent(this.region, this.bucket, key, this.toQiniuDomain(), newOpt);
       }
 
       saveContent(key, content, opt) {
-        const newOpt = Object.assign(opt || {}, { preferS3Adapter: true });
+        const newOpt = Object.assign({}, opt, { preferS3Adapter: true });
         return QiniuClient.saveContent(this.region, this.bucket, key, content, this.toQiniuDomain(), newOpt);
       }
 
@@ -86,17 +86,17 @@ angular.module("web").factory("Domains", [
 
       signatureUrl(key, expires, opt) {
         expires = expires || this.maxLifetime();
-        const newOpt = Object.assign(opt || {}, { preferKodoAdapter: true });
+        const newOpt = Object.assign({}, opt, { preferKodoAdapter: true });
         return QiniuClient.signatureUrl(this.region, this.bucket, key, this.domain, expires, newOpt);
       }
 
       getContent(key, opt) {
-        const newOpt = Object.assign(opt || {}, { preferKodoAdapter: true });
+        const newOpt = Object.assign({}, opt, { preferKodoAdapter: true });
         return QiniuClient.getContent(this.region, this.bucket, key, this.toQiniuDomain(), newOpt);
       }
 
       saveContent(key, content, opt) {
-        const newOpt = Object.assign(opt || {}, { preferKodoAdapter: true });
+        const newOpt = Object.assign({}, opt, { preferKodoAdapter: true });
         return QiniuClient.saveContent(this.region, this.bucket, key, content, this.toQiniuDomain(), newOpt);
       }
 

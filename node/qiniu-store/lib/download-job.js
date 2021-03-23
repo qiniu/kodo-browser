@@ -87,7 +87,7 @@ DownloadJob.prototype.start = function (params) {
   let job = {
     job: this.id,
     key: 'job-download',
-    clientOptions: Object.assign(this.clientOptions, { backendMode: this.backendMode }),
+    clientOptions: Object.assign({}, this.clientOptions, { backendMode: this.backendMode }),
     options: {
       resumeDownload: this.resumeDownload,
       maxConcurrency: this.maxConcurrency,

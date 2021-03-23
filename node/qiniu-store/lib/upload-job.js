@@ -93,7 +93,7 @@ UploadJob.prototype.start = function (overwrite, prog) {
   let job = {
     job: this.id,
     key: 'job-upload',
-    clientOptions: Object.assign(this.clientOptions, { backendMode: this.backendMode, isDebug: this.isDebug }),
+    clientOptions: Object.assign({}, this.clientOptions, { backendMode: this.backendMode, isDebug: this.isDebug }),
     options: {
       resumeUpload: this.resumeUpload,
       maxConcurrency: this.maxConcurrency,

@@ -331,6 +331,7 @@ module.exports = {
   "cannot.preview": "无法预览",
   "cannot.preview.this.file": "该文件类型无法预览。",
   "tryto.open.as.textfile": "尝试作为文本文件打开",
+  "preview.should_not_use_cdn_domain_to_edit": "编辑文件，建议不要使用自定义 CDN 域名（有缓存机制），以获取最新的文件内容",
 
   save: "保存",
   size: "大小",

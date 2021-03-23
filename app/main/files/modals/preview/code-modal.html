@@ -49,9 +49,13 @@
       {{'close'|translate}}
     </button>
 
-  <button ng-if="previewBarVisible && currentUser.privilege!='readOnly'" type="button" class="pull-right btn btn-primary btn-sm" ng-click="saveContent()">
+  <button ng-if="previewBarVisible && currentUser.privilege!='readOnly' && objectInfo.size <= MAX_SIZE" type="button" class="pull-right btn btn-primary btn-sm" ng-click="saveContent()">
         <i class="fa fa-save"></i>
         <!-- 保存 -->
         {{'save'|translate}}
       </button>
+
+  <div ng-if="previewBarVisible && currentUser.privilege!='readOnly' && objectInfo.size <= MAX_SIZE && !domain.default()" class="text-right pull-right small" style="display: inline-block; position: relative; height: 30px; width: 500px;">
+    <p style="display: inline-block; margin: 0; width: 500px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">{{'preview.should_not_use_cdn_domain_to_edit'|translate}}</p>
+  </div>
 </div>

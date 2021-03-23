@@ -4,15 +4,15 @@ angular.module("web").factory("Domains", [
   "$translate",
   "AuthInfo",
   "QiniuClient",
-  function(
+  function (
     $q,
     $timeout,
     $translate,
     AuthInfo,
     QiniuClient,
-    ) {
+  ) {
     const T = $translate.instant,
-          { KODO_MODE, S3_MODE } = require('kodo-s3-adapter-sdk');
+      { KODO_MODE, S3_MODE } = require('kodo-s3-adapter-sdk');
 
     class S3Domain {
       constructor(region, bucket) {
@@ -48,8 +48,8 @@ angular.module("web").factory("Domains", [
       }
 
       saveContent(key, content, opt) {
-        const newOpt = Object.assign({}, opt, { preferS3Adapter: true });
-        return QiniuClient.saveContent(this.region, this.bucket, key, content, this.toQiniuDomain(), newOpt);
+        const getOpt = Object.assign({}, opt, { preferS3Adapter: true });
+        return QiniuClient.saveContent(this.region, this.bucket, key, content, this.toQiniuDomain(), getOpt, opt);
       }
 
       deadlineRequired() {
@@ -96,8 +96,8 @@ angular.module("web").factory("Domains", [
       }
 
       saveContent(key, content, opt) {
-        const newOpt = Object.assign({}, opt, { preferKodoAdapter: true });
-        return QiniuClient.saveContent(this.region, this.bucket, key, content, this.toQiniuDomain(), newOpt);
+        const getOpt = Object.assign({}, opt, { preferKodoAdapter: true });
+        return QiniuClient.saveContent(this.region, this.bucket, key, content, this.toQiniuDomain(), getOpt, opt);
       }
 
       deadlineRequired() {

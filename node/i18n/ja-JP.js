@@ -330,6 +330,7 @@ module.exports = {
   "cannot.preview": "プレビューできません",
   "cannot.preview.this.file": "このファイルをプレビューできません。",
   "tryto.open.as.textfile": "テキストファイルとして開こうとする",
+  "preview.should_not_use_cdn_domain_to_edit": "ファイルを編集する場合は、カスタマイズされたCDNドメイン（キャッシュメカニズムを使用）を使用して最新のファイルコンテンツを取得しないことをお勧めします。",
 
   save: "セーブ",
   size: "サイズ",

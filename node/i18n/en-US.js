@@ -331,6 +331,7 @@ module.exports = {
   "cannot.preview": "Can not preview",
   "cannot.preview.this.file": "Can not preview this file.",
   "tryto.open.as.textfile": "Try to open as a text file",
+  "preview.should_not_use_cdn_domain_to_edit": "If you're going to edit the file, it is recommended not to use a customized CDN domain (with caching mechanism) to get the latest file content",
 
   save: "Save",
   size: "Size",

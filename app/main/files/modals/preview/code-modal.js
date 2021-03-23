@@ -10,6 +10,7 @@ angular.module('web')
         fileType: fileType,
         qiniuClientOpt: qiniuClientOpt,
         afterCheckSuccess: afterCheckSuccess,
+        domain: selectedDomain.domain,
 
         previewBarVisible: false,
         showFn: showFn,

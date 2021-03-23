@@ -8,14 +8,14 @@ angular.module('web').factory('QiniuClient', [
   'Config',
   'AuthInfo',
   'settingsSvs',
-  function($q, $rootScope, $translate, $timeout, $state, Toast, Config, AuthInfo, settingsSvs) {
+  function ($q, $rootScope, $translate, $timeout, $state, Toast, Config, AuthInfo, settingsSvs) {
     const { Qiniu, Region, KODO_MODE, S3_MODE, RegionService } = require('kodo-s3-adapter-sdk'),
-          path = require('path'),
-          { Semaphore } = require('semaphore-promise'),
-          T = $translate.instant,
-          kodoAdaptersCache = {},
-          s3AdaptersCache = {},
-          regionServicesCache = {};
+      path = require('path'),
+      { Semaphore } = require('semaphore-promise'),
+      T = $translate.instant,
+      kodoAdaptersCache = {},
+      s3AdaptersCache = {},
+      regionServicesCache = {};
 
     return {
       isQueryRegionAPIAvaiable: isQueryRegionAPIAvaiable,
@@ -210,7 +210,7 @@ angular.module('web').factory('QiniuClient', [
 
     function headFile(region, bucket, key, opt) {
       let promise = getDefaultClient(opt)
-                      .getObjectInfo(region, { bucket: bucket, key: key });
+        .getObjectInfo(region, { bucket: bucket, key: key });
       if (!opt.ignoreError) {
         promise = promise.catch((err) => {
           handleError(err);
@@ -232,12 +232,11 @@ angular.module('web').factory('QiniuClient', [
       });
     }
 
-    function saveContent(region, bucket, key, content, domain, opt) {
+    function saveContent(region, bucket, key, content, domain, getOpt, putOpt) {
       return new Promise((resolve, reject) => {
-        const client = getDefaultClient(opt);
-        client.getObjectHeader(region, { bucket: bucket, key: key }, domain).then((headers) => {
+        getDefaultClient(getOpt).getObjectHeader(region, { bucket: bucket, key: key }, domain).then((headers) => {
           const basename = path.basename(key);
-          client.putObject(region, { bucket: bucket, key: key }, Buffer.from(content), basename,
+          getDefaultClient(putOpt).putObject(region, { bucket: bucket, key: key }, Buffer.from(content), basename,
             { metadata: headers.metadata },
           ).then(() => { resolve(); }).catch((err) => {
             handleError(err);
@@ -592,7 +591,7 @@ angular.module('web').factory('QiniuClient', [
     function clientBackendMode(opt) {
       const adapterOption = getAdapterOption(opt);
       const usePublicCloud = AuthInfo.usePublicCloud();
-        if (adapterOption.regions && adapterOption.regions.length > 0 && !adapterOption.preferKodoAdapter || adapterOption.preferS3Adapter || !usePublicCloud) {
+      if (adapterOption.regions && adapterOption.regions.length > 0 && !adapterOption.preferKodoAdapter || adapterOption.preferS3Adapter || !usePublicCloud) {
         return S3_MODE;
       } else {
         return KODO_MODE;
@@ -613,11 +612,11 @@ angular.module('web').factory('QiniuClient', [
     }
 
     function getDefaultClient(opt) {
-      switch(clientBackendMode(opt)) {
-      case S3_MODE:
-        return getS3Client(opt);
-      case KODO_MODE:
-        return getKodoClient(opt);
+      switch (clientBackendMode(opt)) {
+        case S3_MODE:
+          return getS3Client(opt);
+        case KODO_MODE:
+          return getKodoClient(opt);
       }
     }
 
@@ -650,18 +649,18 @@ angular.module('web').factory('QiniuClient', [
     }
 
     function clearAllCache() {
-        Object.keys(s3AdaptersCache).forEach((key) => {
-          s3AdaptersCache[key].clearCache();
-          delete s3AdaptersCache[key];
-        });
-        Object.keys(kodoAdaptersCache).forEach((key) => {
-          kodoAdaptersCache[key].clearCache();
-          delete kodoAdaptersCache[key];
-        });
-        Object.keys(regionServicesCache).forEach((key) => {
-          regionServicesCache[key].clearCache();
-          delete regionServicesCache[key];
-        });
+      Object.keys(s3AdaptersCache).forEach((key) => {
+        s3AdaptersCache[key].clearCache();
+        delete s3AdaptersCache[key];
+      });
+      Object.keys(kodoAdaptersCache).forEach((key) => {
+        kodoAdaptersCache[key].clearCache();
+        delete kodoAdaptersCache[key];
+      });
+      Object.keys(regionServicesCache).forEach((key) => {
+        regionServicesCache[key].clearCache();
+        delete regionServicesCache[key];
+      });
     }
 
     function debugRequest(mode) {
@@ -686,13 +685,13 @@ angular.module('web').factory('QiniuClient', [
         }
 
         let requestUrl = undefined, requestMethod = undefined, requestHeaders = undefined,
-            responseStatusCode = undefined, responseHeaders = undefined, responseInterval = undefined, responseData = undefined, responseError = undefined;
+          responseStatusCode = undefined, responseHeaders = undefined, responseInterval = undefined, responseData = undefined, responseError = undefined;
         if (response) {
-            responseStatusCode = response.statusCode;
-            responseHeaders = response.headers;
-            responseInterval = response.interval;
-            responseData = response.data;
-            responseError = response.error;
+          responseStatusCode = response.statusCode;
+          responseHeaders = response.headers;
+          responseInterval = response.interval;
+          responseData = response.data;
+          responseError = response.error;
           if (response.request) {
             requestUrl = response.request.url;
             requestMethod = response.request.method;
@@ -700,7 +699,7 @@ angular.module('web').factory('QiniuClient', [
           }
         }
         console.info('<<', mode, 'REQ_URL:', requestUrl, 'REQ_METHOD:', requestMethod, 'REQ_HEADERS: ', requestHeaders,
-            'RESP_STATUS:', responseStatusCode, 'RESP_HEADERS:', responseHeaders, 'RESP_INTERVAL:', responseInterval, 'ms RESP_DATA:', responseData, 'RESP_ERROR:', responseError);
+          'RESP_STATUS:', responseStatusCode, 'RESP_HEADERS:', responseHeaders, 'RESP_INTERVAL:', responseInterval, 'ms RESP_DATA:', responseData, 'RESP_ERROR:', responseError);
       };
     }
 

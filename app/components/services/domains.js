@@ -47,6 +47,11 @@ angular.module("web").factory("Domains", [
         return QiniuClient.getContent(this.region, this.bucket, key, this.toQiniuDomain(), newOpt);
       }
 
+      saveContent(key, content, opt) {
+        const newOpt = Object.assign(opt || {}, { preferS3Adapter: true });
+        return QiniuClient.saveContent(this.region, this.bucket, key, content, this.toQiniuDomain(), newOpt);
+      }
+
       deadlineRequired() {
         return true;
       }
@@ -88,6 +93,11 @@ angular.module("web").factory("Domains", [
       getContent(key, opt) {
         const newOpt = Object.assign(opt || {}, { preferKodoAdapter: true });
         return QiniuClient.getContent(this.region, this.bucket, key, this.toQiniuDomain(), newOpt);
+      }
+
+      saveContent(key, content, opt) {
+        const newOpt = Object.assign(opt || {}, { preferKodoAdapter: true });
+        return QiniuClient.saveContent(this.region, this.bucket, key, content, this.toQiniuDomain(), newOpt);
       }
 
       deadlineRequired() {

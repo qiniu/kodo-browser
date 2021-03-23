@@ -38,7 +38,7 @@ angular.module('web')
           DiffModal.show('Diff', originalContent, v, function (v) {
             Toast.info(T('saving')); //'正在保存...'
 
-            QiniuClient.saveContent(bucketInfo.regionId, bucketInfo.bucketName, objectInfo.path, v, qiniuClientOpt).then(function (result) {
+            selectedDomain.domain.saveContent(objectInfo.path, v, qiniuClientOpt).then(() => {
               Toast.success(T('save.successfully'));//'保存成功'
               cancel();
               reload();

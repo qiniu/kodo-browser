@@ -232,12 +232,13 @@ angular.module('web').factory('QiniuClient', [
       });
     }
 
-    function saveContent(region, bucket, key, content, opt) {
+    function saveContent(region, bucket, key, content, domain, opt) {
       return new Promise((resolve, reject) => {
         const client = getDefaultClient(opt);
-        client.getObjectHeader(region, { bucket: bucket, key: key }).then((headers) => {
-          client.putObject(region, { bucket: bucket, key: key },
-            Buffer.from(content), { metadata: headers.metadata },
+        client.getObjectHeader(region, { bucket: bucket, key: key }, domain).then((headers) => {
+          const basename = path.basename(key);
+          client.putObject(region, { bucket: bucket, key: key }, Buffer.from(content), basename,
+            { metadata: headers.metadata },
           ).then(() => { resolve(); }).catch((err) => {
             handleError(err);
             reject(err);

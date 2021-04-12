@@ -13,7 +13,7 @@ angular.module('web')
         current: current,
         domains: domains,
         showDomains: showDomains,
-        sec: 600,
+        info: { sec: 600 },
         cancel: cancel,
         onSubmit: onSubmit,
       });
@@ -47,7 +47,7 @@ angular.module('web')
 
       function onSubmit(form1){
         if(!form1.$valid) return;
-        const lifetime = $scope.sec;
+        const lifetime = $scope.info.sec;
 
         Dialog.showDownloadDialog((folderPaths) => {
           if (!folderPaths || folderPaths.length == 0) {

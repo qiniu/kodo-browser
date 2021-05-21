@@ -1497,7 +1497,7 @@ angular.module("web").controller("filesCtrl", [
             `;
           },
           events: {
-            'click a': (evt, val, row, idx) => {
+            'click a,i': (evt, val, row, idx) => {
               if (row.itemType === 'folder') {
                 $timeout(() => {
                   $scope.total_folders = 0;
@@ -1508,7 +1508,7 @@ angular.module("web").controller("filesCtrl", [
 
               return false;
             },
-            'dblclick a': (evt, val, row, idx) => {
+            'dblclick a,i': (evt, val, row, idx) => {
               if (row.itemType === 'folder') {
                 $timeout(() => {
                   $scope.total_folders = 0;

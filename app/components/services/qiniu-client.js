@@ -58,7 +58,11 @@ angular.module('web').factory('QiniuClient', [
 
     function isQueryRegionAPIAvaiable(ucUrl) {
       return new Promise((resolve) => {
-        Region.query({ accessKey: '', bucketName: '', ucUrl: ucUrl }).then(() => {
+        const option = {
+                         accessKey: '', bucketName: '', ucUrl: ucUrl,
+                         requestCallback: debugRequest(KODO_MODE), responseCallback: debugResponse(KODO_MODE),
+                       };
+        Region.query(option).then(() => {
           resolve(true);
         }, (err) => {
           if (err.res && err.res.statusCode === 404) {

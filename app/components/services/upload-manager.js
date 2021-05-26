@@ -182,22 +182,19 @@ angular.module("web").factory("UploadMgr", [
             subDirPath = subDirPath.replace(/\\/g, "/");
           }
 
-          QiniuClient
-            .createFolder(bucketInfo.regionId, bucketInfo.bucketName, subDirPath)
-            .then(() => {
-              checkNeedRefreshFileList(bucketInfo.bucketName, subDirPath);
-            });
-
           //递归遍历目录
           fs.readdir(absPath, (err, arr) => {
             if (err) {
               console.error(err.stack);
+            } else if (arr.length > 0 || arr.length === 0 && $scope.emptyFolderUploading.enabled) {
+              QiniuClient
+                .createFolder(bucketInfo.regionId, bucketInfo.bucketName, subDirPath)
+                .then(() => {
+                  checkNeedRefreshFileList(bucketInfo.bucketName, subDirPath);
+                  loop(absPath, dirPath, arr, (jobs) => { $timeout(() => { callFn(jobs); }, 1); });
+                });
             } else {
-              loop(absPath, dirPath, arr, (jobs) => {
-                $timeout(() => {
-                  callFn(jobs);
-                }, 1);
-              });
+              $timeout(() => { callFn([]); }, 1);
             }
           });
         } else {
@@ -412,9 +409,9 @@ angular.module("web").factory("UploadMgr", [
     }
 
     function checkNeedRefreshFileList(bucket, key) {
-      if ($scope.currentInfo.bucketName == bucket) {
+      if ($scope.currentInfo.bucketName === bucket) {
         var p = path.dirname(key) + "/";
-        p = p == "./" ? "" : p;
+        p = p === "./" ? "" : p;
 
         if ($scope.currentInfo.key == p) {
           $scope.$emit("refreshFilesList");

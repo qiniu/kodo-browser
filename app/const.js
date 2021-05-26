@@ -3,6 +3,7 @@ angular.module("web").factory("Const", [
     return {
       AUTH_INFO_KEY: "auth-info",
       CLOUD_CHOICE_KEY: "cloud-choice",
+      EMPTY_FOLDER_UPLOADING: "empty-folder-uploading",
       OVERWRITE_UPLOADING: "overwrite-uploading",
       OVERWRITE_DOWNLOADING: "overwrite-downloading",
 

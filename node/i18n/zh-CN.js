@@ -352,6 +352,8 @@ module.exports = {
 
   "transframe.search.placeholder": "根据名称或状态搜索",
 
+  "upload.emptyfolder": "允许空目录上传",
+  "upload.emptyfolder.disabled": "禁止空目录上传",
   "upload.overwrite": "开启覆盖上传",
   "upload.overwrite.disabled": "禁用覆盖上传",
   "download.overwrite": "开启覆盖下载",

@@ -24,6 +24,9 @@ angular.module("web").controller("transferFrameCtrl", [
         uploadJobList: [],
         downloadJobList: []
       },
+      emptyFolderUploading: {
+        enabled: localStorage.getItem(Const.EMPTY_FOLDER_UPLOADING) || true,
+      },
       overwriteUploading: {
         enabled: localStorage.getItem(Const.OVERWRITE_UPLOADING) || false,
       },

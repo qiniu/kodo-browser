@@ -21,6 +21,18 @@
       </a>
     </div>
 
+    <!-- 开启空目录上传 -->
+    <button type="button" ng-if="!emptyFolderUploading.enabled" class="btn btn-default btn-sm" ng-click="triggerEmptyFolder()" uib-tooltip="{{'upload.emptyfolder'|translate}}" tooltip-append-to-body="true">
+      <span class="">
+        <i class="text-muted glyphicon glyphicon-level-up"></i>
+      </span>
+    </button>
+    <button type="button" ng-if="emptyFolderUploading.enabled" class="btn btn-default btn-sm" ng-click="triggerEmptyFolder()" uib-tooltip="{{'upload.emptyfolder.disabled'|translate}}" tooltip-append-to-body="true">
+      <span class="" style="color: blue;">
+        <i class="text-empty-folder-uploading-enabled glyphicon glyphicon-level-up"></i>
+      </span>
+    </button>
+
     <!-- 开启全局覆盖 -->
     <button type="button" ng-if="!overwriteUploading.enabled" class="btn btn-default btn-sm" ng-click="triggerOverwriting()" uib-tooltip="{{'upload.overwrite'|translate}}" tooltip-append-to-body="true">
       <span class="">

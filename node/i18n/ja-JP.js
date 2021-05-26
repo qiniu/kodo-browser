@@ -351,6 +351,8 @@ module.exports = {
 
   "transframe.search.placeholder": "名前またはステータスによるフィルタリング",
 
+  "upload.emptyfolder": "空のディレクトリのアップロードを許可する",
+  "upload.emptyfolder.disabled": "空のディレクトリのアップロードを禁止する",
   "upload.overwrite": "アップロードの上書きを有効にする",
   "upload.overwrite.disabled": "アップロードの上書きを無効にする",
   "download.overwrite": "ダウンロードの上書きを有効にする",

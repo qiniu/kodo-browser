@@ -352,6 +352,8 @@ module.exports = {
 
   "transframe.search.placeholder": "Filter by name or status",
 
+  "upload.emptyfolder": "Allow uploading empty folder",
+  "upload.emptyfolder.disabled": "Prohibit uploading empty folder",
   "upload.overwrite": "Enable overwrite for uploading",
   "upload.overwrite.disabled": "Disable overwrite for uploading",
   "download.overwrite": "Enable overwrite for downloading",

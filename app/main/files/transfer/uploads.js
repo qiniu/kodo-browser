@@ -24,6 +24,7 @@ angular.module("web").controller("transferUploadsCtrl", [
     var T = $translate.instant;
 
     angular.extend($scope, {
+      triggerEmptyFolder: triggerEmptyFolder,
       triggerOverwriting: triggerOverwriting,
       showRemoveItem: showRemoveItem,
       clearAllCompleted: clearAllCompleted,
@@ -53,6 +54,11 @@ angular.module("web").controller("transferUploadsCtrl", [
       if ($scope.limitToNum < len) {
         $scope.limitToNum += Math.min(100, len - $scope.limitToNum);
       }
+    }
+
+    function triggerEmptyFolder() {
+      $scope.emptyFolderUploading.enabled = !$scope.emptyFolderUploading.enabled;
+      localStorage.setItem(Const.EMPTY_FOLDER_UPLOADING, $scope.emptyFolderUploading.enabled);
     }
 
     function triggerOverwriting() {

@@ -25,14 +25,15 @@ class Client {
       clientOptions.accessKey, clientOptions.secretKey, clientOptions.ucUrl,
       `Kodo-Browser/${options.kodoBrowserVersion}/ioutil`,
       clientOptions.regions);
-    const callbacks = {};
+
+    const modeOpts = { appName: 'kodo-browser/ioutil', appVersion: options.kodoBrowserVersion };
     if (clientOptions.isDebug) {
-      callbacks.requestCallback = debugRequest(clientOptions.backendMode);
-      callbacks.responseCallback = debugResponse(clientOptions.backendMode);
+      modeOpts.requestCallback = debugRequest(clientOptions.backendMode);
+      modeOpts.responseCallback = debugResponse(clientOptions.backendMode);
     };
-    this.client = qiniu.mode(clientOptions.backendMode, callbacks);
-    this.uploader = new Uploader(this.client);
-    this.downloader = new Downloader(this.client);
+    this.client = qiniu.mode(clientOptions.backendMode, modeOpts);
+    this.uploader = undefined;
+    this.downloader = undefined;
 
     this.resumeUpload = options.resumeUpload === true;
     this.multipartUploadThreshold = options.multipartUploadThreshold || (MIN_MULTIPART_SIZE * 10);
@@ -83,19 +84,28 @@ class Client {
     eventEmitter.progressResumable = false;
     eventEmitter.abort = handleAbort;
 
-    if (isOverwrite) {
-      startUploadFile();
-    } else {
-      this.client.isExists(params.region, { bucket: params.bucket, key: params.key }).then((isExists) => {
-        if (isExists) {
-          eventEmitter.emit('fileDuplicated', eventEmitter);
-        } else {
-          startUploadFile();
-        }
-      }, () => {
-        startUploadFile();
-      });
-    }
+    this.client.enter('uploadFile', (client) => {
+      this.uploader = new Uploader(client);
+
+      if (isOverwrite) {
+        return startUploadFile();
+      } else {
+        return new Promise((resolve, reject) => {
+          client.isExists(params.region, { bucket: params.bucket, key: params.key }).then((isExists) => {
+            if (isExists) {
+              eventEmitter.emit('fileDuplicated', eventEmitter);
+              resolve();
+            } else {
+              startUploadFile().then(resolve).catch(reject);
+            }
+          }, () => {
+            startUploadFile().then(resolve).catch(reject);
+          });
+        });
+      }
+    }).finally(() => {
+      this.uploader = undefined;
+    });
 
     process.on('uncaughtException', (err) => {
       handleError({
@@ -107,88 +117,100 @@ class Client {
     return eventEmitter;
 
     function startUploadFile() {
-      fsPromises.stat(localFile).then((stats) => {
-        if (isAborted) {
-          return;
-        }
-        const partsCount = Math.ceil(stats.size / uploadedPartSize);
-        if (partsCount > MAX_MULTIPART_COUNT) {
-          uploadedPartSize = smallestPartSizeFromFileSize(stats.size);
-        }
-        if (uploadedPartSize > MAX_PUTOBJECT_SIZE) {
-          const err = new Error(`File size exceeds maximum object size: ${localFile}`);
-          err.retryable = false;
-          handleError(err);
-          return;
-        }
-        eventEmitter.progressLoaded = 0;
-        eventEmitter.progressTotal = stats.size;
-        eventEmitter.progressResumable = self.resumeUpload && (!recoveredOption || uploadedPartSize === self.multipartUploadSize);
-        eventEmitter.emit('fileStat', eventEmitter);
-
-        fsPromises.open(localFile, 'r').then((fileHandle) => {
+      return new Promise((resolve, reject) => {
+        fsPromises.stat(localFile).then((stats) => {
           if (isAborted) {
+            reject(new Error('Aborted'));
             return;
           }
-
-          const fileName = path.basename(localFile);
-          let lastProgressTime = new Date();
-          let uploadThrottleOption = undefined;
-
-          if (self.uploadSpeedLimit) {
-            uploadThrottleOption = { rate: self.uploadSpeedLimit * 1024 };
+          const partsCount = Math.ceil(stats.size / uploadedPartSize);
+          if (partsCount > MAX_MULTIPART_COUNT) {
+            uploadedPartSize = smallestPartSizeFromFileSize(stats.size);
           }
+          if (uploadedPartSize > MAX_PUTOBJECT_SIZE) {
+            const err = new Error(`File size exceeds maximum object size: ${localFile}`);
+            err.retryable = false;
+            handleError(err);
+            reject(err);
+            return;
+          }
+          eventEmitter.progressLoaded = 0;
+          eventEmitter.progressTotal = stats.size;
+          eventEmitter.progressResumable = self.resumeUpload && (!recoveredOption || uploadedPartSize === self.multipartUploadSize);
+          eventEmitter.emit('fileStat', eventEmitter);
 
-          self.uploader.putObjectFromFile(params.region, { bucket: params.bucket, key: params.key }, fileHandle, stats.size, fileName, {
-            header: { contenType: contenType },
-            recovered: recoveredOption,
-            uploadThreshold: uploadThreshold,
-            partSize: uploadedPartSize,
-            putCallback: {
-              partsInitCallback: (recovered) => {
-                recoveredOption = recovered;
-              },
-              partPutCallback: (part) => {
-                if (isAborted) {
-                  return;
-                }
-                eventEmitter.emit('filePartUploaded', {
-                  uploadId: recoveredOption.uploadId,
-                  part: part,
-                });
-              },
-              progressCallback: (uploaded) => {
-                if (isAborted) {
-                  return;
-                }
-                eventEmitter.progressLoaded = uploaded;
-                if (eventEmitter.progressLoaded > eventEmitter.progressTotal) {
-                  eventEmitter.progressLoaded = eventEmitter.progressTotal;
-                }
-
-                const now = new Date();
-                if (now - lastProgressTime > 1000) {
-                  lastProgressTime = now;
-                  eventEmitter.emit('progress', eventEmitter);
-                }
-              },
-              uploadThrottleOption: uploadThrottleOption,
-            },
-          }).then(() => {
+          fsPromises.open(localFile, 'r').then((fileHandle) => {
             if (isAborted) {
+              reject(new Error('Aborted'));
               return;
             }
-            eventEmitter.progressLoaded = eventEmitter.progressTotal;
-            eventEmitter.emit('progress', eventEmitter);
-            eventEmitter.emit('fileUploaded', eventEmitter);
-          }).catch(handleError);
+
+            const fileName = path.basename(localFile);
+            let lastProgressTime = new Date();
+            let uploadThrottleOption = undefined;
+
+            if (self.uploadSpeedLimit) {
+              uploadThrottleOption = { rate: self.uploadSpeedLimit * 1024 };
+            }
+
+            self.uploader.putObjectFromFile(params.region, { bucket: params.bucket, key: params.key }, fileHandle, stats.size, fileName, {
+              header: { contenType: contenType },
+              recovered: recoveredOption,
+              uploadThreshold: uploadThreshold,
+              partSize: uploadedPartSize,
+              putCallback: {
+                partsInitCallback: (recovered) => {
+                  recoveredOption = recovered;
+                },
+                partPutCallback: (part) => {
+                  if (isAborted) {
+                    return;
+                  }
+                  eventEmitter.emit('filePartUploaded', {
+                    uploadId: recoveredOption.uploadId,
+                    part: part,
+                  });
+                },
+                progressCallback: (uploaded) => {
+                  if (isAborted) {
+                    return;
+                  }
+                  eventEmitter.progressLoaded = uploaded;
+                  if (eventEmitter.progressLoaded > eventEmitter.progressTotal) {
+                    eventEmitter.progressLoaded = eventEmitter.progressTotal;
+                  }
+
+                  const now = new Date();
+                  if (now - lastProgressTime > 1000) {
+                    lastProgressTime = now;
+                    eventEmitter.emit('progress', eventEmitter);
+                  }
+                },
+                uploadThrottleOption: uploadThrottleOption,
+              },
+            }).then(() => {
+              if (isAborted) {
+                reject(new Error('Aborted'));
+                return;
+              }
+              eventEmitter.progressLoaded = eventEmitter.progressTotal;
+              eventEmitter.emit('progress', eventEmitter);
+              eventEmitter.emit('fileUploaded', eventEmitter);
+              resolve();
+            }).catch((err) => {
+              handleError(err);
+              reject(err);
+            });
+          }).catch((err) => {
+            err.retryable = false;
+            handleError(err);
+            reject(err);
+          });
         }).catch((err) => {
           err.retryable = false;
           handleError(err);
+          reject(err);
         });
-      }).catch((err) => {
-        err.retryable = false;
-        handleError(err);
       });
     }
 
@@ -247,7 +269,12 @@ class Client {
     eventEmitter.progressResumable = self.resumeDownload;
     eventEmitter.abort = handleAbort;
 
-    startDownloadFile();
+    this.client.enter('downloadFile', (client) => {
+      this.downloader = new Downloader(client);
+      return startDownloadFile().finally(() => {
+        this.downloader = undefined;
+      });
+    });
 
     process.on('uncaughtException', (err) => {
       handleError({
@@ -267,7 +294,7 @@ class Client {
       eventEmitter.emit('progress', eventEmitter);
       let lastProgressTime = new Date();
 
-      self.downloader.getObjectToFile(params.region, { bucket: params.bucket, key: params.key }, localFile, params.domain, {
+      return self.downloader.getObjectToFile(params.region, { bucket: params.bucket, key: params.key }, localFile, params.domain, {
         recoveredFrom: downloadedBytes,
         partSize: downloadedPartSize,
         chunkTimeout: 30000,

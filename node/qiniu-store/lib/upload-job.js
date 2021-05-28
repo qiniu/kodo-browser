@@ -99,7 +99,8 @@ UploadJob.prototype.start = function (overwrite, prog) {
       maxConcurrency: this.maxConcurrency,
       multipartUploadThreshold: this.multipartUploadThreshold * 1024 * 1024,
       multipartUploadSize: this.multipartUploadSize * 1024 * 1024,
-      uploadSpeedLimit: this.uploadSpeedLimit
+      uploadSpeedLimit: this.uploadSpeedLimit,
+      kodoBrowserVersion: this.kodoBrowserVersion,
     },
     params: {
       region: this.region,

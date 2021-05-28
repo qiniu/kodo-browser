@@ -93,7 +93,8 @@ DownloadJob.prototype.start = function (params) {
       maxConcurrency: this.maxConcurrency,
       multipartDownloadThreshold: this.multipartDownloadThreshold * 1024 * 1024,
       multipartDownloadSize: this.multipartDownloadSize * 1024 * 1024,
-      downloadSpeedLimit: this.downloadSpeedLimit
+      downloadSpeedLimit: this.downloadSpeedLimit,
+      kodoBrowserVersion: this.kodoBrowserVersion,
     },
     params: {
       region: this.region,

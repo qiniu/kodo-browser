@@ -25,6 +25,13 @@ process.on('message', (msg) => {
     break;
 
   case 'start':
+    global.Global = {
+      app: {
+        id: 'kodo-browser',
+        logo: 'icons/icon.png',
+        version: msg.data.options.kodoBrowserVersion,
+      },
+    };
     const client = createClient(msg.data.clientOptions, msg.data.options);
 
     const downloader = client.downloadFile(msg.data.params);

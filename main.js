@@ -281,6 +281,7 @@ ipcMain.on("asynchronous-job", (event, data) => {
     var worker = fork(execScript, [], forkOptions);
     forkedWorkers.set(data.job, worker);
 
+console.log('****', data);
     worker.send({
       key: 'start',
       data: data
@@ -348,8 +349,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
           data: msg.data
         });
 
-        worker.kill();
         forkedWorkers.delete(data.job);
+        setTimeout(() => { worker.kill(); }, 2000);
 
         break;
 
@@ -361,8 +362,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
           stack: msg.stack
         });
 
-        worker.kill();
         forkedWorkers.delete(data.job);
+        setTimeout(() => { worker.kill(); }, 2000);
 
         break;
 
@@ -498,8 +499,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
           data: msg.data
         });
 
-        worker.kill();
         forkedWorkers.delete(data.job);
+        setTimeout(() => { worker.kill(); }, 2000);
 
         break;
 
@@ -511,8 +512,8 @@ ipcMain.on("asynchronous-job", (event, data) => {
           stack: msg.stack
         });
 
-        worker.kill();
         forkedWorkers.delete(data.job);
+        setTimeout(() => { worker.kill(); }, 2000);
 
         break;
 
@@ -581,7 +582,7 @@ ipcMain.on("asynchronous-job", (event, data) => {
       worker.send({
         key: "stop"
       });
-      worker.kill();
+      setTimeout(() => { worker.kill(); }, 1000);
     });
 
     forkedWorkers = new Map();

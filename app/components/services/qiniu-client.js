@@ -60,46 +60,51 @@ angular.module('web').factory('QiniuClient', [
       return new Promise((resolve) => {
         const option = {
                          accessKey: '', bucketName: '', ucUrl: ucUrl,
-                         requestCallback: debugRequest(KODO_MODE), responseCallback: debugResponse(KODO_MODE),
+                         appName: 'kodo-browser', appVersion: Global.app.version,
+                         requestCallback: debugRequest(KODO_MODE),
+                         responseCallback: debugResponse(KODO_MODE),
                        };
-        Region.query(option).then(() => {
-          resolve(true);
-        }, (err) => {
-          if (err.res && err.res.statusCode === 404) {
-            resolve(false);
-          } else if (err.code && (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED')) {
-            resolve(false);
-          } else {
-            resolve(true);
-          }
-        });
+        Region.query(option).
+          then(() => { resolve(true); }).
+          catch((err) => {
+            if (err.res && err.res.statusCode === 404) {
+              resolve(false);
+            } else if (err.code && (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED')) {
+              resolve(false);
+            } else {
+              resolve(true);
+            }
+          });
       });
     }
 
     function listAllBuckets(opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).listBuckets().then(resolve).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+        getDefaultClient(opt).enter('listAllBuckets', (client) => client.listBuckets()).
+          then(resolve).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
     function createBucket(region, bucket, opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).createBucket(region, bucket).then(resolve).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+        getDefaultClient(opt).enter('createBucket', (client) => client.createBucket(region, bucket)).
+          then(resolve).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
     function deleteBucket(region, bucket, opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).deleteBucket(region, bucket).then(resolve).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+        getDefaultClient(opt).enter('deleteBucket', (client) => client.deleteBucket(region, bucket)).
+          then(resolve).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
@@ -116,48 +121,50 @@ angular.module('web').factory('QiniuClient', [
         if (!prefix.endsWith('/')) {
           prefix = prefix.substring(0, prefix.lastIndexOf('/') + 1);
         }
-        getDefaultClient(opt).listObjects(region, bucket, key, option).then((listedObjects) => {
-          if (listedObjects.commonPrefixes) {
-            listedObjects.commonPrefixes.forEach((item) => {
-              items.push({
-                bucket: item.bucket,
-                name: item.key.substring(prefix.length).replace(/\/$/, ''),
-                path: item.key,
-                itemType: 'folder',
-              });
-            });
-          }
-          if (listedObjects.objects) {
-            const ONE_HOUR = 60 * 60 * 1000;
-            listedObjects.objects.forEach((item) => {
-              if (!key.endsWith('/') || item.key != key) {
+        getDefaultClient(opt).enter('listFiles', (client) => client.listObjects(region, bucket, key, option)).
+          then((listedObjects) => {
+            if (listedObjects.commonPrefixes) {
+              listedObjects.commonPrefixes.forEach((item) => {
                 items.push({
-                  bucket: bucket,
-                  name: item.key.substring(prefix.length),
+                  bucket: item.bucket,
+                  name: item.key.substring(prefix.length).replace(/\/$/, ''),
                   path: item.key,
-                  size: item.size,
-                  storageClass: item.storageClass,
-                  lastModified: item.lastModified,
-                  itemType: 'file',
-                  withinFourHours: (new Date() - item.lastModified) <= 4 * ONE_HOUR,
+                  itemType: 'folder',
                 });
-              }
-            });
-          }
-          resolve({ data: items, marker: listedObjects.nextContinuationToken });
-        }).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+              });
+            }
+            if (listedObjects.objects) {
+              const ONE_HOUR = 60 * 60 * 1000;
+              listedObjects.objects.forEach((item) => {
+                if (!key.endsWith('/') || item.key != key) {
+                  items.push({
+                    bucket: bucket,
+                    name: item.key.substring(prefix.length),
+                    path: item.key,
+                    size: item.size,
+                    storageClass: item.storageClass,
+                    lastModified: item.lastModified,
+                    itemType: 'file',
+                    withinFourHours: (new Date() - item.lastModified) <= 4 * ONE_HOUR,
+                  });
+                }
+              });
+            }
+            resolve({ data: items, marker: listedObjects.nextContinuationToken });
+          }).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
     function listDomains(region, bucket, opt) {
-      return new Promise((resolve, reject) => {
-        getDefaultClient(opt).listDomains(region, bucket).then(resolve).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+      return new Promise((resolve, listDomains) => {
+        getDefaultClient(opt).enter('listDomains', (client) => client.listDomains(region, bucket)).
+          then(resolve).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
@@ -169,10 +176,11 @@ angular.module('web').factory('QiniuClient', [
       }
 
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt)
-          .putObject(region, { bucket: bucket, key: prefix }, Buffer.alloc(0), basename)
-          .then(resolve)
-          .catch((err) => {
+        getDefaultClient(opt).enter('createFolder', (client) => {
+          return client.putObject(region, { bucket: bucket, key: prefix }, Buffer.alloc(0), basename);
+        }).
+          then(resolve).
+          catch((err) => {
             handleError(err);
             reject(err);
           });
@@ -181,40 +189,38 @@ angular.module('web').factory('QiniuClient', [
 
     function checkFileExists(region, bucket, key, opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).isExists(region, { bucket: bucket, key: key }).then(resolve).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+        getDefaultClient(opt).enter('checkFileExists', (client) => client.isExists(region, { bucket: bucket, key: key })).
+          then(resolve).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
     function checkFolderExists(region, bucket, prefix, opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).listObjects(region, bucket, prefix, { maxKeys: 1 }).then((results) => {
-          if (results.objects && results.objects.length > 0 && results.objects[0].key.startsWith(prefix)) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        }).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+        getDefaultClient(opt).enter('checkFolderExists', (client) => client.listObjects(region, bucket, prefix, { maxKeys: 1 })).
+          then((results) => {
+            resolve(results.objects && results.objects.length > 0 && results.objects[0].key.startsWith(prefix));
+          }).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
     function getFrozenInfo(region, bucket, key, opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).getFrozenInfo(region, { bucket: bucket, key: key }).then(resolve).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+        getDefaultClient(opt).enter('getFrozenInfo', (client) => client.getFrozenInfo(region, { bucket: bucket, key: key })).
+          then(resolve).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
     function headFile(region, bucket, key, opt) {
-      let promise = getDefaultClient(opt)
-        .getObjectInfo(region, { bucket: bucket, key: key });
+      let promise = getDefaultClient(opt).enter('headFile', (client) => client.getObjectInfo(region, { bucket: bucket, key: key }));
       if (!opt.ignoreError) {
         promise = promise.catch((err) => {
           handleError(err);
@@ -227,58 +233,62 @@ angular.module('web').factory('QiniuClient', [
 
     function getContent(region, bucket, key, domain, opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).getObject(region, { bucket: bucket, key: key }, domain).then((result) => {
-          resolve(result.data);
-        }).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+        getDefaultClient(opt).enter('getContent', (client) => client.getObject(region, { bucket: bucket, key: key }, domain)).
+          then((result) => {
+            resolve(result.data);
+          }).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
     function saveContent(region, bucket, key, content, domain, getOpt, putOpt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(getOpt).getObjectHeader(region, { bucket: bucket, key: key }, domain).then((headers) => {
-          const basename = path.basename(key);
-          getDefaultClient(putOpt).putObject(region, { bucket: bucket, key: key }, Buffer.from(content), basename,
-            { metadata: headers.metadata },
-          ).then(() => { resolve(); }).catch((err) => {
+        getDefaultClient(opt).enter('saveContent', (client) => {
+          return client.getObjectHeader(region, { bucket: bucket, key: key }, domain).then((headers) => {
+            const basename = path.basename(key);
+            client.putObject(region, { bucket: bucket, key: key }, Buffer.from(content), basename,
+              { metadata: headers.metadata },
+            ).then(() => { resolve(); }).catch((err) => {
+              handleError(err);
+              reject(err);
+            });
+          }).catch((err) => {
             handleError(err);
             reject(err);
           });
-        }).catch((err) => {
-          handleError(err);
-          reject(err);
         });
       });
     }
 
     function moveOrCopyFile(region, bucket, oldKey, newKey, isCopy, opt) {
-      const client = getDefaultClient(opt);
-      const transferObject = {
-        from: { bucket: bucket, key: oldKey },
-        to: { bucket: bucket, key: newKey },
-      };
-
       return new Promise((resolve, reject) => {
-        if (isCopy) {
-          return client.copyObject(region, transferObject).then(resolve).catch((err) => {
-            handleError(err);
-            reject(err);
-          });
-        } else {
-          return client.moveObject(region, transferObject).then(resolve).catch((err) => {
-            if (err.code === 'AccessDenied' && err.stage === 'delete') {
-              Toast.error(T('permission.denied.move.error_when_delete', {
-                fromKey: oldKey, toKey: newKey,
-              }));
+        const transferObject = {
+          from: { bucket: bucket, key: oldKey },
+          to: { bucket: bucket, key: newKey },
+        };
+
+        getDefaultClient(opt).enter('moveOrCopyFile', (client) => {
+          if (isCopy) {
+            return client.copyObject(region, transferObject).then(resolve).catch((err) => {
+              handleError(err);
               reject(err);
-              return;
-            }
-            handleError(err);
-            reject(err);
-          });
-        }
+            });
+          } else {
+            return client.moveObject(region, transferObject).then(resolve).catch((err) => {
+              if (err.code === 'AccessDenied' && err.stage === 'delete') {
+                Toast.error(T('permission.denied.move.error_when_delete', {
+                  fromKey: oldKey, toKey: newKey,
+                }));
+                reject(err);
+                return;
+              }
+              handleError(err);
+              reject(err);
+            });
+          }
+        });
       });
     }
 
@@ -289,23 +299,24 @@ angular.module('web').factory('QiniuClient', [
       stopCopyFilesFlag = false;
 
       return new Promise((resolve, reject) => {
-        const client = getDefaultClient(opt);
-        const newProgressFn = (progress) => {
-          if (progressFn) {
-            try {
-              progressFn(progress);
-            } catch (err) {
-              handleError(err);
+        getDefaultClient(opt).enter('moveOrCopyFiles', (client) => {
+          const newProgressFn = (progress) => {
+            if (progressFn) {
+              try {
+                progressFn(progress);
+              } catch (err) {
+                handleError(err);
+              }
             }
-          }
-        };
-        newProgressFn(progress);
+          };
+          newProgressFn(progress);
 
-        deepForEachItem(client, region, items, target, progress, newProgressFn, isCopy, renamePrefix, new Semaphore(3))
-          .then(resolve)
-          .catch((err) => {
-            handleError(err);
-            reject(err);
+          return deepForEachItem(client, region, items, target, progress, newProgressFn, isCopy, renamePrefix, new Semaphore(3))
+            .then(resolve)
+            .catch((err) => {
+              handleError(err);
+              reject(err);
+            });
           });
       });
 
@@ -435,10 +446,11 @@ angular.module('web').factory('QiniuClient', [
 
     function restoreFile(region, bucket, key, days, opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).unfreeze(region, { bucket: bucket, key: key }, days).then(resolve).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+        getDefaultClient(opt).enter('restoreFile', (client) => client.unfreeze(region, { bucket: bucket, key: key }, days)).
+          then(resolve).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
@@ -449,7 +461,7 @@ angular.module('web').factory('QiniuClient', [
       stopDeleteFilesFlag = false;
 
       const errorItems = [];
-      const client = getDefaultClient(opt);
+
       const newProgressFn = (progress) => {
         if (progressFn) {
           try {
@@ -474,22 +486,25 @@ angular.module('web').factory('QiniuClient', [
         }
       };
 
-      const toDeleteObjects = items.filter((item) => item.itemType === 'file');
-      let promises = [];
-      if (toDeleteObjects && toDeleteObjects.length > 0) {
-        promises.push(client.deleteObjects(region, bucket, toDeleteObjects.map((item) => item.path), deleteCallback));
-        progress.total += toDeleteObjects.length;
-        newProgressFn(progress);
-      }
-
-      const toDeleteFolders = items.filter((item) => item.itemType === 'folder');
-      const semaphore = new Semaphore(3);
-      promises = promises.concat(toDeleteFolders.map((toDeleteFolder) => {
-        return doDeleteFolder(client, region, toDeleteFolder, progress, newProgressFn, semaphore, deleteCallback);
-      }));
       return new Promise((resolve, reject) => {
-        Promise.all(promises).then(() => { resolve(errorItems); }, reject);
-      })
+        getDefaultClient(opt).enter('deleteFiles', (client) => {
+          const toDeleteObjects = items.filter((item) => item.itemType === 'file');
+          let promises = [];
+          if (toDeleteObjects && toDeleteObjects.length > 0) {
+            promises.push(client.deleteObjects(region, bucket, toDeleteObjects.map((item) => item.path), deleteCallback));
+            progress.total += toDeleteObjects.length;
+            newProgressFn(progress);
+          }
+
+          const toDeleteFolders = items.filter((item) => item.itemType === 'folder');
+          const semaphore = new Semaphore(3);
+          promises = promises.concat(toDeleteFolders.map((toDeleteFolder) => {
+            return doDeleteFolder(client, region, toDeleteFolder, progress, newProgressFn, semaphore, deleteCallback);
+          }));
+
+          return Promise.all(promises).then(() => { resolve(errorItems); }, reject);
+        });
+      });
 
       function doDeleteFolder(client, region, folderObject, progress, progressFn, semaphore, deleteCallback) {
         return new Promise((resolve, reject) => {
@@ -561,10 +576,9 @@ angular.module('web').factory('QiniuClient', [
       deadline.setSeconds(deadline.getSeconds() + expires || 60);
 
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt)
-          .getObjectURL(region, { bucket: bucket, key: key }, domain, deadline)
-          .then(resolve)
-          .catch((err) => {
+        getDefaultClient(opt).enter('signatureUrl', (client) => getObjectURL(region, { bucket: bucket, key: key }, domain, deadline)).
+          then(resolve).
+          catch((err) => {
             handleError(err);
             reject(err);
           });
@@ -573,22 +587,23 @@ angular.module('web').factory('QiniuClient', [
 
     function getRegions(opt) {
       return new Promise((resolve, reject) => {
-        getRegionService(opt).getAllRegions().then((regions) => {
-          if (regions && regions.length > 0) {
-            const lang = $rootScope.langSettings.lang.replace('-', '_');
-            regions.forEach((region) => {
-              if (region.translatedLabels && region.translatedLabels[lang]) {
-                region.translatedLabel = region.translatedLabels[lang];
-              } else {
-                region.translatedLabel = region.label;
-              }
-            });
-          }
-          resolve(regions);
-        }).catch((err) => {
-          handleError(err);
-          reject(err);
-        });
+        getDefaultClient(opt).enter('getRegions', (_, regionOptions) => getRegionService(opt).getAllRegions(regionOptions)).
+          then((regions) => {
+            if (regions && regions.length > 0) {
+              const lang = $rootScope.langSettings.lang.replace('-', '_');
+              regions.forEach((region) => {
+                if (region.translatedLabels && region.translatedLabels[lang]) {
+                  region.translatedLabel = region.translatedLabels[lang];
+                } else {
+                  region.translatedLabel = region.label;
+                }
+              });
+            }
+            resolve(regions);
+          }).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
       });
     }
 
@@ -632,7 +647,12 @@ angular.module('web').factory('QiniuClient', [
         return kodoAdaptersCache[cacheKey];
       } else {
         const qiniuAdapter = getQiniuAdapter(adapterOption.accessKey, adapterOption.secretKey, adapterOption.ucUrl, adapterOption.regions);
-        const kodoClient = qiniuAdapter.mode(KODO_MODE, { requestCallback: debugRequest(KODO_MODE), responseCallback: debugResponse(KODO_MODE) });
+        const kodoClient = qiniuAdapter.mode(KODO_MODE, {
+          appName: adapterOption.appName,
+          appVersion: adapterOption.appVersion,
+          requestCallback: debugRequest(KODO_MODE),
+          responseCallback: debugResponse(KODO_MODE),
+        });
         kodoAdaptersCache[cacheKey] = kodoClient;
         return kodoClient;
       }
@@ -646,7 +666,12 @@ angular.module('web').factory('QiniuClient', [
         return s3AdaptersCache[cacheKey];
       } else {
         const qiniuAdapter = getQiniuAdapter(adapterOption.accessKey, adapterOption.secretKey, adapterOption.ucUrl, adapterOption.regions);
-        const s3Client = qiniuAdapter.mode(S3_MODE, { requestCallback: debugRequest(S3_MODE), responseCallback: debugResponse(S3_MODE) });
+        const s3Client = qiniuAdapter.mode(S3_MODE, {
+          appName: adapterOption.appName,
+          appVersion: adapterOption.appVersion,
+          requestCallback: debugRequest(S3_MODE),
+          responseCallback: debugResponse(S3_MODE),
+        });
         s3AdaptersCache[cacheKey] = s3Client;
         return s3Client;
       }
@@ -715,7 +740,9 @@ angular.module('web').factory('QiniuClient', [
     }
 
     function getAdapterOption(opt) {
-      const result = {};
+      const result = {
+        appName: 'kodo-browser', appVersion: Global.app.version,
+      };
 
       if (typeof opt === 'object' && opt.id && opt.secret) {
         result.accessKey = opt.id;

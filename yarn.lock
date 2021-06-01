@@ -4953,10 +4953,10 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "https://registry.npmjs.org/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
 
-kodo-s3-adapter-sdk@^0.2.14:
-  version "0.2.14"
-  resolved "https://registry.npmjs.org/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.14.tgz#7c6629432939061d2d41286f2de07b6e71630fc9"
-  integrity sha512-3Zu1iSicynsz8dE3y9P9jI5BwG0pSOJRPc0tZx6tYonu7QKm1ywRmgZTwLd/I7TAwOaFUIlvczjj4z5OBv9ANw==
+kodo-s3-adapter-sdk@^0.2.15:
+  version "0.2.15"
+  resolved "https://registry.npmjs.org/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.15.tgz#967c740f896f69f09fbfdd2a7a044b41ae9bedac"
+  integrity sha512-sKEbRg6XYl5EE0s8GpfmoI/hhlybtehiRfSG1aB0PeXY9biioUaKAjgmwedky919vq/m8hfO3V35VkCkoryuqw==
   dependencies:
     "@types/async-lock" "^1.1.2"
     "@types/buffer-crc32" "^0.2.0"
@@ -6970,6 +6970,15 @@ punycode@^2.1.0, punycode@^2.1.1:
   version "2.1.1"
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
+
+qiniu-path@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.npmjs.org/qiniu-path/-/qiniu-path-0.0.3.tgz#38e2dc41fbdb43c9791ea4bbb0339c3e7b60196e"
+  integrity sha512-VHpaCnUJyEFQPWPG/XkcNCu6I5J2hUIieqMaW60gu9/3lzUUA12tVg8WLlmjIoNK4WEATRAawnUA3OSDd/LHgw==
+  dependencies:
+    "@types/node" "^14.14.7"
+    tslint "^6.1.3"
+    typescript "^4.0.5"
 
 qrcode-terminal@^0.12.0:
   version "0.12.0"

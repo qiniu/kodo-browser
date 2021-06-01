@@ -89,7 +89,7 @@ angular.module("web").controller("transferFrameCtrl", [
 
         AuditLog.log('downloadFilesStart', {
           from: fromRemotePath.map((entry) => {
-            return { regionId: entry.region, bucket: entry.bucketName, path: entry.path };
+            return { regionId: entry.region, bucket: entry.bucketName, path: entry.path.toString() };
           }),
           to: toLocalPath
         });

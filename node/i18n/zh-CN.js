@@ -349,6 +349,7 @@ module.exports = {
   filesize: "文件大小",
   "codepreview.notsupport": "不支持直接打开，请下载到本地后打开。",
   "download.file": "下载文件",
+  "download.emptyNameFolder.forbidden": "{{path}}，空名目录下的文件不支持下载",
 
   lastModifyTime: "最后修改时间",
   "to.load.more": "加载更多...",

@@ -208,7 +208,7 @@ angular.module("web")
   ])
   .filter("htmlEscape", function () {
     return function (html) {
-      return html.replace(/[\u00A0-\u9999<>\&\'\"]/gim, function(char) {
+      return html.toString().replace(/[\u00A0-\u9999<>\&\'\"]/gim, function(char) {
         return '&#' + char.charCodeAt(0) + ';';
       });
     };

@@ -281,7 +281,6 @@ ipcMain.on("asynchronous-job", (event, data) => {
     var worker = fork(execScript, [], forkOptions);
     forkedWorkers.set(data.job, worker);
 
-console.log('****', data);
     worker.send({
       key: 'start',
       data: data

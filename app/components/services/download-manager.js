@@ -1,6 +1,7 @@
 angular.module("web").factory("DownloadMgr", [
   "$q",
   "$timeout",
+  '$translate',
   "AuthInfo",
   "QiniuClient",
   "Config",
@@ -9,13 +10,15 @@ angular.module("web").factory("DownloadMgr", [
   function (
     $q,
     $timeout,
+    $translate,
     AuthInfo,
     QiniuClient,
     Config,
     Toast,
     settingsSvs
   ) {
-    const fs = require("fs"),
+    const T = $translate.instant,
+          fs = require("fs"),
           http = require("http"),
           https = require("https"),
           pfs = fs.promises,
@@ -106,7 +109,7 @@ angular.module("web").factory("DownloadMgr", [
     function createDownloadJobs(bucketInfos, toLocalPath, jobsAddedFn) {
       stopCreatingFlag = false;
 
-      var dirPath = path.dirname(bucketInfos[0].path);
+      const dirPath = bucketInfos[0].path.parentDirectoryPath();
 
       loop(bucketInfos, (jobs) => {}, () => {
         if (jobsAddedFn) {
@@ -115,10 +118,10 @@ angular.module("web").factory("DownloadMgr", [
       });
 
       function loop(arr, callFn, callFn2) {
-        var t = [];
-        var len = arr.length;
-        var c = 0;
-        var c2 = 0;
+        const t = [];
+        const len = arr.length;
+        let c = 0;
+        let c2 = 0;
 
         if (len == 0) {
           callFn(t);
@@ -146,7 +149,7 @@ angular.module("web").factory("DownloadMgr", [
               return;
             }
 
-            $timeout(_kdig, 10);
+            $timeout(_kdig, 0);
           }
         }
       }
@@ -156,14 +159,14 @@ angular.module("web").factory("DownloadMgr", [
           return;
         }
 
-        var fileName = sanitize(path.basename(qiniuInfo.path)),
-          filePath = "";
-        if (path.sep == "\\") {
-          angular.forEach(path.relative(dirPath.replace(/\\/g, "/"), qiniuInfo.path).replace(/\\/g, "/").split("/"), (folder) => {
+        const fileName = sanitize(qiniuInfo.path.basename() || qiniuInfo.path.directoryBasename());
+        let filePath = '';
+        if (path.sep == '\\') {
+          angular.forEach(path.relative(dirPath.toString().replace(/\\/g, '/'), qiniuInfo.path.toString()).replace(/\\/g, '/').split('/'), (folder) => {
             filePath = path.join(filePath, sanitize(folder));
           });
         } else {
-          angular.forEach(path.relative(dirPath, qiniuInfo.path).split("/"), (folder) => {
+          angular.forEach(path.relative(dirPath.toString(), qiniuInfo.path.toString()).split('/'), (folder) => {
             filePath = path.join(filePath, sanitize(folder));
           });
         }
@@ -172,7 +175,7 @@ angular.module("web").factory("DownloadMgr", [
           // list all files under qiniuInfo.path
           function tryLoadFiles(marker) {
             QiniuClient
-              .listFiles(qiniuInfo.region, qiniuInfo.bucket, qiniuInfo.path, marker, {
+              .listFiles(qiniuInfo.region, qiniuInfo.bucket, qiniuInfo.path.toString(), marker, {
                 maxKeys: 1000,
                 minKeys: 0,
               })
@@ -196,25 +199,30 @@ angular.module("web").factory("DownloadMgr", [
               });
           }
 
+          if (!qiniuInfo.path.directoryBasename()) {
+            Toast.error(T('download.emptyNameFolder.forbidden', { path: qiniuInfo.path.toString() }));
+            return;
+          }
+
           tryLoadFiles();
         } else {
-          var fileFolders = "";
-          if (path.sep == "\\") {
-            fileFolders = path.dirname(filePath.replace(/\\/g, "/")).split("/");
+          let fileFolders = '';
+          if (path.sep == '\\') {
+            fileFolders = path.dirname(filePath.replace(/\\/g, '/')).split('/');
           } else {
-            fileFolders = path.dirname(filePath.replace(path.sep, "/")).split("/");
+            fileFolders = path.dirname(filePath.replace(path.sep, '/')).split('/');
           }
 
           fileFolders.reduce((prevPromise, folder) => {
             return prevPromise.then((localFolder) => {
-              var absfolder = path.join(localFolder, folder);
+              const absfolder = localFolder.joinFolder(folder);
 
-              return pfs.stat(absfolder).then((stat) => {
+              return pfs.stat(absfolder.toString()).then((stat) => {
                 if (stat.isDirectory()) {
                   return Promise.resolve(absfolder);
                 }
 
-                return pfs.mkdir(absfolder).then(() => {
+                return pfs.mkdir(absfolder.toString()).then(() => {
                   return Promise.resolve(absfolder);
                 }).catch((err) => {
                   if (err.message.indexOf('EEXIST: file already exists') > -1) {
@@ -224,7 +232,7 @@ angular.module("web").factory("DownloadMgr", [
                   throw err;
                 });
               }).catch((err) => {
-                return pfs.mkdir(absfolder).then(() => {
+                return pfs.mkdir(absfolder.toString()).then(() => {
                   return Promise.resolve(absfolder);
                 }).catch((err) => {
                   if (err.message.indexOf('EEXIST: file already exists') > -1) {
@@ -237,7 +245,8 @@ angular.module("web").factory("DownloadMgr", [
             });
           }, Promise.resolve(toLocalPath)).then((localPath) => {
             const ext = path.extname(fileName);
-            const fileLocalPathWithoutExt = path.normalize(path.join(localPath, path.basename(fileName, ext)));
+            /// *** TODO 这里需要重点测试
+            const fileLocalPathWithoutExt = path.normalize(localPath.joinFile(path.basename(fileName, ext)).toString());
             let fileLocalPathWithSuffixWithoutExt = fileLocalPathWithoutExt
 
             if (!$scope.overwriteDownloading.enabled) {
@@ -250,7 +259,7 @@ angular.module("web").factory("DownloadMgr", [
               region: qiniuInfo.region,
               from: {
                 bucket: qiniuInfo.bucket,
-                key: qiniuInfo.path,
+                key: qiniuInfo.path.toString(),
                 size: qiniuInfo.size,
                 mtime: qiniuInfo.lastModified.toISOString(),
               },

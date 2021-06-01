@@ -20,6 +20,7 @@ angular.module("web").factory("UploadMgr", [
           https = require("https"),
           path = require("path"),
           os = require("os"),
+          qiniuPath = require("qiniu-path"),
           QiniuStore = require("./node/qiniu-store"),
           T = $translate.instant;
 
@@ -109,19 +110,19 @@ angular.module("web").factory("UploadMgr", [
       return;
 
       function _kdig(filePaths, fn) {
-        var t = [];
-        var len = filePaths.length;
-        var c = 0;
+        let t = [];
+        let c = 0;
+        const len = filePaths.length;
 
         function _dig() {
           if (stopCreatingFlag) {
             return;
           }
 
-          var n = filePaths[c];
-          var dirPath = path.dirname(n);
+          const n = filePaths[c];
+          const dirPath = n.parentDirectoryPath();
 
-          dig(filePaths[c], dirPath, (jobs) => {
+          dig(filePaths[c].toString(), dirPath, (jobs) => {
             t = t.concat(jobs);
             c++;
 
@@ -147,7 +148,7 @@ angular.module("web").factory("UploadMgr", [
 
         //串行
         function inDig() {
-          dig(path.join(parentPath, arr[c]), dirPath, (jobs) => {
+          dig(path.join(parentPath.toString(), arr[c].toString()), dirPath, (jobs) => {
             t = t.concat(jobs);
 
             c++;
@@ -169,18 +170,27 @@ angular.module("web").factory("UploadMgr", [
           return;
         }
 
-        var fileName = path.basename(absPath);
-        var filePath = path.relative(dirPath, absPath);
+        const fileName = path.basename(absPath);
+        let filePath = path.relative(dirPath.toString(), absPath);
 
-        filePath = bucketInfo.key ? bucketInfo.key + "/" + filePath : filePath;
+        if (bucketInfo.key) {
+          if (bucketInfo.key.endsWith('/')) {
+            filePath = bucketInfo.key + filePath;
+          } else {
+            filePath = bucketInfo.key + '/' + filePath;
+          }
+        }
         const fileStat = fs.statSync(absPath);
 
         if (fileStat.isDirectory()) {
           //创建目录
-          var subDirPath = path.normalize(filePath + "/");
-          if (path.sep == "\\") {
-            subDirPath = subDirPath.replace(/\\/g, "/");
+          /// *** TODO 这里需要重点测试
+          // var subDirPath = path.normalize(filePath + "/");
+          let subDirPath = filePath + '/';
+          if (path.sep == '\\') {
+            subDirPath = subDirPath.replace(/\\/g, '/');
           }
+          subDirPath = qiniuPath.fromLocalPath(subDirPath);
 
           //递归遍历目录
           fs.readdir(absPath, (err, arr) => {
@@ -201,9 +211,10 @@ angular.module("web").factory("UploadMgr", [
           //文件
 
           //修复 window 下 \ 问题
-          filePath = path.normalize(filePath);
-          if (path.sep == "\\") {
-            filePath = filePath.replace(/\\/g, "/");
+          /// *** TODO 这里需要在 Windows 下重点测试
+          // filePath = path.normalize(filePath);
+          if (path.sep == '\\') {
+            filePath = filePath.replace(/\\/g, '/');
           }
 
           const job = createJob({
@@ -271,7 +282,7 @@ angular.module("web").factory("UploadMgr", [
         $timeout(() => {
           trySchedJob();
           $scope.calcTotalProg();
-          checkNeedRefreshFileList(job.to.bucket, job.to.key);
+          checkNeedRefreshFileList(job.to.bucket, qiniuPath.fromLocalPath(job.to.key));
         });
       });
       job.on("error", (err) => {
@@ -410,11 +421,8 @@ angular.module("web").factory("UploadMgr", [
 
     function checkNeedRefreshFileList(bucket, key) {
       if ($scope.currentInfo.bucketName === bucket) {
-        var p = path.dirname(key) + "/";
-        p = p === "./" ? "" : p;
-
-        if ($scope.currentInfo.key == p) {
-          $scope.$emit("refreshFilesList");
+        if ($scope.currentInfo.key === key.parentDirectoryPath().toString()) {
+          $scope.$emit('refreshFilesList');
         }
       }
     }

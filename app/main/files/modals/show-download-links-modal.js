@@ -82,7 +82,7 @@ angular.module('web')
           loopItems(current.info.regionId, current.info.bucketName, items,
             (item) => {
               promises.push($scope.current.domain.signatureUrl(item.path, lifetime, qiniuClientOpt).then((url) => {
-                              csvStringifier.write([current.info.bucketName, item.path, url.toString()]);
+                              csvStringifier.write([current.info.bucketName, item.path.toString(), url.toString()]);
                             }));
             }, () => {
               Promise.all(promises).then(() => { csvStringifier.end(); });

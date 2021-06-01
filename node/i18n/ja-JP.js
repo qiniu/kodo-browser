@@ -348,6 +348,7 @@ module.exports = {
   filesize: "ファイルサイズ",
   "codepreview.notsupport": "このファイルは直接開くことはできません。ローカルにダウンロードしてから開いてください。",
   "download.file": "ダウンロードファイル",
+  "download.emptyNameFolder.forbidden": "{{path}}，空の名前のディレクトリ内のファイルはダウンロードできません",
 
   lastModifyTime: "最終更新日",
   "to.load.more": "もっと読み込む...",

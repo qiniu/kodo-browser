@@ -349,6 +349,7 @@ module.exports = {
   filesize: "File size",
   "codepreview.notsupport": "This file can not be opening directly, please download to the local and then open.",
   "download.file": "Download File",
+  "download.emptyNameFolder.forbidden": "{{path}}，Files in empty-name directories are not supported for downloading",
 
   lastModifyTime: "Last Modified",
   "to.load.more": "Load more...",

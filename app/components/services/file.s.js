@@ -16,10 +16,7 @@ angular.module("web").factory("fileSvs", [
           };
         }
 
-        var ext =
-          item.name.indexOf(".") != -1 ?
-          item.name.toLowerCase().substring(item.name.lastIndexOf(".") + 1) :
-          "";
+        const ext = item.path.extname() ? item.path.extname().substring(1) : '';
 
         switch (ext) {
         case "png":

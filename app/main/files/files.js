@@ -42,7 +42,9 @@ angular.module("web").controller("filesCtrl", [
     const deepEqual = require('fast-deep-equal'),
           { Base64 } = require('js-base64'),
           T = $translate.instant,
-          { S3_MODE } = require('kodo-s3-adapter-sdk');
+          { S3_MODE } = require('kodo-s3-adapter-sdk'),
+          path = require('path'),
+          qiniuPath = require('qiniu-path');
 
     angular.extend($scope, {
       showTab: 1,
@@ -1101,7 +1103,10 @@ angular.module("web").controller("filesCtrl", [
         if (!folderPaths || folderPaths.length == 0) {
           return;
         }
-        const to = folderPaths[0].replace(/(\/*$)/g, "");
+        if (!folderPaths[0].endsWith(path.sep)) {
+          folderPaths[0] += path.sep;
+        }
+        const to = qiniuPath.fromLocalPath(folderPaths[0]);
         $scope.handlers.downloadFilesHandler([fromInfo], to);
       });
     }
@@ -1250,7 +1255,7 @@ angular.module("web").controller("filesCtrl", [
           return;
         }
 
-        $scope.handlers.uploadFilesHandler(filePaths, angular.copy($scope.currentInfo));
+        $scope.handlers.uploadFilesHandler(filePaths.map(qiniuPath.fromLocalPath), angular.copy($scope.currentInfo));
       });
     }
 
@@ -1273,6 +1278,10 @@ angular.module("web").controller("filesCtrl", [
 
     function tryDownloadFiles(to) {
       to = to.replace(/(\/*$)/g, "");
+      if (!to.endsWith(path.sep)) {
+        to += path.sep;
+      }
+      const localPath = qiniuPath.fromLocalPath(to);
 
       const selectedFiles = angular.copy($scope.sel.has);
       angular.forEach(selectedFiles, (n) => {
@@ -1285,7 +1294,7 @@ angular.module("web").controller("filesCtrl", [
        * @param fromS3Path {array}  item={region, bucket, path, name, size }
        * @param toLocalPath {string}
        */
-      $scope.handlers.downloadFilesHandler(selectedFiles, to);
+      $scope.handlers.downloadFilesHandler(selectedFiles, localPath);
     }
 
     /**
@@ -1301,7 +1310,7 @@ angular.module("web").controller("filesCtrl", [
       const filePaths = [];
       if (files) {
         angular.forEach(files, (n) => {
-          filePaths.push(n.path);
+          filePaths.push(qiniuPath.fromLocalPath(n.path));
         });
       }
 
@@ -1563,7 +1572,9 @@ angular.module("web").controller("filesCtrl", [
               acts.push(`<button type="button" class="btn unfreeze text-warning" data-toggle="tooltip" data-toggle-i18n="restore"><span class="fa fa-fire"></span></button>`);
             }
             if ($scope.domains && $scope.domains.length > 0) {
-              acts.push(`<button type="button" class="btn download" data-toggle="tooltip" data-toggle-i18n="download"><span class="fa fa-download"></span></button>`);
+              if (row.itemType !== 'folder' || row.path.directoryBasename() && row.path.directoryBasename().length > 0) {
+                acts.push(`<button type="button" class="btn download" data-toggle="tooltip" data-toggle-i18n="download"><span class="fa fa-download"></span></button>`);
+              }
               if (row.itemType !== 'folder') {
                 acts.push(`<button type="button" class="btn download-link" data-toggle="tooltip" data-toggle-i18n="getDownloadLink"><span class="fa fa-link"></span></button>`);
               }

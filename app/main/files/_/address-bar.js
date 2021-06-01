@@ -195,7 +195,7 @@ angular.module('web')
         }
 
         addressAndMode.address = addressAndMode.address.substring(KODO_ADDR_PROTOCOL.length);
-        addressAndMode.address = addressAndMode.address.replace(/(^\/*)|(\/*$)/g, '');
+        addressAndMode.address = addressAndMode.address.replace(/(^\/?)|(\/?$)/g, '');
 
         const splits = addressAndMode.address.split('/');
 

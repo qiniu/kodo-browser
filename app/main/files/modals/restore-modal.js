@@ -5,6 +5,7 @@ angular.module('web')
       angular.extend($scope, {
         currentInfo: currentInfo,
         item: item,
+        path: `kodo://${currentInfo.bucketName}/${currentInfo.key}${item.name}`,
         info: {
           days: 1,
           msg: null

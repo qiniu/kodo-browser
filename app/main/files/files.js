@@ -1039,6 +1039,29 @@ angular.module("web").controller("filesCtrl", [
       }).result.then(angular.noop, angular.noop);
     }
 
+    function showUpdateStorageClass(item) {
+      $modal.open({
+        templateUrl: "main/files/modals/update-storage-class-modal.html",
+        controller: "updateStorageClassModalCtrl",
+        resolve: {
+          item: () => {
+            return angular.copy(item);
+          },
+          currentInfo: () => {
+            return angular.copy($scope.currentInfo);
+          },
+          qiniuClientOpt: () => {
+            return getQiniuClientOpt();
+          },
+          callback: () => {
+            return () => {
+              $timeout(listFiles, 100);
+            };
+          }
+        }
+      }).result.then(angular.noop, angular.noop);
+    }
+
     function showRestore(item) {
       $modal.open({
         templateUrl: "main/files/modals/restore-modal.html",
@@ -1466,7 +1489,7 @@ angular.module("web").controller("filesCtrl", [
             return `
               <div class="text-overflow file-item-name" style="cursor:pointer; ${row.itemType === 'folder' ? 'color:orange' : ''}" ${htmlAttributes}>
                 <i class="fa fa-${$filter('fileIcon')(row)}"></i>
-                <a href="" style="width: 800px; display: inline-block;"><span>${$filter('htmlEscape')(val)}</span></a>
+                <a href="" style="width: 700px; display: inline-block;"><span>${$filter('htmlEscape')(val)}</span></a>
               </div>
             `;
           },
@@ -1542,6 +1565,9 @@ angular.module("web").controller("filesCtrl", [
                 acts.push(`<button type="button" class="btn download-link" data-toggle="tooltip" data-toggle-i18n="getDownloadLink"><span class="fa fa-link"></span></button>`);
               }
             }
+            if (row.itemType !== 'folder') {
+              acts.push(`<button type="button" class="btn updateStorageClass text-warning" data-toggle="tooltip" data-toggle-i18n="updateStorageClass"><span class="fa fa-fire"></span></button>`);
+            }
             if ($scope.currentInfo.bucketGrantedPermission !== 'readonly') {
               acts.push(`<button type="button" class="btn remove text-danger" data-toggle="tooltip" data-toggle-i18n="delete"><span class="fa fa-trash"></span></button>`);
             }
@@ -1566,6 +1592,29 @@ angular.module("web").controller("filesCtrl", [
                 $scope.total_folders = $list.find('i.fa-folder').length;
               });
 
+              return false;
+            },
+            'click button.updateStorageClass': (evt, val, row, idx) => {
+              const region = $scope.currentInfo.regionId,
+                    bucket = $scope.currentInfo.bucketName,
+                    key = row.name;
+              isFrozenOrNot(region, bucket, key, {
+                'normal': () => {
+                  showUpdateStorageClass(row);
+                },
+                'unfrozen': () => {
+                  showUpdateStorageClass(row);
+                },
+                'unfreezing': () => {
+                  Dialog.alert(T('restore.title'), T('restore.message.unfreezing'));
+                },
+                'frozen': () => {
+                  Dialog.alert(T('restore.title'), T('restore.message.frozen'));
+                },
+                'error': (err) => {
+                  Dialog.alert(T('restore.title'), T('restore.message.head_error'));
+                },
+              });
               return false;
             },
             'click button.unfreeze': (evt, val, row, idx) => {

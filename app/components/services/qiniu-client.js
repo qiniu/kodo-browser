@@ -31,6 +31,7 @@ angular.module('web').factory('QiniuClient', [
       checkFolderExists: checkFolderExists,
       getFrozenInfo: getFrozenInfo,
       headFile: headFile,
+      setStorageClass: setStorageClass,
 
       getContent: getContent,
       saveContent: saveContent,
@@ -229,6 +230,16 @@ angular.module('web').factory('QiniuClient', [
       }
       delete opt.ignoreError;
       return promise;
+    }
+
+    function setStorageClass(region, bucket, key, storageClass, opt) {
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt).enter('setStorageClass', (client) => client.setObjectStorageClass(region, { bucket: bucket, key: key }, storageClass)).
+          then(resolve).catch((err) => {
+            handleError(err);
+            reject(err);
+          });
+      });
     }
 
     function getContent(region, bucket, key, domain, opt) {
@@ -446,7 +457,7 @@ angular.module('web').factory('QiniuClient', [
 
     function restoreFile(region, bucket, key, days, opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).enter('restoreFile', (client) => client.unfreeze(region, { bucket: bucket, key: key }, days)).
+        getDefaultClient(opt).enter('restoreFile', (client) => client.restoreObject(region, { bucket: bucket, key: key }, days)).
           then(resolve).catch((err) => {
             handleError(err);
             reject(err);

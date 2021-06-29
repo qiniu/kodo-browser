@@ -1569,7 +1569,7 @@ angular.module("web").controller("filesCtrl", [
               }
             }
             if (row.itemType !== 'folder') {
-              acts.push(`<button type="button" class="btn updateStorageClass text-warning" data-toggle="tooltip" data-toggle-i18n="updateStorageClass"><span class="fa fa-retweet"></span></button>`);
+              acts.push(`<button type="button" class="btn updateStorageClass text-warning" data-toggle="tooltip" data-toggle-i18n="updateStorageClass"><span class="iconfont icon-a-fileconversion"></span></button>`);
             }
             if ($scope.currentInfo.bucketGrantedPermission !== 'readonly') {
               acts.push(`<button type="button" class="btn remove text-danger" data-toggle="tooltip" data-toggle-i18n="delete"><span class="fa fa-trash"></span></button>`);

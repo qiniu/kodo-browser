@@ -176,3 +176,21 @@ html, body {
 @keyframes blinker {
   20%, 80% { color: red; }
 }
+
+@font-face {
+  font-family: 'iconfont';
+  src: url('fonts/iconfont.woff2?t=1624951753754') format('woff2'),
+       url('fonts/iconfont.woff?t=1624951753754') format('woff'),
+       url('fonts/iconfont.ttf?t=1624951753754') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-a-fileconversion:before {
+  content: "\e601";
+}

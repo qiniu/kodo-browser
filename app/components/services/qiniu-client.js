@@ -410,7 +410,7 @@ angular.module('web').factory('QiniuClient', [
               reject(new Error('User Cancelled'));
               return;
             }
-            client.listObjects(region, transferObject.from.bucket, transferObject.from.key, { nextContinuationToken: marker }).then((listedObjects) => {
+            client.listObjects(region, transferObject.from.bucket, transferObject.from.key, { nextContinuationToken: marker, maxKeys: 1000 }).then((listedObjects) => {
               if (stopCopyFilesFlag) {
                 reject(new Error('User Cancelled'));
                 return;
@@ -532,7 +532,7 @@ angular.module('web').factory('QiniuClient', [
               reject(new Error('User Cancelled'));
               return;
             }
-            client.listObjects(region, folderObject.bucket, folderObject.path, { nextContinuationToken: marker }).then((listedObjects) => {
+            client.listObjects(region, folderObject.bucket, folderObject.path, { nextContinuationToken: marker, maxKeys: 1000 }).then((listedObjects) => {
               if (stopDeleteFilesFlag) {
                 reject(new Error('User Cancelled'));
                 return;

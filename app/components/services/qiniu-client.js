@@ -705,13 +705,14 @@ angular.module('web').factory('QiniuClient', [
         if (settingsSvs.isDebug.get() === 0) {
           return;
         }
-        let url = undefined, method = undefined, headers = undefined;
+        let url = undefined, method = undefined, headers = undefined, data = undefined;
         if (request) {
           url = request.url;
           method = request.method;
           headers = request.headers;
+          data = request.data;
         }
-        console.info('>>', mode, 'REQ_URL:', url, 'REQ_METHOD:', method, 'REQ_HEADERS:', headers);
+        console.info('>>', mode, 'REQ_URL:', url, 'REQ_METHOD:', method, 'REQ_HEADERS:', headers, 'REQ_DATA:', data);
       };
     }
 
@@ -721,7 +722,7 @@ angular.module('web').factory('QiniuClient', [
           return;
         }
 
-        let requestUrl = undefined, requestMethod = undefined, requestHeaders = undefined,
+        let requestUrl = undefined, requestMethod = undefined, requestHeaders = undefined, requestData = undefined,
           responseStatusCode = undefined, responseHeaders = undefined, responseInterval = undefined, responseData = undefined, responseError = undefined;
         if (response) {
           responseStatusCode = response.statusCode;
@@ -733,9 +734,10 @@ angular.module('web').factory('QiniuClient', [
             requestUrl = response.request.url;
             requestMethod = response.request.method;
             requestHeaders = response.request.headers;
+            requestData = response.request.data;
           }
         }
-        console.info('<<', mode, 'REQ_URL:', requestUrl, 'REQ_METHOD:', requestMethod, 'REQ_HEADERS: ', requestHeaders,
+        console.info('<<', mode, 'REQ_URL:', requestUrl, 'REQ_METHOD:', requestMethod, 'REQ_HEADERS: ', requestHeaders, 'REQ_DATA: ', requestData,
           'RESP_STATUS:', responseStatusCode, 'RESP_HEADERS:', responseHeaders, 'RESP_INTERVAL:', responseInterval, 'ms RESP_DATA:', responseData, 'RESP_ERROR:', responseError);
       };
     }

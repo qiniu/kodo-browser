@@ -437,14 +437,12 @@ angular.module('web').factory('QiniuClient', [
               } else {
                 promise = client.moveObjects(region, transferObjects, moveOrCopyFileCallback);
               }
-              promise.then(() => {
-                if (listedObjects.nextContinuationToken) {
-                  _doCopyFolder(client, region, transferObject, progress, progressFn, isCopy, listedObjects.nextContinuationToken, moveOrCopyFileCallback)
-                    .then(resolve, reject);
-                } else {
-                  resolve();
-                }
-              }).catch(reject);
+              if (listedObjects.nextContinuationToken) {
+                const promises = [promise];
+                promises.push(_doCopyFolder(client, region, transferObject, progress, progressFn, isCopy, listedObjects.nextContinuationToken, moveOrCopyFileCallback));
+                promise = Promise.all(promises);
+              }
+              promise.then(resolve).catch(reject);
             }).catch(reject);
           });
         }
@@ -544,14 +542,13 @@ angular.module('web').factory('QiniuClient', [
               progress.total += listedObjects.objects.length;
               progressFn(progress);
 
-              client.deleteObjects(region, folderObject.bucket, listedObjects.objects.map((object) => object.key), deleteCallback).then(() => {
-                if (listedObjects.nextContinuationToken) {
-                  _doDeleteFolder(client, region, folderObject, progress, progressFn, listedObjects.nextContinuationToken, deleteCallback)
-                    .then(resolve, reject);
-                } else {
-                  resolve();
-                }
-              }).catch(reject);
+              let promise = client.deleteObjects(region, folderObject.bucket, listedObjects.objects.map((object) => object.key), deleteCallback);
+              if (listedObjects.nextContinuationToken) {
+                const promises = [promise];
+                promises.push(_doDeleteFolder(client, region, folderObject, progress, progressFn, listedObjects.nextContinuationToken, deleteCallback));
+                promise = Promise.all(promises);
+              }
+              promise.then(resolve).catch(reject);
             }).catch(reject);
           });
         }

@@ -584,7 +584,7 @@ angular.module('web').factory('QiniuClient', [
       deadline.setSeconds(deadline.getSeconds() + expires || 60);
 
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).enter('signatureUrl', (client) => getObjectURL(region, { bucket: bucket, key: key }, domain, deadline)).
+        getDefaultClient(opt).enter('signatureUrl', (client) => client.getObjectURL(region, { bucket: bucket, key: key }, domain, deadline)).
           then(resolve).
           catch((err) => {
             handleError(err);

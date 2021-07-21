@@ -1,19 +1,22 @@
-
+<form class="form-horizontal" name="form1" ng-submit="onSubmit(form1)">
   <div class="modal-header">
     <button type="button" class="close" ng-click="close()">
       <span aria-hidden="true">&times;</span>
     </button>
-    <h4 class="modal-title text-danger">
-      <!-- 删除目录和文件 -->
-      {{'deleteModal.title'|translate}}
+    <h4 class="modal-title text-info">
+      <!-- 恢复 -->
+      {{'restore.title'|translate}}
     </h4>
   </div>
   <div class="modal-body">
 
    <div ng-if="step==1" style="max-height: 500px; overflow-y: auto;">
-    <div class="text-warning">
+    <!-- <div class="text-warning">
       {{'deleteModal.message1'|translate}}:
-      <!-- 将删除以下目录或文件: -->
+      将删除以下目录或文件:
+    </div> -->
+    <div class="text-info">
+      将恢复以下目录或文件:
     </div>
     <ul>
       <li ng-repeat="item in items" class="break">
@@ -22,12 +25,22 @@
         {{item.name}}
       </li>
     </ul>
+    <div class="form-group">
+      <label class="col-sm-2 control-label" for="days">
+        <!-- 解冻天数: -->
+        {{'restore.days'|translate}}:
+      </label>
+      <div class="col-sm-8">
+        <select class="form-control" style="width: 50%;" id="days" name="days" ng-model="info.days" autocomplete="off" autofocus ng-options="day for day in [1,2,3,4,5,6,7]"></select>
+      </div>
+
+      <div class="clearfix"></div>
+    </div>
    </div>
 
    <div ng-if="step==2">
     <div class="text-info">
-      {{'delete.on'|translate}}
-      <!-- 正在删除... -->
+      正在恢复...
     </div>
    </div>
 
@@ -46,12 +59,10 @@
 
     <div ng-if='terr && terr.length>0'>
       <div ng-if="isStop" class="text-danger">
-         <!-- 用户取消删除 -->
-         {{'deleteModal.message2'|translate}}
+         用户取消恢复
       </div>
       <div class="text-warning">
-        <!-- 部分目录或文件无法删除： -->
-        {{'deleteModal.message3'|translate}}:
+        部分目录或文件无法恢复：
       </div>
       <ul>
         <li ng-repeat="terrItem in terr" ng-if="$index<10">
@@ -60,7 +71,7 @@
 
           <i class="fa fa-file-o" ng-if="terrItem.item.itemType !== 'folder'"></i>
 
-          {{terrItem.item.path.toString().substring(currentInfo.key.length)}}
+          {{terrItem.item.key.substring(currentInfo.key.length)}}
 
           <i class="fa fa-exclamation-circle text-danger"
           uib-tooltip="{{terrItem.error.message}}"
@@ -73,8 +84,7 @@
 
     <div ng-if='!terr || terr.length==0' class="text-success">
      <i class="fa fa-check text-success"></i>
-      <!-- 删除成功 -->
-      {{'delete.success'|translate}}
+      恢复成功
     </div>
  </div>
 
@@ -83,9 +93,9 @@
     <div class="clearfix"></div>
   </div>
   <div class="modal-footer">
-    <button ng-if="step==1" type="button" class="btn btn-danger btn-sm" ng-click="start()">
-      <i class="glyphicon glyphicon-trash"></i>
-      <!-- 确定删除 -->
+    <button ng-if="step==1" type="submit" class="btn btn-success btn-sm">
+      <i class="glyphicon glyphicon-ok"></i>
+      <!-- 确定 -->
       {{'ok'|translate}}
     </button>
 
@@ -101,3 +111,4 @@
       {{'close'|translate}}
     </button>
   </div>
+</form>

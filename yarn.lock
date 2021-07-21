@@ -4953,10 +4953,10 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "https://registry.npmjs.org/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
 
-kodo-s3-adapter-sdk@^0.2.15:
-  version "0.2.15"
-  resolved "https://registry.npmjs.org/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.15.tgz#967c740f896f69f09fbfdd2a7a044b41ae9bedac"
-  integrity sha512-sKEbRg6XYl5EE0s8GpfmoI/hhlybtehiRfSG1aB0PeXY9biioUaKAjgmwedky919vq/m8hfO3V35VkCkoryuqw==
+kodo-s3-adapter-sdk@^0.2.17:
+  version "0.2.17"
+  resolved "https://registry.npmjs.org/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.17.tgz#4d4bfc9946c38110851659a5eee0e6179cf1b6ac"
+  integrity sha512-elIi/bYRuoIZjkPaidlzXopRu9W/NZFXyJZh75UTeGTNAJ3F9JmwMzQgBPOgc1YmS/ZieZh3JciRJNmSXU7LWg==
   dependencies:
     "@types/async-lock" "^1.1.2"
     "@types/buffer-crc32" "^0.2.0"

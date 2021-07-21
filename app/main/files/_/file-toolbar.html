@@ -12,7 +12,7 @@
 
     &nbsp;
 
-    <div class="btn-group" role="group" ng-if="!copy.pwd">
+    <div class="btn-group" role="group">
       <button type="button" class="btn btn-default btn-sm" ng-click="showUploadDialog()" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly'">
         <i class="glyphicon glyphicon-cloud-upload text-info"></i>
         {{'upload'|translate}}
@@ -32,30 +32,38 @@
         {{'rename'|translate}}
       </button>
 
-      <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
-        {{'more'|translate}}
-        <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu" role="menu">
-        <li>
-          <a href="" ng-click="showMove(sel.has)" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
-            <i class="fa fa-clone text-primary"></i>
-            {{'move'|translate}}
-          </a>
-        </li>
-        <li>
-          <a href="" ng-click="showDeleteFilesSelected()" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
-            <i class="fa fa-clone text-primary"></i>
-            {{'delete'|translate}}
-          </a>
-        </li>
-        <li>
-          <a href="" ng-click="showDownloadLinkOfFilesSelected()" ng-disabled="sel.has.length === 0 || !domains || domains.length === 0">
-            <i class="fa fa-link text-primary"></i>
-            {{'exportDownloadLinks'|translate}}
-          </a>
-        </li>
-      </ul>
+      <div class="btn-group">
+        <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          {{'more'|translate}}
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          <li>
+            <a href="" ng-click="showMove(sel.has)" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
+              <i class="fa fa-cut text-primary"></i>
+              {{'move'|translate}}
+            </a>
+          </li>
+          <li>
+            <a href="" ng-click="showDeleteFilesSelected()" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
+              <i class="fa fa-trash text-primary"></i>
+              {{'delete'|translate}}
+            </a>
+          </li>
+          <li>
+            <a href="" ng-click="showDownloadLinkOfFilesSelected()" ng-disabled="sel.has.length === 0 || !domains || domains.length === 0">
+              <i class="fa fa-link text-primary"></i>
+              {{'exportDownloadLinks'|translate}}
+            </a>
+          </li>
+          <li>
+            <a href="" ng-click="showRestoreFilesSelected()" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
+              <i class="fa fa-fire text-primary"></i>
+              恢复
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
 
     &nbsp;

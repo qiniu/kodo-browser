@@ -122,6 +122,8 @@ angular.module("web").controller("filesCtrl", [
       showMove: showMove,
       showDeleteFiles: showDeleteFiles,
       showDeleteFilesSelected: showDeleteFilesSelected,
+      showRestoreFiles: showRestoreFiles,
+      showRestoreFilesSelected: showRestoreFilesSelected,
 
       // upload && download
       handlers: {
@@ -1144,6 +1146,39 @@ angular.module("web").controller("filesCtrl", [
       }).result.then(angular.noop, angular.noop);
     }
 
+    function showRestoreFilesSelected() {
+      showRestoreFiles($scope.sel.has);
+    }
+
+    function showRestoreFiles(items) {
+      if ($scope.currentInfo.bucketGrantedPermission === 'readonly') {
+        Toast.error(T('permission.denied'));
+        return;
+      }
+
+      $modal.open({
+        templateUrl: "main/files/modals/restore-files-modal.html",
+        controller: "restoreFilesModalCtrl",
+        backdrop: "static",
+        resolve: {
+          items: () => {
+            return items;
+          },
+          currentInfo: () => {
+            return angular.copy($scope.currentInfo);
+          },
+          qiniuClientOpt: () => {
+            return getQiniuClientOpt();
+          },
+          callback: () => {
+            return () => {
+              $timeout(listFiles, 300);
+            };
+          }
+        }
+      }).result.then(angular.noop, angular.noop);
+    }
+
     ////////////////////////
     function selectBucket(item) {
       if ($scope.bucket_sel === item) {
@@ -1496,7 +1531,7 @@ angular.module("web").controller("filesCtrl", [
             let htmlAttributes = '';
             if (row.storageClass) {
               const currentInfo = $scope.currentInfo;
-              htmlAttributes = `data-storage-class="${row.storageClass.toLowerCase()}" data-key="${Base64.encode(row.name)}" data-region="${currentInfo.regionId}" data-bucket="${currentInfo.bucketName}"`;
+              htmlAttributes = `data-storage-class="${row.storageClass.toLowerCase()}" data-key="${Base64.encode(row.path.toString())}" data-region="${currentInfo.regionId}" data-bucket="${currentInfo.bucketName}"`;
             }
             return `
               <div class="text-overflow file-item-name" style="cursor:pointer; ${row.itemType === 'folder' ? 'color:orange' : ''}" ${htmlAttributes}>
@@ -1611,7 +1646,7 @@ angular.module("web").controller("filesCtrl", [
             'click button.updateStorageClass': (evt, val, row, idx) => {
               const region = $scope.currentInfo.regionId,
                     bucket = $scope.currentInfo.bucketName,
-                    key = row.name;
+                    key = row.path.toString();
               isFrozenOrNot(region, bucket, key, {
                 'normal': () => {
                   showUpdateStorageClass(row);
@@ -1634,7 +1669,7 @@ angular.module("web").controller("filesCtrl", [
             'click button.unfreeze': (evt, val, row, idx) => {
               const region = $scope.currentInfo.regionId,
                     bucket = $scope.currentInfo.bucketName,
-                    key = row.name;
+                    key = row.path.toString();
               isFrozenOrNot(region, bucket, key, {
                 'frozen': () => {
                   showRestore(row);

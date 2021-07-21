@@ -24,7 +24,8 @@
       将删除以下目录或文件:
     </div> -->
     <div class="text-info">
-      将修改以下目录或文件:
+      <!-- 将修改以下目录或文件 -->
+      {{'updateStorageClassModal.message1'|translate}}:
     </div>
     <ul>
       <li ng-repeat="item in items" class="break">
@@ -61,7 +62,8 @@
 
    <div ng-if="step==2">
     <div class="text-info">
-      正在修改...
+      <!-- 正在修改... -->
+      {{'updateStorageClass.on'|translate}}
     </div>
    </div>
 
@@ -80,10 +82,12 @@
 
     <div ng-if='terr && terr.length>0'>
       <div ng-if="isStop" class="text-danger">
-         用户取消设置
+        <!-- 用户取消修改 -->
+        {{'updateStorageClassModal.message2'|translate}}
       </div>
       <div class="text-warning">
-        部分目录或文件无法设置：
+        <!-- 部分目录或文件无法修改 -->
+        {{'updateStorageClassModal.message3'|translate}}:
       </div>
       <ul>
         <li ng-repeat="terrItem in terr" ng-if="$index<10">
@@ -103,7 +107,8 @@
 
     <div ng-if='!terr || terr.length==0' class="text-success">
      <i class="fa fa-check text-success"></i>
-      设置成功
+       <!-- 修改存储类型成功 -->
+       {{'updateStorageClass.success'|translate}}
     </div>
  </div>
 

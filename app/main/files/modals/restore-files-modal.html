@@ -11,12 +11,9 @@
   <div class="modal-body">
 
    <div ng-if="step==1" style="max-height: 500px; overflow-y: auto;">
-    <!-- <div class="text-warning">
-      {{'deleteModal.message1'|translate}}:
-      将删除以下目录或文件:
-    </div> -->
     <div class="text-info">
-      将恢复以下目录或文件:
+      <!-- 将解冻以下目录或文件: -->
+      {{'restoreModal.message1'|translate}}:
     </div>
     <ul>
       <li ng-repeat="item in items" class="break">
@@ -40,7 +37,8 @@
 
    <div ng-if="step==2">
     <div class="text-info">
-      正在恢复...
+      <!-- 提交中... -->
+      {{'restore.on'|translate}}
     </div>
    </div>
 
@@ -59,10 +57,12 @@
 
     <div ng-if='terr && terr.length>0'>
       <div ng-if="isStop" class="text-danger">
-         用户取消恢复
+        <!-- 用户取消解冻 -->
+       {{'restoreModal.message2'|translate}}
       </div>
       <div class="text-warning">
-        部分目录或文件无法恢复：
+        <!-- 部分目录或文件无法解冻 -->
+        {{'restoreModal.message3'|translate}}
       </div>
       <ul>
         <li ng-repeat="terrItem in terr" ng-if="$index<10">
@@ -82,7 +82,8 @@
 
     <div ng-if='!terr || terr.length==0' class="text-success">
      <i class="fa fa-check text-success"></i>
-      恢复成功
+      <!-- 提交成功 -->
+      {{'restoreModal.success'|translate}}
     </div>
  </div>
 

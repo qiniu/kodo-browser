@@ -59,13 +59,13 @@
           <li>
             <a href="" ng-click="showRestoreFilesSelected()" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
               <i class="fa fa-fire text-primary"></i>
-              恢复
+              {{'restore'|translate}}
             </a>
           </li>
           <li>
             <a href="" ng-click="showSetStorageClassOfFilesSelected()" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
               <i class="iconfont icon-a-fileconversion text-primary" style="margin: 0 -4px;"></i>
-              设置存储类型
+              {{'updateStorageClass'|translate}}
             </a>
           </li>
         </ul>

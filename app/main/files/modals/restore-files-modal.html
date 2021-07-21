@@ -67,14 +67,12 @@
       <ul>
         <li ng-repeat="terrItem in terr" ng-if="$index<10">
 
-          <i class="fa fa-folder" style="color:orange" ng-if="terrItem.item.itemType === 'folder'"></i>
-
-          <i class="fa fa-file-o" ng-if="terrItem.item.itemType !== 'folder'"></i>
+          <i class="fa fa-file-o"></i>
 
           {{terrItem.item.key.substring(currentInfo.key.length)}}
 
           <i class="fa fa-exclamation-circle text-danger"
-          uib-tooltip="{{terrItem.error.message}}"
+          uib-tooltip="{{terrItem.error.translated_message||terrItem.error.message}}"
           tooltip-placement="right" tooltip-append-to-body="true"></i>
         </li>
         <li ng-if="terr.length > 10">......</li>

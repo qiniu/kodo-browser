@@ -363,37 +363,41 @@ angular.module('web').factory('QiniuClient', [
             }
           }
 
+          item = Object.assign({ key: item.path.toString() }, item);
+
           return {
-            from: { bucket: item.bucket, key: item.path.toString() },
+            from: { bucket: item.bucket, key: item.key },
             to: { bucket: target.bucket, key: toPrefix },
             item: item,
           };
         });
-        const moveOrCopyFileCallback = (index, err) => {
-          if (err) {
-            errorItems.push({ item: transferObjects[index].item, error: err });
-            progress.errorCount += 1;
-            if (err.code === 'AccessDenied' && err.stage === 'delete') {
-              err.translated_message = T('permission.denied.move.error_when_delete', {
-                fromKey: transferObjects[index].from.key, toKey: transferObjects[index].to.key,
-              });
+        const moveOrCopyFileCallback = (transferObjects) => {
+          return (index, err) => {
+            if (err) {
+              errorItems.push({ item: transferObjects[index].item, error: err });
+              progress.errorCount += 1;
+              if (err.code === 'AccessDenied' && err.stage === 'delete') {
+                err.translated_message = T('permission.denied.move.error_when_delete', {
+                  fromKey: transferObjects[index].from.key, toKey: transferObjects[index].to.key,
+                });
+              }
+            } else {
+              progress.current += 1;
             }
-          } else {
-            progress.current += 1;
-          }
-          progressFn(progress);
-          if (stopCopyFilesFlag) {
-            return false;
-          }
+            progressFn(progress);
+            if (stopCopyFilesFlag) {
+              return false;
+            }
+          };
         };
 
         const transferFileObjects = transferObjects.filter((transferObject) => transferObject.item.itemType === 'file');
         let promises = [];
         if (transferFileObjects && transferFileObjects.length > 0) {
           if (isCopy) {
-            promises.push(client.copyObjects(region, transferFileObjects, moveOrCopyFileCallback));
+            promises.push(client.copyObjects(region, transferFileObjects, moveOrCopyFileCallback(transferFileObjects)));
           } else {
-            promises.push(client.moveObjects(region, transferFileObjects, moveOrCopyFileCallback));
+            promises.push(client.moveObjects(region, transferFileObjects, moveOrCopyFileCallback(transferFileObjects)));
           }
           progress.total += transferFileObjects.length;
           progressFn(progress);
@@ -438,7 +442,7 @@ angular.module('web').factory('QiniuClient', [
                   toKey += '/';
                 }
                 toKey += object.key.substring(transferObject.from.key.length);
-                return { from: object, to: { bucket: transferObject.to.bucket, key: toKey } };
+                return { from: object, to: { bucket: transferObject.to.bucket, key: toKey }, item: { key: toKey, itemType: toKey.endsWith('/') ? 'folder' : 'file' } };
               }).filter((object) => object.to.key);
 
               progress.total += transferObjects.length;
@@ -446,9 +450,9 @@ angular.module('web').factory('QiniuClient', [
 
               let promise;
               if (isCopy) {
-                promise = client.copyObjects(region, transferObjects, moveOrCopyFileCallback);
+                promise = client.copyObjects(region, transferObjects, moveOrCopyFileCallback(transferObjects));
               } else {
-                promise = client.moveObjects(region, transferObjects, moveOrCopyFileCallback);
+                promise = client.moveObjects(region, transferObjects, moveOrCopyFileCallback(transferObjects));
               }
               if (listedObjects.nextContinuationToken) {
                 const promises = [promise];
@@ -616,10 +620,13 @@ angular.module('web').factory('QiniuClient', [
 
       return new Promise((resolve, reject) => {
         getDefaultClient(opt).enter('deleteFiles', (client) => {
+          items.forEach((item) => {
+            item.key = item.path.toString();
+          });
           const toDeleteObjects = items.filter((item) => item.itemType === 'file');
           let promises = [];
           if (toDeleteObjects && toDeleteObjects.length > 0) {
-            promises.push(client.deleteObjects(region, bucket, toDeleteObjects.map((item) => item.path.toString()), deleteCallback(toDeleteObjects.map((item) => { return { key: item.path.toString() }; }))));
+            promises.push(client.deleteObjects(region, bucket, toDeleteObjects.map((item) => item.key), deleteCallback(toDeleteObjects)));
             progress.total += toDeleteObjects.length;
             newProgressFn(progress);
           }
@@ -658,10 +665,12 @@ angular.module('web').factory('QiniuClient', [
                 return;
               }
 
-              progress.total += listedObjects.objects.length;
+              const objects = listedObjects.objects.map((object) => Object.assign({ itemType: object.key.endsWith('/') ? 'folder' : 'file' }, object));
+
+              progress.total += objects.length;
               progressFn(progress);
 
-              let promise = client.deleteObjects(region, folderObject.bucket, listedObjects.objects.map((object) => object.key), deleteCallback(listedObjects.objects.map((item) => { return { key: item.key }; })));
+              let promise = client.deleteObjects(region, folderObject.bucket, objects.map((object) => object.key), deleteCallback(objects));
               if (listedObjects.nextContinuationToken) {
                 const promises = [promise];
                 promises.push(_doDeleteFolder(client, region, folderObject, progress, progressFn, listedObjects.nextContinuationToken, deleteCallback));

@@ -43,10 +43,13 @@
         <!-- 部分目录或文件无法{{isCopy?"复制":"移动"}}： -->
       </div>
       <ul>
-        <li ng-repeat="item in terr" ng-if="$index<10">
-          <i class="fa fa-folder" style="color:orange" ng-if="item.item.itemType === 'folder'"></i>
-          <i class="fa fa-file-o" ng-if="item.item.itemType !== 'folder'"></i> {{item.item.name}}
-          <i class="fa fa-exclamation-circle text-danger" uib-tooltip="{{item.error.translated_message||item.error.message}}" tooltip-placement="right" tooltip-append-to-body="true"></i>
+        <li ng-repeat="terrItem in terr" ng-if="$index<10">
+          <i class="fa fa-folder" style="color:orange" ng-if="terrItem.item.itemType === 'folder'"></i>
+          <i class="fa fa-file-o" ng-if="terrItem.item.itemType !== 'folder'"></i>
+
+          {{terrItem.item.key.substring(fromInfo.key.length)}}
+
+          <i class="fa fa-exclamation-circle text-danger" uib-tooltip="{{terrItem.error.translated_message||terrItem.error.message}}" tooltip-placement="right" tooltip-append-to-body="true"></i>
         </li>
         <li ng-if="terr.length > 10">...</li>
       </ul>

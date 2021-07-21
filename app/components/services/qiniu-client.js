@@ -33,6 +33,8 @@ angular.module('web').factory('QiniuClient', [
       getFrozenInfo: getFrozenInfo,
       headFile: headFile,
       setStorageClass: setStorageClass,
+      setStorageClassOfFiles: setStorageClassOfFiles,
+      stopSetStorageClassOfFiles: stopSetStorageClassOfFiles,
 
       getContent: getContent,
       saveContent: saveContent,
@@ -277,6 +279,110 @@ angular.module('web').factory('QiniuClient', [
           });
         });
       });
+    }
+
+    var stopSetStorageClassOfFilesFlag = false;
+
+    function setStorageClassOfFiles(region, bucket, items, storageClass, progressFn, opt) {
+      const progress = { total: 0, current: 0, errorCount: 0 };
+      stopSetStorageClassOfFilesFlag = false;
+
+      const errorItems = [];
+
+      const newProgressFn = (progress) => {
+        if (progressFn) {
+          try {
+            progressFn(progress);
+          } catch (err) {
+            handleError(err);
+          }
+        }
+      };
+      newProgressFn(progress);
+
+      const restoreCallback = (items) => {
+        return (index, error) => {
+          if (error) {
+            errorItems.push({ item: items[index], error: error });
+            progress.errorCount += 1;
+          } else {
+            progress.current += 1;
+          }
+          newProgressFn(progress);
+          if (stopSetStorageClassOfFilesFlag) {
+            return false;
+          }
+        };
+      };
+
+      return new Promise((resolve, reject) => {
+        getDefaultClient(opt).enter('setStorageClassOfFiles', (client) => {
+          const toSetStorageClassOfObjects = items.filter((item) => item.itemType === 'file');
+          let promises = [];
+          if (toSetStorageClassOfObjects && toSetStorageClassOfObjects.length > 0) {
+            promises.push(client.setObjectsStorageClass(region, bucket, toSetStorageClassOfObjects.map((item) => item.path.toString()), storageClass, restoreCallback(toSetStorageClassOfObjects.map((item) => { return { key: item.path.toString() }; }))));
+            progress.total += toSetStorageClassOfObjects.length;
+            newProgressFn(progress);
+          }
+
+          const toSetStorageClassOfFolders = items.filter((item) => item.itemType === 'folder');
+          const semaphore = new Semaphore(3);
+          promises = promises.concat(toSetStorageClassOfFolders.map((toSetStorageClassOfFolder) => {
+            return doSetStorageClassOfFolder(client, region, toSetStorageClassOfFolder, progress, newProgressFn, semaphore, restoreCallback);
+          }));
+
+          return Promise.all(promises).then(() => { resolve(errorItems); }, reject);
+        });
+      });
+
+      function doSetStorageClassOfFolder(client, region, folderObject, progress, progressFn, semaphore, restoreCallback) {
+        return new Promise((resolve, reject) => {
+          semaphore.acquire().then((release) => {
+            _doSetStorageClassOfFolder(client, region, folderObject, progress, progressFn, undefined, restoreCallback)
+              .then(resolve, reject)
+              .finally(() => { release(); });
+          });
+        });
+
+        function _doSetStorageClassOfFolder(client, region, folderObject, progress, progressFn, marker, restoreCallback) {
+          return new Promise((resolve, reject) => {
+            if (stopSetStorageClassOfFilesFlag) {
+              reject(new Error('User Cancelled'));
+              return;
+            }
+            client.listObjects(region, folderObject.bucket, folderObject.path.toString(), { nextContinuationToken: marker, maxKeys: 1000 }).then((listedObjects) => {
+              if (stopSetStorageClassOfFilesFlag) {
+                reject(new Error('User Cancelled'));
+                return;
+              } else if (!listedObjects.objects || listedObjects.objects.length === 0) {
+                resolve();
+                return;
+              }
+
+              const objects = listedObjects.objects.filter((object) => !object.key.endsWith('/'));
+
+              let promise;
+              if (objects.length > 0) {
+                progress.total += objects.length;
+                progressFn(progress);
+                promise = client.setObjectsStorageClass(region, folderObject.bucket, objects.map((object) => object.key), storageClass, restoreCallback(objects.map((item) => { return { key: item.key }; })));
+              } else {
+                promise = Promise.resolve();
+              }
+              if (listedObjects.nextContinuationToken) {
+                const promises = [promise];
+                promises.push(_doSetStorageClassOfFolder(client, region, folderObject, progress, progressFn, listedObjects.nextContinuationToken, restoreCallback));
+                promise = Promise.all(promises);
+              }
+              promise.then(resolve).catch(reject);
+            }).catch(reject);
+          });
+        }
+      }
+    }
+
+    function stopSetStorageClassOfFiles() {
+      stopSetStorageClassOfFilesFlag = true;
     }
 
     function moveOrCopyFile(region, bucket, oldKey, newKey, isCopy, opt) {

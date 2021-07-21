@@ -124,6 +124,8 @@ angular.module("web").controller("filesCtrl", [
       showDeleteFilesSelected: showDeleteFilesSelected,
       showRestoreFiles: showRestoreFiles,
       showRestoreFilesSelected: showRestoreFilesSelected,
+      showSetStorageClassOfFiles: showSetStorageClassOfFiles,
+      showSetStorageClassOfFilesSelected: showSetStorageClassOfFilesSelected,
 
       // upload && download
       handlers: {
@@ -1179,6 +1181,39 @@ angular.module("web").controller("filesCtrl", [
       }).result.then(angular.noop, angular.noop);
     }
 
+    function showSetStorageClassOfFilesSelected() {
+      showSetStorageClassOfFiles($scope.sel.has);
+    }
+
+    function showSetStorageClassOfFiles(items) {
+      if ($scope.currentInfo.bucketGrantedPermission === 'readonly') {
+        Toast.error(T('permission.denied'));
+        return;
+      }
+
+      $modal.open({
+        templateUrl: "main/files/modals/update-storage-classes-modal.html",
+        controller: "updateStorageClassesModalCtrl",
+        backdrop: "static",
+        resolve: {
+          items: () => {
+            return items;
+          },
+          currentInfo: () => {
+            return angular.copy($scope.currentInfo);
+          },
+          qiniuClientOpt: () => {
+            return getQiniuClientOpt();
+          },
+          callback: () => {
+            return () => {
+              $timeout(listFiles, 300);
+            };
+          }
+        }
+      }).result.then(angular.noop, angular.noop);
+    }
+
     ////////////////////////
     function selectBucket(item) {
       if ($scope.bucket_sel === item) {
@@ -1672,7 +1707,7 @@ angular.module("web").controller("filesCtrl", [
                     key = row.path.toString();
               isFrozenOrNot(region, bucket, key, {
                 'frozen': () => {
-                  showRestore(row);
+                  showStorageClassOf(row);
                 },
                 'unfreezing': () => {
                   Dialog.alert(T('restore.title'), T('restore.message.unfreezing'));

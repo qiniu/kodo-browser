@@ -60,7 +60,7 @@
 
           <i class="fa fa-file-o" ng-if="terrItem.item.itemType !== 'folder'"></i>
 
-          {{terrItem.item.path.toString().substring(currentInfo.key.length)}}
+          {{terrItem.item.key.substring(currentInfo.key.length)}}
 
           <i class="fa fa-exclamation-circle text-danger"
           uib-tooltip="{{terrItem.error.message}}"

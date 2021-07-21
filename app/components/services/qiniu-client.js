@@ -599,17 +599,19 @@ angular.module('web').factory('QiniuClient', [
       };
       newProgressFn(progress);
 
-      const deleteCallback = (index, error) => {
-        if (error) {
-          errorItems.push({ item: items[index], error: error });
-          progress.errorCount += 1;
-        } else {
-          progress.current += 1;
-        }
-        newProgressFn(progress);
-        if (stopDeleteFilesFlag) {
-          return false;
-        }
+      const deleteCallback = (items) => {
+        return (index, error) => {
+          if (error) {
+            errorItems.push({ item: items[index], error: error });
+            progress.errorCount += 1;
+          } else {
+            progress.current += 1;
+          }
+          newProgressFn(progress);
+          if (stopDeleteFilesFlag) {
+            return false;
+          }
+        };
       };
 
       return new Promise((resolve, reject) => {
@@ -617,7 +619,7 @@ angular.module('web').factory('QiniuClient', [
           const toDeleteObjects = items.filter((item) => item.itemType === 'file');
           let promises = [];
           if (toDeleteObjects && toDeleteObjects.length > 0) {
-            promises.push(client.deleteObjects(region, bucket, toDeleteObjects.map((item) => item.path.toString()), deleteCallback));
+            promises.push(client.deleteObjects(region, bucket, toDeleteObjects.map((item) => item.path.toString()), deleteCallback(toDeleteObjects.map((item) => { return { key: item.path.toString() }; }))));
             progress.total += toDeleteObjects.length;
             newProgressFn(progress);
           }
@@ -659,7 +661,7 @@ angular.module('web').factory('QiniuClient', [
               progress.total += listedObjects.objects.length;
               progressFn(progress);
 
-              let promise = client.deleteObjects(region, folderObject.bucket, listedObjects.objects.map((object) => object.key.toString()), deleteCallback);
+              let promise = client.deleteObjects(region, folderObject.bucket, listedObjects.objects.map((object) => object.key), deleteCallback(listedObjects.objects.map((item) => { return { key: item.key }; })));
               if (listedObjects.nextContinuationToken) {
                 const promises = [promise];
                 promises.push(_doDeleteFolder(client, region, folderObject, progress, progressFn, listedObjects.nextContinuationToken, deleteCallback));

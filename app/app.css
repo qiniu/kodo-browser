@@ -178,7 +178,7 @@ html, body {
 }
 
 @font-face {
-  font-family: 'iconfont';
+  font-family: "iconfont"; /* Project id 2640239 */
   src: url('fonts/iconfont.woff2?t=1624951753754') format('woff2'),
        url('fonts/iconfont.woff?t=1624951753754') format('woff'),
        url('fonts/iconfont.ttf?t=1624951753754') format('truetype');

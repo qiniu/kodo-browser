@@ -15,6 +15,7 @@ const VERSION = pkg.version;
 const ELECTRON_VERSION = "4.2.7";
 const ROOT = __dirname;
 const ICONS = `${ROOT}/app/icons`;
+const FONTS = `${ROOT}/app/fonts`;
 const DIST = `${ROOT}/dist`;
 const TARGET = `${ROOT}/build`;
 const RELEASE = `${ROOT}/releases`;
@@ -60,7 +61,7 @@ let appTasks = {
   }
 };
 
-[ICONS, DIST, TARGET, RELEASE].forEach((dir) => {
+[ICONS, FONTS, DIST, TARGET, RELEASE].forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -129,6 +130,7 @@ gulp.task("lib.css", () => {
 gulp.task("copy-fonts", () => {
   gulp
     .src([
+      "./app/fonts/**",
       "./node_modules/bootstrap/fonts/*",
       "./node_modules/font-awesome/fonts/*"
     ])

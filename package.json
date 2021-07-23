@@ -92,7 +92,7 @@
   },
   "dependencies": {
     "csv-stringify": "^5.3.6",
-    "downloads-folder": "^1.0.3",
+    "downloads-folder": "1.0.3",
     "js-base64": "^3.4.5",
     "js-md5": "^0.7.3",
     "kodo-s3-adapter-sdk": "^0.2.17",

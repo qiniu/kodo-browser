@@ -245,7 +245,6 @@ angular.module("web").factory("DownloadMgr", [
             });
           }, Promise.resolve(toLocalPath)).then((localPath) => {
             const ext = path.extname(fileName);
-            /// *** TODO 这里需要重点测试
             const fileLocalPathWithoutExt = path.normalize(localPath.joinFile(path.basename(fileName, ext)).toString());
             let fileLocalPathWithSuffixWithoutExt = fileLocalPathWithoutExt
 

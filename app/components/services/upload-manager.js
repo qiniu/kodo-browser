@@ -184,13 +184,11 @@ angular.module("web").factory("UploadMgr", [
 
         if (fileStat.isDirectory()) {
           //创建目录
-          /// *** TODO 这里需要重点测试
-          // var subDirPath = path.normalize(filePath + "/");
           let subDirPath = filePath + '/';
           if (path.sep == '\\') {
             subDirPath = subDirPath.replace(/\\/g, '/');
           }
-          subDirPath = qiniuPath.fromLocalPath(subDirPath);
+          subDirPath = qiniuPath.fromQiniuPath(subDirPath);
 
           //递归遍历目录
           fs.readdir(absPath, (err, arr) => {
@@ -211,8 +209,6 @@ angular.module("web").factory("UploadMgr", [
           //文件
 
           //修复 window 下 \ 问题
-          /// *** TODO 这里需要在 Windows 下重点测试
-          // filePath = path.normalize(filePath);
           if (path.sep == '\\') {
             filePath = filePath.replace(/\\/g, '/');
           }

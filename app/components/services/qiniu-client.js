@@ -177,16 +177,14 @@ angular.module('web').factory('QiniuClient', [
     }
 
     function createFolder(region, bucket, prefix, opt) {
-      if (!prefix.basename) {
+      if (!prefix.directoryBasename) {
           prefix = qiniuPath.fromQiniuPath(prefix);
       }
-      const basename = prefix.basename() || prefix.directoryBasename();
-
       return new Promise((resolve, reject) => {
         getDefaultClient(opt).enter('createFolder', (client) => {
           return client.putObject(region, {
             bucket: bucket, key: prefix.toString(),
-          }, Buffer.alloc(0), basename);
+          }, Buffer.alloc(0), prefix.directoryBasename());
         }).
           then(resolve).
           catch((err) => {

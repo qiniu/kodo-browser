@@ -1707,7 +1707,7 @@ angular.module("web").controller("filesCtrl", [
                     key = row.path.toString();
               isFrozenOrNot(region, bucket, key, {
                 'frozen': () => {
-                  showStorageClassOf(row);
+                  showRestore(row);
                 },
                 'unfreezing': () => {
                   Dialog.alert(T('restore.title'), T('restore.message.unfreezing'));

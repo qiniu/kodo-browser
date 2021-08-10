@@ -33,37 +33,37 @@
       </button>
 
       <div class="btn-group">
-        <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="btn btn-default btn-sm dropdown-toggle" ng-disabled="sel.has.length === 0 || (currentInfo.bucketGrantedPermission === 'readonly' && (!domains || domains.length === 0))" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           {{'more'|translate}}
           <span class="caret"></span>
         </button>
         <ul class="dropdown-menu" role="menu">
           <li>
-            <a href="" ng-click="showMove(sel.has)" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
+            <a href="#" ng-click="showMove(sel.has)" ng-hide="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
               <i class="fa fa-cut text-primary"></i>
               {{'move'|translate}}
             </a>
           </li>
           <li>
-            <a href="" ng-click="showDeleteFilesSelected()" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
+            <a href="#" ng-click="showDeleteFilesSelected()" ng-hide="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
               <i class="fa fa-trash text-primary"></i>
               {{'delete'|translate}}
             </a>
           </li>
           <li>
-            <a href="" ng-click="showDownloadLinkOfFilesSelected()" ng-disabled="sel.has.length === 0 || !domains || domains.length === 0">
+            <a href="#" ng-click="showDownloadLinkOfFilesSelected()" ng-hide="sel.has.length === 0 || !domains || domains.length === 0">
               <i class="fa fa-link text-primary"></i>
               {{'exportDownloadLinks'|translate}}
             </a>
           </li>
           <li>
-            <a href="" ng-click="showRestoreFilesSelected()" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
+            <a href="#" ng-click="showRestoreFilesSelected()" ng-hide="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
               <i class="fa fa-fire text-primary"></i>
               {{'restore'|translate}}
             </a>
           </li>
           <li>
-            <a href="" ng-click="showSetStorageClassOfFilesSelected()" ng-disabled="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
+            <a href="#" ng-click="showSetStorageClassOfFilesSelected()" ng-hide="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0">
               <i class="iconfont icon-a-fileconversion text-primary" style="margin: 0 -4px;"></i>
               {{'updateStorageClass'|translate}}
             </a>

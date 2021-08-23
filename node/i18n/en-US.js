@@ -328,8 +328,8 @@ module.exports = {
   "restore.tooltip.unfreezing": "Unfreezing",
   "restore.tooltip.unfrozen": "Unfrozen",
   "restore.message.frozen": "Archive storage files have been frozen",
-  "restore.message.unfreezing": "Archived storage file is being restored",
-  "restore.message.unfrozen": "Archived storage file has been restored",
+  "restore.message.unfreezing": "Archived storage file is being unfreezing",
+  "restore.message.unfrozen": "Archived storage file has been unfrozen",
   "restore.message.head_error": "Failed to get status of the archived storage file",
 
   updateStorageClass: "Set Storage Class",
@@ -345,6 +345,9 @@ module.exports = {
   "updateStorageClassModal.message1": "The following directories or files will be updated",
   "updateStorageClassModal.message2": "Has been cancelled",
   "updateStorageClassModal.message3": "Some directories or files can not be updated",
+  "updateStorageClassModal.message.frozen": "Archived storage file only supports modification of storage type after being unfrozen",
+  "updateStorageClassModal.message.unfreezing": "Archived storage file is being unfreezing, it only supports modification of storage type after being unfrozen",
+  "updateStorageClassModal.message.head_error": "Failed to get status of the archived storage file",
 
   preview: "Preview",
   "cannot.preview": "Can not preview",

@@ -344,6 +344,9 @@ module.exports = {
   "updateStorageClassModal.message1": "以下のディレクトリまたはファイルが更新されます",
   "updateStorageClassModal.message2": "キャンセルされました",
   "updateStorageClassModal.message3": "一部のディレクトリまたはファイルは更新できません",
+  "updateStorageClassModal.message.frozen": "アーカイブされたストレージファイルは、解凍後のストレージタイプの変更のみをサポートします",
+  "updateStorageClassModal.message.unfreezing": "アーカイブされたストレージファイルはフリーズ解除されており、フリーズ解除後のストレージタイプの変更のみをサポートしています",
+  "updateStorageClassModal.message.head_error": "アーカイブされたストレージファイルのステータスを取得できませんでした",
 
   preview: "プレビュー",
   "cannot.preview": "プレビューできません",

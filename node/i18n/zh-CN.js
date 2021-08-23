@@ -345,6 +345,9 @@ module.exports = {
   "updateStorageClassModal.message1": "将修改以下目录或文件",
   "updateStorageClassModal.message2": "用户取消修改",
   "updateStorageClassModal.message3": "部分目录或文件无法修改",
+  "updateStorageClassModal.message.frozen": "归档存储文件，要解冻后才支持修改存储类型",
+  "updateStorageClassModal.message.unfreezing": "归档存储文件正在解冻中，要解冻后才支持修改存储类型",
+  "updateStorageClassModal.message.head_error": "获取归档存储文件状态失败",
 
   preview: "预览",
   "cannot.preview": "无法预览",

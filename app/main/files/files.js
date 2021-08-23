@@ -1690,13 +1690,13 @@ angular.module("web").controller("filesCtrl", [
                   showUpdateStorageClass(row);
                 },
                 'unfreezing': () => {
-                  Dialog.alert(T('restore.title'), T('restore.message.unfreezing'));
+                  Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.unfreezing'));
                 },
                 'frozen': () => {
-                  Dialog.alert(T('restore.title'), T('restore.message.frozen'));
+                  Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.frozen'));
                 },
                 'error': (err) => {
-                  Dialog.alert(T('restore.title'), T('restore.message.head_error'));
+                  Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.head_error'));
                 },
               });
               return false;

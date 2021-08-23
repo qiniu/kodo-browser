@@ -4,7 +4,7 @@
   "scripts": {},
   "main": "lib/index.js",
   "dependencies": {
-    "kodo-s3-adapter-sdk": "^0.2.18",
+    "kodo-s3-adapter-sdk": "^0.2.19",
     "electron": "^4.0",
     "events": "^2.0.0",
     "mime": "^2.2.0",

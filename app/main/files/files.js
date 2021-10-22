@@ -1214,6 +1214,36 @@ angular.module("web").controller("filesCtrl", [
       }).result.then(angular.noop, angular.noop);
     }
 
+    /**
+    * @param filePaths { string }
+    */
+    function showUploadConfirmModal(filePaths) {
+      $modal.open({
+        templateUrl: "main/files/modals/upload-confirm-modal.html",
+        controller: "uploadConfirmModalCtrl",
+        resolve: {
+          items: () => {
+            return filePaths;
+          },
+          currentInfo: () => {
+            return angular.copy($scope.currentInfo);
+          },
+          qiniuClientOpt: () => {
+            return getQiniuClientOpt();
+          },
+          okCallback: () => {
+            return ({ files, uploadOptions }) => {
+              $scope.handlers.uploadFilesHandler(
+                files.map(qiniuPath.fromLocalPath),
+                angular.copy($scope.currentInfo),
+                uploadOptions,
+              );
+            }
+          }
+        }
+      }).result.then(angular.noop, angular.noop);
+    }
+
     ////////////////////////
     function selectBucket(item) {
       if ($scope.bucket_sel === item) {
@@ -1325,7 +1355,7 @@ angular.module("web").controller("filesCtrl", [
           return;
         }
 
-        $scope.handlers.uploadFilesHandler(filePaths.map(qiniuPath.fromLocalPath), angular.copy($scope.currentInfo));
+        showUploadConfirmModal(filePaths)
       });
     }
 
@@ -1377,15 +1407,12 @@ angular.module("web").controller("filesCtrl", [
       e.stopPropagation();
 
       const files = e.originalEvent.dataTransfer.files;
-      const filePaths = [];
-      if (files) {
-        angular.forEach(files, (n) => {
-          filePaths.push(qiniuPath.fromLocalPath(n.path));
-        });
-      }
 
-      if (filePaths.length) {
-        $scope.handlers.uploadFilesHandler(filePaths, angular.copy($scope.currentInfo));
+      if (files.length) {
+        showUploadConfirmModal(Array.prototype.map.call(
+          files,
+          f => f.path
+        ))
       }
 
       return false;

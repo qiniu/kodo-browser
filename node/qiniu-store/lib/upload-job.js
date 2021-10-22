@@ -62,6 +62,7 @@ class UploadJob extends Base {
     this.uploadedId = this._config.uploadedId;
     this.uploadedParts = this._config.uploadedParts;
     this.overwrite = this._config.overwrite;
+    this.storageClassName = this._config.storageClassName;
 
     this.message = this._config.message;
     this.status = this._config.status || 'waiting';
@@ -110,6 +111,7 @@ UploadJob.prototype.start = function (overwrite, prog) {
       uploadedId: prog.uploadedId,
       uploadedParts: prog.uploadedParts,
       overwriteDup: !!overwrite || this.overwrite,
+      storageClassName: this.storageClassName,
     }
   };
 

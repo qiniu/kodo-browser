@@ -286,6 +286,16 @@ module.exports = {
   "genAuthToken.message6.1": "确定生成",
   "genAuthToken.message6.2": "重新生成",
 
+  "uploadModal.title": "上传文件",
+  "uploadModal.selectedFilesTitle": "已选择以下文件或目录：",
+  "uploadModal.maxShowFilesHelper": "个文件/目录",
+  "uploadModal.ifCoverUpload": "覆盖上传",
+  "uploadModal.ifCoverUploadHelper": "（本次开启覆盖上传）",
+  "uploadModal.storageClassesHelper.Standard": "",
+  "uploadModal.storageClassesHelper.InfrequentAccess": "Object 最小计量 64KB，保存时间少于 30 天也将按 30 天收费",
+  "uploadModal.storageClassesHelper.Glacier": "Object 访问前需要先解冻；最小计量 64KB，保存时间少于 60 天也将按 60 天计费",
+  "uploadModal.ok": "确定上传",
+
   "deleteModal.title": "删除目录和文件",
   "deleteModal.message1": "将删除以下目录或文件",
   "delete.on": "正在删除...",
@@ -377,8 +387,6 @@ module.exports = {
 
   "upload.emptyfolder": "允许空目录上传",
   "upload.emptyfolder.disabled": "禁止空目录上传",
-  "upload.overwrite": "开启覆盖上传",
-  "upload.overwrite.disabled": "禁用覆盖上传",
   "download.overwrite": "开启覆盖下载",
   "download.overwrite.disabled": "禁用覆盖下载",
   "start.all": "启动全部",

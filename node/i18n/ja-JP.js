@@ -285,6 +285,16 @@ module.exports = {
   "genAuthToken.message6.1": "生成する",
   "genAuthToken.message6.2": "再生成する",
 
+  "uploadModal.title": "ファイルのアップロード",
+  "uploadModal.selectedFilesTitle": "ファイルやディレクトリの選択：",
+  "uploadModal.maxShowFilesHelper": "ファイル/ディレクトリー",
+  "uploadModal.ifCoverUpload": "上書き",
+  "uploadModal.ifCoverUploadHelper": "（今回の上書き）",
+  "uploadModal.storageClassesHelper.Standard": "",
+  "uploadModal.storageClassesHelper.InfrequentAccess": "オブジェクトの最小計測値は64KBです。30日に満たない場合も30日分の料金が発生します。",
+  "uploadModal.storageClassesHelper.Glacier": "アクセスする前にオブジェクトの凍結を解除する必要があります。最小測定値は64KBで、保存期間が60日未満の場合も60日として課金されます。",
+  "uploadModal.ok": "アップロード",
+
   "deleteModal.title": "これらのファイルを削除する",
   "deleteModal.message1": "次のディレクトリまたはファイルが削除されます",
   "delete.on": "削除中...",
@@ -376,8 +386,6 @@ module.exports = {
 
   "upload.emptyfolder": "空のディレクトリのアップロードを許可する",
   "upload.emptyfolder.disabled": "空のディレクトリのアップロードを禁止する",
-  "upload.overwrite": "アップロードの上書きを有効にする",
-  "upload.overwrite.disabled": "アップロードの上書きを無効にする",
   "download.overwrite": "ダウンロードの上書きを有効にする",
   "download.overwrite.disabled": "ダウンロードの上書きを無効にする",
   "start.all": "すべて開始",

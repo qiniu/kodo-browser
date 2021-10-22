@@ -286,6 +286,16 @@ module.exports = {
   "genAuthToken.message6.1": "Generate",
   "genAuthToken.message6.2": "Re-Generate",
 
+  "uploadModal.title": "Upload Files",
+  "uploadModal.selectedFilesTitle": "Selected Files or Directories:",
+  "uploadModal.maxShowFilesHelper": "files/directories",
+  "uploadModal.ifCoverUpload": "Overwrite",
+  "uploadModal.ifCoverUploadHelper": "(overwrite for this time)",
+  "uploadModal.storageClassesHelper.Standard": "",
+  "uploadModal.storageClassesHelper.InfrequentAccess": "Object minimum measurement is 64KB. less than 30 days will also be charged as 30 days",
+  "uploadModal.storageClassesHelper.Glacier": "Object needs to be unfrozen before accessing; minimum measurement of 64KB, retention time less than 60 days will also be charged as 60 days",
+  "uploadModal.ok": "Upload",
+
   "deleteModal.title": "Delete These Files",
   "deleteModal.message1": "The following directory or file will be deleted",
   "delete.on": "Deleting...",
@@ -377,8 +387,6 @@ module.exports = {
 
   "upload.emptyfolder": "Allow uploading empty folder",
   "upload.emptyfolder.disabled": "Prohibit uploading empty folder",
-  "upload.overwrite": "Enable overwrite for uploading",
-  "upload.overwrite.disabled": "Disable overwrite for uploading",
   "download.overwrite": "Enable overwrite for downloading",
   "download.overwrite.disabled": "Disable overwrite for downloading",
   "start.all": "Start All",

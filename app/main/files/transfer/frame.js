@@ -27,9 +27,6 @@ angular.module("web").controller("transferFrameCtrl", [
       emptyFolderUploading: {
         enabled: localStorage.getItem(Const.EMPTY_FOLDER_UPLOADING) || true,
       },
-      overwriteUploading: {
-        enabled: localStorage.getItem(Const.OVERWRITE_UPLOADING) || false,
-      },
       overwriteDownloading: {
         enabled: localStorage.getItem(Const.OVERWRITE_DOWNLOADING) || false,
       },
@@ -59,10 +56,11 @@ angular.module("web").controller("transferFrameCtrl", [
      * upload
      * @param filePaths []  {array<string>}, iter for folder
      * @param bucketInfo {object} {bucket, region, key}
+     * @param uploadOptions {object} {isOverwrite, storageClassName}, storageClassName is 'Standard', 'InfrequentAccess', 'Glacier'
      */
-    function uploadFilesHandler(filePaths, bucketInfo) {
+    function uploadFilesHandler(filePaths, bucketInfo,uploadOptions) {
       Toast.info(T("upload.addtolist.on"));
-      UploadMgr.createUploadJobs(filePaths, bucketInfo, function (isCancelled) {
+      UploadMgr.createUploadJobs(filePaths, bucketInfo, uploadOptions, function (isCancelled) {
         Toast.info(T("upload.addtolist.success"));
 
         $scope.transTab = 1;

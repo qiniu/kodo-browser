@@ -96,10 +96,11 @@ angular.module("web").factory("UploadMgr", [
      * upload
      * @param filePaths []  {array<string>}  有可能是目录，需要遍历
      * @param bucketInfo {object} {bucket, region, key}
+     * @param uploadOptions {object} {isOverwrite, storageClassName}, storageClassName is 'Standard', 'InfrequentAccess', 'Glacier'
      * @param jobsAddingFn {Function} 快速加入列表回调方法， 返回jobs引用，但是该列表长度还在增长。
      * @param jobsAddedFn {Function} 加入列表完成回调方法， jobs列表已经稳定
      */
-    function createUploadJobs(filePaths, bucketInfo, jobsAddingFn) {
+    function createUploadJobs(filePaths, bucketInfo, uploadOptions, jobsAddingFn) {
       stopCreatingFlag = false;
 
       _kdig(filePaths, () => {
@@ -214,18 +215,19 @@ angular.module("web").factory("UploadMgr", [
           }
 
           const job = createJob({
-                        region: bucketInfo.regionId,
-                        from: {
-                          name: fileName,
-                          path: absPath
-                        },
-                        to: {
-                          bucket: bucketInfo.bucketName,
-                          key: filePath
-                        },
-                        overwrite: $scope.overwriteUploading.enabled,
-                        backendMode: bucketInfo.qiniuBackendMode,
-                      });
+            region: bucketInfo.regionId,
+            from: {
+              name: fileName,
+              path: absPath
+            },
+            to: {
+              bucket: bucketInfo.bucketName,
+              key: filePath
+            },
+            overwrite: uploadOptions.isOverwrite,
+            storageClassName: uploadOptions.storageClassName,
+            backendMode: bucketInfo.qiniuBackendMode,
+          });
           addEvents(job);
           $timeout(() => { callFn([job]); }, 1);
         }
@@ -364,6 +366,7 @@ angular.module("web").factory("UploadMgr", [
               return { PartNumber: part.partNumber, ETag: part.etag };
             }),
             overwrite: job.overwrite,
+            storageClassName: job.storageClassName,
             backendMode: job.backendMode,
           };
         }

@@ -249,6 +249,7 @@ angular.module("web").factory("UploadMgr", [
       job.on('fileDuplicated', (data) => {
         concurrency--;
         $timeout(() => {
+          trySchedJob();
           $scope.calcTotalProg();
         });
       });

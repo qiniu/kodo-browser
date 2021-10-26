@@ -2,8 +2,8 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import Config from '@/config'
-import QiniuClient from '@/components/services/qiniu-client'
+import NgConfig from '@/ng-config'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
 
 const CUSTOMIZE_CLOUD_MODAL_CONTROLLER_NAME = 'customizeCloudModalCtrl'
 
@@ -13,8 +13,8 @@ webModule
     '$translate',
     '$uibModalInstance',
     '$timeout',
-    Config,
-    QiniuClient,
+    NgConfig,
+    NgQiniuClient,
     function ($scope, $translate, $modalInstance, $timeout, Config, QiniuClient) {
       const T = $translate.instant;
 

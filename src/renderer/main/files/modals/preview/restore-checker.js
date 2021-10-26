@@ -2,7 +2,7 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import QiniuClient from '@/components/services/qiniu-client'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
 import safeApply from '@/components/services/safe-apply'
 
 import { restoreCheckerHtmlMapping } from "@template-mappings/main/files/modals/preview"
@@ -26,7 +26,7 @@ webModule
           qiniuClientOpt: '=',
           afterCheckSuccess: '&',
         },
-        controller: ['$scope', '$timeout', '$uibModal', QiniuClient, safeApply, ctrlFn]
+        controller: ['$scope', '$timeout', '$uibModal', NgQiniuClient, safeApply, ctrlFn]
       }
 
       function ctrlFn($scope, $timeout, $modal, QiniuClient, safeApply){
@@ -75,7 +75,7 @@ webModule
               }
               break;
             default:
-              console.error("Unrecognized status from QiniuClient.getFrozenInfo(): ", data.status);
+              console.error("Unrecognized status from NgQiniuClient.getFrozenInfo(): ", data.status);
             }
           })
             .catch(e => {

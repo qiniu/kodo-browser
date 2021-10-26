@@ -1,6 +1,6 @@
 import ng from '@/libCompatible/ng'
 
-import CodeMirror from './codemirror'
+import CodeMirror from './codemirror.ts'
 
 const angular = ng
 

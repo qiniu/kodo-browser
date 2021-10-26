@@ -9,12 +9,12 @@ import webModule from '@/app-module/web'
 
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
 import Auth from '@/components/services/auth'
-import AuthInfo from '@/components/services/authinfo'
-import settingsSvs from '@/components/services/settings'
+import * as AuthInfo from '@/components/services/authinfo'
+import Settings from '@/components/services/settings'
 import { TOAST_FACTORY_NAME as Toast } from "@/components/directives/toast-list"
-import Config from '@/config'
+import NgConfig from '@/ng-config'
 import autoUpgradeSvs from '@/components/services/auto-upgrade'
-import AuditLog from "@/components/services/audit-log"
+import * as AuditLog from "@/components/services/audit-log"
 
 import { aboutHtmlMapping, bookmarksHtmlMapping, settingsHtmlMapping } from "@template-mappings/main/modals"
 import settingsCtrl from '../modals/settings'
@@ -37,12 +37,9 @@ webModule.controller(TOP_CONTROLLER_NAME, [
   "$timeout",
   Dialog,
   Auth,
-  AuthInfo,
-  settingsSvs,
   Toast,
-  Config,
+  NgConfig,
   autoUpgradeSvs,
-  AuditLog,
   function(
     $scope,
     $rootScope,
@@ -52,12 +49,9 @@ webModule.controller(TOP_CONTROLLER_NAME, [
     $timeout,
     Dialog,
     Auth,
-    AuthInfo,
-    settingsSvs,
     Toast,
     Config,
     autoUpgradeSvs,
-    AuditLog
   ) {
     var T = $translate.instant;
 
@@ -96,7 +90,7 @@ webModule.controller(TOP_CONTROLLER_NAME, [
 
     $scope.$watch("upgradeInfo.isLastVersion", function(v) {
       if (false === v) {
-        if (1 == settingsSvs.autoUpgrade.get()) autoUpgradeSvs.start();
+        if (1 === Settings.autoUpgrade) autoUpgradeSvs.start();
         else $scope.showAbout();
       }
     });
@@ -128,7 +122,10 @@ webModule.controller(TOP_CONTROLLER_NAME, [
           if (b) {
             const originalAccessKeyId = AuthInfo.get().id;
             Auth.logout().then(() => {
-              AuditLog.log('logout', { from: originalAccessKeyId });
+              AuditLog.log(
+                AuditLog.Action.Logout,
+                { from: originalAccessKeyId },
+              );
               $location.url("/login");
             }).catch((err) => {
               Toast.error(err.message, 5000);
@@ -163,7 +160,10 @@ webModule.controller(TOP_CONTROLLER_NAME, [
                       } else {
                         AuthInfo.switchToPrivateCloud();
                       }
-                      AuditLog.log('switchAccount', { from: originalAccessKeyId });
+                      AuditLog.log(
+                        AuditLog.Action.SwitchAccount,
+                        { from: originalAccessKeyId },
+                      );
                       Toast.success(T("login.successfully"), 1000);
                       ipcRenderer.send('asynchronous', { key: 'reloadWindow' });
                     },
@@ -221,7 +221,7 @@ webModule.controller(TOP_CONTROLLER_NAME, [
     }
 
     function isExternalPathEnabled() {
-      return settingsSvs.externalPathEnabled.get() > 0
+      return Settings.externalPathEnabled > 0
     }
 
     function showBucketsOrFiles() {

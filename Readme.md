@@ -133,7 +133,7 @@ kodo-browser/
 
 ## 5. OEM 定制
 
-编辑 `app/customize.js` 中的代码然后重新打包以定制部分 OEM 功能，目前支持的 OEM 定制有：
+编辑 `src/renderer/customize.ts` 中的代码然后重新打包以定制部分 OEM 功能，目前支持的 OEM 定制有：
 
 * 禁止创建 Bucket
 * 禁止删除 Bucket

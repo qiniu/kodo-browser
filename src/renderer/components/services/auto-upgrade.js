@@ -7,18 +7,17 @@ import downloadsFolder from 'downloads-folder'
 import * as util from '../../../common/qiniu-store/lib/util'
 import webModule from '@/app-module/web'
 
-import Customize from '@/customize'
+import { upgrade } from '@/customize'
 
 const AUTO_UPGRADE_SVS_FACTORY_NAME = 'autoUpgradeSvs'
 
 webModule.factory(AUTO_UPGRADE_SVS_FACTORY_NAME, [
   "$timeout",
-  Customize,
-  function ($timeout, Customize) {
+  function ($timeout) {
     const NAME = "kodo-browser";
 
-    const upgrade_url = Customize.upgrade.check_url;
-    const release_notes_url = Customize.upgrade.release_notes_url;
+    const upgrade_url = upgrade.check_url;
+    const release_notes_url = upgrade.release_notes_url;
     const gVersion = Global.app.version;
 
     var upgradeOpt = {

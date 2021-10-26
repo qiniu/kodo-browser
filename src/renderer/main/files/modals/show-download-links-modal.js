@@ -8,7 +8,7 @@ import moment from 'moment'
 import webModule from '@/app-module/web'
 
 import safeApply from '@/components/services/safe-apply'
-import QiniuClient from '@/components/services/qiniu-client'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 
@@ -21,7 +21,7 @@ webModule
     '$translate',
     '$uibModalInstance',
     safeApply,
-    QiniuClient,
+    NgQiniuClient,
     'items',
     'current',
     'domains',

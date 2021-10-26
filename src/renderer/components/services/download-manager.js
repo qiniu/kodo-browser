@@ -7,11 +7,11 @@ import { KODO_MODE } from 'kodo-s3-adapter-sdk'
 import QiniuStore from '../../../common/qiniu-store/lib'
 import webModule from '@/app-module/web'
 
-import Config from '@/config'
-import AuthInfo from './authinfo'
-import QiniuClient from './qiniu-client'
+import NgConfig from '@/ng-config'
+import * as AuthInfo from './authinfo'
+import NgQiniuClient from './ng-qiniu-client'
 import { TOAST_FACTORY_NAME as Toast } from '../directives/toast-list'
-import settingsSvs from './settings'
+import Settings from './settings.ts'
 
 const DOWNLOAD_MGR_FACTORY_NAME = 'DownloadMgr'
 
@@ -19,20 +19,16 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
   "$q",
   "$timeout",
   '$translate',
-  AuthInfo,
-  QiniuClient,
-  Config,
+  NgQiniuClient,
+  NgConfig,
   Toast,
-  settingsSvs,
   function (
     $q,
     $timeout,
     $translate,
-    AuthInfo,
     QiniuClient,
     Config,
     Toast,
-    settingsSvs
   ) {
     const T = $translate.instant
     const pfs = fs.promises
@@ -99,11 +95,11 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
       };
       options.region = region;
       options.domain = domain;
-      options.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
-      options.multipartDownloadThreshold = settingsSvs.multipartDownloadThreshold.get();
-      options.multipartDownloadSize = settingsSvs.multipartDownloadSize.get();
-      options.downloadSpeedLimit = (settingsSvs.downloadSpeedLimitEnabled.get() == 1 && settingsSvs.downloadSpeedLimitKBperSec.get());
-      options.isDebug = (settingsSvs.isDebug.get() == 1);
+      options.resumeDownload = (Settings.resumeDownload === 1);
+      options.multipartDownloadThreshold = Settings.multipartDownloadThreshold;
+      options.multipartDownloadSize = Settings.multipartDownloadSize;
+      options.downloadSpeedLimit = (Settings.downloadSpeedLimitEnabled === 1 && Settings.downloadSpeedLimitKBperSec);
+      options.isDebug = (Settings.isDebug === 1);
 
       const store = new QiniuStore();
       return store.createDownloadJob(options);
@@ -345,8 +341,8 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
     }
 
     function trySchedJob() {
-      var maxConcurrency = settingsSvs.maxDownloadConcurrency.get();
-      var isDebug = (settingsSvs.isDebug.get() == 1);
+      var maxConcurrency = Settings.maxDownloadConcurrency;
+      var isDebug = (Settings.isDebug === 1);
 
       concurrency = Math.max(0, concurrency);
       if (isDebug) {

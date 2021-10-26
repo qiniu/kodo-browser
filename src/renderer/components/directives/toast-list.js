@@ -23,8 +23,7 @@ webModule
       controller: [
         "$scope",
         "$timeout",
-        "$location",
-        function ($scope, $timeout, $location) {
+        function ($scope, $timeout) {
           $scope.alerts = [];
 
           $scope.$on("message", function (evt, data) {

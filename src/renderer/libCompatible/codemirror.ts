@@ -1,4 +1,4 @@
-import CodeMirror from 'codemirror/lib/codemirror'
+import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
 
 import 'codemirror/addon/merge/merge'

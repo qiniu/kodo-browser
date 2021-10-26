@@ -2,10 +2,10 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import Bookmark from '@/components/services/bookmark'
-import AuthInfo from '@/components/services/authinfo'
+import * as Bookmark from '@/components/services/bookmark'
+import * as AuthInfo from '@/components/services/authinfo'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
-import settingsSvs from '@/components/services/settings'
+import Settings from '@/components/services/settings'
 
 import './address-bar.css'
 
@@ -15,11 +15,8 @@ webModule
   .controller(ADDRESS_BAR_CONTROLLER_NAME, [
     '$scope',
     '$translate',
-    Bookmark,
-    AuthInfo,
     Toast,
-    settingsSvs,
-    function ($scope, $translate, Bookmark, AuthInfo, Toast, settingsSvs) {
+    function ($scope, $translate, Toast) {
 
       const KODO_ADDR_PROTOCOL = 'kodo://',
             T = $translate.instant;
@@ -73,7 +70,7 @@ webModule
           arr.push({ url: url, mode: mode, time: new Date().getTime() });
           index++;
 
-          const MAX = settingsSvs.historiesLength.get();
+          const MAX = Settings.historiesLength;
           if (arr.length > MAX) {
             arr.splice(MAX, arr.length - MAX);
             index = arr.length - 1;

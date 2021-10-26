@@ -6,29 +6,23 @@ import qiniuPath from "qiniu-path"
 import QiniuStore from '../../../common/qiniu-store/lib'
 import webModule from '@/app-module/web'
 
-import QiniuClient from './qiniu-client'
-import AuthInfo from './authinfo'
-import Config from '@/config'
-import settingsSvs from './settings'
+import NgQiniuClient from './ng-qiniu-client'
+import * as AuthInfo from './authinfo'
+import NgConfig from '@/ng-config'
+import Settings from './settings.ts'
 
 const UPLOAD_MGR_FACTORY_NAME = 'UploadMgr'
 
 webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
-  "$q",
   "$timeout",
   "$translate",
-  QiniuClient,
-  AuthInfo,
-  Config,
-  settingsSvs,
+  NgQiniuClient,
+  NgConfig,
   function (
-    $q,
     $timeout,
     $translate,
     QiniuClient,
-    AuthInfo,
     Config,
-    settingsSvs
   ) {
     const T = $translate.instant;
 
@@ -90,11 +84,11 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
         regions: config.regions || [],
       };
       options.region = region;
-      options.resumeUpload = (settingsSvs.resumeUpload.get() == 1);
-      options.multipartUploadSize = settingsSvs.multipartUploadSize.get();
-      options.multipartUploadThreshold = settingsSvs.multipartUploadThreshold.get();
-      options.uploadSpeedLimit = (settingsSvs.uploadSpeedLimitEnabled.get() == 1 && settingsSvs.uploadSpeedLimitKBperSec.get());
-      options.isDebug = (settingsSvs.isDebug.get() == 1);
+      options.resumeUpload = (Settings.resumeUpload === 1);
+      options.multipartUploadSize = Settings.multipartUploadSize;
+      options.multipartUploadThreshold = Settings.multipartUploadThreshold;
+      options.uploadSpeedLimit = (Settings.uploadSpeedLimitEnabled === 1 && Settings.uploadSpeedLimitKBperSec);
+      options.isDebug = (Settings.isDebug === 1);
 
       const store = new QiniuStore();
       return store.createUploadJob(options);
@@ -312,8 +306,8 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
     }
 
     function trySchedJob() {
-      var maxConcurrency = settingsSvs.maxUploadConcurrency.get();
-      var isDebug = (settingsSvs.isDebug.get() == 1);
+      var maxConcurrency = Settings.maxUploadConcurrency;
+      var isDebug = (Settings.isDebug === 1);
 
       concurrency = Math.max(0, concurrency);
       if (isDebug) {

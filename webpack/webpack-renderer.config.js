@@ -16,7 +16,7 @@ module.exports = function(webpackEnv) {
       ? shouldUseSourceMap
         ? 'source-map'
         : false
-      : isEnvDevelopment && 'cheap-module-source-map',
+      : isEnvDevelopment && 'eval-source-map',
     target: 'electron-renderer',
     mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
     resolve: {
@@ -24,6 +24,7 @@ module.exports = function(webpackEnv) {
         '@': paths.appRenderer,
         '@template-mappings': paths.appRendererTemplateMappings,
       },
+      extensions: ['.ts', '.js'],
     },
     entry: {
       renderer: paths.appRendererIndex
@@ -63,6 +64,7 @@ module.exports = function(webpackEnv) {
     ],
     module: {
       rules: [
+        { test: /\.ts$/, loader: "ts-loader" },
         {
           test: /\.css$/i,
           use: [MiniCssExtractPlugin.loader, 'css-loader'],

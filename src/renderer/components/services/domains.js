@@ -2,8 +2,8 @@ import { KODO_MODE, S3_MODE } from 'kodo-s3-adapter-sdk'
 
 import webModule from '../../app-module/web'
 
-import AuthInfo from './authinfo'
-import QiniuClient from './qiniu-client'
+import * as AuthInfo from './authinfo'
+import NgQiniuClient from './ng-qiniu-client'
 
 const DOMAINS_FACTORY_NAME = 'Domains'
 
@@ -11,13 +11,11 @@ webModule.factory(DOMAINS_FACTORY_NAME, [
   "$q",
   "$timeout",
   "$translate",
-  AuthInfo,
-  QiniuClient,
+  NgQiniuClient,
   function (
     $q,
     $timeout,
     $translate,
-    AuthInfo,
     QiniuClient,
   ) {
     const T = $translate.instant;

@@ -2,10 +2,10 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import QiniuClient from '@/components/services/qiniu-client'
-import Const from '@/const'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
+import { bucketACL } from '@/const/setting-keys'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
-import AuditLog from '@/components/services/audit-log'
+import * as AuditLog from '@/components/services/audit-log'
 
 const ADD_BUCKET_MODAL_CONTROLLER_NAME = 'addBucketModalCtrl'
 
@@ -15,18 +15,17 @@ webModule
     '$uibModalInstance',
     '$translate',
     'callback',
-    QiniuClient,
+    NgQiniuClient,
     'qiniuClientOpt',
-    Const,
     Toast,
-    AuditLog,
     'regions',
-    function ($scope, $modalInstance, $translate, callback, QiniuClient, qiniuClientOpt, Const, Toast, AuditLog, regions) {
-      const T = $translate.instant,
-            bucketACL = angular.copy(Const.bucketACL);
+    function ($scope, $modalInstance, $translate, callback, QiniuClient, qiniuClientOpt, Toast, regions) {
+      const T = $translate.instant
+      const bucketACL = angular.copy(bucketACL)
+        console.log('lihs debug:', bucketACL);
       angular.extend($scope, {
         regions: regions.filter((region) => !region.cannotCreateBucket),
-        bucketACL: [], //angular.copy(Const.bucketACL),
+        bucketACL: [], //angular.copy(bucketACL),
         cancel: cancel,
         onSubmit: onSubmit,
         item: {
@@ -42,7 +41,7 @@ webModule
       i18nBucketACL();
 
       function i18nBucketACL() {
-        const acls = angular.copy(Const.bucketACL);
+        const acls = angular.copy(bucketACL);
         angular.forEach(acls, function (n) {
           n.label = T('aclType.' + n.acl);
         });
@@ -58,11 +57,14 @@ webModule
 
         var item = angular.copy($scope.item);
         QiniuClient.createBucket(item.region, item.name, qiniuClientOpt).then((result) => {
-          AuditLog.log('addBucket', {
-            regionId: item.region,
-            name: item.name,
-            acl: item.acl,
-          });
+          AuditLog.log(
+            AuditLog.Action.AddBucket,
+            {
+              regionId: item.region,
+              name: item.name,
+              acl: item.acl,
+            },
+          );
           callback();
           cancel();
         });

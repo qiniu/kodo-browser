@@ -1,9 +1,10 @@
 import angular from 'angular'
+import qiniuPath from 'qiniu-path'
 
 import webModule from '@/app-module/web'
 
-import QiniuClient from '@/components/services/qiniu-client'
-import AuditLog from '@/components/services/audit-log'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
+import * as AuditLog from '@/components/services/audit-log'
 
 const ADD_FOLDER_MODAL_CONTROLLER_NAME = 'addFolderModalCtrl'
 
@@ -14,9 +15,8 @@ webModule
     'currentInfo',
     'qiniuClientOpt',
     'callback',
-    QiniuClient,
-    AuditLog,
-    function ($scope, $modalInstance, currentInfo, qiniuClientOpt, callback, QiniuClient, AuditLog) {
+    NgQiniuClient,
+    function ($scope, $modalInstance, currentInfo, qiniuClientOpt, callback, QiniuClient) {
 
       angular.extend($scope, {
         currentInfo: currentInfo,
@@ -36,13 +36,16 @@ webModule
         if (!form.$valid) return;
 
         const folderName = $scope.item.name;
-        const fullPath = currentInfo.key + folderName + '/';
+        const fullPath = qiniuPath.fromQiniuPath(currentInfo.key + folderName + '/');
         QiniuClient.createFolder(currentInfo.regionId, currentInfo.bucketName, fullPath, qiniuClientOpt).then(function () {
-          AuditLog.log('addFolder', {
-            regionId: currentInfo.regionId,
-            bucket: currentInfo.bucketName,
-            path: fullPath
-          });
+          AuditLog.log(
+            AuditLog.Action.AddFolder,
+            {
+              regionId: currentInfo.regionId,
+              bucket: currentInfo.bucketName,
+              path: fullPath
+            },
+          );
           callback();
           cancel();
         });

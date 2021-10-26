@@ -16,15 +16,15 @@ import './transfer/frame'
 // import factories
 import safeApply from '@/components/services/safe-apply'
 import Auth from '@/components/services/auth'
-import AuthInfo from '@/components/services/authinfo'
-import AuditLog from '@/components/services/audit-log'
-import QiniuClient from '@/components/services/qiniu-client'
-import settingsSvs from '@/components/services/settings'
+import * as AuthInfo from '@/components/services/authinfo'
+import * as AuditLog from '@/components/services/audit-log'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
+import Settings from '@/components/services/settings'
 import ExternalPath from '@/components/services/external-path'
-import fileSvs from '@/components/services/file.s'
+import { getFileType } from '@/components/services/file.s'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
-import Customize from "@/customize"
+import { disable as customizeDisable } from "@/customize"
 import Domains from '@/components/services/domains'
 
 // import filters
@@ -90,15 +90,10 @@ webModule.controller(FILES_CONTROLLER_NAME, [
   "$location",
   safeApply,
   Auth,
-  AuthInfo,
-  AuditLog,
-  QiniuClient,
-  settingsSvs,
+  NgQiniuClient,
   ExternalPath,
-  fileSvs,
   Toast,
   Dialog,
-  Customize,
   Domains,
   function (
     $rootScope,
@@ -110,15 +105,10 @@ webModule.controller(FILES_CONTROLLER_NAME, [
     $location,
     safeApply,
     Auth,
-    AuthInfo,
-    AuditLog,
     QiniuClient,
-    settingsSvs,
     ExternalPath,
-    fileSvs,
     Toast,
     Dialog,
-    Customize,
     Domains,
   ) {
     const T = $translate.instant;
@@ -145,7 +135,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
       },
 
       // Read OEM Customization config to disable features
-      disabledFeatures: Customize.disable,
+      disabledFeatures: customizeDisable,
 
       // search
       sch: {
@@ -221,8 +211,6 @@ webModule.controller(FILES_CONTROLLER_NAME, [
       gotoExternalPath: gotoExternalPath,
       showDownloadLink: showDownloadLink,
       showDownloadLinkOfFilesSelected: showDownloadLinkOfFilesSelected,
-      showPreview: showPreview,
-
       showPaste: showPaste,
       disablePaste: disablePaste,
       cancelPaste: cancelPaste
@@ -305,7 +293,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
     /////////////////////////////////
 
     function stepByStepLoadingFiles() {
-      return settingsSvs.stepByStepLoadingFiles.get() == 1;
+      return Settings.stepByStepLoadingFiles === 1;
     }
 
     /////////////////////////////////
@@ -588,7 +576,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
         return;
       }
 
-      const filesLoadingSize = settingsSvs.filesLoadingSize.get();
+      const filesLoadingSize = Settings.filesLoadingSize;
       QiniuClient.listFiles(
         info.regionId, info.bucketName, info.key, marker || undefined,
         angular.extend(getQiniuClientOpt(), { maxKeys: filesLoadingSize, minKeys: filesLoadingSize }),
@@ -768,10 +756,13 @@ webModule.controller(FILES_CONTROLLER_NAME, [
         (btn) => {
           if (btn) {
             QiniuClient.deleteBucket(item.regionId, item.name, getQiniuClientOpt()).then(() => {
-              AuditLog.log('deleteBucket', {
-                regionId: item.regionId,
-                name: item.name,
-              });
+              AuditLog.log(
+                AuditLog.Action.DeleteBucket,
+                {
+                  regionId: item.regionId,
+                  name: item.name,
+                },
+              );
               Toast.success(T("bucket.delete.success")); //删除Bucket成功
               $timeout(listBuckets, 1000);
             });
@@ -796,10 +787,13 @@ webModule.controller(FILES_CONTROLLER_NAME, [
             ExternalPath.remove(item.fullPath, item.regionId).then(() => {
               Toast.success(T("externalPath.delete.success")); //删除外部路径成功
 
-              AuditLog.log('deleteExternalPath', {
-                regionId: item.regionId,
-                fullPath: item.fullPath
-              });
+              AuditLog.log(
+                AuditLog.Action.DeleteExternalPath,
+                {
+                  regionId: item.regionId,
+                  fullPath: item.fullPath
+                },
+              );
               $timeout(listExternalPaths, 1000);
             });
           }
@@ -841,7 +835,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
         return;
       }
 
-      var fileType = fileSvs.getFileType(item);
+      var fileType = getFileType(item);
       fileType.type = type || fileType.type;
 
       var template = previewOthersModalHtmlMapping.path,
@@ -1508,6 +1502,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
             field: 'name',
             title: T('bucket.name'),
             formatter: (val, row, idx, field) => {
+              console.log('lihs debug:', val, row);
               if (row.grantedPermission === 'readonly') {
                 return `<i class="text-warning"><img src="icons/buckets/zhidu.png" style="display: inline-block; height: 15px;" /></i>&nbsp;<a href=""><span class="bucket-name bucket-readonly">${val}</span></a>`;
               } else if (row.grantedPermission === 'readwrite') {

@@ -1,19 +1,14 @@
 import webModule from '@/app-module/web'
 
-import AuthInfo from './authinfo'
-import QiniuClient from './qiniu-client'
+import * as AuthInfo from './authinfo'
+import * as QiniuClient from './qiniu-client/index'
 
 const AUTH_FACTORY_NAME = 'Auth'
 
 webModule.factory(AUTH_FACTORY_NAME, [
   "$q",
   "$location",
-  "$translate",
-  QiniuClient,
-  AuthInfo,
-  function ($q, $location, $translate, QiniuClient, AuthInfo) {
-    const T = $translate.instant;
-
+  function ($q, $location) {
     return {
       login: login,
       logout: logout

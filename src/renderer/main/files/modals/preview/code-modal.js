@@ -5,7 +5,7 @@ import webModule from '@/app-module/web'
 import safeApply from '@/components/services/safe-apply'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 import DiffModal from '@/components/services/diff-modal'
-import QiniuClient from '@/components/services/qiniu-client'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
 
 const CODE_MODAL_CONTROLLER_NAME = 'codeModalCtrl'
 
@@ -26,7 +26,7 @@ webModule
     'reload',
     Toast,
     DiffModal,
-    QiniuClient,
+    NgQiniuClient,
     function ($scope, safeApply, $modalInstance, $translate, $timeout, $modal, bucketInfo, objectInfo, selectedDomain, qiniuClientOpt, fileType, showFn, reload, Toast, DiffModal, QiniuClient) {
       const T = $translate.instant;
       angular.extend($scope, {

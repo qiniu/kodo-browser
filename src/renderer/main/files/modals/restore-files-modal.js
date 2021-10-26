@@ -2,9 +2,9 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import QiniuClient from '@/components/services/qiniu-client'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
 import safeApply from '@/components/services/safe-apply'
-import AuditLog from '@/components/services/audit-log'
+import * as AuditLog from '@/components/services/audit-log'
 
 const RESTORE_FILES_MODAL_CONTROLLER_NAME = 'restoreFilesModalCtrl'
 
@@ -17,11 +17,10 @@ webModule
     'items',
     'currentInfo',
     'callback',
-    QiniuClient,
+    NgQiniuClient,
     'qiniuClientOpt',
     safeApply,
-    AuditLog,
-    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, QiniuClient, qiniuClientOpt, safeApply, AuditLog) {
+    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, QiniuClient, qiniuClientOpt, safeApply) {
       angular.extend($scope, {
         items: items,
         currentInfo:currentInfo,
@@ -50,7 +49,7 @@ webModule
         $scope.step = 2;
         const days = $scope.info.days;
 
-        AuditLog.log('restoreFiles', {
+        AuditLog.log(AuditLog.Action.RestoreFiles, {
           regionId: currentInfo.regionId,
           bucket: currentInfo.bucketName,
           paths: items.map((item) => item.path),
@@ -66,7 +65,7 @@ webModule
           $scope.step = 3;
           $scope.terr = terr;
           if (!terr || terr.length === 0) {
-            AuditLog.log('restoreFilesDone');
+            AuditLog.log(AuditLog.Action.RestoreFilesDone);
           }
           callback();
         });

@@ -25,7 +25,6 @@ angular.module("web").controller("transferUploadsCtrl", [
 
     angular.extend($scope, {
       triggerEmptyFolder: triggerEmptyFolder,
-      triggerOverwriting: triggerOverwriting,
       showRemoveItem: showRemoveItem,
       clearAllCompleted: clearAllCompleted,
       clearAll: clearAll,
@@ -59,11 +58,6 @@ angular.module("web").controller("transferUploadsCtrl", [
     function triggerEmptyFolder() {
       $scope.emptyFolderUploading.enabled = !$scope.emptyFolderUploading.enabled;
       localStorage.setItem(Const.EMPTY_FOLDER_UPLOADING, $scope.emptyFolderUploading.enabled);
-    }
-
-    function triggerOverwriting() {
-      $scope.overwriteUploading.enabled = !$scope.overwriteUploading.enabled;
-      localStorage.setItem(Const.OVERWRITE_UPLOADING, $scope.overwriteUploading.enabled);
     }
 
     function checkStartJob(item, force) {

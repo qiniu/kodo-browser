@@ -153,7 +153,7 @@ class Client {
               uploadThrottleOption = { rate: self.uploadSpeedLimit * 1024 };
             }
 
-            self.uploader.putObjectFromFile(params.region, { bucket: params.bucket, key: params.key }, fileHandle, stats.size, fileName, {
+            self.uploader.putObjectFromFile(params.region, { bucket: params.bucket, key: params.key, storageClassName: params.storageClassName }, fileHandle, stats.size, fileName, {
               header: { contenType: contenType },
               recovered: recoveredOption,
               uploadThreshold: uploadThreshold,

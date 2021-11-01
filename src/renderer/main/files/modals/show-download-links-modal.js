@@ -3,6 +3,7 @@ import path from 'path'
 
 import angular from 'angular'
 import csvStringify from 'csv-stringify'
+import moment from 'moment'
 
 import webModule from '@/app-module/web'
 

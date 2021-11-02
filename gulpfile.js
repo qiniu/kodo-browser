@@ -39,7 +39,7 @@ const packagerOptions = {
   }
 });
 
-gulp.task("mac", () => {
+gulp.task("mac", done => {
   console.log(`--package ${NAME}-darwin-x64`);
 
   plugins.run(`rm -rf ${TARGET}/${NAME}-darwin-x64`).exec(() => {
@@ -50,23 +50,24 @@ gulp.task("mac", () => {
 
     packager(options).then((paths) => {
       console.log("--done");
+      done();
     }, (errs) => {
       console.error(errs);
     });
   });
 });
 
-gulp.task("maczip", () => {
+gulp.task("maczip", done => {
   console.log(`--package ${KICK_NAME}-darwin-x64-v${VERSION}.zip`);
   var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-darwin-x64-v${VERSION}.zip`);
   var archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
   archive.directory(`${TARGET}/${NAME}-darwin-x64/${NAME}.app`, `${NAME}.app`);
-  archive.finalize();
+  archive.finalize().then(done);
 });
 
-gulp.task("dmg", () => {
+gulp.task("dmg", done => {
   console.log(`--package ${NAME}.dmg`);
 
   createDMG({
@@ -84,10 +85,12 @@ gulp.task("dmg", () => {
     } else {
       console.log("--done");
     }
+  }).then(() => {
+    done();
   });
 });
 
-gulp.task("win64", () => {
+gulp.task("win64", done => {
   console.log(`--package ${NAME}-win32-x64`);
 
   plugins.run(`rm -rf ${TARGET}/${NAME}-win32-x64`).exec(() => {
@@ -98,23 +101,24 @@ gulp.task("win64", () => {
 
     packager(options).then((paths) => {
       console.log("--done");
+      done();
     }, (errs) => {
       console.error(errs);
     });
   });
 });
 
-gulp.task("win64zip", () => {
+gulp.task("win64zip", done => {
   console.log(`--package ${KICK_NAME}-win32-x64-v${VERSION}.zip`);
   var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-win32-x64-v${VERSION}.zip`);
   var archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
   archive.directory(`${TARGET}/${NAME}-win32-x64`, false);
-  archive.finalize();
+  archive.finalize().then(done);
 });
 
-gulp.task("win32", () => {
+gulp.task("win32", done => {
   console.log(`--package ${NAME}-win32-ia32`);
 
   plugins.run(`rm -rf ${TARGET}/${NAME}-win32-ia32`).exec(() => {
@@ -125,23 +129,24 @@ gulp.task("win32", () => {
 
     packager(options).then((paths) => {
       console.log("--done");
+      done();
     }, (errs) => {
       console.error(errs);
     });
   });
 });
 
-gulp.task("win32zip", () => {
+gulp.task("win32zip", done => {
   console.log(`--package ${KICK_NAME}-win32-x86-v${VERSION}.zip`);
   var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-win32-x86-v${VERSION}.zip`);
   var archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
   archive.directory(`${TARGET}/${NAME}-win32-ia32`, false);
-  archive.finalize();
+  archive.finalize().then(done);
 });
 
-gulp.task("linux64", () => {
+gulp.task("linux64", done => {
   console.log(`--package ${NAME}-linux-x64`);
 
   plugins.run(`rm -rf ${TARGET}/${NAME}-linux-x64`).exec(() => {
@@ -151,23 +156,24 @@ gulp.task("linux64", () => {
 
     packager(options).then((paths) => {
       console.log("--done");
+      done();
     }, (errs) => {
       console.error(errs);
     });
   });
 });
 
-gulp.task("linux64zip", () => {
+gulp.task("linux64zip", done => {
   console.log(`--package ${KICK_NAME}-linux-x64-v${VERSION}.zip`);
   var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-linux-x64-v${VERSION}.zip`);
   var archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
   archive.directory(`${TARGET}/${NAME}-linux-x64`, false);
-  archive.finalize();
+  archive.finalize().then(done);
 });
 
-gulp.task("linux32", () => {
+gulp.task("linux32", done => {
   console.log(`--package ${NAME}-linux-ia32`);
 
   plugins.run(`rm -rf ${TARGET}/${NAME}-linux-ia32`).exec(() => {
@@ -177,18 +183,19 @@ gulp.task("linux32", () => {
 
     packager(options).then((paths) => {
       console.log("--done");
+      done();
     }, (errs) => {
       console.error(errs);
     });
   });
 });
 
-gulp.task("linux32zip", () => {
+gulp.task("linux32zip", done => {
   console.log(`--package ${KICK_NAME}-linux-x86-v${VERSION}.zip`);
   var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-linux-x86-v${VERSION}.zip`);
   var archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
   archive.directory(`${TARGET}/${NAME}-linux-ia32`, false);
-  archive.finalize();
+  archive.finalize().then(done);
 });

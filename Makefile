@@ -1,6 +1,5 @@
 NAME=kodo-browser
 
-GULP=node ./node_modules/gulp/bin/gulp.js
 PKGER=node node_modules/electron-packager/cli.js
 ZIP=node ../zip.js
 
@@ -16,9 +15,9 @@ clean:
 prod:
 	npm run prod
 watch:
-	$(GULP) watch
+	npm run watch
 build:
-	$(GULP) build
+	npm run prod
 
 win64: build
 	npm run build:win64

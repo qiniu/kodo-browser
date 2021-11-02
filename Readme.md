@@ -86,17 +86,15 @@ make win64  # 打包 win64 程序，可选: mac, dmg, linux64, linux32, win32, w
 
 ```
 kodo-browser/
- |-- app/                 # 前端代码, 采用angular1.x + bootstrap3.x
- |-- node/                # 前端调用的 node 模块
-     |-- qiniu-store/     # 上传下载 job 类
-     |-- i18n/            # 国际化
- |-- vendor/              # 前端第三方库依赖
- |-- node_modules         # node 端依赖的模块
- |-- dist                 # 前端临时 build 出的代码
- |-- build                # electron build 出的应用
- |-- gulpfile.js          # 项目管理文件
- |-- package.json         # 项目描述文件
- |-- main.js              # 程序入口
+├── build          # 打包好的 应用程序
+├── dist           # 打包好的 js 代码
+├── gulpfile.js
+├── package.json
+├── src
+│   ├── common     # 通用模块
+│   ├── main       # electron 主进程与子进程
+│   └── renderer   # 前端子进程
+└── webpack        # 打包工具
 ```
 
 ## 4. 私有云配置

@@ -17,7 +17,7 @@ prod:
 watch:
 	npm run watch
 build:
-	npm run prod
+	npm run build
 
 win64: build
 	npm run build:win64

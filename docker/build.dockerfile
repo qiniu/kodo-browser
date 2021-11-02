@@ -20,9 +20,9 @@ RUN curl -fsSL "http://resources.koderover.com/docker-cli-v19.03.2.tar.gz" -o do
 RUN curl -L "http://resource.koderover.com/reaper" -o reaper && \
     chmod +x reaper && \
     mv reaper /usr/local/bin
-RUN wget -q --tries=0 -c -O /tmp/node-v11.15.0-linux-x64.tar.xz http://mirrors.qiniu-solutions.com/node-v11.15.0-linux-x64.tar.xz && \
-    tar xf /tmp/node-v11.15.0-linux-x64.tar.xz --strip-components=1 --exclude=CHANGELOG.md --exclude=LICENSE --exclude=README.md -C /usr/local && \
-    rm /tmp/node-v11.15.0-linux-x64.tar.xz
+RUN wget -q --tries=0 -c -O /tmp/node-v12.22.7-linux-x64.tar.xz http://mirrors.qiniu-solutions.com/node-v12.22.7-linux-x64.tar.xz && \
+    tar xf /tmp/node-v12.22.7-linux-x64.tar.xz --strip-components=1 --exclude=CHANGELOG.md --exclude=LICENSE --exclude=README.md -C /usr/local && \
+    rm /tmp/node-v12.22.7-linux-x64.tar.xz
 RUN npm config set registry https://registry.npm.taobao.org && \
     npm install yarn -g && \
     yarn config set registry https://registry.npm.taobao.org && \

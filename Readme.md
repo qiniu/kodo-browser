@@ -28,7 +28,7 @@ KODO Browser 参考 [OSS Browser](https://github.com/aliyun/oss-browser.git) 设
 
 > 如果你要在此基础上开发，请按照以下步骤进行。
 
-### (1) 安装 Node.js v11.15.0
+### (1) 安装 Node.js v12.22.7
 
 官网: https://nodejs.org/
 

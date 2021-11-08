@@ -104,17 +104,19 @@
 
         <div class="col-sm-2 text-right">
           <a ng-if="item.prog.resumable && (item.status=='running' || item.status=='waiting'|| item.status=='verifying')"
-            href="" ng-click="item.stop()" class="btn btn-default btn-xs">
+            href="" ng-click="item.stop()" class="btn btn-default btn-xs" uib-tooltip="{{'download.job.pause'|translate}}"
+            tooltip-placement="left">
             <i class="glyphicon glyphicon-pause text-warning"></i>
           </a>
 
           <a ng-if="item.status=='stopped' || item.status=='failed' || item.status=='finished'" href=""
-            ng-click="showRemoveItem(item)" class="btn btn-default btn-xs">
+            ng-click="showRemoveItem(item)" class="btn btn-default btn-xs" uib-tooltip="{{'download.job.remove'|translate}}"
+            tooltip-placement="left">
             <i class="glyphicon glyphicon-remove text-danger"></i>
           </a>
 
           <a ng-if="item.status=='stopped' || item.status=='failed'" href="" ng-click="checkStartJob(item)"
-            class="btn btn-default btn-xs">
+            class="btn btn-default btn-xs" uib-tooltip="{{'download.job.retry'|translate}}" tooltip-placement="left">
             <i class="glyphicon glyphicon-play text-success"></i>
           </a>
         </div>

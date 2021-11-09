@@ -9,7 +9,7 @@ jobs:
           ref: ${{ github.ref }}
       - uses: actions/setup-node@v1
         with:
-          node-version: '11.x'
+          node-version: '12.x'
       - name: install wine
         run: |
           sudo dpkg --add-architecture i386
@@ -25,6 +25,6 @@ jobs:
           ref: ${{ github.ref }}
       - uses: actions/setup-node@v1
         with:
-          node-version: '11.x'
+          node-version: '12.x'
       - name: test
         run: make i mac

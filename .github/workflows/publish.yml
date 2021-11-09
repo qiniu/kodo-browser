@@ -34,7 +34,7 @@ jobs:
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
       - uses: actions/setup-node@v1
         with:
-          node-version: '11.x'
+          node-version: '12.x'
       - run: make i linux64
       - name: Upload Release Asset
         id: upload-release-asset
@@ -59,7 +59,7 @@ jobs:
         shell: bash
       - uses: actions/setup-node@v1
         with:
-          node-version: '11.x'
+          node-version: '12.x'
       - run: make i win64
       - name: Upload Release Asset
         id: upload-release-asset
@@ -83,7 +83,7 @@ jobs:
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
       - uses: actions/setup-node@v1
         with:
-          node-version: '11.x'
+          node-version: '12.x'
       - run: make i mac
       - name: Upload Release Asset
         id: upload-release-asset

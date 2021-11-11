@@ -249,7 +249,7 @@ webModule.factory(QINIU_CLIENT_FACTORY_NAME, [
 
     function setStorageClass(region, bucket, key, storageClass, opt) {
       return new Promise((resolve, reject) => {
-        getDefaultClient(opt).enter('setStorageClass', (client) => client.setObjectStorageClass(region, { bucket: bucket, key: key }, storageClass)).
+        getDefaultClient(opt).enter('setStorageClass', (client) => client.setObjectStorageClass(region, { bucket: bucket, key: key.toString() }, storageClass)).
           then(resolve).catch((err) => {
             handleError(err);
             reject(err);

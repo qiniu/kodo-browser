@@ -93,7 +93,7 @@
           {{terrItem.item.key.substring(currentInfo.key.length)}}
 
           <i class="fa fa-exclamation-circle text-danger"
-          uib-tooltip="{{terrItem.error.translated_message||terrItem.error.message}}"
+          uib-tooltip="{{terrItem.error.translated_message||terrItem.error.message||terrItem.error.code}}"
           tooltip-placement="right" tooltip-append-to-body="true"></i>
         </li>
         <li ng-if="terr.length > 10">...</li>

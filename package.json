@@ -18,7 +18,7 @@
     "dev:run": "./node_modules/.bin/cross-env NODE_ENV=development electron ./dist/main/main-bundle.js",
     "prod": "./node_modules/.bin/cross-env NODE_ENV=production electron ./dist",
     "watch": "./node_modules/.bin/webpack --env development -c ./webpack/webpack-renderer.config.js -w",
-    "build": "./node_modules/.bin/webpack --env production -c ./webpack/webpack.config.js",
+    "build": "./node_modules/.bin/webpack --env production --env sourcemap -c ./webpack/webpack.config.js",
     "build:mac": "./node_modules/.bin/gulp mac",
     "pkg:mac": "./node_modules/.bin/gulp maczip",
     "build:dmg": "./node_modules/.bin/gulp dmg",

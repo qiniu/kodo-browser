@@ -901,6 +901,7 @@ webModule.factory(QINIU_CLIENT_FACTORY_NAME, [
           appVersion: adapterOption.appVersion,
           requestCallback: debugRequest(KODO_MODE),
           responseCallback: debugResponse(KODO_MODE),
+          uplogBufferSize: adapterOption.uplogBufferSize,
         });
         kodoAdaptersCache[cacheKey] = kodoClient;
         return kodoClient;
@@ -920,6 +921,7 @@ webModule.factory(QINIU_CLIENT_FACTORY_NAME, [
           appVersion: adapterOption.appVersion,
           requestCallback: debugRequest(S3_MODE),
           responseCallback: debugResponse(S3_MODE),
+          uplogBufferSize: adapterOption.uplogBufferSize,
         });
         s3AdaptersCache[cacheKey] = s3Client;
         return s3Client;
@@ -1013,6 +1015,12 @@ webModule.factory(QINIU_CLIENT_FACTORY_NAME, [
       result.regions = config.regions || [];
       if (opt && opt.preferS3Adapter) {
         result.preferS3Adapter = opt.preferS3Adapter;
+      }
+
+      // disable uplog when use customize cloud
+      // because there isn't a valid access key of uplog
+      if (!AuthInfo.usePublicCloud()) {
+        result.uplogBufferSize = -1;
       }
       return result;
     }

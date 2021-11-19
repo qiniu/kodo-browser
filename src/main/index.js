@@ -13,6 +13,7 @@ const {
 const {
   fork
 } = require("child_process");
+const { UplogBuffer } = require("kodo-s3-adapter-sdk/dist/uplog");
 
 ///*****************************************
 let root = path.dirname(__dirname);
@@ -602,7 +603,15 @@ ipcMain.on("asynchronous-job", (event, data) => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+app.on("ready", () => {
+  // prevent Uplog always locked
+  // due to forcing quiting app when locked
+  UplogBuffer.forceUnlock()
+      .catch(err => {
+        console.warn("unlock file failed:", err);
+      });
+  createWindow();
+});
 
 app.on("activate", () => {
   // On OS X it's common to recreate a window in the app when the

@@ -882,18 +882,6 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@types/async-lock@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.npmjs.org/@types/async-lock/-/async-lock-1.1.2.tgz#cbc26a34b11b83b28f7783a843c393b443ef8bef"
-  integrity sha512-j9n4bb6RhgFIydBe0+kpjnBPYumDaDyU8zvbWykyVMkku+c2CSu31MZkLeaBfqIwU+XCxlDpYDfyMQRkM0AkeQ==
-
-"@types/buffer-crc32@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.npmjs.org/@types/buffer-crc32/-/buffer-crc32-0.2.0.tgz#a4d94b1a4f01ea414268e9ef7576c7d32a1a14e4"
-  integrity sha512-6lBhJ55o2DKVCxTanyS6ohWRyebCcyivIK7pRHiwZuOYbUhivcByYBrvm2dc9f72LZP12mH5mGxUhG7JQ64lQg==
-  dependencies:
-    "@types/node" "*"
-
 "@types/debug@^4.1.4":
   version "4.1.5"
   resolved "https://registry.npmjs.org/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
@@ -933,20 +921,10 @@
   resolved "https://registry.yarnpkg.com/@types/html-minifier-terser/-/html-minifier-terser-5.1.2.tgz#693b316ad323ea97eed6b38ed1a3cc02b1672b57"
   integrity sha512-h4lTMgMJctJybDp8CQrxTUiiYmedihHWkjnF/8Pxseu2S6Nlfcy8kwboQ8yejh456rP2yWoEVm1sS/FVsfM48w==
 
-"@types/js-md5@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.npmjs.org/@types/js-md5/-/js-md5-0.4.2.tgz#95b39911e2081bf2915436e61cc345e12459e5bb"
-  integrity sha512-FUPoQkpQTzA5wz9ebrdVRjsjQsFehr+cW1CVhLcI2UwD/SO/4NHPO1esrXPPbx7ux762U0POmWFSrUjQq2ophw==
-
 "@types/json-schema@*", "@types/json-schema@^7.0.8":
   version "7.0.9"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.9.tgz#97edc9037ea0c38585320b28964dde3b39e4660d"
   integrity sha512-qcUXuemtEu+E5wZSJHNxUXeCZhAfXKQ41D+duX+VYPde7xyEVZci+/oXKJL13tnRs9lR2pr4fod59GT6/X1/yQ==
-
-"@types/lockfile@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@types/lockfile/-/lockfile-1.0.1.tgz#434a3455e89843312f01976e010c60f1bcbd56f7"
-  integrity sha512-65WZedEm4AnOsBDdsapJJG42MhROu3n4aSSiu87JXF/pSdlubxZxp3S1yz3kTfkJ2KBPud4CpjoHVAptOm9Zmw==
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -962,25 +940,6 @@
   version "10.17.50"
   resolved "https://registry.npmjs.org/@types/node/-/node-10.17.50.tgz#7a20902af591282aa9176baefc37d4372131c32d"
   integrity sha512-vwX+/ija9xKc/z9VqMCdbf4WYcMTGsI0I/L/6shIF3qXURxZOhPQlPRHtjTpiNhAwn0paMJzlOQqw6mAGEQnTA==
-
-"@types/object-hash@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.npmjs.org/@types/object-hash/-/object-hash-2.1.0.tgz#284353e535481690a72bf748619d77577bd23317"
-  integrity sha512-RW3VRiuQIMo5PJ4Q1IwBtdLHL/t8ACpzUY40norN9ejE6CUBwKetmSxJnITJ0NlzN/ymF1nvPvlpvegtns7yOg==
-
-"@types/stream-buffers@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.npmjs.org/@types/stream-buffers/-/stream-buffers-3.0.3.tgz#34e565bf64e3e4bdeee23fd4aa58d4636014a02b"
-  integrity sha512-NeFeX7YfFZDYsCfbuaOmFQ0OjSmHreKBpp7MQ4alWQBHeh2USLsj7qyMyn9t82kjqIX516CR/5SRHnARduRtbQ==
-  dependencies:
-    "@types/node" "*"
-
-"@types/stream-throttle@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.npmjs.org/@types/stream-throttle/-/stream-throttle-0.1.0.tgz#8807746990431b68ec897e86cf14832f3025950e"
-  integrity sha512-rwH5ZUkJwOMvy+7VJoz8CoQbBGfTGmhHgYRaSW4iwLfX0sFut07E/8ldszrh7AN4J0vfuGrWvL/tQPPx5o2AkA==
-  dependencies:
-    "@types/node" "*"
 
 "@uirouter/angularjs@^1.0.20":
   version "1.0.29"
@@ -5502,19 +5461,11 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
 
-kodo-s3-adapter-sdk@0.2.20:
-  version "0.2.20"
-  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.20.tgz#1aef918136d041d5534fa556b616a10635b79994"
-  integrity sha512-OC5K1moAuzQtaDrIdWW5BdnGO9N5yD3Hq+vIh+ne0uN4dzCzfpMj+ExAqy06fdFi5y1fjh8PEiXxcR5jDTNthA==
+kodo-s3-adapter-sdk@0.2.22:
+  version "0.2.22"
+  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.22.tgz#80be48f8935fe247dde86126e4d33d0d86f84461"
+  integrity sha512-RbS0bMZqCuhw45t8xXfXIIsv3m8NAn04naxtAsvFrEgw9UQ5Kn+7ZY8oF8Uhbtl/udEAFK57DPw8YksVTgidTw==
   dependencies:
-    "@types/async-lock" "^1.1.2"
-    "@types/buffer-crc32" "^0.2.0"
-    "@types/js-md5" "^0.4.2"
-    "@types/lockfile" "^1.0.1"
-    "@types/node" "^14.14.7"
-    "@types/object-hash" "^2.1.0"
-    "@types/stream-buffers" "^3.0.3"
-    "@types/stream-throttle" "^0.1.0"
     async-lock "^1.2.4"
     aws-sdk "^2.800.0"
     buffer-crc32 "^0.2.13"
@@ -5527,8 +5478,6 @@ kodo-s3-adapter-sdk@0.2.20:
     stream-buffers "^3.0.2"
     stream-throttle "^0.1.3"
     timestamp-nano "^1.0.0"
-    tslint "^6.1.3"
-    typescript "^4.0.5"
     urllib "^2.36.1"
 
 last-run@^1.1.0:

@@ -75,7 +75,7 @@
   },
   "dependencies": {
     "@uirouter/angularjs": "^1.0.20",
-    "angular": "1.7.9",
+    "angular": "1.8.0",
     "angular-sanitize": "1.7.5",
     "angular-translate": "^2.18.1",
     "angular-ui-bootstrap": "^2.5.6",

@@ -11,7 +11,6 @@ enum Duration {
 
 describe("test util", () => {
     describe("test leftTime", () => {
-        // TODO const oneDay oneHour oneMinute oneSecond oneMillisecond
 
         it("param NaN", () => {
             expect(leftTime(NaN)).toBe("");

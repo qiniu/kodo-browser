@@ -15,7 +15,6 @@ export function leftTime(ms: number): string {
         return "∞"
     }
 
-    //return moment.duration(ms).humanize();
     const t = [];
 
     const d = Math.floor(ms / 24 / 3600 / 1000);

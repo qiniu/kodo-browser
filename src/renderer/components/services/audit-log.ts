@@ -130,7 +130,6 @@ interface Options {
 
 export function log<T extends Action>(
     action: T,
-    // 
     ...args: (Params[T] extends undefined ? [undefined?, Options?] : [Params[T], Options?])
 ): void {
     const [params, options] = args;

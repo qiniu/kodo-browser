@@ -1,8 +1,6 @@
 import CodeMirror from '@/libCompatible/codemirror';
 import * as FileItem from "@/models/file-item";
 
-// const FILE_SVS_FACTORY = 'fileSvs'
-
 export enum FileExtensionType {
   Folder = "folder",
   Picture = "picture",

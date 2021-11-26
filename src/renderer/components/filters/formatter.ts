@@ -1,5 +1,6 @@
 import moment from "moment/moment"
 
+import Duration from "@/const/duration";
 import * as FileItem from "@/models/file-item";
 
 import { leftTime } from "@/components/services/util"
@@ -63,24 +64,24 @@ export const elapse = {
 
     if (ms <= 0) {
       return 0;
-    } else if (ms < 1000) {
+    } else if (ms < Duration.Second) {
       return `${ms}ms`;
     }
 
     const t = [];
-    const h = Math.floor(ms / 3600 / 1000);
+    const h = Math.floor(ms / Duration.Hour);
     if (h) {
-      ms -= h * 3600 * 1000;
+      ms -= h * Duration.Hour;
       t.push(h + "h");
     }
-    const m = Math.floor(ms / 60 / 1000);
+    const m = Math.floor(ms / Duration.Minute);
     if (m) {
-      ms = ms - m * 60 * 1000;
+      ms = ms - m * Duration.Minute;
       t.push(m + "m");
     }
-    const s = Math.floor(ms / 1000);
+    const s = Math.floor(ms / Duration.Second);
     if (s) {
-      ms = ms - s * 1000;
+      ms = ms - s * Duration.Second;
       t.push(s + "s");
     }
     return t.join("");

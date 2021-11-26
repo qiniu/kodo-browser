@@ -1,3 +1,5 @@
+import Duration from "@/const/duration";
+
 export function leftTime(ms: number): string {
     if (Number.isNaN(ms)) {
         return ""
@@ -7,7 +9,7 @@ export function leftTime(ms: number): string {
         return "0";
     }
 
-    if (ms < 1000) {
+    if (ms < Duration.Second) {
         return ms + "ms";
     }
 
@@ -17,24 +19,24 @@ export function leftTime(ms: number): string {
 
     const t = [];
 
-    const d = Math.floor(ms / 24 / 3600 / 1000);
+    const d = Math.floor(ms / Duration.Day);
     if (d > 0) {
-        ms -= d * 3600 * 1000 * 24;
+        ms -= d * Duration.Day;
         t.push(d + "D");
     }
-    const h = Math.floor(ms / 3600 / 1000);
+    const h = Math.floor(ms / Duration.Hour);
     if (h > 0) {
-        ms -= h * 3600 * 1000;
+        ms -= h * Duration.Hour;
         t.push(h + "h");
     }
-    const m = Math.floor(ms / 60 / 1000);
+    const m = Math.floor(ms / Duration.Minute);
     if (m > 0) {
-        ms -= m * 60 * 1000;
+        ms -= m * Duration.Minute;
         t.push(m + "m");
     }
-    const s = Math.floor(ms / 1000);
+    const s = Math.floor(ms / Duration.Second);
     if (s > 0) {
-        ms -= s * 1000;
+        ms -= s * Duration.Second;
         t.push(s + "s");
     }
 

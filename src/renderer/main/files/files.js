@@ -1502,7 +1502,6 @@ webModule.controller(FILES_CONTROLLER_NAME, [
             field: 'name',
             title: T('bucket.name'),
             formatter: (val, row, idx, field) => {
-              console.log('lihs debug:', val, row);
               if (row.grantedPermission === 'readonly') {
                 return `<i class="text-warning"><img src="icons/buckets/zhidu.png" style="display: inline-block; height: 15px;" /></i>&nbsp;<a href=""><span class="bucket-name bucket-readonly">${val}</span></a>`;
               } else if (row.grantedPermission === 'readwrite') {

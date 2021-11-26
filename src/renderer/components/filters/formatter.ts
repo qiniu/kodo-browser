@@ -67,7 +67,6 @@ export const elapse = {
       return `${ms}ms`;
     }
 
-    //return moment.duration(ms).humanize();
     const t = [];
     const h = Math.floor(ms / 3600 / 1000);
     if (h) {

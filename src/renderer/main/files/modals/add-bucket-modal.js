@@ -22,7 +22,6 @@ webModule
     function ($scope, $modalInstance, $translate, callback, QiniuClient, qiniuClientOpt, Toast, regions) {
       const T = $translate.instant
       const bucketACL = angular.copy(bucketACL)
-        console.log('lihs debug:', bucketACL);
       angular.extend($scope, {
         regions: regions.filter((region) => !region.cannotCreateBucket),
         bucketACL: [], //angular.copy(bucketACL),

@@ -1,7 +1,6 @@
 import * as Cipher from './cipher'
 import * as KodoNav from '@/const/kodo-nav'
 
-// const AUTH_INFO_FACTORY_NAME = 'AuthInfo'
 const AUTH_INFO_KEY = "auth-info";
 const CLOUD_CHOICE_KEY = "cloud-choice";
 
@@ -17,18 +16,6 @@ interface AuthInfoOption {
   address?: string,
   mode?: KodoNav.Mode,
 }
-
-/*
-{
-    "id":"NgKd0BmebvsFERFEBfKVVZGeGn7VsZQd_H_AunOC",
-    "secret":"lp4Zv3Gi_7CHtxNTcJx2Pum5hUJB3gHROcg4vp9i",
-    "description":"lihs-qiniu-dev",
-    "isPublicCloud":true,
-    "isAuthed":true,
-    "address":"kodo://kodo-browser-dev/ahhhh/",
-    "mode":"localFiles"
-}
-* */
 
 export enum CloudServerType {
   Default = "default",

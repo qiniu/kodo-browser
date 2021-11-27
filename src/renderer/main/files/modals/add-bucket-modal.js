@@ -21,14 +21,14 @@ webModule
     'regions',
     function ($scope, $modalInstance, $translate, callback, QiniuClient, qiniuClientOpt, Toast, regions) {
       const T = $translate.instant
-      const bucketACL = angular.copy(bucketACL)
+      const ngBucketACL = angular.copy(bucketACL)
       angular.extend($scope, {
         regions: regions.filter((region) => !region.cannotCreateBucket),
-        bucketACL: [], //angular.copy(bucketACL),
+        bucketACL: [], //angular.copy(ngBucketACL),
         cancel: cancel,
         onSubmit: onSubmit,
         item: {
-          acl: bucketACL[0].acl,
+          acl: ngBucketACL[0].acl,
           region: regions[0].s3Id,
         },
         reg: /^[a-z0-9][a-z0-9\-]{1,61}[a-z0-9]$/i,
@@ -40,7 +40,7 @@ webModule
       i18nBucketACL();
 
       function i18nBucketACL() {
-        const acls = angular.copy(bucketACL);
+        const acls = angular.copy(ngBucketACL);
         angular.forEach(acls, function (n) {
           n.label = T('aclType.' + n.acl);
         });

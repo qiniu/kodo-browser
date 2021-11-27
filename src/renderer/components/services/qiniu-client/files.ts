@@ -1,9 +1,10 @@
 import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
 import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 import { Adapter, Domain, FrozenInfo, ObjectInfo, PartialObjectError, StorageClass, TransferObject } from 'kodo-s3-adapter-sdk/dist/adapter'
-import { GetAdapterOptionParam, getDefaultClient } from "./common"
 import Duration from "@/const/duration";
 import * as FileItem from "@/models/file-item";
+
+import { GetAdapterOptionParam, getDefaultClient } from "./common"
 
 // listFiles
 interface ListFilesOption extends GetAdapterOptionParam {
@@ -391,7 +392,7 @@ class BatchOperator {
         const maxConcurrence = 3;
         while(folder = folderQueue.shift()) {
             if (this.progress.stopController.stopFlag) {
-                throw new Error("User Cancelled");
+                break;
             }
             concurrentPromises.push(this.processFolder(folder, operateFilesFn, operationFoldersFn));
 
@@ -454,6 +455,9 @@ class BatchOperator {
         let batchMark: string | undefined;
 
         while(true) {
+            if (this.progress.stopController.stopFlag) {
+                break;
+            }
             const getItemsInFolderResult = await this.getItemsInFolder(
                 folder,
                 batchMark,

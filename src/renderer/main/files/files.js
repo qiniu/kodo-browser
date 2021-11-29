@@ -15,7 +15,7 @@ import './transfer/frame'
 
 // import factories
 import safeApply from '@/components/services/safe-apply'
-import Auth from '@/components/services/auth'
+import * as Auth from '@/components/services/auth'
 import * as AuthInfo from '@/components/services/authinfo'
 import * as AuditLog from '@/components/services/audit-log'
 import NgQiniuClient from '@/components/services/ng-qiniu-client'
@@ -89,7 +89,6 @@ webModule.controller(FILES_CONTROLLER_NAME, [
   "$translate",
   "$location",
   safeApply,
-  Auth,
   NgQiniuClient,
   ExternalPath,
   Toast,
@@ -104,7 +103,6 @@ webModule.controller(FILES_CONTROLLER_NAME, [
     $translate,
     $location,
     safeApply,
-    Auth,
     QiniuClient,
     ExternalPath,
     Toast,
@@ -380,10 +378,8 @@ webModule.controller(FILES_CONTROLLER_NAME, [
     function init() {
       var user = AuthInfo.get();
       if (!user.isAuthed) {
-        Auth.logout().then(() => {
-          $location.url("/login");
-        });
-
+        Auth.logout();
+        $location.url("/login");
         return;
       }
 

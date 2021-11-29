@@ -2,7 +2,7 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import Auth from '@/components/services/auth'
+import * as Auth from '@/components/services/auth'
 import * as AuthInfo from '@/components/services/authinfo'
 import NgConfig from '@/ng-config'
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
@@ -24,7 +24,6 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
   "$rootScope",
   "$translate",
   "$uibModal",
-  Auth,
   "$location",
   NgConfig,
   Dialog,
@@ -36,7 +35,6 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
     $rootScope,
     $translate,
     $modal,
-    Auth,
     $location,
     Config,
     Dialog,

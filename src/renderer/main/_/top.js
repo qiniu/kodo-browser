@@ -8,7 +8,7 @@ import moment from 'moment'
 import webModule from '@/app-module/web'
 
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
-import Auth from '@/components/services/auth'
+import * as Auth from '@/components/services/auth'
 import * as AuthInfo from '@/components/services/authinfo'
 import Settings from '@/components/services/settings'
 import { TOAST_FACTORY_NAME as Toast } from "@/components/directives/toast-list"
@@ -36,7 +36,6 @@ webModule.controller(TOP_CONTROLLER_NAME, [
   "$translate",
   "$timeout",
   Dialog,
-  Auth,
   Toast,
   NgConfig,
   autoUpgradeSvs,
@@ -48,7 +47,6 @@ webModule.controller(TOP_CONTROLLER_NAME, [
     $translate,
     $timeout,
     Dialog,
-    Auth,
     Toast,
     Config,
     autoUpgradeSvs,
@@ -121,16 +119,17 @@ webModule.controller(TOP_CONTROLLER_NAME, [
         function(b) {
           if (b) {
             const originalAccessKeyId = AuthInfo.get().id;
-            Auth.logout().then(() => {
-              AuditLog.log(
-                AuditLog.Action.Logout,
-                { from: originalAccessKeyId },
-              );
-              $location.url("/login");
-            }).catch((err) => {
+            try {
+              Auth.logout();
+            } catch(err) {
               Toast.error(err.message, 5000);
               Dialog.alert(T('auth.logout.error.title'), T('auth.logout.error.description'), null, 1);
-            });
+            }
+            AuditLog.log(
+              AuditLog.Action.Logout,
+              { from: originalAccessKeyId },
+            );
+            $location.url("/login");
           }
         },
         1
@@ -146,36 +145,36 @@ webModule.controller(TOP_CONTROLLER_NAME, [
           choose: function() {
             return function(history) {
               const originalAccessKeyId = AuthInfo.get().id;
-              Auth.logout().then(
-                function () {
-                  const isPublicCloud = history.isPublicCloud;
-                  Auth.login({
-                    id: history.accessKeyId,
-                    secret: history.accessKeySecret,
-                    isPublicCloud: isPublicCloud
-                  }).then(
-                    function () {
-                      if (isPublicCloud) {
-                        AuthInfo.switchToPublicCloud();
-                      } else {
-                        AuthInfo.switchToPrivateCloud();
-                      }
-                      AuditLog.log(
+              try {
+                Auth.logout();
+              }
+              catch (err) {
+                Toast.error(err.message, 5000);
+                Dialog.alert(T('auth.logout.error.title'), T('auth.logout.error.description'), null, 1);
+              }
+              const isPublicCloud = history.isPublicCloud;
+              Auth.login({
+                id: history.accessKeyId,
+                secret: history.accessKeySecret,
+                isPublicCloud: isPublicCloud
+              }).then(
+                  function () {
+                    if (isPublicCloud) {
+                      AuthInfo.switchToPublicCloud();
+                    } else {
+                      AuthInfo.switchToPrivateCloud();
+                    }
+                    AuditLog.log(
                         AuditLog.Action.SwitchAccount,
                         { from: originalAccessKeyId },
-                      );
-                      Toast.success(T("login.successfully"), 1000);
-                      ipcRenderer.send('asynchronous', { key: 'reloadWindow' });
-                    },
-                    function (err) {
-                      Toast.error(err.message, 5000);
-                      Dialog.alert(T('auth.switch.error.title'), T('auth.switch.error.description'), null, 1);
-                    });
-                },
-                function (err) {
-                  Toast.error(err.message, 5000);
-                  Dialog.alert(T('auth.logout.error.title'), T('auth.logout.error.description'), null, 1);
-                });
+                    );
+                    Toast.success(T("login.successfully"), 1000);
+                    ipcRenderer.send('asynchronous', { key: 'reloadWindow' });
+                  },
+                  function (err) {
+                    Toast.error(err.message, 5000);
+                    Dialog.alert(T('auth.switch.error.title'), T('auth.switch.error.description'), null, 1);
+                  });
             }
           }
         }

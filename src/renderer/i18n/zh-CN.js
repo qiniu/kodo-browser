@@ -291,7 +291,7 @@ export default {
   "uploadModal.ifCoverUpload": "覆盖上传",
   "uploadModal.ifCoverUploadHelper": "（本次开启覆盖上传）",
   "uploadModal.storageClassesHelper.Standard": "",
-  "uploadModal.storageClassesHelper.InfrequentAccess": "Object 最小计量 64KB，保存时间少于 30 天也将按 30 天收费",
+  "uploadModal.storageClassesHelper.InfrequentAccess": "Object 最小计量 64KB，保存时间少于 30 天也将按 30 天计费",
   "uploadModal.storageClassesHelper.Glacier": "Object 访问前需要先解冻；最小计量 64KB，保存时间少于 60 天也将按 60 天计费",
   "uploadModal.ok": "确定上传",
 

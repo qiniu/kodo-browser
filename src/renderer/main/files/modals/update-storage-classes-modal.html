@@ -18,12 +18,12 @@
       <div class="col-sm-12 pdt4">{{'updateStorageClass.text4'|translate}}</div>
     </div>
 
-   <div ng-if="step==1" style="max-height: 500px; overflow-y: auto; overflow-x: hidden;">
+   <div ng-if="step==1">
     <div class="text-info">
       <!-- 将修改以下目录或文件 -->
       {{'updateStorageClassModal.message1'|translate}}:
     </div>
-    <ul>
+    <ul style="max-height: 300px; overflow: auto;">
       <li ng-repeat="item in items" class="break">
         <i class="fa fa-folder" style="color:orange" ng-if="item.itemType === 'folder'"></i>
         <i class="fa fa-file" ng-if="item.itemType !== 'folder'"></i>
@@ -86,7 +86,7 @@
         {{'updateStorageClassModal.message3'|translate}}:
       </div>
       <ul>
-        <li ng-repeat="terrItem in terr" ng-if="$index<10">
+        <li class="break" ng-repeat="terrItem in terr" ng-if="$index<10">
 
           <i class="fa fa-file-o"></i>
 

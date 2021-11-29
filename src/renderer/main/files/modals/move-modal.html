@@ -43,7 +43,7 @@
         <!-- 部分目录或文件无法{{isCopy?"复制":"移动"}}： -->
       </div>
       <ul>
-        <li ng-repeat="terrItem in terr" ng-if="$index<10">
+        <li class="break" ng-repeat="terrItem in terr" ng-if="$index<10">
           <i class="fa fa-folder" style="color:orange" ng-if="terrItem.item.itemType === 'folder'"></i>
           <i class="fa fa-file-o" ng-if="terrItem.item.itemType !== 'folder'"></i>
 

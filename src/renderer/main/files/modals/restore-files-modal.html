@@ -15,7 +15,7 @@
       <!-- 将解冻以下目录或文件: -->
       {{'restoreModal.message1'|translate}}:
     </div>
-    <ul>
+    <ul style="max-height: 300px; overflow: auto;">
       <li ng-repeat="item in items" class="break">
         <i class="fa fa-folder" style="color:orange" ng-if="item.itemType === 'folder'"></i>
         <i class="fa fa-file" ng-if="item.itemType !== 'folder'"></i>
@@ -65,7 +65,7 @@
         {{'restoreModal.message3'|translate}}
       </div>
       <ul>
-        <li ng-repeat="terrItem in terr" ng-if="$index<10">
+        <li class="break" ng-repeat="terrItem in terr" ng-if="$index<10">
 
           <i class="fa fa-file-o"></i>
 

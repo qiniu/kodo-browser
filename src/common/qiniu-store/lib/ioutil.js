@@ -26,7 +26,12 @@ class Client {
     if (clientOptions.isDebug) {
       modeOpts.requestCallback = debugRequest(clientOptions.backendMode);
       modeOpts.responseCallback = debugResponse(clientOptions.backendMode);
-    };
+    }
+    // disable uplog when use customize cloud
+    // because there isn't a valid access key of uplog
+    if (clientOptions.ucUrl) {
+      modeOpts.uplogBufferSize = -1;
+    }
     this.client = qiniu.mode(clientOptions.backendMode, modeOpts);
     this.uploader = undefined;
     this.downloader = undefined;

@@ -15,7 +15,9 @@ interface ConfigInner {
     }[],
 }
 
-interface ConfigPublic {}
+interface ConfigPublic {
+    [ x: string ]: never,
+}
 
 interface ConfigCustomize {
     ucUrl: string,
@@ -91,10 +93,11 @@ export function load(isUsingPublic?: boolean): Config {
 
     result = {
         ucUrl,
-        regions: cachedConfig.regions?.map(r => {
+        regions: (cachedConfig.regions ?? []).map<Region>(r => {
             const region = new Region('', r.id, r.label);
             region.ucUrls = [ucUrl];
             region.s3Urls = [r.endpoint];
+            return region;
         }),
     }
     return result;

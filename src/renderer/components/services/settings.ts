@@ -100,10 +100,10 @@ class Settings {
   }
 
   // resumeDownload
-  get resumeDownload() {
+  get resumeDownload(): number {
     return parseInt(localStorage.getItem(SettingKey.ResumeDownload) || "0");
   }
-  set resumeDownload(v) {
+  set resumeDownload(v: number) {
     localStorage.setItem(SettingKey.ResumeDownload, v.toString());
   }
 
@@ -116,10 +116,10 @@ class Settings {
   }
 
   // multipartDownloadSize
-  get multipartDownloadSize() {
+  get multipartDownloadSize(): number {
     return parseInt(localStorage.getItem(SettingKey.MultipartDownloadSize) || "8");
   }
-  set multipartDownloadSize(v) {
+  set multipartDownloadSize(v: number) {
     localStorage.setItem(SettingKey.MultipartDownloadSize, v.toString());
   }
 

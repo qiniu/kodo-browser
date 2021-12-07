@@ -46,7 +46,7 @@ webModule.controller(TRANSFER_DOWNLOADS_CONTROLLER_NAME, [
       },
       schKeyFn: function (item) {
         return (
-          item.to.name +
+          item.options.to.name +
           " " +
           item.status +
           " " +

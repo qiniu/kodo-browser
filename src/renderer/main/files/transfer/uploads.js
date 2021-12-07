@@ -48,7 +48,7 @@ webModule.controller(TRANSFER_UPLOAD_CONTROLLER_NAME, [
       },
       schKeyFn: function (item) {
         return (
-          item.from.name +
+          item.options.from.name +
           " " +
           item.status +
           " " +

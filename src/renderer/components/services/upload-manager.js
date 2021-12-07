@@ -3,7 +3,7 @@ import path from 'path'
 
 import qiniuPath from "qiniu-path"
 
-import QiniuStore from '../../../common/qiniu-store/lib'
+import {UploadJob} from '@/models/job'
 import webModule from '@/app-module/web'
 
 import NgQiniuClient from './ng-qiniu-client'
@@ -62,13 +62,11 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
                 job.events: statuschange, progress
       */
     function createJob(options) {
-      const bucket = options.to.bucket,
-            region = options.region;
 
       console.info(
         "PUT",
         "::",
-        region,
+        options.region,
         "::",
         options.from.path + "/" + options.from.name,
         "=>",
@@ -80,25 +78,23 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
       options.clientOptions = {
         accessKey: AuthInfo.get().id,
         secretKey: AuthInfo.get().secret,
-        ucUrl: config.ucUrl,
+        ucUrl: config.ucUrl || "",
         regions: config.regions || [],
       };
-      options.region = region;
       options.resumeUpload = (Settings.resumeUpload === 1);
       options.multipartUploadSize = Settings.multipartUploadSize;
       options.multipartUploadThreshold = Settings.multipartUploadThreshold;
       options.uploadSpeedLimit = (Settings.uploadSpeedLimitEnabled === 1 && Settings.uploadSpeedLimitKBperSec);
       options.isDebug = (Settings.isDebug === 1);
 
-      const store = new QiniuStore();
-      return store.createUploadJob(options);
+      return new UploadJob(options);
     }
 
     /**
      * upload
      * @param filePaths []  {array<string>}  有可能是目录，需要遍历
-     * @param bucketInfo {object} {bucket, region, key}
-     * @param uploadOptions {object} {isOverwrite, storageClassName}, storageClassName is 'Standard', 'InfrequentAccess', 'Glacier'
+     * @param bucketInfo {object: {bucketName, regionId, key, qiniuBackendMode}}
+     * @param uploadOptions {object: {isOverwrite, storageClassName}}, storageClassName is 'Standard', 'InfrequentAccess', 'Glacier'
      * @param jobsAddingFn {Function} 快速加入列表回调方法， 返回jobs引用，但是该列表长度还在增长。
      * @param jobsAddedFn {Function} 加入列表完成回调方法， jobs列表已经稳定
      */
@@ -283,12 +279,12 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
         $timeout(() => {
           trySchedJob();
           $scope.calcTotalProg();
-          checkNeedRefreshFileList(job.to.bucket, qiniuPath.fromLocalPath(job.to.key));
+          checkNeedRefreshFileList(job.options.to.bucket, qiniuPath.fromLocalPath(job.options.to.key));
         });
       });
       job.on("error", (err) => {
         if (err) {
-          console.error(`upload kodo://${job.to.bucket}/${job.to.key} error: ${err}`);
+          console.error(`upload kodo://${job.options.to.bucket}/${job.options.to.key} error: ${err}`);
         }
         if (job.message) {
           switch (job.message.error) {
@@ -351,27 +347,15 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
           job.uploadedParts = [];
         }
 
-        if (fs.existsSync(job.from.path)) {
-          const fileStat = fs.statSync(job.from.path);
+        if (fs.existsSync(job.options.from.path)) {
+          const fileStat = fs.statSync(job.options.from.path);
 
-          job.from.size = fileStat.size;
-          job.from.mtime = fileStat.mtimeMs;
-
-          t[job.id] = {
-            region: job.region,
-            to: job.to,
-            from: job.from,
-            prog: job.prog,
-            status: job.status,
-            message: job.message,
-            uploadedId: job.uploadedId,
-            uploadedParts: job.uploadedParts.map((part) => {
-              return { PartNumber: part.partNumber, ETag: part.etag };
-            }),
-            overwrite: job.overwrite,
-            storageClassName: job.storageClassName,
-            backendMode: job.backendMode,
-          };
+          t[job.id] = job.getInfoForSave({
+            from: {
+              size: fileStat.size,
+              mtime: fileStat.mtimeMs,
+            }
+          });
         }
       });
 
@@ -379,6 +363,7 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
     }
 
     function tryLoadProg() {
+      let result = {}
       let progs = {};
       try {
         const data = fs.readFileSync(getProgFilePath());
@@ -408,7 +393,42 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
         }
       });
 
-      return progs;
+      Object.entries(progs)
+          .forEach(([jobId, briefJob]) => {
+            if (!briefJob.from || !briefJob.from.size || !briefJob.from.mtime) {
+              delete briefJob.prog.loaded;
+              result[jobId] = {
+                ...briefJob,
+                uploadedParts: [],
+              };
+              return;
+            }
+            if (!fs.existsSync(briefJob.from.path)) {
+              delete briefJob.prog.loaded;
+              result[jobId] = {
+                ...briefJob,
+                uploadedParts: [],
+              };
+              return;
+            }
+            const fileStat = fs.statSync(briefJob.from.path);
+            if (fileStat.size !== briefJob.from.size || briefJob.from.mtime !== fileStat.mtimeMs) {
+              delete briefJob.prog.loaded;
+              result[jobId] = {
+                ...briefJob,
+                uploadedParts: [],
+              };
+              return;
+            }
+            result[jobId] = {
+              ...briefJob,
+              uploadedParts: (briefJob.uploadedParts || [])
+                  .filter(part => part && part.PartNumber && part.ETag)
+                  .map(part => ({partNumber: part.PartNumber, etag: part.ETag}))
+            };
+          });
+
+      return result;
     }
 
     function getProgFilePath() {

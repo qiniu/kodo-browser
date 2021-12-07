@@ -5,6 +5,8 @@ ZIP=node ../zip.js
 
 i:
 	yarn install
+test:
+	npm run test
 dev:
 	NODE_ENV=development electron .
 run:

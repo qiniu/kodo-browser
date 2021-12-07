@@ -4,7 +4,7 @@ import path from 'path'
 import request from 'request'
 import downloadsFolder from 'downloads-folder'
 
-import * as util from '../../../common/qiniu-store/lib/util'
+import * as util from '@/models/job/utils'
 import webModule from '@/app-module/web'
 
 import { upgrade } from '@/customize'

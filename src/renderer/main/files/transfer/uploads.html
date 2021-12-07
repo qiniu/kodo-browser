@@ -75,7 +75,7 @@
         <div class="col-sm-4">
           <div class="text-overflow" uib-tooltip-template="'upload-path-tooltip-tpl.html'" tooltip-placement="left"
             tooltip-append-to-body="true">
-            {{$index+1}}. {{::item.from.name}}
+            {{$index+1}}. {{::item.options.from.name}}
           </div>
 
           <div class="progress mg0" style="height:4px;">
@@ -146,7 +146,7 @@
 
 <script type="text/ng-template" id="upload-path-tooltip-tpl.html">
   <div class="break text-left">
-    <div><label class="text-primary">From:</label> {{item.from.path}}</div>
-    <div><label class="text-success">To:</label> kodo://{{item.to.bucket}}/{{item.to.key}}</div>
+    <div><label class="text-primary">From:</label> {{item.options.from.path}}</div>
+    <div><label class="text-success">To:</label> kodo://{{item.options.to.bucket}}/{{item.options.to.key}}</div>
   </div>
 </script>

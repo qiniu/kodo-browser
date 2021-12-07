@@ -31,7 +31,7 @@
     "build:linux64": "./node_modules/.bin/gulp linux64",
     "pkg:linux64": "./node_modules/.bin/gulp linux64zip",
     "release": "build",
-    "test": "jest"
+    "test": "./node_modules/.bin/cross-env TZ=UTC jest"
   },
   "build": {
     "appId": "com.qiniu.browser",

@@ -16,7 +16,9 @@ jobs:
           sudo apt-get update -yqq
           sudo apt-get install -yqq wine32 wine64
       - name: test
-        run: make i linux32 linux64 win32 win64
+        run: make i test
+      - name: build
+        run: make linux32 linux64 win32 win64
   build-on-mac:
     runs-on: macos-latest
     steps:
@@ -27,4 +29,6 @@ jobs:
         with:
           node-version: '12.x'
       - name: test
-        run: make i mac
+        run: make i test
+      - name: build
+        run: make mac

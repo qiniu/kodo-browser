@@ -8,6 +8,7 @@ jest.mock("electron", () => ({
 }));
 
 import { ipcRenderer } from "electron";
+import * as AppConfig from "@/const/app-config";
 import { IpcJobEvent, Status } from "./types";
 import { downloadOptionsFromResumeJob } from "./_mock-helpers_/data";
 
@@ -65,7 +66,7 @@ describe("test models/job/download-job.ts",  () => {
                     job: downloadJob.id,
                     key: "job-download",
                     options: {
-                        kodoBrowserVersion: "1.0.15",
+                        kodoBrowserVersion: AppConfig.app.version,
                         maxConcurrency: 10,
                         multipartDownloadSize: 8388608,
                         multipartDownloadThreshold: 104857600,

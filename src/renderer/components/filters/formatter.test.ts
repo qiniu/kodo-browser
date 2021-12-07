@@ -37,24 +37,19 @@ describe("formatter test", () => {
             expect(formatter.timeFormat.name).toBe("timeFormat");
         });
         it("format time with param type string", () => {
-            // toBe beijin timezone
-            expect(formatter.timeFormat.fn("2021-11-24 13:37:07")).toBe("2021-11-24 13:37:07");
+            expect(formatter.timeFormat.fn("2021-11-24 05:37:07")).toBe("2021-11-24 05:37:07");
         });
         it("format time with invalid string param", () => {
-            // toBe beijin timezone
             expect(formatter.timeFormat.fn("kodo-invalid")).toBe("");
         });
         it("format time with param type number", () => {
-            // toBe beijin timezone
-            expect(formatter.timeFormat.fn(dateToFormat.getTime())).toBe("2021-11-24 13:37:07");
+            expect(formatter.timeFormat.fn(dateToFormat.getTime())).toBe("2021-11-24 05:37:07");
         });
         it("format time with NaN param", () => {
-            // toBe beijin timezone
             expect(formatter.timeFormat.fn(NaN)).toBe("");
         });
         it("format time with param type Date", () => {
-            // toBe beijin timezone
-            expect(formatter.timeFormat.fn(dateToFormat)).toBe("2021-11-24 13:37:07");
+            expect(formatter.timeFormat.fn(dateToFormat)).toBe("2021-11-24 05:37:07");
         });
     });
     describe("elapse", () => {

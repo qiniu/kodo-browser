@@ -8,6 +8,8 @@ jest.mock("electron", () => ({
 }));
 
 import { ipcRenderer } from "electron";
+import * as AppConfig from "@/const/app-config"
+
 import { IpcJobEvent, Status } from "./types";
 import { uploadOptionsFromNewJob } from "./_mock-helpers_/data";
 
@@ -65,7 +67,7 @@ describe("test models/job/upload-job.ts",  () => {
                     job: uploadJob.id,
                     key: "job-upload",
                     options: {
-                        kodoBrowserVersion: "1.0.15",
+                        kodoBrowserVersion: AppConfig.app.version,
                         maxConcurrency: 10,
                         multipartUploadSize: 16777216,
                         multipartUploadThreshold: 104857600,

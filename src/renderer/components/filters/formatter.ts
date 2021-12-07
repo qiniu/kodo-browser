@@ -95,7 +95,7 @@ export const leftTimeFormat = {
 
 export const sizeFormat = {
   name: "sizeFormat",
-  fn: (n: number, isApproximate: boolean): string => {
+  fn: (n: number, isApproximate: boolean = true): string => {
     if (n == 0 || !n || n < 0) {
       return "0";
     }

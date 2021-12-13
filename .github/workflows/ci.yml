@@ -1,4 +1,4 @@
-on: [push]
+on: [push, pull_request]
 name: Test Build
 jobs:
   build-on-linux:
@@ -11,10 +11,14 @@ jobs:
         with:
           node-version: '12.x'
       - name: install wine
+        # https://github.com/actions/virtual-environments/issues/4589
         run: |
           sudo dpkg --add-architecture i386
-          sudo apt-get update -yqq
-          sudo apt-get install -yqq wine32 wine64
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 86B72ED9
+          sudo add-apt-repository 'deb [arch=amd64] https://mirror.mxe.cc/repos/apt focal main'
+          sudo apt -qq update
+          sudo apt install -y --allow-downgrades libpcre2-8-0=10.34-7
+          sudo apt install -y wine32 wine64
       - name: test
         run: make i linux32 linux64 win32 win64
   build-on-mac:

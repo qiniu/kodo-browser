@@ -3,7 +3,7 @@ import moment from "moment/moment"
 
 import webModule from '@/app-module/web'
 
-import Bookmark from '@/components/services/bookmark'
+import * as Bookmark from '@/components/services/bookmark'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 
 const BOOKMARKS_CONTROLLER_NAME = 'bookmarksCtrl'
@@ -14,9 +14,8 @@ webModule.controller(BOOKMARKS_CONTROLLER_NAME, [
   "$translate",
   "$state",
   "$uibModalInstance",
-  Bookmark,
   Toast,
-  function ($scope, $rootScope, $translate, $state, $modalInstance, Bookmark, Toast) {
+  function ($scope, $rootScope, $translate, $state, $modalInstance, Toast) {
     const T = $translate.instant;
 
     angular.extend($scope, {

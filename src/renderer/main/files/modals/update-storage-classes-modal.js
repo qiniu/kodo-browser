@@ -3,8 +3,8 @@ import angular from 'angular'
 import webModule from '@/app-module/web'
 
 import safeApply from '@/components/services/safe-apply'
-import QiniuClient from '@/components/services/qiniu-client'
-import AuditLog from '@/components/services/audit-log'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
+import * as AuditLog from '@/components/services/audit-log'
 
 const UPDATE_STORAGE_CLASSES_MODAL_CONTROLLER_NAME = 'updateStorageClassesModalCtrl'
 
@@ -17,11 +17,10 @@ webModule
     'items',
     'currentInfo',
     'callback',
-    QiniuClient,
+    NgQiniuClient,
     'qiniuClientOpt',
     safeApply,
-    AuditLog,
-    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, QiniuClient, qiniuClientOpt, safeApply, AuditLog) {
+    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, QiniuClient, qiniuClientOpt, safeApply) {
       angular.extend($scope, {
         items: items,
         currentInfo:currentInfo,
@@ -50,7 +49,7 @@ webModule
         $scope.step = 2;
         const newStorageClass = $scope.info.updateTo;
 
-        AuditLog.log('setStorageClassOfFiles', {
+        AuditLog.log(AuditLog.Action.SetStorageClassOfFiles, {
           regionId: currentInfo.regionId,
           bucket: currentInfo.bucketName,
           paths: items.map((item) => item.path),
@@ -66,7 +65,7 @@ webModule
           $scope.step = 3;
           $scope.terr = terr;
           if (!terr || terr.length === 0) {
-            AuditLog.log('setStorageClassOfFilesDone');
+            AuditLog.log(AuditLog.Action.SetStorageClassOfFilesDone);
           }
           callback();
         });

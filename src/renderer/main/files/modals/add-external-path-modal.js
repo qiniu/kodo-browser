@@ -2,9 +2,8 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import QiniuClient from '@/components/services/qiniu-client'
-import Const from '@/const'
-import AuditLog from '@/components/services/audit-log'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
+import * as AuditLog from '@/components/services/audit-log'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 
 const ADD_EXTERNAL_PATH_MODAL_CONTROLLER_NAME = 'addExternalPathModalCtrl'
@@ -16,12 +15,10 @@ webModule
     '$translate',
     'callback',
     'ExternalPath',
-    QiniuClient,
-    Const,
+    NgQiniuClient,
     'regions',
-    AuditLog,
     Toast,
-    function ($scope, $modalInstance, $translate, callback, ExternalPath, QiniuClient, Const, regions, AuditLog, Toast) {
+    function ($scope, $modalInstance, $translate, callback, ExternalPath, QiniuClient, regions, Toast) {
       const T = $translate.instant;
 
       angular.extend($scope, {
@@ -48,10 +45,13 @@ webModule
           { preferS3Adapter: true, maxKeys: 1, minKeys: 0 },
         ).then(() => {
           ExternalPath.create(item.path, item.regionId).then(() => {
-            AuditLog.log('addExternalPath', {
-              path: item.path,
-              regionId: item.regionId
-            });
+            AuditLog.log(
+              AuditLog.Action.AddExternalPath,
+              {
+                path: item.path,
+                regionId: item.regionId
+              },
+            );
             callback();
             cancel();
           }).catch((err) => {

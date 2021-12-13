@@ -2,18 +2,18 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import Auth from '@/components/services/auth'
-import AuthInfo from '@/components/services/authinfo'
-import Const from '@/const'
-import Config from '@/config'
+import * as Auth from '@/components/services/auth'
+import * as AuthInfo from '@/components/services/authinfo'
+import NgConfig from '@/ng-config'
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
-import AkHistory from '@/components/services/ak-history'
-import AuditLog from '@/components/services/audit-log'
+import * as AkHistory from '@/components/services/ak-history'
+import * as AuditLog from '@/components/services/audit-log'
 
 import { akHistoriesModalHtmlMapping, customizeCloudModalHtmlMapping } from "@template-mappings/main/auth/modals"
 import akHistoriesModalCtrl from './modals/ak-histories-modal'
 import customizeCloudModalCtrl from './modals/customize-cloud-modal'
+import { CloudServerType } from "@/components/services/authinfo"
 
 const LOGIN_CONTROLLER_NAME = 'loginCtrl'
 
@@ -24,15 +24,10 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
   "$rootScope",
   "$translate",
   "$uibModal",
-  Auth,
-  AuthInfo,
   "$location",
-  Const,
-  Config,
+  NgConfig,
   Dialog,
   Toast,
-  AkHistory,
-  AuditLog,
   function (
     $q,
     $timeout,
@@ -40,15 +35,10 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
     $rootScope,
     $translate,
     $modal,
-    Auth,
-    AuthInfo,
     $location,
-    Const,
     Config,
     Dialog,
     Toast,
-    AkHistory,
-    AuditLog,
   ) {
     const T = $translate.instant;
 
@@ -56,10 +46,10 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
       item: {},
       clouds: [{
         name: "auth.defaultCloud",
-        value: "default"
+        value: CloudServerType.Default,
       }, {
         name: "auth.customizedCloud",
-        value: "customized"
+        value: CloudServerType.Customized,
       }],
       isPrivateCloudConfigured: isPrivateCloudConfigured(),
       selectedCloud: selectedCloud(),
@@ -74,7 +64,7 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
     });
 
     function selectedCloud() {
-      return AuthInfo.usePublicCloud() || !Config.exists() ? 'default' : 'customized';
+      return AuthInfo.usePublicCloud() || !Config.exists() ? CloudServerType.Default : CloudServerType.Customized;
     }
 
     function isPrivateCloudConfigured() {
@@ -109,9 +99,9 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
           choose: function() {
             return function(history) {
               if (history.isPublicCloud) {
-                $scope.selectedCloud = 'default';
+                $scope.selectedCloud = CloudServerType.Default;
               } else {
-                $scope.selectedCloud = 'customized';
+                $scope.selectedCloud = CloudServerType.Customized;
               }
               $scope.item.id = history.accessKeyId;
               $scope.item.secret = history.accessKeySecret;
@@ -155,7 +145,7 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
         if (data.remember) {
           AkHistory.add(isPublicCloud, data.id, data.secret, data.description);
         }
-        AuditLog.log('login');
+        AuditLog.log(AuditLog.Action.Login);
         Toast.success(T("login.successfully"), 1000);
         $location.url("/");
       }).catch((err) => {

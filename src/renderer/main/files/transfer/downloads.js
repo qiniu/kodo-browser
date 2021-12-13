@@ -6,7 +6,7 @@ import jobUtil from '@/components/services/job-util'
 import DownloadMgr from '@/components/services/download-manager'
 import DelayDone from '@/components/services/delay-done'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
-import Const from '@/const'
+import { OVERWRITE_DOWNLOADING } from '@/const/setting-keys'
 import { DIALOG_FACTORY_NAME as Dialog} from '@/components/services/dialog.s'
 
 const TRANSFER_DOWNLOADS_CONTROLLER_NAME = 'transferDownloadsCtrl'
@@ -19,7 +19,6 @@ webModule.controller(TRANSFER_DOWNLOADS_CONTROLLER_NAME, [
   DownloadMgr,
   DelayDone,
   Toast,
-  Const,
   Dialog,
   function (
     $scope,
@@ -29,7 +28,6 @@ webModule.controller(TRANSFER_DOWNLOADS_CONTROLLER_NAME, [
     DownloadMgr,
     DelayDone,
     Toast,
-    Const,
     Dialog
   ) {
     var T = $translate.instant;
@@ -48,7 +46,7 @@ webModule.controller(TRANSFER_DOWNLOADS_CONTROLLER_NAME, [
       },
       schKeyFn: function (item) {
         return (
-          item.to.name +
+          item.options.to.name +
           " " +
           item.status +
           " " +
@@ -68,7 +66,7 @@ webModule.controller(TRANSFER_DOWNLOADS_CONTROLLER_NAME, [
 
     function triggerOverwriting() {
       $scope.overwriteDownloading.enabled = !$scope.overwriteDownloading.enabled;
-      localStorage.setItem(Const.OVERWRITE_DOWNLOADING, $scope.overwriteDownloading.enabled);
+      localStorage.setItem(OVERWRITE_DOWNLOADING, $scope.overwriteDownloading.enabled);
     }
 
     function checkStartJob(item) {

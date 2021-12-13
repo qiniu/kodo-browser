@@ -8,13 +8,13 @@ import moment from 'moment'
 import webModule from '@/app-module/web'
 
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
-import Auth from '@/components/services/auth'
-import AuthInfo from '@/components/services/authinfo'
-import settingsSvs from '@/components/services/settings'
+import * as Auth from '@/components/services/auth'
+import * as AuthInfo from '@/components/services/authinfo'
+import Settings from '@/components/services/settings'
 import { TOAST_FACTORY_NAME as Toast } from "@/components/directives/toast-list"
-import Config from '@/config'
+import NgConfig from '@/ng-config'
 import autoUpgradeSvs from '@/components/services/auto-upgrade'
-import AuditLog from "@/components/services/audit-log"
+import * as AuditLog from "@/components/services/audit-log"
 
 import { aboutHtmlMapping, bookmarksHtmlMapping, settingsHtmlMapping } from "@template-mappings/main/modals"
 import settingsCtrl from '../modals/settings'
@@ -36,13 +36,9 @@ webModule.controller(TOP_CONTROLLER_NAME, [
   "$translate",
   "$timeout",
   Dialog,
-  Auth,
-  AuthInfo,
-  settingsSvs,
   Toast,
-  Config,
+  NgConfig,
   autoUpgradeSvs,
-  AuditLog,
   function(
     $scope,
     $rootScope,
@@ -51,13 +47,9 @@ webModule.controller(TOP_CONTROLLER_NAME, [
     $translate,
     $timeout,
     Dialog,
-    Auth,
-    AuthInfo,
-    settingsSvs,
     Toast,
     Config,
     autoUpgradeSvs,
-    AuditLog
   ) {
     var T = $translate.instant;
 
@@ -96,7 +88,7 @@ webModule.controller(TOP_CONTROLLER_NAME, [
 
     $scope.$watch("upgradeInfo.isLastVersion", function(v) {
       if (false === v) {
-        if (1 == settingsSvs.autoUpgrade.get()) autoUpgradeSvs.start();
+        if (1 === Settings.autoUpgrade) autoUpgradeSvs.start();
         else $scope.showAbout();
       }
     });
@@ -127,13 +119,17 @@ webModule.controller(TOP_CONTROLLER_NAME, [
         function(b) {
           if (b) {
             const originalAccessKeyId = AuthInfo.get().id;
-            Auth.logout().then(() => {
-              AuditLog.log('logout', { from: originalAccessKeyId });
-              $location.url("/login");
-            }).catch((err) => {
+            try {
+              Auth.logout();
+            } catch(err) {
               Toast.error(err.message, 5000);
               Dialog.alert(T('auth.logout.error.title'), T('auth.logout.error.description'), null, 1);
-            });
+            }
+            AuditLog.log(
+              AuditLog.Action.Logout,
+              { from: originalAccessKeyId },
+            );
+            $location.url("/login");
           }
         },
         1
@@ -149,33 +145,36 @@ webModule.controller(TOP_CONTROLLER_NAME, [
           choose: function() {
             return function(history) {
               const originalAccessKeyId = AuthInfo.get().id;
-              Auth.logout().then(
-                function () {
-                  const isPublicCloud = history.isPublicCloud;
-                  Auth.login({
-                    id: history.accessKeyId,
-                    secret: history.accessKeySecret,
-                    isPublicCloud: isPublicCloud
-                  }).then(
-                    function () {
-                      if (isPublicCloud) {
-                        AuthInfo.switchToPublicCloud();
-                      } else {
-                        AuthInfo.switchToPrivateCloud();
-                      }
-                      AuditLog.log('switchAccount', { from: originalAccessKeyId });
-                      Toast.success(T("login.successfully"), 1000);
-                      ipcRenderer.send('asynchronous', { key: 'reloadWindow' });
-                    },
-                    function (err) {
-                      Toast.error(err.message, 5000);
-                      Dialog.alert(T('auth.switch.error.title'), T('auth.switch.error.description'), null, 1);
-                    });
-                },
-                function (err) {
-                  Toast.error(err.message, 5000);
-                  Dialog.alert(T('auth.logout.error.title'), T('auth.logout.error.description'), null, 1);
-                });
+              try {
+                Auth.logout();
+              }
+              catch (err) {
+                Toast.error(err.message, 5000);
+                Dialog.alert(T('auth.logout.error.title'), T('auth.logout.error.description'), null, 1);
+              }
+              const isPublicCloud = history.isPublicCloud;
+              Auth.login({
+                id: history.accessKeyId,
+                secret: history.accessKeySecret,
+                isPublicCloud: isPublicCloud
+              }).then(
+                  function () {
+                    if (isPublicCloud) {
+                      AuthInfo.switchToPublicCloud();
+                    } else {
+                      AuthInfo.switchToPrivateCloud();
+                    }
+                    AuditLog.log(
+                        AuditLog.Action.SwitchAccount,
+                        { from: originalAccessKeyId },
+                    );
+                    Toast.success(T("login.successfully"), 1000);
+                    ipcRenderer.send('asynchronous', { key: 'reloadWindow' });
+                  },
+                  function (err) {
+                    Toast.error(err.message, 5000);
+                    Dialog.alert(T('auth.switch.error.title'), T('auth.switch.error.description'), null, 1);
+                  });
             }
           }
         }
@@ -221,7 +220,7 @@ webModule.controller(TOP_CONTROLLER_NAME, [
     }
 
     function isExternalPathEnabled() {
-      return settingsSvs.externalPathEnabled.get() > 0
+      return Settings.externalPathEnabled > 0
     }
 
     function showBucketsOrFiles() {

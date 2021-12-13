@@ -3,8 +3,8 @@ import angular from 'angular'
 import webModule from '@/app-module/web'
 
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
-import Config from '@/config'
-import AkHistory from '@/components/services/ak-history'
+import NgConfig from '@/ng-config'
+import * as AkHistory from '@/components/services/ak-history'
 
 const AK_HISTORIES_MODAL_CONTROLLER_NAME = 'akHistoriesModalCtrl'
 
@@ -15,9 +15,8 @@ webModule
     '$uibModalInstance',
     'choose',
     Dialog,
-    Config,
-    AkHistory,
-    function ($scope, $translate, $modalInstance, choose, Dialog, Config, AkHistory) {
+    NgConfig,
+    function ($scope, $translate, $modalInstance, choose, Dialog, Config) {
       const T = $translate.instant;
       angular.extend($scope, {
         histories: AkHistory.list(),

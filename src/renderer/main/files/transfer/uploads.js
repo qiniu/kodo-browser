@@ -6,7 +6,9 @@ import jobUtil from '@/components/services/job-util'
 import DelayDone from '@/components/services/delay-done'
 import UploadMgr from '@/components/services/upload-manager'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
-import Const from '@/const'
+import {
+  EMPTY_FOLDER_UPLOADING,
+} from '@/const/setting-keys'
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
 
 const TRANSFER_UPLOAD_CONTROLLER_NAME = 'transferUploadsCtrl'
@@ -19,7 +21,6 @@ webModule.controller(TRANSFER_UPLOAD_CONTROLLER_NAME, [
   DelayDone,
   UploadMgr,
   Toast,
-  Const,
   Dialog,
   function (
     $scope,
@@ -29,7 +30,6 @@ webModule.controller(TRANSFER_UPLOAD_CONTROLLER_NAME, [
     DelayDone,
     UploadMgr,
     Toast,
-    Const,
     Dialog
   ) {
     var T = $translate.instant;
@@ -48,7 +48,7 @@ webModule.controller(TRANSFER_UPLOAD_CONTROLLER_NAME, [
       },
       schKeyFn: function (item) {
         return (
-          item.from.name +
+          item.options.from.name +
           " " +
           item.status +
           " " +
@@ -68,7 +68,7 @@ webModule.controller(TRANSFER_UPLOAD_CONTROLLER_NAME, [
 
     function triggerEmptyFolder() {
       $scope.emptyFolderUploading.enabled = !$scope.emptyFolderUploading.enabled;
-      localStorage.setItem(Const.EMPTY_FOLDER_UPLOADING, $scope.emptyFolderUploading.enabled);
+      localStorage.setItem(EMPTY_FOLDER_UPLOADING, $scope.emptyFolderUploading.enabled);
     }
 
     function checkStartJob(item, force) {

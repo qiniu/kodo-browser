@@ -4,14 +4,14 @@ import path from 'path'
 import sanitize from 'sanitize-filename'
 import { KODO_MODE } from 'kodo-s3-adapter-sdk'
 
-import QiniuStore from '../../../common/qiniu-store/lib'
+import { DownloadJob } from '@/models/job'
 import webModule from '@/app-module/web'
 
-import Config from '@/config'
-import AuthInfo from './authinfo'
-import QiniuClient from './qiniu-client'
+import NgConfig from '@/ng-config'
+import * as AuthInfo from './authinfo'
+import NgQiniuClient from './ng-qiniu-client'
 import { TOAST_FACTORY_NAME as Toast } from '../directives/toast-list'
-import settingsSvs from './settings'
+import Settings from './settings.ts'
 
 const DOWNLOAD_MGR_FACTORY_NAME = 'DownloadMgr'
 
@@ -19,20 +19,16 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
   "$q",
   "$timeout",
   '$translate',
-  AuthInfo,
-  QiniuClient,
-  Config,
+  NgQiniuClient,
+  NgConfig,
   Toast,
-  settingsSvs,
   function (
     $q,
     $timeout,
     $translate,
-    AuthInfo,
     QiniuClient,
     Config,
     Toast,
-    settingsSvs
   ) {
     const T = $translate.instant
     const pfs = fs.promises
@@ -68,12 +64,13 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
     }
 
     /**
-     * @param  opt { region, from, to, ...}
-     * @param  opt.from {bucket, key}
-     * @param  opt.to   {name, path}
+     * @param  briefJob { object: { options: {region, from, to,}}}
+     * @param  briefJob.from {bucket, key}
+     * @param  briefJob.to   {name, path}
      * @return job  { start(), stop(), status, progress }
      */
-    function createJob(options) {
+    function createJob(briefJob) {
+      const { options } = briefJob;
       const bucket = options.from.bucket,
             key = options.from.key,
             region = options.region,
@@ -94,19 +91,20 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
       options.clientOptions = {
         accessKey: AuthInfo.get().id,
         secretKey: AuthInfo.get().secret,
-        ucUrl: config.ucUrl,
+        ucUrl: config.ucUrl || "",
         regions: config.regions || [],
       };
       options.region = region;
       options.domain = domain;
-      options.resumeDownload = (settingsSvs.resumeDownload.get() == 1);
-      options.multipartDownloadThreshold = settingsSvs.multipartDownloadThreshold.get();
-      options.multipartDownloadSize = settingsSvs.multipartDownloadSize.get();
-      options.downloadSpeedLimit = (settingsSvs.downloadSpeedLimitEnabled.get() == 1 && settingsSvs.downloadSpeedLimitKBperSec.get());
-      options.isDebug = (settingsSvs.isDebug.get() == 1);
+      options.resumeDownload = (Settings.resumeDownload === 1);
+      options.multipartDownloadThreshold = Settings.multipartDownloadThreshold;
+      options.multipartDownloadSize = Settings.multipartDownloadSize;
+      options.downloadSpeedLimit = Settings.downloadSpeedLimitEnabled === 1
+        ? Settings.downloadSpeedLimitKBperSec
+        : 0;
+      options.isDebug = (Settings.isDebug === 1);
 
-      const store = new QiniuStore();
-      return store.createDownloadJob(options);
+      return new DownloadJob(options);
     }
 
     /**
@@ -264,19 +262,21 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
             }
 
             const job = createJob({
-              region: qiniuInfo.region,
-              from: {
-                bucket: qiniuInfo.bucket,
-                key: qiniuInfo.path.toString(),
-                size: qiniuInfo.size,
-                mtime: qiniuInfo.lastModified.toISOString(),
+              options: {
+                region: qiniuInfo.region,
+                from: {
+                  bucket: qiniuInfo.bucket,
+                  key: qiniuInfo.path.toString(),
+                  size: qiniuInfo.size,
+                  mtime: qiniuInfo.lastModified.getTime(),
+                },
+                to: {
+                  name: fileName,
+                  path: fileLocalPathWithSuffixWithoutExt + ext
+                },
+                domain: qiniuInfo.domain.toQiniuDomain(),
+                backendMode: qiniuInfo.domain.qiniuBackendMode(),
               },
-              to: {
-                name: fileName,
-                path: fileLocalPathWithSuffixWithoutExt + ext
-              },
-              domain: qiniuInfo.domain.toQiniuDomain(),
-              backendMode: qiniuInfo.domain.qiniuBackendMode(),
             });
             addEvents(job);
             t.push(job);
@@ -289,9 +289,6 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
     }
 
     function addEvents(job) {
-      if (!job.downloadedParts) {
-        job.downloadedParts = [];
-      }
 
       $scope.lists.downloadJobList.push(job);
 
@@ -332,7 +329,7 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
       });
       job.on("error", (err) => {
         if (err) {
-          console.error(`download kodo://${job.from.bucket}/${job.from.key} error: ${err}`);
+          console.error(`download kodo://${job.options.from.bucket}/${job.options.from.key} error: ${err}`);
         }
 
         concurrency--;
@@ -345,8 +342,8 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
     }
 
     function trySchedJob() {
-      var maxConcurrency = settingsSvs.maxDownloadConcurrency.get();
-      var isDebug = (settingsSvs.isDebug.get() == 1);
+      var maxConcurrency = Settings.maxDownloadConcurrency;
+      var isDebug = (Settings.isDebug === 1);
 
       concurrency = Math.max(0, concurrency);
       if (isDebug) {
@@ -366,18 +363,14 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
 
           const job = jobs[i];
           if (isDebug) {
-            console.log('[JOB] sched ', job.status, ' => ', job._config);
+            console.log('[JOB] sched ', job.status, ' => ', job.options);
           }
           if (job.status === "waiting") {
             concurrency++;
 
             if (job.prog.resumable) {
-              tryLoadProgForJob(job).then((prog) => {
-                if (prog) {
-                  job.start(prog);
-                } else {
-                  job.start();
-                }
+              tryLoadProgForJob(job).then((job) => {
+                job.start(job && job.prog);
               }).finally(() => {
                 startAllJobsFrom(i + 1);
               });
@@ -395,22 +388,9 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
     function trySaveProg() {
       var t = {};
       angular.forEach($scope.lists.downloadJobList, function (job) {
-        if (job.status == "finished") return;
+        if (job.status === "finished") return;
 
-        t[job.id] = {
-          region: job.region,
-          to: job.to,
-          from: job.from,
-          prog: {
-            synced: job.prog.synced,
-            total: job.prog.total,
-            resumable: job.prog.resumable
-          },
-          backendMode: job.backendMode,
-          domain: job.domain,
-          status: job.status,
-          message: job.message,
-        };
+        t[job.id] = job.getInfoForSave();
       });
 
       fs.writeFileSync(getDownProgFilePath(), JSON.stringify(t));
@@ -430,28 +410,39 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
         return Promise.resolve([]);
       }
 
-      const promises = Object.values(progs).map((job) => tryLoadProgForJob(job));
+      const promises = Object.values(progs)
+          .map(briefJob => ({
+            options: briefJob,
+          }))
+          .map(jobOptions => tryLoadProgForJob(jobOptions));
       return Promise.all(promises);
     }
 
     function tryLoadProgForJob(job) {
       return new Promise((resolve) => {
+        // next block within `if` handle persist job < v1.0.16
+        if (job.prog && job.prog.synced) {
+          job.prog.loaded = job.prog.synced;
+          delete job.prog.synced;
+
+          job.from.mtime = new Date(job.from.mtime).getTime();
+        }
         const options = { ignoreError: true };
-        if (job.backendMode == KODO_MODE) {
+        if (job.options.backendMode === KODO_MODE) {
           options.preferKodoAdapter = true;
         } else {
           options.preferS3Adapter = true;
         }
-        QiniuClient.headFile(job.region, job.from.bucket, job.from.key, options).then((info) => {
-          if (info.size !== job.from.size || info.lastModified.toISOString() !== job.from.mtime) {
+        QiniuClient.headFile(job.options.region, job.options.from.bucket, job.options.from.key, options).then((info) => {
+          if (info.size !== job.options.from.size || info.lastModified.getTime() !== job.options.from.mtime) {
             if (job.prog) {
-              delete job.prog.synced;
+              job.prog.loaded = 0;
             }
           }
           resolve(job);
         }).catch(() => {
           if (job.prog) {
-            delete job.prog.synced;
+            job.prog.loaded = 0;
           }
           resolve(job);
         });

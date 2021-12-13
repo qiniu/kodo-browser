@@ -2,8 +2,6 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import AuthInfo from '@/components/services/authinfo'
-
 const PICTURE_MODAL_CONTROLLER_NAME = 'pictureModalCtrl'
 
 webModule
@@ -16,9 +14,8 @@ webModule
     'bucketInfo',
     'objectInfo',
     'qiniuClientOpt',
-    AuthInfo,
     'fileType',
-    function ($scope, $modalInstance, $timeout, $modal, showFn, selectedDomain, bucketInfo, objectInfo, qiniuClientOpt, AuthInfo, fileType) {
+    function ($scope, $modalInstance, $timeout, $modal, showFn, selectedDomain, bucketInfo, objectInfo, qiniuClientOpt, fileType) {
 
       angular.extend($scope, {
         bucketInfo: bucketInfo,

@@ -2,7 +2,7 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import QiniuClient from '@/components/services/qiniu-client'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 import safeApply from '@/components/services/safe-apply'
 
@@ -14,7 +14,7 @@ webModule
     '$uibModalInstance',
     '$translate',
     '$timeout',
-    QiniuClient,
+    NgQiniuClient,
     'item',
     'currentInfo',
     'qiniuClientOpt',

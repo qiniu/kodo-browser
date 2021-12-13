@@ -5,8 +5,11 @@ import webModule from '@/app-module/web'
 import UploadMgr from '@/components/services/upload-manager'
 import DownloadMgr from '@/components/services/download-manager'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
-import Const from '@/const'
-import AuditLog from '@/components/services/audit-log'
+import {
+  EMPTY_FOLDER_UPLOADING,
+  OVERWRITE_DOWNLOADING,
+} from '@/const/setting-keys'
+import * as AuditLog from '@/components/services/audit-log'
 
 // import dependent controllers
 import './downloads'
@@ -22,16 +25,12 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
   UploadMgr,
   DownloadMgr,
   Toast,
-  Const,
-  AuditLog,
   function (
     $scope,
     $translate,
     UploadMgr,
     DownloadMgr,
     Toast,
-    Const,
-    AuditLog
   ) {
     const T = $translate.instant;
 
@@ -43,10 +42,10 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
         downloadJobList: []
       },
       emptyFolderUploading: {
-        enabled: localStorage.getItem(Const.EMPTY_FOLDER_UPLOADING) || true,
+        enabled: localStorage.getItem(EMPTY_FOLDER_UPLOADING) || true,
       },
       overwriteDownloading: {
-        enabled: localStorage.getItem(Const.OVERWRITE_DOWNLOADING) || false,
+        enabled: localStorage.getItem(OVERWRITE_DOWNLOADING) || false,
       },
 
       totalStat: {
@@ -84,12 +83,15 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
         $scope.transTab = 1;
         $scope.toggleTransVisible(true);
 
-        AuditLog.log('uploadFilesStart', {
-          regionId: bucketInfo.region,
-          bucket: bucketInfo.bucketName,
-          to: bucketInfo.key,
-          from: filePaths
-        });
+        AuditLog.log(
+          AuditLog.Action.UploadFilesStart,
+          {
+            regionId: bucketInfo.region,
+            bucket: bucketInfo.bucketName,
+            to: bucketInfo.key,
+            from: filePaths,
+          },
+        );
       });
     }
 
@@ -103,12 +105,15 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
       DownloadMgr.createDownloadJobs(fromRemotePath, toLocalPath, function (isCancelled) {
         Toast.info(T("download.addtolist.success"));
 
-        AuditLog.log('downloadFilesStart', {
-          from: fromRemotePath.map((entry) => {
-            return { regionId: entry.region, bucket: entry.bucketName, path: entry.path.toString() };
-          }),
-          to: toLocalPath
-        });
+        AuditLog.log(
+          AuditLog.Action.DownloadFilesStart,
+          {
+            from: fromRemotePath.map((entry) => {
+              return { regionId: entry.region, bucket: entry.bucketName, path: entry.path.toString() };
+            }),
+            to: toLocalPath,
+          },
+        );
 
         $scope.transTab = 2;
         $scope.toggleTransVisible(true);

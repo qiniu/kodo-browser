@@ -2,9 +2,9 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import QiniuClient from '@/components/services/qiniu-client'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
 import safeApply from '@/components/services/safe-apply'
-import AuditLog from '@/components/services/audit-log'
+import * as AuditLog from '@/components/services/audit-log'
 
 const DELETE_FILES_MODAL_CONTROLLER = 'deleteFilesModalCtrl'
 
@@ -17,11 +17,10 @@ webModule
     'items',
     'currentInfo',
     'callback',
-    QiniuClient,
+    NgQiniuClient,
     'qiniuClientOpt',
     safeApply,
-    AuditLog,
-    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, QiniuClient, qiniuClientOpt, safeApply, AuditLog) {
+    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, QiniuClient, qiniuClientOpt, safeApply) {
       angular.extend($scope, {
         items: items,
 
@@ -45,7 +44,7 @@ webModule
         $scope.isStop = false;
         $scope.step = 2;
 
-        AuditLog.log('deleteFiles', {
+        AuditLog.log(AuditLog.Action.DeleteFiles, {
           regionId: currentInfo.regionId,
           bucket: currentInfo.bucketName,
           paths: items.map((item) => item.path),
@@ -60,7 +59,7 @@ webModule
           $scope.step = 3;
           $scope.terr = terr;
           if (!terr || terr.length === 0) {
-            AuditLog.log('deleteFilesDone');
+            AuditLog.log(AuditLog.Action.DeleteFilesDone);
           }
           callback();
         });

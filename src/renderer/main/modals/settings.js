@@ -2,7 +2,7 @@ import angular from "angular"
 
 import webModule from '../../app-module/web'
 
-import settingsSvs from '../../components/services/settings'
+import Settings from '../../components/services/settings.ts'
 import { TOAST_FACTORY_NAME as Toast} from '../../components/directives/toast-list'
 
 const SETTINGS_CONTROLLER_NAME = 'settingsCtrl'
@@ -14,7 +14,6 @@ webModule.controller(SETTINGS_CONTROLLER_NAME, [
   "$uibModalInstance",
   "$translate",
   "callback",
-  settingsSvs,
   Toast,
   function (
     $scope,
@@ -23,30 +22,29 @@ webModule.controller(SETTINGS_CONTROLLER_NAME, [
     $modalInstance,
     $translate,
     callback,
-    settingsSvs,
     Toast,
   ) {
     var T = $translate.instant;
 
     angular.extend($scope, {
       set: {
-        isDebug: settingsSvs.isDebug.get(),
-        autoUpgrade: settingsSvs.autoUpgrade.get(),
-        resumeUpload: settingsSvs.resumeUpload.get(),
-        maxUploadConcurrency: settingsSvs.maxUploadConcurrency.get(),
-        multipartUploadThreshold: settingsSvs.multipartUploadThreshold.get(),
-        multipartUploadSize: settingsSvs.multipartUploadSize.get(),
-        uploadSpeedLimitEnabled: settingsSvs.uploadSpeedLimitEnabled.get(),
-        uploadSpeedLimitKBperSec: settingsSvs.uploadSpeedLimitKBperSec.get(),
-        resumeDownload: settingsSvs.resumeDownload.get(),
-        maxDownloadConcurrency: settingsSvs.maxDownloadConcurrency.get(),
-        multipartDownloadThreshold: settingsSvs.multipartDownloadThreshold.get(),
-        multipartDownloadSize: settingsSvs.multipartDownloadSize.get(),
-        downloadSpeedLimitEnabled: settingsSvs.downloadSpeedLimitEnabled.get(),
-        downloadSpeedLimitKBperSec: settingsSvs.downloadSpeedLimitKBperSec.get(),
-        externalPathEnabled: settingsSvs.externalPathEnabled.get(),
-        stepByStepLoadingFiles: settingsSvs.stepByStepLoadingFiles.get(),
-        filesLoadingSize: settingsSvs.filesLoadingSize.get(),
+        isDebug: Settings.isDebug,
+        autoUpgrade: Settings.autoUpgrade,
+        resumeUpload: Settings.resumeUpload,
+        maxUploadConcurrency: Settings.maxUploadConcurrency,
+        multipartUploadThreshold: Settings.multipartUploadThreshold,
+        multipartUploadSize: Settings.multipartUploadSize,
+        uploadSpeedLimitEnabled: Settings.uploadSpeedLimitEnabled,
+        uploadSpeedLimitKBperSec: Settings.uploadSpeedLimitKBperSec,
+        resumeDownload: Settings.resumeDownload,
+        maxDownloadConcurrency: Settings.maxDownloadConcurrency,
+        multipartDownloadThreshold: Settings.multipartDownloadThreshold,
+        multipartDownloadSize: Settings.multipartDownloadSize,
+        downloadSpeedLimitEnabled: Settings.downloadSpeedLimitEnabled,
+        downloadSpeedLimitKBperSec: Settings.downloadSpeedLimitKBperSec,
+        externalPathEnabled: Settings.externalPathEnabled,
+        stepByStepLoadingFiles: Settings.stepByStepLoadingFiles,
+        filesLoadingSize: Settings.filesLoadingSize,
       },
       setChange: setChange,
       cancel: cancel
@@ -62,7 +60,7 @@ webModule.controller(SETTINGS_CONTROLLER_NAME, [
       $timeout.cancel(tid);
 
       tid = $timeout(function () {
-        settingsSvs[key].set($scope.set[key]);
+        Settings[key] = $scope.set[key];
         Toast.success(T("settings.success")); //已经保存设置
       }, ttl || 100);
     }

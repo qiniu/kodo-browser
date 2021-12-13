@@ -2,10 +2,10 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import QiniuClient from '@/components/services/qiniu-client'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
-import AuditLog from '@/components/services/audit-log'
+import * as AuditLog from '@/components/services/audit-log'
 import safeApply from '@/components/services/safe-apply'
 
 import { moveModalHtmlMapping } from "@template-mappings/main/files/modals"
@@ -25,12 +25,11 @@ webModule
     'moveTo',
     'qiniuClientOpt',
     'callback',
-    QiniuClient,
+    NgQiniuClient,
     Dialog,
     Toast,
-    AuditLog,
     safeApply,
-    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, qiniuClientOpt, callback, QiniuClient, Dialog, Toast, AuditLog, safeApply) {
+    function ($scope, $modalInstance, $translate, $modal, item, isCopy, currentInfo, moveTo, qiniuClientOpt, callback, QiniuClient, Dialog, Toast, safeApply) {
       var T = $translate.instant;
       //console.log(item)
       angular.extend($scope, {
@@ -113,7 +112,7 @@ webModule
         QiniuClient.moveOrCopyFile(currentInfo.regionId, currentInfo.bucketName, item.path, newPath, isCopy, qiniuClientOpt).then(() => {
           Toast.success(successMsg);
 
-          AuditLog.log('moveOrCopyFile', {
+          AuditLog.log(AuditLog.Action.MoveOrCopyFile, {
             regionId: currentInfo.regionId,
             bucket: currentInfo.bucketName,
             from: item.path,

@@ -2,10 +2,10 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
-import QiniuClient from '@/components/services/qiniu-client'
+import NgQiniuClient from '@/components/services/ng-qiniu-client'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 import safeApply from '@/components/services/safe-apply'
-import AuditLog from '@/components/services/audit-log'
+import * as AuditLog from '@/components/services/audit-log'
 
 const MOVE_MODAL_CONTROLLER_NAME = 'moveModalCtrl'
 
@@ -22,11 +22,10 @@ webModule
     'moveTo',
     'qiniuClientOpt',
     'callback',
-    QiniuClient,
+    NgQiniuClient,
     Toast,
     safeApply,
-    AuditLog,
-    function ($scope, $modalInstance, $translate, $timeout, items, isCopy, renamePath, fromInfo, moveTo, qiniuClientOpt, callback, QiniuClient, Toast, safeApply, AuditLog) {
+    function ($scope, $modalInstance, $translate, $timeout, items, isCopy, renamePath, fromInfo, moveTo, qiniuClientOpt, callback, QiniuClient, Toast, safeApply) {
       const T = $translate.instant;
 
       angular.extend($scope, {
@@ -83,7 +82,7 @@ webModule
           return;
         }
 
-        AuditLog.log('moveOrCopyFilesStart', {
+        AuditLog.log(AuditLog.Action.MoveOrCopyFilesStart, {
           regionId: fromInfo.regionId,
           from: items.map((item) => {
             return { bucket: item.bucket, path: item.path };
@@ -104,7 +103,7 @@ webModule
           //结果
           $scope.step = 3;
           $scope.terr = terr;
-          AuditLog.log('moveOrCopyFilesDone');
+          AuditLog.log(AuditLog.Action.MoveOrCopyFilesStartDone);
           callback();
           safeApply($scope);
         });

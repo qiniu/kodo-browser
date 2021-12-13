@@ -13,8 +13,6 @@ import 'bootstrap/dist/js/bootstrap'
 import 'bootstrap-table'
 
 // 自定义 factories
-import './const'
-import './customize'
 import './components/services'
 
 // 自定义 directives

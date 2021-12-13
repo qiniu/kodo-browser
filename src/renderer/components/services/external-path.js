@@ -3,17 +3,16 @@ import path from 'path'
 
 import webModule from '@/app-module/web'
 
-import Config from '@/config'
-import AuthInfo from './authinfo'
+import NgConfig from '@/ng-config'
+import * as AuthInfo from './authinfo'
 
 const EXTERNAL_PATH_FACTORY_NAME = 'ExternalPath'
 
 webModule.factory(EXTERNAL_PATH_FACTORY_NAME, [
     "$q",
     "$translate",
-    AuthInfo,
-    Config,
-    function($q, $translate, AuthInfo, Config) {
+    NgConfig,
+    function($q, $translate, Config) {
         const T = $translate.instant;
 
         class ExternalPath {

@@ -21,15 +21,17 @@ export const uploadOptionsFromNewJob = {
     "resumeUpload": false,
     "multipartUploadSize": 16,
     "multipartUploadThreshold": 100,
-    uploadSpeedLimit: 0, // break change, 0 means no limit
-    "isDebug": false
+    uploadSpeedLimit: 0, // break change from 1.0.16, 0 means no limit
+    "isDebug": false,
+
+    userNatureLanguage: 'zh-CN' as const, // break change from 1.0.16
 }
 
 export const uploadOptionsFromResumeJob = {
     "clientOptions": {
         "accessKey": "NgKd0BmebvsFERFEBfKVVZGeGn7VsZQe_H_AunOC",
         "secretKey": "lp4Zv3Gi_7CHtxNTcJx2Pum5hUJB3gHROcg4vp0i",
-        ucUrl: "", // break change, "" means public
+        ucUrl: "", // break change from 1.0.16, "" means public
         "regions": []
     },
     // ↑ manual add ↓ from file
@@ -73,14 +75,16 @@ export const uploadOptionsFromResumeJob = {
     "multipartUploadSize": 16,
     "multipartUploadThreshold": 100,
     "uploadSpeedLimit": false,
-    "isDebug": false
+    "isDebug": false,
+
+    userNatureLanguage: 'zh-CN' as const, // break change from 1.0.16
 }
 
 export const downloadOptionsFromResumeJob = {
     "clientOptions": {
         "accessKey": "NgKd0BmebvsFERFEBfKVVZGeGn7VsZQe_H_AunOC",
         "secretKey": "lp4Zv3Gi_7CHtxNTcJx2Pum5hUJB3gHROcg4vp0i",
-        ucUrl: "", // break change, "" means public
+        ucUrl: "", // break change from 1.0.16, "" means public
         "regions": []
     },
     // ↑ manual add ↓ from file
@@ -100,6 +104,8 @@ export const downloadOptionsFromResumeJob = {
         "total": 135515599,
         "resumable": true
     },
-    "backendMode": "s3" as const, // break change, must as const
-    "message": ""
+    "backendMode": "s3" as const, // break change from 1.0.16, must as const
+    "message": "",
+
+    userNatureLanguage: 'zh-CN' as const, // break change from 1.0.16
 }

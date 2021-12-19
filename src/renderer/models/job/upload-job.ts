@@ -8,6 +8,7 @@ import { BackendMode, EventKey, IpcUploadJob, IpcJobEvent, Status, UploadedPart 
 import Base from "./base"
 import * as Utils from "./utils";
 import Duration from "@/const/duration";
+import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
 
 // if change options, remember to check toJsonString()
 interface RequiredOptions {
@@ -25,6 +26,8 @@ interface RequiredOptions {
 
     overwrite: boolean,
     storageClassName: StorageClass,
+
+    userNatureLanguage: NatureLanguage,
 }
 
 interface OptionalOptions {
@@ -155,6 +158,8 @@ export default class UploadJob extends Base {
                     ? undefined
                     : this.options.clientOptions.ucUrl,
                 backendMode: this.options.backendMode,
+
+                userNatureLanguage: this.options.userNatureLanguage,
             },
             options: {
                 resumeUpload: this.options.resumeUpload,

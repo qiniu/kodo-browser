@@ -109,8 +109,8 @@ webModule.factory(NG_QINIU_CLIENT_FACTORY_NAME, [
     function setStorageClassOfFiles(region, bucket, items, storageClass, progressFn, opt) {
       return QiniuClient.setStorageClassOfFiles(
           region,
+          bucket,
           items,
-          target,
           storageClass,
           progressFn,
           handleError,

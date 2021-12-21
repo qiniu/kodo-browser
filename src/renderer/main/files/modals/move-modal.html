@@ -47,7 +47,7 @@
           <i class="fa fa-folder" style="color:orange" ng-if="terrItem.item.itemType === 'folder'"></i>
           <i class="fa fa-file-o" ng-if="terrItem.item.itemType !== 'folder'"></i>
 
-          {{terrItem.item.key.substring(fromInfo.key.length)}}
+          {{terrItem.item.path.toString().substring(fromInfo.key.length)}}
 
           <i class="fa fa-exclamation-circle text-danger" uib-tooltip="{{terrItem.error.translated_message||terrItem.error.message||terrItem.error.code}}" tooltip-placement="right" tooltip-append-to-body="true"></i>
         </li>

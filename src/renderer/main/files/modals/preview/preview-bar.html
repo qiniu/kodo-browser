@@ -43,7 +43,7 @@
   <i class="glyphicon glyphicon-link"></i>
   {{'getDownloadLink'|translate}}</button>
 
-<button type="button" class="btn btn-default btn-sm" ng-click="showFn.updateStorageClass();">
+<button type="button" class="btn btn-default btn-sm" ng-hide="currentInfo.availableStorageClasses.length === 0" ng-click="showFn.updateStorageClass();">
   <i class="iconfont icon-a-726-8-02"></i>
   {{'updateStorageClass'|translate}}</button>
 

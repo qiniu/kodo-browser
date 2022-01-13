@@ -11,7 +11,6 @@ const UPDATE_STORAGE_CLASSES_MODAL_CONTROLLER_NAME = 'updateStorageClassesModalC
 webModule
   .controller(UPDATE_STORAGE_CLASSES_MODAL_CONTROLLER_NAME, [
     '$scope',
-    '$q',
     '$uibModalInstance',
     '$timeout',
     'items',
@@ -20,18 +19,46 @@ webModule
     NgQiniuClient,
     'qiniuClientOpt',
     safeApply,
-    function ($scope, $q, $modalInstance, $timeout, items, currentInfo, callback, QiniuClient, qiniuClientOpt, safeApply) {
+    function (
+      $scope,
+      $modalInstance,
+      $timeout,
+      items,
+      currentInfo,
+      callback,
+      QiniuClient,
+      qiniuClientOpt,
+      safeApply,
+    ) {
       angular.extend($scope, {
         items: items,
-        currentInfo:currentInfo,
-        info: {
-          updateTo: 'Standard',
+        currentInfo: currentInfo,
+        storageClassOptions: currentInfo.availableStorageClasses,
+        updateStorageClassFormData: {
+          storageClassKodoName: currentInfo.availableStorageClasses > 0
+            ? $scope.storageClassOptions[0].kodoName
+            : 'Standard',
+        },
+        uploadConfirmFormHelper: {
+          storageClassBilling: currentInfo.availableStorageClasses > 0
+            ? $scope.storageClassOptions[0].billingI18n
+            : {},
         },
         step : 1,
         stop: stop,
         close: close,
         onSubmit: onSubmit
       });
+
+      $scope.$watch('updateStorageClassFormData.storageClassKodoName', function () {
+        const selectedStorageClass = $scope.storageClassOptions
+          .find(item => item.kodoName === $scope.updateStorageClassFormData.storageClassKodoName);
+        if (!selectedStorageClass) {
+          $scope.uploadConfirmFormHelper.storageClassBilling = {};
+          return;
+        }
+        $scope.uploadConfirmFormHelper.storageClassBilling = selectedStorageClass.billingI18n;
+      })
 
       function stop() {
         $scope.isStop = true;
@@ -43,11 +70,13 @@ webModule
       }
 
       function onSubmit(form1) {
-      if(!form1.$valid) return;
+        if(!form1.$valid) {
+          return;
+        }
 
         $scope.isStop = false;
         $scope.step = 2;
-        const newStorageClass = $scope.info.updateTo;
+        const newStorageClass = $scope.updateStorageClassFormData.storageClassKodoName;
 
         AuditLog.log(AuditLog.Action.SetStorageClassOfFiles, {
           regionId: currentInfo.regionId,
@@ -56,11 +85,21 @@ webModule
           updateTo: newStorageClass,
         });
 
-        QiniuClient.setStorageClassOfFiles(currentInfo.regionId, currentInfo.bucketName, items, newStorageClass, (prog) => {
-          //进度
-          $scope.progress = angular.copy(prog);
-          safeApply($scope);
-        }, qiniuClientOpt).then((terr) => {
+        QiniuClient.setStorageClassOfFiles(
+          currentInfo.regionId,
+          currentInfo.bucketName,
+          items,
+          newStorageClass,
+          (prog) => {
+            //进度
+            $scope.progress = angular.copy(prog);
+            safeApply($scope);
+          },
+          {
+            ...qiniuClientOpt,
+            storageClasses: currentInfo.availableStorageClasses,
+          },
+        ).then((terr) => {
           //结果
           $scope.step = 3;
           $scope.terr = terr;

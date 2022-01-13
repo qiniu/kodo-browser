@@ -5,6 +5,7 @@ export const TIME_FORMAT_FILTER_NAME = formatter.timeFormat.name
 export const SIZE_FORMAT_FILTER_NAME = formatter.sizeFormat.name
 export const FILE_ICON_FILTER_NAME = formatter.fileIcon.name
 export const HTML_ESCAPE_FILTER_NAME = formatter.htmlEscape.name
+export const I18N_FILTER_NAME = formatter.i18n.name
 export const STATUS_CLS_FILTER_NAME = "statusCls"
 export const STATUS_FILTER_NAME = "status"
 
@@ -34,3 +35,11 @@ webModule
     .filter(formatter.percent.name, () => formatter.percent.fn)
     .filter(formatter.fileIcon.name, () => formatter.fileIcon.fn)
     .filter(formatter.htmlEscape.name, () => formatter.htmlEscape.fn)
+    .filter(formatter.i18n.name, [
+        "$rootScope",
+        function ($rootScope) {
+            return function (obj, fallback) {
+                return formatter.i18n.fn(obj, $rootScope.langSettings.lang, fallback);
+            }
+        }
+    ])

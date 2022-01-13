@@ -249,3 +249,10 @@ export const htmlEscape = {
         );
   },
 }
+
+export const i18n = {
+  name: "i18n",
+  fn: (obj: Record<string, string>, lang: string, fallback: string = ""): string => {
+    return obj[lang] ?? fallback;
+  },
+}

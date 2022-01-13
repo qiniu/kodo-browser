@@ -105,7 +105,10 @@ describe("test qiniu-client/files.ts", () => {
                         "bucket-kodo-browser-Kodo-createFolder",
                         qiniuPathConvertor.fromQiniuPath("qiniu-client/lots-files/"),
                         undefined,
-                        mockOpt,
+                        {
+                            ...mockOpt,
+                            storageClasses: [],
+                        },
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
                     const [ enterParamsName ] = MockedAdapter.prototype.enter.mock.calls[0];
@@ -131,7 +134,10 @@ describe("test qiniu-client/files.ts", () => {
                         "bucket-kodo-browser-Kodo-createFolder",
                         qiniuPathConvertor.fromQiniuPath("qiniu-client/lots-files/"),
                         undefined,
-                        mockOpt,
+                        {
+                            ...mockOpt,
+                            storageClasses: [],
+                        },
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
                     const [ enterParamsName ] = MockedAdapter.prototype.enter.mock.calls[0];
@@ -294,7 +300,10 @@ describe("test qiniu-client/files.ts", () => {
                         "region-kodo-browser-Kodo-headFile",
                         "bucket-kodo-browser-Kodo-headFile",
                         qiniuPathConvertor.fromQiniuPath("qiniu-client/file-1"),
-                        mockOpt,
+                        {
+                            ...mockOpt,
+                            storageClasses: [],
+                        },
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
                     const [ enterParamsName ] = MockedAdapter.prototype.enter.mock.calls[0];
@@ -316,7 +325,10 @@ describe("test qiniu-client/files.ts", () => {
                         "bucket-kodo-browser-Kodo-setStorageClass",
                         qiniuPathConvertor.fromQiniuPath("qiniu-client/file-1"),
                         "Standard",
-                        mockOpt,
+                        {
+                            ...mockOpt,
+                            storageClasses: [],
+                        },
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
                     const [ enterParamsName ] = MockedAdapter.prototype.enter.mock.calls[0];
@@ -336,7 +348,10 @@ describe("test qiniu-client/files.ts", () => {
                         "bucket-kodo-browser-Kodo-setStorageClass",
                         qiniuPathConvertor.fromQiniuPath("qiniu-client/file-1"),
                         "InfrequentAccess",
-                        mockOpt,
+                        {
+                            ...mockOpt,
+                            storageClasses: [],
+                        },
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
                     const [ enterParamsName ] = MockedAdapter.prototype.enter.mock.calls[0];
@@ -356,7 +371,10 @@ describe("test qiniu-client/files.ts", () => {
                         "bucket-kodo-browser-Kodo-setStorageClass",
                         qiniuPathConvertor.fromQiniuPath("qiniu-client/file-1"),
                         "Glacier",
-                        mockOpt,
+                        {
+                            ...mockOpt,
+                            storageClasses: [],
+                        },
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
                     const [ enterParamsName ] = MockedAdapter.prototype.enter.mock.calls[0];
@@ -581,7 +599,7 @@ describe("test qiniu-client/files.ts", () => {
                             _s3RegionId: string,
                             _bucket: string,
                             keys: string[],
-                            _storageClass: StorageClass,
+                            _storageClass: StorageClass["kodoName"],
                             callback?: BatchCallback
                         ): Promise<PartialObjectError[]> => {
                             keys.forEach((_, i) => callback && callback(i));
@@ -597,7 +615,10 @@ describe("test qiniu-client/files.ts", () => {
                         "Standard",
                         mockHandleProgress,
                         mockHandleErr,
-                        mockOpt,
+                        {
+                            ...mockOpt,
+                            storageClasses: [],
+                        },
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
                     const [ enterParamsName ] = MockedAdapter.prototype.enter.mock.calls[0];

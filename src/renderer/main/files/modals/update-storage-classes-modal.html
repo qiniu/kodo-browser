@@ -13,9 +13,6 @@
 
     <div class="form-group">
       <div class="col-sm-12 pdt4">{{'updateStorageClass.text1'|translate}}</div>
-      <div class="col-sm-12 pdt4">{{'updateStorageClass.text2'|translate}}</div>
-      <div class="col-sm-12 pdt4">{{'updateStorageClass.text3'|translate}}</div>
-      <div class="col-sm-12 pdt4">{{'updateStorageClass.text4'|translate}}</div>
     </div>
 
    <div ng-if="step==1">
@@ -36,20 +33,18 @@
           <!-- * 修改为: -->
           * {{'updateStorageClass.setTo'|translate}}:
         </label>
-        <div>
+        <div ng-repeat="option in storageClassOptions">
           <div class="col-sm-3 input-md pdt4 radio">
-            <label><input type="radio" name="info" ng-model="info.updateTo" value="Standard">{{'storageClassesType.standard'|translate}}</label>
+            <label>
+              <input type="radio" name="storageClassOption" ng-model="updateStorageClassFormData.storageClassKodoName" value="{{option.kodoName}}">
+              {{option.nameI18n|i18n}}
+            </label>
           </div>
         </div>
-        <div>
-          <div class="col-sm-3 input-md pdt4 radio">
-            <label><input type="radio" name="info" ng-model="info.updateTo" value="InfrequentAccess">{{'storageClassesType.infrequentaccess'|translate}}</label>
-          </div>
-        </div>
-        <div>
-          <div class="col-sm-3 input-md pdt4 radio">
-            <label><input type="radio" name="info" ng-model="info.updateTo" value="Glacier">{{'storageClassesType.glacier'|translate}}</label>
-          </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10" style="padding-right: 65px">
+          {{uploadConfirmFormHelper.storageClassBilling|i18n}}
         </div>
       </div>
       <div class="clearfix"></div>

@@ -8,6 +8,7 @@ import { GetAdapterOptionParam, getDefaultClient } from "./common"
 
 // listFiles
 interface ListFilesOption extends GetAdapterOptionParam {
+    storageClasses: StorageClass[],
     maxKeys?: number,
     minKeys?: number,
 }
@@ -30,6 +31,7 @@ export async function listFiles(
         minKeys: opt.minKeys || 1000,
     };
     return await getDefaultClient(opt).enter("listFiles", async client => {
+        client.storageClasses = opt.storageClasses;
         const listedObjects = await client.listObjects(region, bucket, key.toString(), option);
         if (listedObjects.commonPrefixes) {
             listedObjects.commonPrefixes.forEach((item) => {
@@ -151,13 +153,17 @@ export async function getFrozenInfo(
     });
 }
 
+interface HeadFileOption extends GetAdapterOptionParam {
+    storageClasses: StorageClass[],
+}
 export async function headFile(
     region: string,
     bucket: string,
     key: QiniuPath,
-    opt: GetAdapterOptionParam,
+    opt: HeadFileOption,
 ): Promise<ObjectInfo> {
     return await getDefaultClient(opt).enter("headFile", async client => {
+        client.storageClasses = opt.storageClasses;
         return await client.getObjectInfo(
             region,
             {
@@ -171,21 +177,25 @@ export async function headFile(
     });
 }
 
+interface SetStorageClassOption extends GetAdapterOptionParam {
+    storageClasses: StorageClass[],
+}
 export async function setStorageClass(
     region: string,
     bucket: string,
     key: QiniuPath,
-    storageClass: StorageClass,
-    opt: GetAdapterOptionParam,
+    kodoStorageClass: StorageClass['kodoName'],
+    opt: SetStorageClassOption,
 ): Promise<void> {
     await getDefaultClient(opt).enter("setStorageClass", async client => {
+        client.storageClasses = opt.storageClasses;
         await client.setObjectStorageClass(
             region,
             {
                 bucket,
                 key: key.toString(),
             },
-            storageClass,
+            kodoStorageClass,
         );
     }, {
         targetBucket: bucket,
@@ -521,14 +531,17 @@ class BatchOperator {
 // set storage class
 const stopSetStorageClassOfFilesController = new ProgressStopController();
 
+interface SetStorageClassOfFilesOption extends GetAdapterOptionParam {
+    storageClasses: StorageClass[],
+}
 export async function setStorageClassOfFiles(
     region: string,
     bucket: string,
     items: FileItem.Item[],
-    storageClass: StorageClass,
+    kodoStorageClass: StorageClass['kodoName'],
     progressFn: (progress: Progress) => void,
     onError: (err: any) => void,
-    opt: GetAdapterOptionParam,
+    opt: SetStorageClassOfFilesOption,
 ): Promise<BatchErr[]> {
     stopSetStorageClassOfFilesController.reset();
 
@@ -541,6 +554,7 @@ export async function setStorageClassOfFiles(
     progress.handleProgress();
 
     return await getDefaultClient(opt).enter("setStorageClassOfFiles", async client => {
+        client.storageClasses = opt.storageClasses;
         const batchOperator = new BatchOperator({
             client,
             region,
@@ -561,7 +575,7 @@ export async function setStorageClassOfFiles(
             region,
             bucket,
             files.map(item => item.path.toString()),
-            storageClass,
+            kodoStorageClass,
             progress.createCallback(files),
         );
     }

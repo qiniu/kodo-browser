@@ -62,6 +62,7 @@ describe("test models/job/download-job.ts",  () => {
                         regions: [],
                         secretKey: "lp4Zv3Gi_7CHtxNTcJx2Pum5hUJB3gHROcg4vp0i",
                         ucUrl: undefined,
+                        userNatureLanguage: "zh-CN",
                     },
                     job: downloadJob.id,
                     key: "job-download",

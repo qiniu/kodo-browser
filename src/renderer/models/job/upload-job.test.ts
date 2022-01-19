@@ -63,6 +63,7 @@ describe("test models/job/upload-job.ts",  () => {
                         regions: [],
                         secretKey: "lp4Zv3Gi_7CHtxNTcJx2Pum5hUJB3gHROcg4vp0i",
                         ucUrl: undefined,
+                        userNatureLanguage: "zh-CN",
                     },
                     job: uploadJob.id,
                     key: "job-upload",

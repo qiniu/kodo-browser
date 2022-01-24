@@ -233,7 +233,7 @@ export const fileIcon = {
   },
 }
 
-// can removed after use react, that will auto encode
+// can be removed after using react, that will auto encode
 export const htmlEscape = {
   name: "htmlEscape",
   fn: (strToHtmlEntitiesEncode: string):string => {

@@ -13,7 +13,6 @@ import * as AuditLog from '@/components/services/audit-log'
 import { akHistoriesModalHtmlMapping, customizeCloudModalHtmlMapping } from "@template-mappings/main/auth/modals"
 import akHistoriesModalCtrl from './modals/ak-histories-modal'
 import customizeCloudModalCtrl from './modals/customize-cloud-modal'
-import { CloudServerType } from "@/components/services/authinfo"
 
 const LOGIN_CONTROLLER_NAME = 'loginCtrl'
 
@@ -46,10 +45,10 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
       item: {},
       clouds: [{
         name: "auth.defaultCloud",
-        value: CloudServerType.Default,
+        value: AuthInfo.CloudServerType.Default,
       }, {
         name: "auth.customizedCloud",
-        value: CloudServerType.Customized,
+        value: AuthInfo.CloudServerType.Customized,
       }],
       isPrivateCloudConfigured: isPrivateCloudConfigured(),
       selectedCloud: selectedCloud(),
@@ -64,7 +63,7 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
     });
 
     function selectedCloud() {
-      return AuthInfo.usePublicCloud() || !Config.exists() ? CloudServerType.Default : CloudServerType.Customized;
+      return AuthInfo.usePublicCloud() || !Config.exists() ? AuthInfo.CloudServerType.Default : AuthInfo.CloudServerType.Customized;
     }
 
     function isPrivateCloudConfigured() {
@@ -99,9 +98,9 @@ webModule.controller(LOGIN_CONTROLLER_NAME, [
           choose: function() {
             return function(history) {
               if (history.isPublicCloud) {
-                $scope.selectedCloud = CloudServerType.Default;
+                $scope.selectedCloud = AuthInfo.CloudServerType.Default;
               } else {
-                $scope.selectedCloud = CloudServerType.Customized;
+                $scope.selectedCloud = AuthInfo.CloudServerType.Customized;
               }
               $scope.item.id = history.accessKeyId;
               $scope.item.secret = history.accessKeySecret;

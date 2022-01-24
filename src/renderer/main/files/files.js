@@ -436,7 +436,6 @@ webModule.controller(FILES_CONTROLLER_NAME, [
             if (regionId) {
               $scope.currentInfo.regionId = regionId;
               $scope.ref.mode = 'externalFiles';
-              info.bucketName = info.bucketName;
               info.qiniuBackendMode = S3_MODE;
               // TODO: Add bucket id here
             } else {

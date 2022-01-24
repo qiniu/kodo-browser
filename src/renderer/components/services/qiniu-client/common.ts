@@ -1,4 +1,5 @@
 import { KODO_MODE, Qiniu, Region, S3_MODE} from "kodo-s3-adapter-sdk"
+import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
 import { Kodo as KodoAdapter } from "kodo-s3-adapter-sdk/dist/kodo"
 import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3"
 import { RegionService } from "kodo-s3-adapter-sdk/dist/region_service";
@@ -109,6 +110,7 @@ interface AdapterOption {
     // for kodo-s3-adapter-sdk/Qiniu.prototype.mode
     appName: string,
     appVersion: string,
+    appNatureLanguage: NatureLanguage,
 
     // for getAdapterOption
     preferKodoAdapter?: boolean,
@@ -130,6 +132,7 @@ function getAdapterOption(opt?: GetAdapterOptionParam): AdapterOption {
     const baseResult = {
         appName: "kodo-browser",
         appVersion: AppConfig.app.version,
+        appNatureLanguage: localStorage.getItem("lang") as NatureLanguage ?? 'zh-CN',
     }
     let result: AdapterOption;
 
@@ -191,6 +194,7 @@ function getS3Client(opt: GetAdapterOptionParam): S3Adapter {
         const s3Client = qiniuAdapter.mode(S3_MODE, {
             appName: adapterOption.appName,
             appVersion: adapterOption.appVersion,
+            appNatureLanguage: adapterOption.appNatureLanguage,
             requestCallback: debugRequest(S3_MODE),
             responseCallback: debugResponse(S3_MODE),
             uplogBufferSize: adapterOption.uplogBufferSize,
@@ -211,6 +215,7 @@ function getKodoClient(opt: GetAdapterOptionParam): KodoAdapter {
         const kodoClient = qiniuAdapter.mode(KODO_MODE, {
             appName: adapterOption.appName,
             appVersion: adapterOption.appVersion,
+            appNatureLanguage: adapterOption.appNatureLanguage,
             requestCallback: debugRequest(KODO_MODE),
             responseCallback: debugResponse(KODO_MODE),
             uplogBufferSize: adapterOption.uplogBufferSize,

@@ -55,7 +55,7 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
     }
 
     /**
-      * @param  options   { region, from, to, progress, checkPoints, ...}
+      * @param  options   { object: { region, from, to, progress, checkPoints } }
       * @param  options.from {name, path}
       * @param  options.to   {bucket, key}
       * @return job  { start(), stop(), status, progress }
@@ -86,6 +86,7 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
       options.multipartUploadThreshold = Settings.multipartUploadThreshold;
       options.uploadSpeedLimit = (Settings.uploadSpeedLimitEnabled === 1 && Settings.uploadSpeedLimitKBperSec);
       options.isDebug = (Settings.isDebug === 1);
+      options.userNatureLanguage = localStorage.getItem('lang') || 'zh-CN';
 
       return new UploadJob(options);
     }

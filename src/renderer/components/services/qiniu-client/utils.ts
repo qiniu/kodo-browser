@@ -83,5 +83,8 @@ export async function signatureUrl(
             domain,
             deadline,
         );
-    })
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
+    });
 }

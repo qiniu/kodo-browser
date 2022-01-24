@@ -22,7 +22,11 @@ class Client {
       `Kodo-Browser/${options.kodoBrowserVersion}/ioutil`,
       clientOptions.regions);
 
-    const modeOpts = { appName: 'kodo-browser/ioutil', appVersion: options.kodoBrowserVersion };
+    const modeOpts = {
+      appName: 'kodo-browser/ioutil',
+      appVersion: options.kodoBrowserVersion,
+      appNatureLanguage: clientOptions.userNatureLanguage,
+    };
     if (clientOptions.isDebug) {
       modeOpts.requestCallback = debugRequest(clientOptions.backendMode);
       modeOpts.responseCallback = debugResponse(clientOptions.backendMode);
@@ -64,7 +68,7 @@ class Client {
   uploadFile(params) {
     const self = this;
     const localFile = params.localFile;
-    const contenType = mime.getType(localFile);
+    const contentType = mime.getType(localFile);
     const isOverwrite = params.overwriteDup;
     let isAborted = false;
 
@@ -104,6 +108,9 @@ class Client {
           });
         });
       }
+    }, {
+      targetBucket: params.bucket,
+      targetKey: params.key,
     }).finally(() => {
       this.uploader = undefined;
     });
@@ -155,7 +162,7 @@ class Client {
             }
 
             self.uploader.putObjectFromFile(params.region, { bucket: params.bucket, key: params.key, storageClassName: params.storageClassName }, fileHandle, stats.size, fileName, {
-              header: { contenType: contenType },
+              header: { contentType },
               recovered: recoveredOption,
               uploadThreshold: uploadThreshold,
               partSize: uploadedPartSize,
@@ -275,6 +282,9 @@ class Client {
       return startDownloadFile().finally(() => {
         this.downloader = undefined;
       });
+    }, {
+      targetBucket: params.bucket,
+      targetKey: params.key,
     });
 
     process.on('uncaughtException', (err) => {

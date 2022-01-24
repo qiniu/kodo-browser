@@ -63,6 +63,9 @@ export async function listFiles(
             data: items,
             marker: listedObjects.nextContinuationToken,
         };
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
     });
 }
 
@@ -86,6 +89,9 @@ export async function createFolder(
             Buffer.alloc(0),
             directoryBasename,
         );
+    }, {
+        targetBucket: bucket,
+        targetKey: prefix.toString(),
     });
 }
 
@@ -103,6 +109,9 @@ export async function checkFileExists(
                 key: key.toString(),
             },
         );
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
     });
 }
 
@@ -122,6 +131,9 @@ export async function checkFolderExists(
             },
         );
         return listObjects.objects.length > 0 && listObjects.objects[0].key.startsWith(prefix.toString());
+    }, {
+        targetBucket: bucket,
+        targetKey: prefix.toString(),
     });
 }
 
@@ -133,6 +145,9 @@ export async function getFrozenInfo(
 ): Promise<FrozenInfo> {
     return await getDefaultClient(opt).enter('getFrozenInfo', async client => {
         return await client.getFrozenInfo(region, { bucket: bucket, key: key.toString() })
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
     });
 }
 
@@ -150,6 +165,9 @@ export async function headFile(
                 key: key.toString(),
             },
         );
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
     });
 }
 
@@ -169,6 +187,9 @@ export async function setStorageClass(
             },
             storageClass,
         );
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
     });
 }
 
@@ -189,6 +210,9 @@ export async function getContent(
             domain,
         );
         return obj.data;
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
     })
 }
 
@@ -226,6 +250,9 @@ export async function saveContent(
                 metadata: headers.metadata,
             }
         );
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
     });
 }
 
@@ -255,6 +282,9 @@ export async function moveOrCopyFile(
             return
         }
         await client.moveObject(region, transferObject);
+    }, {
+        targetBucket: bucket,
+        targetKey: oldKey.toString(),
     });
 }
 
@@ -274,6 +304,9 @@ export async function restoreFile(
             },
             days,
         );
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
     });
 }
 
@@ -519,6 +552,8 @@ export async function setStorageClassOfFiles(
         // return errs.flat().map(err => ({ item: err }));
         await batchOperator.run(items, _setStorageClassOfFiles);
         return progress.errorItems;
+    }, {
+        targetBucket: bucket,
     });
 
     function _setStorageClassOfFiles(client: Adapter, files: FileItem.File[]): Promise<PartialObjectError[]> {
@@ -571,6 +606,8 @@ export async function restoreFiles(
 
         await batchOperator.run(items, _restoreFiles);
         return progress.errorItems;
+    }, {
+        targetBucket: bucket,
     });
 
     function _restoreFiles(client: Adapter, files: FileItem.File[]): Promise<PartialObjectError[]> {
@@ -621,6 +658,8 @@ export async function deleteFiles(
 
         await batchOperator.run(items, _deleteItems, _deleteItems);
         return progress.errorItems;
+    }, {
+        targetBucket: bucket,
     });
 
     function _deleteItems<T extends FileItem.Item>(client: Adapter, items: T[]): Promise<PartialObjectError[]> {
@@ -674,6 +713,8 @@ export async function moveOrCopyFiles(
 
         await batchOperator.run(items, _moveOrCopyItems, _moveOrCopyItems);
         return progress.errorItems;
+    }, {
+        targetBucket: target.bucket,
     });
 
     function _moveOrCopyItems<T extends FileItem.Item>(

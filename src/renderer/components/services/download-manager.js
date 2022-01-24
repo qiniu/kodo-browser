@@ -103,6 +103,7 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
         ? Settings.downloadSpeedLimitKBperSec
         : 0;
       options.isDebug = (Settings.isDebug === 1);
+      options.userNatureLanguage = localStorage.getItem('lang') || 'zh-CN';
 
       return new DownloadJob(options);
     }

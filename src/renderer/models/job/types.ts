@@ -1,5 +1,6 @@
 import { Region } from "kodo-s3-adapter-sdk";
 import { StorageClass } from "kodo-s3-adapter-sdk/dist/adapter";
+import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
 
 // job constructor options
 export type BackendMode = "kodo" | "s3";
@@ -35,6 +36,8 @@ export interface IpcUploadJob {
         ucUrl?: string,
         regions: Region[],
         backendMode: BackendMode,
+
+        userNatureLanguage: NatureLanguage,
     },
     options: {
         resumeUpload: boolean,
@@ -66,6 +69,8 @@ export interface IpcDownloadJob {
         ucUrl?: string,
         regions: Region[],
         backendMode: BackendMode,
+
+        userNatureLanguage: NatureLanguage,
     },
     options: {
         resumeDownload: boolean,

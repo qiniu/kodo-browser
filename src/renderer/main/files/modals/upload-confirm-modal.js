@@ -13,12 +13,14 @@ webModule
     '$uibModalInstance',
     '$translate',
     'items',
+    'currentInfo',
     'okCallback',
     function (
       $scope,
       $uibModalInstance,
       $translate,
       items,
+      currentInfo,
       okCallback,
     ) {
       const T = $translate.instant
@@ -34,24 +36,35 @@ webModule
 
 
       angular.extend($scope, {
+        currentInfo,
         isLoading: false,
         files: items,
         showFiles,
         maxShowFiles: MAX_SHOW_FILES,
+        storageClassOptions: currentInfo.availableStorageClasses,
         uploadConfirmFormData: {
           isOverwrite: false,
-          storageClassName: 'Standard'
+          storageClassName: currentInfo.availableStorageClasses > 0
+            ? $scope.storageClassOptions[0].kodoName
+            : 'Standard',
         },
         uploadConfirmFormHelper: {
-          storageClassesType: T('uploadModal.storageClassesHelper.Standard')
+          storageClassBilling: currentInfo.availableStorageClasses > 0
+            ? $scope.storageClassOptions[0].billingI18n
+            : {},
         },
         ok: ok,
         cancel: cancel,
       })
 
       $scope.$watch('uploadConfirmFormData.storageClassName', function () {
-        $scope.uploadConfirmFormHelper.storageClassesType =
-          T(`uploadModal.storageClassesHelper.${$scope.uploadConfirmFormData.storageClassName}`)
+        const selectedStorageClass = $scope.storageClassOptions
+          .find(item => item.kodoName === $scope.uploadConfirmFormData.storageClassKodoName);
+        if (!selectedStorageClass) {
+          $scope.uploadConfirmFormHelper.storageClassBilling = {};
+          return;
+        }
+        $scope.uploadConfirmFormHelper.storageClassBilling = selectedStorageClass.billingI18n;
       })
 
       function ok() {

@@ -74,9 +74,7 @@ export default {
   close: "クローズ",
 
   "storageClassesType": "保管タイプ",
-  "storageClassesType.standard": "標準",
-  "storageClassesType.infrequentaccess": "IA",
-  "storageClassesType.glacier": "アーカイブ",
+  "storageClassesType.unknown": "未知",
 
   "aclType.default": "バケツからの継承",
   "aclType.public-read-write": "公開可読は書く",
@@ -290,9 +288,6 @@ export default {
   "uploadModal.maxShowFilesHelper": "ファイル/ディレクトリー",
   "uploadModal.ifCoverUpload": "上書き",
   "uploadModal.ifCoverUploadHelper": "（今回の上書き）",
-  "uploadModal.storageClassesHelper.Standard": "",
-  "uploadModal.storageClassesHelper.InfrequentAccess": "オブジェクトの最小計測値は64KBです。30日に満たない場合も30日分の料金が発生します。",
-  "uploadModal.storageClassesHelper.Glacier": "アクセスする前にオブジェクトの凍結を解除する必要があります。最小測定値は64KBで、保存期間が60日未満の場合も60日として課金されます。",
   "uploadModal.ok": "アップロード",
 
   "deleteModal.title": "これらのファイルを削除する",

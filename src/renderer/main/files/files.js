@@ -22,6 +22,11 @@ import NgQiniuClient from '@/components/services/ng-qiniu-client'
 import Settings from '@/components/services/settings'
 import ExternalPath from '@/components/services/external-path'
 import { getFileType } from '@/components/services/file.s'
+import {
+  fetchFromRemote as fetchRegionsStorageClasses,
+  getAvailable as getAvailableStorageClasses,
+} from '@/components/services/qiniu-client'
+
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
 import { disable as customizeDisable } from "@/customize"
@@ -33,6 +38,7 @@ import {
   SIZE_FORMAT_FILTER_NAME,
   FILE_ICON_FILTER_NAME,
   HTML_ESCAPE_FILTER_NAME,
+  I18N_FILTER_NAME,
 } from '@/components/filters/formater'
 
 // item operation modal
@@ -386,10 +392,17 @@ webModule.controller(FILES_CONTROLLER_NAME, [
       $rootScope.currentUser = user;
       $scope.ref.mode = 'localBuckets';
 
-      $timeout(() => {
-        addEvents();
-        $scope.$broadcast("filesViewReady");
-      });
+      fetchRegionsStorageClasses({
+        id: user.id,
+        secret: user.secret,
+        isPublicCloud: user.isPublicCloud,
+      })
+        .then(() => {
+          $timeout(() => {
+            addEvents();
+            $scope.$broadcast("filesViewReady");
+          });
+        });
     }
 
     function addEvents() {
@@ -436,7 +449,6 @@ webModule.controller(FILES_CONTROLLER_NAME, [
             if (regionId) {
               $scope.currentInfo.regionId = regionId;
               $scope.ref.mode = 'externalFiles';
-              info.bucketName = info.bucketName;
               info.qiniuBackendMode = S3_MODE;
               // TODO: Add bucket id here
             } else {
@@ -445,6 +457,11 @@ webModule.controller(FILES_CONTROLLER_NAME, [
               return;
             }
           }
+
+          $scope.currentInfo.availableStorageClasses = getAvailableStorageClasses(
+              $scope.currentInfo.regionId,
+              $scope.currentInfo.qiniuBackendMode,
+          );
 
           if (info.bucketName !== $scope.selectedDomain.bucketName) {
             $scope.domains = [Domains.s3(info.regionId, info.bucketName)];
@@ -575,7 +592,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
       const filesLoadingSize = Settings.filesLoadingSize;
       QiniuClient.listFiles(
         info.regionId, info.bucketName, info.key, marker || undefined,
-        angular.extend(getQiniuClientOpt(), { maxKeys: filesLoadingSize, minKeys: filesLoadingSize }),
+        angular.extend(getQiniuClientOpt(), { maxKeys: filesLoadingSize, minKeys: filesLoadingSize, storageClasses: $scope.currentInfo.availableStorageClasses }),
       ).then((result) => {
         $timeout(() => {
           if (info.bucketName !== $scope.currentInfo.bucketName ||
@@ -860,6 +877,9 @@ webModule.controller(FILES_CONTROLLER_NAME, [
         size: "lg",
         //backdrop: backdrop,
         resolve: {
+          currentInfo: () => {
+            return angular.copy($scope.currentInfo);
+          },
           bucketInfo: () => {
             return angular.copy($scope.currentInfo);
           },
@@ -1714,11 +1734,17 @@ webModule.controller(FILES_CONTROLLER_NAME, [
         }, {
           field: 'storageClass',
           title: T('storageClassesType'),
+          visible: $scope.currentInfo.availableStorageClasses.length > 0,
           formatter: (val, row, idx, field) => {
             if (row.itemType === 'folder') {
               return `<span class="text-muted">${T('folder')}</span>`;
             } else if (row.storageClass) {
-              return T(`storageClassesType.${row.storageClass.toLowerCase()}`);
+              const storageClass = $scope.currentInfo.availableStorageClasses
+                .find(item => item.kodoName === row.storageClass)
+              if (!storageClass) {
+                return T(`storageClassesType.unknown`);
+              }
+              return $filter(I18N_FILTER_NAME)(storageClass.nameI18n) || row.storageClass;
             } else {
               return '-';
             }
@@ -1749,7 +1775,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
                 acts.push(`<button type="button" class="btn download-link" data-toggle="tooltip" data-toggle-i18n="getDownloadLink"><span class="fa fa-link"></span></button>`);
               }
             }
-            if (row.itemType !== 'folder') {
+            if (row.itemType !== 'folder' && $scope.currentInfo.availableStorageClasses.length > 0) {
               acts.push(`<button type="button" class="btn updateStorageClass text-warning" data-toggle="tooltip" data-toggle-i18n="updateStorageClass"><span class="iconfont icon-a-726-8-02"></span></button>`);
             }
             if ($scope.currentInfo.bucketGrantedPermission !== 'readonly') {

@@ -6,6 +6,7 @@ export const uploadOptionsFromNewJob = {
         "regions": []
     },
     // ↑ manual add ↓ from file
+    storageClasses: [], // break change from 1.0.17, older task will be uploaded with standard storage class
     "region": "cn-east-1",
     "to": {
         "bucket": "kodo-browser-dev",

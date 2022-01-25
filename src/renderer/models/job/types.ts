@@ -56,7 +56,8 @@ export interface IpcUploadJob {
         uploadedId?: string,
         uploadedParts?: UploadedPart[],
         overwriteDup: boolean,
-        storageClassName: StorageClass,
+        storageClassName: StorageClass["kodoName"],
+        storageClasses: StorageClass[],
     }
 }
 

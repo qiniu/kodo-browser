@@ -74,9 +74,7 @@ export default {
   close: "Close",
 
   "storageClassesType": "Storage Type",
-  "storageClassesType.standard": "Standard",
-  "storageClassesType.infrequentaccess": "IA",
-  "storageClassesType.glacier": "Archive",
+  "storageClassesType.unknown": "Unknown",
 
   "aclType.default": "Inherit From Bucket",
   "aclType.public-read-write": "Public Read and Write",
@@ -291,9 +289,6 @@ export default {
   "uploadModal.maxShowFilesHelper": "files/directories",
   "uploadModal.ifCoverUpload": "Overwrite",
   "uploadModal.ifCoverUploadHelper": "(overwrite for this time)",
-  "uploadModal.storageClassesHelper.Standard": "",
-  "uploadModal.storageClassesHelper.InfrequentAccess": "Object minimum measurement is 64KB. less than 30 days will also be charged as 30 days",
-  "uploadModal.storageClassesHelper.Glacier": "Object needs to be unfrozen before accessing; minimum measurement of 64KB, retention time less than 60 days will also be charged as 60 days",
   "uploadModal.ok": "Upload",
 
   "deleteModal.title": "Delete These Files",

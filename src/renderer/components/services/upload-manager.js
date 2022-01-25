@@ -3,7 +3,7 @@ import path from 'path'
 
 import qiniuPath from "qiniu-path"
 
-import {UploadJob} from '@/models/job'
+import { UploadJob } from '@/models/job'
 import webModule from '@/app-module/web'
 
 import NgQiniuClient from './ng-qiniu-client'
@@ -86,6 +86,7 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
       options.multipartUploadThreshold = Settings.multipartUploadThreshold;
       options.uploadSpeedLimit = (Settings.uploadSpeedLimitEnabled === 1 && Settings.uploadSpeedLimitKBperSec);
       options.isDebug = (Settings.isDebug === 1);
+      options.storageClasses = options.storageClasses || [];
       options.userNatureLanguage = localStorage.getItem('lang') || 'zh-CN';
 
       return new UploadJob(options);
@@ -225,6 +226,7 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
             },
             overwrite: uploadOptions.isOverwrite,
             storageClassName: uploadOptions.storageClassName,
+            storageClasses: $scope.currentInfo.availableStorageClasses,
             backendMode: bucketInfo.qiniuBackendMode,
           });
           addEvents(job);

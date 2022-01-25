@@ -17,6 +17,7 @@ webModule
     '$translate',
     '$timeout',
     '$uibModal',
+    'currentInfo',
     'bucketInfo',
     'objectInfo',
     'selectedDomain',
@@ -27,7 +28,25 @@ webModule
     Toast,
     DiffModal,
     NgQiniuClient,
-    function ($scope, safeApply, $modalInstance, $translate, $timeout, $modal, bucketInfo, objectInfo, selectedDomain, qiniuClientOpt, fileType, showFn, reload, Toast, DiffModal, QiniuClient) {
+    function (
+      $scope,
+      safeApply,
+      $modalInstance,
+      $translate,
+      $timeout,
+      $modal,
+      currentInfo,
+      bucketInfo,
+      objectInfo,
+      selectedDomain,
+      qiniuClientOpt,
+      fileType,
+      showFn,
+      reload,
+      Toast,
+      DiffModal,
+      QiniuClient
+    ) {
       const T = $translate.instant;
       angular.extend($scope, {
         bucketInfo: bucketInfo,

@@ -1,4 +1,4 @@
-import { KODO_MODE, Qiniu, Region, S3_MODE} from "kodo-s3-adapter-sdk"
+import { KODO_MODE, Qiniu, Region, S3_MODE } from "kodo-s3-adapter-sdk"
 import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
 import { Kodo as KodoAdapter } from "kodo-s3-adapter-sdk/dist/kodo"
 import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3"
@@ -90,6 +90,7 @@ function getQiniuAdapter(
     if (!accessKey || !secretKey) {
         throw new Error('`accessKey` or `secretKey` is unavailable');
     }
+
     return new Qiniu(
         accessKey,
         secretKey,
@@ -128,6 +129,7 @@ export interface GetAdapterOptionParam {
     preferS3Adapter?: boolean,
 }
 
+// TODO: @lihs change `opt` to required from optional when all js change to ts
 function getAdapterOption(opt?: GetAdapterOptionParam): AdapterOption {
     const baseResult = {
         appName: "kodo-browser",
@@ -158,7 +160,7 @@ function getAdapterOption(opt?: GetAdapterOptionParam): AdapterOption {
             regions: Config.isConfigCustomize(config) ? config.regions : [],
             ucUrl: Config.isConfigCustomize(config) ? config.ucUrl : undefined,
             ...baseResult,
-        }
+        };
     }
     if (opt && opt.preferS3Adapter) {
         result.preferS3Adapter = opt.preferS3Adapter;
@@ -190,7 +192,12 @@ function getS3Client(opt: GetAdapterOptionParam): S3Adapter {
     if (s3AdaptersCache[cacheKey]) {
         return s3AdaptersCache[cacheKey];
     } else {
-        const qiniuAdapter = getQiniuAdapter(adapterOption.accessKey, adapterOption.secretKey, adapterOption.ucUrl, adapterOption.regions);
+        const qiniuAdapter = getQiniuAdapter(
+            adapterOption.accessKey,
+            adapterOption.secretKey,
+            adapterOption.ucUrl,
+            adapterOption.regions,
+        );
         const s3Client = qiniuAdapter.mode(S3_MODE, {
             appName: adapterOption.appName,
             appVersion: adapterOption.appVersion,
@@ -211,7 +218,12 @@ function getKodoClient(opt: GetAdapterOptionParam): KodoAdapter {
     if (kodoAdaptersCache[cacheKey]) {
         return kodoAdaptersCache[cacheKey];
     } else {
-        const qiniuAdapter = getQiniuAdapter(adapterOption.accessKey, adapterOption.secretKey, adapterOption.ucUrl, adapterOption.regions);
+        const qiniuAdapter = getQiniuAdapter(
+            adapterOption.accessKey,
+            adapterOption.secretKey,
+            adapterOption.ucUrl,
+            adapterOption.regions,
+        );
         const kodoClient = qiniuAdapter.mode(KODO_MODE, {
             appName: adapterOption.appName,
             appVersion: adapterOption.appVersion,

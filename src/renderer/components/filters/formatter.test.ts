@@ -332,4 +332,19 @@ describe("formatter test", () => {
                 .toBe(`&#60;header&#62;&#60;h1&#62;&#35835;&#20070;&#31508;&#35760;&#60;/h1&#62;&#60;p&#62;2021-04-26&#60;/p&#62;&#60;p&#62;&#26631;&#31614;：math basic-math book-note&#60;/p&#62;&#60;/header&#62;`);
         });
     });
+    describe("i18n", () => {
+        const nameI18n = {
+            "zh-CN": '简体中文',
+            "en-US": "English(US)",
+        };
+        it("normal", () => {
+            expect(formatter.i18n.fn(nameI18n, "zh-CN")).toBe("简体中文");
+            expect(formatter.i18n.fn(nameI18n, "en-US")).toBe("English(US)");
+        });
+        it("fallback", () => {
+            expect(formatter.i18n.fn(nameI18n, "ja-JP")).toBe("");
+            expect(formatter.i18n.fn(nameI18n, "ja-JP", "unknown")).toBe("unknown");
+            expect(formatter.i18n.fn(nameI18n, "ja-JP", "unknown")).toBe("unknown");
+        });
+    });
 });

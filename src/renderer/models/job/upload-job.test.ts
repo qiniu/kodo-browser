@@ -82,6 +82,7 @@ describe("test models/job/upload-job.ts",  () => {
                         overwriteDup: false,
                         region: "cn-east-1",
                         storageClassName: "Standard",
+                        storageClasses: [],
                         isDebug: false,
                     },
                 },

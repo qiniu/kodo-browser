@@ -90,6 +90,7 @@ class Client {
     eventEmitter.abort = handleAbort;
 
     this.client.enter('uploadFile', (client) => {
+      client.storageClasses = params.storageClasses;
       this.uploader = new Uploader(client);
 
       if (isOverwrite) {

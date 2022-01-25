@@ -25,7 +25,8 @@ interface RequiredOptions {
     backendMode: BackendMode,
 
     overwrite: boolean,
-    storageClassName: StorageClass,
+    storageClassName: StorageClass["kodoName"],
+    storageClasses: StorageClass[],
 
     userNatureLanguage: NatureLanguage,
 }
@@ -176,6 +177,7 @@ export default class UploadJob extends Base {
                 localFile: this.options.from.path,
                 overwriteDup: this.options.overwrite,
                 storageClassName: this.options.storageClassName,
+                storageClasses: this.options.storageClasses,
                 isDebug: this.options.isDebug,
             }
         }
@@ -359,6 +361,7 @@ export default class UploadJob extends Base {
         }
     }) {
         return {
+            storageClasses: this.options.storageClasses,
             region: this.options.region,
             to: this.options.to,
             from: {

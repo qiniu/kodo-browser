@@ -13,13 +13,15 @@ webModule
     '$uibModal',
     'selectedDomain',
     'showFn',
+    'currentInfo',
     'bucketInfo',
     'objectInfo',
     'fileType',
     'qiniuClientOpt',
-    function ($scope, $modalInstance, $timeout, $sce, $modal, selectedDomain, showFn, bucketInfo, objectInfo, fileType, qiniuClientOpt) {
+    function ($scope, $modalInstance, $timeout, $sce, $modal, selectedDomain, showFn, currentInfo, bucketInfo, objectInfo, fileType, qiniuClientOpt) {
 
       angular.extend($scope, {
+        currentInfo: currentInfo,
         bucketInfo: bucketInfo,
         objectInfo: objectInfo,
         fileType: fileType,

@@ -64,6 +64,11 @@ module.exports = function(webpackEnv) {
     ],
     module: {
       rules: [
+        {
+          test: /\.js$/,
+          enforce: "pre",
+          use: ["source-map-loader"],
+        },
         { test: /\.ts$/, loader: "ts-loader" },
         {
           test: /\.css$/i,
@@ -124,5 +129,8 @@ module.exports = function(webpackEnv) {
       },
       minimize: isEnvProduction,
     },
+    ignoreWarnings: [
+      /Failed to parse source map/,
+    ],
   }
 }

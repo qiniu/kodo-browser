@@ -29,13 +29,11 @@
 
 .upload-confirm-modal-body .upload-options-form .storage-class-options {
     display: flex;
-    justify-content: start;
+    flex-direction: column;
 }
 
 .upload-confirm-modal-body .upload-options-form .storage-class-options > * {
-    flex: 1 1 110px;
-    max-width: 200px;
-    text-align: start;
+    flex: none;
 }
 
 .upload-confirm-modal-body .upload-options-form .storage-class-help-text {

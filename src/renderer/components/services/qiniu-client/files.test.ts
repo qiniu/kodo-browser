@@ -318,7 +318,7 @@ describe("test qiniu-client/files.ts", () => {
                 });
 
                 // setStorageClass
-                // "Standard" | "InfrequentAccess" | "Glacier",
+                // "Standard" | "InfrequentAccess" | "Archive",
                 it("test setStorageClass Standard", async () => {
                     await QiniuClientFile.setStorageClass(
                         "region-kodo-browser-Kodo-setStorageClass",
@@ -365,12 +365,12 @@ describe("test qiniu-client/files.ts", () => {
                         "InfrequentAccess",
                     );
                 });
-                it("test setStorageClass Glacier", async () => {
+                it("test setStorageClass Archive", async () => {
                     await QiniuClientFile.setStorageClass(
                         "region-kodo-browser-Kodo-setStorageClass",
                         "bucket-kodo-browser-Kodo-setStorageClass",
                         qiniuPathConvertor.fromQiniuPath("qiniu-client/file-1"),
-                        "Glacier",
+                        "Archive",
                         {
                             ...mockOpt,
                             storageClasses: [],
@@ -385,7 +385,7 @@ describe("test qiniu-client/files.ts", () => {
                             bucket: "bucket-kodo-browser-Kodo-setStorageClass",
                             key: "qiniu-client/file-1",
                         },
-                        "Glacier",
+                        "Archive",
                     );
                 });
 

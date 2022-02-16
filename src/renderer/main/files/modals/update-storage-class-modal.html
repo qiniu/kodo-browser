@@ -41,8 +41,8 @@
           <!-- * 修改为: -->
           * {{'updateStorageClass.setTo'|translate}}:
         </label>
-        <div ng-repeat="option in storageClassOptions">
-          <div class="col-sm-3 input-md pdt4 radio">
+        <div class="col-sm-8 pdt4">
+          <div ng-repeat="option in storageClassOptions">
             <label>
               <input type="radio" name="storageClassOption" ng-model="updateStorageClassFormData.storageClassKodoName" value="{{option.kodoName}}">
               {{option.nameI18n|i18n}}
@@ -51,7 +51,7 @@
         </div>
       </div>
       <div class="form-group">
-        <div class="col-sm-offset-3 col-sm-9" style="padding-right: 65px">
+        <div class="col-sm-offset-3 col-sm-8" style="font-size: 0.8em;">
           {{uploadConfirmFormHelper.storageClassBilling|i18n}}
         </div>
       </div>

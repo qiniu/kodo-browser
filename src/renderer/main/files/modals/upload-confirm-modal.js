@@ -59,7 +59,7 @@ webModule
 
       $scope.$watch('uploadConfirmFormData.storageClassName', function () {
         const selectedStorageClass = $scope.storageClassOptions
-          .find(item => item.kodoName === $scope.uploadConfirmFormData.storageClassKodoName);
+          .find(item => item.kodoName === $scope.uploadConfirmFormData.storageClassName);
         if (!selectedStorageClass) {
           $scope.uploadConfirmFormHelper.storageClassBilling = {};
           return;

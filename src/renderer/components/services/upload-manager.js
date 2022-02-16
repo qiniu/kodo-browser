@@ -96,7 +96,7 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
      * upload
      * @param filePaths []  {array<string>}  有可能是目录，需要遍历
      * @param bucketInfo {object: {bucketName, regionId, key, qiniuBackendMode}}
-     * @param uploadOptions {object: {isOverwrite, storageClassName}}, storageClassName is 'Standard', 'InfrequentAccess', 'Glacier'
+     * @param uploadOptions {object: {isOverwrite, storageClassName}}, storageClassName is fetched from server
      * @param jobsAddingFn {Function} 快速加入列表回调方法， 返回jobs引用，但是该列表长度还在增长。
      * @param jobsAddedFn {Function} 加入列表完成回调方法， jobs列表已经稳定
      */

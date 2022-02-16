@@ -5,7 +5,6 @@ import moment from 'moment'
 
 import * as AuthInfo from './authinfo'
 import * as AppConfig from '@/const/app-config'
-import StorageClassName from '@/const/storage-class-name'
 
 const expirationMonths = 3;
 
@@ -106,7 +105,7 @@ interface Params {
         from: string,
         to: string,
         type: 'copy' | 'move',
-        storageClass: StorageClassName,
+        storageClass: string,
     },
     [Action.RestoreFiles]: {
         regionId: string,
@@ -119,7 +118,7 @@ interface Params {
         regionId: string,
         bucket: string,
         paths: string[],
-        updateTo: StorageClassName,
+        updateTo: string,
     },
     [Action.SetStorageClassOfFilesDone]: undefined,
 }

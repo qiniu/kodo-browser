@@ -1764,7 +1764,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
           title: T('actions'),
           formatter: (val, row, idx, field) => {
             var acts = ['<div class="btn-group btn-group-xs">'];
-            if (row.itemType !== 'folder' && row.storageClass && row.storageClass.toLowerCase() === 'glacier' && $scope.currentInfo.bucketGrantedPermission !== 'readonly') {
+            if (row.itemType !== 'folder' && row.storageClass && row.storageClass.toLowerCase() === 'archive' && $scope.currentInfo.bucketGrantedPermission !== 'readonly') {
               acts.push(`<button type="button" class="btn unfreeze text-warning" data-toggle="tooltip" data-toggle-i18n="restore"><span class="fa fa-fire"></span></button>`);
             }
             if ($scope.domains && $scope.domains.length > 0) {
@@ -1913,7 +1913,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
       } else {
         $list.bootstrapTable('load', files).bootstrapTable('uncheckAll');
       }
-      const fileRowElements = $('#file-list tbody tr [data-storage-class="glacier"]')
+      const fileRowElements = $('#file-list tbody tr [data-storage-class="archive"]')
       if (fileRowElements.length > 0) {
         angular.forEach(fileRowElements, (row) => {
           let isMouseOver = true;

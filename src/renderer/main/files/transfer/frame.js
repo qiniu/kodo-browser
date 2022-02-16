@@ -73,7 +73,7 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
      * upload
      * @param filePaths []  {array<string>}, iter for folder
      * @param bucketInfo {object} {bucket, region, key}
-     * @param uploadOptions {object} {isOverwrite, storageClassName}, storageClassName is 'Standard', 'InfrequentAccess', 'Glacier'
+     * @param uploadOptions {object} {isOverwrite, storageClassName}, storageClassName is fetched from server
      */
     function uploadFilesHandler(filePaths, bucketInfo,uploadOptions) {
       Toast.info(T("upload.addtolist.on"));

@@ -740,6 +740,9 @@ webModule.controller(FILES_CONTROLLER_NAME, [
           item: () => {
             return null;
           },
+          currentInfo: () => {
+            return angular.copy($scope.currentInfo);
+          },
           callback: () => {
             return () => {
               Toast.success(T("externalPath.add.success"));

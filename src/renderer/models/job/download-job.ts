@@ -1,6 +1,8 @@
 import fs from "fs";
 import { ipcRenderer } from "electron";
 import { Region } from "kodo-s3-adapter-sdk";
+import { StorageClass } from "kodo-s3-adapter-sdk/dist/adapter";
+import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
 
 import Duration from "@/const/duration";
 import * as AppConfig from "@/const/app-config";
@@ -8,7 +10,6 @@ import * as AppConfig from "@/const/app-config";
 import { BackendMode, EventKey, IpcDownloadJob, IpcJobEvent, Status } from "./types";
 import Base from "./base";
 import * as Utils from "./utils";
-import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
 
 interface RequiredOptions {
     clientOptions: {
@@ -22,6 +23,8 @@ interface RequiredOptions {
     to: Utils.LocalPath
     region: string,
     backendMode: BackendMode,
+
+    storageClasses: StorageClass[],
 
     userNatureLanguage: NatureLanguage,
 }
@@ -332,6 +335,7 @@ export default class DownloadJob extends Base {
 
     getInfoForSave() {
         return {
+            storageClasses: this.options.storageClasses,
             region: this.options.region,
             to: this.options.to,
             from: this.options.from,

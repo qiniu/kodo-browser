@@ -103,6 +103,7 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
         ? Settings.downloadSpeedLimitKBperSec
         : 0;
       options.isDebug = (Settings.isDebug === 1);
+      options.storageClasses = options.storageClasses || [];
       options.userNatureLanguage = localStorage.getItem('lang') || 'zh-CN';
 
       return new DownloadJob(options);
@@ -186,6 +187,7 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
               .listFiles(qiniuInfo.region, qiniuInfo.bucket, qiniuInfo.path.toString(), marker, {
                 maxKeys: 1000,
                 minKeys: 0,
+                storageClasses: $scope.currentInfo.availableStorageClasses,
               })
               .then((result) => {
                 var files = result.data;
@@ -276,6 +278,7 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
                   path: fileLocalPathWithSuffixWithoutExt + ext
                 },
                 domain: qiniuInfo.domain.toQiniuDomain(),
+                storageClasses: $scope.currentInfo.availableStorageClasses,
                 backendMode: qiniuInfo.domain.qiniuBackendMode(),
               },
             });
@@ -428,7 +431,10 @@ webModule.factory(DOWNLOAD_MGR_FACTORY_NAME, [
 
           job.from.mtime = new Date(job.from.mtime).getTime();
         }
-        const options = { ignoreError: true };
+        const options = {
+          ignoreError: true,
+          storageClasses: job.storageClasses || [],
+        };
         if (job.options.backendMode === KODO_MODE) {
           options.preferKodoAdapter = true;
         } else {

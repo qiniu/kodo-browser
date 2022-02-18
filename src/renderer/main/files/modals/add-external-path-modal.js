@@ -16,12 +16,14 @@ webModule
     'callback',
     'ExternalPath',
     NgQiniuClient,
+    'currentInfo',
     'regions',
     Toast,
-    function ($scope, $modalInstance, $translate, callback, ExternalPath, QiniuClient, regions, Toast) {
+    function ($scope, $modalInstance, $translate, callback, ExternalPath, QiniuClient, currentInfo, regions, Toast) {
       const T = $translate.instant;
 
       angular.extend($scope, {
+        currentInfo: currentInfo,
         regions: regions,
         item: {
             regionId: regions[0].s3Id,
@@ -42,7 +44,7 @@ webModule
         const newExternalPath = ExternalPath.new(item.path, item.regionId);
         QiniuClient.listFiles(
           newExternalPath.regionId, newExternalPath.bucketId, newExternalPath.objectPrefix, undefined,
-          { preferS3Adapter: true, maxKeys: 1, minKeys: 0 },
+          { preferS3Adapter: true, maxKeys: 1, minKeys: 0, storageClasses: $scope.currentInfo.availableStorageClasses },
         ).then(() => {
           ExternalPath.create(item.path, item.regionId).then(() => {
             AuditLog.log(

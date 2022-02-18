@@ -159,7 +159,7 @@ webModule
           QiniuClient
             .listFiles(
               region, bucket, item.path, marker,
-              angular.extend(qiniuClientOpt, { maxKeys: 1000, minKeys: 0 }),
+              angular.extend(qiniuClientOpt, { maxKeys: 1000, minKeys: 0, storageClasses: $scope.current.info.availableStorageClasses }),
             )
             .then((result) => {
                 handleItems(result.data || []);

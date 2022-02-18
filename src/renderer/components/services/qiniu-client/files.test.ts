@@ -683,7 +683,10 @@ describe("test qiniu-client/files.ts", () => {
                         3,
                         mockHandleProgress,
                         mockHandleErr,
-                        mockOpt,
+                        {
+                            ...mockOpt,
+                            storageClasses: [],
+                        },
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
                     const [ enterParamsName ] = MockedAdapter.prototype.enter.mock.calls[0];
@@ -747,7 +750,10 @@ describe("test qiniu-client/files.ts", () => {
                         mockData.initObjects.map(transObjectInfoToFileItem),
                         mockHandleProgress,
                         mockHandleErr,
-                        mockOpt,
+                        {
+                            ...mockOpt,
+                            storageClasses: [],
+                        },
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
                     const [ enterParamsName ] = MockedAdapter.prototype.enter.mock.calls[0];

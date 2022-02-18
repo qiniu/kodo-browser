@@ -33,6 +33,8 @@ export async function isQueryRegionAPIAvailable(ucUrl: string): Promise<boolean>
 export async function listDomains(region: string, bucket: string, opt: GetAdapterOptionParam): Promise<Domain[]> {
     return await getDefaultClient(opt).enter("listDomains", async client => {
         return await client.listDomains(region, bucket);
+    }, {
+        targetBucket: bucket,
     });
 }
 

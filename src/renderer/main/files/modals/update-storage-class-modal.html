@@ -11,10 +11,6 @@
   </div>
   <div class="modal-body">
 
-    <div class="form-group">
-      <div class="col-sm-12 pdt4">{{'updateStorageClass.text1'|translate}}</div>
-    </div>
-
     <div is-loading ng-if="isLoading"></div>
     <div ng-if="!isLoading" class="form-group" ng-class="{'has-error': form1.name.$dirty && !form1.name.$valid,
   'has-success': form1.name.$dirty && form1.name.$valid}">

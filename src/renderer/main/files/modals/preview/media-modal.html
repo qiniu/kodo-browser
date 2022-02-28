@@ -13,7 +13,7 @@
 
   <header class="pd4 bg-success break">kodo://{{bucketInfo.bucketName}}/{{objectInfo.path}}</header>
 
-  <restore-checker bucket-info="bucketInfo" object-info='objectInfo' file-type="fileType" qiniu-client-opt="qiniuClientOpt" after-check-success="afterCheckSuccess()">
+  <restore-checker storage-class-name="objectInfo.storageClass.toLowerCase()" bucket-info="bucketInfo" object-info='objectInfo' file-type="fileType" qiniu-client-opt="qiniuClientOpt" after-check-success="afterCheckSuccess()">
 
     <div style="overflow:auto; " class="text-center">
 

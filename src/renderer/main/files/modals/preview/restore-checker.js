@@ -20,6 +20,7 @@ webModule
         templateUrl: restoreCheckerHtmlMapping.path,
         transclude: true,
         scope: {
+          storageClassName: '=',
           bucketInfo: '=',
           objectInfo: '=',
           fileType: '=',

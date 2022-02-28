@@ -1766,8 +1766,9 @@ webModule.controller(FILES_CONTROLLER_NAME, [
           field: 'actions',
           title: T('actions'),
           formatter: (val, row, idx, field) => {
-            var acts = ['<div class="btn-group btn-group-xs">'];
-            if (row.itemType !== 'folder' && row.storageClass && row.storageClass.toLowerCase() === 'archive' && $scope.currentInfo.bucketGrantedPermission !== 'readonly') {
+            const acts = ['<div class="btn-group btn-group-xs">'];
+            const isUnfrozenStorageClass = row.storageClass && ['archive', 'deeparchive'].includes(row.storageClass.toLowerCase())
+            if (row.itemType !== 'folder' && isUnfrozenStorageClass && $scope.currentInfo.bucketGrantedPermission !== 'readonly') {
               acts.push(`<button type="button" class="btn unfreeze text-warning" data-toggle="tooltip" data-toggle-i18n="restore"><span class="fa fa-fire"></span></button>`);
             }
             if ($scope.domains && $scope.domains.length > 0) {
@@ -1811,6 +1812,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
               const region = $scope.currentInfo.regionId,
                     bucket = $scope.currentInfo.bucketName,
                     key = row.path.toString();
+              const lowercaseStorageClassName = row.storageClass.toLowerCase();
               isFrozenOrNot(region, bucket, key, {
                 'normal': () => {
                   showUpdateStorageClass(row);
@@ -1819,13 +1821,25 @@ webModule.controller(FILES_CONTROLLER_NAME, [
                   showUpdateStorageClass(row);
                 },
                 'unfreezing': () => {
-                  Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.unfreezing'));
+                  if (lowercaseStorageClassName === 'archive') {
+                    Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.archive.unfreezing'));
+                  } else if (lowercaseStorageClassName === 'deeparchive') {
+                    Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.deepArchive.unfreezing'));
+                  }
                 },
                 'frozen': () => {
-                  Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.frozen'));
+                  if (lowercaseStorageClassName === 'archive') {
+                    Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.archive.frozen'));
+                  } else if (lowercaseStorageClassName === 'deeparchive') {
+                    Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.deepArchive.frozen'));
+                  }
                 },
                 'error': (err) => {
-                  Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.head_error'));
+                  if (lowercaseStorageClassName === 'archive') {
+                    Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.archive.headError'));
+                  } else if (lowercaseStorageClassName === 'deeparchive') {
+                    Dialog.alert(T('updateStorageClass.title'), T('updateStorageClassModal.message.deepArchive.headError'));
+                  }
                 },
               });
               return false;
@@ -1834,18 +1848,31 @@ webModule.controller(FILES_CONTROLLER_NAME, [
               const region = $scope.currentInfo.regionId,
                     bucket = $scope.currentInfo.bucketName,
                     key = row.path.toString();
+              const lowercaseStorageClassName = row.storageClass.toLowerCase();
               isFrozenOrNot(region, bucket, key, {
                 'frozen': () => {
                   showRestore(row);
                 },
                 'unfreezing': () => {
-                  Dialog.alert(T('restore.title'), T('restore.message.unfreezing'));
+                  if (lowercaseStorageClassName === 'archive') {
+                    Dialog.alert(T('restore.title'), T('restore.message.archive.unfreezing'));
+                  } else if (lowercaseStorageClassName === 'deeparchive') {
+                    Dialog.alert(T('restore.title'), T('restore.message.deepArchive.unfreezing'));
+                  }
                 },
                 'unfrozen': () => {
-                  Dialog.alert(T('restore.title'), T('restore.message.unfrozen'));
+                  if (lowercaseStorageClassName === 'archive') {
+                    Dialog.alert(T('restore.title'), T('restore.message.archive.unfrozen'));
+                  } else if (lowercaseStorageClassName === 'deeparchive') {
+                    Dialog.alert(T('restore.title'), T('restore.message.deepArchive.unfrozen'));
+                  }
                 },
                 'error': (err) => {
-                  Dialog.alert(T('restore.title'), T('restore.message.head_error'));
+                  if (lowercaseStorageClassName === 'archive') {
+                    Dialog.alert(T('restore.title'), T('restore.message.archive.headError'));
+                  } else if (lowercaseStorageClassName === 'deeparchive') {
+                    Dialog.alert(T('restore.title'), T('restore.message.deepArchive.headError'));
+                  }
                 },
               });
               return false;
@@ -1916,7 +1943,8 @@ webModule.controller(FILES_CONTROLLER_NAME, [
       } else {
         $list.bootstrapTable('load', files).bootstrapTable('uncheckAll');
       }
-      const fileRowElements = $('#file-list tbody tr [data-storage-class="archive"]')
+      const fileRowElements = $('#file-list tbody tr')
+          .find('[data-storage-class="archive"], [data-storage-class="deeparchive"]')
       if (fileRowElements.length > 0) {
         angular.forEach(fileRowElements, (row) => {
           let isMouseOver = true;

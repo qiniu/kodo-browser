@@ -25,7 +25,7 @@ const packagerOptions = {
   out: TARGET,
   overwrite: true,
   download: {
-    mirrorOptions: 'https://npm.taobao.org/mirrors/electron/'
+    mirrorOptions: 'https://repo.huaweicloud.com/electron/'
   },
   appVersion: VERSION,
   appCopyright: "",

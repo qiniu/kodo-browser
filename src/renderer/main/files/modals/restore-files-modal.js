@@ -60,7 +60,10 @@ webModule
           //进度
           $scope.progress = angular.copy(prog);
           safeApply($scope);
-        }, qiniuClientOpt).then((terr) => {
+        }, {
+            ...qiniuClientOpt,
+            storageClasses: $scope.currentInfo.availableStorageClasses,
+        }).then((terr) => {
           //结果
           $scope.step = 3;
           $scope.terr = terr;

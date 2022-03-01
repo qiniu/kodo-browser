@@ -588,6 +588,10 @@ export function stopSetStorageClassOfFiles(): void {
 // restoreFiles
 const stopRestoreFilesController = new ProgressStopController();
 
+
+interface RestoreFilesOption extends GetAdapterOptionParam {
+    storageClasses: StorageClass[],
+}
 export async function restoreFiles(
     region: string,
     bucket: string,
@@ -595,7 +599,7 @@ export async function restoreFiles(
     days: number,
     progressFn: (progress: Progress) => void,
     onError: (err: any) => void,
-    opt: GetAdapterOptionParam,
+    opt: RestoreFilesOption,
 ): Promise<BatchErr[]> {
     stopRestoreFilesController.reset();
 
@@ -608,6 +612,7 @@ export async function restoreFiles(
     progress.handleProgress();
 
     return await getDefaultClient(opt).enter("restoreFiles", async client => {
+        client.storageClasses = opt.storageClasses;
         const batchOperator = new BatchOperator({
             client,
             region,
@@ -641,13 +646,17 @@ export function stopRestoreFiles(): void {
 
 const stopDeleteFilesController = new ProgressStopController();
 
+
+interface DeleteFilesOption extends GetAdapterOptionParam {
+    storageClasses: StorageClass[],
+}
 export async function deleteFiles(
     region: string,
     bucket: string,
     items: FileItem.Item[],
     progressFn: (progress: Progress) => void,
     onErr: (err: any) => void,
-    opt: GetAdapterOptionParam,
+    opt: DeleteFilesOption,
 ): Promise<BatchErr[]> {
     stopSetStorageClassOfFilesController.reset();
 
@@ -660,6 +669,7 @@ export async function deleteFiles(
     progress.handleProgress();
 
     return await getDefaultClient(opt).enter("deleteFiles", async client => {
+        client.storageClasses = opt.storageClasses;
         const batchOperator = new BatchOperator({
             client,
             region,
@@ -692,6 +702,10 @@ export function stopDeleteFiles(): void {
 
 const stopMoveOrCopyFilesController = new ProgressStopController();
 
+
+interface MoveOrCopyFilesOption extends GetAdapterOptionParam {
+    storageClasses: StorageClass[],
+}
 export async function moveOrCopyFiles(
     region: string,
     items: FileItem.Item[],
@@ -703,7 +717,7 @@ export async function moveOrCopyFiles(
     onErr: (err: any) => void,
     isCopy: boolean,
     renamePrefix: string,
-    opt: GetAdapterOptionParam,
+    opt: MoveOrCopyFilesOption,
 ): Promise<BatchErr[]> {
     stopMoveOrCopyFilesController.reset();
 
@@ -715,6 +729,7 @@ export async function moveOrCopyFiles(
     progress.handleProgress();
 
     return await getDefaultClient(opt).enter("moveOrCopyFiles", async client => {
+        client.storageClasses = opt.storageClasses;
         const batchOperator = new BatchOperator({
             client,
             region,

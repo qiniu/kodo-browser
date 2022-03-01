@@ -6,7 +6,7 @@ export const uploadOptionsFromNewJob = {
         "regions": []
     },
     // ↑ manual add ↓ from file
-    storageClasses: [], // break change from 1.0.17, older task will be uploaded with standard storage class
+    storageClasses: [], // break change from 1.0.16, older task will be uploaded with standard storage class
     "region": "cn-east-1",
     "to": {
         "bucket": "kodo-browser-dev",
@@ -89,6 +89,7 @@ export const downloadOptionsFromResumeJob = {
         "regions": []
     },
     // ↑ manual add ↓ from file
+    storageClasses: [], // break change from 1.0.16, older task will be toasted error but work
     "region": "cn-east-1",
     "to": {
         "name": "out.mp4",

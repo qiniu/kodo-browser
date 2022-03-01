@@ -95,18 +95,30 @@ webModule
         });
 
         //复制 or 移动
-        QiniuClient.moveOrCopyFiles(fromInfo.regionId, items, target, (prog) => {
-          //进度
-          $scope.progress = angular.copy(prog);
-          safeApply($scope);
-        }, isCopy, renamePath, qiniuClientOpt).then((terr) => {
-          //结果
-          $scope.step = 3;
-          $scope.terr = terr;
-          AuditLog.log(AuditLog.Action.MoveOrCopyFilesStartDone);
-          callback();
-          safeApply($scope);
-        });
+        QiniuClient.moveOrCopyFiles(
+          fromInfo.regionId,
+          items,
+          target,
+          (prog) => {
+            //进度
+            $scope.progress = angular.copy(prog);
+            safeApply($scope);
+          },
+          isCopy,
+          renamePath,
+          {
+            ...qiniuClientOpt,
+            storageClasses: $scope.fromInfo.availableStorageClasses,
+          }
+        )
+          .then((terr) => {
+            //结果
+            $scope.step = 3;
+            $scope.terr = terr;
+            AuditLog.log(AuditLog.Action.MoveOrCopyFilesStartDone);
+            callback();
+            safeApply($scope);
+          });
       }
     }
   ]);

@@ -1,14 +1,14 @@
 import { ipcRenderer } from "electron";
 import { Region } from "kodo-s3-adapter-sdk";
 import { StorageClass } from "kodo-s3-adapter-sdk/dist/adapter";
+import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
 
+import Duration from "@/const/duration";
 import * as AppConfig from "@/const/app-config";
 
 import { BackendMode, EventKey, IpcUploadJob, IpcJobEvent, Status, UploadedPart } from "./types";
 import Base from "./base"
 import * as Utils from "./utils";
-import Duration from "@/const/duration";
-import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
 
 // if change options, remember to check toJsonString()
 interface RequiredOptions {

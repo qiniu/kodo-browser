@@ -359,6 +359,8 @@ export default {
   "updateStorageClassModal.message.deepArchive.headError": "Failed to get status of the deep archived storage file",
 
   preview: "Preview",
+  "preview.hints.tooBig": "The current file is larger than {{value}}, so the preview may take longer to load and may incur corresponding traffic costs.",
+  "preview.hints.tooBigBtn": "Continue",
   "cannot.preview": "Can not preview",
   "cannot.preview.this.file": "Can not preview this file.",
   "tryto.open.as.textfile": "Try to open as a text file",

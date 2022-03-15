@@ -63,7 +63,7 @@
             </a>
           </li>
           <li>
-            <a href="#" ng-click="showSetStorageClassOfFilesSelected()" ng-hide="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0 || currentInfo.availableStorageClasses.length === 0">
+            <a href="#" ng-click="showSetStorageClassOfFilesSelected()" ng-hide="currentInfo.bucketGrantedPermission === 'readonly' || sel.has.length === 0 || currentInfo.availableStorageClasses.length < 2">
               <i class="iconfont icon-a-726-8-02 text-primary" style="margin: 0 -2px;"></i>
               {{'updateStorageClass'|translate}}
             </a>

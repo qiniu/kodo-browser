@@ -1778,7 +1778,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
                 acts.push(`<button type="button" class="btn download-link" data-toggle="tooltip" data-toggle-i18n="getDownloadLink"><span class="fa fa-link"></span></button>`);
               }
             }
-            if (row.itemType !== 'folder' && $scope.currentInfo.availableStorageClasses.length > 0) {
+            if (row.itemType !== 'folder' && $scope.currentInfo.availableStorageClasses.length >= 2) {
               acts.push(`<button type="button" class="btn updateStorageClass text-warning" data-toggle="tooltip" data-toggle-i18n="updateStorageClass"><span class="iconfont icon-a-726-8-02"></span></button>`);
             }
             if ($scope.currentInfo.bucketGrantedPermission !== 'readonly') {

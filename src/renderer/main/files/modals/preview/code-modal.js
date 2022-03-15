@@ -49,6 +49,7 @@ webModule
     ) {
       const T = $translate.instant;
       angular.extend($scope, {
+        currentInfo: currentInfo,
         bucketInfo: bucketInfo,
         objectInfo: objectInfo,
         fileType: fileType,

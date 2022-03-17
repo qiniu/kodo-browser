@@ -105,6 +105,7 @@ webModule.controller(TRANSFER_DOWNLOADS_CONTROLLER_NAME, [
       for (var i = 0; i < jobs.length; i++) {
         if (item === jobs[i]) {
           jobs.splice(i, 1);
+          item.tryCleanupDownloadFile();
           break;
         }
       }
@@ -152,6 +153,7 @@ webModule.controller(TRANSFER_DOWNLOADS_CONTROLLER_NAME, [
               }
 
               jobs.splice(i, 1);
+              job.tryCleanupDownloadFile();
               i--;
             }
 

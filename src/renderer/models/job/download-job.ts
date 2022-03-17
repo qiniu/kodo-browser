@@ -350,4 +350,16 @@ export default class DownloadJob extends Base {
             message: this.message,
         };
     }
+
+    tryCleanupDownloadFile(): this {
+        if ([Status.Finished, Status.Waiting].includes(this.status)) {
+            return this;
+        }
+        try {
+            fs.unlinkSync(this.tempfile);
+        } catch (_err) {
+            // ignore error
+        }
+        return this;
+    }
 }

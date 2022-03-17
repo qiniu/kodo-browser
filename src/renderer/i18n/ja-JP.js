@@ -358,6 +358,8 @@ export default {
   "updateStorageClassModal.message.deepArchive.headError": "ディープアーカイブストレージファイルのステータスを取得できませんでした",
 
   preview: "プレビュー",
+  "preview.hints.tooBig": "現在のファイルは{{value}}以上あるため、プレビューの読み込みに時間がかかり、それに伴うトラフィックコストが発生する可能性があります。",
+  "preview.hints.tooBigBtn": "続く",
   "cannot.preview": "プレビューできません",
   "cannot.preview.this.file": "このファイルをプレビューできません。",
   "tryto.open.as.textfile": "テキストファイルとして開こうとする",

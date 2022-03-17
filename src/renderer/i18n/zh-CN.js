@@ -358,6 +358,8 @@ export default {
   "updateStorageClassModal.message.deepArchive.headError": "获取深度归档存储文件状态失败",
 
   preview: "预览",
+  "preview.hints.tooBig": "当前文件大于{{value}}，预览加载时间可能较长、也会产生相应的流量费用。",
+  "preview.hints.tooBigBtn": "继续预览",
   "cannot.preview": "无法预览",
   "cannot.preview.this.file": "该文件类型无法预览。",
   "tryto.open.as.textfile": "尝试作为文本文件打开",

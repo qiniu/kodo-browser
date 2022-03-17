@@ -66,7 +66,12 @@
     </div>
     <div ng-if="item.StorageClass && item.StorageClass.toLowerCase()==='archive'" class="form-group">
       <div class="col-sm-2"></div>
-      <div class="col-sm-8 text-danger">{{'getDownloadLink.warning'|translate}}</div>
+      <div class="col-sm-8 text-danger">{{'getDownloadLink.warning.archive'|translate}}</div>
+      <div class="col-sm-2"></div>
+    </div>
+    <div ng-if="item.StorageClass && item.StorageClass.toLowerCase()==='deeparchive'" class="form-group">
+      <div class="col-sm-2"></div>
+      <div class="col-sm-8 text-danger">{{'getDownloadLink.warning.deepArchive'|translate}}</div>
       <div class="col-sm-2"></div>
     </div>
     <div class="clearfix"></div>

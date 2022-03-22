@@ -25,6 +25,8 @@ module.exports = function(webpackEnv) {
         '@template-mappings': paths.appRendererTemplateMappings,
       },
       extensions: ['.ts', '.js'],
+      aliasFields: [],
+      mainFields: ['module', 'main'],
     },
     entry: {
       renderer: paths.appRendererIndex

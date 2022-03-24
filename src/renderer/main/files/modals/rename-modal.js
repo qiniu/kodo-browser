@@ -43,7 +43,7 @@ webModule
         cancel: cancel,
         onSubmit: onSubmit,
         reg: {
-          folderName: /^[^\/]+$/
+          folderName: /^[^\/]((?!\/\/).)*[^\/]$/
         },
         isLoading: false,
         error_message: null

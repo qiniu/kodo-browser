@@ -6925,10 +6925,10 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-kodo-s3-adapter-sdk@0.2.28:
-  version "0.2.28"
-  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.28.tgz#07fdd3be91d4895ff4b79625ecf68043ed0e14b4"
-  integrity sha512-sLig92uudsoQKdrYyeXAqzwnk2kZwLvlNDQgkAJHFvxyIWKRuOFJfmv2afs0l0f+lWhLOHSd0Tbm6BgA3a1BiA==
+kodo-s3-adapter-sdk@0.2.29:
+  version "0.2.29"
+  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.29.tgz#28e518127cbb1daf6ef70877bc3a827e63c98dd5"
+  integrity sha512-SVIqTGbF2g33UzS769in81sD5fSi8XkXcp/lzdkRfl2qnNH91ECg0QgPcVUztvQ2KkjgiTpTRW6iNPnu8TVO6g==
   dependencies:
     async-lock "^1.2.4"
     aws-sdk "^2.800.0"

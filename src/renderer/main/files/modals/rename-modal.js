@@ -2,6 +2,7 @@ import angular from 'angular'
 
 import webModule from '@/app-module/web'
 
+import { FileRename } from '@/const/reg-exps'
 import NgQiniuClient from '@/components/services/ng-qiniu-client'
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
@@ -43,7 +44,7 @@ webModule
         cancel: cancel,
         onSubmit: onSubmit,
         reg: {
-          folderName: /^[^\/]((?!\/\/).)*[^\/]$/
+          folderName: FileRename,
         },
         isLoading: false,
         error_message: null

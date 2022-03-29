@@ -373,29 +373,6 @@ webModule.factory(UPLOAD_MGR_FACTORY_NAME, [
         progs = JSON.parse(data);
       } catch (e) {}
 
-      Object.entries(progs).forEach(([jobId, job]) => {
-        if (!job.uploadedParts) {
-          job.uploadedParts = [];
-        }
-        job.uploadedParts = job.uploadedParts.
-          filter(part => part && part.PartNumber && part.ETag).
-          map((part) => {
-          return { partNumber: part.PartNumber, etag: part.ETag };
-        });
-        if (job.from && job.from.size && job.from.mtime) {
-          if (fs.existsSync(job.from.path)) {
-            const fileStat = fs.statSync(job.from.path);
-            if (fileStat.size === job.from.size && job.from.mtime === fileStat.mtimeMs) {
-              return;
-            }
-          }
-        }
-        job.uploadedParts = [];
-        if (job.prog) {
-          delete job.prog.loaded;
-        }
-      });
-
       Object.entries(progs)
           .forEach(([jobId, briefJob]) => {
             if (!briefJob.from || !briefJob.from.size || !briefJob.from.mtime) {

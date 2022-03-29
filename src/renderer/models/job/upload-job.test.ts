@@ -10,12 +10,12 @@ jest.mock("electron", () => ({
 import { ipcRenderer } from "electron";
 import * as AppConfig from "@/const/app-config"
 
-import { IpcJobEvent, Status } from "./types";
+import { EventKey, IpcJobEvent, Status } from "./types";
 import { uploadOptionsFromNewJob } from "./_mock-helpers_/data";
 
 import UploadJob from "./upload-job";
 
-describe("test models/job/upload-job.ts",  () => {
+describe("test models/job/upload-job.ts", () => {
     describe("test stop", () => {
         it("stop", () => {
             const uploadJob = new UploadJob(uploadOptionsFromNewJob);
@@ -92,6 +92,89 @@ describe("test models/job/upload-job.ts",  () => {
             expect(uploadJob.speed).toBe(0);
             expect(uploadJob.predictLeftTime).toBe(0);
             uploadJob.stop();
+        });
+    });
+
+    describe("test resume upload job", () => {
+        it("getInfoForSave()", () => {
+            const uploadJob = new UploadJob(uploadOptionsFromNewJob);
+            uploadJob.on('partcomplete', (data) => {
+                uploadJob.uploadedId = data.uploadId;
+                uploadJob.uploadedParts[data.part.partNumber] = data.part;
+                return false;
+            })
+
+            // stat
+            const fakeProgressTotal = 1024;
+            const fakeProgressResumable = true;
+            uploadJob.startUpload(null, {
+                key: EventKey.Stat,
+                data: {
+                    progressTotal: fakeProgressTotal,
+                    progressResumable: fakeProgressResumable,
+                },
+            });
+            expect(uploadJob.prog.total).toBe(fakeProgressTotal);
+            expect(uploadJob.prog.resumable).toBe(fakeProgressResumable);
+
+            // progress
+            const fakeProgressLoaded = 512;
+            uploadJob.startUpload(null, {
+                key: EventKey.Progress,
+                data: {
+                    progressLoaded: fakeProgressLoaded,
+                    progressResumable: fakeProgressResumable,
+                },
+            });
+            expect(uploadJob.prog.loaded).toBe(fakeProgressLoaded);
+            expect(uploadJob.prog.resumable).toBe(fakeProgressResumable);
+
+            // part uploaded
+            const fakeUploadedId = 'fakeUploadId';
+            const fakeUploadedPart = {
+                partNumber: 0,
+                etag: 'fakeETag',
+            };
+            uploadJob.startUpload(null, {
+                key: EventKey.PartUploaded,
+                data: {
+                    uploadId: fakeUploadedId,
+                    part: fakeUploadedPart,
+                },
+            });
+            expect(uploadJob.uploadedParts.length).toBe(1);
+            expect(uploadJob.uploadedId).toBe(fakeUploadedId);
+            expect(uploadJob.uploadedParts).toEqual([
+                fakeUploadedPart,
+            ]);
+
+            // info should in disk
+            expect(uploadJob.getInfoForSave({}))
+                .toEqual({
+                    from: uploadOptionsFromNewJob.from,
+
+                    backendMode: uploadOptionsFromNewJob.backendMode,
+                    overwrite: uploadOptionsFromNewJob.overwrite,
+                    to: uploadOptionsFromNewJob.to,
+                    region: uploadOptionsFromNewJob.region,
+                    storageClassName: uploadOptionsFromNewJob.storageClassName,
+                    storageClasses: uploadOptionsFromNewJob.storageClasses,
+
+                    prog: {
+                        loaded: fakeProgressLoaded,
+                        total: fakeProgressTotal,
+                        resumable: fakeProgressResumable,
+                    },
+                    status: Status.Waiting,
+                    uploadedId: fakeUploadedId,
+                    uploadedParts: [
+                        {
+                            PartNumber: fakeUploadedPart.partNumber,
+                            ETag: fakeUploadedPart.etag,
+                        },
+                    ],
+                    message: "",
+                });
         });
     });
 });

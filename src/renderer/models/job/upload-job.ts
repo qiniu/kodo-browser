@@ -355,29 +355,37 @@ export default class UploadJob extends Base {
     getInfoForSave({
         from
     }: {
-        from: {
-            size: number,
-            mtime: number,
+        from?: {
+            size?: number,
+            mtime?: number,
         }
     }) {
         return {
-            storageClasses: this.options.storageClasses,
-            region: this.options.region,
-            to: this.options.to,
             from: {
                 ...this.options.from,
                 ...from,
             },
-            prog: this.options.prog,
-            status: this.options.status,
-            message: this.options.message,
-            uploadedId: this.options.uploadedId,
-            uploadedParts: this.options.uploadedParts.map((part) => {
-                return { PartNumber: part.partNumber, ETag: part.etag };
-            }),
+
+            // read-only info
+            storageClasses: this.options.storageClasses,
+            region: this.options.region,
+            to: this.options.to,
             overwrite: this.options.overwrite,
             storageClassName: this.options.storageClassName,
             backendMode: this.options.backendMode,
+
+            // real-time info
+            prog: {
+                loaded: this.prog.loaded,
+                total: this.prog.total,
+                resumable: this.prog.resumable
+            },
+            status: this.status,
+            message: this.message,
+            uploadedId: this.uploadedId,
+            uploadedParts: this.uploadedParts.map((part) => {
+                return { PartNumber: part.partNumber, ETag: part.etag };
+            }),
         };
     }
 }

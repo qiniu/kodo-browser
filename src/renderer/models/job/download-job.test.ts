@@ -9,12 +9,13 @@ jest.mock("electron", () => ({
 
 import { ipcRenderer } from "electron";
 import * as AppConfig from "@/const/app-config";
-import { IpcJobEvent, Status } from "./types";
+
+import { EventKey, IpcJobEvent, Status } from "./types";
 import { downloadOptionsFromResumeJob } from "./_mock-helpers_/data";
 
 import DownloadJob from "./download-job";
 
-describe("test models/job/download-job.ts",  () => {
+describe("test models/job/download-job.ts", () => {
     describe("test stop", () => {
         it("stop", () => {
             const downloadJob = new DownloadJob(downloadOptionsFromResumeJob);
@@ -90,4 +91,64 @@ describe("test models/job/download-job.ts",  () => {
             downloadJob.stop();
         });
     });
+
+    describe("test resume download job", () => {
+        it("getInfoForSave()", () => {
+            const downloadJob = new DownloadJob(downloadOptionsFromResumeJob);
+
+            // stat
+            const fakeProgressTotal = 1024;
+            const fakeProgressResumable = true;
+            downloadJob.startDownload(null, {
+                key: EventKey.Stat,
+                data: {
+                    progressTotal: fakeProgressTotal,
+                    progressResumable: fakeProgressResumable,
+                },
+            });
+            expect(downloadJob.prog.total).toBe(fakeProgressTotal);
+            expect(downloadJob.prog.resumable).toBe(fakeProgressResumable);
+
+            // progress
+            const fakeProgressLoaded = 512;
+            downloadJob.startDownload(null, {
+                key: EventKey.Progress,
+                data: {
+                    progressLoaded: fakeProgressLoaded,
+                    progressResumable: fakeProgressResumable,
+                },
+            });
+            expect(downloadJob.prog.loaded).toBe(fakeProgressLoaded);
+            expect(downloadJob.prog.resumable).toBe(fakeProgressResumable);
+
+            // part downloaded
+            const lastDownloadedSize = downloadJob.prog.loaded;
+            const fakeDownloadedSize = 512;
+            downloadJob.startDownload(null, {
+                key: EventKey.PartDownloaded,
+                data: {
+                    size: fakeDownloadedSize,
+                },
+            });
+            expect(downloadJob.prog.loaded).toBe(lastDownloadedSize + fakeDownloadedSize);
+
+            // info should in disk
+            expect(downloadJob.getInfoForSave())
+                .toEqual({
+                    storageClasses: downloadOptionsFromResumeJob.storageClasses,
+                    region: downloadOptionsFromResumeJob.region,
+                    to: downloadOptionsFromResumeJob.to,
+                    from: downloadOptionsFromResumeJob.from,
+                    backendMode: downloadOptionsFromResumeJob.backendMode,
+
+                    prog: {
+                        loaded: downloadJob.prog.loaded,
+                        total: fakeProgressTotal,
+                        resumable: fakeProgressResumable,
+                    },
+                    status: Status.Waiting,
+                    message: "",
+                });
+        });
+    })
 });

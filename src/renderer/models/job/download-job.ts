@@ -335,17 +335,20 @@ export default class DownloadJob extends Base {
 
     getInfoForSave() {
         return {
+            // read-only info
             storageClasses: this.options.storageClasses,
             region: this.options.region,
             to: this.options.to,
             from: this.options.from,
+            backendMode: this.options.backendMode,
+            domain: this.options.domain,
+
+            // real-time info
             prog: {
                 loaded: this.prog.loaded,
                 total: this.prog.total,
                 resumable: this.prog.resumable
             },
-            backendMode: this.options.backendMode,
-            domain: this.options.domain,
             status: this.status,
             message: this.message,
         };

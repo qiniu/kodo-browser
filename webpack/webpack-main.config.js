@@ -8,10 +8,16 @@ module.exports = function(webpackEnv) {
   return {
     target: 'electron-main',
     mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
+    resolve: {
+      alias: {
+        '@common': paths.appCommon,
+      },
+      extensions: ['.ts', '.js'],
+    },
     entry: {
       main: paths.appMainIndex,
       'download-worker': paths.appMainDownloadWorker,
-      'upload-worker': paths.appMainUploadWorker,
+      'uploader': paths.appMainUploader,
     },
     output: {
       filename: '[name]-bundle.js',
@@ -20,6 +26,11 @@ module.exports = function(webpackEnv) {
         : isEnvDevelopment && '[name].chunk.js',
       path: paths.appBuildMain,
       clean: true,
+    },
+    module: {
+      rules: [
+        { test: /\.ts$/, loader: "ts-loader" },
+      ],
     },
     optimization: {
       splitChunks: {

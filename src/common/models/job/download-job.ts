@@ -1,16 +1,16 @@
+import fs from "fs";
 import { ipcRenderer } from "electron";
 import { Region } from "kodo-s3-adapter-sdk";
 import { StorageClass } from "kodo-s3-adapter-sdk/dist/adapter";
 import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
 
-import Duration from "@/const/duration";
-import * as AppConfig from "@/const/app-config";
+import Duration from "@common/const/duration";
+import * as AppConfig from "@common/const/app-config";
 
-import { BackendMode, EventKey, IpcUploadJob, IpcJobEvent, Status, UploadedPart } from "./types";
-import Base from "./base"
+import { BackendMode, EventKey, IpcDownloadJob, IpcJobEvent, Status } from "./types";
+import Base from "./base";
 import * as Utils from "./utils";
 
-// if change options, remember to check toJsonString()
 interface RequiredOptions {
     clientOptions: {
         accessKey: string,
@@ -19,62 +19,60 @@ interface RequiredOptions {
         regions: Region[],
     },
 
-    from: Utils.LocalPath,
-    to: Utils.RemotePath,
+    from: Utils.RemotePath,
+    to: Utils.LocalPath
     region: string,
     backendMode: BackendMode,
 
-    overwrite: boolean,
-    storageClassName: StorageClass["kodoName"],
     storageClasses: StorageClass[],
 
     userNatureLanguage: NatureLanguage,
 }
 
 interface OptionalOptions {
+    domain?: string,
+
     maxConcurrency: number,
-    resumeUpload: boolean,
-    multipartUploadThreshold: number,
-    multipartUploadSize: number,
-    uploadSpeedLimit: number,
-    uploadedId: string,
-    uploadedParts: UploadedPart[],
+    resumeDownload: boolean,
+    multipartDownloadThreshold: number,
+    multipartDownloadSize: number,
+    downloadSpeedLimit: number,
 
     status: Status,
 
     prog: {
         total: number,
         loaded: number,
-        resumable?: boolean,
+        resumable: boolean, // what's difference from resumeDownload?
     },
 
     message: string,
     isDebug: boolean,
 }
 
-export type Options = RequiredOptions & Partial<OptionalOptions>
+type Options = RequiredOptions & Partial<OptionalOptions>
 
 const DEFAULT_OPTIONS: OptionalOptions = {
     maxConcurrency: 10,
-    resumeUpload: false,
-    multipartUploadThreshold: 100,
-    multipartUploadSize: 8,
-    uploadSpeedLimit: 0, // 0 means no limit
-    uploadedId: "",
-    uploadedParts: [],
+    resumeDownload: false,
+    multipartDownloadThreshold: 100,
+    multipartDownloadSize: 8,
+    downloadSpeedLimit: 0, // 0 means no limit
 
     status: Status.Waiting,
 
     prog: {
         total: 0,
         loaded: 0,
+        // synced: 0,
+        resumable: false,
     },
 
     message: "",
     isDebug: false,
 };
 
-export default class UploadJob extends Base {
+export default class DownloadJob extends Base {
     // - create options -
     private readonly options: RequiredOptions & OptionalOptions
 
@@ -93,36 +91,29 @@ export default class UploadJob extends Base {
 
     // - for resume from break point -
     prog: OptionalOptions["prog"]
-    uploadedId: string
-    uploadedParts: UploadedPart[]
 
     constructor(config: Options) {
         super();
-        this.id = `uj-${new Date().getTime()}-${Math.random().toString().substring(2)}`
+        this.id = `dj-${new Date().getTime()}-${Math.random().toString().substring(2)}`;
         this.kodoBrowserVersion = AppConfig.app.version;
 
         this.options = {
             ...DEFAULT_OPTIONS,
             ...config,
-        }
+        };
 
         this.__status = this.options.status;
 
         this.prog = {
             ...this.options.prog,
-        }
-        this.uploadedId = this.options.uploadedId;
-        this.uploadedParts = [
-            ...this.options.uploadedParts,
-        ];
+            loaded: this.options.prog.loaded,
+        };
 
         this.message = this.options.message;
 
-        this.startUpload = this.startUpload.bind(this);
+        this.startDownload = this.startDownload.bind(this);
     }
 
-    // TypeScript specification (8.4.3) says...
-    // > Accessors for the same member name must specify the same accessibility
     private set _status(value: Status) {
         this.__status = value;
         this.emit("statuschange", this.status);
@@ -131,10 +122,8 @@ export default class UploadJob extends Base {
             this.status === Status.Failed
             || this.status === Status.Stopped
             || this.status === Status.Finished
-            || this.status === Status.Duplicated
         ) {
             clearInterval(this.speedTimerId);
-
             this.speed = 0;
             this.predictLeftTime = 0;
         }
@@ -148,10 +137,14 @@ export default class UploadJob extends Base {
         return this.status !== Status.Running;
     }
 
-    private get ipcUploadJob(): IpcUploadJob {
+    private get tempfile(): string {
+        return `${this.options.to.path}.download`;
+    }
+
+    private get ipcDownloadJob(): IpcDownloadJob {
         return {
             job: this.id,
-            key: IpcJobEvent.Upload,
+            key: IpcJobEvent.Download,
             clientOptions: {
                 ...this.options.clientOptions,
                 // if ucUrl is not undefined, downloader will use it generator url
@@ -163,59 +156,43 @@ export default class UploadJob extends Base {
                 userNatureLanguage: this.options.userNatureLanguage,
             },
             options: {
-                resumeUpload: this.options.resumeUpload,
+                resumeDownload: this.options.resumeDownload,
                 maxConcurrency: this.options.maxConcurrency,
-                multipartUploadThreshold: this.options.multipartUploadThreshold * 1024 * 1024,
-                multipartUploadSize: this.options.multipartUploadSize * 1024 * 1024,
-                uploadSpeedLimit: this.options.uploadSpeedLimit,
+                multipartDownloadThreshold: this.options.multipartDownloadThreshold * 1024 * 1024,
+                multipartDownloadSize: this.options.multipartDownloadSize * 1024 * 1024,
+                downloadSpeedLimit: this.options.downloadSpeedLimit,
                 kodoBrowserVersion: this.kodoBrowserVersion,
             },
             params: {
                 region: this.options.region,
-                bucket: this.options.to.bucket,
-                key: this.options.to.key,
-                localFile: this.options.from.path,
-                overwriteDup: this.options.overwrite,
-                storageClassName: this.options.storageClassName,
-                storageClasses: this.options.storageClasses,
-                isDebug: this.options.isDebug,
-            }
+                bucket: this.options.from.bucket,
+                key: this.options.from.key,
+                localFile: this.tempfile,
+                domain: this.options.domain,
+                isDebug: this.options.isDebug
+            },
         }
     }
 
-    start(
-        forceOverwrite: boolean = false,
-        prog?: { // not same as Options["prog"]
-            uploadedId: string,
-            uploadedParts: UploadedPart[]
-        },
-    ): this {
+    start(prog?: OptionalOptions["prog"]): this {
         if (this.status === Status.Running || this.status === Status.Finished) {
             return this;
         }
 
         if (this.options.isDebug) {
-            console.log(`Try uploading ${this.options.from.path} to kodo://${this.options.to.bucket}/${this.options.to.key}`);
+            console.log(`Try downloading kodo://${this.options.from.bucket}/${this.options.from.key} to ${this.options.to.path}`);
         }
 
-        this.message = ""
-
+        this.message = "";
         this._status = Status.Running;
 
-        const job = this.ipcUploadJob;
-        if (forceOverwrite) {
-            job.params.overwriteDup = true;
-        }
-        if (prog) {
-            job.params.uploadedId = prog.uploadedId;
-            job.params.uploadedParts = prog.uploadedParts;
-        }
+        const job = this.ipcDownloadJob
+        job.params.downloadedBytes = prog?.loaded;
 
         if (this.options.isDebug) {
-            console.log(`[JOB] sched starting => ${JSON.stringify(job)}`)
+            console.log(`[JOB] ${JSON.stringify(job)}`);
         }
-
-        ipcRenderer.on(this.id, this.startUpload);
+        ipcRenderer.on(this.id, this.startDownload);
         ipcRenderer.send("asynchronous-job", job);
 
         this.startSpeedCounter();
@@ -229,7 +206,7 @@ export default class UploadJob extends Base {
         }
 
         if (this.options.isDebug) {
-            console.log(`Pausing ${this.options.from.path}`);
+            console.log(`Pausing kodo://${this.options.from.bucket}/${this.options.from.key}`);
         }
 
         clearInterval(this.speedTimerId);
@@ -244,7 +221,7 @@ export default class UploadJob extends Base {
             job: this.id,
             key: IpcJobEvent.Stop,
         });
-        ipcRenderer.removeListener(this.id, this.startUpload);
+        ipcRenderer.removeListener(this.id, this.startDownload);
 
         return this;
     }
@@ -253,9 +230,8 @@ export default class UploadJob extends Base {
         if (this.status === Status.Waiting) {
             return this;
         }
-
         if (this.options.isDebug) {
-            console.log(`Pending ${this.options.from.path}`);
+            console.log(`Pending kodo://${this.options.from.bucket}/${this.options.from.key}`);
         }
 
         this._status = Status.Waiting;
@@ -264,39 +240,44 @@ export default class UploadJob extends Base {
         return this;
     }
 
-    startUpload(_: any, data: any) {
+    startDownload(_event: any, data: any) {
         if (this.options.isDebug) {
             console.log("[IPC MAIN]", data);
         }
 
         switch (data.key) {
-            case EventKey.Duplicated:
-                ipcRenderer.removeListener(this.id, this.startUpload);
-                this._status = Status.Duplicated;
-                this.emit("fileDuplicated", data);
-                return;
             case EventKey.Stat:
                 this.prog.total = data.data.progressTotal;
                 this.prog.resumable = data.data.progressResumable;
                 this.emit("progress", this.prog);
-                return;
+                return
             case EventKey.Progress:
                 this.prog.loaded = data.data.progressLoaded;
                 this.prog.resumable = data.data.progressResumable;
                 this.emit("progress", this.prog);
                 return;
-            case EventKey.PartUploaded:
-                this.emit("partcomplete", data.data);
-                return;
-            case EventKey.Uploaded:
-                ipcRenderer.removeListener(this.id, this.startUpload);
+            case EventKey.PartDownloaded:
+                this.prog.loaded = this.prog.loaded + data.data.size;
+                this.emit("partcomplete", this.prog);
+                return
+            case EventKey.Downloaded:
+                ipcRenderer.removeListener(this.id, this.startDownload);
+                this._status = Status.Verifying;
+                fs.rename(this.tempfile, this.options.to.path, err => {
+                    if (err) {
+                        console.error(`rename file ${this.tempfile} to ${this.options.to.path} error:`, err);
 
-                this._status = Status.Finished;
-                this.emit("complete");
+                        this._status = Status.Failed;
+                        this.emit("error", err);
+                    } else {
+                        this._status = Status.Finished;
+                        this.emit("complete");
+                    }
+                });
                 return;
             case EventKey.Error:
-                console.error("upload object error:", data);
-                ipcRenderer.removeListener(this.id, this.startUpload);
+                console.warn("download object error:", data);
+                ipcRenderer.removeListener(this.id, this.startDownload);
 
                 this.message = data;
                 this._status = Status.Failed;
@@ -308,13 +289,13 @@ export default class UploadJob extends Base {
                 }
                 return;
             default:
-                console.warn("Unknown", data);
+                console.log("Unknown", data);
                 return;
         }
     }
 
-    private startSpeedCounter() {
-        const startedAt = new Date().getTime();
+    startSpeedCounter() {
+        const startAt = new Date().getTime();
 
         let lastLoaded = this.prog.loaded;
         let lastSpeed = 0;
@@ -328,7 +309,7 @@ export default class UploadJob extends Base {
                 return;
             }
 
-            const avgSpeed = this.prog.loaded / (new Date().getTime() - startedAt) * Duration.Second;
+            let avgSpeed = this.prog.loaded / (startAt - new Date().getTime()) * Duration.Second;
             this.speed = this.prog.loaded - lastLoaded;
             if (this.speed <= 0 || (lastSpeed / this.speed) > 1.1) {
                 this.speed = lastSpeed * 0.95;
@@ -337,14 +318,14 @@ export default class UploadJob extends Base {
                 this.speed = avgSpeed;
             }
 
-            lastLoaded = this.prog.loaded;
+            lastSpeed = this.prog.loaded;
             lastSpeed = this.speed;
 
 
-            if (this.options.uploadSpeedLimit && this.speed > this.options.uploadSpeedLimit * 1024) {
-                this.speed = this.options.uploadSpeedLimit * 1024;
+            if (this.options.downloadSpeedLimit && this.speed > this.options.downloadSpeedLimit * 1024) {
+                this.speed = this.options.downloadSpeedLimit * 1024;
             }
-            this.emit('speedchange', this.speed * 1.2);
+            this.emit("speedchange", this.speed * 1.2);
 
             this.predictLeftTime = this.speed <= 0
                 ? 0
@@ -352,27 +333,15 @@ export default class UploadJob extends Base {
         }, intervalDuration) as unknown as number; // hack type problem of nodejs and browser
     }
 
-    getInfoForSave({
-        from
-    }: {
-        from?: {
-            size?: number,
-            mtime?: number,
-        }
-    }) {
+    getInfoForSave() {
         return {
-            from: {
-                ...this.options.from,
-                ...from,
-            },
-
             // read-only info
             storageClasses: this.options.storageClasses,
             region: this.options.region,
             to: this.options.to,
-            overwrite: this.options.overwrite,
-            storageClassName: this.options.storageClassName,
+            from: this.options.from,
             backendMode: this.options.backendMode,
+            domain: this.options.domain,
 
             // real-time info
             prog: {
@@ -382,11 +351,18 @@ export default class UploadJob extends Base {
             },
             status: this.status,
             message: this.message,
-            uploadedId: this.uploadedId,
-            uploadedParts: this.uploadedParts.map((part) => {
-                return { PartNumber: part.partNumber, ETag: part.etag };
-            }),
         };
     }
-}
 
+    tryCleanupDownloadFile(): this {
+        if ([Status.Finished, Status.Waiting].includes(this.status)) {
+            return this;
+        }
+        try {
+            fs.unlinkSync(this.tempfile);
+        } catch (_err) {
+            // ignore error
+        }
+        return this;
+    }
+}

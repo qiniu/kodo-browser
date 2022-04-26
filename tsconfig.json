@@ -24,6 +24,9 @@
     "paths": {
       "@/*": [
         "renderer/*"
+      ],
+      "@common/*": [
+        "common/*"
       ]
     },
     "esModuleInterop": true,

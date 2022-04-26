@@ -5,7 +5,7 @@ import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3"
 import { RegionService } from "kodo-s3-adapter-sdk/dist/region_service";
 
 
-import * as AppConfig from "@/const/app-config";
+import * as AppConfig from "@common/const/app-config";
 import * as AuthInfo from "@/components/services/authinfo";
 import * as Config from "@/config";
 import Settings from '@/components/services/settings'

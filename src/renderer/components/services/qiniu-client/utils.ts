@@ -2,7 +2,7 @@ import { KODO_MODE, Region } from "kodo-s3-adapter-sdk";
 import { Domain } from "kodo-s3-adapter-sdk/dist/adapter";
 import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 
-import * as AppConfig from "@/const/app-config";
+import * as AppConfig from "@common/const/app-config";
 import * as KodoNav from "@/const/kodo-nav";
 
 import {debugRequest, debugResponse, GetAdapterOptionParam, getDefaultClient} from './common'

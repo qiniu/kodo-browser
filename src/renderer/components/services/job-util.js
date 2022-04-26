@@ -3,12 +3,9 @@ import webModule from '@/app-module/web'
 const JOB_UTIL_FACTORY_NAME = 'jobUtil'
 
 webModule.factory(JOB_UTIL_FACTORY_NAME, [
-  "$q",
-  "$state",
-  "$timeout",
   "$translate",
-  function($q, $state, $timeout, $translate) {
-    var T = $translate.instant;
+  function($translate) {
+    const T = $translate.instant;
 
     return {
       getStatusLabel: getStatusLabel,

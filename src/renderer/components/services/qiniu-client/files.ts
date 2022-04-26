@@ -1,7 +1,7 @@
 import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
 import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 import { Adapter, Domain, FrozenInfo, ObjectInfo, PartialObjectError, StorageClass, TransferObject } from 'kodo-s3-adapter-sdk/dist/adapter'
-import Duration from "@/const/duration";
+import Duration from "@common/const/duration";
 import * as FileItem from "@/models/file-item";
 
 import { GetAdapterOptionParam, getDefaultClient } from "./common"

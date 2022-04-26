@@ -22,13 +22,14 @@ module.exports = {
   appPages: pages.map(resolveApp),
   appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
+  appCommon: resolveApp('src/common'),
   appNodeModules: resolveApp('node_modules'),
   appWebpackCache: resolveApp('node_modules/.cache'),
 
   appMain: resolveApp('src/main'),
   appMainIndex: resolveApp('src/main/index.js'),
   appMainDownloadWorker: resolveApp('src/main/download-worker.js'),
-  appMainUploadWorker: resolveApp('src/main/upload-worker.js'),
+  appMainUploader: resolveApp('src/main/uploader/index.ts'),
   appBuildMain: resolveApp('dist/main'),
 
   appRenderer: resolveApp('src/renderer'),

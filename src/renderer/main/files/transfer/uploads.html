@@ -3,18 +3,18 @@
 
     <div class="pull-left" style="position:relative">
       <input type="text" cleanable-input placeholder="{{'transframe.search.placeholder'|translate}}"
-        class="form-control input-sm" style="width:200px;" ng-model="sch.upname">
+        class="form-control input-sm" style="width:200px;" ng-model="transSearch.uploadJob">
     </div>
 
     <div class="pull-left">
       <a href="" ng-if="totalStat.upStopped>0" class="btn btn-link btn-sm" style="text-decoration:none"
-        ng-click="sch.upname='stopped'">
+        ng-click="transSearch.uploadJob='stopped'">
         <span class=" text-warning">
           <i class="fa fa-info-circle"></i> {{totalStat.upStopped}}
         </span>
       </a>
       <a href="" ng-if="totalStat.upFailed>0" class="btn btn-link btn-sm" style="text-decoration:none"
-        ng-click="sch.upname='failed'">
+        ng-click="transSearch.uploadJob='failed'">
         <span class=" text-danger">
           <i class="fa fa-remove"></i> {{totalStat.upFailed}}
         </span>
@@ -71,16 +71,16 @@
 
     <ul class="list-group list-condensed" style="margin-bottom:0px">
       <li class="list-group-item"
-        ng-repeat="item in lists.uploadJobList|listFilter:schKeyFn:sch.upname|limitTo:limitToNum track by item.id">
+        ng-repeat="item in lists.uploadJobList track by item.id">
         <div class="col-sm-4">
           <div class="text-overflow" uib-tooltip-template="'upload-path-tooltip-tpl.html'" tooltip-placement="left"
             tooltip-append-to-body="true">
-            {{$index+1}}. {{::item.options.from.name}}
+            {{$index+1}}. {{::item.from.name}}
           </div>
 
           <div class="progress mg0" style="height:4px;">
             <div class="progress-bar progress-bar-{{item.status|statusCls}}"
-              ng-style="{width: (item.prog.loaded|persent:item.prog.total:item.status) + '%'}"></div>
+              ng-style="{width: (item.progress.loaded|persent:item.progress.total:item.status) + '%'}"></div>
           </div>
         </div>
 
@@ -96,11 +96,11 @@
         </div>
 
         <div class="col-sm-4 text-overflow">
-          <small ng-show="item.prog.total">
+          <small ng-show="item.progress.total">
             <span
-              ng-if="item.prog.loaded!=item.prog.total">{{item.prog.loaded|sizeFormat}}/</span>{{item.prog.total|sizeFormat}}
+              ng-if="item.progress.loaded!=item.progress.total">{{item.progress.loaded|sizeFormat}}/</span>{{item.progress.total|sizeFormat}}
           </small>
-          <small ng-show="item.predictLeftTime">, {{item.predictLeftTime|leftTimeFormat}}</small>
+          <small ng-show="item.estimatedTime">, {{item.estimatedTime|leftTimeFormat}}</small>
           <small ng-if="item.status == 'duplicated'" class="text-danger">
             <i class="glyphicon glyphicon-alert"></i>
             {{'upload.duplicated'|translate}}
@@ -108,8 +108,8 @@
         </div>
 
         <div class="col-sm-2 text-right">
-          <a ng-if="item.prog.resumable && (item.status=='running' || item.status=='waiting' || item.status=='verifying')"
-            href="" ng-click="item.stop()" class="btn btn-default btn-xs" uib-tooltip="{{'upload.job.pause'|translate}}"
+          <a ng-if="item.progress.resumable && (item.status=='running' || item.status=='waiting' || item.status=='verifying')"
+            href="" ng-click="stopItem(item)" class="btn btn-default btn-xs" uib-tooltip="{{'upload.job.pause'|translate}}"
             tooltip-placement="left">
             <i class="glyphicon glyphicon-pause text-warning"></i>
           </a>
@@ -136,7 +136,7 @@
     </ul>
 
     <div class="clearfix text-center" style="padding:4px;">
-      <span ng-if="limitToNum < (lists.uploadJobList|listFilter:schKeyFn:sch.upname).length">
+      <span ng-if="limitToNum < lists.uploadJobList.length">
         {{'loading'|translate}}
       </span>
     </div>
@@ -146,7 +146,7 @@
 
 <script type="text/ng-template" id="upload-path-tooltip-tpl.html">
   <div class="break text-left">
-    <div><label class="text-primary">From:</label> {{item.options.from.path}}</div>
-    <div><label class="text-success">To:</label> kodo://{{item.options.to.bucket}}/{{item.options.to.key}}</div>
+    <div><label class="text-primary">From:</label> {{item.from.path}}</div>
+    <div><label class="text-success">To:</label> kodo://{{item.to.bucket}}/{{item.to.key}}</div>
   </div>
 </script>

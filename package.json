@@ -1,6 +1,6 @@
 {
   "name": "kodo-browser",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "license": "Apache-2.0",
   "author": {
     "name": "Rong Zhou",
@@ -17,7 +17,7 @@
     "dev": "./node_modules/.bin/webpack --env development -c ./webpack/webpack.config.js && ./node_modules/.bin/npm-run-all --parallel watch dev:run",
     "dev:run": "./node_modules/.bin/cross-env NODE_ENV=development electron ./dist/main/main-bundle.js",
     "prod": "./node_modules/.bin/cross-env NODE_ENV=production electron ./dist",
-    "watch": "./node_modules/.bin/webpack --env development -c ./webpack/webpack-renderer.config.js -w",
+    "watch": "./node_modules/.bin/webpack --env development -c ./webpack/webpack.config.js -w",
     "build": "./node_modules/.bin/webpack --env production --env sourcemap -c ./webpack/webpack.config.js",
     "build:mac": "./node_modules/.bin/gulp mac",
     "pkg:mac": "./node_modules/.bin/gulp maczip",
@@ -55,6 +55,7 @@
     "@babel/preset-env": "^7.1.6",
     "@types/codemirror": "^5.60.5",
     "@types/jest": "^27.0.2",
+    "@types/lodash": "^4.14.182",
     "@types/mock-fs": "^4.13.1",
     "archiver": "^3.0.3",
     "copy-webpack-plugin": "^9.0.1",
@@ -84,6 +85,7 @@
     "webpack-cli": "^4.9.0"
   },
   "dependencies": {
+    "@root/walk": "^1.1.0",
     "@uirouter/angularjs": "^1.0.20",
     "angular": "1.7.9",
     "angular-sanitize": "1.7.5",
@@ -103,6 +105,7 @@
     "js-base64": "^3.4.5",
     "js-md5": "^0.7.3",
     "kodo-s3-adapter-sdk": "0.2.29",
+    "lodash": "^4.17.21",
     "mime": "^2.3.1",
     "moment": "^2.22.2",
     "qiniu-path": "^0.0.3",

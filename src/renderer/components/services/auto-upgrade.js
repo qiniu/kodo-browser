@@ -4,7 +4,7 @@ import path from 'path'
 import request from 'request'
 import downloadsFolder from 'downloads-folder'
 
-import * as util from '@/models/job/utils'
+import * as util from '@common/models/job/utils'
 import webModule from '@/app-module/web'
 
 import { upgrade } from '@/customize'

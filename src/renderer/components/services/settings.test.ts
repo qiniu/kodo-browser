@@ -1,4 +1,16 @@
+jest.mock("electron", () => ({
+    __esModule: true,
+    ipcRenderer: {
+        on: jest.fn(),
+        send: jest.fn(),
+        removeListener: jest.fn(),
+    }
+}));
+
+import { ipcRenderer } from "electron";
 import Settings, { SettingKey } from "./settings";
+import {UploadAction} from "@common/ipc-actions/upload";
+import ByteSize from "@common/const/byte-size";
 
 // WARNING: The getter tests in "no data in storage" section is
 //          for testing default value.
@@ -93,8 +105,26 @@ describe("test settings.ts", () => {
         it("isDebug setter", () => {
             Settings.isDebug = 1;
             expect(Settings.isDebug).toBe(1);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        isDebug: true,
+                    },
+                },
+            );
             Settings.isDebug = 0;
             expect(Settings.isDebug).toBe(0);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        isDebug: false,
+                    },
+                },
+            );
         });
 
         // autoUpgrade
@@ -115,8 +145,26 @@ describe("test settings.ts", () => {
         it("resumeUpload setter", () => {
             Settings.resumeUpload = 1;
             expect(Settings.resumeUpload).toBe(1);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        resumeUpload: true,
+                    },
+                },
+            );
             Settings.resumeUpload = 0;
             expect(Settings.resumeUpload).toBe(0);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        resumeUpload: false,
+                    },
+                },
+            );
         });
 
         // maxUploadConcurrency
@@ -126,8 +174,26 @@ describe("test settings.ts", () => {
         it("maxUploadConcurrency setter", () => {
             Settings.maxUploadConcurrency = 2;
             expect(Settings.maxUploadConcurrency).toBe(2);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        maxConcurrency: 2,
+                    },
+                },
+            );
             Settings.maxUploadConcurrency = 1;
             expect(Settings.maxUploadConcurrency).toBe(1);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        maxConcurrency: 1,
+                    },
+                },
+            );
         });
 
         // multipartUploadSize
@@ -135,16 +201,34 @@ describe("test settings.ts", () => {
             expect(Settings.multipartUploadSize).toBe(8);
         });
         it("multipartUploadSize setter valid", () => {
-            Settings.multipartUploadSize = 4;
-            expect(Settings.multipartUploadSize).toBe(4);
+            Settings.multipartUploadSize = 10;
+            expect(Settings.multipartUploadSize).toBe(10);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        multipartUploadSize: 10 * ByteSize.MB,
+                    },
+                },
+            );
             Settings.multipartUploadSize = 8;
             expect(Settings.multipartUploadSize).toBe(8);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        multipartUploadSize: 8 * ByteSize.MB,
+                    },
+                },
+            );
         });
         it("multipartUploadSize setter invalid", () => {
-            for (let i = 1; i < 4; i ++) {
-                Settings.multipartUploadSize = i;
-                expect(Settings.multipartUploadSize).toBe(8);
-            }
+            Settings.multipartUploadSize = 0;
+            expect(Settings.multipartUploadSize).toBe(8);
+            Settings.multipartUploadSize = 1025;
+            expect(Settings.multipartUploadSize).toBe(8);
         });
 
         // multipartUploadThreshold
@@ -154,8 +238,26 @@ describe("test settings.ts", () => {
         it("multipartUploadThreshold setter", () => {
             Settings.multipartUploadThreshold = 110;
             expect(Settings.multipartUploadThreshold).toBe(110);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        multipartUploadThreshold: 110 * ByteSize.MB,
+                    },
+                },
+            );
             Settings.multipartUploadThreshold = 100;
             expect(Settings.multipartUploadThreshold).toBe(100);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        multipartUploadThreshold: 100 * ByteSize.MB,
+                    },
+                },
+            );
         });
 
         // uploadSpeedLimitEnabled
@@ -165,8 +267,26 @@ describe("test settings.ts", () => {
         it("uploadSpeedLimitEnabled setter", () => {
             Settings.uploadSpeedLimitEnabled = 1;
             expect(Settings.uploadSpeedLimitEnabled).toBe(1);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        uploadSpeedLimit: Settings.uploadSpeedLimitKBperSec * ByteSize.KB,
+                    },
+                },
+            );
             Settings.uploadSpeedLimitEnabled = 0;
             expect(Settings.uploadSpeedLimitEnabled).toBe(0);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        uploadSpeedLimit: 0,
+                    },
+                },
+            );
         });
 
         // uploadSpeedLimitKBperSec
@@ -174,10 +294,29 @@ describe("test settings.ts", () => {
             expect(Settings.uploadSpeedLimitKBperSec).toBe(1024);
         });
         it("uploadSpeedLimitKBperSec setter", () => {
+            Settings.uploadSpeedLimitEnabled = 1;
             Settings.uploadSpeedLimitKBperSec = 2048;
             expect(Settings.uploadSpeedLimitKBperSec).toBe(2048);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        uploadSpeedLimit: 2048 * ByteSize.KB,
+                    },
+                },
+            );
             Settings.uploadSpeedLimitKBperSec = 1024;
             expect(Settings.uploadSpeedLimitKBperSec).toBe(1024);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "UploaderManager",
+                {
+                    action: UploadAction.UpdateConfig,
+                    data: {
+                        uploadSpeedLimit: 1024 * ByteSize.KB,
+                    },
+                },
+            );
         });
 
         // resumeDownload
@@ -373,14 +512,14 @@ describe("test settings.ts", () => {
         it("multipartUploadSize setter valid", () => {
             Settings.multipartUploadSize = 8;
             expect(Settings.multipartUploadSize).toBe(8);
-            Settings.multipartUploadSize = 4;
-            expect(Settings.multipartUploadSize).toBe(4);
+            Settings.multipartUploadSize = 10;
+            expect(Settings.multipartUploadSize).toBe(10);
         });
         it("multipartUploadSize setter invalid", () => {
-            for (let i = 1; i < 4; i ++) {
-                Settings.multipartUploadSize = i;
-                expect(Settings.multipartUploadSize).toBe(4);
-            }
+            Settings.multipartUploadSize = 0;
+            expect(Settings.multipartUploadSize).toBe(4);
+            Settings.multipartUploadSize = 1025;
+            expect(Settings.multipartUploadSize).toBe(4);
         });
 
         // multipartUploadThreshold

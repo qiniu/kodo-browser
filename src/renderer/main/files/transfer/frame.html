@@ -1,9 +1,9 @@
 <section ng-controller="transferFrameCtrl">
   <div ng-hide="transVisible" class="trans-dock-btn">
     <a href="" ng-click="toggleTransVisible(true);transTab = 1">
-      <i class="fa fa-cloud-upload"></i> {{totalStat.upDone}}/{{lists.uploadJobList.length}}
+      <i class="fa fa-cloud-upload"></i> {{totalStat.upDone}}/{{totalStat.up}}
     </a>
-    &nbsp;&nbsp;
+
     <a href="" ng-click="toggleTransVisible(true);transTab = 2">
       <i class="fa fa-cloud-download"></i> {{totalStat.downDone}}/{{lists.downloadJobList.length}}
     </a>
@@ -15,7 +15,7 @@
       <li role="presentation" ng-class="{active:transTab==1}">
         <a href="#" ng-click="transTab=1">
           <i class="fa fa-upload"></i> {{'upload'|translate}}
-          <label class="badge badge-info">{{totalStat.upDone}}/{{lists.uploadJobList.length}}</label>
+          <label class="badge badge-info">{{totalStat.upDone}}/{{totalStat.up}}</label>
         </a>
       </li>
       <li role="presentation" ng-class="{active:transTab==2}">

@@ -1,10 +1,11 @@
 import moment from "moment/moment"
 
-import Duration from "@/const/duration";
+import Duration from "@common/const/duration";
 import * as FileItem from "@/models/file-item";
 
 import { leftTime } from "@/components/services/util"
 import { FileExtensionType, getFileType } from '@/components/services/file.s'
+import ByteSize from "@common/const/byte-size";
 
 export const sub = {
   name: "sub",
@@ -95,6 +96,7 @@ export const leftTimeFormat = {
 
 export const sizeFormat = {
   name: "sizeFormat",
+  // n: Bytes
   fn: (n: number, isApproximate: boolean = true): string => {
     if (n == 0 || !n || n < 0) {
       return "0";
@@ -103,33 +105,33 @@ export const sizeFormat = {
     const t = [];
     let left = n;
 
-    const gb = Math.floor(n / Math.pow(1024, 3));
+    const gb = Math.floor(n / ByteSize.GB);
     if (gb > 0) {
       if (isApproximate) {
-        return Math.round(n * 100 / Math.pow(1024, 3)) / 100 + "GB";
+        return Math.round(n * 100 / ByteSize.GB) / 100 + "GB";
       } else {
         t.push(gb + "G");
-        left = left % Math.pow(1024, 3);
+        left = left % ByteSize.GB;
       }
     }
 
-    const mb = Math.floor(left / Math.pow(1024, 2));
+    const mb = Math.floor(left / ByteSize.MB);
     if (mb > 0) {
       if (isApproximate) {
-        return Math.round(100 * left / Math.pow(1024, 2)) / 100 + "MB";
+        return Math.round(100 * left / ByteSize.MB) / 100 + "MB";
       } else {
         t.push(mb + "M");
-        left = left % Math.pow(1024, 2);
+        left = left % ByteSize.MB;
       }
     }
 
-    const kb = Math.floor(left / 1024);
+    const kb = Math.floor(left / ByteSize.KB);
     if (kb > 0) {
       if (isApproximate) {
-        return Math.round(100 * left / 1024) / 100 + "KB";
+        return Math.round(100 * left / ByteSize.KB) / 100 + "KB";
       } else {
         t.push(kb + "K");
-        left = left % 1024;
+        left = left % ByteSize.KB;
       }
     }
 

@@ -4,7 +4,7 @@ import path from 'path'
 import moment from 'moment'
 
 import * as AuthInfo from './authinfo'
-import * as AppConfig from '@/const/app-config'
+import * as AppConfig from '@common/const/app-config'
 
 const expirationMonths = 3;
 

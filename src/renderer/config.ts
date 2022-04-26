@@ -3,7 +3,7 @@ import path from 'path'
 
 import { Region } from "kodo-s3-adapter-sdk";
 
-import * as AppConfig from "@/const/app-config";
+import * as AppConfig from "@common/const/app-config";
 import * as AuthInfo from '@/components/services/authinfo'
 
 interface ConfigInner {

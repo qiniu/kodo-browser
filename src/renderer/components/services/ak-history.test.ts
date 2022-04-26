@@ -1,7 +1,7 @@
 import mockFs from "mock-fs";
 import fs from 'fs'
 
-import { config_path } from "@/const/app-config";
+import { config_path } from "@common/const/app-config";
 
 import * as AkHistory from "./ak-history";
 

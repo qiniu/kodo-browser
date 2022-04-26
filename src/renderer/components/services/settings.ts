@@ -1,3 +1,6 @@
+import ByteSize from "@common/const/byte-size";
+import ipcUploadManager from "@/components/services/ipc-upload-manager";
+
 export enum SettingKey {
   IsDebug = "isDebug",
   AutoUpgrade = "autoUpgrade",
@@ -31,6 +34,9 @@ class Settings {
   }
   set isDebug(v: number) {
     localStorage.setItem(SettingKey.IsDebug, v.toString());
+    ipcUploadManager.updateConfig({
+      isDebug: v !== 0,
+    });
   }
 
   // autoUpgrade
@@ -47,6 +53,9 @@ class Settings {
   }
   set resumeUpload(v: number) {
     localStorage.setItem(SettingKey.ResumeUpload, v.toString());
+    ipcUploadManager.updateConfig({
+      resumeUpload: v !== 0,
+    });
   }
 
   // maxUploadConcurrency
@@ -55,6 +64,9 @@ class Settings {
   }
   set maxUploadConcurrency(v: number) {
     localStorage.setItem(SettingKey.MaxUploadConcurrency, v.toString());
+    ipcUploadManager.updateConfig({
+      maxConcurrency: v,
+    });
   }
 
   // multipartUploadSize
@@ -62,8 +74,11 @@ class Settings {
     return parseInt(localStorage.getItem(SettingKey.MultipartUploadSize) || "8");
   }
   set multipartUploadSize(v: number) {
-    if (v % 4 == 0) {
+    if (v >= 1 && v <= 1024) {
       localStorage.setItem(SettingKey.MultipartUploadSize, v.toString());
+      ipcUploadManager.updateConfig({
+        multipartUploadSize: v * ByteSize.MB,
+      });
     }
   }
 
@@ -73,6 +88,9 @@ class Settings {
   }
   set multipartUploadThreshold(v: number) {
     localStorage.setItem(SettingKey.MultipartUploadThreshold, v.toString());
+    ipcUploadManager.updateConfig({
+      multipartUploadThreshold: v * ByteSize.MB,
+    });
   }
 
   // uploadSpeedLimitEnabled
@@ -81,6 +99,15 @@ class Settings {
   }
   set uploadSpeedLimitEnabled(v: number) {
     localStorage.setItem(SettingKey.UploadSpeedLimitEnabled, v.toString());
+    if (v === 0) {
+      ipcUploadManager.updateConfig({
+        uploadSpeedLimit: 0,
+      });
+    } else {
+      ipcUploadManager.updateConfig({
+        uploadSpeedLimit: this.uploadSpeedLimitKBperSec * ByteSize.KB,
+      });
+    }
   }
 
   // uploadSpeedLimitKBperSec
@@ -89,6 +116,11 @@ class Settings {
   }
   set uploadSpeedLimitKBperSec (v) {
     localStorage.setItem(SettingKey.UploadSpeedLimit, v.toString());
+    if (this.uploadSpeedLimitEnabled) {
+      ipcUploadManager.updateConfig({
+        uploadSpeedLimit: v * ByteSize.KB,
+      });
+    }
   }
 
 // downloadSpeedLimitKBperSec

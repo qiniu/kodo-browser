@@ -22,6 +22,7 @@ module.exports = function(webpackEnv) {
     resolve: {
       alias: {
         '@': paths.appRenderer,
+        '@common': paths.appCommon,
         '@template-mappings': paths.appRendererTemplateMappings,
       },
       extensions: ['.ts', '.js'],

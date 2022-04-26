@@ -4,7 +4,7 @@ import path from 'path'
 import sanitize from 'sanitize-filename'
 import { KODO_MODE } from 'kodo-s3-adapter-sdk'
 
-import { DownloadJob } from '@/models/job'
+import { DownloadJob } from '@common/models/job'
 import webModule from '@/app-module/web'
 
 import NgConfig from '@/ng-config'

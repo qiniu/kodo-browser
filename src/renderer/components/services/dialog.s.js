@@ -1,4 +1,4 @@
-import { remote as electronRemote } from 'electron'
+import { dialog as electronDialog } from '@electron/remote'
 
 import webModule from '../../app-module/web'
 
@@ -12,8 +12,6 @@ webModule
   .factory(DIALOG_FACTORY_NAME, [
     "$uibModal",
     function ($modal) {
-      var dialog = electronRemote.dialog;
-
       return {
         alert: alert,
         confirm: confirm,
@@ -25,27 +23,33 @@ webModule
       function showUploadDialog(fn) {
         var isMac = navigator.userAgent.indexOf("Macintosh") != -1;
 
-        dialog.showOpenDialog({
-            title: "Upload",
-            properties: isMac ?
-              ["openFile", "openDirectory", "multiSelections"] :
-              ["openFile", "multiSelections"]
-          },
-          function (filePaths) {
-            if (typeof fn == "function") fn(filePaths);
-          }
-        );
+        electronDialog.showOpenDialog(
+            {
+              title: "Upload",
+              properties: isMac ?
+                ["openFile", "openDirectory", "multiSelections"] :
+                ["openFile", "multiSelections"]
+            },
+          )
+            .then(({canceled, filePaths}) => {
+              if (!canceled && typeof fn == "function") {
+                fn(filePaths);
+              }
+            });
       }
 
       function showDownloadDialog(fn) {
-        dialog.showOpenDialog({
-            title: "Download",
-            properties: ["openDirectory"]
-          },
-          function (filePaths) {
-            if (typeof fn == "function") fn(filePaths);
-          }
-        );
+        electronDialog.showOpenDialog(
+            {
+              title: "Download",
+              properties: ["openDirectory"]
+            },
+          )
+            .then(({canceled, filePaths}) => {
+              if (!canceled && typeof fn == "function") {
+                fn(filePaths);
+              }
+            });
       }
 
       /**

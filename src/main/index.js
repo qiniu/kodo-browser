@@ -1,7 +1,7 @@
-const electron = require("electron");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const electron = require("electron");
 const {
   app,
   globalShortcut,
@@ -10,6 +10,8 @@ const {
   ipcMain,
   BrowserWindow
 } = electron;
+const electronRemote = require('@electron/remote/main');
+electronRemote.initialize();
 const {
   fork
 } = require("child_process");
@@ -69,6 +71,10 @@ let createWindow = () => {
     minHeight: 600,
     title: "Kodo Browser",
     icon: path.join(iconRoot, "icon.ico"),
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
   };
 
   let confirmForWorkers = (e) => {
@@ -165,6 +171,7 @@ let createWindow = () => {
   win = new BrowserWindow(opt);
   win.setTitle(opt.title);
   win.setMenuBarVisibility(false);
+  electronRemote.enable(win.webContents);
 
   // Emitted before window reload
   win.on("beforeunload", confirmForWorkers);

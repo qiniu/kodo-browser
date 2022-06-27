@@ -23,6 +23,7 @@ webModule.factory(JOB_UTIL_FACTORY_NAME, [
           return "danger";
         case "finished":
           return "success";
+        case "duplicated":
         case "stopped":
           return "warning";
         default:
@@ -37,6 +38,7 @@ webModule.factory(JOB_UTIL_FACTORY_NAME, [
           return isUp
             ? T("status.running.uploading")
             : T("status.running.downloading"); //'正在上传':'正在下载';
+        case "duplicated":
         case "failed":
           return T("status.failed"); //'失败';
         case "finished":

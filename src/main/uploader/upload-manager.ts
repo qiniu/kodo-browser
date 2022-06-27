@@ -425,7 +425,7 @@ export default class UploadManager {
                     },
                 );
 
-                if (job.status === Status.Running) {
+                if ([Status.Waiting, Status.Running].includes(job.status)) {
                     job.stop();
                 }
 
@@ -481,11 +481,20 @@ export default class UploadManager {
         this.scheduleJobs();
     }
 
-    public stopAllJobs(): void {
+    public stopAllJobs({
+        matchStatus,
+    }: {
+        matchStatus: Status[],
+    } = {
+        matchStatus: [],
+    }): void {
         this.jobIds
             .map(id => this.jobs.get(id))
             .forEach(job => {
-                if (!job) {
+                if (!job || ![Status.Running, Status.Waiting].includes(job.status)) {
+                    return;
+                }
+                if (!matchStatus.includes(job.status)){
                     return;
                 }
                 job.stop();

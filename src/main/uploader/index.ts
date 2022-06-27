@@ -111,8 +111,44 @@ process.on("message", (message: UploadMessage) => {
     }
 });
 
+let isCleanup = false;
+function handleExit() {
+    if (isCleanup) {
+        return Promise.resolve();
+    }
+
+    isCleanup = true;
+
+    uploadManager.stopAllJobs({
+        matchStatus: [Status.Waiting],
+    });
+
+    return new Promise<void>((resolve, reject) => {
+        try {
+            // resolve inflight jobs persisted status not correct
+            setTimeout(() => {
+                uploadManager.stopAllJobs({
+                    matchStatus: [Status.Running],
+                });
+                uploadManager.persistJobs(true);
+                resolve();
+            }, 2000);
+        } catch {
+            reject()
+        }
+    });
+}
+
+
 process.on("exit", () => {
-    uploadManager.persistJobs(true);
+    handleExit()
+});
+
+process.on('SIGTERM', () => {
+    handleExit()
+        .then(() => {
+            process.exit(0);
+        });
 });
 
 function handleJobDone(jobId: string, job?: UploadJob) {

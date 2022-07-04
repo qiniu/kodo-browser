@@ -1,4 +1,4 @@
-import Duration from "@/const/duration";
+import Duration from "@common/const/duration";
 
 export function leftTime(ms: number): string {
     if (Number.isNaN(ms)) {

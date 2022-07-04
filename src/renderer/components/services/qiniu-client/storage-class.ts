@@ -1,15 +1,8 @@
 import { S3_MODE } from "kodo-s3-adapter-sdk";
+import StorageClass from "@common/models/storage-class";
 
 import { getRegionsStorageClasses } from './regions';
 import { GetAdapterOptionParam } from "./common";
-
-interface StorageClass {
-    fileType: number
-    kodoName: string
-    s3Name: string
-    billingI18n: Record<string, string>
-    nameI18n: Record<string, string>
-}
 
 const regionsStorageClasses = new Map<string, StorageClass[]>();
 

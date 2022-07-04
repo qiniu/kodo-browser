@@ -8,7 +8,7 @@ jest.mock("electron", () => ({
 }));
 
 import { ipcRenderer } from "electron";
-import * as AppConfig from "@/const/app-config";
+import * as AppConfig from "@common/const/app-config";
 
 import { EventKey, IpcJobEvent, Status } from "./types";
 import { downloadOptionsFromResumeJob } from "./_mock-helpers_/data";

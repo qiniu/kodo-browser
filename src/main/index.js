@@ -14,6 +14,7 @@ const {
   fork
 } = require("child_process");
 const { UplogBuffer } = require("kodo-s3-adapter-sdk/dist/uplog");
+const { UploadAction } = require("@common/ipc-actions/upload");
 
 ///*****************************************
 let root = path.dirname(__dirname);
@@ -30,6 +31,7 @@ const iconRoot = path.join(root, 'renderer', 'icons')
 let win;
 let winBlockedTid; // time interval for close
 let forkedWorkers = new Map();
+let uploadRunning = 0;
 
 switch (process.platform) {
 case "darwin":
@@ -70,7 +72,11 @@ let createWindow = () => {
   };
 
   let confirmForWorkers = (e) => {
-    if (forkedWorkers.size <= 0) {
+    const runningJobs = forkedWorkers.size -
+        1 + // upload-worker
+        uploadRunning; // upload running jobs;
+
+    if (runningJobs <= 0) {
       return;
     }
 
@@ -119,8 +125,9 @@ let createWindow = () => {
         // cancel close
         e.preventDefault();
 
+        clearInterval(winBlockedTid);
         winBlockedTid = setInterval(() => {
-          if (forkedWorkers.size > 0) {
+          if (runningJobs > 0) {
             return;
           }
 
@@ -145,7 +152,7 @@ let createWindow = () => {
     // prevent if there still alive workers.
     confirmCb(dialog.showMessageBox({
       type: "warning",
-      message: `There ${forkedWorkers.size > 1 ? "are" : "is"} still ${forkedWorkers.size} ${forkedWorkers.size > 1 ? "jobs" : "job"} in processing, are you sure to quit?`,
+      message: `There ${runningJobs > 1 ? "are" : "is"} still ${runningJobs} ${runningJobs > 1 ? "jobs" : "job"} in processing, are you sure to quit?`,
       buttons: btns
     }));
   };
@@ -233,6 +240,41 @@ let createWindow = () => {
 
 ///*****************************************
 // listener events send from renderer process
+ipcMain.on("UploaderManager", (event, message) => {
+  const processName = "UploaderProcess";
+  let uploaderProcess = forkedWorkers.get(processName);
+  if (!uploaderProcess) {
+    uploaderProcess = fork(
+        path.join(root, "main", "uploader-bundle.js"),
+        // is there a better way to pass parameters?
+        ['--config-json', JSON.stringify({resumeUpload: true, maxConcurrency: 5})],
+        {
+          cwd: root,
+          silent: false,
+        },
+    );
+    forkedWorkers.set(processName, uploaderProcess);
+
+    uploaderProcess.on("exit", () => {
+      forkedWorkers.delete(processName)
+    });
+
+    uploaderProcess.on("message", (message) => {
+      if (win && !win.isDestroyed()) {
+        event.sender.send("UploaderManager-reply", message);
+      }
+      switch (message.action) {
+        case UploadAction.UpdateUiData: {
+          uploadRunning = message.data.running;
+          break;
+        }
+      }
+    });
+  }
+
+  uploaderProcess.send(message);
+});
+
 ipcMain.on("asynchronous", (event, data) => {
   switch (data.key) {
   case "getStaticServerPort":
@@ -626,7 +668,11 @@ app.on("window-all-closed", () => {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   //if (process.platform !== 'darwin') {
-  app.quit();
+
+  // resolve inflight jobs persisted status not correct
+  setTimeout(() => {
+    app.quit();
+  }, 3000);
   //}
 });
 

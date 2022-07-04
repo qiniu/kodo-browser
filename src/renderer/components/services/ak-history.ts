@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 
-import * as AppConfig from "@/const/app-config";
+import * as AppConfig from "@common/const/app-config";
 
 class AkHistory {
     isPublicCloud: boolean

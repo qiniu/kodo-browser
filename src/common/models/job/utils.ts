@@ -8,8 +8,8 @@ import * as KodoNav from "@/const/kodo-nav"
 export interface LocalPath {
     name: string,
     path: string,
-    size?: number,
-    mtime?: number,
+    size?: number, // bytes
+    mtime?: number, // ms timestamp
 }
 // parseLocalPath: get name and path from local path
 export function parseLocalPath(p: string): LocalPath {
@@ -22,8 +22,8 @@ export function parseLocalPath(p: string): LocalPath {
 export interface RemotePath {
     bucket: string,
     key: string,
-    size?: number,
-    mtime?: number,
+    size?: number, // bytes
+    mtime?: number, // ms timestamp
 }
 // parseKodoPath: get bucket and key from KodoPath
 export function parseKodoPath(kodoPath: string): RemotePath {

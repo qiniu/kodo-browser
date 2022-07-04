@@ -35,7 +35,6 @@ export interface IpcUploadJob {
         secretKey: string,
         ucUrl?: string,
         regions: Region[],
-        backendMode: BackendMode,
 
         userNatureLanguage: NatureLanguage,
     },

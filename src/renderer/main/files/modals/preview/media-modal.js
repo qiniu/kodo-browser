@@ -1,6 +1,7 @@
 import angular from 'angular'
 
 import webModule from '@/app-module/web'
+import Duration from "@common/const/duration";
 
 const MEDIA_MODAL_CONTROLLER_NAME = 'mediaModalCtrl'
 
@@ -45,7 +46,7 @@ webModule
       }
 
       function genURL() {
-        selectedDomain.domain.signatureUrl(objectInfo.path, qiniuClientOpt).then((url) => {
+        selectedDomain.domain.signatureUrl(objectInfo.path, 12 * Duration.Hour / Duration.Second, qiniuClientOpt).then((url) => {
           $scope.src_origin = url.toString();
           $scope.src = $sce.trustAsResourceUrl(url.toString());
 

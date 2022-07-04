@@ -1299,6 +1299,11 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@root/walk@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@root/walk/-/walk-1.1.0.tgz#784d81e8b8d3fb3bedbb0e18952e4ea577e3796a"
+  integrity sha512-FfXPAta9u2dBuaXhPRawBcijNC9rmKVApmbi6lIZyg36VR/7L02ytxoY5K/14PJlHqiBUoYII73cTlekdKTUOw==
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.npmjs.org/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -1447,6 +1452,11 @@
   version "7.0.9"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.9.tgz#97edc9037ea0c38585320b28964dde3b39e4660d"
   integrity sha512-qcUXuemtEu+E5wZSJHNxUXeCZhAfXKQ41D+duX+VYPde7xyEVZci+/oXKJL13tnRs9lR2pr4fod59GT6/X1/yQ==
+
+"@types/lodash@^4.14.182":
+  version "4.14.182"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.182.tgz#05301a4d5e62963227eaafe0ce04dd77c54ea5c2"
+  integrity sha512-/THyiqyQAP9AfARo4pF+aCGcyiQ94tX/Is2I7HofNRqoYLgN1PBoOWu2/zTA5zMxzP5EFutMtWtGAFRKUe961Q==
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -6925,10 +6935,10 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-kodo-s3-adapter-sdk@0.2.29:
-  version "0.2.29"
-  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.29.tgz#28e518127cbb1daf6ef70877bc3a827e63c98dd5"
-  integrity sha512-SVIqTGbF2g33UzS769in81sD5fSi8XkXcp/lzdkRfl2qnNH91ECg0QgPcVUztvQ2KkjgiTpTRW6iNPnu8TVO6g==
+kodo-s3-adapter-sdk@0.2.30:
+  version "0.2.30"
+  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.2.30.tgz#6f9ff034eb75e33979aa638fbd2c921df2a903b4"
+  integrity sha512-E1BpNCSSwSG40wJAPT3yAz04jLB4g/FG6qB6uYQNNNXtsZ6JNjlZui1KJq8vuf9b7I+i6zYkpQW860V8CEQySg==
   dependencies:
     async-lock "^1.2.4"
     aws-sdk "^2.800.0"

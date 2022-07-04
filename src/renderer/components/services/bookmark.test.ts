@@ -3,7 +3,7 @@ import { mocked } from "ts-jest/utils";
 import mockFs from "mock-fs";
 import fs from 'fs'
 
-import { config_path } from "@/const/app-config";
+import { config_path } from "@common/const/app-config";
 import * as KodoNav from "@/const/kodo-nav";
 
 import * as AuthInfo from "./authinfo";

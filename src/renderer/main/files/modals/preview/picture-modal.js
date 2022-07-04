@@ -1,5 +1,7 @@
 import angular from 'angular'
 
+import Duration from "@common/const/duration";
+
 import webModule from '@/app-module/web'
 import { SIZE_FORMAT_FILTER_NAME } from "@/components/filters/formater";
 
@@ -52,7 +54,7 @@ webModule
       }
 
       function getContent() {
-        selectedDomain.domain.signatureUrl(objectInfo.path, qiniuClientOpt).then((url) => {
+        selectedDomain.domain.signatureUrl(objectInfo.path, 12 * Duration.Hour / Duration.Second, qiniuClientOpt).then((url) => {
           $timeout(() => {
             $scope.imgsrc = url.toString();
           });

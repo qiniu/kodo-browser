@@ -1,7 +1,7 @@
 import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 import { ObjectInfo } from "kodo-s3-adapter-sdk/dist/adapter";
 import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
-import Duration from "@/const/duration";
+import Duration from "@common/const/duration";
 
 export enum ItemType {
     Directory = "folder",

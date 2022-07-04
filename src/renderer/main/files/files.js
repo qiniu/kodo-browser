@@ -1324,7 +1324,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
           okCallback: () => {
             return ({ files, uploadOptions }) => {
               $scope.handlers.uploadFilesHandler(
-                files.map(qiniuPath.fromLocalPath),
+                files,
                 angular.copy($scope.currentInfo),
                 uploadOptions,
               );

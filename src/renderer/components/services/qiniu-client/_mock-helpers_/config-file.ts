@@ -1,6 +1,6 @@
 import mockFs from "mock-fs";
 
-import { config_path } from "@/const/app-config";
+import { config_path } from "@common/const/app-config";
 
 const CONFIG_MOCK_CONTENT = `{
     "uc_url": "https://mocked-uc.qiniu.io",

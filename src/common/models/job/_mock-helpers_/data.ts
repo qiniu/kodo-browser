@@ -3,7 +3,8 @@ export const uploadOptionsFromNewJob = {
         "accessKey": "NgKd0BmebvsFERFEBfKVVZGeGn7VsZQe_H_AunOC",
         "secretKey": "lp4Zv3Gi_7CHtxNTcJx2Pum5hUJB3gHROcg4vp0i",
         ucUrl: "",
-        "regions": []
+        "regions": [],
+        backendMode: "kodo" as const,
     },
     // ↑ manual add ↓ from file
     storageClasses: [], // break change from 1.0.16, older task will be uploaded with standard storage class
@@ -14,15 +15,16 @@ export const uploadOptionsFromNewJob = {
     },
     "from": {
         "name": "out.gif",
-        "path": "/local/path/to/out.gif"
+        "path": "/local/path/to/out.gif",
+        "size": 1024,
+        "mtime": 1651042948862,
     },
     "overwrite": false,
     storageClassName: "Standard" as const,
-    backendMode: "kodo" as const,
     "resumeUpload": false,
     "multipartUploadSize": 16,
     "multipartUploadThreshold": 100,
-    uploadSpeedLimit: 0, // break change from 1.0.16, 0 means no limit
+    uploadSpeedLimit: 0, // break change from 1.0.16, 0 means no limit. remove persist from 1.0.18
     "isDebug": false,
 
     userNatureLanguage: 'zh-CN' as const, // break change from 1.0.16
@@ -33,9 +35,11 @@ export const uploadOptionsFromResumeJob = {
         "accessKey": "NgKd0BmebvsFERFEBfKVVZGeGn7VsZQe_H_AunOC",
         "secretKey": "lp4Zv3Gi_7CHtxNTcJx2Pum5hUJB3gHROcg4vp0i",
         ucUrl: "", // break change from 1.0.16, "" means public
-        "regions": []
+        "regions": [],
+        backendMode: "kodo" as const,
     },
     // ↑ manual add ↓ from file
+    storageClasses: [], // break change from 1.0.16, older task will be uploaded with standard storage class
     "region": "cn-east-1",
     "to": {
         "bucket": "kodo-browser-dev",
@@ -52,7 +56,6 @@ export const uploadOptionsFromResumeJob = {
         "loaded": 17825792,
         "resumable": false
     },
-    "status": "stopped",
     "message": "",
     "uploadedId": "61a5f55fda9ed605fd263bc2region02z0",
     "uploadedParts": [
@@ -75,7 +78,7 @@ export const uploadOptionsFromResumeJob = {
     "resumeUpload": false,
     "multipartUploadSize": 16,
     "multipartUploadThreshold": 100,
-    "uploadSpeedLimit": false,
+    "uploadSpeedLimit": 0,
     "isDebug": false,
 
     userNatureLanguage: 'zh-CN' as const, // break change from 1.0.16

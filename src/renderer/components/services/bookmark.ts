@@ -3,7 +3,7 @@ import path from 'path'
 
 import moment from 'moment'
 
-import * as AppConfig from '@/const/app-config'
+import * as AppConfig from '@common/const/app-config'
 import * as KodoNav from '@/const/kodo-nav'
 import * as AuthInfo from './authinfo'
 

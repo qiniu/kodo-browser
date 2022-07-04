@@ -107,7 +107,7 @@
     "kodo-s3-adapter-sdk": "0.2.30",
     "lodash": "^4.17.21",
     "mime": "^2.3.1",
-    "moment": "^2.22.2",
+    "moment": "^2.29.2",
     "qiniu-path": "^0.0.3",
     "request": "^2.88.0",
     "sanitize-filename": "^1.6.1",

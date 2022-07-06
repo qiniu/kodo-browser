@@ -171,8 +171,8 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
         clientOptions: {
           accessKey: AuthInfo.get().id,
           secretKey: AuthInfo.get().secret,
-          ucUrl: NgConfig.ucUrl || "",
-          regions: NgConfig.regions || [],
+          ucUrl: ngConfig.load().ucUrl || "",
+          regions: ngConfig.load().regions || [],
         },
         uploadOptions: {
           userNatureLanguage: localStorage.getItem("lang") || "zh-CN",
@@ -233,8 +233,8 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
         clientOptions: {
           accessKey: AuthInfo.get().id,
           secretKey: AuthInfo.get().secret,
-          ucUrl: ngConfig.ucUrl || "",
-          regions: ngConfig.regionId || [],
+          ucUrl: ngConfig.load().ucUrl || "",
+          regions: ngConfig.load().regions || [],
           backendMode: bucketInfo.qiniuBackendMode,
         },
       });

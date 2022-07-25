@@ -5,7 +5,7 @@
     </a>
 
     <a href="" ng-click="toggleTransVisible(true);transTab = 2">
-      <i class="fa fa-cloud-download"></i> {{totalStat.downDone}}/{{lists.downloadJobList.length}}
+      <i class="fa fa-cloud-download"></i> {{totalStat.downDone}}/{{totalStat.down}}
     </a>
   </div>
 
@@ -21,7 +21,7 @@
       <li role="presentation" ng-class="{active:transTab==2}">
         <a href="#" ng-click="transTab=2">
           <i class="fa fa-download"></i> {{'download'|translate}}
-          <label class="badge">{{totalStat.downDone}}/{{lists.downloadJobList.length}}</label>
+          <label class="badge">{{totalStat.downDone}}/{{totalStat.down}}</label>
         </a>
       </li>
 

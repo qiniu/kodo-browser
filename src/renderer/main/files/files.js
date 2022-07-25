@@ -1201,7 +1201,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
           folderPaths[0] += path.sep;
         }
         const to = qiniuPath.fromLocalPath(folderPaths[0]);
-        $scope.handlers.downloadFilesHandler([fromInfo], to);
+        $scope.handlers.downloadFilesHandler([fromInfo], to, angular.copy($scope.currentInfo));
       });
     }
 
@@ -1484,7 +1484,7 @@ webModule.controller(FILES_CONTROLLER_NAME, [
        * @param fromS3Path {array}  item={region, bucket, path, name, size }
        * @param toLocalPath {string}
        */
-      $scope.handlers.downloadFilesHandler(selectedFiles, localPath);
+      $scope.handlers.downloadFilesHandler(selectedFiles, localPath, angular.copy($scope.currentInfo));
     }
 
     /**

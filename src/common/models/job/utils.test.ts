@@ -6,21 +6,23 @@ import * as JobUtils from "./utils";
 
 describe("test models/job/utils.ts", () => {
     describe("test parseLocalPath", () => {
-        it("unix-like path", () => {
-            expect(JobUtils.parseLocalPath("/path/to/Some/file.txt"))
-                .toEqual({
-                    name: "file.txt",
-                    path: "/path/to/Some/file.txt",
-                });
-        });
-        // TODO: check on win system
-        // it("win path", () => {
-        //     expect(JobUtils.parseLocalPath("D:\\path\\to\\Some\\file.txt"))
-        //         .toEqual({
-        //             name: "file.txt",
-        //             path: "D:\\path\\to\\Some\\file.txt",
-        //         });
-        // });
+        if (process.platform === "win32") {
+            it("win path", () => {
+                expect(JobUtils.parseLocalPath("D:\\path\\to\\Some\\file.txt"))
+                    .toEqual({
+                        name: "file.txt",
+                        path: "D:\\path\\to\\Some\\file.txt",
+                    });
+            });
+        } else {
+            it("unix-like path", () => {
+                expect(JobUtils.parseLocalPath("/path/to/Some/file.txt"))
+                    .toEqual({
+                        name: "file.txt",
+                        path: "/path/to/Some/file.txt",
+                    });
+            });
+        }
     });
 
     describe("test parseKodoPath", () => {

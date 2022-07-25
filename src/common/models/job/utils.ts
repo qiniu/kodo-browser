@@ -40,6 +40,10 @@ export function parseKodoPath(kodoPath: string): RemotePath {
     };
 }
 
+export function isLocalPath(p: LocalPath | RemotePath): p is LocalPath {
+    return p.hasOwnProperty("name");
+}
+
 // get etag
 function sha1(content: Buffer): Buffer {
     return crypto.createHash("sha1")
@@ -86,7 +90,9 @@ function getEtagByBuffer(content: Buffer, callback: (etag: string) => void): voi
     }
 }
 function getEtagByStream(dataStream: ReadableStream, callback: (etag: string) => void): void {
-    // 以4M为单位分割，why?
+    // 以 4M 为单位分割，why?
+    // 对外暴露的方法仅有自动下载新版本，猜测时用于验证是否下载完整，后续 crc 上线后需要修改这里
+    // 4M 是上传新版本到七牛空间时采用的分片
     const blockSize = 4*1024*1024;
     const sha1String: Buffer[] = [];
     let blockCount = 0;

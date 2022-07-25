@@ -3,18 +3,18 @@
 
     <div class="pull-left" style="position:relative">
       <input type="text" cleanable-input placeholder="{{'transframe.search.placeholder'|translate}}"
-        class="form-control input-sm" style="width:150px;" ng-model="sch.downname">
+        class="form-control input-sm" style="width:150px;" ng-model="transSearch.downloadJob">
     </div>
 
     <div class="pull-left">
       <a href="" ng-if="totalStat.downStopped>0" class="btn btn-link btn-sm" style="text-decoration:none"
-        ng-click="sch.downname='stopped'">
+        ng-click="transSearch.downloadJob='stopped'">
         <span class="text-warning">
           <i class="fa fa-info-circle"></i> {{totalStat.downStopped}}
         </span>
       </a>
       <a href="" ng-if="totalStat.downFailed>0" class="btn btn-link btn-sm" style="text-decoration:none"
-        ng-click="sch.downname='failed'">
+        ng-click="transSearch.downloadJob='failed'">
         <span class="text-danger">
           <i class="fa fa-remove"></i> {{totalStat.downFailed}}
         </span>
@@ -68,18 +68,18 @@
   <div class="clearfix" style="overflow:auto;height:343px;" long-scroll-list load-more="loadMoreDownloadItems"
     trigger-size="100">
 
-    <ul class="list-group list-condensed" style="margin:0px;">
+    <ul class="list-group list-condensed" style="margin:0; padding-bottom: 30px;">
       <li class="list-group-item"
-        ng-repeat="item in lists.downloadJobList|listFilter:schKeyFn:sch.downname|limitTo:limitToNum track by item.id">
+        ng-repeat="item in lists.downloadJobList track by item.id">
         <div class="col-sm-4">
           <div class="text-overflow" uib-tooltip-template="'download-path-tooltip-tpl.html'"
             tooltip-trigger="mouseenter" tooltip-delay="500" tooltip-placement="left" tooltip-append-to-body="true">
-            {{$index+1}}. {{::item.options.to.name}}
+            {{$index+1}}. {{::item.to.name}}
           </div>
 
           <div class="progress mg0" style="height:4px;width:100%">
             <div class="progress-bar progress-bar-{{item.status|statusCls}}"
-              ng-style="{width: (item.prog.loaded|persent:item.prog.total:item.status) + '%'}"></div>
+              ng-style="{width: (item.progress.loaded|persent:item.progress.total:item.status) + '%'}"></div>
           </div>
         </div>
 
@@ -95,28 +95,29 @@
         </div>
 
         <div class="col-sm-4 text-overflow">
-          <small ng-show="item.prog.total">
+          <small ng-show="item.progress.total">
             <span
-              ng-if="item.prog.loaded!=item.prog.total">{{item.prog.loaded|sizeFormat}}/</span>{{item.prog.total|sizeFormat}}
+              ng-if="item.progress.loaded!=item.progress.total">{{item.progress.loaded|sizeFormat}}/</span>{{item.progress.total|sizeFormat}}
           </small>
-          <small ng-show="item.predictLeftTime">, {{item.predictLeftTime|leftTimeFormat}}</small>
+          <small ng-show="item.estimatedTime">, {{item.estimatedTime|leftTimeFormat}}</small>
         </div>
 
         <div class="col-sm-2 text-right">
-          <a ng-if="item.prog.resumable && (item.status=='running' || item.status=='waiting'|| item.status=='verifying')"
-            href="" ng-click="item.stop()" class="btn btn-default btn-xs" uib-tooltip="{{'download.job.pause'|translate}}"
-            tooltip-placement="left">
+          <a ng-if="item.progress.resumable && (item.status=='running' || item.status=='waiting'|| item.status=='verifying')"
+            href="" ng-click="stopItem(item)" class="btn btn-default btn-xs" uib-tooltip="{{'download.job.pause'|translate}}"
+            tooltip-placement="left" tooltip-append-to-body="true">
             <i class="glyphicon glyphicon-pause text-warning"></i>
           </a>
 
           <a ng-if="item.status=='stopped' || item.status=='failed' || item.status=='finished'" href=""
             ng-click="showRemoveItem(item)" class="btn btn-default btn-xs" uib-tooltip="{{'download.job.remove'|translate}}"
-            tooltip-placement="left">
+            tooltip-placement="left" tooltip-append-to-body="true">
             <i class="glyphicon glyphicon-remove text-danger"></i>
           </a>
 
           <a ng-if="item.status=='stopped' || item.status=='failed'" href="" ng-click="checkStartJob(item)"
-            class="btn btn-default btn-xs" uib-tooltip="{{'download.job.retry'|translate}}" tooltip-placement="left">
+            class="btn btn-default btn-xs" uib-tooltip="{{'download.job.retry'|translate}}"
+            tooltip-placement="left" tooltip-append-to-body="true">
             <i class="glyphicon glyphicon-play text-success"></i>
           </a>
         </div>
@@ -126,7 +127,7 @@
     </ul>
 
     <div class="clearfix text-center" style="padding:4px;">
-      <span ng-if="limitToNum < (lists.downloadJobList|listFilter:schKeyFn:sch.downname).length">
+      <span ng-if="limitToNum < lists.downloadJobList.length">
         {{'loading'|translate}}
       </span>
     </div>
@@ -137,7 +138,7 @@
 
 <script type="text/ng-template" id="download-path-tooltip-tpl.html">
   <div class="break text-left">
-    <div><label class="text-success">From:</label> kodo://{{item.options.from.bucket}}/{{item.options.from.key}}</div>
-    <div><label class="text-primary">To:</label> {{item.options.to.path}}</div>
+    <div><label class="text-success">From:</label> kodo://{{item.from.bucket}}/{{item.from.key}}</div>
+    <div><label class="text-primary">To:</label> {{item.to.path}}</div>
   </div>
 </script>

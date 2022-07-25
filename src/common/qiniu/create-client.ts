@@ -4,8 +4,7 @@ import {ModeOptions} from "kodo-s3-adapter-sdk/dist/qiniu";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
 import * as AppConfig from "@common/const/app-config";
-import {ClientOptions} from "@common/ipc-actions/upload";
-import {BackendMode} from "@common/const/qiniu";
+import {BackendMode, ClientOptions} from "./types";
 
 export default function createQiniuClient(
     clientOptions: ClientOptions,

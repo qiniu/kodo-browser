@@ -6,7 +6,7 @@ import {
     UploadAction,
     UploadMessage
 } from "@common/ipc-actions/upload";
-import UploadManager from "./upload-manager";
+import UploadManager from "./transfer-managers/upload-manager";
 import UploadJob from "@common/models/job/upload-job";
 import {Status} from "@common/models/job/types";
 
@@ -39,8 +39,8 @@ process.on("message", (message: UploadMessage) => {
             uploadManager.createUploadJobs(
                 message.data.filePathnameList,
                 message.data.destInfo,
-                message.data.uploadOptions,
                 message.data.clientOptions,
+                message.data.uploadOptions,
                 {
                     jobsAdding: () => {
                         uploadManager.persistJobs();
@@ -52,10 +52,10 @@ process.on("message", (message: UploadMessage) => {
                                 filePathnameList: message.data.filePathnameList,
                                 destInfo: message.data.destInfo,
                             },
-                        }
+                        };
                         process.send?.(replyMessage);
-                    }
-                }
+                    },
+                },
             );
             break;
         }
@@ -80,7 +80,7 @@ process.on("message", (message: UploadMessage) => {
             break;
         }
         case UploadAction.StartJob: {
-            uploadManager.startJob(message.data.jobId, message.data.forceOverwrite);
+            uploadManager.startJob(message.data.jobId, message.data.options);
             break;
         }
         case UploadAction.RemoveJob: {
@@ -102,7 +102,7 @@ process.on("message", (message: UploadMessage) => {
         }
         case UploadAction.RemoveAllJobs: {
             uploadManager.removeAllJobs();
-            uploadManager.persistJobs();
+            uploadManager.persistJobs(true);
             break;
         }
         default: {
@@ -141,7 +141,7 @@ function handleExit() {
 
 
 process.on("exit", () => {
-    handleExit()
+    handleExit();
 });
 
 process.on("SIGTERM", () => {

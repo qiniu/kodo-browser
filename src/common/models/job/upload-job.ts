@@ -3,28 +3,21 @@ import {promises as fsPromises} from "fs";
 // @ts-ignore
 import mime from "mime";
 import lodash from "lodash";
-import {Qiniu, Region, Uploader} from "kodo-s3-adapter-sdk";
+import {Uploader} from "kodo-s3-adapter-sdk";
 import {Adapter, Part, StorageClass} from "kodo-s3-adapter-sdk/dist/adapter";
 import {RecoveredOption} from "kodo-s3-adapter-sdk/dist/uploader";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
-import Duration from "@common/const/duration";
+import {ClientOptions, createQiniuClient} from "@common/qiniu";
 import ByteSize from "@common/const/byte-size";
-import * as AppConfig from "@common/const/app-config";
 
-import {BackendMode, Status, UploadedPart} from "./types";
-import Base from "./base"
+import {Status, UploadedPart} from "./types";
 import * as Utils from "./utils";
+import TransferJob from "./transfer-job";
 
-// if change options, remember to check PersistInfo
+// if change options, remember to check `get persistInfo()`
 interface RequiredOptions {
-    clientOptions: {
-        accessKey: string,
-        secretKey: string,
-        ucUrl: string,
-        regions: Region[],
-        backendMode: BackendMode,
-    },
+    clientOptions: ClientOptions,
 
     from: Required<Utils.LocalPath>,
     to: Utils.RemotePath,
@@ -46,12 +39,13 @@ interface UploadOptions {
     userNatureLanguage: NatureLanguage,
 }
 
-interface OptionalOptions extends UploadOptions{
+interface OptionalOptions extends UploadOptions {
     id: string,
     uploadedId: string,
     uploadedParts: UploadedPart[],
 
     status: Status,
+    message: string,
 
     prog: {
         total: number, // Bytes
@@ -59,7 +53,10 @@ interface OptionalOptions extends UploadOptions{
         resumable?: boolean,
     },
 
-    message: string,
+    onStatusChange?: (status: Status) => void,
+    onProgress?: (prog: UploadJob["prog"]) => void,
+    onPartCompleted?: (part: Part) => void,
+    onCompleted?: () => void,
 }
 
 export type Options = RequiredOptions & Partial<OptionalOptions>
@@ -113,7 +110,7 @@ type PersistInfo = {
     multipartUploadSize: OptionalOptions["multipartUploadSize"],
 }
 
-export default class UploadJob extends Base {
+export default class UploadJob extends TransferJob {
     static fromPersistInfo(
         id: string,
         persistInfo: PersistInfo,
@@ -156,24 +153,10 @@ export default class UploadJob extends Base {
     }
 
     // - create options -
-    private readonly options: Readonly<RequiredOptions & OptionalOptions>
-
-    // - for job save and log -
-    readonly id: string
-    readonly kodoBrowserVersion: string
+    protected readonly options: Readonly<RequiredOptions & OptionalOptions>
     private isForceOverwrite: boolean = false
 
-    // - for UI -
-    private __status: Status
-    // speed
-    speedTimerId?: number = undefined
-    speed: number = 0 // Bytes/s
-    predictLeftTime: number = 0 // seconds
-    // message
-    message: string
-
     // - for resume from break point -
-    prog: OptionalOptions["prog"]
     uploadedId: string
     uploadedParts: UploadedPart[]
 
@@ -181,82 +164,45 @@ export default class UploadJob extends Base {
     uploader?: Uploader
 
     constructor(config: Options) {
-        super();
-        this.id = config.id
-            ? config.id
-            : `uj-${new Date().getTime()}-${Math.random().toString().substring(2)}`;
-        this.kodoBrowserVersion = AppConfig.app.version;
+        super(config)
 
         this.options = lodash.merge({}, DEFAULT_OPTIONS, config);
 
-        this.__status = this.options.status;
-
-        this.prog = {
-            ...this.options.prog,
-        }
         this.uploadedId = this.options.uploadedId;
         this.uploadedParts = [
             ...this.options.uploadedParts,
         ];
 
-        this.message = this.options.message;
-
         // hook functions
         this.startUpload = this.startUpload.bind(this);
+        this.handleStatusChange = this.handleStatusChange.bind(this);
         this.handleProgress = this.handleProgress.bind(this);
         this.handlePartsInit = this.handlePartsInit.bind(this);
         this.handlePartPutted = this.handlePartPutted.bind(this);
     }
 
-    get accessKey(): string {
-        return this.options.clientOptions.accessKey;
-    }
-
-    // TypeScript specification (8.4.3) says...
-    // > Accessors for the same member name must specify the same accessibility
-    private set _status(value: Status) {
-        this.__status = value;
-        this.emit("statuschange", this.status);
-
-        if (
-            this.status === Status.Failed
-            || this.status === Status.Stopped
-            || this.status === Status.Finished
-            || this.status === Status.Duplicated
-        ) {
-            this.stopSpeedCounter();
-        }
-    }
-
-    get status(): Status {
-        return this.__status
-    }
-
-    get isNotRunning(): boolean {
-        return this.status !== Status.Running;
-    }
-
     get uiData() {
         return {
-            id: this.id,
+            ...super.uiData,
             from: this.options.from,
-            to: this.options.to,
-            status: this.status,
-            speed: this.speed,
-            estimatedTime: this.predictLeftTime,
-            progress: this.prog,
-            message: this.message,
-        }
+        };
     }
 
     async start(
-        forceOverwrite: boolean = false,
+        options?: {
+            forceOverwrite: boolean
+        },
     ): Promise<void> {
         if (this.status === Status.Running || this.status === Status.Finished) {
             return;
         }
 
-        if (forceOverwrite) {
+        this.message = "";
+        this._status = Status.Running;
+
+        this.startSpeedCounter();
+
+        if (options?.forceOverwrite) {
             this.isForceOverwrite = true;
         }
 
@@ -264,36 +210,13 @@ export default class UploadJob extends Base {
             console.log(`Try uploading ${this.options.from.path} to kodo://${this.options.to.bucket}/${this.options.to.key}`);
         }
 
-        this.message = ""
-
-        this._status = Status.Running;
-
         // create client
-        const qiniu = new Qiniu(
-            this.options.clientOptions.accessKey,
-            this.options.clientOptions.secretKey,
-            this.options.clientOptions.ucUrl,
-            `Kodo-Browser/${this.kodoBrowserVersion}/ioutil`,
-            this.options.clientOptions.regions,
-        );
-        const qiniuClient = qiniu.mode(
-            this.options.clientOptions.backendMode,
-            {
-                appName: 'kodo-browser/ioutil',
-                appVersion: this.kodoBrowserVersion,
-                appNatureLanguage: this.options.userNatureLanguage,
-                // disable uplog when use customize cloud
-                // because there isn't a valid access key of uplog
-                uplogBufferSize: this.options.clientOptions.ucUrl ? -1 : undefined,
-                requestCallback: () => {
-                },
-                responseCallback: () => {
-                },
-            },
-        );
+        const qiniuClient = createQiniuClient(this.options.clientOptions, {
+            userNatureLanguage: this.options.userNatureLanguage,
+            isDebug: this.options.isDebug,
+        });
 
         // upload
-        this.startSpeedCounter();
         await qiniuClient.enter(
             "uploadFile",
             this.startUpload,
@@ -370,7 +293,7 @@ export default class UploadJob extends Base {
         this._status = Status.Finished;
 
         await fileHandle.close();
-        this.emit("complete");
+        this.options.onCompleted?.();
     }
 
     stop(): this {
@@ -411,68 +334,6 @@ export default class UploadJob extends Base {
         return this;
     }
 
-    private startSpeedCounter() {
-        this.stopSpeedCounter();
-
-        let lastTimestamp = new Date().getTime();
-        let lastLoaded = this.prog.loaded;
-        let zeroSpeedCounter = 0;
-        const intervalDuration = Duration.Second;
-        this.speedTimerId = setInterval(() => {
-            if (this.isNotRunning) {
-                this.stopSpeedCounter();
-                return;
-            }
-
-            const nowTimestamp = new Date().getTime();
-            const currentSpeed = (this.prog.loaded - lastLoaded) / ((nowTimestamp - lastTimestamp) / Duration.Second);
-            if (currentSpeed < 1 && zeroSpeedCounter < 3) {
-                zeroSpeedCounter += 1;
-                return;
-            }
-
-            this.speed = Math.round(currentSpeed);
-            this.predictLeftTime = Math.max(
-                Math.round((this.prog.total - this.prog.loaded) / this.speed) * Duration.Second,
-                0,
-            );
-
-            lastLoaded = this.prog.loaded;
-            lastTimestamp = nowTimestamp;
-            zeroSpeedCounter = 0;
-        }, intervalDuration) as unknown as number; // hack type problem of nodejs and browser
-    }
-
-    private stopSpeedCounter() {
-        this.speed = 0;
-        this.predictLeftTime = 0;
-        clearInterval(this.speedTimerId);
-    }
-
-    private handleProgress(uploaded: number, total: number) {
-        if (!this.uploader) {
-            return;
-        }
-        this.prog.loaded = uploaded;
-        this.prog.total = total;
-
-        this.emit("progress", lodash.merge({}, this.prog));
-    }
-
-    private handlePartsInit(initInfo: RecoveredOption) {
-        this.uploadedId = initInfo.uploadId;
-        this.uploadedParts = initInfo.parts;
-    }
-
-    private handlePartPutted(part: Part) {
-        if (!this.uploader) {
-            return;
-        }
-        this.uploadedParts.push(part);
-
-        this.emit("partcomplete", lodash.merge({}, part));
-    }
-
     get persistInfo(): PersistInfo {
         return {
             from: this.options.from,
@@ -498,5 +359,35 @@ export default class UploadJob extends Base {
             multipartUploadThreshold: this.options.multipartUploadThreshold,
             multipartUploadSize: this.options.multipartUploadSize,
         };
+    }
+
+    protected handleStatusChange() {
+        this.options.onStatusChange?.(this.status);
+    }
+
+    private handleProgress(uploaded: number, total: number) {
+        if (!this.uploader) {
+            return;
+        }
+        this.prog.loaded = uploaded;
+        this.prog.total = total;
+
+        this.options.onProgress?.(lodash.merge({}, this.prog));
+
+        this.speedCount(this.options.uploadSpeedLimit);
+    }
+
+    private handlePartsInit(initInfo: RecoveredOption) {
+        this.uploadedId = initInfo.uploadId;
+        this.uploadedParts = initInfo.parts;
+    }
+
+    private handlePartPutted(part: Part) {
+        if (!this.uploader) {
+            return;
+        }
+        this.uploadedParts.push(part);
+
+        this.options.onPartCompleted?.(lodash.merge({}, part));
     }
 }

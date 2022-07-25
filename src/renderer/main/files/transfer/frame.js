@@ -73,6 +73,8 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
       totalStat: {
         running: 0,
         total: 0,
+
+        // upload
         up: 0,
         upRunning: 0,
         upDone: 0,
@@ -162,7 +164,9 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
         maxConcurrency: Settings.maxUploadConcurrency,
         multipartUploadSize: Settings.multipartUploadSize * ByteSize.MB,
         multipartUploadThreshold: Settings.multipartUploadThreshold * ByteSize.MB,
-        uploadSpeedLimit: Settings.uploadSpeedLimitEnabled * ByteSize.KB,
+        uploadSpeedLimit: Settings.uploadSpeedLimitEnabled === 0
+            ? 0
+            : Settings.uploadSpeedLimitKBperSec * ByteSize.KB,
         isDebug: Settings.isDebug !== 0,
         isSkipEmptyDirectory: $scope.emptyFolderUploading.enabled,
         persistPath: getProgFilePath(),
@@ -211,9 +215,16 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
 
     /**
      * upload
-     * @param filePaths []  {array<string>}, iter for folder
-     * @param bucketInfo {object} {bucket, region, key}
-     * @param uploadOptions {object} {isOverwrite, storageClassName}, storageClassName is fetched from server
+     * @param {string[]} filePaths iter for folder
+     * @param {object} bucketInfo
+     *   @param {string} bucketInfo.bucketName
+     *   @param {string} bucketInfo.regionId
+     *   @param {string} bucketInfo.key
+     *   @param {string} bucketInfo.qiniuBackendMode
+     *   @param {object[]} bucketInfo.availableStorageClasses
+     * @param {object} uploadOptions
+     *   @param {string} uploadOptions.isOverwrite
+     *   @param {string} uploadOptions.storageClassName storageClassName is fetched from server
      */
     function uploadFilesHandler(filePaths, bucketInfo,uploadOptions) {
       Toast.info(T("upload.addtolist.on"));

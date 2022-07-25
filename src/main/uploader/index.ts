@@ -144,7 +144,7 @@ process.on("exit", () => {
     handleExit()
 });
 
-process.on('SIGTERM', () => {
+process.on("SIGTERM", () => {
     handleExit()
         .then(() => {
             process.exit(0);

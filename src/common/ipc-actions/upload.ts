@@ -200,56 +200,56 @@ export class UploadActionFns {
     ) {
     }
 
-    updateConfig(data: UpdateConfigMessage['data']) {
+    updateConfig(data: UpdateConfigMessage["data"]) {
         this.ipc.send(this.channel, {
             action: UploadAction.UpdateConfig,
             data,
         });
     }
 
-    loadPersistJobs(data: LoadPersistJobsMessage['data']) {
+    loadPersistJobs(data: LoadPersistJobsMessage["data"]) {
         this.ipc.send(this.channel, {
             action: UploadAction.LoadPersistJobs,
             data,
         });
     }
 
-    addJobs(data: AddJobsMessage['data']) {
+    addJobs(data: AddJobsMessage["data"]) {
         this.ipc.send(this.channel, {
             action: UploadAction.AddJobs,
             data,
         });
     }
 
-    updateUiData(data: UpdateUiDataMessage['data']) {
+    updateUiData(data: UpdateUiDataMessage["data"]) {
         this.ipc.send(this.channel, {
             action: UploadAction.UpdateUiData,
             data,
         });
     }
 
-    waitJob(data: WaitJobMessage['data']) {
+    waitJob(data: WaitJobMessage["data"]) {
         this.ipc.send(this.channel, {
             action: UploadAction.WaitJob,
             data,
         });
     }
 
-    startJob(data: StartJobMessage['data']) {
+    startJob(data: StartJobMessage["data"]) {
         this.ipc.send(this.channel, {
             action: UploadAction.StartJob,
             data,
         });
     }
 
-    stopJob(data: StopJobMessage['data']) {
+    stopJob(data: StopJobMessage["data"]) {
         this.ipc.send(this.channel, {
             action: UploadAction.StopJob,
             data,
         });
     }
 
-    removeJob(data: RemoveJobMessage['data']) {
+    removeJob(data: RemoveJobMessage["data"]) {
         this.ipc.send(this.channel, {
             action: UploadAction.RemoveJob,
             data,

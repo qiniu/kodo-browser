@@ -1,4 +1,4 @@
-import {promises as fsPromises} from 'fs';
+import {promises as fsPromises} from "fs";
 
 // @ts-ignore
 import mime from "mime";
@@ -65,7 +65,7 @@ interface OptionalOptions extends UploadOptions{
 export type Options = RequiredOptions & Partial<OptionalOptions>
 
 const DEFAULT_OPTIONS: OptionalOptions = {
-    id: '',
+    id: "",
 
     multipartUploadThreshold: 10 * ByteSize.MB,
     multipartUploadSize: 4 * ByteSize.MB,
@@ -87,24 +87,27 @@ const DEFAULT_OPTIONS: OptionalOptions = {
 };
 
 type PersistInfo = {
-    from: RequiredOptions['from'],
-    storageClasses: RequiredOptions['storageClasses'],
-    region: RequiredOptions['region'],
-    to: RequiredOptions['to'],
-    overwrite: RequiredOptions['overwrite'],
-    storageClassName: RequiredOptions['storageClassName'],
-    // if we can remove backendMode?
-    // because we always use the client current backendMode.
-    backendMode: RequiredOptions['clientOptions']['backendMode'],
-    prog: OptionalOptions['prog'],
-    status: OptionalOptions['status'],
-    message: OptionalOptions['message'],
-    uploadedId: OptionalOptions['uploadedId'],
-    // ugly. if can do some break changes, make it be
-    // `uploadedParts: OptionalOptions['uploadedParts'],`
+    from: RequiredOptions["from"],
+    storageClasses: RequiredOptions["storageClasses"],
+    region: RequiredOptions["region"],
+    to: RequiredOptions["to"],
+    overwrite: RequiredOptions["overwrite"],
+    storageClassName: RequiredOptions["storageClassName"],
+    // Q: if we can remove backendMode?
+    // Be client backendMode.
+    // A: It seems no problems, because backendMode is invariant in business logic.
+    // But It's also a risk, if business logic changes. Because we may get errors
+    // when restart job from break point with different backendMode.
+    backendMode: RequiredOptions["clientOptions"]["backendMode"],
+    prog: OptionalOptions["prog"],
+    status: OptionalOptions["status"],
+    message: OptionalOptions["message"],
+    uploadedId: OptionalOptions["uploadedId"],
+    // ugly. if we can do some break changes, make it be
+    // `uploadedParts: OptionalOptions["uploadedParts"],`
     uploadedParts: {
-        PartNumber: UploadedPart['partNumber'],
-        ETag: UploadedPart['etag'],
+        PartNumber: UploadedPart["partNumber"],
+        ETag: UploadedPart["etag"],
     }[],
     multipartUploadThreshold: OptionalOptions["multipartUploadThreshold"],
     multipartUploadSize: OptionalOptions["multipartUploadSize"],
@@ -114,7 +117,7 @@ export default class UploadJob extends Base {
     static fromPersistInfo(
         id: string,
         persistInfo: PersistInfo,
-        clientOptions: RequiredOptions['clientOptions'],
+        clientOptions: RequiredOptions["clientOptions"],
         uploadOptions: {
             uploadSpeedLimit: number,
             isDebug: boolean,
@@ -292,7 +295,7 @@ export default class UploadJob extends Base {
         // upload
         this.startSpeedCounter();
         await qiniuClient.enter(
-            'uploadFile',
+            "uploadFile",
             this.startUpload,
             {
                 targetBucket: this.options.to.bucket,
@@ -310,6 +313,8 @@ export default class UploadJob extends Base {
 
     private async startUpload(client: Adapter) {
         client.storageClasses = this.options.storageClasses;
+
+        // check overwrite
         const isOverwrite = this.isForceOverwrite || this.options.overwrite;
         if (!isOverwrite) {
             const isExists = await client.isExists(
@@ -325,8 +330,9 @@ export default class UploadJob extends Base {
             }
         }
 
+        // upload
         this.uploader = new Uploader(client);
-        const fileHandle = await fsPromises.open(this.options.from.path, 'r');
+        const fileHandle = await fsPromises.open(this.options.from.path, "r");
         await this.uploader.putObjectFromFile(
             this.options.region,
             {

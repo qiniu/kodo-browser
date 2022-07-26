@@ -4,14 +4,13 @@ import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 import Duration from "@common/const/duration";
 import {ClientOptions} from "@common/qiniu";
 
-import {Status} from "./types";
-import * as Utils from "./utils";
+import {LocalPath, RemotePath, Status} from "./types";
 
 interface RequiredOptions {
     clientOptions: ClientOptions,
 
-    from: Utils.LocalPath | Utils.RemotePath
-    to: Utils.LocalPath | Utils.RemotePath
+    from: LocalPath | RemotePath
+    to: LocalPath | RemotePath
     region: string,
 }
 

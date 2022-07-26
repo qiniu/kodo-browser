@@ -11,6 +11,4 @@ export interface ClientOptions {
     ucUrl: string,
     regions: Region[],
     backendMode: BackendMode,
-
-    // storageClasses: StorageClass[], // TODO
 }

@@ -1,7 +1,7 @@
 import fs from "fs";
 
 import TransferJob from "@common/models/job/transfer-job";
-import {isLocalPath} from "@common/models/job/utils";
+import {isLocalPath} from "@common/models/job/types";
 
 import ByteSize from "@common/const/byte-size";
 import {Status} from "@common/models/job/types";

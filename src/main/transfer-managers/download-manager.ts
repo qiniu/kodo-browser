@@ -8,7 +8,6 @@ import {Adapter, ListedObjects} from "kodo-s3-adapter-sdk/dist/adapter";
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
 import DownloadJob from "@common/models/job/download-job";
 import {Status} from "@common/models/job/types";
-import {LocalPath, RemotePath} from "@common/models/job/utils";
 import {DownloadOptions, RemoteObject} from "@common/ipc-actions/download";
 
 import TransferManager, {TransferManagerConfig} from "./transfer-manager";
@@ -255,8 +254,8 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
     }
 
     private createDownloadJob(
-        from: Required<RemotePath>,
-        to: LocalPath,
+        from: Required<DownloadJob["options"]["from"]>,
+        to: DownloadJob["options"]["to"],
         clientOptions: ClientOptions,
         downloadOptions: DownloadOptions,
     ): void {

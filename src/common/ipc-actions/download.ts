@@ -18,13 +18,6 @@ export interface RemoteObject {
     isFile: boolean,
 }
 
-//
-// export interface FromInfo {
-//     regionId: string,
-//     bucketName: string,
-//     objectList: RemoteObject[],
-// }
-
 export interface DownloadOptions {
     region: string,
     bucket: string,

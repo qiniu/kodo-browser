@@ -3,7 +3,7 @@ import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
 import {ClientOptions} from "@common/qiniu";
 import StorageClass from "@common/models/storage-class";
-import {UploadJob} from "@common/models/job";
+import UploadJob from "@common/models/job/upload-job";
 import {Status} from "@common/models/job/types";
 
 // some types maybe should in models

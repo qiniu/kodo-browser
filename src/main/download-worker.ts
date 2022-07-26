@@ -9,7 +9,6 @@ import DownloadManager from "./transfer-managers/download-manager";
 import DownloadJob from "@common/models/job/download-job";
 import {Status} from "@common/models/job/types";
 
-
 // initial DownloadManager Config from argv after `--config-json`
 const configStr = process.argv.find((_arg, i, arr) => arr[i - 1] === "--config-json");
 const downloadManagerConfig = configStr ? JSON.parse(configStr) : {};
@@ -84,6 +83,7 @@ process.on("message", (message: DownloadMessage) => {
         }
         case DownloadAction.RemoveJob: {
             downloadManager.removeJob(message.data.jobId);
+            downloadManager.persistJobs();
             break;
         }
         case DownloadAction.CleanupJobs: {
@@ -160,5 +160,6 @@ function handleJobDone(jobId: string, job?: DownloadJob) {
             }
         };
         process.send?.(jobCompletedReplyMessage);
+        downloadManager.persistJobs();
     }
 }

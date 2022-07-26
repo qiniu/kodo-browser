@@ -11,16 +11,15 @@ import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
 import ByteSize from "@common/const/byte-size";
 
-import {Status, UploadedPart} from "./types";
-import * as Utils from "./utils";
+import {LocalPath, RemotePath, Status, UploadedPart} from "./types";
 import TransferJob from "./transfer-job";
 
 // if change options, remember to check `get persistInfo()`
 interface RequiredOptions {
     clientOptions: ClientOptions,
 
-    from: Required<Utils.LocalPath>,
-    to: Utils.RemotePath,
+    from: Required<LocalPath>,
+    to: RemotePath,
     region: string,
 
     overwrite: boolean,

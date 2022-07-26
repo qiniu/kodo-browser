@@ -19,7 +19,7 @@ const uploadManager = new UploadManager(uploadManagerConfig);
 
 process.on("uncaughtException", (err) => {
     uploadManager.persistJobs(true);
-    console.error(err);
+    console.error("upload worker: uncaughtException", err);
 });
 
 process.on("message", (message: UploadMessage) => {
@@ -173,4 +173,5 @@ function handleCreatedDirectory(bucket: string, directoryKey: string) {
         },
     };
     process.send?.(createdDirectoryReplyMessage);
+    uploadManager.persistJobs();
 }

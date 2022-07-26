@@ -1,48 +1,6 @@
-import path from "path";
 import crypto from "crypto";
 import { Readable as ReadableStream } from "stream";
 import fs from "fs";
-
-import * as KodoNav from "@/const/kodo-nav"
-
-export interface LocalPath {
-    name: string,
-    path: string,
-    size?: number, // bytes
-    mtime?: number, // ms timestamp
-}
-// parseLocalPath: get name and path from local path
-export function parseLocalPath(p: string): LocalPath {
-    return {
-        name: path.basename(p),
-        path: p,
-    };
-}
-
-export interface RemotePath {
-    bucket: string,
-    key: string,
-    size?: number, // bytes
-    mtime?: number, // ms timestamp
-}
-// parseKodoPath: get bucket and key from KodoPath
-export function parseKodoPath(kodoPath: string): RemotePath {
-    if (!kodoPath.startsWith(KodoNav.ADDR_KODO_PROTOCOL)) {
-        throw Error("Invalid kodo path");
-    }
-
-    const [bucket, key] = kodoPath
-        .substring(KodoNav.ADDR_KODO_PROTOCOL.length)
-        .split('/', 2);
-    return {
-        bucket,
-        key: key.replace(/\\/g, "/"),
-    };
-}
-
-export function isLocalPath(p: LocalPath | RemotePath): p is LocalPath {
-    return p.hasOwnProperty("name");
-}
 
 // get etag
 function sha1(content: Buffer): Buffer {

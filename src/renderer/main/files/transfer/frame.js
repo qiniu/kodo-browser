@@ -90,8 +90,6 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
         downStopped: 0,
         downFailed: 0
       },
-
-      calcTotalProg: calcTotalProg
     });
 
     // functions in parent scope
@@ -288,7 +286,6 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
                     to: message.data.destPath,
                   },
               );
-
               break;
             }
           }
@@ -417,15 +414,6 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
           backendMode: bucketInfo.qiniuBackendMode,
         },
       });
-    }
-
-    function calcTotalProg() {
-      $scope.totalStat.running =
-          $scope.totalStat.upRunning +
-          $scope.totalStat.downRunning;
-      $scope.totalStat.total =
-          $scope.totalStat.up +
-          $scope.totalStat.down;
     }
   }
 ]);

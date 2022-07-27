@@ -1,3 +1,5 @@
+import {Region} from "kodo-s3-adapter-sdk";
+
 import {
     AddedJobsReplyMessage,
     DownloadAction,
@@ -5,9 +7,10 @@ import {
     JobCompletedReplyMessage,
     UpdateUiDataReplyMessage
 } from "@common/ipc-actions/download";
-import DownloadManager from "./transfer-managers/download-manager";
-import DownloadJob from "@common/models/job/download-job";
 import {Status} from "@common/models/job/types";
+import DownloadJob from "@common/models/job/download-job";
+
+import DownloadManager from "./transfer-managers/download-manager";
 
 // initial DownloadManager Config from argv after `--config-json`
 const configStr = process.argv.find((_arg, i, arr) => arr[i - 1] === "--config-json");
@@ -28,7 +31,21 @@ process.on("message", (message: DownloadMessage) => {
         }
         case DownloadAction.LoadPersistJobs: {
             downloadManager.loadJobsFromStorage(
-                message.data.clientOptions,
+                {
+                    ...message.data.clientOptions,
+                    // regions ars serialized, so need new it.
+                    // reference src/renderer/config.ts load(): result
+                    regions: message.data.clientOptions.regions.map(serializedRegion => {
+                        const r = new Region(
+                            serializedRegion.id,
+                            serializedRegion.s3Id,
+                            serializedRegion.label,
+                        );
+                        r.ucUrls = serializedRegion.ucUrls;
+                        r.s3Urls = serializedRegion.s3Urls;
+                        return r;
+                    }),
+                },
                 message.data.downloadOptions,
             );
             break;
@@ -37,7 +54,21 @@ process.on("message", (message: DownloadMessage) => {
             downloadManager.createDownloadJobs(
                 message.data.remoteObjects,
                 message.data.destPath,
-                message.data.clientOptions,
+                {
+                    ...message.data.clientOptions,
+                    // regions ars serialized, so need new it.
+                    // reference src/renderer/config.ts load(): result
+                    regions: message.data.clientOptions.regions.map(serializedRegion => {
+                        const r = new Region(
+                            serializedRegion.id,
+                            serializedRegion.s3Id,
+                            serializedRegion.label,
+                        );
+                        r.ucUrls = serializedRegion.ucUrls;
+                        r.s3Urls = serializedRegion.s3Urls;
+                        return r;
+                    }),
+                },
                 message.data.downloadOptions,
                 {
                     jobsAdding: () => {

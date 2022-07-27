@@ -95,6 +95,9 @@ export function load(isUsingPublic?: boolean): Config {
         ucUrl,
         regions: (cachedConfig.regions ?? []).map<Region>(r => {
             const region = new Region('', r.id, r.label);
+            // if change region's properties, need change this too:
+            // src/main/upload-worker.ts LoadPersistJobs, createUploadJobs
+            // src/main/download-worker.ts LoadPersistJobs, createUploadJobs
             region.ucUrls = [ucUrl];
             region.s3Urls = [r.endpoint];
             return region;

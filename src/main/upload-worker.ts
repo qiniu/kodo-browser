@@ -1,3 +1,5 @@
+import {Region} from "kodo-s3-adapter-sdk";
+
 import {
     AddedJobsReplyMessage,
     CreatedDirectoryReplyMessage,
@@ -6,9 +8,10 @@ import {
     UploadAction,
     UploadMessage
 } from "@common/ipc-actions/upload";
-import UploadManager from "./transfer-managers/upload-manager";
-import UploadJob from "@common/models/job/upload-job";
 import {Status} from "@common/models/job/types";
+import UploadJob from "@common/models/job/upload-job";
+
+import UploadManager from "./transfer-managers/upload-manager";
 
 // initial UploadManager Config from argv after `--config-json`
 const configStr = process.argv.find((_arg, i, arr) => arr[i - 1] === "--config-json");
@@ -30,7 +33,21 @@ process.on("message", (message: UploadMessage) => {
         }
         case UploadAction.LoadPersistJobs: {
             uploadManager.loadJobsFromStorage(
-                message.data.clientOptions,
+                {
+                    ...message.data.clientOptions,
+                    // regions ars serialized, so need new it.
+                    // reference src/renderer/config.ts load(): result
+                    regions: message.data.clientOptions.regions.map(serializedRegion => {
+                        const r = new Region(
+                            serializedRegion.id,
+                            serializedRegion.s3Id,
+                            serializedRegion.label,
+                        );
+                        r.ucUrls = serializedRegion.ucUrls;
+                        r.s3Urls = serializedRegion.s3Urls;
+                        return r;
+                    }),
+                },
                 message.data.uploadOptions,
             );
             break;
@@ -39,7 +56,21 @@ process.on("message", (message: UploadMessage) => {
             uploadManager.createUploadJobs(
                 message.data.filePathnameList,
                 message.data.destInfo,
-                message.data.clientOptions,
+                {
+                    ...message.data.clientOptions,
+                    // regions ars serialized, so need new it.
+                    // reference src/renderer/config.ts load(): result
+                    regions: message.data.clientOptions.regions.map(serializedRegion => {
+                        const r = new Region(
+                            serializedRegion.id,
+                            serializedRegion.s3Id,
+                            serializedRegion.label,
+                        );
+                        r.ucUrls = serializedRegion.ucUrls;
+                        r.s3Urls = serializedRegion.s3Urls;
+                        return r;
+                    }),
+                },
                 message.data.uploadOptions,
                 {
                     jobsAdding: () => {

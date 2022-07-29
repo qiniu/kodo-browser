@@ -16,8 +16,8 @@ module.exports = function(webpackEnv) {
     },
     entry: {
       main: paths.appMainIndex,
-      'download-worker': paths.appMainDownloadWorker,
-      'uploader': paths.appMainUploader,
+      downloader: paths.appMainDownloader,
+      uploader: paths.appMainUploader,
     },
     output: {
       filename: '[name]-bundle.js',

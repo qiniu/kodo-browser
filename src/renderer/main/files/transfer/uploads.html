@@ -69,7 +69,7 @@
   <div class="clearfix" style="overflow:auto;height:343px;" long-scroll-list load-more="loadMoreUploadItems"
     trigger-size="100">
 
-    <ul class="list-group list-condensed" style="margin-bottom:0px">
+    <ul class="list-group list-condensed" style="margin-bottom:0; padding-bottom: 30px;">
       <li class="list-group-item"
         ng-repeat="item in lists.uploadJobList track by item.id">
         <div class="col-sm-4">
@@ -110,23 +110,25 @@
         <div class="col-sm-2 text-right">
           <a ng-if="item.progress.resumable && (item.status=='running' || item.status=='waiting' || item.status=='verifying')"
             href="" ng-click="stopItem(item)" class="btn btn-default btn-xs" uib-tooltip="{{'upload.job.pause'|translate}}"
-            tooltip-placement="left">
+            tooltip-placement="left" tooltip-append-to-body="true">
             <i class="glyphicon glyphicon-pause text-warning"></i>
           </a>
 
           <a ng-if="item.status=='stopped' || item.status=='failed' || item.status=='finished' || item.status=='duplicated'"
             href="" ng-click="showRemoveItem(item)" class="btn btn-danger btn-xs" uib-tooltip="{{'upload.job.remove'|translate}}"
-            tooltip-placement="left">
+            tooltip-placement="left" tooltip-append-to-body="true">
             <i class="glyphicon glyphicon-remove text-danger"></i>
           </a>
 
           <a ng-if="item.status=='stopped' || item.status=='failed'" href="" ng-click="checkStartJob(item)"
-            class="btn btn-success btn-xs" uib-tooltip="{{'upload.job.retry'|translate}}" tooltip-placement="left">
+            class="btn btn-success btn-xs" uib-tooltip="{{'upload.job.retry'|translate}}"
+            tooltip-placement="left" tooltip-append-to-body="true">
             <i class="glyphicon glyphicon-play text-success"></i>
           </a>
 
           <a ng-if="item.status=='duplicated'" href="" ng-click="checkStartJob(item, true)"
-            class="btn btn-warning btn-xs" uib-tooltip="{{'upload.job.retry.overwrite'|translate}}" tooltip-placement="left">
+            class="btn btn-warning btn-xs" uib-tooltip="{{'upload.job.retry.overwrite'|translate}}"
+            tooltip-placement="left" tooltip-append-to-body="true">
             <i class="glyphicon glyphicon-repeat"></i>
           </a>
         </div>

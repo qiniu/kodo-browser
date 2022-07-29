@@ -1,44 +1,6 @@
-import path from "path";
 import crypto from "crypto";
 import { Readable as ReadableStream } from "stream";
 import fs from "fs";
-
-import * as KodoNav from "@/const/kodo-nav"
-
-export interface LocalPath {
-    name: string,
-    path: string,
-    size?: number, // bytes
-    mtime?: number, // ms timestamp
-}
-// parseLocalPath: get name and path from local path
-export function parseLocalPath(p: string): LocalPath {
-    return {
-        name: path.basename(p),
-        path: p,
-    };
-}
-
-export interface RemotePath {
-    bucket: string,
-    key: string,
-    size?: number, // bytes
-    mtime?: number, // ms timestamp
-}
-// parseKodoPath: get bucket and key from KodoPath
-export function parseKodoPath(kodoPath: string): RemotePath {
-    if (!kodoPath.startsWith(KodoNav.ADDR_KODO_PROTOCOL)) {
-        throw Error("Invalid kodo path");
-    }
-
-    const [bucket, key] = kodoPath
-        .substring(KodoNav.ADDR_KODO_PROTOCOL.length)
-        .split('/', 2);
-    return {
-        bucket,
-        key: key.replace(/\\/g, "/"),
-    };
-}
 
 // get etag
 function sha1(content: Buffer): Buffer {
@@ -86,7 +48,9 @@ function getEtagByBuffer(content: Buffer, callback: (etag: string) => void): voi
     }
 }
 function getEtagByStream(dataStream: ReadableStream, callback: (etag: string) => void): void {
-    // 以4M为单位分割，why?
+    // 以 4M 为单位分割，why?
+    // 对外暴露的方法仅有自动下载新版本，猜测时用于验证是否下载完整，后续 crc 上线后需要修改这里
+    // 4M 是上传新版本到七牛空间时采用的分片
     const blockSize = 4*1024*1024;
     const sha1String: Buffer[] = [];
     let blockCount = 0;

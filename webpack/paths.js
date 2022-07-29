@@ -27,9 +27,9 @@ module.exports = {
   appWebpackCache: resolveApp('node_modules/.cache'),
 
   appMain: resolveApp('src/main'),
-  appMainIndex: resolveApp('src/main/index.js'),
-  appMainDownloadWorker: resolveApp('src/main/download-worker.js'),
-  appMainUploader: resolveApp('src/main/uploader/index.ts'),
+  appMainIndex: resolveApp('src/main/index.ts'),
+  appMainDownloader: resolveApp('src/main/download-worker.ts'),
+  appMainUploader: resolveApp('src/main/upload-worker.ts'),
   appBuildMain: resolveApp('dist/main'),
 
   appRenderer: resolveApp('src/renderer'),

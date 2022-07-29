@@ -1,27 +1,35 @@
 import {IpcRenderer} from "electron";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
+import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
 import {ClientOptions} from "@common/qiniu";
-import StorageClass from "@common/models/storage-class";
-import UploadJob from "@common/models/job/upload-job";
 import {Status} from "@common/models/job/types";
+import DownloadJob from "@common/models/job/download-job";
+import StorageClass from "@common/models/storage-class";
 
-// some types maybe should in models
-export interface DestInfo {
-    regionId: string,
-    bucketName: string,
+export interface RemoteObject {
+    name: string,
+    region: string,
+    bucket: string,
     key: string,
+    size: number,
+    mtime: number,
+    isDirectory: boolean,
+    isFile: boolean,
 }
 
-export interface UploadOptions {
+export interface DownloadOptions {
+    region: string,
+    bucket: string,
+
+    domain?: Domain,
+
     isOverwrite: boolean,
-    storageClassName: StorageClass["kodoName"],
     storageClasses: StorageClass[],
-    userNatureLanguage: NatureLanguage,
+    userNatureLanguage: NatureLanguage
 }
 
-// action names
-export enum UploadAction {
+export enum DownloadAction {
     UpdateConfig = "UpdateConfig",
     LoadPersistJobs = "LoadPersistJobs",
     AddJobs = "AddJobs",
@@ -40,63 +48,65 @@ export enum UploadAction {
     // reply only
     AddedJobs = "AddedJobs",
     JobCompleted = "JobCompleted",
-    CreatedDirectory = "CreatedDirectory",
 }
 
-// actions with payload data
 export interface UpdateConfigMessage {
-    action: UploadAction.UpdateConfig,
+    action: DownloadAction.UpdateConfig,
     data: Partial<{
         resumable: boolean,
         maxConcurrency: number,
-        multipartSize: number, // Bytes
-        multipartThreshold: number, // Bytes
-        speedLimit: number, // Bytes/s
+        multipartSize: number,
+        multipartThreshold: number,
+        speedLimit: number,
         isDebug: boolean,
-        isSkipEmptyDirectory: boolean,
         persistPath: string,
-    }>,
+
+        isOverwrite: boolean,
+    }>
 }
 
 export interface LoadPersistJobsMessage {
-    action: UploadAction.LoadPersistJobs,
+    action: DownloadAction.LoadPersistJobs,
     data: {
-        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
-        uploadOptions: Pick<UploadOptions, "userNatureLanguage">,
-    },
+        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">
+        downloadOptions: Pick<DownloadOptions, "userNatureLanguage">,
+    }
 }
 
 export interface AddJobsMessage {
-    action: UploadAction.AddJobs,
+    action: DownloadAction.AddJobs,
     data: {
-        filePathnameList: string[],
-        destInfo: DestInfo,
-        uploadOptions: UploadOptions,
+        remoteObjects: RemoteObject[],
+        destPath: string,
+        downloadOptions: DownloadOptions,
         clientOptions: ClientOptions,
-    },
+    }
 }
 
 export interface AddedJobsReplyMessage {
-    action: UploadAction.AddedJobs,
+    action: DownloadAction.AddedJobs,
     data: {
-        filePathnameList: string[],
-        destInfo: DestInfo,
+        remoteObjects: RemoteObject[],
+        destPath: string,
     },
 }
 
 export interface UpdateUiDataMessage {
-    action: UploadAction.UpdateUiData,
+    action: DownloadAction.UpdateUiData,
     data: {
         pageNum: number,
         count: number,
-        query?: { status?: Status, name?: string },
+        query?: {
+            status?: Status,
+            name?: string,
+        },
     },
 }
 
 export interface UpdateUiDataReplyMessage {
-    action: UploadAction.UpdateUiData,
+    action: DownloadAction.UpdateUiData,
     data: {
-        list: (UploadJob["uiData"] | undefined)[],
+        list: (DownloadJob["uiData"] | undefined)[],
         total: number,
         finished: number,
         running: number,
@@ -106,73 +116,64 @@ export interface UpdateUiDataReplyMessage {
 }
 
 export interface StopJobMessage {
-    action: UploadAction.StopJob,
+    action: DownloadAction.StopJob,
     data: {
         jobId: string,
     },
 }
 
 export interface WaitJobMessage {
-    action: UploadAction.WaitJob,
+    action: DownloadAction.WaitJob,
     data: {
         jobId: string,
     },
 }
 
 export interface StartJobMessage {
-    action: UploadAction.StartJob,
+    action: DownloadAction.StartJob,
     data: {
         jobId: string,
-        options?: {
-            forceOverwrite: boolean,
-        },
+        forceOverwrite?: boolean,
     },
 }
 
 export interface RemoveJobMessage {
-    action: UploadAction.RemoveJob,
+    action: DownloadAction.RemoveJob,
     data: {
         jobId: string,
     },
 }
 
 export interface CleanupJobMessage {
-    action: UploadAction.CleanupJobs,
+    action: DownloadAction.CleanupJobs,
     data?: {},
 }
 
+
 export interface StartAllJobsMessage {
-    action: UploadAction.StartAllJobs,
+    action: DownloadAction.StartAllJobs,
     data?: {},
 }
 
 export interface StopAllJobsMessage {
-    action: UploadAction.StopAllJobs,
+    action: DownloadAction.StopAllJobs,
     data?: {},
 }
 
 export interface RemoveAllJobsMessage {
-    action: UploadAction.RemoveAllJobs,
+    action: DownloadAction.RemoveAllJobs,
     data?: {},
 }
 
 export interface JobCompletedReplyMessage {
-    action: UploadAction.JobCompleted,
+    action: DownloadAction.JobCompleted,
     data: {
-        jobId: string,
-        jobUiData: UploadJob["uiData"],
-    },
+        jobsId: string,
+        jobUiData: DownloadJob["uiData"],
+    }
 }
 
-export interface CreatedDirectoryReplyMessage {
-    action: UploadAction.CreatedDirectory,
-    data: {
-        bucket: string,
-        directoryKey: string,
-    },
-}
-
-export type UploadMessage = UpdateConfigMessage
+export type DownloadMessage = UpdateConfigMessage
     | LoadPersistJobsMessage
     | AddJobsMessage
     | UpdateUiDataMessage
@@ -185,13 +186,11 @@ export type UploadMessage = UpdateConfigMessage
     | StopAllJobsMessage
     | RemoveAllJobsMessage
 
-export type UploadReplyMessage = UpdateUiDataReplyMessage
+export type DownloadReplyMessage = UpdateUiDataReplyMessage
     | AddedJobsReplyMessage
     | JobCompletedReplyMessage
-    | CreatedDirectoryReplyMessage
 
-// send actions functions
-export class UploadActionFns {
+export class DownloadActionFns {
     constructor(
         private readonly ipc: IpcRenderer,
         private readonly channel: string,
@@ -200,84 +199,84 @@ export class UploadActionFns {
 
     updateConfig(data: UpdateConfigMessage["data"]) {
         this.ipc.send(this.channel, {
-            action: UploadAction.UpdateConfig,
-            data,
+            action: DownloadAction.UpdateConfig,
+            data: data,
         });
     }
 
     loadPersistJobs(data: LoadPersistJobsMessage["data"]) {
         this.ipc.send(this.channel, {
-            action: UploadAction.LoadPersistJobs,
+            action: DownloadAction.LoadPersistJobs,
             data,
-        });
+        })
     }
 
     addJobs(data: AddJobsMessage["data"]) {
         this.ipc.send(this.channel, {
-            action: UploadAction.AddJobs,
+            action: DownloadAction.AddJobs,
             data,
         });
     }
 
     updateUiData(data: UpdateUiDataMessage["data"]) {
         this.ipc.send(this.channel, {
-            action: UploadAction.UpdateUiData,
+            action: DownloadAction.UpdateUiData,
             data,
         });
     }
 
     waitJob(data: WaitJobMessage["data"]) {
         this.ipc.send(this.channel, {
-            action: UploadAction.WaitJob,
+            action: DownloadAction.WaitJob,
             data,
         });
     }
 
     startJob(data: StartJobMessage["data"]) {
         this.ipc.send(this.channel, {
-            action: UploadAction.StartJob,
+            action: DownloadAction.StartJob,
             data,
         });
     }
 
     stopJob(data: StopJobMessage["data"]) {
         this.ipc.send(this.channel, {
-            action: UploadAction.StopJob,
+            action: DownloadAction.StopJob,
             data,
         });
     }
 
     removeJob(data: RemoveJobMessage["data"]) {
         this.ipc.send(this.channel, {
-            action: UploadAction.RemoveJob,
+            action: DownloadAction.RemoveJob,
             data,
         });
     }
 
     cleanUpJobs() {
         this.ipc.send(this.channel, {
-            action: UploadAction.CleanupJobs,
+            action: DownloadAction.CleanupJobs,
             data: {},
         });
     }
 
     startAllJobs() {
         this.ipc.send(this.channel, {
-            action: UploadAction.StartAllJobs,
+            action: DownloadAction.StartAllJobs,
             data: {},
         });
     }
 
     stopAllJobs() {
         this.ipc.send(this.channel, {
-            action: UploadAction.StopAllJobs,
+            action: DownloadAction.StopAllJobs,
             data: {},
         });
     }
 
     removeAllJobs() {
         this.ipc.send(this.channel, {
-            action: UploadAction.RemoveAllJobs,
+            action: DownloadAction.RemoveAllJobs,
             data: {},
         });
     }

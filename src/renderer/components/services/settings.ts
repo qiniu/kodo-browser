@@ -1,5 +1,6 @@
 import ByteSize from "@common/const/byte-size";
 import ipcUploadManager from "@/components/services/ipc-upload-manager";
+import ipcDownloadManager from "@/components/services/ipc-download-manager";
 
 export enum SettingKey {
   IsDebug = "isDebug",
@@ -37,6 +38,9 @@ class Settings {
     ipcUploadManager.updateConfig({
       isDebug: v !== 0,
     });
+    ipcDownloadManager.updateConfig({
+      isDebug: v !== 0,
+    })
   }
 
   // autoUpgrade
@@ -54,7 +58,7 @@ class Settings {
   set resumeUpload(v: number) {
     localStorage.setItem(SettingKey.ResumeUpload, v.toString());
     ipcUploadManager.updateConfig({
-      resumeUpload: v !== 0,
+      resumable: v !== 0,
     });
   }
 
@@ -77,7 +81,7 @@ class Settings {
     if (v >= 1 && v <= 1024) {
       localStorage.setItem(SettingKey.MultipartUploadSize, v.toString());
       ipcUploadManager.updateConfig({
-        multipartUploadSize: v * ByteSize.MB,
+        multipartSize: v * ByteSize.MB,
       });
     }
   }
@@ -89,7 +93,7 @@ class Settings {
   set multipartUploadThreshold(v: number) {
     localStorage.setItem(SettingKey.MultipartUploadThreshold, v.toString());
     ipcUploadManager.updateConfig({
-      multipartUploadThreshold: v * ByteSize.MB,
+      multipartThreshold: v * ByteSize.MB,
     });
   }
 
@@ -101,11 +105,11 @@ class Settings {
     localStorage.setItem(SettingKey.UploadSpeedLimitEnabled, v.toString());
     if (v === 0) {
       ipcUploadManager.updateConfig({
-        uploadSpeedLimit: 0,
+        speedLimit: 0,
       });
     } else {
       ipcUploadManager.updateConfig({
-        uploadSpeedLimit: this.uploadSpeedLimitKBperSec * ByteSize.KB,
+        speedLimit: this.uploadSpeedLimitKBperSec * ByteSize.KB,
       });
     }
   }
@@ -118,7 +122,7 @@ class Settings {
     localStorage.setItem(SettingKey.UploadSpeedLimit, v.toString());
     if (this.uploadSpeedLimitEnabled) {
       ipcUploadManager.updateConfig({
-        uploadSpeedLimit: v * ByteSize.KB,
+        speedLimit: v * ByteSize.KB,
       });
     }
   }
@@ -129,6 +133,11 @@ class Settings {
   }
   set downloadSpeedLimitKBperSec(v: number) {
     localStorage.setItem(SettingKey.DownloadSpeedLimit, v.toString());
+    if (this.downloadSpeedLimitEnabled){
+      ipcDownloadManager.updateConfig({
+        speedLimit: v * ByteSize.KB,
+      });
+    }
   }
 
   // resumeDownload
@@ -137,6 +146,9 @@ class Settings {
   }
   set resumeDownload(v: number) {
     localStorage.setItem(SettingKey.ResumeDownload, v.toString());
+    ipcDownloadManager.updateConfig({
+      resumable: v !== 0,
+    });
   }
 
   // maxDownloadConcurrency
@@ -145,6 +157,9 @@ class Settings {
   }
   set maxDownloadConcurrency(v: number) {
     localStorage.setItem(SettingKey.MaxDownloadConcurrency, v.toString());
+    ipcDownloadManager.updateConfig({
+      maxConcurrency: v,
+    });
   }
 
   // multipartDownloadSize
@@ -153,6 +168,9 @@ class Settings {
   }
   set multipartDownloadSize(v: number) {
     localStorage.setItem(SettingKey.MultipartDownloadSize, v.toString());
+    ipcDownloadManager.updateConfig({
+      multipartSize: v * ByteSize.MB,
+    });
   }
 
   // multipartDownloadThreshold
@@ -161,6 +179,9 @@ class Settings {
   }
   set multipartDownloadThreshold(v: number) {
     localStorage.setItem(SettingKey.MultipartDownloadThreshold, v.toString());
+    ipcDownloadManager.updateConfig({
+      multipartThreshold: v * ByteSize.MB,
+    });
   }
 
   // downloadSpeedLimitEnabled
@@ -169,6 +190,15 @@ class Settings {
   }
   set downloadSpeedLimitEnabled(v: number) {
     localStorage.setItem(SettingKey.DownloadSpeedLimitEnabled, v.toString());
+    if (v === 0) {
+      ipcDownloadManager.updateConfig({
+        speedLimit: 0,
+      });
+    } else {
+      ipcDownloadManager.updateConfig({
+        speedLimit: this.downloadSpeedLimitKBperSec * ByteSize.KB,
+      });
+    }
   }
 
   // externalPathEnabled

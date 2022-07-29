@@ -1,3 +1,5 @@
+import {Region} from "kodo-s3-adapter-sdk";
+
 import {
     AddedJobsReplyMessage,
     CreatedDirectoryReplyMessage,
@@ -6,9 +8,10 @@ import {
     UploadAction,
     UploadMessage
 } from "@common/ipc-actions/upload";
-import UploadManager from "./upload-manager";
-import UploadJob from "@common/models/job/upload-job";
 import {Status} from "@common/models/job/types";
+import UploadJob from "@common/models/job/upload-job";
+
+import UploadManager from "./transfer-managers/upload-manager";
 
 // initial UploadManager Config from argv after `--config-json`
 const configStr = process.argv.find((_arg, i, arr) => arr[i - 1] === "--config-json");
@@ -19,7 +22,7 @@ const uploadManager = new UploadManager(uploadManagerConfig);
 
 process.on("uncaughtException", (err) => {
     uploadManager.persistJobs(true);
-    console.error(err);
+    console.error("upload worker: uncaughtException", err);
 });
 
 process.on("message", (message: UploadMessage) => {
@@ -30,7 +33,21 @@ process.on("message", (message: UploadMessage) => {
         }
         case UploadAction.LoadPersistJobs: {
             uploadManager.loadJobsFromStorage(
-                message.data.clientOptions,
+                {
+                    ...message.data.clientOptions,
+                    // regions ars serialized, so need new it.
+                    // reference src/renderer/config.ts load(): result
+                    regions: message.data.clientOptions.regions.map(serializedRegion => {
+                        const r = new Region(
+                            serializedRegion.id,
+                            serializedRegion.s3Id,
+                            serializedRegion.label,
+                        );
+                        r.ucUrls = serializedRegion.ucUrls;
+                        r.s3Urls = serializedRegion.s3Urls;
+                        return r;
+                    }),
+                },
                 message.data.uploadOptions,
             );
             break;
@@ -39,8 +56,22 @@ process.on("message", (message: UploadMessage) => {
             uploadManager.createUploadJobs(
                 message.data.filePathnameList,
                 message.data.destInfo,
+                {
+                    ...message.data.clientOptions,
+                    // regions ars serialized, so need new it.
+                    // reference src/renderer/config.ts load(): result
+                    regions: message.data.clientOptions.regions.map(serializedRegion => {
+                        const r = new Region(
+                            serializedRegion.id,
+                            serializedRegion.s3Id,
+                            serializedRegion.label,
+                        );
+                        r.ucUrls = serializedRegion.ucUrls;
+                        r.s3Urls = serializedRegion.s3Urls;
+                        return r;
+                    }),
+                },
                 message.data.uploadOptions,
-                message.data.clientOptions,
                 {
                     jobsAdding: () => {
                         uploadManager.persistJobs();
@@ -52,10 +83,10 @@ process.on("message", (message: UploadMessage) => {
                                 filePathnameList: message.data.filePathnameList,
                                 destInfo: message.data.destInfo,
                             },
-                        }
+                        };
                         process.send?.(replyMessage);
-                    }
-                }
+                    },
+                },
             );
             break;
         }
@@ -80,7 +111,7 @@ process.on("message", (message: UploadMessage) => {
             break;
         }
         case UploadAction.StartJob: {
-            uploadManager.startJob(message.data.jobId, message.data.forceOverwrite);
+            uploadManager.startJob(message.data.jobId, message.data.options);
             break;
         }
         case UploadAction.RemoveJob: {
@@ -102,7 +133,7 @@ process.on("message", (message: UploadMessage) => {
         }
         case UploadAction.RemoveAllJobs: {
             uploadManager.removeAllJobs();
-            uploadManager.persistJobs();
+            uploadManager.persistJobs(true);
             break;
         }
         default: {
@@ -141,10 +172,10 @@ function handleExit() {
 
 
 process.on("exit", () => {
-    handleExit()
+    handleExit();
 });
 
-process.on('SIGTERM', () => {
+process.on("SIGTERM", () => {
     handleExit()
         .then(() => {
             process.exit(0);
@@ -173,4 +204,5 @@ function handleCreatedDirectory(bucket: string, directoryKey: string) {
         },
     };
     process.send?.(createdDirectoryReplyMessage);
+    uploadManager.persistJobs();
 }

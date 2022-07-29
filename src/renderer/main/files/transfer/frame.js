@@ -14,7 +14,6 @@ import safeApply from '@/components/services/safe-apply';
 import ipcUploadManager from '@/components/services/ipc-upload-manager';
 
 import NgConfig from '@/ng-config'
-import DownloadMgr from '@/components/services/download-manager'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 import {
   EMPTY_FOLDER_UPLOADING,
@@ -28,6 +27,8 @@ import './uploads'
 
 import './frame.css'
 import {Status} from "@common/models/job/types";
+import ipcDownloadManager from "@/components/services/ipc-download-manager";
+import {DownloadAction} from "@common/ipc-actions/download";
 
 const TRANSFER_FRAME_CONTROLLER_NAME = 'transferFrameCtrl'
 
@@ -36,30 +37,31 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
   "$translate",
   safeApply,
   NgConfig,
-  DownloadMgr,
   Toast,
   function (
     $scope,
     $translate,
     safeApply,
     ngConfig,
-    DownloadMgr,
     Toast,
   ) {
     const T = $translate.instant;
     let uploaderTimer;
+    let downloaderTimer;
 
     angular.extend($scope, {
       transTab: 1,
 
       transSearch: {
         uploadJob: "",
+        downloadJob: "",
       },
 
       lists: {
         uploadJobList: [],
         uploadJobListLimit: 100,
         downloadJobList: [],
+        downloadJobListLimit: 100,
       },
       emptyFolderUploading: {
         enabled: localStorage.getItem(EMPTY_FOLDER_UPLOADING) !== null
@@ -73,17 +75,21 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
       totalStat: {
         running: 0,
         total: 0,
+
+        // upload
         up: 0,
         upRunning: 0,
         upDone: 0,
         upStopped: 0,
         upFailed: 0,
+
+        // download
+        down: 0,
+        downRunning: 0,
         downDone: 0,
         downStopped: 0,
         downFailed: 0
       },
-
-      calcTotalProg: calcTotalProg
     });
 
     // functions in parent scope
@@ -91,10 +97,11 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
     $scope.handlers.downloadFilesHandler = downloadFilesHandler;
 
     initUploaderIpc();
-    DownloadMgr.init($scope);
+    initDownloaderIpc();
 
     $scope.$on('$destroy', () => {
       clearInterval(uploaderTimer);
+      clearInterval(downloaderTimer);
     });
 
     // init Uploader IPC
@@ -158,11 +165,13 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
         });
       });
       ipcUploadManager.updateConfig({
-        resumeUpload: Settings.resumeUpload !== 0,
+        resumable: Settings.resumeUpload !== 0,
         maxConcurrency: Settings.maxUploadConcurrency,
-        multipartUploadSize: Settings.multipartUploadSize * ByteSize.MB,
-        multipartUploadThreshold: Settings.multipartUploadThreshold * ByteSize.MB,
-        uploadSpeedLimit: Settings.uploadSpeedLimitEnabled * ByteSize.KB,
+        multipartSize: Settings.multipartUploadSize * ByteSize.MB,
+        multipartThreshold: Settings.multipartUploadThreshold * ByteSize.MB,
+        speedLimit: Settings.uploadSpeedLimitEnabled === 0
+            ? 0
+            : Settings.uploadSpeedLimitKBperSec * ByteSize.KB,
         isDebug: Settings.isDebug !== 0,
         isSkipEmptyDirectory: $scope.emptyFolderUploading.enabled,
         persistPath: getProgFilePath(),
@@ -211,9 +220,16 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
 
     /**
      * upload
-     * @param filePaths []  {array<string>}, iter for folder
-     * @param bucketInfo {object} {bucket, region, key}
-     * @param uploadOptions {object} {isOverwrite, storageClassName}, storageClassName is fetched from server
+     * @param {string[]} filePaths iter for folder
+     * @param {object} bucketInfo
+     *   @param {string} bucketInfo.bucketName
+     *   @param {string} bucketInfo.regionId
+     *   @param {string} bucketInfo.key
+     *   @param {string} bucketInfo.qiniuBackendMode
+     *   @param {object[]} bucketInfo.availableStorageClasses
+     * @param {object} uploadOptions
+     *   @param {string} uploadOptions.isOverwrite
+     *   @param {string} uploadOptions.storageClassName storageClassName is fetched from server
      */
     function uploadFilesHandler(filePaths, bucketInfo,uploadOptions) {
       Toast.info(T("upload.addtolist.on"));
@@ -240,55 +256,164 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
       });
     }
 
-    /**
-     * download
-     * @param fromRemotePath {array}  item={region, bucket, path, name, domain, size=0, itemType='file'}, create folder if required
-     * @param toLocalPath {string}
-     */
-    function downloadFilesHandler(fromRemotePath, toLocalPath) {
-      Toast.info(T("download.addtolist.on"));
-      DownloadMgr.createDownloadJobs(fromRemotePath, toLocalPath, function (isCancelled) {
-        Toast.info(T("download.addtolist.success"));
+    function initDownloaderIpc() {
+      ipcRenderer.on("DownloaderManager-reply", (_event, message) => {
+        safeApply($scope, () => {
+          switch (message.action) {
+            case DownloadAction.UpdateUiData: {
+              $scope.lists.downloadJobList = message.data.list;
+              $scope.totalStat.down = message.data.total;
+              $scope.totalStat.downDone = message.data.finished;
+              $scope.totalStat.downStopped = message.data.stopped;
+              $scope.totalStat.downFailed = message.data.failed;
+              break;
+            }
+            case DownloadAction.AddedJobs: {
+              Toast.info(T("download.addtolist.success"));
+              $scope.transTab = 2;
+              $scope.toggleTransVisible(true);
 
-        AuditLog.log(
-          AuditLog.Action.DownloadFilesStart,
-          {
-            from: fromRemotePath.map((entry) => {
-              return { regionId: entry.region, bucket: entry.bucketName, path: entry.path.toString() };
-            }),
-            to: toLocalPath,
-          },
-        );
-
-        $scope.transTab = 2;
-        $scope.toggleTransVisible(true);
+              AuditLog.log(
+                  AuditLog.Action.DownloadFilesStart,
+                  {
+                    from: message.data.remoteObjects.map((remoteObject) => {
+                      return {
+                        regionId: remoteObject.region,
+                        bucket: remoteObject.bucketName,
+                        path: remoteObject.key,
+                      };
+                    }),
+                    to: message.data.destPath,
+                  },
+              );
+              break;
+            }
+          }
+        });
       });
+      ipcDownloadManager.updateConfig({
+        resumable: Settings.resumeDownload !== 0,
+        maxConcurrency: Settings.maxDownloadConcurrency,
+        multipartSize: Settings.multipartDownloadSize * ByteSize.MB,
+        multipartThreshold: Settings.multipartDownloadThreshold * ByteSize.MB,
+        speedLimit: Settings.downloadSpeedLimitEnabled === 0
+          ? 0
+          : Settings.downloadSpeedLimitKBperSec * ByteSize.KB,
+        isDebug: Settings.isDebug !== 0,
+        isOverwrite: $scope.overwriteDownloading.enabled,
+        persistPath: getProgFilePath(),
+      });
+      ipcDownloadManager.loadPersistJobs({
+        clientOptions: {
+          accessKey: AuthInfo.get().id,
+          secretKey: AuthInfo.get().secret,
+          ucUrl: ngConfig.load().ucUrl || "",
+          regions: ngConfig.load().regions || [],
+        },
+        downloadOptions: {
+          userNatureLanguage: localStorage.getItem("lang") || "zh-CN",
+        },
+      });
+      downloaderTimer = setInterval(() => {
+        let query;
+        if ($scope.transSearch.downloadJob) {
+          if (Object.values(Status).includes($scope.transSearch.downloadJob.trim())) {
+            query = {
+              status: $scope.transSearch.downloadJob.trim(),
+            };
+          } else {
+            query = {
+              name: $scope.transSearch.downloadJob.trim(),
+            };
+          }
+        }
+        ipcDownloadManager.updateUiData({
+          pageNum: 0,
+          count: $scope.lists.downloadJobListLimit,
+          query: query,
+        })
+      }, 1000);
+
+      function getProgFilePath() {
+        const folder = Global.config_path;
+        if (!fs.existsSync(folder)) {
+          fs.mkdirSync(folder);
+        }
+
+        const username = AuthInfo.get().id || "kodo-browser";
+        return path.join(folder, "downprog_" + username + ".json");
+      }
     }
 
-    function calcTotalProg() {
-      let c = 0, c2 = 0, cf = 0, cf2 = 0, cs = 0, cs2 = 0;
+    /**
+     * download
+     * @param {object[]} fromRemotePath
+     * @param {string} fromRemotePath.bucket
+     * @param {string} fromRemotePath.region
+     * @param {string} fromRemotePath.name
+     * @param {number} [fromRemotePath.size]
+     * @param {Date} [fromRemotePath.lastModified]
+     * @param {object} fromRemotePath.path
+     *   @param {boolean} fromRemotePath.path.isDir
+     *   @param {string[]} fromRemotePath.path.dirSegments
+     *   @param {string} fromRemotePath.path.sep
+     * @param {object} fromRemotePath.domain
+     *   @param {string} fromRemotePath.domain.region
+     *   @param {string} fromRemotePath.domain.bucket
+     * @param {string} fromRemotePath[].qiniuBackendMode
+     * @param {string} toLocalPath
+     * @param {object} bucketInfo
+     *   @param {object[]} bucketInfo.availableStorageClasses
+     *   @param {string} bucketInfo.regionId
+     *   @param {string} bucketInfo.qiniuBackendMode
+     *   @param {string} bucketInfo.bucketName
+     *   @param {string} bucketInfo.bucketId
+     */
+    function downloadFilesHandler(fromRemotePath, toLocalPath, bucketInfo) {
+      Toast.info(T("download.addtolist.on"));
 
-      angular.forEach($scope.lists.downloadJobList, function (n) {
-        if (n.status === 'running') {
-          c2++;
+      const remoteObjects = fromRemotePath.map(item => {
+        // key
+        let key = item.path.dirSegments.join(item.path.sep);
+        if (item.path.isDir) {
+          key += "/";
+        } else if (key) {
+          key += `/${item.name}`;
+        } else {
+          key = item.name;
         }
-        if (n.status === 'waiting') {
-          c2++;
-        }
-        if (n.status === 'failed') {
-          cf2++;
-        }
-        if (n.status === 'stopped') {
-          c2++;
-          cs2++;
-        }
+
+        // result
+        return {
+          region: item.region,
+          bucket: item.bucket,
+          key: key,
+          name: item.name,
+          size: item.path.isDir ? 0 : item.size,
+          mtime: item.path.isDir ? 0 : item.lastModified,
+          isDirectory: item.path.isDir,
+          isFile: !item.path.isDir,
+        };
       });
-
-      $scope.totalStat.running = $scope.totalStat.upRunning + c2;
-      $scope.totalStat.total = $scope.totalStat.up + $scope.lists.downloadJobList.length;
-      $scope.totalStat.downDone = $scope.lists.downloadJobList.length - c2;
-      $scope.totalStat.downStopped = cs2;
-      $scope.totalStat.downFailed = cf2;
+      ipcDownloadManager.addJobs({
+        remoteObjects: remoteObjects,
+        destPath: toLocalPath.toString(),
+        downloadOptions: {
+          region: bucketInfo.regionId,
+          bucket: bucketInfo.bucketName,
+          domain: $scope.selectedDomain.domain.toQiniuDomain(),
+          isOverwrite: $scope.overwriteDownloading.enabled,
+          storageClasses: bucketInfo.availableStorageClasses,
+          userNatureLanguage: localStorage.getItem('lang') || 'zh-CN',
+        },
+        clientOptions: {
+          accessKey: AuthInfo.get().id,
+          secretKey: AuthInfo.get().secret,
+          ucUrl: ngConfig.load().ucUrl || "",
+          regions: ngConfig.load().regionId || [],
+          backendMode: bucketInfo.qiniuBackendMode,
+        },
+      });
     }
   }
 ]);

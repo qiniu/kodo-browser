@@ -3,7 +3,6 @@ import angular from "angular"
 import webModule from '@/app-module/web'
 import ipcUploadManager from "@/components/services/ipc-upload-manager"
 import jobUtil from '@/components/services/job-util'
-import DelayDone from '@/components/services/delay-done'
 import { TOAST_FACTORY_NAME as Toast } from '@/components/directives/toast-list'
 import {
   EMPTY_FOLDER_UPLOADING,
@@ -17,7 +16,6 @@ webModule.controller(TRANSFER_UPLOAD_CONTROLLER_NAME, [
   "$timeout",
   "$translate",
   jobUtil,
-  DelayDone,
   Toast,
   Dialog,
   function (
@@ -25,7 +23,6 @@ webModule.controller(TRANSFER_UPLOAD_CONTROLLER_NAME, [
     $timeout,
     $translate,
     jobUtil,
-    DelayDone,
     Toast,
     Dialog
   ) {
@@ -131,7 +128,7 @@ webModule.controller(TRANSFER_UPLOAD_CONTROLLER_NAME, [
       Toast.info(T("pause.on")); //'正在暂停...'
       $scope.allActionBtnDisabled = true;
 
-      ipcUploadManager.stopAllJobs()
+      ipcUploadManager.stopAllJobs();
 
       Toast.info(T("pause.success"));
 

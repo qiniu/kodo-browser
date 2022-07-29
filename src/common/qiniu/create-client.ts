@@ -4,8 +4,7 @@ import {ModeOptions} from "kodo-s3-adapter-sdk/dist/qiniu";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
 import * as AppConfig from "@common/const/app-config";
-import {ClientOptions} from "@common/ipc-actions/upload";
-import {BackendMode} from "@common/const/qiniu";
+import {BackendMode, ClientOptions} from "./types";
 
 export default function createQiniuClient(
     clientOptions: ClientOptions,
@@ -22,7 +21,7 @@ export default function createQiniuClient(
         clientOptions.regions,
     );
     const modeOptions: ModeOptions = {
-        appName: 'kodo-browser/ioutil',
+        appName: "kodo-browser/ioutil",
         appVersion: AppConfig.app.version,
         appNatureLanguage: options.userNatureLanguage,
         // disable uplog when use customize cloud
@@ -48,7 +47,7 @@ function debugRequest(mode: BackendMode) {
             method = request.method;
             headers = request.headers;
         }
-        console.info('>>', mode, 'REQ_URL:', url, 'REQ_METHOD:', method, 'REQ_HEADERS:', headers);
+        console.info(">>", mode, "REQ_URL:", url, "REQ_METHOD:", method, "REQ_HEADERS:", headers);
     };
 }
 
@@ -68,7 +67,7 @@ function debugResponse(mode: BackendMode) {
                 requestHeaders = response.request.headers;
             }
         }
-        console.info('<<', mode, 'REQ_URL:', requestUrl, 'REQ_METHOD:', requestMethod, 'REQ_HEADERS: ', requestHeaders,
-            'RESP_STATUS:', responseStatusCode, 'RESP_HEADERS:', responseHeaders, 'RESP_INTERVAL:', responseInterval, 'ms RESP_DATA:', responseData, 'RESP_ERROR:', responseError);
+        console.info("<<", mode, "REQ_URL:", requestUrl, "REQ_METHOD:", requestMethod, "REQ_HEADERS: ", requestHeaders,
+            "RESP_STATUS:", responseStatusCode, "RESP_HEADERS:", responseHeaders, "RESP_INTERVAL:", responseInterval, "ms RESP_DATA:", responseData, "RESP_ERROR:", responseError);
     };
 }

@@ -1,6 +1,6 @@
 {
   "name": "kodo-browser",
-  "version": "1.0.18",
+  "version": "1.0.19-alpha",
   "license": "Apache-2.0",
   "author": {
     "name": "Rong Zhou",
@@ -85,6 +85,7 @@
     "webpack-cli": "^4.9.0"
   },
   "dependencies": {
+    "@electron/remote": "^2.0.8",
     "@root/walk": "^1.1.0",
     "@uirouter/angularjs": "^1.0.20",
     "angular": "1.7.9",
@@ -97,14 +98,14 @@
     "codemirror": "^5.41.0",
     "csv-stringify": "^5.3.6",
     "downloads-folder": "1.0.3",
-    "electron": "^4.0",
+    "electron": "18.3.3",
     "events": "^2.0.0",
     "form-data": "^4.0.0",
     "jquery": "^3.5.1",
     "jquery.qrcode": "^1.0.3",
     "js-base64": "^3.4.5",
     "js-md5": "^0.7.3",
-    "kodo-s3-adapter-sdk": "0.2.30",
+    "kodo-s3-adapter-sdk": "0.2.31",
     "lodash": "^4.17.21",
     "mime": "^2.3.1",
     "moment": "^2.22.2",

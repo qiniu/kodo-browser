@@ -7,10 +7,11 @@ jest.mock("electron", () => ({
     }
 }));
 
-import { ipcRenderer } from "electron";
-import Settings, { SettingKey } from "./settings";
+import {ipcRenderer} from "electron";
 import {UploadAction} from "@common/ipc-actions/upload";
+import {DownloadAction} from "@common/ipc-actions/download";
 import ByteSize from "@common/const/byte-size";
+import Settings, {SettingKey} from "./settings";
 
 // WARNING: The getter tests in "no data in storage" section is
 //          for testing default value.
@@ -105,7 +106,7 @@ describe("test settings.ts", () => {
         it("isDebug setter", () => {
             Settings.isDebug = 1;
             expect(Settings.isDebug).toBe(1);
-            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+            expect(ipcRenderer.send).toHaveBeenCalledWith(
                 "UploaderManager",
                 {
                     action: UploadAction.UpdateConfig,
@@ -114,12 +115,30 @@ describe("test settings.ts", () => {
                     },
                 },
             );
+            expect(ipcRenderer.send).toHaveBeenCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        isDebug: true,
+                    },
+                },
+            );
             Settings.isDebug = 0;
             expect(Settings.isDebug).toBe(0);
-            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+            expect(ipcRenderer.send).toHaveBeenCalledWith(
                 "UploaderManager",
                 {
                     action: UploadAction.UpdateConfig,
+                    data: {
+                        isDebug: false,
+                    },
+                },
+            );
+            expect(ipcRenderer.send).toHaveBeenCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
                     data: {
                         isDebug: false,
                     },
@@ -150,7 +169,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        resumeUpload: true,
+                        resumable: true,
                     },
                 },
             );
@@ -161,7 +180,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        resumeUpload: false,
+                        resumable: false,
                     },
                 },
             );
@@ -208,7 +227,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        multipartUploadSize: 10 * ByteSize.MB,
+                        multipartSize: 10 * ByteSize.MB,
                     },
                 },
             );
@@ -219,7 +238,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        multipartUploadSize: 8 * ByteSize.MB,
+                        multipartSize: 8 * ByteSize.MB,
                     },
                 },
             );
@@ -243,7 +262,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        multipartUploadThreshold: 110 * ByteSize.MB,
+                        multipartThreshold: 110 * ByteSize.MB,
                     },
                 },
             );
@@ -254,7 +273,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        multipartUploadThreshold: 100 * ByteSize.MB,
+                        multipartThreshold: 100 * ByteSize.MB,
                     },
                 },
             );
@@ -272,7 +291,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        uploadSpeedLimit: Settings.uploadSpeedLimitKBperSec * ByteSize.KB,
+                        speedLimit: Settings.uploadSpeedLimitKBperSec * ByteSize.KB,
                     },
                 },
             );
@@ -283,7 +302,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        uploadSpeedLimit: 0,
+                        speedLimit: 0,
                     },
                 },
             );
@@ -302,7 +321,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        uploadSpeedLimit: 2048 * ByteSize.KB,
+                        speedLimit: 2048 * ByteSize.KB,
                     },
                 },
             );
@@ -313,7 +332,7 @@ describe("test settings.ts", () => {
                 {
                     action: UploadAction.UpdateConfig,
                     data: {
-                        uploadSpeedLimit: 1024 * ByteSize.KB,
+                        speedLimit: 1024 * ByteSize.KB,
                     },
                 },
             );
@@ -326,8 +345,26 @@ describe("test settings.ts", () => {
         it("resumeDownload setter", () => {
             Settings.resumeDownload = 1;
             expect(Settings.resumeDownload).toBe(1);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        resumable: true,
+                    },
+                },
+            );
             Settings.resumeDownload = 0;
             expect(Settings.resumeDownload).toBe(0);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        resumable: false,
+                    },
+                },
+            );
         });
 
         // maxDownloadConcurrency
@@ -337,8 +374,26 @@ describe("test settings.ts", () => {
         it("maxDownloadConcurrency setter", () => {
             Settings.maxDownloadConcurrency = 2;
             expect(Settings.maxDownloadConcurrency).toBe(2);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        maxConcurrency: 2,
+                    },
+                },
+            );
             Settings.maxDownloadConcurrency = 1;
             expect(Settings.maxDownloadConcurrency).toBe(1);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        maxConcurrency: 1,
+                    },
+                },
+            );
         });
 
         // multipartDownloadSize
@@ -348,8 +403,26 @@ describe("test settings.ts", () => {
         it("multipartDownloadSize setter", () => {
             Settings.multipartDownloadSize = 4;
             expect(Settings.multipartDownloadSize).toBe(4);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        multipartSize: 4 * ByteSize.MB,
+                    },
+                },
+            );
             Settings.multipartDownloadSize = 8;
             expect(Settings.multipartDownloadSize).toBe(8);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        multipartSize: 8 * ByteSize.MB,
+                    },
+                },
+            );
         });
 
         // multipartDownloadThreshold
@@ -359,8 +432,26 @@ describe("test settings.ts", () => {
         it("multipartDownloadThreshold setter", () => {
             Settings.multipartDownloadThreshold = 110;
             expect(Settings.multipartDownloadThreshold).toBe(110);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        multipartThreshold: 110 * ByteSize.MB,
+                    },
+                },
+            );
             Settings.multipartDownloadThreshold = 100;
             expect(Settings.multipartDownloadThreshold).toBe(100);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        multipartThreshold: 100 * ByteSize.MB,
+                    },
+                },
+            );
         });
 
         // downloadSpeedLimitEnabled
@@ -370,8 +461,26 @@ describe("test settings.ts", () => {
         it("downloadSpeedLimitEnabled setter", () => {
             Settings.downloadSpeedLimitEnabled = 1;
             expect(Settings.downloadSpeedLimitEnabled).toBe(1);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        speedLimit: Settings.uploadSpeedLimitKBperSec * ByteSize.KB,
+                    },
+                },
+            );
             Settings.downloadSpeedLimitEnabled = 0;
             expect(Settings.downloadSpeedLimitEnabled).toBe(0);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        speedLimit: 0,
+                    },
+                },
+            );
         });
 
         // downloadSpeedLimitKBperSec
@@ -379,10 +488,29 @@ describe("test settings.ts", () => {
             expect(Settings.downloadSpeedLimitKBperSec).toBe(1024);
         });
         it("downloadSpeedLimitKBperSec setter", () => {
+            Settings.downloadSpeedLimitEnabled = 1;
             Settings.downloadSpeedLimitKBperSec = 2048;
             expect(Settings.downloadSpeedLimitKBperSec).toBe(2048);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        speedLimit: 2048 * ByteSize.KB,
+                    },
+                },
+            );
             Settings.downloadSpeedLimitKBperSec = 1024;
             expect(Settings.downloadSpeedLimitKBperSec).toBe(1024);
+            expect(ipcRenderer.send).toHaveBeenLastCalledWith(
+                "DownloaderManager",
+                {
+                    action: DownloadAction.UpdateConfig,
+                    data: {
+                        speedLimit: 1024 * ByteSize.KB,
+                    },
+                },
+            );
         });
 
         // externalPathEnabled

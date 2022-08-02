@@ -1,31 +1,34 @@
-const path = require('path')
+// Node.JS package
+const path = require("path");
 
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+// Webpack package
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
-const paths = require('./paths')
+// project package
+const paths = require("./paths");
 
 module.exports = function(webpackEnv) {
-  const isEnvDevelopment = webpackEnv.development
-  const isEnvProduction = webpackEnv.production
-  const shouldUseSourceMap = webpackEnv.sourcemap
+  const isEnvDevelopment = webpackEnv.development;
+  const isEnvProduction = webpackEnv.production;
+  const shouldUseSourceMap = webpackEnv.sourcemap;
 
   return {
     devtool: isEnvProduction
-      ? shouldUseSourceMap
-        ? 'source-map'
-        : false
-      : isEnvDevelopment && 'eval-source-map',
-    target: 'electron-renderer',
-    mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
+        ? shouldUseSourceMap
+            ? "source-map"
+            : false
+        : isEnvDevelopment && "source-map",
+    target: "electron-renderer",
+    mode: isEnvProduction ? "production" : isEnvDevelopment && "development",
     resolve: {
       alias: {
-        '@': paths.appRenderer,
-        '@common': paths.appCommon,
-        '@template-mappings': paths.appRendererTemplateMappings,
+        "@": paths.appSrc,
+        "@common": paths.appCommon,
+        "@renderer": paths.appRenderer,
       },
-      extensions: ['.ts', '.js'],
+      extensions: [".ts", ".tsx", ".js"],
       aliasFields: [],
       mainFields: ['module', 'main'],
     },
@@ -36,20 +39,20 @@ module.exports = function(webpackEnv) {
       path: paths.appBuildRenderer,
       pathinfo: isEnvDevelopment,
       filename: isEnvProduction
-        ? '[name].[chunkhash:8].js'
-        : isEnvDevelopment && '[name].js',
+          ? "[name].[chunkhash:8].js"
+          : isEnvDevelopment && "[name].js",
       chunkFilename: isEnvProduction
-        ? '[name].chunk.[chunkhash:8].js'
-        : isEnvDevelopment && '[name].chunk.js',
+          ? "[name].chunk.[chunkhash:8].js"
+          : isEnvDevelopment && "[name].chunk.js",
       clean: true,
     },
     plugins: [
       ...paths.appPages.map(
-        pagePath =>
-          new HtmlWebpackPlugin({
-            template: pagePath,
-            inject: false,
-          })
+          pagePath =>
+              new HtmlWebpackPlugin({
+                template: pagePath,
+                inject: false,
+              })
       ),
       new MiniCssExtractPlugin(),
       new CopyWebpackPlugin({
@@ -72,10 +75,37 @@ module.exports = function(webpackEnv) {
           enforce: "pre",
           use: ["source-map-loader"],
         },
-        { test: /\.ts$/, loader: "ts-loader" },
+        { test: /\.tsx?$/, loader: "ts-loader" },
         {
           test: /\.css$/i,
-          use: [MiniCssExtractPlugin.loader, 'css-loader'],
+          use: [
+            MiniCssExtractPlugin.loader,
+            "css-loader",
+          ],
+        },
+        {
+          test: /\.s[ac]ss$/i,
+          use: [
+            MiniCssExtractPlugin.loader,
+            {
+              loader: "css-loader",
+              options: {
+                sourceMap: true,
+              },
+            },
+            {
+              loader: "postcss-loader",
+              options: {
+                sourceMap: true,
+              },
+            },
+            {
+              loader: "sass-loader",
+              options: {
+                sourceMap: true,
+              },
+            },
+          ],
         },
         {
           test: /\.html$/i,
@@ -92,14 +122,14 @@ module.exports = function(webpackEnv) {
         },
         {
           test: /\.(png|svg|jpg|jpeg|gif)$/i,
-          type: 'asset/resource',
+          type: "asset/resource",
           generator: {
             filename: "static/images/[name][ext]",
           },
         },
         {
           test: /\.(woff|woff2|eot|ttf|otf)$/i,
-          type: 'asset/resource',
+          type: "asset/resource",
           generator: {
             filename: "static/fonts/[name][ext]",
           },
@@ -111,29 +141,29 @@ module.exports = function(webpackEnv) {
         chunks: "all",
         cacheGroups: {
           libs: {
-            name: 'chunk-libs',
+            name: "chunk-libs",
             test: /[\\/]node_modules[\\/]/,
             priority: 20,
-            chunks: 'initial' // only package third parties that are initially dependent
+            chunks: "initial", // only package third parties that are initially dependent
           },
           templates: {
-            name: 'chunk-templates',
+            name: "chunk-templates",
             test: /\.html$/i,
             priority: 10,
             minChunks: 1,
           },
           components: {
-            name: 'chunk-components',
+            name: "chunk-components",
             test: paths.appRendererComponents,
             priority: 5,
             minChunks: 2,
           },
-        }
+        },
       },
       minimize: isEnvProduction,
     },
     ignoreWarnings: [
       /Failed to parse source map/,
     ],
-  }
-}
+  };
+};

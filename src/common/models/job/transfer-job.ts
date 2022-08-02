@@ -54,7 +54,7 @@ export default abstract class TransferJob {
     private lastTimestamp = 0 // ms
     private lastLoaded = 0 // Bytes
     private speed: number = 0 // Bytes/s
-    private estimatedTime: number = 0 // seconds
+    private estimatedTime: number = 0 // timestamp
     // message
     message: string
 
@@ -96,6 +96,7 @@ export default abstract class TransferJob {
             progress: this.prog,
             speed: this.speed,
             estimatedTime: this.estimatedTime,
+            estimatedDuration: this.estimatedTime - Date.now(),
         }
     }
 
@@ -140,15 +141,14 @@ export default abstract class TransferJob {
         }
 
         const nowTimestamp = Date.now();
-        const currentSpeed = (this.prog.loaded - this.lastLoaded) /
-            ((nowTimestamp - this.lastTimestamp) / Duration.Second);
+        const currentSpeedByMs = (this.prog.loaded - this.lastLoaded) / (nowTimestamp - this.lastTimestamp);
 
-        this.speed = Math.round(currentSpeed);
+        this.speed = Math.round(currentSpeedByMs * Duration.Second);
         if (speedLimit > 0) {
             this.speed = Math.min(this.speed, speedLimit);
         }
-        this.estimatedTime = Math.max(
-            Math.round((this.prog.total - this.prog.loaded) / this.speed) * Duration.Second,
+        this.estimatedTime = Date.now() + Math.max(
+            Math.round(this.prog.total - this.prog.loaded) / currentSpeedByMs,
             0,
         );
 

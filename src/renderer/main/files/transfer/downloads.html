@@ -99,7 +99,7 @@
             <span
               ng-if="item.progress.loaded!=item.progress.total">{{item.progress.loaded|sizeFormat}}/</span>{{item.progress.total|sizeFormat}}
           </small>
-          <small ng-show="item.estimatedTime">, {{item.estimatedTime|leftTimeFormat}}</small>
+          <small ng-show="item.estimatedTime">, {{item.estimatedDuration|leftTimeFormat}}</small>
         </div>
 
         <div class="col-sm-2 text-right">

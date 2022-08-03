@@ -13,6 +13,7 @@ import ByteSize from "@common/const/byte-size";
 
 import {LocalPath, RemotePath, Status, UploadedPart} from "./types";
 import TransferJob from "./transfer-job";
+import crc32Async from "@common/models/job/crc32";
 
 // if change options, remember to check `get persistInfo()`
 interface RequiredOptions {
@@ -255,6 +256,7 @@ export default class UploadJob extends TransferJob {
         // upload
         this.uploader = new Uploader(client);
         const fileHandle = await fsPromises.open(this.options.from.path, "r");
+        const fileCrc32Hex = await crc32Async(this.options.from.path);
         await this.uploader.putObjectFromFile(
             this.options.region,
             {
@@ -266,8 +268,9 @@ export default class UploadJob extends TransferJob {
             this.options.from.size,
             this.options.from.name,
             {
+                crc32: parseInt(fileCrc32Hex, 16).toString(),
                 header: {
-                    contentType: mime.getType(this.options.from.path)
+                    contentType: mime.getType(this.options.from.path),
                 },
                 recovered: this.uploadedId && this.uploadedParts
                     ? {

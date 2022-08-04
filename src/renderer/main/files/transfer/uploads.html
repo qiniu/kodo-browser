@@ -100,7 +100,7 @@
             <span
               ng-if="item.progress.loaded!=item.progress.total">{{item.progress.loaded|sizeFormat}}/</span>{{item.progress.total|sizeFormat}}
           </small>
-          <small ng-show="item.estimatedTime">, {{item.estimatedTime|leftTimeFormat}}</small>
+          <small ng-show="item.estimatedTime">, {{item.estimatedDuration|leftTimeFormat}}</small>
           <small ng-if="item.status == 'duplicated'" class="text-danger">
             <i class="glyphicon glyphicon-alert"></i>
             {{'upload.duplicated'|translate}}

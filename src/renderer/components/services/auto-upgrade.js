@@ -4,7 +4,6 @@ import path from 'path'
 import request from 'request'
 import downloadsFolder from 'downloads-folder'
 
-import {getEtag} from '@common/qiniu'
 import webModule from '@/app-module/web'
 
 import { upgrade } from '@/customize'
@@ -80,15 +79,9 @@ webModule.factory(AUTO_UPGRADE_SVS_FACTORY_NAME, [
         this._changeStatus("finished");
       };
       this.check = function (expected, callback) {
-        //crc
-        console.log("etag check");
-        return getEtag(to + ".download", function(actual) {
-          if (expected !== `"${actual}"`) {
-            callback(new Error(`Etag check failed, expected: ${expected}, actual: "${actual}"`));
-          } else {
-            callback();
-          }
-        });
+        // skip check, because etag is unreliable.
+        // TODO: check x-qiniu-hash-crc64ecma header when crc64-ecma-182 online
+        callback();
       };
 
       this.precheck = function () {

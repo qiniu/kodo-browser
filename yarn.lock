@@ -2466,10 +2466,10 @@ boolean@^3.0.1:
   resolved "https://registry.npmjs.org/boolean/-/boolean-3.0.2.tgz#df1baa18b6a2b0e70840475e1d93ec8fe75b2570"
   integrity sha512-RwywHlpCRc3/Wh81MiCKun4ydaIFyW5Ea6JbL6sRCVx5q5irDw7pMXBUFYF/jArQ6YrG36q0kpovc9P/Kd3I4g==
 
-bootstrap-table@^1.12.1:
-  version "1.18.1"
-  resolved "https://registry.npmjs.org/bootstrap-table/-/bootstrap-table-1.18.1.tgz#124fa50aebc4e6c3b888a4939108cd8590634f9a"
-  integrity sha512-1dkPJSakL4A2Dv0SzAI9CFM5609iDvYoydAUE5PhuAiKvzFE3jfzQDlakEmlZ4TcleOihbWcW6sVB1Sh7UksDw==
+bootstrap-table@^1.20.2:
+  version "1.20.2"
+  resolved "https://registry.yarnpkg.com/bootstrap-table/-/bootstrap-table-1.20.2.tgz#187fcd1812fa3422f964e3b32e3fc3d266108a83"
+  integrity sha512-6j9zfjjK6VZyJj8KsH+LnGczqglmMvMctGAoEAKDvrQ92ExQbA3mHGYPQr9iPrzoyeGL8+6Dyx6LqJbWmWmBoA==
 
 bootstrap@^3.4.1:
   version "3.4.1"

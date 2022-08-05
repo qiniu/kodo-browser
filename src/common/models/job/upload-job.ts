@@ -226,7 +226,6 @@ export default class UploadJob extends TransferJob {
             },
         ).catch(err => {
             if (err === Uploader.userCanceledError) {
-                this._status = Status.Stopped;
                 return;
             }
             this._status = Status.Failed;

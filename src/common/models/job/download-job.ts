@@ -240,7 +240,6 @@ export default class DownloadJob extends TransferJob {
             },
         ).catch(err => {
             if (err === Downloader.userCanceledError) {
-                this._status = Status.Stopped;
                 return;
             }
             this._status = Status.Failed;

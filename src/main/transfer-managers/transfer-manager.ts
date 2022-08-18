@@ -148,7 +148,11 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     }
 
     startJob(jobId: string, options?: any): void {
-        this.jobs.get(jobId)?.start(options);
+        this.jobs.get(jobId)?.start(options)
+            .finally(() => {
+                this.afterJobDone(jobId);
+            });
+
         this.running += 1;
     }
 
@@ -270,7 +274,6 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
                     this.afterJobDone(job.id);
                 });
 
-            this.running = Math.max(0, this.running);
             if (this.running >= this.config.maxConcurrency) {
                 return;
             }
@@ -279,6 +282,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
 
     private afterJobDone(id: string): void {
         this.running -= 1;
+        this.running = Math.max(0, this.running);
         this.scheduleJobs();
         this.config.onJobDone?.(id, this.jobs.get(id));
     }

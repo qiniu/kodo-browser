@@ -1,10 +1,9 @@
-import fs from 'fs'
-import path from 'path'
-
 import angular from "angular"
 import { ipcRenderer } from 'electron'
 import moment from 'moment'
+import showdown from 'showdown'
 
+import * as AppConfig from "@common/const/app-config";
 import webModule from '@/app-module/web'
 
 import { DIALOG_FACTORY_NAME as Dialog } from '@/components/services/dialog.s'
@@ -182,20 +181,21 @@ webModule.controller(TOP_CONTROLLER_NAME, [
     }
 
     function showReleaseNote() {
-      var converter = new showdown.Converter();
-      fs.readFile(
-        path.join(__dirname, "release-notes", Global.app.version + ".md"),
-        function(err, text) {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          text = text + "";
-          var html = converter.makeHtml(text);
-          var message = T("main.upgration"); //'主要更新'
-          Dialog.alert(message, html, function() {}, { size: "lg" });
-        }
-      );
+      const converter = new showdown.Converter();
+      autoUpgradeSvs.getLastestReleaseNote(AppConfig.app.version, function (text) {
+        text = text + "";
+
+        const html = converter.makeHtml(text);
+
+        Dialog.alert(
+            T("main.upgration"), //'主要更新'
+            html,
+            () => {},
+            {
+              size: "lg",
+            },
+        );
+      });
     }
 
     function showBookmarks() {

@@ -60,7 +60,9 @@ webModule.controller(TRANSFER_UPLOAD_CONTROLLER_NAME, [
       if (force) {
         ipcUploadManager.startJob({
           jobId: item.id,
-          forceOverwrite: force,
+          options: {
+            forceOverwrite: force,
+          },
         });
       } else {
         ipcUploadManager.waitJob({

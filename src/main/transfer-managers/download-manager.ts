@@ -63,7 +63,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                     let relativePath = walkingPath.slice(remoteBaseDirectory.length);
                     // for windows path
                     if (path.sep === "\\") {
-                        relativePath = relativePath.replace("/", "\\");
+                        relativePath = relativePath.replaceAll("/", "\\");
                     }
                     // sanitizeFilename
                     relativePath = relativePath

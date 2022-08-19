@@ -173,7 +173,7 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
             ? 0
             : Settings.uploadSpeedLimitKBperSec * ByteSize.KB,
         isDebug: Settings.isDebug !== 0,
-        isSkipEmptyDirectory: $scope.emptyFolderUploading.enabled,
+        isSkipEmptyDirectory: !$scope.emptyFolderUploading.enabled,
         persistPath: getProgFilePath(),
       });
       ipcUploadManager.loadPersistJobs({

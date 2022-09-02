@@ -206,15 +206,12 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     }: {
         matchStatus: Status[],
     } = {
-        matchStatus: [],
+        matchStatus: [Status.Running, Status.Waiting],
     }): void {
         this.jobIds
             .map(id => this.jobs.get(id))
             .forEach(job => {
-                if (!job || ![Status.Running, Status.Waiting].includes(job.status)) {
-                    return;
-                }
-                if (!matchStatus.includes(job.status)){
+                if (!job || !matchStatus.includes(job.status)){
                     return;
                 }
                 job.stop();

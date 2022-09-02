@@ -1305,9 +1305,17 @@ webModule.controller(FILES_CONTROLLER_NAME, [
     }
 
     /**
-    * @param filePaths { string }
+    * @param filePaths { string[] }
     */
     function showUploadConfirmModal(filePaths) {
+      // check is duplicated basename to prevent create same directory
+      const fileNames = filePaths.map(p => path.basename(p));
+      const isSomeDuplicatedBasename = fileNames.some((p, i) => fileNames.indexOf(p) < i);
+      if (isSomeDuplicatedBasename) {
+        Toast.error(T('upload.duplicated.basename'))
+        return;
+      }
+
       $modal.open({
         templateUrl: uploadConfirmModalHtmlMapping.path,
         controller: uploadConfirmModalCtrl,

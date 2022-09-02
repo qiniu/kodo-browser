@@ -223,6 +223,7 @@ export default {
 
   //files
   upload: "アップロード",
+  "upload.duplicated.basename": "選択したファイルやディレクトリの名前が重複している",
   "folder.create": "ディレクトリ",
   "folder.create.success": "ディレクトリが正常に作成されました",
   "folder.name": "名前",

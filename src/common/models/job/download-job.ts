@@ -250,6 +250,9 @@ export default class DownloadJob extends TransferJob {
     private async startDownload(client: Adapter) {
         client.storageClasses = this.options.storageClasses;
 
+        // prevent the base directory has gone by unexpected reason.
+        await this.checkAndCreateBaseDir(this.options.to.path);
+
         // check overwrite
         // the reason for overwrite when `this.prog.loaded > 0` is to allow
         // download from breakpoint to work properly.
@@ -378,5 +381,28 @@ export default class DownloadJob extends TransferJob {
             return;
         }
         // useless?
+    }
+
+    private async checkAndCreateBaseDir(filePath: string) {
+        const baseDirPath = path.dirname(filePath);
+        const isBaseDirValid: boolean = await fsPromises.access(
+            baseDirPath,
+            fsConstants.R_OK | fsConstants.W_OK | fsConstants.X_OK,
+        )
+            .then(() => true)
+            .catch(() => false);
+        if (isBaseDirValid) {
+            return;
+        }
+        const isBaseDirExists: boolean = await fsPromises.access(
+            baseDirPath,
+            fsConstants.F_OK,
+        )
+            .then(() => true)
+            .catch(() => false);
+        if (isBaseDirExists) {
+            throw Error(`Can't download to ${this.options.to}: Permission denied`);
+        }
+        await fsPromises.mkdir(baseDirPath, {recursive: true})
     }
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {Button, Col, Form, Row, Spinner} from "react-bootstrap";
 import classNames from "classnames";
 import {toast} from "react-hot-toast";
@@ -14,7 +14,13 @@ export interface LoginFormValues extends AkItem {
   rememberMe: boolean,
 }
 
-const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  defaultValues?: LoginFormValues,
+  onClickPrivateEndpointSetting: () => void,
+  onClickAccessKeyHistory: () => void,
+}
+
+const LoginForm: React.FC<LoginFormProps> = (props) => {
   const {translate} = useI18n();
   const {signIn} = useAuth();
 
@@ -32,11 +38,18 @@ const LoginForm: React.FC = () => {
     watch,
     register,
     handleSubmit,
+    reset,
     formState: {
       errors,
       isSubmitting,
     },
-  } = useForm<LoginFormValues>();
+  } = useForm<LoginFormValues>({
+    defaultValues: props.defaultValues,
+  });
+
+  useEffect(() => {
+    reset(props.defaultValues);
+  }, [props.defaultValues]);
 
   return (
     <Form className="login-form" onSubmit={handleSubmit(handleLogin)}>
@@ -68,7 +81,7 @@ const LoginForm: React.FC = () => {
             <Button
               variant="link"
               className="private-endpoint-setting"
-              onClick={() => LocalLogger.info("open private endpoint settings")}
+              onClick={props.onClickPrivateEndpointSetting}
             >
               <i className="bi bi-gear-fill"/>
             </Button>
@@ -142,7 +155,7 @@ const LoginForm: React.FC = () => {
             <Button
               variant="link"
               size="sm"
-              onClick={() => {LocalLogger.info("open AK history")}}
+              onClick={props.onClickAccessKeyHistory}
             >
               {translate("login.accessKeyHistory")}
             </Button>

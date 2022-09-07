@@ -1,0 +1,15 @@
+.login-form {
+  & .private-endpoint-setting {
+    transition: all 300ms;
+    color: var(--bs-dark);
+
+    &:hover, &:focus {
+      color: var(--bs-primary);
+
+      & .bi {
+        display: inline-block;
+        animation: spinner-border 2s linear infinite;
+      }
+    }
+  }
+}

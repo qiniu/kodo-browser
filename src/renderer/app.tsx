@@ -8,6 +8,7 @@ import {Provider as AuthProvider} from "@renderer/modules/auth";
 
 import Top from "@renderer/components/top";
 
+import LoginPage from "@renderer/pages/login";
 import NotFound from "@renderer/pages/exceptions/not-found";
 
 const App: React.FC = () => {
@@ -19,6 +20,8 @@ const App: React.FC = () => {
       <AuthProvider>
         <Top/>
         <Routes location={state?.backgroundLocation ?? location}>
+          <Route path="/" element={<LoginPage/>}/>
+          <Route path="/login" element={<LoginPage/>}/>
           <Route path="*" element={<NotFound location={location}/>}/>
         </Routes>
         <Toaster

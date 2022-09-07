@@ -3,6 +3,10 @@ import {Routes, Route, useLocation} from "react-router-dom";
 import {Toaster} from "react-hot-toast";
 import {Spinner} from "react-bootstrap";
 
+import {Provider as I18nProvider} from "@renderer/modules/i18n";
+
+import Top from "@renderer/components/top";
+
 import NotFound from "@renderer/pages/exceptions/not-found";
 
 const App: React.FC = () => {
@@ -10,7 +14,8 @@ const App: React.FC = () => {
   const state = location.state as { backgroundLocation?: Location };
 
   return (
-    <>
+    <I18nProvider>
+      <Top/>
       <Routes location={state?.backgroundLocation ?? location}>
         <Route path="*" element={<NotFound location={location}/>}/>
       </Routes>
@@ -37,7 +42,7 @@ const App: React.FC = () => {
           },
         }}
       />
-    </>
+    </I18nProvider>
   );
 }
 

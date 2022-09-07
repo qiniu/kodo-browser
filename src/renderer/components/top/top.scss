@@ -1,0 +1,11 @@
+.navbar-brand {
+  & .app-name {
+    margin-left: .5rem;
+  }
+
+  & .app-version {
+    margin-left: .5em;
+    font-size: small;
+    color: #FF9900;
+  }
+}

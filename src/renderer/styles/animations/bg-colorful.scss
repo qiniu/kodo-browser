@@ -1,0 +1,26 @@
+@keyframes colorful {
+  20% {
+    background-color: var(--bs-red);
+  }
+
+  40% {
+    background-color: var(--bs-yellow);
+  }
+
+  60% {
+    background-color: var(--bs-teal);
+  }
+
+  80% {
+    background-color: var(--bs-cyan);
+  }
+
+  100% {
+    background-color: var(--bs-indigo);
+  }
+}
+
+.bg-colorful {
+  color: var(--bs-white);
+  animation: colorful 2.5s linear infinite alternate;
+}

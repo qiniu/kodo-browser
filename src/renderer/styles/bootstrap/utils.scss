@@ -1,0 +1,7 @@
+:root {
+  --bs-highlight-bg-rgb: 255, 243, 205;
+}
+
+.bg-highlight {
+  background-color: rgba(var(--bs-highlight-bg-rgb), var(--bs-bg-opacity)) !important;
+}

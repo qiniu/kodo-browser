@@ -1,0 +1,36 @@
+.BaseTable {
+  font-family: var(--bs-body-font-family);
+  font-size: var(--bs-body-font-size);
+  font-weight: var(--bs-body-font-weight);
+  line-height: var(--bs-body-line-height);
+  color: var(--bs-body-color);
+  text-align: var(--bs-body-text-align);
+  --bt-table-accent-bg: transparent;
+  --bt-table-striped-bg: rgba(0, 0, 0, 0.05);
+  --bt-table-hover-bg: rgba(0, 0, 0, 0.075);
+
+  & .BaseTable__body {
+  }
+
+  & .BaseTable__row {
+    border-bottom:  1px solid var(--bs-border-color);
+  }
+
+  & .BaseTable__row > * {
+    padding: 0.25rem;
+    box-shadow: inset 0 0 0 9999px var(--bt-table-accent-bg);
+  }
+
+  & .BaseTable__row:hover > * {
+    --bt-table-accent-bg: var(--bt-table-hover-bg);
+    background: transparent;
+  }
+
+  & .BaseTable__row.row-striped {
+    background: var(--bt-table-striped-bg)
+  }
+
+  & .BaseTable__row-cell ~ .BaseTable__row-cell {
+    border-left: 1px solid var(--bs-border-color);
+  }
+}

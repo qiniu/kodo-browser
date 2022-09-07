@@ -1,0 +1,34 @@
+.no-selectable {
+  user-select: none;
+}
+
+.text-link {
+  color: var(--bs-link-color);
+  cursor: pointer;
+
+  &:hover, &:focus {
+    color: var(--bs-link-hover-color);
+    text-decoration: underline;
+  }
+  &.disable {
+    color: var(--bs-gray-600);
+  }
+}
+
+@each $color, $_ in $colors {
+  .text-#{$color} {
+    color: var(--bs-#{$color});
+  }
+}
+
+.text-brown {
+  color: #8a6d3b;
+}
+
+.overflow-ellipsis {
+  --line-num: 1;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--line-num);
+}

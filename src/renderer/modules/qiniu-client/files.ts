@@ -2,7 +2,8 @@ import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
 import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 import { Adapter, Domain, FrozenInfo, ObjectInfo, PartialObjectError, StorageClass, TransferObject } from 'kodo-s3-adapter-sdk/dist/adapter'
 import Duration from "@common/const/duration";
-import * as FileItem from "@/models/file-item";
+
+import * as FileItem from "./file-item";
 
 import { GetAdapterOptionParam, getDefaultClient } from "./common"
 
@@ -19,7 +20,7 @@ interface ListFilesResult {
 export async function listFiles(
     region: string,
     bucket: string,
-    key: QiniuPath,
+    key: QiniuPath | string,
     marker: string | undefined,
     opt: ListFilesOption,
 ): Promise<ListFilesResult> {
@@ -100,7 +101,7 @@ export async function createFolder(
 export async function checkFileExists(
     region: string,
     bucket: string,
-    key: QiniuPath,
+    key: QiniuPath | string,
     opt: GetAdapterOptionParam,
 ): Promise<boolean> {
     return await getDefaultClient(opt).enter("checkFileExists", async client => {
@@ -120,7 +121,7 @@ export async function checkFileExists(
 export async function checkFolderExists(
     region: string,
     bucket: string,
-    prefix: QiniuPath,
+    prefix: QiniuPath | string,
     opt: GetAdapterOptionParam,
 ): Promise<boolean> {
     return await getDefaultClient(opt).enter("checkFolderExists", async client => {
@@ -142,7 +143,7 @@ export async function checkFolderExists(
 export async function getFrozenInfo(
     region: string,
     bucket: string,
-    key: QiniuPath,
+    key: QiniuPath | string,
     opt: GetAdapterOptionParam,
 ): Promise<FrozenInfo> {
     return await getDefaultClient(opt).enter('getFrozenInfo', async client => {
@@ -159,7 +160,7 @@ interface HeadFileOption extends GetAdapterOptionParam {
 export async function headFile(
     region: string,
     bucket: string,
-    key: QiniuPath,
+    key: QiniuPath | string,
     opt: HeadFileOption,
 ): Promise<ObjectInfo> {
     return await getDefaultClient(opt).enter("headFile", async client => {
@@ -183,7 +184,7 @@ interface SetStorageClassOption extends GetAdapterOptionParam {
 export async function setStorageClass(
     region: string,
     bucket: string,
-    key: QiniuPath,
+    key: QiniuPath | string,
     kodoStorageClass: StorageClass['kodoName'],
     opt: SetStorageClassOption,
 ): Promise<void> {
@@ -206,8 +207,8 @@ export async function setStorageClass(
 export async function getContent(
     region: string,
     bucket: string,
-    key: QiniuPath,
-    domain: Domain,
+    key: QiniuPath | string,
+    domain: Domain | undefined,
     opt: GetAdapterOptionParam,
 ):Promise<Buffer> {
     return await getDefaultClient(opt).enter("getContent", async client => {
@@ -229,13 +230,12 @@ export async function getContent(
 export async function saveContent(
     region: string,
     bucket: string,
-    key: QiniuPath,
+    key: QiniuPath | string,
     content: Buffer,
-    domain: Domain,
-    _getOpt: GetAdapterOptionParam,
+    domain: Domain | undefined,
     putOpt: GetAdapterOptionParam,
 ): Promise<void> {
-    const basename = key.basename();
+    const basename = key.toString().split("/").pop();
     if (!basename) {
         throw new Error("saveContent lost basename");
     }
@@ -271,7 +271,7 @@ export async function moveOrCopyFile(
     region: string,
     bucket: string,
     oldKey: QiniuPath,
-    newKey: QiniuPath,
+    newKey: QiniuPath | string,
     isCopy: boolean,
     opt: GetAdapterOptionParam,
 ): Promise<void> {
@@ -301,7 +301,7 @@ export async function moveOrCopyFile(
 export async function restoreFile(
     region: string,
     bucket: string,
-    key: QiniuPath,
+    key: QiniuPath | string,
     days: number,
     opt: GetAdapterOptionParam,
 ) {
@@ -313,6 +313,33 @@ export async function restoreFile(
                 key: key.toString(),
             },
             days,
+        );
+    }, {
+        targetBucket: bucket,
+        targetKey: key.toString(),
+    });
+}
+
+export async function signatureUrl(
+    region: string,
+    bucket: string,
+    key: QiniuPath | string,
+    domain: Domain | undefined,
+    expires: number, // seconds
+    opt: GetAdapterOptionParam,
+): Promise<URL> {
+    const deadline = new Date();
+    deadline.setSeconds(deadline.getSeconds() + expires || 60);
+
+    return await getDefaultClient(opt).enter("signatureUrl", async client => {
+        return await client.getObjectURL(
+            region,
+            {
+                bucket,
+                key: key.toString(),
+            },
+            domain,
+            deadline,
         );
     }, {
         targetBucket: bucket,
@@ -476,7 +503,7 @@ class BatchOperator {
                 maxKeys: 1000,
             },
         );
-        if (listedObjects?.objects.length <= 0) {
+        if (!listedObjects?.objects.length) {
             return {
                 items: [],
             };
@@ -783,7 +810,9 @@ export async function moveOrCopyFiles(
                         // foundItem relative path of originFolder
                         foundItem.path.toString().slice(baseFolder.path.toString().length);
                 } else {
-                    toPrefix += foundItem.name;
+                    if (toPrefix.endsWith("/")) {
+                      toPrefix += foundItem.name;
+                    }
                     if(FileItem.isItemFolder(foundItem)) {
                         toPrefix += "/";
                     }
@@ -805,3 +834,74 @@ export async function moveOrCopyFiles(
 export function stopMoveOrCopyFiles(): void {
     stopMoveOrCopyFilesController.abort();
 }
+
+
+// signatureUrls
+interface SignatureUrlsOption extends GetAdapterOptionParam {
+    storageClasses: StorageClass[],
+}
+export async function signatureUrls(
+    region: string,
+    bucket: string,
+    items: FileItem.Item[],
+    domain: Domain | undefined,
+    expires: number,
+    progressFn: (progress: Progress) => void,
+    onEachSuccess: (file: FileItem.File, url: URL) => void,
+    onError: (err: any) => void,
+    opt: SignatureUrlsOption,
+): Promise<BatchErr[]> {
+    const progress = new Progress(
+        progressFn,
+        onError,
+    );
+
+    progress.handleProgress();
+
+    const deadline = new Date();
+    deadline.setSeconds(deadline.getSeconds() + expires || 60);
+
+    return await getDefaultClient(opt).enter("signatureUrls", async client => {
+        client.storageClasses = opt.storageClasses;
+        const batchOperator = new BatchOperator({
+            client,
+            region,
+            progress,
+        });
+
+        await batchOperator.run(items, _signatureUrls);
+        return progress.errorItems;
+    }, {
+        targetBucket: bucket,
+    });
+
+    async function _signatureUrls(client: Adapter, files: FileItem.File[]): Promise<PartialObjectError[]> {
+        let results: PartialObjectError[] = [];
+        const progressCallback = progress.createCallback(files);
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          try {
+            const url = await client.getObjectURL(
+              region,
+              {
+                bucket: file.bucket,
+                key: file.path.toString(),
+              },
+              domain,
+              deadline,
+            );
+            onEachSuccess(file, url);
+            progressCallback(i, null);
+          } catch (err: any) {
+            progressCallback(i, err);
+            results.push({
+              bucket: file.bucket,
+              key: file.path.toString(),
+              error: err,
+            });
+          }
+        }
+        return results;
+    }
+}
+

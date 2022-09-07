@@ -6,16 +6,13 @@ import { RegionService } from "kodo-s3-adapter-sdk/dist/region_service";
 
 
 import * as AppConfig from "@common/const/app-config";
-import * as AuthInfo from "@/components/services/authinfo";
-import * as Config from "@/config";
-import Settings from '@/components/services/settings'
+import * as LocalLogger from "@renderer/modules/local-logger";
+
+import {privateEndpointPersistence} from "./endpoint";
 
 export function debugRequest(mode: string) {
     return (request: any) => {
-        if (Settings.isDebug === 0) {
-            return;
-        }
-        console.info(
+        LocalLogger.info(
             '>>',
             mode,
 
@@ -36,10 +33,7 @@ export function debugRequest(mode: string) {
 
 export function debugResponse(mode: string) {
     return (response: any) => {
-        if (Settings.isDebug === 0) {
-            return;
-        }
-        console.info(
+      LocalLogger.info(
             '<<',
             mode,
 
@@ -84,13 +78,9 @@ function makeAdapterCacheKey(accessKey: string, secretKey: string, ucUrl?: strin
 function getQiniuAdapter(
     accessKey: string,
     secretKey: string,
-    ucUrl?: string,
-    regions?: Region[],
+    ucUrl: string | undefined = undefined,
+    regions: Region[] = [],
 ) {
-    if (!accessKey || !secretKey) {
-        throw new Error('`accessKey` or `secretKey` is unavailable');
-    }
-
     return new Qiniu(
         accessKey,
         secretKey,
@@ -122,63 +112,60 @@ interface AdapterOption {
 }
 
 export interface GetAdapterOptionParam {
-    id?: string,
-    secret?: string,
+    id: string,
+    secret: string,
     isPublicCloud: boolean,
     preferKodoAdapter?: boolean,
     preferS3Adapter?: boolean,
 }
 
-// TODO: @lihs change `opt` to required from optional when all js change to ts
-function getAdapterOption(opt?: GetAdapterOptionParam): AdapterOption {
-    const baseResult = {
-        appName: "kodo-browser",
+function getAdapterOption(opt: GetAdapterOptionParam): AdapterOption {
+    let baseResult = {
+        accessKey: opt.id,
+        secretKey: opt.secret,
+        appName: AppConfig.app.id,
         appVersion: AppConfig.app.version,
+        // TODO: get from @renderer/modules/settings or pass by opt
         appNatureLanguage: localStorage.getItem("lang") as NatureLanguage ?? 'zh-CN',
-    }
+    };
     let result: AdapterOption;
-
-    let config
-    if (opt && opt.id && opt.secret) {
-        config = Config.load(opt.isPublicCloud);
+    if (opt.isPublicCloud) {
         result = {
-            accessKey: opt.id,
-            secretKey: opt.secret,
-            regions: Config.isConfigCustomize(config) ? config.regions : [],
-            ucUrl: Config.isConfigCustomize(config) ? config.ucUrl : undefined,
             ...baseResult,
-        }
-    } else {
-        config = Config.load();
-        const authInfo = AuthInfo.get();
-        if (!authInfo.id || !authInfo.secret) {
-            throw new Error("lost accessKey or secretKey");
-        }
-        result = {
-            accessKey: authInfo.id,
-            secretKey: authInfo.secret,
-            regions: Config.isConfigCustomize(config) ? config.regions : [],
-            ucUrl: Config.isConfigCustomize(config) ? config.ucUrl : undefined,
-            ...baseResult,
+            ucUrl: undefined,
+            regions: [],
         };
+    } else {
+        const privateEndpoint = privateEndpointPersistence.read();
+        result = {
+            ...baseResult,
+            ucUrl: privateEndpoint.ucUrl,
+            regions: privateEndpoint.regions.map(r => {
+                const region = new Region('', r.identifier, r.label);
+                region.ucUrls = [privateEndpoint.ucUrl];
+                region.s3Urls = [r.endpoint];
+                return region;
+            }),
+            // disable uplog when use customize cloud
+            // because there isn't a valid access key of uplog
+            uplogBufferSize: -1,
+        }
     }
-    if (opt && opt.preferS3Adapter) {
+    if (opt.preferS3Adapter) {
         result.preferS3Adapter = opt.preferS3Adapter;
     }
 
-
-    // disable uplog when use customize cloud
-    // because there isn't a valid access key of uplog
-    if (!AuthInfo.usePublicCloud()) {
-        result.uplogBufferSize = -1;
-    }
     return result;
 }
 
 export function clientBackendMode(opt: GetAdapterOptionParam): string {
     const adapterOption = getAdapterOption(opt);
-    const isUsePublicCloud = AuthInfo.usePublicCloud();
-    if (adapterOption.regions.length > 0 && !adapterOption.preferKodoAdapter || adapterOption.preferS3Adapter || !isUsePublicCloud) {
+    if (
+      adapterOption.regions.length > 0 &&
+      !adapterOption.preferKodoAdapter ||
+      adapterOption.preferS3Adapter ||
+      !opt.isPublicCloud
+    ) {
         return S3_MODE;
     } else {
         return KODO_MODE;

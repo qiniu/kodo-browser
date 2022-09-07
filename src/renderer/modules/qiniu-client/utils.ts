@@ -3,9 +3,10 @@ import { Domain } from "kodo-s3-adapter-sdk/dist/adapter";
 import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 
 import * as AppConfig from "@common/const/app-config";
-import * as KodoNav from "@/const/kodo-nav";
+import * as KodoNav from "@renderer/const/kodo-nav";
 
 import {debugRequest, debugResponse, GetAdapterOptionParam, getDefaultClient} from './common'
+import {checkFileExists, checkFolderExists} from "@renderer/modules/qiniu-client/files";
 
 export async function isQueryRegionAPIAvailable(ucUrl: string): Promise<boolean> {
     try {
@@ -64,29 +65,25 @@ export function parseKodoPath(s3Path: string) {
     };
 }
 
-export async function signatureUrl(
-    region: string,
-    bucket: string,
-    key: QiniuPath,
-    domain: Domain | undefined,
-    expires: number,
-    opt: GetAdapterOptionParam,
-): Promise<URL> {
-    const deadline = new Date();
-    deadline.setSeconds(deadline.getSeconds() + expires || 60);
-
-    return await getDefaultClient(opt).enter("signatureUrl", async client => {
-        return await client.getObjectURL(
-            region,
-            {
-                bucket,
-                key: key.toString(),
-            },
-            domain,
-            deadline,
-        );
-    }, {
-        targetBucket: bucket,
-        targetKey: key.toString(),
-    });
+export function checkFileOrDirectoryExists(
+  region: string,
+  bucket: string,
+  prefix: QiniuPath | string,
+  opt: GetAdapterOptionParam,
+): Promise<boolean> {
+  if (prefix.toString().endsWith("/")) {
+    return checkFolderExists(
+      region,
+      bucket,
+      prefix,
+      opt,
+    );
+  } else {
+    return checkFileExists(
+      region,
+      bucket,
+      prefix,
+      opt,
+    );
+  }
 }

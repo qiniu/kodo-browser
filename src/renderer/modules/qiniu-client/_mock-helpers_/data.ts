@@ -24,13 +24,16 @@ export const mockDataOfGetAllRegions: Region[] = [
         translatedLabels: {
             "zh_CN": "中国中部",
         },
+        storageClasses: [],
     },
     {
         ...mockDataOfRegionBase,
         id: "region-id-2",
         s3Id: 'region-s3-id-2',
-        // exist label but translatedLabels
+        // exist label but translatedLabels empty
         label: 'region-label-2',
+        translatedLabels: {},
+        storageClasses: [],
     },
     {
         ...mockDataOfRegionBase,
@@ -41,11 +44,14 @@ export const mockDataOfGetAllRegions: Region[] = [
         translatedLabels: {
             "en_US": "China Middle",
         },
+        storageClasses: [],
     },
     {
         ...mockDataOfRegionBase,
         id: "region-id-4",
         s3Id: 'region-s3-id-4',
+        translatedLabels: {},
+        storageClasses: [],
         // neither label and translatedLabels
     },
     {
@@ -56,6 +62,7 @@ export const mockDataOfGetAllRegions: Region[] = [
         translatedLabels: {
             "en_US": "China Middle",
         },
+        storageClasses: [],
     },
     {
         ...mockDataOfRegionBase,
@@ -65,14 +72,6 @@ export const mockDataOfGetAllRegions: Region[] = [
         translatedLabels: {
             "zh_CN": "中国中部",
         },
+        storageClasses: [],
     },
 ];
-const expectRegionTranslatedLabels: (string | undefined)[] = [
-    "中国中部", "region-label-2", "region-label-3", undefined, undefined, "中国中部"
-];
-export const expectDataOfGetAllRegions = expectRegionTranslatedLabels.map(
-    (translatedLabel, index) => ({
-        ...mockDataOfGetAllRegions[index],
-        translatedLabel,
-    })
-);

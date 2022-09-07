@@ -33,9 +33,8 @@ jest.mock("kodo-s3-adapter-sdk", () => ({
 import { mocked } from "ts-jest/utils";
 import { Kodo as KodoAdapter } from "kodo-s3-adapter-sdk/dist/kodo";
 import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3";
-import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 
-import * as KodoNav from "@/const/kodo-nav";
+import * as KodoNav from "@renderer/const/kodo-nav";
 import * as QiniuClientCommon from "./common";
 import * as QiniuClientUtils from "./utils";
 
@@ -119,8 +118,6 @@ describe("test qiniu-client/utils.ts", () => {
             MockedS3Adapter.prototype.getObjectURL.mockClear();
         });
         it("listDomains with KodoAdapter", async () => {
-            // mock public to use KodoAdapter
-            MockAuth.mockPublicAuthInfo();
             await QiniuClientUtils.listDomains(
                 "region-kodo-browser-Kodo-listDomains",
                 "bucket-kodo-browser-Kodo-listDomains",
@@ -133,13 +130,15 @@ describe("test qiniu-client/utils.ts", () => {
                 "region-kodo-browser-Kodo-listDomains",
                 "bucket-kodo-browser-Kodo-listDomains",
             );
-            MockAuth.resetAuthInfo();
         });
         it("listDomains with S3Adapter", async () => {
             await QiniuClientUtils.listDomains(
                 "region-kodo-browser-S3-listDomains",
                 "bucket-kodo-browser-S3-listDomains",
-                opt,
+                {
+                    ...opt,
+                    preferS3Adapter: true,
+                },
             );
             expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
             const [ enterParamsName ] = MockedS3Adapter.prototype.enter.mock.calls[0];
@@ -150,105 +149,7 @@ describe("test qiniu-client/utils.ts", () => {
             );
         });
     });
-    describe("signatureUrl", () => {
-        const spiedGetDefaultClient = jest.spyOn(QiniuClientCommon, "getDefaultClient");
-        const MockedKodoAdapter = mocked(KodoAdapter, true);
-        const MockedS3Adapter = mocked(S3Adapter, true);
-        const mockDate = new Date();
-        const ENV = {
-            QINIU_ACCESS_KEY: MockAuth.QINIU_ACCESS_KEY,
-            QINIU_SECRET_KEY: MockAuth.QINIU_SECRET_KEY,
-        }
-        const opt: QiniuClientCommon.GetAdapterOptionParam = {
-            id: ENV.QINIU_ACCESS_KEY,
-            secret: ENV.QINIU_SECRET_KEY,
-            isPublicCloud: true,
-        };
-        beforeEach(() => {
-            spiedGetDefaultClient.mockClear();
-
-            MockedKodoAdapter.mockClear();
-            MockedKodoAdapter.prototype.enter.mockClear();
-            MockedKodoAdapter.prototype.getObjectURL.mockClear();
-
-            MockedS3Adapter.mockClear();
-            MockedS3Adapter.prototype.enter.mockClear();
-            MockedS3Adapter.prototype.getObjectURL.mockClear();
-
-
-            jest.useFakeTimers()
-                .setSystemTime(mockDate);
-        });
-        afterEach(() => {
-            jest.useRealTimers();
-        })
-
-        it("signatureUrl with KodoAdapter", async () => {
-            // mock public to use KodoAdapter
-            MockAuth.mockPublicAuthInfo();
-            const mockDataKey = new QiniuPath(
-                "/",
-                "/",
-                "/kodo-browser/QiniuClientUtils/signatureUrl.txt",
-                ".txt",
-                ["kodo-browser", "QiniuClientUtils", "signatureUrl.txt"],
-                false,
-            );
-            await QiniuClientUtils.signatureUrl(
-                "region-kodo-browser-Kodo-signatureUrl",
-                "bucket-kodo-browser-Kodo-signatureUrl",
-                mockDataKey,
-                undefined,
-                10,
-                opt,
-            );
-            expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
-            const [ enterParamsName ] = MockedKodoAdapter.prototype.enter.mock.calls[0];
-            expect(enterParamsName).toBe("signatureUrl");
-            const expectDeadline = new Date(mockDate);
-            expectDeadline.setSeconds(expectDeadline.getSeconds() + 10 || 60);
-            expect(MockedKodoAdapter.prototype.getObjectURL).toBeCalledWith(
-                "region-kodo-browser-Kodo-signatureUrl",
-                {
-                    bucket: "bucket-kodo-browser-Kodo-signatureUrl",
-                    key: mockDataKey.toString(),
-                },
-                undefined,
-                expectDeadline,
-            );
-            MockAuth.resetAuthInfo();
-        });
-        it("signatureUrl with S3Adapter", async () => {
-            const mockDataKey = new QiniuPath(
-                "/",
-                "/",
-                "/kodo-browser/QiniuClientUtils/signatureUrl.txt",
-                ".txt",
-                ["kodo-browser", "QiniuClientUtils", "signatureUrl.txt"],
-                false,
-            );
-            await QiniuClientUtils.signatureUrl(
-                "region-kodo-browser-S3-signatureUrl",
-                "bucket-kodo-browser-S3-signatureUrl",
-                mockDataKey,
-                undefined,
-                10,
-                opt,
-            );
-            expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
-            const [ enterParamsName ] = MockedS3Adapter.prototype.enter.mock.calls[0];
-            expect(enterParamsName).toBe("signatureUrl");
-            const expectDeadline = new Date(mockDate);
-            expectDeadline.setSeconds(expectDeadline.getSeconds() + 10 || 60);
-            expect(MockedS3Adapter.prototype.getObjectURL).toBeCalledWith(
-                "region-kodo-browser-S3-signatureUrl",
-                {
-                    bucket: "bucket-kodo-browser-S3-signatureUrl",
-                    key: mockDataKey.toString(),
-                },
-                undefined,
-                expectDeadline,
-            );
-        });
+    describe("checkFileOrDirectoryExists", () => {
+      fail("implement me!");
     });
 });

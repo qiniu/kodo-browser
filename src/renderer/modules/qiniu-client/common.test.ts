@@ -22,7 +22,6 @@ describe("test qiniu-client/common.ts", () => {
 
     describe("clientBackendMode", () => {
         it("should kodo", () => {
-            MockAuth.mockPublicAuthInfo();
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
@@ -31,13 +30,13 @@ describe("test qiniu-client/common.ts", () => {
             expect(QiniuClientCommon.clientBackendMode(opt)).toBe(KODO_MODE);
             opt.preferKodoAdapter = true;
             expect(QiniuClientCommon.clientBackendMode(opt)).toBe(KODO_MODE);
-            MockAuth.resetAuthInfo();
         });
         it("should s3", () => {
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
                 isPublicCloud: true,
+                preferS3Adapter: true,
             };
             // preferS3Adapter || !isPublicCloud
             opt.preferS3Adapter = true;
@@ -53,7 +52,6 @@ describe("test qiniu-client/common.ts", () => {
 
     describe("getDefaultClient", () => {
         it("should kodo adapter", () => {
-            MockAuth.mockPublicAuthInfo();
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
@@ -62,7 +60,6 @@ describe("test qiniu-client/common.ts", () => {
             expect(QiniuClientCommon.getDefaultClient(opt).constructor).toBe(KodoAdapter);
             opt.preferKodoAdapter = true;
             expect(QiniuClientCommon.getDefaultClient(opt).constructor).toBe(KodoAdapter);
-            MockAuth.resetAuthInfo();
         });
 
         it("should s3 adapter", () => {
@@ -70,6 +67,7 @@ describe("test qiniu-client/common.ts", () => {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
                 isPublicCloud: true,
+                preferS3Adapter: true,
             };
             // preferS3Adapter || !isPublicCloud
             opt.preferS3Adapter = true;

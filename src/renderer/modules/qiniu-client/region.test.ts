@@ -45,39 +45,39 @@ describe("test qiniu-client/region.ts", () => {
     const MockedS3Adapter = mocked(S3Adapter, true);
 
     describe("test with KodoAdapter", () => {
-        beforeAll(() => {
-            // mock public to use KodoAdapter
-            MockAuth.mockPublicAuthInfo();
-        });
-        afterAll(() => {
-            MockAuth.resetAuthInfo();
-        });
         beforeEach(() => {
             MockedKodoAdapter.mockClear();
             MockedKodoAdapter.prototype.enter.mockClear();
         });
 
         it("test getRegions", async () => {
-            const actualRegions = await QiniuClientRegions.getRegions("zh-CN", opt);
+            const actualRegions = await QiniuClientRegions.getRegions(opt);
             const [ enterParamsName ] = MockedKodoAdapter.prototype.enter.mock.calls[0];
             expect(enterParamsName).toBe("getRegions");
             expect(MockedRegionService).toBeCalled();
             expect(MockedRegionService.prototype.getAllRegions).toBeCalled();
-            expect(actualRegions).toEqual(MockData.expectDataOfGetAllRegions);
+            expect(actualRegions).toEqual(MockData.mockDataOfGetAllRegions);
         });
     });
 
     describe("test with S3Adapter", () => {
+        beforeAll(() => {
+            // mock public to use S3Adapter
+            opt.preferS3Adapter = true;
+        });
+        afterAll(() => {
+            delete opt.preferS3Adapter;
+        });
         beforeEach(() => {
             MockedS3Adapter.mockClear();
             MockedS3Adapter.prototype.enter.mockClear();
         });
 
         it("test getRegions", async () => {
-            const actualRegions = await QiniuClientRegions.getRegions("zh-CN", opt);
+            const actualRegions = await QiniuClientRegions.getRegions(opt);
             const [ enterParamsName ] = MockedS3Adapter.prototype.enter.mock.calls[0];
             expect(enterParamsName).toBe("getRegions");
-            expect(actualRegions).toEqual(MockData.expectDataOfGetAllRegions);
+            expect(actualRegions).toEqual(MockData.mockDataOfGetAllRegions);
         });
     });
 });

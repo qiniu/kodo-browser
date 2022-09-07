@@ -1,7 +1,7 @@
 import { ListedObjects, ObjectInfo } from "kodo-s3-adapter-sdk/dist/adapter";
 import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
 import Duration from "@common/const/duration";
-import * as FileItem from "@/models/file-item";
+import * as FileItem from "../file-item";
 
 export function mockAdapterFactory(adapterName: string) {
     const mockedClient = jest.fn();

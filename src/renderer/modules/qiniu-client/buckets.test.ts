@@ -32,13 +32,6 @@ describe("test qiniu-client/buckets.ts", () => {
     };
 
     describe("Kodo", () => {
-        beforeAll(() => {
-            // mock public to use KodoAdapter
-            MockAuth.mockPublicAuthInfo();
-        });
-        afterAll(() => {
-            MockAuth.resetAuthInfo();
-        });
         beforeEach(() => {
             spiedGetDefaultClient.mockClear();
             MockedKodoAdapter.mockClear();
@@ -88,6 +81,15 @@ describe("test qiniu-client/buckets.ts", () => {
     });
 
     describe("S3", () => {
+        beforeAll(() => {
+          // mock public to use S3Adapter
+          opt.preferS3Adapter = true;
+        });
+
+        afterAll(() => {
+          delete opt.preferS3Adapter;
+        });
+
         beforeEach(() => {
             spiedGetDefaultClient.mockClear();
             MockedS3Adapter.mockClear();

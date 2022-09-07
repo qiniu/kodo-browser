@@ -1,8 +1,7 @@
-import { Bucket } from "kodo-s3-adapter-sdk/dist/adapter";
-
 import { GetAdapterOptionParam, getDefaultClient } from "./common"
+import {BucketItem} from "./bucket-item";
 
-export async function listAllBuckets(opt: GetAdapterOptionParam): Promise<Bucket[]> {
+export async function listAllBuckets(opt: GetAdapterOptionParam): Promise<BucketItem[]> {
     return await getDefaultClient(opt).enter("listBuckets", async client => {
         return await client.listBuckets();
     });

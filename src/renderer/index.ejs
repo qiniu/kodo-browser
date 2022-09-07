@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title>Kodo Browser</title>
+    <% for (let css of htmlWebpackPlugin.files.css) { %>
+        <link href="<%= css %>" rel="stylesheet">
+    <% } %>
+</head>
+
+<body>
+
+<div id="kodo-browser-app"></div>
+
+<!-- codemirror dependent diff_match_patch -->
+<script src="./static/diff_match_patch.js"></script>
+
+<% for (let js of htmlWebpackPlugin.files.js) { %>
+    <script type="text/javascript" src="<%= js %>"></script>
+<% } %>
+
+</body>
+
+</html>

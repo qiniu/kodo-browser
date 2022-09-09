@@ -1,4 +1,5 @@
 import angular from 'angular'
+import lodash from 'lodash'
 import deepEqual from 'fast-deep-equal'
 import { Base64 } from 'js-base64'
 import { S3_MODE } from 'kodo-s3-adapter-sdk'
@@ -338,19 +339,17 @@ webModule.controller(FILES_CONTROLLER_NAME, [
     }
 
     /////////////////////////////////
-    var refreshTid;
+    const refreshFilesListThrottled = lodash.throttle((bucketName, key) => {
+      if (bucketName === $scope.currentInfo.bucketName &&
+          key === $scope.currentInfo.key) {
+        gotoAddress(bucketName, key);
+      }
+    }, 5000);
 
-    $scope.$on("refreshFilesList", (e) => {
-      $timeout.cancel(refreshTid);
-
-      const bucketName = $scope.currentInfo.bucketName,
-            key = $scope.currentInfo.key;
-      refreshTid = $timeout(() => {
-        if (bucketName === $scope.currentInfo.bucketName &&
-            key === $scope.currentInfo.key) {
-          gotoAddress(bucketName, key);
-        }
-      }, 600);
+    $scope.$on("refreshFilesList", () => {
+      const bucketName = $scope.currentInfo.bucketName;
+      const key = $scope.currentInfo.key;
+      refreshFilesListThrottled(bucketName, key);
     });
 
     var searchTid;

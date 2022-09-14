@@ -410,7 +410,7 @@ webModule.controller(TRANSFER_FRAME_CONTROLLER_NAME, [
           accessKey: AuthInfo.get().id,
           secretKey: AuthInfo.get().secret,
           ucUrl: ngConfig.load().ucUrl || "",
-          regions: ngConfig.load().regionId || [],
+          regions: ngConfig.load().regions || [],
           backendMode: $scope.selectedDomain.domain.qiniuBackendMode(),
         },
       });

@@ -224,6 +224,7 @@ export default {
 
   //files
   upload: "Upload",
+  "upload.duplicated.basename": "Duplicated name in selected files or directories",
   "folder.create": "Directory",
   "folder.create.success": "Directory created successfully",
   "folder.name": "Name",

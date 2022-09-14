@@ -1,5 +1,5 @@
 import path from "path";
-import fs, {promises as fsPromises} from "fs";
+import fs, {promises as fsPromises, constants as fsConstants} from "fs";
 
 import lodash from "lodash";
 import sanitizeFilename from "sanitize-filename";
@@ -232,22 +232,20 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
 
     private async createDirectory(path: string): Promise<void> {
         try {
-            await fsPromises.stat(path)
-                .then(stat => {
-                    if (stat.isDirectory()) {
-                        return;
-                    }
-                })
-                .catch(err => {
-                    if (err.message.indexOf("EEXIST: file already exists") > -1) {
-                        return Promise.resolve();
-                    }
-                    if (err.message.indexOf("ENOENT: no such file or directory") > -1) {
-                        return fsPromises.mkdir(path);
-                    }
-
-                    return Promise.reject(err);
-                });
+            const isDirectoryExists: boolean = await fsPromises.access(
+                path,
+                fsConstants.F_OK,
+            )
+                .then(() => true)
+                .catch(() => false);
+            if (isDirectoryExists) {
+                return;
+            }
+            const stat = await fsPromises.stat(path);
+            if (stat.isDirectory()) {
+                return;
+            }
+            await fsPromises.mkdir(path);
         } catch (err: any) {
             this.config.onError?.(err);
         }

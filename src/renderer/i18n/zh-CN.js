@@ -223,6 +223,7 @@ export default {
 
   //files
   upload: "上传",
+  "upload.duplicated.basename": "所选项目存在同名文件或目录",
   "folder.create": "创建目录",
   "folder.create.success": "创建目录成功",
   "folder.name": "目录名",

@@ -13,6 +13,7 @@ import {Status} from "@common/models/job/types";
 
 import {MAX_MULTIPART_COUNT, MIN_MULTIPART_SIZE} from "./boundary-const";
 import TransferManager, {TransferManagerConfig} from "./transfer-manager";
+import singleFlight from "./single-flight";
 
 // for walk
 interface StatsWithName extends Stats {
@@ -77,7 +78,9 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                     // if enable skip empty directory upload.
                     const remoteDirectoryKey = path.dirname(remoteKey) + "/";
                     if (remoteDirectoryKey !== "./" && !directoryToCreate.get(remoteDirectoryKey)) {
-                        this.createDirectory(
+                        const flightKey = destInfo.regionId + destInfo.bucketName + remoteDirectoryKey;
+                        this.createDirectoryWithSingleFlight(
+                            flightKey,
                             qiniuClient,
                             {
                                 region: destInfo.regionId,
@@ -95,9 +98,11 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                         //  and in this electron version(nodejs v10.x) read the directory again
                         //  is too waste. so we create later.
                         //  if we are nodejs > v12.12，use opendir API to determine empty.
-                        if (!this.config.isSkipEmptyDirectory) {
+                        if (!this.config.isSkipEmptyDirectory && !directoryToCreate.get(remoteDirectoryKey)) {
                             const remoteDirectoryKey = remoteKey + "/";
-                            this.createDirectory(
+                            const flightKey = destInfo.regionId + destInfo.bucketName + remoteDirectoryKey;
+                            this.createDirectoryWithSingleFlight(
+                                flightKey,
                                 qiniuClient,
                                 {
                                     region: destInfo.regionId,
@@ -134,6 +139,9 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
         hooks?.jobsAdded?.();
     }
 
+    /**
+     *  best to call {@link createDirectoryWithSingleFlight}
+     */
     private async createDirectory(
         client: Adapter,
         options: {
@@ -144,6 +152,16 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
         },
     ) {
         await client.enter("createFolder", async client => {
+            const isDirectoryExists = await client.isExists(
+                options.region,
+                {
+                    bucket: options.bucketName,
+                    key: options.key,
+                },
+            );
+            if (isDirectoryExists) {
+                return
+            }
             await client.putObject(
                 options.region,
                 {
@@ -162,6 +180,8 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             key: options.key,
         };
     }
+
+    private createDirectoryWithSingleFlight = singleFlight(this.createDirectory)
 
     private createUploadJob(
         from: Required<UploadJob["options"]["from"]>,

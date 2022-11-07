@@ -98,12 +98,6 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = (props) =
       .then(fileUrl => {
         setFileLink(fileUrl.toString());
       });
-
-    // return toast.promise(p, {
-    //   loading: translate("common.submitting"),
-    //   success: translate("common.submitted"),
-    //   error: translate("common.failed"),
-    // });
   };
 
   const {ref: submitButtonRef, portal: submitButtonPortal} = usePortal();

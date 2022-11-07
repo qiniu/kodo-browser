@@ -77,12 +77,6 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
       .then(fileUrl => {
         setFileLink(fileUrl.toString());
       });
-
-    // return toast.promise(p, {
-    //   loading: translate("common.submitting"),
-    //   success: translate("common.submitted"),
-    //   error: translate("common.failed"),
-    // });
   };
 
   return (

@@ -35,7 +35,7 @@ const SignInForm: React.FC<SignInFormProps> = (props) => {
     return toast.promise(p, {
       loading: translate("signIn.form.submit"),
       success: translate("common.success"),
-      error: translate("common.failed"),
+      error: err => `${translate("common.failed")}: ${err}`,
     });
   };
 

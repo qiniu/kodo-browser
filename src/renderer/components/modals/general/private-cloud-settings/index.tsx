@@ -23,7 +23,7 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
     return toast.promise(p, {
       loading: translate("common.saving"),
       success: translate("common.saved"),
-      error: translate("common.failed"),
+      error: err => `${translate("common.failed")}: ${err}`,
     });
   }
 

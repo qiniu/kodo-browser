@@ -231,7 +231,7 @@ const MoveFiles: React.FC<ModalProps & MoveFilesProps> = (props) => {
     return toast.promise(p, {
       loading: translate("common.submitting"),
       success: translate("common.submitted"),
-      error: translate("common.failed"),
+      error: err => `${translate("common.failed")}: ${err}`,
     });
   }
 

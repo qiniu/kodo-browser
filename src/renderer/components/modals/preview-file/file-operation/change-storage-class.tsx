@@ -97,7 +97,7 @@ const ChangeStorageClass: React.FC<ChangeStorageClassProps> = ({
     return toast.promise(p, {
       loading: translate("common.submitting"),
       success: translate("common.submitted"),
-      error: translate("common.failed"),
+      error: err => `${translate("common.failed")}: ${err}`,
     });
   };
 

@@ -122,7 +122,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
     return toast.promise(p, {
       loading: translate("common.submitting"),
       success: translate("common.submitted"),
-      error: translate("common.failed"),
+      error: err => `${translate("common.failed")}: ${err}`,
     });
   }
 

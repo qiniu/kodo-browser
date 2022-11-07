@@ -90,7 +90,7 @@ const CreateDirectoryFile: React.FC<ModalProps & CreateDirectoryFileProps> = (pr
     return toast.promise(p, {
       loading: translate("common.submitting"),
       success: translate("common.submitted"),
-      error: translate("common.failed"),
+      error: err => `${translate("common.failed")}: ${err}`,
     });
   }
 

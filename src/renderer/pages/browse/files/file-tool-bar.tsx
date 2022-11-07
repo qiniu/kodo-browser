@@ -9,6 +9,7 @@ import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 import StorageClass from "@common/models/storage-class";
 import {translate} from "@renderer/modules/i18n";
 import * as FileItem from "@renderer/modules/qiniu-client/file-item";
+import {FilesOperationType, useFileOperation} from "@renderer/modules/file-operation";
 
 import TooltipButton from "@renderer/components/tooltip-button";
 import {useDisplayModal} from "@renderer/components/modals/hooks";
@@ -23,19 +24,6 @@ import RestoreFiles from "@renderer/components/modals/file/restore-files";
 import ChangeFilesStorageClass from "@renderer/components/modals/file/change-files-storage-class";
 import GenerateFileLinks from "@renderer/components/modals/file/generate-file-links";
 
-enum FilesOperationType {
-  Copy = "copy",
-  Move = "move",
-}
-
-interface FileOperation {
-  action: FilesOperationType,
-  bucketName: string,
-  regionId: string,
-  files: FileItem.Item[],
-  basePath: string,
-}
-
 interface FileToolBarProps {
   basePath?: string,
   availableStorageClasses?: Record<string, StorageClass>,
@@ -45,7 +33,6 @@ interface FileToolBarProps {
   listedFileNumber: number,
   hasMoreFiles: boolean,
   selectedFiles: FileItem.Item[],
-  defaultFileOperation?: FileOperation,
 
   loadingDomains: boolean,
   domains: Domain[],
@@ -76,7 +63,6 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     listedFileNumber,
     hasMoreFiles,
     selectedFiles,
-    defaultFileOperation = null,
 
     loadingDomains,
     domains,
@@ -98,7 +84,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
   } = props;
 
   // file operation state
-  const [fileOperation, setFileOperation] = useState<FileOperation | null>(defaultFileOperation);
+  const {fileOperation, setFileOperation} = useFileOperation();
 
   const handleCopyFileOperation = () => {
     if (!bucketName || !regionId || basePath === undefined) {

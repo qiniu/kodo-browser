@@ -6,6 +6,7 @@ import * as LocalLogger from "@renderer/modules/local-logger";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {useKodoNavigator} from "@renderer/modules/kodo-address";
 import {BucketItem, getRegions, listAllBuckets} from "@renderer/modules/qiniu-client";
+import {Provider as FileOperationProvider} from "@renderer/modules/file-operation";
 
 import Buckets from "./buckets";
 import Files from "./files";
@@ -66,30 +67,32 @@ const Contents: React.FC<ContentsProps> = ({
   const region = bucket?.regionId ? regionsMap.get(bucket?.regionId) : undefined;
 
   return (
-    <div
-      style={{
-        position: "relative",
-        height: "calc(100vh - 6rem)",
-      }}
-      className="d-flex flex-column"
-    >
-      {
-        !bucketName
-          ? <Buckets
-            loading={loadingBucketAndRegion}
-            regions={[...regionsMap.values()]}
-            data={[...bucketsMap.values()]}
-            onOperatedBucket={handleReloadBuckets}
-          />
-          : <Files
-            // load files need finish fetching buckets and regions
-            prepareLoading={loadingBucketAndRegion}
-            toggleRefresh={toggleRefresh}
-            bucket={bucket}
-            region={region}
-          />
-      }
-    </div>
+    <FileOperationProvider>
+      <div
+        style={{
+          position: "relative",
+          height: "calc(100vh - 6rem)",
+        }}
+        className="d-flex flex-column"
+      >
+        {
+          !bucketName
+            ? <Buckets
+              loading={loadingBucketAndRegion}
+              regions={[...regionsMap.values()]}
+              data={[...bucketsMap.values()]}
+              onOperatedBucket={handleReloadBuckets}
+            />
+            : <Files
+              // load files need finish fetching buckets and regions
+              prepareLoading={loadingBucketAndRegion}
+              toggleRefresh={toggleRefresh}
+              bucket={bucket}
+              region={region}
+            />
+        }
+      </div>
+    </FileOperationProvider>
   );
 };
 

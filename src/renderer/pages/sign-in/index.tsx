@@ -7,27 +7,31 @@ import {useI18n} from "@renderer/modules/i18n";
 
 // modals
 import {useDisplayModal} from "@renderer/components/modals/hooks";
-import AkHistory from "@renderer/components/modals/ak-history";
-import PrivateCloudSettings from "@renderer/components/modals/private-cloud-settings";
+import AkHistory from "@renderer/components/modals/general/ak-history";
+import PrivateCloudSettings from "@renderer/components/modals/general/private-cloud-settings";
 
 // locals
-import "./login.scss";
-import LoginForm, {LoginFormValues} from "./login-form";
+import "./sign-in.scss";
+import SignInForm, {SignInFormValues} from "./sign-in-form";
 
-const Login: React.FC = () => {
+const SignIn: React.FC = () => {
   // context states
   const {translate} = useI18n();
 
   // modal states
   const [
-    isShowPrivateEndpointSetting,
+    {
+      show: isShowPrivateEndpointSetting,
+    },
     {
       showModal: handleClickPrivateEndpointSetting,
       closeModal: handleHidePrivateEndpointSetting,
     },
   ] = useDisplayModal();
   const [
-    isShowAccessKeyHistory,
+    {
+      show:isShowAccessKeyHistory,
+    },
     {
       showModal: handleClickAccessKeyHistory,
       closeModal: handleHideAccessKeyHistory,
@@ -35,17 +39,17 @@ const Login: React.FC = () => {
   ] = useDisplayModal();
 
   // local states
-  const [formDefaultValues, setFormDefaultValues] = useState<LoginFormValues>();
+  const [formDefaultValues, setFormDefaultValues] = useState<SignInFormValues>();
 
   return (
     <Container>
       <Row>
         <Col/>
-        <Col className="login-page">
+        <Col className="sign-in-page">
           <Card>
-            <Card.Header as="h3">{translate("login.title")}</Card.Header>
+            <Card.Header as="h3">{translate("signIn.title")}</Card.Header>
             <Card.Body>
-              <LoginForm
+              <SignInForm
                 defaultValues={formDefaultValues}
                 onClickPrivateEndpointSetting={handleClickPrivateEndpointSetting}
                 onClickAccessKeyHistory={handleClickAccessKeyHistory}
@@ -55,20 +59,16 @@ const Login: React.FC = () => {
         </Col>
         <Col/>
       </Row>
-      {
-        isShowPrivateEndpointSetting
-          ? <PrivateCloudSettings
-            show
-            dialogClassName="modal-720p"
-            onHide={handleHidePrivateEndpointSetting}
-          />
-          : null // destroy when hidden
-      }
+      <PrivateCloudSettings
+        show={isShowPrivateEndpointSetting}
+        dialogClassName="modal-720p"
+        onHide={handleHidePrivateEndpointSetting}
+      />
       <AkHistory
         show={isShowAccessKeyHistory}
         size="xl"
         onHide={handleHideAccessKeyHistory}
-        onActiveAk={(akItem) => {
+        onActiveAk={akItem => {
           setFormDefaultValues({
             ...akItem,
             rememberMe: true,
@@ -80,4 +80,4 @@ const Login: React.FC = () => {
   )
 };
 
-export default Login;
+export default SignIn;

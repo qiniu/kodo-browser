@@ -32,3 +32,11 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: var(--line-num);
 }
+
+.overflow-ellipsis-one-line {
+  display: inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  vertical-align: bottom;
+}

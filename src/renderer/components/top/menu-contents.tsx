@@ -99,7 +99,12 @@ const MenuContents: React.FC<MenuContentsProps> = (props) => {
             align="end"
             id="user-menu"
             title={
-              <i className="bi bi-person-circle me-1"/>
+              <>
+                <i className="bi bi-person-circle me-1"/>
+                <span className="overflow-ellipsis-one-line" style={{maxWidth: "8em"}}>
+                  {currentUser.description}
+                </span>
+              </>
             }
           >
             <NavDropdown.Item

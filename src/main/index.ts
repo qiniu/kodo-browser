@@ -321,33 +321,15 @@ ipcMain.on("asynchronous", (_event, data) => {
     win?.webContents.reload();
     break;
 
-  case "clearCache":
+  case "signOut":
     win?.webContents.session.clearCache()
-        .then(() => {
-          console.info('cache cleared');
-        });
-    break;
-  }
-});
-
-ipcMain.on("asynchronous-job", (event, data) => {
-  switch (data.key) {
-  case "job-stopall": {
-    forkedWorkers.forEach((worker) => {
-      worker.send({
-        // TODO: both UploadAction.StopAllJobs and DownloadAction.StopAllJobs
-        action: "StopAllJobs",
+      .then(() => {
+        console.info('cache cleared');
       });
+    forkedWorkers.forEach((worker) => {
+      worker.kill();
     });
     break;
-  }
-
-  default:
-    event.sender.send(data.job, {
-      job: data.job,
-      key: 'unknown',
-      data: data
-    });
   }
 });
 

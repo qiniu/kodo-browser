@@ -1,0 +1,12 @@
+.code-mirror-container {
+  width: 100%;
+  height: 100%;
+
+  & .CodeMirror, .CodeMirror-merge {
+    height: 100%;
+  }
+
+  & .CodeMirror-merge-pane {
+    height: 100%;
+  }
+}

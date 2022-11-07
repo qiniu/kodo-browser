@@ -31,15 +31,17 @@ class PrivateEndpointPersistence {
   }
 
   read(): Endpoint {
-    let data = JSON.parse(
-      localFile
+    const jsonStrData = localFile
         .read(PrivateEndpointPersistence.ConfigFile)
-        .toString()
-    );
+        .toString();
+    if (!jsonStrData) {
+      throw new Error("lost endpoint config!");
+    }
+    let data = JSON.parse(jsonStrData);
     return {
       // Backward Compatibility
       ucUrl: data.uc_url,
-      regions: data.regions
+      regions: (data.regions ?? [])
         .map((r: {id: string, label: string, endpoint: string}) => ({
           identifier: r.id,
           label: r.label,

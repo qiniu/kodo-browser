@@ -1,14 +1,18 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {Button, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {toast} from "react-hot-toast";
+import {SubmitHandler, useForm} from "react-hook-form";
 
 import StorageClass from "@common/models/storage-class";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
-import {deleteFiles, FileItem, stopDeleteFiles} from "@renderer/modules/qiniu-client";
+import {
+  FileItem,
+  setStorageClassOfFiles,
+  stopSetStorageClassOfFiles
+} from "@renderer/modules/qiniu-client";
 import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
 
-import {useSubmitModal} from "@renderer/components/modals/hooks";
 import {
   BatchProgress,
   BatchTaskStatus,
@@ -16,26 +20,27 @@ import {
   ErrorFileList,
   useBatchProgress
 } from "@renderer/components/batch-progress";
+import {ChangeStorageClassForm, ChangeStorageClassFormData} from "@renderer/components/forms";
 
-import {OperationDoneRecallFn} from "@renderer/components/modals/file/types";
+import {OperationDoneRecallFn} from "../types";
 
-interface DeleteFilesProps {
+interface ChangeFilesStorageClassProps {
   regionId: string,
   bucketName: string,
   basePath: string,
   fileItems: FileItem.Item[],
   storageClasses: StorageClass[],
-  onDeletedFile: OperationDoneRecallFn,
+  onChangedFilesStorageClass: OperationDoneRecallFn,
 }
 
-const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
+const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProps> = (props) => {
   const {
     regionId,
     bucketName,
     basePath,
     fileItems,
     storageClasses,
-    onDeletedFile,
+    onChangedFilesStorageClass,
     ...modalProps
   } = props;
 
@@ -48,49 +53,65 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
     memoRegionId,
     memoBucketName,
     memoBasePath,
-  } = useMemo(() => ({
-    memoFileItems: modalProps.show ? fileItems : [],
-    memoRegionId: regionId,
-    memoBucketName: bucketName,
-    memoBasePath: basePath,
-  }), [modalProps.show]);
-
-  const {
-    state: {
-      isSubmitting,
-    },
-    handleSubmit,
-  } = useSubmitModal();
-  const [batchProgressState, setBatchProgressState] = useBatchProgress();
-  const [erroredFileOperations, setErroredFileOperations] = useState<ErroredFileOperation[]>([]);
-
-  useEffect(() => {
+    memoStorageClasses,
+  } = useMemo(() => {
     if (modalProps.show) {
+      return {
+        memoFileItems: fileItems,
+        memoRegionId: regionId,
+        memoBucketName: bucketName,
+        memoBasePath: basePath,
+        memoStorageClasses: storageClasses,
+      };
     } else {
-      setBatchProgressState({
-        status: BatchTaskStatus.Standby,
-      });
-      setErroredFileOperations([]);
+      return {
+        memoFileItems: [],
+        memoRegionId: regionId,
+        memoBucketName: bucketName,
+        memoBasePath: basePath,
+        memoStorageClasses: storageClasses,
+      };
     }
   }, [modalProps.show]);
 
-  const handleSubmitDeleteFiles = () => {
+  // batch operation progress states
+  const [batchProgressState, setBatchProgressState] = useBatchProgress();
+  const [erroredFileOperations, setErroredFileOperations] = useState<ErroredFileOperation[]>([]);
+
+  // form to change files storage class
+  const changeStorageClassFormController = useForm<ChangeStorageClassFormData>({
+    mode: "onChange",
+    defaultValues: {
+      storageClassKodoName: storageClasses[0]?.kodoName ?? "Standard",
+    },
+  });
+
+  const {
+    handleSubmit,
+      formState: {
+      // errors,
+      isSubmitting,
+    },
+  } = changeStorageClassFormController;
+
+  const handleSubmitChangeFilesStorageClass: SubmitHandler<ChangeStorageClassFormData> = (data) => {
     if (!memoFileItems.length || !currentUser) {
-      return Promise.resolve();
+      return;
     }
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      storageClasses: storageClasses,
+      storageClasses: memoStorageClasses,
     };
     setBatchProgressState({
       status: BatchTaskStatus.Running,
     });
-    const p = deleteFiles(
+    const p = setStorageClassOfFiles(
       memoRegionId,
       memoBucketName,
       memoFileItems,
+      data.storageClassKodoName,
       (progress) => {
         setBatchProgressState({
           total: progress.total,
@@ -100,7 +121,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
       },
       () => {},
       opt,
-    )
+    );
     p
       .then(batchErrors => {
         setErroredFileOperations(batchErrors.map<ErroredFileOperation>(batchError => ({
@@ -110,7 +131,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
             || batchError.error.message
             || batchError.error.code,
         })));
-        onDeletedFile({
+        onChangedFilesStorageClass({
           originBasePath: memoBasePath,
         });
       })
@@ -127,15 +148,26 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
   }
 
   const handleInterrupt = () => {
-    stopDeleteFiles();
-  }
+    stopSetStorageClassOfFiles();
+  };
+
+  // reset states when open/close modal.
+  useEffect(() => {
+    if (modalProps.show) {
+    } else {
+      setBatchProgressState({
+        status: BatchTaskStatus.Standby,
+      });
+      setErroredFileOperations([]);
+    }
+  }, [modalProps.show]);
 
   return (
     <Modal {...modalProps}>
       <Modal.Header closeButton>
         <Modal.Title>
-          <i className="bi bi-trash me-1 text-danger"/>
-          {translate("modals.deleteFiles.title")}
+          <i className="fa fa-exchange me-1"/>
+          {translate("modals.changeFilesStorageClass.title")}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -146,7 +178,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
             </div>
             : <>
               <div className="text-danger">
-                {translate("modals.deleteFiles.description")}
+                {translate("modals.changeFilesStorageClass.description")}
               </div>
               <ul className="scroll-max-vh-40">
                 {
@@ -162,6 +194,11 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
                   ))
                 }
               </ul>
+              <ChangeStorageClassForm
+                formController={changeStorageClassFormController}
+                storageClasses={memoStorageClasses}
+                onSubmit={handleSubmitChangeFilesStorageClass}
+              />
             </>
         }
         {
@@ -191,7 +228,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
               variant="primary"
               size="sm"
               disabled={isSubmitting}
-              onClick={handleSubmit(handleSubmitDeleteFiles)}
+              onClick={handleSubmit(handleSubmitChangeFilesStorageClass)}
             >
               {
                 isSubmitting
@@ -215,4 +252,4 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
   );
 };
 
-export default DeleteFiles;
+export default ChangeFilesStorageClass;

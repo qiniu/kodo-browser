@@ -5,13 +5,13 @@ import {useI18n} from "@renderer/modules/i18n";
 
 import {AkItem} from "@renderer/modules/auth";
 
-interface AkItemProps {
+interface AkTableRowProps {
   data: AkItem,
   onActive?: (item: AkItem) => void,
   onDelete?: (item: AkItem) => void,
 }
 
-const AkTableRow: React.FC<AkItemProps> = (props) => {
+const AkTableRow: React.FC<AkTableRowProps> = (props) => {
   const {translate} = useI18n();
 
   const {

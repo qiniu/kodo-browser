@@ -3,11 +3,10 @@ import {Button, Modal, ModalProps, Table} from "react-bootstrap";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {AkItem, useAuth} from "@renderer/modules/auth";
-import * as LocalLogger from "@renderer/modules/local-logger";
 
 import EmptyHolder from "@renderer/components/empty-holder";
 
-import AkTableRow from "./table-item/ak-table-row";
+import AkTableRow from "./ak-table-row";
 
 interface AkHistoryProps {
   onActiveAk: (akItem: AkItem) => void,
@@ -15,7 +14,7 @@ interface AkHistoryProps {
 
 const AkHistory: React.FC<ModalProps & AkHistoryProps> = (props) => {
   const {translate} = useI18n();
-  const {akHistory} = useAuth();
+  const {akHistory, deleteHistory} = useAuth();
 
   const {
     onActiveAk,
@@ -25,13 +24,16 @@ const AkHistory: React.FC<ModalProps & AkHistoryProps> = (props) => {
   return (
     <Modal {...modalProps}>
       <Modal.Header closeButton>
-        <Modal.Title><i className="bi bi-clock-history me-2"/>{translate("modals.akHistory.title")}</Modal.Title>
+        <Modal.Title>
+          <i className="bi bi-clock-history me-1"/>
+          {translate("modals.akHistory.title")}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Button variant="danger" size="sm">{translate("modals.akHistory.removeAllButton")}</Button>
         <div className="scroll-max-vh-60 scroll-shadow position-relative">
           <Table striped hover>
-            <thead className="sticky-top bg-white">
+            <thead className="sticky-top bg-body">
             <tr>
               <th>{translate("modals.akHistory.table.endpoint")}</th>
               <th>{translate("modals.akHistory.table.accessKeyId")}</th>
@@ -47,11 +49,11 @@ const AkHistory: React.FC<ModalProps & AkHistoryProps> = (props) => {
                   <AkTableRow
                     key={item.accessKey + item.accessSecret}
                     data={item}
-                    onActive={i => onActiveAk(i)}
-                    onDelete={i => LocalLogger.debug(i)}
+                    onActive={onActiveAk}
+                    onDelete={deleteHistory}
                   />
                 ))
-                : <EmptyHolder/>
+                : <EmptyHolder col={5}/>
             }
             </tbody>
           </Table>

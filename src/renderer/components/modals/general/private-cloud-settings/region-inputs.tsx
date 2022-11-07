@@ -3,7 +3,7 @@ import React from "react";
 
 import {useI18n} from "@renderer/modules/i18n";
 
-// 规定整体的 onChange 是否可行？
+// the other way to implement this is using useController
 interface RegionInputsProps {
   id: string,
   groupNameSuffix: string | number,

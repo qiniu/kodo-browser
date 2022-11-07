@@ -1,0 +1,11 @@
+.settings-form {
+  position: relative;
+
+  & legend {
+    position: sticky;
+    top: 0;
+    background-color: var(--bs-body-bg);
+    font-size: large;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+}

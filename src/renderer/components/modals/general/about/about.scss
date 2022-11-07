@@ -1,0 +1,12 @@
+.about-brand {
+  & .app-name {
+    margin-left: .5rem;
+    font-weight: bolder;
+  }
+
+  & .app-version {
+    margin-left: .5em;
+    font-size: small;
+    color: #FF9900;
+  }
+}

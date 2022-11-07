@@ -7,9 +7,9 @@ import {useI18n} from "@renderer/modules/i18n";
 import * as LocalLogger from "@renderer/modules/local-logger";
 import {Endpoint, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 
-import RegionInputs from "./form-item/region-inputs";
+import RegionInputs from "./region-inputs";
 
-const PrivateCloudSettings: React.FC<ModalProps> = (props) => {
+const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
   const {translate} = useI18n();
 
   const handleSavePrivateCloudSettings: SubmitHandler<Endpoint> = (data) => {
@@ -19,7 +19,7 @@ const PrivateCloudSettings: React.FC<ModalProps> = (props) => {
         resolve(data);
       }, 3000);
     }));
-    LocalLogger.debug("lihs debug: save private cloud settings", data)
+    LocalLogger.debug("save private cloud settings", data);
     return toast.promise(p, {
       loading: translate("common.saving"),
       success: translate("common.saved"),
@@ -49,18 +49,22 @@ const PrivateCloudSettings: React.FC<ModalProps> = (props) => {
 
   useEffect(() => {
     reset(privateEndpointPersistence.read());
-  }, [props.show])
+  }, [modalProps.show])
 
   return (
-    <Modal {...props}>
+    <Modal {...modalProps}>
       <Modal.Header closeButton>
-        <Modal.Title><i className="bi bi-gear-fill me-2"/>{translate("modals.privateCloudSettings.title")}</Modal.Title>
+        <Modal.Title>
+          <i className="bi bi-gear-fill me-1"/>
+          {translate("modals.privateCloudSettings.title")}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body className="scroll-max-vh-60">
         <Button variant="success" size="sm" disabled={isSubmitting} onClick={() => {
           append({identifier: "", label: "", endpoint: ""})
         }}>
-          <i className="bi bi-plus-circle-fill me-2"/>{translate("modals.privateCloudSettings.appendRegionButton")}
+          <i className="bi bi-plus-circle-fill me-1"/>
+          {translate("modals.privateCloudSettings.appendRegionButton")}
         </Button>
         <Form className="mt-2">
           <fieldset disabled={isSubmitting}>
@@ -126,7 +130,7 @@ const PrivateCloudSettings: React.FC<ModalProps> = (props) => {
         <Button
           variant="light"
           size="sm"
-          onClick={props.onHide}
+          onClick={modalProps.onHide}
         >
           {translate("common.cancel")}
         </Button>

@@ -1,14 +1,14 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {Button, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {toast} from "react-hot-toast";
+import {SubmitHandler, useForm} from "react-hook-form";
 
 import StorageClass from "@common/models/storage-class";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
-import {deleteFiles, FileItem, stopDeleteFiles} from "@renderer/modules/qiniu-client";
+import {FileItem, restoreFiles, stopRestoreFiles} from "@renderer/modules/qiniu-client";
 import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
 
-import {useSubmitModal} from "@renderer/components/modals/hooks";
 import {
   BatchProgress,
   BatchTaskStatus,
@@ -17,30 +17,52 @@ import {
   useBatchProgress
 } from "@renderer/components/batch-progress";
 
-import {OperationDoneRecallFn} from "@renderer/components/modals/file/types";
+import {RestoreForm, RestoreFormData} from "@renderer/components/forms";
+import {OperationDoneRecallFn} from "../types";
 
-interface DeleteFilesProps {
+interface RestoreFilesProps {
   regionId: string,
   bucketName: string,
   basePath: string,
   fileItems: FileItem.Item[],
   storageClasses: StorageClass[],
-  onDeletedFile: OperationDoneRecallFn,
+  onRestoredFile: OperationDoneRecallFn,
 }
 
-const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
+const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
   const {
     regionId,
     bucketName,
     basePath,
     fileItems,
     storageClasses,
-    onDeletedFile,
+    onRestoredFile,
     ...modalProps
   } = props;
 
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+
+
+  // form to restore
+  const restoreFormController = useForm<RestoreFormData>({
+    mode: "onChange",
+    defaultValues: {
+      days: 1,
+    },
+  });
+
+  const {
+    handleSubmit,
+    reset,
+    formState: {
+      isSubmitting,
+    },
+  } = restoreFormController;
+
+  // batch operation progress states
+  const [batchProgressState, setBatchProgressState] = useBatchProgress();
+  const [erroredFileOperations, setErroredFileOperations] = useState<ErroredFileOperation[]>([]);
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -48,24 +70,31 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
     memoRegionId,
     memoBucketName,
     memoBasePath,
-  } = useMemo(() => ({
-    memoFileItems: modalProps.show ? fileItems : [],
-    memoRegionId: regionId,
-    memoBucketName: bucketName,
-    memoBasePath: basePath,
-  }), [modalProps.show]);
+    memoStorageClasses,
+  } = useMemo(() => {
+    if (modalProps.show) {
+      return {
+        memoFileItems: fileItems,
+        memoRegionId: regionId,
+        memoBucketName: bucketName,
+        memoBasePath: basePath,
+        memoStorageClasses: storageClasses,
+      };
+    } else {
+      return {
+        memoFileItems: [],
+        memoRegionId: regionId,
+        memoBucketName: bucketName,
+        memoBasePath: basePath,
+        memoStorageClasses: storageClasses,
+      };
+    }
+  }, [modalProps.show]);
 
-  const {
-    state: {
-      isSubmitting,
-    },
-    handleSubmit,
-  } = useSubmitModal();
-  const [batchProgressState, setBatchProgressState] = useBatchProgress();
-  const [erroredFileOperations, setErroredFileOperations] = useState<ErroredFileOperation[]>([]);
-
+  // reset states when open/close modal.
   useEffect(() => {
     if (modalProps.show) {
+      reset();
     } else {
       setBatchProgressState({
         status: BatchTaskStatus.Standby,
@@ -74,23 +103,24 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
     }
   }, [modalProps.show]);
 
-  const handleSubmitDeleteFiles = () => {
+  const handleSubmitRestoreFiles: SubmitHandler<RestoreFormData> = (data) => {
     if (!memoFileItems.length || !currentUser) {
-      return Promise.resolve();
+      return;
     }
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      storageClasses: storageClasses,
+      storageClasses: memoStorageClasses,
     };
     setBatchProgressState({
       status: BatchTaskStatus.Running,
     });
-    const p = deleteFiles(
+    const p = restoreFiles(
       memoRegionId,
       memoBucketName,
       memoFileItems,
+      data.days,
       (progress) => {
         setBatchProgressState({
           total: progress.total,
@@ -110,7 +140,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
             || batchError.error.message
             || batchError.error.code,
         })));
-        onDeletedFile({
+        onRestoredFile({
           originBasePath: memoBasePath,
         });
       })
@@ -127,15 +157,15 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
   }
 
   const handleInterrupt = () => {
-    stopDeleteFiles();
+    stopRestoreFiles();
   }
 
   return (
     <Modal {...modalProps}>
       <Modal.Header closeButton>
         <Modal.Title>
-          <i className="bi bi-trash me-1 text-danger"/>
-          {translate("modals.deleteFiles.title")}
+          <i className="bi bi-fire me-1"/>
+          {translate("modals.restoreFiles.title")}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -146,12 +176,12 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
             </div>
             : <>
               <div className="text-danger">
-                {translate("modals.deleteFiles.description")}
+                {translate("modals.restoreFiles.description")}
               </div>
               <ul className="scroll-max-vh-40">
                 {
                   memoFileItems.map(fileItem => (
-                    <li key={fileItem.path.toString()}>
+                    <li>
                       {
                         isItemFolder(fileItem)
                           ? <i className="bi bi-folder-fill me-1 text-yellow"/>
@@ -162,6 +192,10 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
                   ))
                 }
               </ul>
+              <RestoreForm
+                formController={restoreFormController}
+                onSubmit={handleSubmitRestoreFiles}
+              />
             </>
         }
         {
@@ -191,7 +225,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
               variant="primary"
               size="sm"
               disabled={isSubmitting}
-              onClick={handleSubmit(handleSubmitDeleteFiles)}
+              onClick={handleSubmit(handleSubmitRestoreFiles)}
             >
               {
                 isSubmitting
@@ -215,4 +249,4 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
   );
 };
 
-export default DeleteFiles;
+export default RestoreFiles;

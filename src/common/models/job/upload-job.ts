@@ -229,6 +229,10 @@ export default class UploadJob extends TransferJob {
             if (err === Uploader.userCanceledError) {
                 return;
             }
+            if (err.toString().includes("no such uploadId")) {
+              this.uploadedId = "";
+              this.uploadedParts = [];
+            }
             this._status = Status.Failed;
             this.message = err.toString();
         });

@@ -185,6 +185,7 @@ export default class UploadJob extends TransferJob {
         return {
             ...super.uiData,
             from: this.options.from,
+            to: this.options.to,
         };
     }
 

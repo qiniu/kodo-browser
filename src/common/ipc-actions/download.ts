@@ -2,7 +2,7 @@ import {IpcRenderer} from "electron";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
-import {ClientOptions} from "@common/qiniu";
+import {ClientOptionsSerialized} from "@common/qiniu";
 import {Status} from "@common/models/job/types";
 import DownloadJob from "@common/models/job/download-job";
 import StorageClass from "@common/models/storage-class";
@@ -68,7 +68,7 @@ export interface UpdateConfigMessage {
 export interface LoadPersistJobsMessage {
     action: DownloadAction.LoadPersistJobs,
     data: {
-        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">
+        clientOptions: Pick<ClientOptionsSerialized, "accessKey" | "secretKey" | "ucUrl" | "regions">
         downloadOptions: Pick<DownloadOptions, "userNatureLanguage">,
     }
 }
@@ -79,7 +79,7 @@ export interface AddJobsMessage {
         remoteObjects: RemoteObject[],
         destPath: string,
         downloadOptions: DownloadOptions,
-        clientOptions: ClientOptions,
+        clientOptions: ClientOptionsSerialized,
     }
 }
 

@@ -43,7 +43,7 @@ process.on("message", (message: UploadMessage) => {
                             serializedRegion.s3Id,
                             serializedRegion.label,
                         );
-                        r.ucUrls = serializedRegion.ucUrls;
+                        r.ucUrls =  [message.data.clientOptions.ucUrl];
                         r.s3Urls = serializedRegion.s3Urls;
                         return r;
                     }),
@@ -66,7 +66,7 @@ process.on("message", (message: UploadMessage) => {
                             serializedRegion.s3Id,
                             serializedRegion.label,
                         );
-                        r.ucUrls = serializedRegion.ucUrls;
+                        r.ucUrls = [message.data.clientOptions.ucUrl];
                         r.s3Urls = serializedRegion.s3Urls;
                         return r;
                     }),

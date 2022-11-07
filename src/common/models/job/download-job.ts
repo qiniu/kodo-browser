@@ -184,6 +184,7 @@ export default class DownloadJob extends TransferJob {
     get uiData() {
         return {
             ...super.uiData,
+            from: this.options.from,
             to: this.options.to,
         }
     }

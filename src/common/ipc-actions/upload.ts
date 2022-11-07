@@ -1,7 +1,7 @@
 import {IpcRenderer} from "electron";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
-import {ClientOptions} from "@common/qiniu";
+import {ClientOptionsSerialized} from "@common/qiniu";
 import StorageClass from "@common/models/storage-class";
 import UploadJob from "@common/models/job/upload-job";
 import {Status} from "@common/models/job/types";
@@ -61,7 +61,7 @@ export interface UpdateConfigMessage {
 export interface LoadPersistJobsMessage {
     action: UploadAction.LoadPersistJobs,
     data: {
-        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
+        clientOptions: Pick<ClientOptionsSerialized, "accessKey" | "secretKey" | "ucUrl" | "regions">,
         uploadOptions: Pick<UploadOptions, "userNatureLanguage">,
     },
 }
@@ -72,7 +72,7 @@ export interface AddJobsMessage {
         filePathnameList: string[],
         destInfo: DestInfo,
         uploadOptions: UploadOptions,
-        clientOptions: ClientOptions,
+        clientOptions: ClientOptionsSerialized,
     },
 }
 

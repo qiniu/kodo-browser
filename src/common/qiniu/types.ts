@@ -5,10 +5,22 @@ export enum BackendMode {
     S3 = "s3",
 }
 
-export interface ClientOptions {
-    accessKey: string,
-    secretKey: string,
-    ucUrl: string,
-    regions: Region[],
-    backendMode: BackendMode,
+interface ClientOptionsBase {
+  accessKey: string,
+  secretKey: string,
+  ucUrl: string,
+  backendMode: BackendMode,
+}
+
+export interface ClientOptions extends ClientOptionsBase{
+  regions: Region[],
+}
+
+export interface ClientOptionsSerialized extends ClientOptionsBase{
+    regions: {
+      id: string,
+      s3Id: string,
+      label: string,
+      s3Urls: string[],
+    }[],
 }

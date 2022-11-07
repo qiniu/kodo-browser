@@ -1,4 +1,4 @@
-import {Qiniu} from "kodo-s3-adapter-sdk";
+import {Qiniu, Region} from "kodo-s3-adapter-sdk";
 import {Adapter, RequestInfo, ResponseInfo} from "kodo-s3-adapter-sdk/dist/adapter";
 import {ModeOptions} from "kodo-s3-adapter-sdk/dist/qiniu";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
@@ -18,7 +18,12 @@ export default function createQiniuClient(
         clientOptions.secretKey,
         clientOptions.ucUrl,
         `Kodo-Browser/${AppConfig.app.version}/ioutil`,
-        clientOptions.regions,
+        clientOptions.regions.map<Region>(r => {
+          const region = new Region(r.id, r.s3Id, r.label);
+          region.ucUrls = [clientOptions.ucUrl];
+          region.s3Urls = r.s3Urls;
+          return region;
+        }),
     );
     const modeOptions: ModeOptions = {
         appName: "kodo-browser/ioutil",

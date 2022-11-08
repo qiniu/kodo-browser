@@ -9,11 +9,11 @@ import {
 } from "@renderer/modules/kodo-address";
 import {useAuth} from "@renderer/modules/auth";
 
+import LoadingHolder from "@renderer/components/loading-holder";
 import KodoAddressBar from "@renderer/components/kodo-address-bar";
 
 import Contents from "./contents";
-import TransferPanel from "@renderer/components/transfer-panel";
-import LoadingHolder from "@renderer/components/loading-holder";
+import Transfer from "./transfer";
 
 interface BrowseProps {
   activeKodoAddress?: KodoAddress | null,
@@ -65,21 +65,14 @@ const Browse: React.FC<BrowseProps> = ({
   return (
     <KodoNavigatorProvider kodoNavigator={kodoNavigator}>
       <KodoAddressBar
-        onClickRefresh={() => setToggleRefresh(!toggleRefresh)}
+        onClickRefresh={() => setToggleRefresh(v => !v)}
       />
       <Contents
         toggleRefresh={toggleRefresh}
       />
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          right: 0,
-          margin: "0 -1px -1px 0",
-        }}
-      >
-        <TransferPanel/>
-      </div>
+      <Transfer
+        onRefresh={() => setToggleRefresh(v => !v)}
+      />
     </KodoNavigatorProvider>
   );
 };

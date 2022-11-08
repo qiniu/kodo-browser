@@ -166,7 +166,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     },
     {
       showModal: handleShowCreateDirectoryFile,
-      closeModal: handleHideCreateDirectoryFile,
+      hideModal: handleHideCreateDirectoryFile,
     },
   ] = useDisplayModal();
 
@@ -176,7 +176,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     },
     {
       showModal: handleShowRenameFile,
-      closeModal: handleHideRenameFile,
+      hideModal: handleHideRenameFile,
     },
   ] = useDisplayModal();
 
@@ -186,7 +186,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     },
     {
       showModal: handleShowDeleteFiles,
-      closeModal: handleHideDeleteFiles,
+      hideModal: handleHideDeleteFiles,
     },
   ] = useDisplayModal();
 
@@ -196,7 +196,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     },
     {
       showModal: handleShowCopyFiles,
-      closeModal: handleHideCopyFiles,
+      hideModal: handleHideCopyFiles,
     },
   ] = useDisplayModal();
 
@@ -206,7 +206,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     },
     {
       showModal: handleShowMoveFiles,
-      closeModal: handleHideMoveFiles,
+      hideModal: handleHideMoveFiles,
     },
   ] = useDisplayModal();
 
@@ -216,7 +216,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     },
     {
       showModal: handleShowRestoreFiles,
-      closeModal: handleHideRestoreFiles,
+      hideModal: handleHideRestoreFiles,
     },
   ] = useDisplayModal();
 
@@ -226,7 +226,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     },
     {
       showModal: handleShowChangeFilesStorageClass,
-      closeModal: handleHideChangeFilesStorageClass,
+      hideModal: handleHideChangeFilesStorageClass,
     },
   ] = useDisplayModal();
 
@@ -236,7 +236,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     },
     {
       showModal: handleShowGenerateFileLinks,
-      closeModal: handleHideGenerateFileLinks,
+      hideModal: handleHideGenerateFileLinks,
     },
   ] = useDisplayModal();
 

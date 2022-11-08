@@ -25,7 +25,7 @@ const SignIn: React.FC = () => {
     },
     {
       showModal: handleClickPrivateEndpointSetting,
-      closeModal: handleHidePrivateEndpointSetting,
+      hideModal: handleHidePrivateEndpointSetting,
     },
   ] = useDisplayModal();
   const [
@@ -34,7 +34,7 @@ const SignIn: React.FC = () => {
     },
     {
       showModal: handleClickAccessKeyHistory,
-      closeModal: handleHideAccessKeyHistory,
+      hideModal: handleHideAccessKeyHistory,
     },
   ] = useDisplayModal();
 

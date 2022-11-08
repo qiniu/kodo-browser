@@ -31,7 +31,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
     },
     {
       showModal: handleShowRemoveAllConfirmModal,
-      closeModal: handleCloseRemoveAllConfirmModal,
+      hideModal: handleCloseRemoveAllConfirmModal,
     },
   ] = useDisplayModal();
 

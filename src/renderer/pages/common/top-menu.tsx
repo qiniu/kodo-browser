@@ -46,7 +46,7 @@ const TopMenu: React.FC<TopMenuProps> = ({
     },
     {
       showModal: handleClickReleaseNote,
-      closeModal: handleHideReleaseNote,
+      hideModal: handleHideReleaseNote,
     },
   ] = useDisplayModal();
 
@@ -57,7 +57,7 @@ const TopMenu: React.FC<TopMenuProps> = ({
     },
     {
       showModal: handleClickAbout,
-      closeModal: handleHideAbout,
+      hideModal: handleHideAbout,
     },
   ] = useDisplayModal();
 
@@ -68,7 +68,7 @@ const TopMenu: React.FC<TopMenuProps> = ({
     },
     {
       showModal: handleClickBookmarkManager,
-      closeModal: handleHideBookmarkManager,
+      hideModal: handleHideBookmarkManager,
     },
   ] = useDisplayModal();
 
@@ -79,7 +79,7 @@ const TopMenu: React.FC<TopMenuProps> = ({
     },
     {
       showModal: handleClickExternalPathManager,
-      closeModal: handleHideExternalPathManager,
+      hideModal: handleHideExternalPathManager,
     },
   ] = useDisplayModal();
 
@@ -90,7 +90,7 @@ const TopMenu: React.FC<TopMenuProps> = ({
     },
     {
       showModal: handleClickSettings,
-      closeModal: handleHideSettings,
+      hideModal: handleHideSettings,
     },
   ] = useDisplayModal();
 

@@ -31,7 +31,7 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
     },
     {
       showModal: handleShowRemoveAllConfirmModal,
-      closeModal: handleCloseRemoveAllConfirmModal,
+      hideModal: handleCloseRemoveAllConfirmModal,
     },
   ] = useDisplayModal();
 

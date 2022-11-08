@@ -1,5 +1,7 @@
 import {useState} from "react";
 
+import displayModalCounterStore from "./modal-counter-store";
+
 interface DisplayModalState<T> {
   show: boolean,
   data: T,
@@ -7,8 +9,8 @@ interface DisplayModalState<T> {
 
 interface DisplayModalFns<T> {
   showModal: T extends undefined ? () => void : (data: T) => void,
-  closeModal: T extends undefined ? () => void : (data: T) => void,
-  toggleModal:T extends undefined ? () => void :  (data: T) => void,
+  hideModal: T extends undefined ? () => void : (data: T) => void,
+  toggleModal: T extends undefined ? () => void : (data: T) => void,
 }
 
 function useDisplayModal<T>(initialData: T): [DisplayModalState<T>, DisplayModalFns<T>]
@@ -25,33 +27,42 @@ function useDisplayModal<T>(initialData?: T): [DisplayModalState<T | undefined>,
     data: initialData,
   });
 
-  const showModal = (data?: T) => setShowWithData(v => ({
-    show: true,
-    data: data === undefined
-      ? v.data
-      : {
-        ...v.data,
-        ...data,
-      },
-  }));
-  const closeModal = (data?: T) => setShowWithData(v => ({
-    show: false,
-    data: data === undefined
-      ? v.data
-      : {
-        ...v.data,
-        ...data,
-      },
-  }));
-  const toggleModal = (data?: T) => setShowWithData(v => ({
-    show: !show,
-    data: data === undefined
-      ? v.data
-      : {
-        ...v.data,
-        ...data,
-      },
-  }));
+  const showModal = (data?: T) => {
+    displayModalCounterStore.dispatch("open");
+    return setShowWithData(v => ({
+      show: true,
+      data: data === undefined
+        ? v.data
+        : {
+          ...v.data,
+          ...data,
+        },
+    }));
+  };
+  const hideModal = (data?: T) => {
+    displayModalCounterStore.dispatch("close");
+    return setShowWithData(v => ({
+      show: false,
+      data: data === undefined
+        ? v.data
+        : {
+          ...v.data,
+          ...data,
+        },
+    }));
+  };
+  const toggleModal = (data?: T) => setShowWithData(v => {
+    displayModalCounterStore.dispatch(!v.show ? "close" : "open");
+    return {
+      show: !v.show,
+      data: data === undefined
+        ? v.data
+        : {
+          ...v.data,
+          ...data,
+        },
+    }
+  });
 
   return [
     {
@@ -60,9 +71,9 @@ function useDisplayModal<T>(initialData?: T): [DisplayModalState<T | undefined>,
     },
     {
       showModal,
-      closeModal,
+      hideModal,
       toggleModal,
-    }
+    },
   ];
 }
 

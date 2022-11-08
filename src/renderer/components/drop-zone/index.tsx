@@ -7,6 +7,8 @@ interface DropZoneProps {
   enterText?: string,
   overText?: string,
   alwaysShow?: boolean,
+  disabled?: boolean,
+  // costumeContainer?: HTMLElement,
   onDropped: (filePaths: string[]) => void,
 }
 
@@ -14,6 +16,8 @@ const DropZone: React.FC<React.HTMLProps<HTMLDivElement> & DropZoneProps> = ({
   enterText,
   overText,
   alwaysShow= false,
+  disabled = false,
+  // costumeContainer = <div/>,
   onDropped,
   ...divProps
 }) => {
@@ -21,6 +25,13 @@ const DropZone: React.FC<React.HTMLProps<HTMLDivElement> & DropZoneProps> = ({
   const [showDropZone, setShowDropZone] = useState(alwaysShow);
 
   useEffect(() => {
+    if (disabled) {
+      if (!alwaysShow) {
+        setShowDropZone(false);
+      }
+      return;
+    }
+
     if (alwaysShow) {
       setShowDropZone(true);
       return;
@@ -63,7 +74,7 @@ const DropZone: React.FC<React.HTMLProps<HTMLDivElement> & DropZoneProps> = ({
       document.body.removeEventListener("dragleave", handleBodyDragLeave)
       document.body.removeEventListener("drop", handleBodyDrop)
     }
-  }, [alwaysShow]);
+  }, [alwaysShow, disabled]);
 
   const handleDragEnter: DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
@@ -101,6 +112,7 @@ const DropZone: React.FC<React.HTMLProps<HTMLDivElement> & DropZoneProps> = ({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
+      {/*costumeContainer*/}
       <h1>{contentText}</h1>
     </div>
   );

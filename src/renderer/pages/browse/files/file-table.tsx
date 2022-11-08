@@ -61,7 +61,7 @@ const FileTable: React.FC<FileTableProps> = ({
     },
     {
       showModal: handleClickGeneratingLink,
-      closeModal: handleHideGeneratingLink,
+      hideModal: handleHideGeneratingLink,
     },
   ] = useDisplayModal<{ fileItem: FileItem.File | null }>({
     fileItem: null
@@ -76,7 +76,7 @@ const FileTable: React.FC<FileTableProps> = ({
     },
     {
       showModal: handleClickRestoreFile,
-      closeModal: handleHideRestoreFile,
+      hideModal: handleHideRestoreFile,
     },
   ] = useDisplayModal<{ fileItem: FileItem.File | null }>({
     fileItem: null
@@ -91,7 +91,7 @@ const FileTable: React.FC<FileTableProps> = ({
     },
     {
       showModal: handleClickChangeFileStorageClass,
-      closeModal: handleHideChangeFileStorageClass,
+      hideModal: handleHideChangeFileStorageClass,
     },
   ] = useDisplayModal<{ fileItem: FileItem.File | null }>({
     fileItem: null
@@ -106,7 +106,7 @@ const FileTable: React.FC<FileTableProps> = ({
     },
     {
       showModal: handleClickDeleteFiles,
-      closeModal: handleHideDeleteFiles,
+      hideModal: handleHideDeleteFiles,
     },
   ] = useDisplayModal<{ fileItem: FileItem.Item | null }>({
     fileItem: null
@@ -121,7 +121,7 @@ const FileTable: React.FC<FileTableProps> = ({
     },
     {
       showModal: handleClickPreviewFile,
-      closeModal: handleHidePreviewFile,
+      hideModal: handleHidePreviewFile,
     },
   ] = useDisplayModal<{ fileItem: FileItem.File | null }>({
     fileItem: null
@@ -142,7 +142,7 @@ const FileTable: React.FC<FileTableProps> = ({
       handleClickPreviewFile({fileItem: file});
     }
   };
-  
+
   const handleFileOperation = (action: OperationName, file: FileItem.Item) => {
     switch (action) {
       case OperationName.Restore:

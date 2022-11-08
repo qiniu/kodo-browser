@@ -37,7 +37,7 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
     },
     {
       showModal: handleClickCreateBucket,
-      closeModal: handleHideCreateBucket,
+      hideModal: handleHideCreateBucket,
     },
   ] = useDisplayModal();
 
@@ -47,7 +47,7 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
     },
     {
       showModal: handleClickDeleteBucket,
-      closeModal: handleHideDeleteBucket,
+      hideModal: handleHideDeleteBucket,
     },
   ] = useDisplayModal();
 

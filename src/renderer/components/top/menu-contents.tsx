@@ -72,7 +72,7 @@ const MenuContents: React.FC<MenuContentsProps> = (props) => {
     },
     {
       showModal: handleClickAccessKeyHistory,
-      closeModal: handleHideAccessKeyHistory,
+      hideModal: handleHideAccessKeyHistory,
     },
   ] = useDisplayModal();
 

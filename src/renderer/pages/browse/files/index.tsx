@@ -21,7 +21,7 @@ import {useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 
 import DropZone from "@renderer/components/drop-zone";
-import {useDisplayModal} from "@renderer/components/modals/hooks";
+import {useDisplayModal, useIsShowAnyModal} from "@renderer/components/modals/hooks";
 import UploadFilesConfirm from "@renderer/components/modals/file/upload-files-confirm";
 
 import FileToolBar from "./file-tool-bar";
@@ -191,6 +191,7 @@ const Files: React.FC<FilesProps> = (props) => {
   };
 
   // modal state
+  const isShowAnyModal = useIsShowAnyModal();
   const [
     {
       show: isShowUploadFilesConfirm,
@@ -200,7 +201,7 @@ const Files: React.FC<FilesProps> = (props) => {
     },
     {
       showModal: showUploadFilesConfirm,
-      closeModal: handleHideUploadFilesConfirm,
+      hideModal: handleHideUploadFilesConfirm,
     },
   ] = useDisplayModal<{filePaths: string[]}>({
     filePaths: []
@@ -333,6 +334,7 @@ const Files: React.FC<FilesProps> = (props) => {
         className="files-upload-zone bg-body bg-opacity-75"
         enterText={translate("transfer.upload.dropZone.enter")}
         overText={translate("transfer.upload.dropZone.over")}
+        disabled={isShowAnyModal}
         onDropped={handleUploadFiles}
       />
 

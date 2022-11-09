@@ -1,11 +1,12 @@
-import React, {useEffect} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {Button, Col, Form, Modal, ModalProps, Row} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useFieldArray, useForm} from "react-hook-form";
+import lodash from "lodash";
 
 import {useI18n} from "@renderer/modules/i18n";
 import * as LocalLogger from "@renderer/modules/local-logger";
-import {Endpoint, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
+import {Endpoint, isQueryRegionAPIAvailable, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 
 import RegionInputs from "./region-inputs";
 
@@ -30,6 +31,8 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
   const {
     handleSubmit,
     control,
+    getValues,
+    setValue,
     register,
     reset,
     formState: {
@@ -49,8 +52,37 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
 
   useEffect(() => {
     reset(privateEndpointPersistence.read());
-  }, [modalProps.show])
+  }, [modalProps.show]);
 
+  // check query region available
+  // inheritance from old code.
+  // seems useless,
+  // because Region.query only be used in kodo,
+  // but private cloud only s3.
+  const [debouncedUcUrl, setDebouncedUcUrl] = useState<string>("");
+  const handleChangeUcUrlDebounced = useCallback(lodash.debounce((v: string) => {
+    setDebouncedUcUrl(v);
+  }, 500), []);
+  const [isQueryApiAvailable, setIsQueryApiAvailable] = useState<boolean>(false);
+  useEffect(() => {
+    if (errors.ucUrl) {
+      return;
+    }
+    isQueryRegionAPIAvailable(debouncedUcUrl)
+      .then(available => {
+        setIsQueryApiAvailable(available);
+        if (!available && !getValues("regions").length) {
+          setValue("regions", [{
+            identifier: "",
+            label: "",
+            endpoint: "",
+          }]);
+        }
+      });
+  }, [debouncedUcUrl])
+
+
+  // render
   return (
     <Modal {...modalProps}>
       <Modal.Header closeButton>
@@ -75,13 +107,20 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
                 </Form.Label>
                 <Col sm={7}>
                   <Form.Control
-                    {...register("ucUrl", {required: true})}
+                    {...register("ucUrl", {
+                      required: translate("modals.privateCloudSettings.form.ucUrl.feedback.required"),
+                      pattern: {
+                        value: /^https?:\/\//,
+                        message: translate("modals.privateCloudSettings.form.ucUrl.feedback.pattern"),
+                      },
+                      onChange: e => handleChangeUcUrlDebounced(e.target.value),
+                    })}
                     type="text"
                     placeholder={translate("modals.privateCloudSettings.form.ucUrl.holder")}
                     isInvalid={Boolean(errors.ucUrl)}
                   />
                   <Form.Control.Feedback type="invalid">
-                    {translate("modals.privateCloudSettings.form.ucUrl.feedback.required")}
+                    {errors.ucUrl?.message}
                   </Form.Control.Feedback>
                 </Col>
               </Form.Group>
@@ -93,9 +132,13 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
                     key={field.id}
                     id={field.id}
                     groupNameSuffix={index + 1}
-                    onRemove={() => {
-                      remove(index)
-                    }}
+                    onRemove={
+                      isQueryApiAvailable
+                        ? () => {
+                          remove(index)
+                        }
+                        : undefined
+                    }
                     regionIdentifierControlProps={{
                       ...register(
                         `regions.${index}.identifier`,
@@ -141,6 +184,6 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
       </Modal.Footer>
     </Modal>
   );
-}
+};
 
 export default PrivateCloudSettings;

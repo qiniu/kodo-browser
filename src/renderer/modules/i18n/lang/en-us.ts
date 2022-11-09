@@ -287,6 +287,7 @@ const dict: Dictionary = {
           holder: "UC URL",
           feedback: {
             required: "UC URL is required",
+            pattern: "UC URL is not start with http(s)://",
           }
         },
         regionIdentifier: {

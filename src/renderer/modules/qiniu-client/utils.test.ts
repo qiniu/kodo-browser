@@ -36,6 +36,7 @@ import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3";
 
 import * as KodoNav from "@renderer/const/kodo-nav";
 import * as QiniuClientCommon from "./common";
+import * as QiniuClientFiles from "./files";
 import * as QiniuClientUtils from "./utils";
 
 describe("test qiniu-client/utils.ts", () => {
@@ -150,6 +151,34 @@ describe("test qiniu-client/utils.ts", () => {
         });
     });
     describe("checkFileOrDirectoryExists", () => {
-      fail("implement me!");
+        const ENV = {
+            QINIU_ACCESS_KEY: MockAuth.QINIU_ACCESS_KEY,
+            QINIU_SECRET_KEY: MockAuth.QINIU_SECRET_KEY,
+        }
+        const opt: QiniuClientCommon.GetAdapterOptionParam = {
+            id: ENV.QINIU_ACCESS_KEY,
+            secret: ENV.QINIU_SECRET_KEY,
+            isPublicCloud: true,
+        };
+        it("just check call checkFolderExists or checkFileExists", async () => {
+            const mockedCheckFolder = jest.spyOn(QiniuClientFiles, "checkFolderExists")
+                .mockImplementationOnce(() => Promise.resolve(true));
+            const mockedCheckFile = jest.spyOn(QiniuClientFiles, "checkFileExists")
+                .mockImplementationOnce(() => Promise.resolve(true));
+            await QiniuClientUtils.checkFileOrDirectoryExists(
+                "region-kodo-browser-Kodo-checkFileOrDirectoryExists",
+                "bucket-kodo-browser-Kodo-checkFileOrDirectoryExists",
+                "dir-kodo-browser-Kodo-checkFileOrDirectoryExists/",
+                opt,
+            );
+            await QiniuClientUtils.checkFileOrDirectoryExists(
+                "region-kodo-browser-Kodo-checkFileOrDirectoryExists",
+                "bucket-kodo-browser-Kodo-checkFileOrDirectoryExists",
+                "file-kodo-browser-Kodo-checkFileOrDirectoryExists",
+                opt,
+            );
+            expect(mockedCheckFolder).toBeCalledTimes(1);
+            expect(mockedCheckFile).toBeCalledTimes(1);
+        });
     });
 });

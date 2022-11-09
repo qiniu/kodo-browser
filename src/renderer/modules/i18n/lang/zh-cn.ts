@@ -287,6 +287,7 @@ const dict: Dictionary = {
           holder: "请输入 UC 服务 URL",
           feedback: {
             required: "必须输入 UC 服务 URL",
+            pattern: "UC 服务 URL 必须以 http(s):// 开头",
           }
         },
         regionIdentifier: {

@@ -65,6 +65,9 @@ export function parseKodoPath(s3Path: string) {
     };
 }
 
+// why this function not in files.ts?
+// because it just calls checkFolderExists and checkFileExists,
+// in difference file will easy to test.(just check it calls correct methods)
 export function checkFileOrDirectoryExists(
   region: string,
   bucket: string,

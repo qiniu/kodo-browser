@@ -10,30 +10,40 @@ interface RegionInputsProps {
   regionIdentifierControlProps: FormControlProps,
   regionNameControlProps: FormControlProps,
   regionEndpointControlProps: FormControlProps,
-  onRemove: () => void,
+  onRemove?: () => void,
 }
 
-const RegionInputs: React.FC<RegionInputsProps> = (props) => {
+const RegionInputs: React.FC<RegionInputsProps> = ({
+  id,
+  groupNameSuffix,
+  regionIdentifierControlProps,
+  regionNameControlProps,
+  regionEndpointControlProps,
+  onRemove,
+}) => {
   const {translate} = useI18n();
 
   return (
     <>
       <Row className="justify-content-between sticky-top bg-body" style={{top: "7.3125rem"}}>
-        <Col>{translate("modals.privateCloudSettings.region")}{props.groupNameSuffix}</Col>
-        <Col className="text-end">
-          <Button variant="lite-danger" size="sm" onClick={props.onRemove}>
-            {translate("modals.privateCloudSettings.removeRegionButton")}
-          </Button>
-        </Col>
+        <Col>{translate("modals.privateCloudSettings.region")}{groupNameSuffix}</Col>
+        {
+          onRemove &&
+          <Col className="text-end">
+            <Button variant="lite-danger" size="sm" onClick={onRemove}>
+              {translate("modals.privateCloudSettings.removeRegionButton")}
+            </Button>
+          </Col>
+        }
       </Row>
       <hr className="mt-0"/>
-      <Form.Group as={Row} className="mb-3" controlId={`regionIdentifier-${props.id}`}>
+      <Form.Group as={Row} className="mb-3" controlId={`regionIdentifier-${id}`}>
         <Form.Label className="text-end" column sm={4}>
           <span className="text-danger">*</span>{translate("modals.privateCloudSettings.form.regionIdentifier.label")}
         </Form.Label>
         <Col sm={7}>
           <Form.Control
-            {...props.regionIdentifierControlProps}
+            {...regionIdentifierControlProps}
             type="text"
             placeholder={translate("modals.privateCloudSettings.form.regionIdentifier.holder")}
           />
@@ -42,25 +52,25 @@ const RegionInputs: React.FC<RegionInputsProps> = (props) => {
           </Form.Control.Feedback>
         </Col>
       </Form.Group>
-      <Form.Group as={Row} className="mb-3" controlId={`regionName-${props.id}`}>
+      <Form.Group as={Row} className="mb-3" controlId={`regionName-${id}`}>
         <Form.Label className="text-end" column sm={4}>
           {translate("modals.privateCloudSettings.form.regionName.label")}
         </Form.Label>
         <Col sm={7}>
           <Form.Control
-            {...props.regionNameControlProps}
+            {...regionNameControlProps}
             type="text"
             placeholder={translate("modals.privateCloudSettings.form.regionName.holder")}
           />
         </Col>
       </Form.Group>
-      <Form.Group as={Row} className="mb-3" controlId={`regionEndpoint-${props.id}`}>
+      <Form.Group as={Row} className="mb-3" controlId={`regionEndpoint-${id}`}>
         <Form.Label className="text-end" column sm={4}>
           <span className="text-danger">*</span>{translate("modals.privateCloudSettings.form.regionEndpoint.label")}
         </Form.Label>
         <Col sm={7}>
           <Form.Control
-            {...props.regionEndpointControlProps}
+            {...regionEndpointControlProps}
             type="text"
             placeholder={translate("modals.privateCloudSettings.form.regionEndpoint.holder")}
           />

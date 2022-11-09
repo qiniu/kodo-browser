@@ -1,3 +1,5 @@
+import {ipcRenderer} from "electron";
+
 import React from "react";
 import {Container, Navbar} from "react-bootstrap";
 import classNames from "classnames";
@@ -8,6 +10,19 @@ import {useI18n} from "@renderer/modules/i18n";
 import {MenuItem} from "./menu-item";
 import MenuContents from "./menu-contents";
 import "./top.scss";
+
+let brandClickCount = 0;
+
+const handleBrandClick = () => {
+  if (brandClickCount === 10) {
+    ipcRenderer.send("asynchronous", {
+      key: "openDevTools",
+    });
+    brandClickCount = 0;
+    return;
+  }
+  brandClickCount += 1;
+}
 
 interface TopProps {
   onClickVersion?: (version: string) => void,
@@ -33,7 +48,12 @@ const Top: React.FC<TopProps> = ({
             width="30"
             height="30"
           />
-          <span className="app-name">{translate("common.kodoBrowser")}</span>
+          <span
+            className="app-name"
+            onClick={handleBrandClick}
+          >
+            {translate("common.kodoBrowser")}
+          </span>
           <span
             className={classNames(
               "app-version",

@@ -18,7 +18,7 @@ const RegionInputs: React.FC<RegionInputsProps> = (props) => {
 
   return (
     <>
-      <Row className="justify-content-between">
+      <Row className="justify-content-between sticky-top bg-body" style={{top: "7.3125rem"}}>
         <Col>{translate("modals.privateCloudSettings.region")}{props.groupNameSuffix}</Col>
         <Col className="text-end">
           <Button variant="lite-danger" size="sm" onClick={props.onRemove}>

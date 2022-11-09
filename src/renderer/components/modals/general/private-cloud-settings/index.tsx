@@ -59,62 +59,66 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
           {translate("modals.privateCloudSettings.title")}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body className="scroll-max-vh-60">
-        <Button variant="success" size="sm" disabled={isSubmitting} onClick={() => {
-          append({identifier: "", label: "", endpoint: ""})
-        }}>
-          <i className="bi bi-plus-circle-fill me-1"/>
-          {translate("modals.privateCloudSettings.appendRegionButton")}
-        </Button>
-        <Form className="mt-2">
+      <Modal.Body className="scroll-max-vh-60 p-0">
+        <Form>
           <fieldset disabled={isSubmitting}>
-            <Form.Group as={Row} className="mb-3" controlId="privateCloudSettingUcUrl">
-              <Form.Label className="text-end" column sm={4}>
-                <span className="text-danger">*</span>{translate("modals.privateCloudSettings.form.ucUrl.label")}
-              </Form.Label>
-              <Col sm={7}>
-                <Form.Control
-                  {...register("ucUrl", {required: true})}
-                  type="text"
-                  placeholder={translate("modals.privateCloudSettings.form.ucUrl.holder")}
-                  isInvalid={Boolean(errors.ucUrl)}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {translate("modals.privateCloudSettings.form.ucUrl.feedback.required")}
-                </Form.Control.Feedback>
-              </Col>
-            </Form.Group>
-            {
-              fields.map((field, index) => (
-                <RegionInputs
-                  key={field.id}
-                  id={field.id}
-                  groupNameSuffix={index + 1}
-                  onRemove={() => {
-                    remove(index)
-                  }}
-                  regionIdentifierControlProps={{
-                    ...register(
-                      `regions.${index}.identifier`,
-                      {
-                        required: true,
-                      },
-                    ),
-                    isInvalid: Boolean(errors?.regions?.[index]?.identifier),
-                  }}
-                  regionNameControlProps={register(`regions.${index}.label`)}
-                  regionEndpointControlProps={{
-                    ...register(
-                      `regions.${index}.endpoint`,
-                      {
-                        required: true,
-                      },
-                    ),
-                    isInvalid: Boolean(errors?.regions?.[index]?.endpoint),
-                  }}
-                />
-              ))
-            }
+            <div className="sticky-top bg-body p-3">
+              <Button variant="success" size="sm" disabled={isSubmitting} onClick={() => {
+                append({identifier: "", label: "", endpoint: ""})
+              }}>
+                <i className="bi bi-plus-circle-fill me-1"/>
+                {translate("modals.privateCloudSettings.appendRegionButton")}
+              </Button>
+              <Form.Group as={Row} className="mb-3" controlId="privateCloudSettingUcUrl">
+                <Form.Label className="text-end" column sm={4}>
+                  <span className="text-danger">*</span>{translate("modals.privateCloudSettings.form.ucUrl.label")}
+                </Form.Label>
+                <Col sm={7}>
+                  <Form.Control
+                    {...register("ucUrl", {required: true})}
+                    type="text"
+                    placeholder={translate("modals.privateCloudSettings.form.ucUrl.holder")}
+                    isInvalid={Boolean(errors.ucUrl)}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {translate("modals.privateCloudSettings.form.ucUrl.feedback.required")}
+                  </Form.Control.Feedback>
+                </Col>
+              </Form.Group>
+            </div>
+            <div className="px-3 pb-3">
+              {
+                fields.map((field, index) => (
+                  <RegionInputs
+                    key={field.id}
+                    id={field.id}
+                    groupNameSuffix={index + 1}
+                    onRemove={() => {
+                      remove(index)
+                    }}
+                    regionIdentifierControlProps={{
+                      ...register(
+                        `regions.${index}.identifier`,
+                        {
+                          required: true,
+                        },
+                      ),
+                      isInvalid: Boolean(errors?.regions?.[index]?.identifier),
+                    }}
+                    regionNameControlProps={register(`regions.${index}.label`)}
+                    regionEndpointControlProps={{
+                      ...register(
+                        `regions.${index}.endpoint`,
+                        {
+                          required: true,
+                        },
+                      ),
+                      isInvalid: Boolean(errors?.regions?.[index]?.endpoint),
+                    }}
+                  />
+                ))
+              }
+            </div>
           </fieldset>
         </Form>
       </Modal.Body>

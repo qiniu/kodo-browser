@@ -3,14 +3,14 @@ import classNames from "classnames";
 
 import {FileItem} from "@renderer/modules/qiniu-client";
 
-import {CellDataProps} from "../types";
+import {RowCellDataProps} from "../../types";
 
 export interface FileNameCellProps {
   onClickFile: (file: FileItem.Item) => void,
   onDoubleClickFile: (file: FileItem.Item) => void,
 }
 
-const FileName: React.FC<CellDataProps & FileNameCellProps> = ({
+const FileName: React.FC<RowCellDataProps & FileNameCellProps> = ({
   rowData: file,
   cellData: fileName,
   onClickFile,

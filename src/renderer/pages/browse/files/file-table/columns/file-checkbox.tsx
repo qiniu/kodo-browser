@@ -1,7 +1,7 @@
 import React from "react";
 import {Form} from "react-bootstrap";
 
-import {CellDataProps} from "../types"
+import {RowCellDataProps} from "../../types"
 
 export interface FileCheckboxHeaderProps {
   isSelectedAll: boolean,
@@ -25,7 +25,7 @@ export const FileCheckboxHeader: React.FC<FileCheckboxHeaderProps> = ({
 export interface FileCheckboxCellProps {
 }
 
-const FileCheckbox: React.FC<CellDataProps<boolean> & FileCheckboxCellProps> = ({
+const FileCheckbox: React.FC<RowCellDataProps<boolean> & FileCheckboxCellProps> = ({
   cellData,
 }) => {
   // select action will be handled on row,

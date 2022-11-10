@@ -13,7 +13,7 @@ import {DownloadAction} from "@common/ipc-actions/download";
 import ByteSize from "@common/const/byte-size";
 import {LangName} from "@renderer/modules/i18n";
 
-import Settings, {SettingKey, SettingStorageKey} from "./index";
+import Settings, {ContentViewStyle, SettingKey, SettingStorageKey} from "./index";
 
 // WARNING: The getter tests in "no data in storage" section is
 //          for testing default value.
@@ -50,6 +50,7 @@ describe("test settings.ts", () => {
                 "filesLoadingSize",
                 "navHistoriesLength",
                 "lang",
+                "is-list-view",
             ];
             const ACTUAL_KEY_LIST = Object.values(SettingStorageKey);
             for (const expectKey of EXPECT_KES) {
@@ -85,6 +86,7 @@ describe("test settings.ts", () => {
                 "filesLoadingSize",
                 "historiesLength",
                 "language",
+                "contentViewStyle",
             ];
             const settingsProto = Reflect.getPrototypeOf(Settings);
             if (settingsProto === null){
@@ -644,6 +646,15 @@ describe("test settings.ts", () => {
             Settings.language = LangName.EN_US;
             expect(Settings.language).toBe(LangName.EN_US);
         });
+
+        // content view style
+        it("content view style", () => {
+            expect(Settings.contentViewStyle).toBe(ContentViewStyle.Table);
+        });
+        it("content view style", () => {
+            Settings.contentViewStyle = ContentViewStyle.Grid;
+            expect(Settings.contentViewStyle).toBe(ContentViewStyle.Grid);
+        });
     });
 
     describe("some data in storage", () => {
@@ -670,6 +681,7 @@ describe("test settings.ts", () => {
                 filesLoadingSize: "600",
                 navHistoriesLength: "110",
                 lang: "en-US",
+                "is-list-view": "false",
             };
 
             for (const [key, value] of Object.entries(MOCK_LOCALSTORAGE_DATA)) {
@@ -914,6 +926,15 @@ describe("test settings.ts", () => {
         it("language setter", () => {
             Settings.language = LangName.ZH_CN;
             expect(Settings.language).toBe(LangName.ZH_CN);
+        });
+
+        // content view style
+        it("content view style getter", () => {
+            expect(Settings.contentViewStyle).toBe(ContentViewStyle.Grid);
+        });
+        it("content view style setter", () => {
+            Settings.contentViewStyle = ContentViewStyle.Table;
+            expect(Settings.contentViewStyle).toBe(ContentViewStyle.Table);
         });
     });
 

@@ -4,6 +4,11 @@ import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-downl
 import {LangName} from "@renderer/modules/i18n";
 import * as LocalLogger from "@renderer/modules/local-logger";
 
+export enum ContentViewStyle {
+  Table = "table",
+  Grid = "grid",
+}
+
 export enum SettingStorageKey {
   IsDebug = "isDebug",
   AutoUpgrade = "autoUpgrade",
@@ -32,6 +37,7 @@ export enum SettingStorageKey {
   FilesLoadingSize = "filesLoadingSize",
   HistoriesLength = "navHistoriesLength",
   Language = "lang",
+  IsListView = "is-list-view",
 }
 
 export enum SettingKey {
@@ -56,6 +62,7 @@ export enum SettingKey {
   FilesLoadingSize = "filesLoadingSize",
   HistoriesLength = "historiesLength",
   Language = "language",
+  ContentViewStyle = "contentViewStyle",
 }
 
 interface NumberSettingsChange {
@@ -91,9 +98,15 @@ interface LangNameSettingsChange {
   value: LangName,
 }
 
+interface ContentViewStyleChange {
+  key: SettingKey.ContentViewStyle,
+  value: ContentViewStyle,
+}
+
 type SettingsChange = NumberSettingsChange
   | BooleanSettingsChange
-  | LangNameSettingsChange;
+  | LangNameSettingsChange
+  | ContentViewStyleChange;
 
 export type OnChangeCallback = (params: SettingsChange) => void;
 
@@ -413,6 +426,22 @@ class Settings {
     localStorage.setItem(SettingStorageKey.Language, v.replace("_", "-"));
     this.trigger({
       key: SettingKey.Language,
+      value: v,
+    });
+  }
+
+  get contentViewStyle(): ContentViewStyle {
+    return (localStorage.getItem(SettingStorageKey.IsListView) ?? "true") === "true"
+        ? ContentViewStyle.Table
+        : ContentViewStyle.Grid;
+  }
+  set contentViewStyle(v: ContentViewStyle) {
+    localStorage.setItem(
+      SettingStorageKey.IsListView,
+      (v === ContentViewStyle.Table).toString()
+    );
+    this.trigger({
+      key: SettingKey.ContentViewStyle,
       value: v,
     });
   }

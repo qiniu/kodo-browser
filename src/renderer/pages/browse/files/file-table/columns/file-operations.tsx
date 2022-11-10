@@ -3,13 +3,13 @@ import {Button} from "react-bootstrap";
 
 import {FileItem} from "@renderer/modules/qiniu-client";
 
-import {CellDataProps, OperationName} from "../types";
+import {OperationName, RowCellDataProps} from "../../types";
 
 export interface FileOperationsCellProps {
   onAction: (action: OperationName, file: FileItem.Item) => void,
 }
 
-const FileOperations: React.FC<CellDataProps & FileOperationsCellProps> = ({
+const FileOperations: React.FC<RowCellDataProps & FileOperationsCellProps> = ({
   rowData: file,
   onAction,
 }) => {

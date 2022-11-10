@@ -8,7 +8,7 @@ import StorageClass from "@common/models/storage-class";
 import {getLang, translate} from "@renderer/modules/i18n";
 import {FileItem} from "@renderer/modules/qiniu-client";
 
-import {FileRowData} from "../types";
+import {FileRowData} from "../../types";
 import FileName, {FileNameCellProps} from "./file-name";
 import FileCheckbox, {FileCheckboxCellProps, FileCheckboxHeader, FileCheckboxHeaderProps} from "./file-checkbox";
 import FileOperations, {FileOperationsCellProps} from "./file-operations";
@@ -108,5 +108,3 @@ export function getColumns({
     },
   ];
 }
-
-export * from "../types";

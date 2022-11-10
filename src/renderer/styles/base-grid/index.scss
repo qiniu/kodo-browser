@@ -1,0 +1,15 @@
+.base-grid {
+  --bt-cell-accent-bg: transparent;
+  --bg-cell-hover-bg: rgba(0, 0, 0, 0.075);
+  padding-bottom: 1.4rem;
+
+  & .base-cell {
+    --bs-card-bg: transparent;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 9999px var(--bt-cell-accent-bg);
+
+    &:hover {
+      --bt-cell-accent-bg: var(--bg-cell-hover-bg);
+    }
+  }
+}

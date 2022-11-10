@@ -17,19 +17,21 @@ interface BucketTableProps {
   onChangeSelectedBucket: (bucket: BucketItem | null) => void,
 }
 
-const BucketTable: React.FC<BucketTableProps> = (props) => {
+const BucketTable: React.FC<BucketTableProps> = ({
+  loading,
+  buckets,
+  selectedBucket,
+  onChangeSelectedBucket,
+}) => {
   const {translate} = useI18n();
   const {currentAddress, goTo} = useKodoNavigator();
 
   const handleClickRow = (bucket: BucketItem) => {
-    if (
-      props.selectedBucket !== null &&
-      bucket.name === props.selectedBucket.name
-    ) {
-      props.onChangeSelectedBucket(null);
+    if (bucket.name === selectedBucket?.name) {
+      onChangeSelectedBucket(null);
       return;
     }
-    props.onChangeSelectedBucket(bucket);
+    onChangeSelectedBucket(bucket);
   };
 
   const handleClickBucket = (bucket: BucketItem) => {
@@ -58,14 +60,14 @@ const BucketTable: React.FC<BucketTableProps> = (props) => {
         </thead>
         <tbody>
         {
-          props.loading
+          loading
             ? <LoadingHolder col={4}/>
-            : props.buckets.length
-              ? props.buckets.map(bucket => (
+            : buckets.length
+              ? buckets.map(bucket => (
                 <BucketTableRow
                   key={bucket.name}
                   data={bucket}
-                  isSelected={props.selectedBucket !== null && props.selectedBucket.name === bucket.name}
+                  isSelected={selectedBucket?.name === bucket.name}
                   onClickRow={handleClickRow}
                   onClickBucket={handleClickBucket}
                 />

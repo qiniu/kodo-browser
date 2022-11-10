@@ -7,8 +7,11 @@ import StorageClass from "@common/models/storage-class";
 import {FileItem} from "@renderer/modules/qiniu-client";
 import EmptyHolder from "@renderer/components/empty-holder";
 
-import OverlayHolder from "./overlay-holder";
-import {FileRowData, getColumns, OperationName} from "./columns";
+import {LOAD_MORE_THRESHOLD} from "../const"
+import {OperationName, FileRowData} from "../types";
+import OverlayHolder from "../overlay-holder";
+import {getColumns} from "./columns";
+import "./file-table.scss";
 
 interface FileTableProps {
   availableStorageClasses?: Record<string, StorageClass>,
@@ -23,7 +26,7 @@ interface FileTableProps {
   onAction: (action: OperationName, file: FileItem.Item) => void,
 }
 
-const FileBaseTable: React.FC<FileTableProps> = ({
+const FileTable: React.FC<FileTableProps> = ({
   availableStorageClasses,
   loading,
   hasMore,
@@ -35,18 +38,6 @@ const FileBaseTable: React.FC<FileTableProps> = ({
   onDoubleClickFile,
   onAction,
 }) => {
-  const isSelectedAll = data.length > 0 && selectedFiles.size === data.length;
-  const loadingMore = data.length > 0 && loading;
-
-  const columns = getColumns({
-    availableStorageClasses,
-    isSelectedAll: isSelectedAll,
-    onToggleSelectAll: (checked: boolean) => onSelectFiles(data, checked),
-    onClickFile,
-    onDoubleClickFile,
-    onAction,
-  });
-
   const rowData: FileRowData[] = useMemo(() =>
     data.map(item => ({
         ...item,
@@ -54,6 +45,18 @@ const FileBaseTable: React.FC<FileTableProps> = ({
         isSelected: selectedFiles.has(item.path.toString()),
       })
     ), [data, selectedFiles]);
+
+  const isSelectedAll = rowData.length > 0 && selectedFiles.size === rowData.length;
+  const loadingMore = rowData.length > 0 && loading;
+
+  const columns = getColumns({
+    availableStorageClasses,
+    isSelectedAll: isSelectedAll,
+    onToggleSelectAll: (checked: boolean) => onSelectFiles(rowData, checked),
+    onClickFile,
+    onDoubleClickFile,
+    onAction,
+  });
 
   const handleEndReached = () => {
     if (!hasMore || loading) {
@@ -86,7 +89,7 @@ const FileBaseTable: React.FC<FileTableProps> = ({
             rowProps={({rowData}) => ({
               onClick: () => onSelectFiles([rowData], !rowData.isSelected),
             })}
-            onEndReachedThreshold={100}
+            onEndReachedThreshold={LOAD_MORE_THRESHOLD}
             onEndReached={handleEndReached}
             emptyRenderer={<EmptyHolder loading={loading}/>}
             overlayRenderer={<OverlayHolder loadingMore={loadingMore}/>}
@@ -97,6 +100,4 @@ const FileBaseTable: React.FC<FileTableProps> = ({
   )
 };
 
-export default FileBaseTable;
-
-export * from "./types";
+export default FileTable;

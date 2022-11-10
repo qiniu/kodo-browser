@@ -3,8 +3,8 @@ import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
 import StorageClass from "@common/models/storage-class";
 import {FileItem} from "@renderer/modules/qiniu-client";
-import {isItemFile, isItemFolder} from "@renderer/modules/qiniu-client/file-item";
 import {useKodoNavigator} from "@renderer/modules/kodo-address";
+import {ContentViewStyle} from "@renderer/modules/settings";
 
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import {OperationDoneRecallFn} from "@renderer/components/modals/file/types";
@@ -14,9 +14,12 @@ import ChangeFileStorageClass from "@renderer/components/modals/file/change-file
 import DeleteFiles from "@renderer/components/modals/file/delete-files";
 import PreviewFile from "@renderer/components/modals/preview-file";
 
-import FileBaseTable, {OperationName} from "./file-base-table";
+import {OperationName} from "./types";
+import FileTable from "./file-table";
+import FileGrid from "./file-grid";
 
-interface FileTableProps {
+interface FileContentProps {
+  viewStyle: ContentViewStyle,
   loading: boolean,
   availableStorageClasses?: Record<string, StorageClass>,
   data: FileItem.Item[],
@@ -34,7 +37,8 @@ interface FileTableProps {
   onReloadFiles: OperationDoneRecallFn,
 }
 
-const FileTable: React.FC<FileTableProps> = ({
+const FileContent: React.FC<FileContentProps> = ({
+  viewStyle,
   loading,
   availableStorageClasses,
   data,
@@ -128,19 +132,11 @@ const FileTable: React.FC<FileTableProps> = ({
   });
 
   // handle events
-  const handleClickFile = (file: FileItem.Item) => {
-    if (isItemFolder(file)) {
-      goTo({
-        protocol: currentAddress.protocol,
-        path: `${file.bucket}/${file.path.toString()}`,
-      });
-    }
-  };
-
-  const handleDoubleClickFile = (file: FileItem.Item) => {
-    if (isItemFile(file)) {
-      handleClickPreviewFile({fileItem: file});
-    }
+  const changePathByDirectory = (file: FileItem.Folder) => {
+    goTo({
+      protocol: currentAddress.protocol,
+      path: `${file.bucket}/${file.path.toString()}`,
+    });
   };
 
   const handleFileOperation = (action: OperationName, file: FileItem.Item) => {
@@ -165,18 +161,43 @@ const FileTable: React.FC<FileTableProps> = ({
 
   return (
     <>
-      <FileBaseTable
-        availableStorageClasses={availableStorageClasses}
-        loading={loading}
-        hasMore={hasMore}
-        onLoadMore={onLoadMore}
-        data={data}
-        selectedFiles={selectedFiles}
-        onSelectFiles={onSelectFiles}
-        onClickFile={handleClickFile}
-        onDoubleClickFile={handleDoubleClickFile}
-        onAction={handleFileOperation}
-      />
+      {
+        viewStyle === ContentViewStyle.Table
+          ? <FileTable
+            availableStorageClasses={availableStorageClasses}
+            loading={loading}
+            hasMore={hasMore}
+            onLoadMore={onLoadMore}
+            data={data}
+            selectedFiles={selectedFiles}
+            onSelectFiles={onSelectFiles}
+            onClickFile={f =>
+              FileItem.isItemFolder(f) &&
+              changePathByDirectory(f)
+            }
+            onDoubleClickFile={f =>
+              FileItem.isItemFile(f) &&
+              handleClickPreviewFile({fileItem: f})
+            }
+            onAction={handleFileOperation}
+          />
+          : <FileGrid
+            loading={loading}
+            hasMore={hasMore}
+            onLoadMore={onLoadMore}
+            data={data}
+            selectedFiles={selectedFiles}
+            onSelectFiles={onSelectFiles}
+            onDoubleClickFile={f => {
+              if (FileItem.isItemFile(f)) {
+                handleClickPreviewFile({fileItem: f});
+              }
+              if (FileItem.isItemFolder(f)) {
+                changePathByDirectory(f)
+              }
+            }}
+          />
+      }
 
       {
         regionId === undefined || bucketName === undefined || basePath === undefined || availableStorageClasses === undefined
@@ -239,4 +260,4 @@ const FileTable: React.FC<FileTableProps> = ({
   );
 }
 
-export default FileTable;
+export default FileContent;

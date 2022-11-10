@@ -1,0 +1,6 @@
+.file-base-table {
+  // make sure last one can be operated
+  & .BaseTable__body {
+    padding-bottom: 1.4rem;
+  }
+}

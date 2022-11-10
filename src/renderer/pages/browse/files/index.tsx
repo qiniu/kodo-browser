@@ -13,7 +13,7 @@ import * as LocalLogger from "@renderer/modules/local-logger";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {KodoNavigator, useKodoNavigator} from "@renderer/modules/kodo-address";
-import Settings from "@renderer/modules/settings";
+import Settings, {ContentViewStyle} from "@renderer/modules/settings";
 
 import {BucketItem, FileItem, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 import {isItemFile, isItemFolder} from "@renderer/modules/qiniu-client/file-item";
@@ -25,7 +25,7 @@ import {useDisplayModal, useIsShowAnyModal} from "@renderer/components/modals/ho
 import UploadFilesConfirm from "@renderer/components/modals/file/upload-files-confirm";
 
 import FileToolBar from "./file-tool-bar";
-import FileTable from "./file-table";
+import FileContent from "./file-content";
 import "./files.scss";
 
 interface FilesProps {
@@ -190,6 +190,13 @@ const Files: React.FC<FilesProps> = (props) => {
     });
   };
 
+  // view style
+  const [viewStyle, setViewStyle] = useState(Settings.contentViewStyle);
+  const handleChangeViewStyle = (style: ContentViewStyle) => {
+    setViewStyle(style);
+    Settings.contentViewStyle = style;
+  };
+
   // modal state
   const isShowAnyModal = useIsShowAnyModal();
   const [
@@ -303,6 +310,9 @@ const Files: React.FC<FilesProps> = (props) => {
         defaultSearchText={searchPrefix}
         onSearch={handleSearchPrefix}
 
+        viewStyle={viewStyle}
+        onChangeView={handleChangeViewStyle}
+
         onCreatedDirectory={handleReloadFiles}
         onRenamedFile={handleReloadFiles}
         onUploadFiles={filePaths => showUploadFilesConfirm({filePaths})}
@@ -313,7 +323,8 @@ const Files: React.FC<FilesProps> = (props) => {
         onChangedFilesStorageClass={handleReloadFiles}
       />
 
-      <FileTable
+      <FileContent
+        viewStyle={viewStyle}
         loading={props.prepareLoading || loadingFiles}
         availableStorageClasses={availableStorageClasses}
         data={files}

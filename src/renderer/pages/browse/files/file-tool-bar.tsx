@@ -10,6 +10,7 @@ import StorageClass from "@common/models/storage-class";
 import {translate} from "@renderer/modules/i18n";
 import * as FileItem from "@renderer/modules/qiniu-client/file-item";
 import {FilesOperationType, useFileOperation} from "@renderer/modules/file-operation";
+import {ContentViewStyle} from "@renderer/modules/settings";
 
 import TooltipButton from "@renderer/components/tooltip-button";
 import {useDisplayModal} from "@renderer/components/modals/hooks";
@@ -45,6 +46,9 @@ interface FileToolBarProps {
   defaultSearchText: string,
   onSearch: (searchText: string) => void,
 
+  viewStyle: ContentViewStyle,
+  onChangeView: (style: ContentViewStyle) => void,
+
   onCreatedDirectory: OperationDoneRecallFn,
   onRenamedFile: OperationDoneRecallFn,
   onDeletedFiles: OperationDoneRecallFn,
@@ -74,6 +78,9 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
 
     defaultSearchText,
     onSearch,
+
+    viewStyle,
+    onChangeView,
 
     onCreatedDirectory,
     onRenamedFile,
@@ -402,6 +409,20 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
             {listedFileNumber}{hasMoreFiles ? "+" : null}
           </InputGroup.Text>
         </InputGroup>
+        <ButtonGroup size="sm" className="ms-1">
+          <Button
+            variant={viewStyle === ContentViewStyle.Table ? "primary" : "outline-solid-gray-300"}
+            onClick={() => onChangeView(ContentViewStyle.Table)}
+          >
+            <i className="bi bi-list"/>
+          </Button>
+          <Button
+            variant={viewStyle === ContentViewStyle.Grid ? "primary" : "outline-solid-gray-300"}
+            onClick={() => onChangeView(ContentViewStyle.Grid)}
+          >
+            <i className="bi bi-grid"/>
+          </Button>
+        </ButtonGroup>
       </div>
 
       {

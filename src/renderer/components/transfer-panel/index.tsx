@@ -1,6 +1,7 @@
-import React, {useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {Badge, CloseButton, Tab, Tabs} from "react-bootstrap";
 import {toast} from "react-hot-toast";
+import lodash from "lodash";
 
 import {config_path} from "@common/const/app-config";
 import ByteSize from "@common/const/byte-size";
@@ -12,6 +13,7 @@ import {EndpointType, useAuth} from "@renderer/modules/auth";
 import Settings from "@renderer/modules/settings";
 import {privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 
+import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
 import useIpcUpload from "./use-ipc-upload";
 import UploadPanel from "./upload-panel";
 import useIpcDownload from "./use-ipc-download";
@@ -72,6 +74,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
   const {
     jobState: uploadJobState,
     setSearchText: setUploadSearchText,
+    setQueryCount: setUploadQueryCount,
   } = useIpcUpload({
     endpoint: customizedEndpoint,
     user: currentUser,
@@ -106,10 +109,15 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
 
   const uploadProgressText = `${uploadJobState?.finished ?? 0}/${uploadJobState?.total ?? 0}`
 
+  const handleLoadMoreUploadJobs = useCallback(lodash.debounce(() => {
+    setUploadQueryCount(v => v + JOB_NUMS_PER_QUERY);
+  }, LAPSE_PER_QUERY, {leading: true, trailing: false}), []);
+
   // download state
   const {
     jobState: downloadJobState,
     setSearchText: setDownloadSearchText,
+    setQueryCount: setDownloadQueryCount,
   } = useIpcDownload({
     endpoint: customizedEndpoint,
     user: currentUser,
@@ -139,16 +147,31 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
     },
   });
 
-  // render
   const downloadProgressText = `${downloadJobState?.finished ?? 0}/${downloadJobState?.total ?? 0}`
 
+  const handleLoadMoreDownloadJobs = useCallback(lodash.debounce(() => {
+    setDownloadQueryCount(v => v + JOB_NUMS_PER_QUERY);
+  }, LAPSE_PER_QUERY, {leading: true, trailing: false}), []);
+
+  // reset ipc jobs number for save performance
+  useEffect(() => {
+    if (!openPanelName) {
+      setUploadQueryCount(0);
+      setDownloadQueryCount(0);
+    } else {
+      setUploadQueryCount(JOB_NUMS_PER_QUERY);
+      setDownloadQueryCount(JOB_NUMS_PER_QUERY);
+    }
+  }, [openPanelName]);
+
+  // render
   if (!openPanelName) {
     return (
       <div
         className="transfer-panel-bar d-flex justify-content-around bg-body"
       >
         <div
-          className="text-link"
+          className="text-link me-2"
           onClick={() => setOpenPanelName(PanelName.Upload)}
         >
           <i className="bi bi-cloud-upload me-1"/> {uploadProgressText}
@@ -182,10 +205,15 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
             </>
           }
         >
-          <UploadPanel
-            data={uploadJobState?.list ?? []}
-            onChangeSearchText={setUploadSearchText}
-          />
+          {
+            uploadJobState &&
+            <UploadPanel
+              data={uploadJobState.list}
+              onChangeSearchText={setUploadSearchText}
+              hasMore={uploadJobState.list.length < uploadJobState.total}
+              onLoadMore={handleLoadMoreUploadJobs}
+            />
+          }
         </Tab>
         <Tab
           eventKey={PanelName.Download}
@@ -197,10 +225,15 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
             </>
           }
         >
-          <DownloadPanel
-            data={downloadJobState?.list ?? []}
-            onChangeSearchText={setDownloadSearchText}
-          />
+          {
+            downloadJobState &&
+            <DownloadPanel
+              data={downloadJobState.list}
+              onChangeSearchText={setDownloadSearchText}
+              hasMore={downloadJobState.list.length < downloadJobState.total}
+              onLoadMore={handleLoadMoreDownloadJobs}
+            />
+          }
         </Tab>
       </Tabs>
     </div>

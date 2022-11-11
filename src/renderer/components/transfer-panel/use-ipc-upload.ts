@@ -17,6 +17,8 @@ import {AkItem} from "@renderer/modules/auth";
 import {Endpoint} from "@renderer/modules/qiniu-client";
 import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
 
+import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
+
 interface UploadConfig {
   resumable: boolean,
   maxConcurrency: number,
@@ -36,6 +38,8 @@ interface UseIpcUploadProps {
   user: AkItem | null,
   config: UploadConfig,
 
+  initQueryCount?: number,
+
   onAddedJobs?: (data: AddedJobsReplyMessage["data"]) => void,
   onJobCompleted?: (data: JobCompletedReplyMessage["data"]) => void,
   onCreatedDirectory?: (data: CreatedDirectoryReplyMessage["data"]) => void,
@@ -46,12 +50,15 @@ const useIpcUpload = ({
   user,
   config,
 
+  initQueryCount = JOB_NUMS_PER_QUERY,
+
   onAddedJobs = () => {},
   onJobCompleted = () => {},
   onCreatedDirectory = () => {},
 }: UseIpcUploadProps) => {
   const [searchText, setSearchText] = useState<string>("");
-  const [queryCount, setQueryCount] = useState<number>(100);
+  const [pageNum, setPageNum] = useState<number>(0);
+  const [queryCount, setQueryCount] = useState<number>(initQueryCount);
   const [jobState, setJobState] = useState<UpdateUiDataReplyMessage["data"]>();
 
   // subscribe IPC events of upload and make sure there is a valid configuration
@@ -126,11 +133,11 @@ const useIpcUpload = ({
         }
       }
       ipcUploadManager.updateUiData({
-        pageNum: 0,
+        pageNum: pageNum,
         count: queryCount,
         query: query,
       });
-    }, 1000);
+    }, LAPSE_PER_QUERY);
 
     return () => {
       clearInterval(uploaderTimer);
@@ -138,8 +145,11 @@ const useIpcUpload = ({
   }, [searchText, queryCount]);
 
   return {
+    pageNum,
+    queryCount,
     jobState,
     setSearchText,
+    setPageNum,
     setQueryCount,
   }
 };

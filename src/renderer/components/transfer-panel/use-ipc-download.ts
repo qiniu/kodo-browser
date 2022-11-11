@@ -16,6 +16,8 @@ import {AkItem} from "@renderer/modules/auth";
 import {Endpoint} from "@renderer/modules/qiniu-client";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 
+import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
+
 interface DownloadConfig {
   resumable: boolean,
   maxConcurrency: number,
@@ -35,6 +37,8 @@ interface UseIpcDownloadProps {
   user: AkItem | null,
   config: DownloadConfig,
 
+  initQueryCount?: number,
+
   onAddedJobs?: (data: AddedJobsReplyMessage["data"]) => void,
   onJobCompleted?: (data: JobCompletedReplyMessage["data"]) => void,
 }
@@ -44,11 +48,14 @@ const useIpcDownload = ({
   user,
   config,
 
+  initQueryCount = JOB_NUMS_PER_QUERY,
+
   onAddedJobs = () => {},
   onJobCompleted = () => {},
 }: UseIpcDownloadProps) => {
   const [searchText, setSearchText] = useState<string>("");
-  const [queryCount, setQueryCount] = useState<number>(100);
+  const [pageNum, setPageNum] = useState<number>(0);
+  const [queryCount, setQueryCount] = useState<number>(initQueryCount);
   const [jobState, setJobState] = useState<UpdateUiDataReplyMessage["data"]>();
 
   // subscribe IPC events of download and make sure there is a valid configuration
@@ -119,11 +126,11 @@ const useIpcDownload = ({
         }
       }
       ipcDownloadManager.updateUiData({
-        pageNum: 0,
+        pageNum: pageNum,
         count: queryCount,
         query: query,
       });
-    }, 1000);
+    }, LAPSE_PER_QUERY);
 
     return () => {
       clearInterval(downloaderTimer);
@@ -131,8 +138,11 @@ const useIpcDownload = ({
   }, [searchText, queryCount]);
 
   return {
+    pageNum,
+    queryCount,
     jobState,
     setSearchText,
+    setPageNum,
     setQueryCount,
   }
 };

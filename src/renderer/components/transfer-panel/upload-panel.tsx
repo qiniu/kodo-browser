@@ -1,6 +1,8 @@
 import React, {useMemo, useState} from "react";
 import {Form} from "react-bootstrap";
 import classNames from "classnames";
+import AutoResizer from "react-virtualized-auto-sizer";
+import {areEqual, FixedSizeList as List, ListChildComponentProps} from 'react-window';
 
 import UploadJob from "@common/models/job/upload-job";
 
@@ -16,14 +18,52 @@ import JobItem from "./job-item";
 import UploadJobOperation from "./upload-job-operation";
 import Settings from "@renderer/modules/settings";
 
+import {ITEM_HEIGHT, LOAD_MORE_THRESHOLD} from "./const";
+
+const Item: React.FC<ListChildComponentProps<(UploadJob["uiData"] | undefined)[]>> = ({
+  index,
+  style,
+  data
+}) => {
+  const job = data[index];
+  if (!job) {
+    return (
+      <div style={style}>
+        {index}. {translate("common.errored")}
+      </div>
+    );
+  }
+  return (
+    <div style={style}>
+      <JobItem
+        namePrefix={`${index + 1}. `}
+        data={job}
+        operationButtons={
+          <UploadJobOperation
+            jobId={job.id}
+            status={job.status}
+            resumable={job.progress.resumable}
+          />
+        }
+      />
+    </div>
+  );
+};
+
+const MemoItem = React.memo(Item, areEqual);
+
 interface UploadPanelProps {
   data: (UploadJob["uiData"] | undefined)[],
   onChangeSearchText: (searchText: string) => void,
+  hasMore: boolean,
+  onLoadMore: () => void,
 }
 
 const UploadPanel: React.FC<UploadPanelProps> = ({
   data,
   onChangeSearchText,
+  hasMore,
+  onLoadMore,
 }) => {
   const [
     {
@@ -43,7 +83,7 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
   const handleToggleIsSkipEmptyDirectoryUpload = () => {
     Settings.skipEmptyDirectoryUpload = !isSkipEmptyDirectoryUpload;
     setIsSkipEmptyDirectoryUpload(!isSkipEmptyDirectoryUpload);
-  }
+  };
 
   return (
     <>
@@ -94,26 +134,33 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
             />
           </div>
         </div>
-        <div className="job-list p-1">
+        <div className="job-list w-100 h-100 p-1">
+          <AutoResizer>
+            {({width, height}) => (
+              <List
+                width={width}
+                height={height}
+                itemSize={ITEM_HEIGHT}
+                itemCount={data.length}
+                itemData={data}
+                onScroll={({scrollOffset}) => {
+                  if (!hasMore) {
+                    return;
+                  }
+                  const contentHeight = ITEM_HEIGHT * data.length;
+                  const heightToReachBottom = contentHeight - (height + scrollOffset);
+                  if (heightToReachBottom < LOAD_MORE_THRESHOLD) {
+                    onLoadMore();
+                  }
+                }}
+              >
+                {MemoItem}
+              </List>
+            )}
+          </AutoResizer>
           {
-            // TODO window list to virtual
-            !data.length
-              ? <EmptyHolder/>
-              : data.map((job, i) => job && (
-                  <JobItem
-                    key={job.id}
-                    namePrefix={`${i + 1}. `}
-                    data={job}
-                    operationButtons={
-                      <UploadJobOperation
-                        jobId={job.id}
-                        status={job.status}
-                        resumable={job.progress.resumable}
-                      />
-                    }
-                  />
-                )
-              )
+            !data.length &&
+            <EmptyHolder/>
           }
         </div>
       </div>

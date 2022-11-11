@@ -37,7 +37,7 @@ const ErrorFileList: React.FC<ErroredFileOperationListProps> = (props) => {
               {
                 erroredFile.fileType === FileItem.ItemType.Directory
                   ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                  : <i className="fa fa-file-o me-1"/>
+                  : <i className="bi bi-file-earmark me-1"/>
               }
               <span className="me-1">{erroredFile.path}</span>
               <OverlayTrigger

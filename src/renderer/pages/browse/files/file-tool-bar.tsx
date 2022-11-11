@@ -334,7 +334,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
             <Dropdown.Item
               onClick={handleShowChangeFilesStorageClass}
             >
-              <i className="fa fa-exchange me-1"/>
+              <i className="bi bi-arrow-left-right me-1"/>
               {translate("common.changeStorageClass")}
             </Dropdown.Item>
           </DropdownButton>

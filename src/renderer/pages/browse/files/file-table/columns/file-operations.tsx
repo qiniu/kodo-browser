@@ -64,7 +64,7 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellProps> = ({
             onAction(OperationName.ChangeStorageClass, file);
           }}
         >
-          <i className="fa fa-exchange"/>
+          <i className="bi bi-arrow-left-right"/>
         </Button>
       }
       <Button

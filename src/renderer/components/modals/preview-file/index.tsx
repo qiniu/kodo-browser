@@ -157,7 +157,7 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
             variant="outline-solid-gray-300"
             onClick={() => setFileOperation(FileOperationType.ChangeStorageClass)}
           >
-            <i className="fa fa-exchange me-1"/>
+            <i className="bi bi-arrow-left-right me-1"/>
             {translate("common.changeStorageClass")}
           </Button>
         </div>

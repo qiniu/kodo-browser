@@ -205,7 +205,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
                             {fileShowItem.path}
                           </>
                           : <>
-                            <i className="fa fa-file-o me-1"/>
+                            <i className="bi bi-file-earmark me-1"/>
                             {fileShowItem.basename}
                           </>
                       }

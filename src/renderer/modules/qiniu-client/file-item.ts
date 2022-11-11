@@ -364,36 +364,36 @@ export function getFileIconClassName(item: Item) {
     return "bi bi-folder-fill";
   }
   if (info.type == FileExtensionType.Video) {
-    return "fa fa-file-video-o";
+    return "bi bi-file-play";
   }
   if (info.type == FileExtensionType.Audio) {
-    return "fa fa-file-audio-o";
+    return "bi bi-file-music";
   }
   if (info.type == FileExtensionType.Picture) {
-    return "fa fa-file-image-o";
+    return "bi bi-file-image";
   }
   if (info.type == FileExtensionType.Document) {
     switch (info?.ext?.[0]) {
       case "doc":
       case "docx":
-        return "fa fa-file-word-o";
+        return "bi bi-file-richtext";
       case "pdf":
-        return "fa fa-file-pdf-o";
+        return "bi bi-file-pdf";
       case "ppt":
       case "pptx":
-        return "fa fa-file-powerpoint-o";
+        return "bi bi-file-slides";
       case "exl":
-        return "fa fa-file-excel-o";
+        return "bi bi-file-spreadsheet";
     }
-    return "fa fa-file-o";
+    return "bi bi-file-earmark";
   }
   if (info.type == FileExtensionType.Code) {
     switch (info?.ext?.[0]) {
       case "cmd":
       case "sh":
-        return "fa fa-terminal";
+        return "bi bi-file-code";
     }
-    return "fa fa-file-text-o";
+    return "bi bi-file-text";
   }
   if (info.type == FileExtensionType.Others) {
     switch (info?.ext?.[0]) {
@@ -404,25 +404,25 @@ export function getFileIconClassName(item: Item) {
       case "bz":
       case "war":
       case "xz":
-        return "fa fa-file-zip-o";
+        return "bi bi-file-zip";
       case "pkg":
-        return "fa fa-dropbox";
+        return "bi bi-box-seam";
       case "app":
       case "dmg":
-        return "fa fa-apple";
+        return "bi bi-apple";
       case "apk":
-        return "fa fa-android";
+        return "bi bi-android2";
       case "msi":
       case "deb":
       case "bin":
       case "exe":
-        return "fa fa-cog";
+        return "bi bi-file-binary";
       case "img":
       case "iso":
-        return "fa fa-dot-circle-o";
+        return "bi bi-disc";
       case "cmd":
-        return "fa fa-terminal";
+        return "bi bi-file-code";
     }
   }
-  return "fa fa-file-o";
+  return "bi bi-file-earmark";
 }

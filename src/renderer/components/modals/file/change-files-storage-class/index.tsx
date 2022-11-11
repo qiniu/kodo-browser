@@ -166,7 +166,7 @@ const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProp
     <Modal {...modalProps}>
       <Modal.Header closeButton>
         <Modal.Title>
-          <i className="fa fa-exchange me-1"/>
+          <i className="bi bi-arrow-left-right me-1"/>
           {translate("modals.changeFilesStorageClass.title")}
         </Modal.Title>
       </Modal.Header>
@@ -187,7 +187,7 @@ const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProp
                       {
                         isItemFolder(fileItem)
                           ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                          : <i className="fa fa-file-o me-1"/>
+                          : <i className="bi bi-file-earmark me-1"/>
                       }
                       {fileItem.name}
                     </li>

@@ -1,6 +1,6 @@
 import React, {PropsWithChildren, useEffect, useRef, useState} from "react";
 import {toast} from "react-hot-toast";
-import {Button} from "react-bootstrap";
+import {Button, Spinner} from "react-bootstrap";
 import {Editor} from "codemirror";
 import {MergeView} from "codemirror/addon/merge/merge";
 import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
@@ -94,10 +94,13 @@ const CodeContent: React.FC<CodeContentProps> = ({
   // ---
 
   // save content
+  const [isSavingContent, setIsSavingContent] = useState<boolean>(false);
   const handleSaveContent = () => {
     if (!currentUser || !filePath) {
       return;
     }
+
+    setIsSavingContent(true);
 
     const opt = {
       id: currentUser.accessKey,
@@ -114,6 +117,15 @@ const CodeContent: React.FC<CodeContentProps> = ({
       domain,
       opt,
     );
+
+    p
+      .then(() => {
+        setCodeContent(dirtyContent);
+        setIsShowDiff(false);
+      })
+      .finally(() => {
+        setIsSavingContent(false);
+      });
 
     return toast.promise(p, {
       loading: translate("common.submitting"),
@@ -158,9 +170,19 @@ const CodeContent: React.FC<CodeContentProps> = ({
                 size="sm"
                 variant="primary"
                 onClick={handleSaveContent}
+                disabled={isSavingContent}
               >
-                <i className="bi bi-cloud-upload me-1"/>
-                {translate("modals.preview.content.code.saveContent")}
+                {
+                  isSavingContent
+                    ? <>
+                      <Spinner className="me-1" animation="border" size="sm"/>
+                      {translate("common.saving")}
+                    </>
+                    : <>
+                      <i className="bi bi-cloud-upload me-1"/>
+                      {translate("modals.preview.content.code.saveContent")}
+                    </>
+                }
               </Button>
           }
         </Portal>

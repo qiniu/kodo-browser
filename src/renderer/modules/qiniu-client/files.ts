@@ -615,7 +615,6 @@ export function stopSetStorageClassOfFiles(): void {
 // restoreFiles
 const stopRestoreFilesController = new ProgressStopController();
 
-
 interface RestoreFilesOption extends GetAdapterOptionParam {
     storageClasses: StorageClass[],
 }
@@ -671,8 +670,8 @@ export function stopRestoreFiles(): void {
     stopRestoreFilesController.abort();
 }
 
+// delete
 const stopDeleteFilesController = new ProgressStopController();
-
 
 interface DeleteFilesOption extends GetAdapterOptionParam {
     storageClasses: StorageClass[],
@@ -685,12 +684,12 @@ export async function deleteFiles(
     onErr: (err: any) => void,
     opt: DeleteFilesOption,
 ): Promise<BatchErr[]> {
-    stopSetStorageClassOfFilesController.reset();
+    stopDeleteFilesController.reset();
 
     const progress = new Progress(
         progressFn,
         onErr,
-        stopSetStorageClassOfFilesController,
+        stopDeleteFilesController,
     );
 
     progress.handleProgress();
@@ -727,8 +726,8 @@ export function stopDeleteFiles(): void {
     stopDeleteFilesController.abort();
 }
 
+// move or copy
 const stopMoveOrCopyFilesController = new ProgressStopController();
-
 
 interface MoveOrCopyFilesOption extends GetAdapterOptionParam {
     storageClasses: StorageClass[],

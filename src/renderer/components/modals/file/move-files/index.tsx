@@ -338,7 +338,7 @@ const MoveFiles: React.FC<ModalProps & MoveFilesProps> = (props) => {
                             {
                               isItemFolder(fileItem)
                                 ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                                : <i className="fa fa-file-o me-1"/>
+                                : <i className="bi bi-file-earmark me-1"/>
                             }
                             {fileItem.name}
                           </li>

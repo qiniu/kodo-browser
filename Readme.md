@@ -6,7 +6,7 @@
 
 KODO Browser 参考 [OSS Browser](https://github.com/aliyun/oss-browser.git) 设计，提供类似 Windows 资源管理器功能。用户可以很方便的浏览文件，上传下载文件，支持断点续传等。
 
-本工具使用开源框架 Angular 1.x + [Electron](http://electron.atom.io/)制作。
+本工具使用开源框架 [React](https://reactjs.org/) + [Electron](https://www.electronjs.org/) 制作。
 
 > Electron 框架可以让你使用 JavaScript，HTML 和 CSS 构建跨平台的桌面应用程序。它是基于node.js 和 Chromium 开源项目。Electron 可以打包出跨平台的程序，运行在 Mac，Windows 和 Linux 上。
 
@@ -28,7 +28,7 @@ KODO Browser 参考 [OSS Browser](https://github.com/aliyun/oss-browser.git) 设
 
 > 如果你要在此基础上开发，请按照以下步骤进行。
 
-### (1) 安装 Node.js v12.22.7
+### (1) 安装 Node.js v14 或 v16
 
 官网: https://nodejs.org/
 

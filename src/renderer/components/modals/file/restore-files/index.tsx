@@ -8,6 +8,7 @@ import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem, restoreFiles, stopRestoreFiles} from "@renderer/modules/qiniu-client";
 import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import {
   BatchProgress,
@@ -116,6 +117,12 @@ const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
     setBatchProgressState({
       status: BatchTaskStatus.Running,
     });
+    AuditLog.log(AuditLog.Action.RestoreFiles, {
+      regionId: memoRegionId,
+      bucket: memoBucketName,
+      paths: memoFileItems.map(i => i.path.toString()),
+      days: data.days,
+    });
     const p = restoreFiles(
       memoRegionId,
       memoBucketName,
@@ -143,6 +150,7 @@ const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
         onRestoredFile({
           originBasePath: memoBasePath,
         });
+        AuditLog.log(AuditLog.Action.RestoreFilesDone);
       })
       .finally(() => {
         setBatchProgressState({

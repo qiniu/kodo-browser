@@ -9,6 +9,7 @@ import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {ExternalPathItem, useKodoExternalPath} from "@renderer/modules/kodo-address";
 import {listFiles} from "@renderer/modules/qiniu-client";
 import useLoadRegions from "@renderer/modules/qiniu-client-hooks/use-load-regions";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import EmptyHolder from "@renderer/components/empty-holder";
 import TooltipText from "@renderer/components/tooltip-text";
@@ -92,6 +93,10 @@ const ExternalPathManager: React.FC<ModalProps & ExternalPathManagerProps> = ({
       });
       setExternalPaths(kodoExternalPath?.read().list ?? []);
       reset();
+      AuditLog.log(AuditLog.Action.AddExternalPath, {
+        regionId: data.regionId,
+        path: ADDR_KODO_PROTOCOL + data.path,
+      });
     });
 
     return toast.promise(p, {
@@ -115,6 +120,21 @@ const ExternalPathManager: React.FC<ModalProps & ExternalPathManagerProps> = ({
       regionId: loadRegionsState.regions[0].s3Id,
     });
   }, [loadRegionsState.regions]);
+
+  // event handler
+  const handleActivePath = (item: ExternalPathItem) => {
+    onActiveExternalPath(item);
+    modalProps.onHide?.();
+  };
+
+  const handleDeletePath = (item: ExternalPathItem) => {
+    kodoExternalPath?.deleteExternalPath(item);
+    setExternalPaths(kodoExternalPath?.read().list ?? []);
+    AuditLog.log(AuditLog.Action.DeleteExternalPath, {
+      regionId: item.regionId,
+      fullPath: item.protocol + item.path,
+    });
+  };
 
   // reset state when open/close modal
   useEffect(() => {
@@ -222,14 +242,8 @@ const ExternalPathManager: React.FC<ModalProps & ExternalPathManagerProps> = ({
                     key={item.protocol + item.path}
                     regions={loadRegionsState.regions}
                     data={item}
-                    onActive={externalPath => {
-                      onActiveExternalPath(externalPath);
-                      modalProps.onHide?.();
-                    }}
-                    onDelete={() => {
-                      kodoExternalPath?.deleteExternalPath(item);
-                      setExternalPaths(kodoExternalPath?.read().list ?? []);
-                    }}
+                    onActive={handleActivePath}
+                    onDelete={handleDeletePath}
                   />
                 ))
                 : <EmptyHolder col={3}/>

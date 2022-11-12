@@ -7,6 +7,7 @@ import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {deleteFiles, FileItem, stopDeleteFiles} from "@renderer/modules/qiniu-client";
 import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import {useSubmitModal} from "@renderer/components/modals/hooks";
 import {
@@ -78,6 +79,11 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
     if (!memoFileItems.length || !currentUser) {
       return Promise.resolve();
     }
+    AuditLog.log(AuditLog.Action.DeleteFiles, {
+      regionId: memoRegionId,
+      bucket: memoBucketName,
+      paths: memoFileItems.map(i => i.path.toString()),
+    });
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
@@ -100,7 +106,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
       },
       () => {},
       opt,
-    )
+    );
     p
       .then(batchErrors => {
         setErroredFileOperations(batchErrors.map<ErroredFileOperation>(batchError => ({
@@ -113,6 +119,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
         onDeletedFile({
           originBasePath: memoBasePath,
         });
+        AuditLog.log(AuditLog.Action.DeleteFilesDone);
       })
       .finally(() => {
         setBatchProgressState({

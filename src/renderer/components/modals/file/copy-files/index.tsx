@@ -14,6 +14,7 @@ import {
   checkFileOrDirectoryExists,
 } from "@renderer/modules/qiniu-client";
 import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import {
   BatchProgress,
@@ -162,6 +163,18 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
     setBatchProgressState({
       status: BatchTaskStatus.Running,
     });
+    AuditLog.log(AuditLog.Action.MoveOrCopyFilesStart, {
+      regionId: memoRegionId,
+      from: memoFileItems.map(i => ({
+        bucket: i.bucket,
+        path: i.path.toString(),
+      })),
+      to: {
+        bucket: memoBucketName,
+        path: memoBasePath,
+      },
+      type: "copy",
+    });
     return moveOrCopyFiles(
       memoRegionId,
       memoFileItems,
@@ -193,6 +206,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
         onCopiedFile({
           originBasePath: memoBasePath,
         });
+        AuditLog.log(AuditLog.Action.MoveOrCopyFilesStartDone);
       })
       .finally(() => {
         setBatchProgressState({

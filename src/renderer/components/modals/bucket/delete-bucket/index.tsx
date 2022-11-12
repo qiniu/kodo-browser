@@ -5,6 +5,7 @@ import {toast} from "react-hot-toast";
 import {Translate, useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {deleteBucket} from "@renderer/modules/qiniu-client";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import {useSubmitModal} from "../../hooks";
 
@@ -63,6 +64,10 @@ const DeleteBucket: React.FC<ModalProps & DeleteBucketProps> = ({
     p.then(() => {
       onDeletedBucket();
       modalProps.onHide?.();
+      AuditLog.log(AuditLog.Action.DeleteBucket, {
+        regionId: memoRegionId,
+        name: memoBucketName,
+      });
     });
     return toast.promise(p, {
       loading: translate("common.submitting"),

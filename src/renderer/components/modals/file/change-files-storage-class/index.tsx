@@ -12,6 +12,7 @@ import {
   stopSetStorageClassOfFiles
 } from "@renderer/modules/qiniu-client";
 import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import {
   BatchProgress,
@@ -107,6 +108,12 @@ const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProp
     setBatchProgressState({
       status: BatchTaskStatus.Running,
     });
+    AuditLog.log(AuditLog.Action.SetStorageClassOfFiles, {
+      regionId: memoRegionId,
+      bucket: memoBucketName,
+      paths: memoFileItems.map(i => i.path.toString()),
+      updateTo: data.storageClassKodoName,
+    })
     const p = setStorageClassOfFiles(
       memoRegionId,
       memoBucketName,
@@ -134,6 +141,7 @@ const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProp
         onChangedFilesStorageClass({
           originBasePath: memoBasePath,
         });
+        AuditLog.log(AuditLog.Action.SetStorageClassOfFilesDone);
       })
       .finally(() => {
         setBatchProgressState({

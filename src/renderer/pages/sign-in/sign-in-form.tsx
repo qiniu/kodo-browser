@@ -7,6 +7,7 @@ import {useNavigate} from "react-router-dom";
 import * as LocalLogger from "@renderer/modules/local-logger";
 import {useI18n} from "@renderer/modules/i18n";
 import {AkItem, EndpointType, useAuth} from "@renderer/modules/auth";
+import * as AuditLog from "@renderer/modules/audit-log";
 import RoutePath from "@renderer/pages/route-path";
 
 import "./sign-in-form.scss";
@@ -31,6 +32,7 @@ const SignInForm: React.FC<SignInFormProps> = (props) => {
     const p = signIn(data, data.rememberMe);
     p.then(() => {
       navigate(RoutePath.Browse);
+      AuditLog.log(AuditLog.Action.Login);
     });
     return toast.promise(p, {
       loading: translate("signIn.form.submit"),

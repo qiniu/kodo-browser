@@ -19,6 +19,7 @@ import {BucketItem, FileItem, privateEndpointPersistence} from "@renderer/module
 import {isItemFile, isItemFolder} from "@renderer/modules/qiniu-client/file-item";
 import {useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import DropZone from "@renderer/components/drop-zone";
 import {useDisplayModal, useIsShowAnyModal} from "@renderer/components/modals/hooks";
@@ -261,6 +262,12 @@ const Files: React.FC<FilesProps> = (props) => {
     }));
 
     toast(translate("transfer.download.hint.addingJobs"));
+    AuditLog.log(AuditLog.Action.DownloadFilesStart, {
+      regionId: currentRegion.s3Id,
+      bucket: currentBucket.name,
+      to: destDirectoryPath,
+      from: remoteObjects.map(i => i.key),
+    });
     ipcDownloadManager.addJobs({
       remoteObjects,
       destPath: destDirectoryPath,

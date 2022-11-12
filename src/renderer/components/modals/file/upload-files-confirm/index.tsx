@@ -13,6 +13,7 @@ import {Translate, useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 
@@ -129,6 +130,12 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
       return;
     }
     toast(translate("transfer.upload.hint.addingJobs"));
+    AuditLog.log(AuditLog.Action.UploadFilesStart, {
+      regionId: memoRegionId,
+      bucket: memoBucketName,
+      to: memoDestPath,
+      from: memoFilePaths,
+    });
     ipcUploadManager.addJobs({
       filePathnameList: memoFilePaths,
       destInfo: {

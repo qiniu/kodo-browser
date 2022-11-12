@@ -1,12 +1,13 @@
 import {ipcRenderer} from "electron";
 
-import React, {useEffect} from "react";
+import React, {useEffect, useMemo} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {toast} from "react-hot-toast";
 
 import {AkItem, useAuth} from "@renderer/modules/auth";
 import {clearAllCache} from "@renderer/modules/qiniu-client";
 import {useI18n} from "@renderer/modules/i18n";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 
@@ -14,13 +15,14 @@ import RoutePath from "@renderer/pages/route-path";
 
 const SwitchUser: React.FC = () => {
   const {translate} = useI18n();
-  const {signIn, signOut} = useAuth();
+  const {currentUser, signIn, signOut} = useAuth();
   const navigate = useNavigate();
   const {
     state: akItem,
   } = useLocation() as {
     state: AkItem,
   };
+  const memoCurrentUser = useMemo(() => currentUser, []);
 
 
   useEffect(() => {
@@ -41,6 +43,11 @@ const SwitchUser: React.FC = () => {
       .catch(err => {
         toast.error(translate("switchUser.error") + err.toString());
         navigate(RoutePath.SignIn);
+      })
+      .finally(() => {
+        AuditLog.log(AuditLog.Action.SwitchAccount, {
+          from: memoCurrentUser?.accessKey ?? "",
+        });
       });
   }, []);
 

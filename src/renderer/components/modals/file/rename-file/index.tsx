@@ -15,6 +15,7 @@ import {
   stopMoveOrCopyFiles
 } from "@renderer/modules/qiniu-client";
 import {isItemFile, isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import {usePromiseConfirm} from "@renderer/components/lite-confirm";
 import {
@@ -62,11 +63,13 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
     memoRegionId,
     memoBucketName,
     memoBasePath,
+    memoStorageClasses,
   } = useMemo(() => ({
     memoFileItem: fileItem,
     memoRegionId: regionId,
     memoBucketName: bucketName,
     memoBasePath: basePath,
+    memoStorageClasses: storageClasses,
   }), [modalProps.show]);
 
   const {
@@ -128,6 +131,14 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
     };
+    AuditLog.log(AuditLog.Action.MoveOrCopyFile, {
+      regionId: memoRegionId,
+      bucket: memoBucketName,
+      from: origin.path.toString(),
+      to: toPath,
+      type: "move",
+      storageClass: origin.storageClass,
+    });
     return moveOrCopyFile(
       memoRegionId,
       memoBucketName,
@@ -146,10 +157,22 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      storageClasses: storageClasses,
+      storageClasses: memoStorageClasses,
     };
     setBatchProgressState({
       status: BatchTaskStatus.Running,
+    });
+    AuditLog.log(AuditLog.Action.MoveOrCopyFilesStart, {
+      regionId: memoRegionId,
+      from: [{
+        bucket: origin.bucket,
+        path: origin.path.toString(),
+      }],
+      to: {
+        bucket: memoBucketName,
+        path: memoBasePath,
+      },
+      type: "move",
     });
     const result = moveOrCopyFiles(
       memoRegionId,
@@ -180,6 +203,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
             || batchError.error.message
             || batchError.error.code,
         })));
+        AuditLog.log(AuditLog.Action.MoveOrCopyFilesStartDone);
       })
       .finally(() => {
         setBatchProgressState({

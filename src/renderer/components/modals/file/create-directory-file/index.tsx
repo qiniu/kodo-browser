@@ -8,6 +8,7 @@ import {DirectoryName} from "@renderer/const/patterns";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {useI18n} from "@renderer/modules/i18n";
 import {createFolder} from "@renderer/modules/qiniu-client";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 import {OperationDoneRecallFn} from "../types";
 
@@ -85,6 +86,12 @@ const CreateDirectoryFile: React.FC<ModalProps & CreateDirectoryFileProps> = (pr
     p.then(() => {
       onCreatedDirectory({
         originBasePath: memoBasePath,
+      });
+      modalProps.onHide?.();
+      AuditLog.log(AuditLog.Action.AddFolder, {
+        regionId: memoRegionId,
+        bucket: memoBucketName,
+        path: prefix.toString(),
       });
     });
     return toast.promise(p, {

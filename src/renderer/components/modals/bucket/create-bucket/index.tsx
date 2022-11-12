@@ -9,6 +9,7 @@ import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {createBucket} from "@renderer/modules/qiniu-client";
 import useLoadRegions from "@renderer/modules/qiniu-client-hooks/use-load-regions";
+import * as AuditLog from "@renderer/modules/audit-log";
 
 interface CreateBucketProps {
   onCreatedBucket: () => void,
@@ -79,6 +80,7 @@ const CreateBucket: React.FC<ModalProps & CreateBucketProps> = ({
     p.then(() => {
       onCreatedBucket();
       modalProps.onHide?.();
+      AuditLog.log(AuditLog.Action.AddBucket, data);
     });
     return toast.promise(p, {
       loading: translate("common.submitting"),

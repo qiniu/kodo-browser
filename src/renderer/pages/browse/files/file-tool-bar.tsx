@@ -435,10 +435,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
               regionId={regionId}
               bucketName={bucketName}
               basePath={basePath}
-              onCreatedDirectory={(...args) => {
-                onCreatedDirectory(...args);
-                handleHideCreateDirectoryFile();
-              }}
+              onCreatedDirectory={onCreatedDirectory}
             />
             <RenameFile
               show={isShowRenameFile}

@@ -14,7 +14,7 @@ interface AkHistoryProps {
 
 const AkHistory: React.FC<ModalProps & AkHistoryProps> = (props) => {
   const {translate} = useI18n();
-  const {akHistory, deleteHistory} = useAuth();
+  const {akHistory, deleteHistory, clearHistory} = useAuth();
 
   const {
     onActiveAk,
@@ -30,7 +30,14 @@ const AkHistory: React.FC<ModalProps & AkHistoryProps> = (props) => {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Button variant="danger" size="sm">{translate("modals.akHistory.removeAllButton")}</Button>
+        <Button
+          className="mb-1"
+          variant="danger"
+          size="sm"
+          onClick={clearHistory}
+        >
+          {translate("modals.akHistory.removeAllButton")}
+        </Button>
         <div className="scroll-max-vh-60 scroll-shadow position-relative">
           <Table striped hover>
             <thead className="sticky-top bg-body">

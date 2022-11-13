@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React from "react";
 import {Modal, ModalProps, Table} from "react-bootstrap";
 
 import {useI18n} from "@renderer/modules/i18n";
@@ -22,15 +22,10 @@ const BookmarkManager: React.FC<ModalProps & BookmarkManagerProps> = ({
 
   const {
     bookmarkState: {
-      kodoBookmark,
-      bookmarks,
+      list: bookmarks,
     },
-    setBookmarks,
+    deleteBookmark,
   } = useKodoBookmark(currentUser);
-
-  useEffect(() => {
-    setBookmarks(kodoBookmark?.read().list ?? []);
-  }, [modalProps.show]);
 
   return (
     <Modal {...modalProps}>
@@ -62,8 +57,7 @@ const BookmarkManager: React.FC<ModalProps & BookmarkManagerProps> = ({
                       modalProps.onHide?.();
                     }}
                     onDelete={itemToDelete => {
-                      kodoBookmark?.deleteBookmark(itemToDelete);
-                      setBookmarks(kodoBookmark?.read().list ?? []);
+                      deleteBookmark(itemToDelete);
                     }}
                   />
                 ))

@@ -100,9 +100,6 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
       toast.success(translate("transfer.upload.hint.addedJobs"));
       setOpenPanelName(PanelName.Upload);
     },
-    // this could be a closure trap.
-    // if anything about this not work as expect,
-    // change `onUploadJobComplete` to a ref.
     onJobCompleted: ({jobUiData}) => onUploadJobComplete(jobUiData),
     onCreatedDirectory: (data) => onCreatedDirectory(data),
   });

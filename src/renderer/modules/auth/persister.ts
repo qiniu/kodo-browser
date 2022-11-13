@@ -45,11 +45,13 @@ class AuthPersistence {
   }
 
   readHistory(): AkItem[] {
-    let data = JSON.parse(
-      localFile
-        .read(AuthPersistence.HistoryFile)
-        .toString()
-    );
+    const jsonStrData = localFile
+      .read(AuthPersistence.HistoryFile)
+      .toString();
+    if (!jsonStrData) {
+      return [];
+    }
+    let data = JSON.parse(jsonStrData);
     return data.historyItems
       // Backward Compatibility
       .map((d: {

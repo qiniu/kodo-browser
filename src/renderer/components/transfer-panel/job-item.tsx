@@ -97,7 +97,7 @@ const JobItem: React.FC<JobItemProps> = ({
               tooltipContent={
                 Status.Duplicated === status
                   ? translate("transfer.jobItem.fileDuplicated")
-                  : message.trim() || translate("transfer.jobItem.unknownError")
+                  : message || translate("transfer.jobItem.unknownError")
               }
             >
               <i className="bi bi-exclamation-triangle-fill text-danger"/>

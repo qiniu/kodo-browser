@@ -28,23 +28,23 @@ export const Provider: React.FC<{
   const signIn = async (akItem: AkItem, remember: boolean) => {
     await AuthFunc.signIn(akItem, remember);
     setUser(akItem);
-    setHistory(AuthFunc.getHistory());
-  }
+    setHistory([...AuthFunc.getHistory()]);
+  };
 
   const signOut = () => {
     AuthFunc.signOut();
     setUser(null);
-  }
+  };
 
   const deleteHistory = (akItem: AkItem) => {
     AuthFunc.deleteHistory(akItem);
-    setHistory(AuthFunc.getHistory());
-  }
+    setHistory([...AuthFunc.getHistory()]);
+  };
 
   const clearHistory = () => {
     AuthFunc.clearHistory();
-    setHistory(AuthFunc.getHistory());
-  }
+    setHistory([...AuthFunc.getHistory()]);
+  };
 
   return (
     <AuthContext.Provider value={{

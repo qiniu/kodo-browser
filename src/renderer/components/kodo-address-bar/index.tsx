@@ -25,9 +25,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
     currentIndex,
     goBack,
     goForward,
-    goHome,
     goTo,
-    setHome,
   } = useKodoNavigator();
 
   const [address, setAddress] = useState<KodoAddress>(currentAddress);
@@ -40,10 +38,12 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
 
   const {
     bookmarkState: {
-      kodoBookmark,
-      bookmarks,
+      homeAddress,
+      list: bookmarks,
     },
-    setBookmarks,
+    setHome,
+    deleteBookmark,
+    addBookmark,
   } = useKodoBookmark(currentUser);
 
   const isActiveBookmark = bookmarks.some(b =>
@@ -95,7 +95,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
           iconClassName="fa fa-home"
           tooltipPlacement="bottom"
           tooltipContent={translate("kodoAddressBar.goHome")}
-          onClick={goHome}
+          onClick={() => goTo(homeAddress)}
         />
         <InputGroup.Text>
           {address.protocol}
@@ -124,7 +124,6 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
           tooltipPlacement="bottom"
           tooltipContent={translate("kodoAddressBar.setHome")}
           onClick={() => {
-            kodoBookmark?.setHome(address);
             setHome(address);
             toast.success(translate("kodoAddressBar.setHomeSuccess"))
           }}
@@ -143,12 +142,10 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
           }
           onClick={() => {
             if (isActiveBookmark) {
-              kodoBookmark?.deleteBookmark(address);
-              setBookmarks(kodoBookmark?.read().list ?? []);
+              deleteBookmark(address);
               toast.success(translate("kodoAddressBar.deleteBookmarkSuccess"));
             } else {
-              kodoBookmark?.addBookmark(address);
-              setBookmarks(kodoBookmark?.read().list ?? []);
+              addBookmark(address);
               toast.success(translate("kodoAddressBar.setBookmarkSuccess"));
             }
           }}

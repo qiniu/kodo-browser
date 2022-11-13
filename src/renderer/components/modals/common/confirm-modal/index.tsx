@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import {Button, Modal, ModalProps} from "react-bootstrap";
+import {ButtonVariant} from "react-bootstrap/types";
 import {useI18n} from "@renderer/modules/i18n";
 
 interface ConfirmModalProps {
@@ -7,8 +8,10 @@ interface ConfirmModalProps {
   content: React.ReactNode,
   okText?: string,
   okClassName?: string,
+  okVariant?: ButtonVariant,
   cancelText?: string,
   cancelClassName?: string,
+  cancelVariant?: ButtonVariant,
   onOk: () => Promise<any> | void,
 }
 
@@ -17,8 +20,10 @@ const ConfirmModal: React.FC<ModalProps & ConfirmModalProps> = ({
   content,
   okText,
   okClassName,
+  okVariant = "primary",
   cancelText,
   cancelClassName,
+  cancelVariant = "light",
   onOk,
   ...modalProps
 }) => {
@@ -56,7 +61,7 @@ const ConfirmModal: React.FC<ModalProps & ConfirmModalProps> = ({
       <Modal.Footer>
         <Button
           className={okClassName}
-          variant="primary"
+          variant={okVariant}
           size="sm"
           disabled={isSubmitting}
           onClick={handleClickOk}
@@ -65,7 +70,7 @@ const ConfirmModal: React.FC<ModalProps & ConfirmModalProps> = ({
         </Button>
         <Button
           className={cancelClassName}
-          variant="light"
+          variant={cancelVariant}
           size="sm"
           onClick={modalProps.onHide}
         >

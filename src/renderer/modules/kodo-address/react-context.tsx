@@ -12,9 +12,7 @@ const KodoNavigatorContext = createContext<{
   goBack: () => void,
   goForward: () => void,
   goUp: (p?: KodoAddress) => void,
-  goHome: () => void,
-  goTo: (kodoAddress: KodoAddress) => void,
-  setHome: (home: KodoAddress) => void,
+  goTo: (kodoAddress?: KodoAddress) => void,
 }>({
   currentAddress: {
     protocol: "",
@@ -27,9 +25,7 @@ const KodoNavigatorContext = createContext<{
   goBack: () => {},
   goForward: () => {},
   goUp: (_p?: KodoAddress) => {},
-  goHome: () => {},
-  goTo: (_kodoAddress: KodoAddress) => {},
-  setHome: (_home: KodoAddress) => {},
+  goTo: (_kodoAddress?: KodoAddress) => {},
 });
 
 export const Provider: React.FC<{
@@ -46,14 +42,16 @@ export const Provider: React.FC<{
   const [basePath, setBasePath] = useState<string | undefined>(kodoNavigator.basePath);
 
   useEffect(() => {
-    kodoNavigator.onChange(() => {
+    const handleChange = () => {
       setCurrentAddress(kodoNavigator.current);
       setCurrentIndex(kodoNavigator.currentIndex);
       setAddressHistory(kodoNavigator.history);
       setBucketName(kodoNavigator.bucketName);
       setBasePath(kodoNavigator.basePath);
-    });
-  }, []);
+    };
+    kodoNavigator.onChange(handleChange);
+    return () => kodoNavigator.offChange(handleChange);
+  }, [kodoNavigator]);
 
   return (
     <KodoNavigatorContext.Provider value={{
@@ -62,12 +60,11 @@ export const Provider: React.FC<{
       addressHistory: addressHistory,
       bucketName: bucketName,
       basePath: basePath,
+      // wrapped functions are required because of `this`
       goBack: () => kodoNavigator.goBack(),
       goForward: () => kodoNavigator.goForward(),
       goUp: (...args) => kodoNavigator.goUp(...args),
-      goHome: () => kodoNavigator.goHome(),
       goTo: (...args) => kodoNavigator.goTo(...args),
-      setHome: (...args) => kodoNavigator.setHome(...args),
     }}>
       {children}
     </KodoNavigatorContext.Provider>

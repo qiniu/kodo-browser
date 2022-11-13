@@ -47,6 +47,7 @@ const FieldsExternalPath: React.FC = () => {
         <Col sm={6}>
           <Form.Control
             {...register("loadFilesNumberPerPage", {
+              valueAsNumber: true,
               required: true,
               min: 1,
               max: 1000,

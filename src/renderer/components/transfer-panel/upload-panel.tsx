@@ -160,7 +160,7 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
           </AutoResizer>
           {
             !data.length &&
-            <EmptyHolder/>
+            <EmptyHolder loading={hasMore}/>
           }
         </div>
       </div>
@@ -170,6 +170,7 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
         title={translate("transfer.upload.removeAllConfirm.title")}
         content={translate("transfer.upload.removeAllConfirm.content")}
         okText={translate("transfer.upload.removeAllConfirm.ok")}
+        okVariant="danger"
         cancelText={translate("transfer.upload.removeAllConfirm.cancel")}
         onOk={() => {
           ipcUploadManager.removeAllJobs();

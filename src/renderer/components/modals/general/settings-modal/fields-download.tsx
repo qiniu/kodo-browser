@@ -35,6 +35,7 @@ const FieldsDownload: React.FC = () => {
         <Col sm={6}>
           <Form.Control
             {...register("multipartDownloadThreshold", {
+              valueAsNumber: true,
               required: true,
               min: 10,
               max: 1000,
@@ -60,6 +61,7 @@ const FieldsDownload: React.FC = () => {
         <Col sm={6}>
           <Form.Control
             {...register("multipartDownloadPartSize", {
+              valueAsNumber: true,
               required: true,
               min: 8,
               max: 100,
@@ -85,6 +87,7 @@ const FieldsDownload: React.FC = () => {
         <Col sm={6}>
           <Form.Control
             {...register("maxDownloadConcurrency", {
+              valueAsNumber: true,
               required: true,
               min: 1,
               max: 10,
@@ -121,6 +124,7 @@ const FieldsDownload: React.FC = () => {
         <Col sm={6}>
           <Form.Control
             {...register("downloadSpeedLimit", {
+              valueAsNumber: true,
               required: true,
               min: 1,
               max: 102400,

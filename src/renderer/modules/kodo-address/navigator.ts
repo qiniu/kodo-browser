@@ -1,13 +1,11 @@
 import {KodoAddress} from "./types"
 
-interface Listener {
-  callback: (data: { previous: KodoAddress, current: KodoAddress }) => void
-}
+type OnChangeListener = (data: { previous: KodoAddress, current: KodoAddress }) => void;
 
 export interface KodoNavigatorOptions {
   defaultProtocol: string,
   maxHistory?: number,
-  homeItem?: KodoAddress,
+  initAddress?: KodoAddress,
 }
 
 export class KodoNavigator {
@@ -22,17 +20,16 @@ export class KodoNavigator {
     return upPathArr.join("/") + "/";
   }
 
-  private onChangeListener?: Listener
+  private onChangeListeners: Set<OnChangeListener> = new Set();
 
   history: KodoAddress[] = []
   currentIndex: number
   maxHistory: number
-  homeItem: KodoAddress
 
   constructor({
     defaultProtocol,
     maxHistory = 100,
-    homeItem,
+    initAddress,
   }: KodoNavigatorOptions) {
     const defaultItem = {
       protocol: defaultProtocol,
@@ -40,15 +37,16 @@ export class KodoNavigator {
     };
 
     this.currentIndex = 0;
-    this.history.push(homeItem ?? defaultItem);
+    this.history.push(initAddress ?? defaultItem);
     this.maxHistory = maxHistory;
-    this.homeItem = homeItem ?? defaultItem;
   }
 
-  onChange(callback: Listener["callback"]) {
-    this.onChangeListener = {
-      callback: callback
-    };
+  onChange(callback: OnChangeListener) {
+    this.onChangeListeners.add(callback);
+  }
+
+  offChange(callback: OnChangeListener) {
+    this.onChangeListeners.delete(callback);
   }
 
   get current(): KodoAddress {
@@ -61,39 +59,42 @@ export class KodoNavigator {
   }
 
   get basePath(): string | undefined {
-    const bucketNamer = this.bucketName;
-    if (!bucketNamer) {
+    const bucketName = this.bucketName;
+    if (!bucketName) {
       return undefined;
     }
     let baseRightPosition = this.current.path.length;
     if (!this.current.path.endsWith("/")) {
       baseRightPosition = this.current.path.lastIndexOf("/") + 1;
     }
-    return this.current.path.slice(`${bucketNamer}/`.length, baseRightPosition);
+    return this.current.path.slice(`${bucketName}/`.length, baseRightPosition);
   }
 
-  goTo(kodoAddress: KodoAddress) {
+  goTo(kodoAddress?: KodoAddress) {
     const previous = this.current;
+    const next = kodoAddress ?? {
+      ...this.history[0],
+    };
 
     if (
-      kodoAddress.protocol === previous.protocol &&
-      kodoAddress.path === previous.path
+      next.protocol === previous.protocol &&
+      next.path === previous.path
     ) {
       return;
     }
 
     this.history.splice(this.currentIndex + 1);
-    this.history.push(kodoAddress);
+    this.history.push(next);
 
     if (this.history.length > this.maxHistory) {
       this.history.splice(this.history.length - this.maxHistory);
     }
 
     this.currentIndex = this.history.length - 1;
-    this.onChangeListener?.callback({
+    this.onChangeListeners.forEach(l => l({
       previous,
       current: this.current,
-    });
+    }));
   }
 
   goBack() {
@@ -102,10 +103,10 @@ export class KodoNavigator {
     }
     const previous = this.current;
     this.currentIndex -= 1;
-    this.onChangeListener?.callback({
+    this.onChangeListeners.forEach(l => l({
       previous,
       current: this.current,
-    });
+    }));
   }
 
   goForward() {
@@ -114,10 +115,10 @@ export class KodoNavigator {
     }
     const previous = this.current;
     this.currentIndex += 1;
-    this.onChangeListener?.callback({
+    this.onChangeListeners.forEach(l => l({
       previous,
       current: this.current,
-    });
+    }));
   }
 
   goUp(p?: KodoAddress) {
@@ -127,13 +128,5 @@ export class KodoNavigator {
       protocol: current.protocol,
       path: KodoNavigator.getBaseDir(current.path),
     });
-  }
-
-  goHome() {
-    this.goTo(this.homeItem);
-  }
-
-  setHome(home: KodoAddress) {
-    this.homeItem = home;
   }
 }

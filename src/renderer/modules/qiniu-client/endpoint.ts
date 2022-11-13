@@ -12,6 +12,15 @@ export interface Endpoint {
   regions: RegionSetting[],
 }
 
+const DEFAULT_ENDPOINT: Endpoint = {
+  ucUrl: "",
+  regions: [{
+    identifier: "",
+    label: "",
+    endpoint: "",
+  }],
+};
+
 class PrivateEndpointPersistence {
   static ConfigFile = "config.json";
 
@@ -35,7 +44,7 @@ class PrivateEndpointPersistence {
         .read(PrivateEndpointPersistence.ConfigFile)
         .toString();
     if (!jsonStrData) {
-      throw new Error("lost endpoint config!");
+      return DEFAULT_ENDPOINT;
     }
     let data = JSON.parse(jsonStrData);
     return {

@@ -47,7 +47,7 @@ const FileTable: React.FC<FileTableProps> = ({
     ), [data, selectedFiles]);
 
   const isSelectedAll = rowData.length > 0 && selectedFiles.size === rowData.length;
-  const loadingMore = rowData.length > 0 && loading;
+  const loadingMore = hasMore && loading;
 
   const columns = getColumns({
     availableStorageClasses,

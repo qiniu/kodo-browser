@@ -1,30 +1,90 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState, useSyncExternalStore} from "react";
 
 import {AkItem} from "@renderer/modules/auth";
 
-import {BookmarkItem, KodoBookmark} from "./bookmark";
+import {KodoAddress} from "./types";
+import {Bookmark, KodoBookmark} from "./bookmark";
 import {ExternalPathItem, KodoExternalPath} from "./external-path";
 
+const bookmarkStore = {
+  data: {
+    list: []
+  } as Bookmark,
+  listeners: new Set<() => void>(),
+  subscribe(l: () => void) {
+    bookmarkStore.listeners.add(l);
+    return () => bookmarkStore.listeners.delete(l);
+  },
+  getSnapshot() {
+    return bookmarkStore.data;
+  },
+  dispatch(data: Bookmark) {
+    bookmarkStore.data = {
+      ...bookmarkStore.data,
+      ...data,
+    };
+    bookmarkStore.listeners.forEach(l => l());
+  },
+};
+
 export function useKodoBookmark(currentUser: AkItem | null) {
-  const [kodoBookmark, setKodoBookmark] = useState<KodoBookmark>();
-  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
+  const kodoBookmarkRef = useRef<KodoBookmark | null>(null);
+
+  const bookmarkState = useSyncExternalStore(
+    bookmarkStore.subscribe,
+    bookmarkStore.getSnapshot,
+  );
+
   useEffect(() => {
     if (!currentUser) {
+      bookmarkStore.dispatch({
+        list: [],
+      });
       return;
     }
-    const kodoBookmark = new KodoBookmark({
+    kodoBookmarkRef.current = new KodoBookmark({
       persistPath: KodoBookmark.getPersistPath(currentUser.accessKey),
     });
-    setBookmarks(kodoBookmark.read().list);
-    setKodoBookmark(kodoBookmark);
+    bookmarkStore.dispatch(
+      kodoBookmarkRef.current.read()
+    );
   }, [currentUser]);
 
+  const addBookmark = (target: KodoAddress) => {
+    if (!kodoBookmarkRef.current) {
+      return;
+    }
+    kodoBookmarkRef.current.addBookmark(target);
+    bookmarkStore.dispatch(
+      kodoBookmarkRef.current.read()
+    );
+  };
+
+  const deleteBookmark = (target: KodoAddress) => {
+    if (!kodoBookmarkRef.current) {
+      return;
+    }
+    kodoBookmarkRef.current.deleteBookmark(target);
+    bookmarkStore.dispatch(
+      kodoBookmarkRef.current.read()
+    );
+  };
+
+  const setHome = (target: KodoAddress) => {
+    if (!kodoBookmarkRef.current) {
+      return;
+    }
+    kodoBookmarkRef.current.setHome(target);
+    bookmarkStore.dispatch(
+      kodoBookmarkRef.current.read()
+    );
+  };
+
   return {
-    bookmarkState: {
-      kodoBookmark,
-      bookmarks,
-    },
-    setBookmarks,
+    bookmarkState,
+    addBookmark,
+    deleteBookmark,
+    setHome,
   };
 }
 

@@ -5,7 +5,7 @@ import {
   KodoAddress,
   KodoBookmark,
   KodoNavigator,
-  Provider as KodoNavigatorProvider
+  Provider as KodoNavigatorProvider,
 } from "@renderer/modules/kodo-address";
 import {useAuth} from "@renderer/modules/auth";
 
@@ -23,27 +23,24 @@ const Browse: React.FC<BrowseProps> = ({
   activeKodoAddress,
 }) => {
   const {currentUser} = useAuth();
-  if (!currentUser) {
-    return (
-      <>not sign in</>
-    );
-  }
 
   const [kodoNavigator, setKodoNavigator] = useState<KodoNavigator>();
   const [toggleRefresh, setToggleRefresh] = useState<boolean>(true);
 
   // initial kodo navigator
   useEffect(() => {
+    if (!currentUser) {
+      return;
+    }
     const kodoBookmark = new KodoBookmark({
       persistPath: `bookmarks_${currentUser.accessKey}.json`,
     });
-
     setKodoNavigator(new KodoNavigator({
       defaultProtocol: ADDR_KODO_PROTOCOL,
       maxHistory: 100,
-      homeItem: kodoBookmark.read().homeAddress,
+      initAddress: kodoBookmark.read().homeAddress,
     }));
-  }, []);
+  }, [currentUser]);
 
   // bookmark go to
   useEffect(() => {
@@ -55,6 +52,13 @@ const Browse: React.FC<BrowseProps> = ({
       path: activeKodoAddress.path,
     });
   }, [activeKodoAddress]);
+
+  // render
+  if (!currentUser) {
+    return (
+      <>not sign in</>
+    );
+  }
 
   if (!kodoNavigator) {
     return (

@@ -35,6 +35,7 @@ const FieldsUpload: React.FC = () => {
         <Col sm={6}>
           <Form.Control
             {...register("multipartUploadThreshold", {
+              valueAsNumber: true,
               required: true,
               min: 10,
               max: 1000,
@@ -60,6 +61,7 @@ const FieldsUpload: React.FC = () => {
         <Col sm={6}>
           <Form.Control
             {...register("multipartUploadPartSize", {
+              valueAsNumber: true,
               required: true,
               min: 8,
               max: 100,
@@ -85,6 +87,7 @@ const FieldsUpload: React.FC = () => {
         <Col sm={6}>
           <Form.Control
             {...register("maxUploadConcurrency", {
+              valueAsNumber: true,
               required: true,
               min: 1,
               max: 10,
@@ -121,6 +124,7 @@ const FieldsUpload: React.FC = () => {
         <Col sm={6}>
           <Form.Control
             {...register("uploadSpeedLimit", {
+              valueAsNumber: true,
               required: true,
               min: 1,
               max: 102400,

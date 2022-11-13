@@ -13,20 +13,6 @@ import RegionInputs from "./region-inputs";
 const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
   const {translate} = useI18n();
 
-  const handleSavePrivateCloudSettings: SubmitHandler<Endpoint> = (data) => {
-    LocalLogger.info("private cloud saving settings", data);
-    const p = new Promise((resolve => {
-      setTimeout(() => {
-        resolve(data);
-      }, 3000);
-    }));
-    LocalLogger.debug("save private cloud settings", data);
-    return toast.promise(p, {
-      loading: translate("common.saving"),
-      success: translate("common.saved"),
-      error: err => `${translate("common.failed")}: ${err}`,
-    });
-  }
 
   const {
     handleSubmit,
@@ -49,6 +35,13 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
     control,
     name: "regions",
   });
+
+  const handleSavePrivateCloudSettings: SubmitHandler<Endpoint> = (data) => {
+    LocalLogger.debug("save private cloud settings", data);
+    privateEndpointPersistence.save(data);
+    toast.success(translate("common.saved"));
+    modalProps.onHide?.();
+  };
 
   useEffect(() => {
     reset(privateEndpointPersistence.read());

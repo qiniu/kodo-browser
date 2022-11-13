@@ -160,7 +160,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
           </AutoResizer>
           {
             !data.length &&
-            <EmptyHolder/>
+            <EmptyHolder loading={hasMore}/>
           }
         </div>
       </div>
@@ -170,6 +170,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
         title={translate("transfer.download.removeAllConfirm.title")}
         content={translate("transfer.download.removeAllConfirm.content")}
         okText={translate("transfer.download.removeAllConfirm.ok")}
+        okVariant="danger"
         cancelText={translate("transfer.download.removeAllConfirm.cancel")}
         onOk={() => {
           ipcDownloadManager.removeAllJobs();

@@ -170,7 +170,7 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
                 <Col sm={7}>
                   <InputGroup>
                     <Form.Control
-                      {...register("expireAfter")}
+                      {...register("expireAfter", {valueAsNumber: true})}
                       type="number"
                     />
                     <InputGroup.Text>

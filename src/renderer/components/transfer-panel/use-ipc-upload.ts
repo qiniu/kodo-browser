@@ -1,6 +1,6 @@
 import {ipcRenderer, IpcRendererEvent} from "electron";
 
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
 import {Status} from "@common/models/job/types";
@@ -61,9 +61,12 @@ const useIpcUpload = ({
   const [queryCount, setQueryCount] = useState<number>(initQueryCount);
   const [jobState, setJobState] = useState<UpdateUiDataReplyMessage["data"]>();
 
-  // subscribe IPC events of upload and make sure there is a valid configuration
+  const uploadReplyHandlerRef = useRef<
+    (_event: IpcRendererEvent, message: UploadReplyMessage) => void
+  >();
+
   useEffect(() => {
-    const uploadReplyHandler = (_event: IpcRendererEvent, message: UploadReplyMessage) => {
+    uploadReplyHandlerRef.current = (_event: IpcRendererEvent, message: UploadReplyMessage) => {
       switch (message.action) {
         case UploadAction.UpdateUiData: {
           setJobState(message.data);
@@ -82,8 +85,13 @@ const useIpcUpload = ({
           break;
         }
       }
-    };
+    }
+  }, [onAddedJobs, onJobCompleted, onCreatedDirectory]);
 
+  // subscribe IPC events of upload and make sure there is a valid configuration
+  useEffect(() => {
+    const uploadReplyHandler =
+      (event: IpcRendererEvent, message: UploadReplyMessage) => uploadReplyHandlerRef.current?.(event, message);
     ipcRenderer.on("UploaderManager-reply", uploadReplyHandler);
     ipcUploadManager.updateConfig(config);
 

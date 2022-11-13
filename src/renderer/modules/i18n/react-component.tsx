@@ -26,9 +26,15 @@ export const Translate = <T extends Record<string, string>>(props: TranslateProp
         splitVariables(translate(i18nKey))
           .map<React.ReactNode>(snippet => {
             if (snippet.isVar) {
-              return slots[snippet.value]
-                ? slots[snippet.value](data[snippet.value])
-                : data[snippet.value];
+              return (
+                <React.Fragment key={snippet.value}>
+                  {
+                    slots[snippet.value]
+                      ? slots[snippet.value](data[snippet.value])
+                      : data[snippet.value]
+                  }
+                </React.Fragment>
+              );
             }
             return snippet.value;
           })

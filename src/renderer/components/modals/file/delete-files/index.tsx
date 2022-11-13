@@ -195,7 +195,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
           !memoFileItems.length || batchProgressState.status === BatchTaskStatus.Ended
             ? null
             : <Button
-              variant="primary"
+              variant="danger"
               size="sm"
               disabled={isSubmitting}
               onClick={handleSubmit(handleSubmitDeleteFiles)}
@@ -204,9 +204,9 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
                 isSubmitting
                   ? <>
                     <Spinner className="me-1" animation="border" size="sm"/>
-                    {translate("common.submitting")}
+                    {translate("common.delete")}
                   </>
-                  : translate("common.submit")
+                  : translate("common.delete")
               }
             </Button>
         }

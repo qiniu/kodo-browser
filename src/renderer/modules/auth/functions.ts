@@ -1,3 +1,5 @@
+import lodash from "lodash";
+
 import * as LocalLogger from "@renderer/modules/local-logger";
 import * as QiniuClient from "@renderer/modules/qiniu-client";
 
@@ -44,14 +46,16 @@ export function getHistory(): AkItem[] {
 }
 
 export function deleteHistory(target: AkItem) {
-  history = history.filter(
+  lodash.remove(
+    history,
     akItem =>
-      !(akItem.accessKey !== target.accessKey &&
-      akItem.accessSecret !== target.accessSecret)
+      akItem.accessKey === target.accessKey &&
+      akItem.accessSecret === target.accessSecret
   );
   authPersistence.saveHistory(history);
 }
 
 export function clearHistory() {
+  history = [];
   authPersistence.clearHistory();
 }

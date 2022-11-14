@@ -10,6 +10,7 @@ import {Provider as FileOperationProvider} from "@renderer/modules/file-operatio
 
 import Buckets from "./buckets";
 import Files from "./files";
+import LoadingHolder from "@renderer/components/loading-holder";
 
 interface ContentsProps {
   toggleRefresh?: boolean,
@@ -59,8 +60,13 @@ const Contents: React.FC<ContentsProps> = ({
     loadRegionsAndBuckets();
   }
   useEffect(() => {
-    // refresh when bucket view
     loadRegionsAndBuckets();
+  }, []);
+  // refresh when bucket view
+  useEffect(() => {
+    if (!bucketName && !loadingBucketAndRegion) {
+      loadRegionsAndBuckets();
+    }
   }, [toggleRefresh]);
 
   const bucket = bucketName ? bucketsMap.get(bucketName) : undefined;
@@ -83,13 +89,14 @@ const Contents: React.FC<ContentsProps> = ({
               data={[...bucketsMap.values()]}
               onOperatedBucket={handleReloadBuckets}
             />
-            : <Files
-              // load files need finish fetching buckets and regions
-              prepareLoading={loadingBucketAndRegion}
-              toggleRefresh={toggleRefresh}
-              bucket={bucket}
-              region={region}
-            />
+            : loadingBucketAndRegion
+              ? <LoadingHolder/>
+              : <Files
+                // load files need finish fetching buckets and regions
+                toggleRefresh={toggleRefresh}
+                bucket={bucket}
+                region={region}
+              />
         }
       </div>
     </FileOperationProvider>

@@ -14,6 +14,7 @@ import {getColumns} from "./columns";
 import "./file-table.scss";
 
 interface FileTableProps {
+  regionId?: string,
   availableStorageClasses?: Record<string, StorageClass>,
   loading: boolean,
   hasMore: boolean,
@@ -27,6 +28,7 @@ interface FileTableProps {
 }
 
 const FileTable: React.FC<FileTableProps> = ({
+  regionId,
   availableStorageClasses,
   loading,
   hasMore,
@@ -43,11 +45,12 @@ const FileTable: React.FC<FileTableProps> = ({
         ...item,
         id: item.path.toString(),
         isSelected: selectedFiles.has(item.path.toString()),
+        regionId,
       })
-    ), [data, selectedFiles]);
+    ), [data, selectedFiles, regionId]);
 
   const isSelectedAll = rowData.length > 0 && selectedFiles.size === rowData.length;
-  const loadingMore = hasMore && loading;
+  const loadingMore = rowData.length > 0 && loading;
 
   const columns = getColumns({
     availableStorageClasses,
@@ -59,7 +62,7 @@ const FileTable: React.FC<FileTableProps> = ({
   });
 
   const handleEndReached = () => {
-    if (!hasMore || loading) {
+    if (!hasMore || loadingMore) {
       return;
     }
     onLoadMore();

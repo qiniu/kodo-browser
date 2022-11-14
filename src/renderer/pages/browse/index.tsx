@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
+import lodash from "lodash";
 
 import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 import {
@@ -26,6 +27,10 @@ const Browse: React.FC<BrowseProps> = ({
 
   const [kodoNavigator, setKodoNavigator] = useState<KodoNavigator>();
   const [toggleRefresh, setToggleRefresh] = useState<boolean>(true);
+
+  const toggleRefreshThrottled = useCallback(lodash.throttle(() => {
+    setToggleRefresh(v => !v);
+  }, 300), []);
 
   // initial kodo navigator
   useEffect(() => {
@@ -69,13 +74,13 @@ const Browse: React.FC<BrowseProps> = ({
   return (
     <KodoNavigatorProvider kodoNavigator={kodoNavigator}>
       <KodoAddressBar
-        onClickRefresh={() => setToggleRefresh(v => !v)}
+        onClickRefresh={toggleRefreshThrottled}
       />
       <Contents
         toggleRefresh={toggleRefresh}
       />
       <Transfer
-        onRefresh={() => setToggleRefresh(v => !v)}
+        onRefresh={toggleRefreshThrottled}
       />
     </KodoNavigatorProvider>
   );

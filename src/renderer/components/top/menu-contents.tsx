@@ -139,7 +139,10 @@ const MenuContents: React.FC<MenuContentsProps> = (props) => {
         }
       </Nav>
       <Form className="d-flex flex-grow-0 align-items-center">
-        <div className="text-light flex-shrink-0 pe-1">{translate("top.language")}</div>
+        <div className="text-light flex-shrink-0 pe-1">
+          <i className="bi bi-translate me-1"/>
+          {translate("top.language")}
+        </div>
         <Form.Select
           size="sm"
           defaultValue={currentLanguage}
@@ -150,7 +153,7 @@ const MenuContents: React.FC<MenuContentsProps> = (props) => {
         >
           <option value={LangName.ZH_CN}>中文</option>
           <option value={LangName.EN_US}>English</option>
-          {/*<option value="{LangName.JA_JP">日本語</option>*/}
+          <option value={LangName.JA_JP}>日本語</option>
         </Form.Select>
       </Form>
     </>

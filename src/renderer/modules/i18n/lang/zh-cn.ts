@@ -149,6 +149,13 @@ const dict: Dictionary = {
       fileOperation: "操作",
       loadMore: "加载更多",
     },
+    restoreStatus: {
+      label: "解冻状态：",
+      normal: "无需解冻",
+      frozen: "冻结",
+      unfreezing: "解冻中",
+      unfrozen: "已解冻",
+    },
   },
 
   transfer: {

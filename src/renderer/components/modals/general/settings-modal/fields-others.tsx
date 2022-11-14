@@ -81,6 +81,7 @@ const FieldsExternalPath: React.FC = () => {
 
       <Form.Group as={Row} className="mb-3" controlId="language">
         <Form.Label className="text-end" column sm={5}>
+          <i className="bi bi-translate me-1"/>
           {translate("modals.settings.others.form.language.label")}
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
@@ -89,7 +90,7 @@ const FieldsExternalPath: React.FC = () => {
           >
             <option value={LangName.ZH_CN}>中文</option>
             <option value={LangName.EN_US}>English</option>
-            {/*<option value="{LangName.JA_JP">日本語</option>*/}
+            <option value={LangName.JA_JP}>日本語</option>
           </Form.Select>
         </Col>
       </Form.Group>

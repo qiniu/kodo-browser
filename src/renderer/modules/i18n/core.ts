@@ -7,13 +7,14 @@ import zhCN from "./lang/zh-cn";
 
 export enum LangName {
   ZH_CN = "zh_CN",
-  EN_US = "en_US"
+  EN_US = "en_US",
+  JA_JP = "ja_JP",
 }
 
 const dictionaryFetcherMap: Record<LangName, () => Promise<{ default: any }>> = {
   "zh_CN": () => import("./lang/zh-cn"),
   "en_US": () => import("./lang/en-us"),
-  // "ja_JP": () => import("./lang/ja-jp"),
+  "ja_JP": () => import("./lang/ja-jp"),
 }
 
 let currentLang: LangName = LangName.ZH_CN;

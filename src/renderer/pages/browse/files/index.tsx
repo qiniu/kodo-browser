@@ -30,7 +30,6 @@ import FileContent from "./file-content";
 import "./files.scss";
 
 interface FilesProps {
-  prepareLoading: boolean,
   region?: Region,
   bucket?: BucketItem,
   toggleRefresh?: boolean,
@@ -85,9 +84,6 @@ const Files: React.FC<FilesProps> = (props) => {
     currentAddressPath: currentAddress.path,
     pageSize: Settings.filesLoadingSize,
     shouldAutoReload: () => {
-      if (props.prepareLoading) {
-        return false;
-      }
       if (!props.region || !props.bucket) {
         toast.error("region or bucket not found!");
         return false;
@@ -164,9 +160,6 @@ const Files: React.FC<FilesProps> = (props) => {
     regionId: props.region?.s3Id,
     bucketName: props.bucket?.name,
     shouldAutoReload: () => {
-      if (props.prepareLoading) {
-        return false;
-      }
       if (!props.region || !props.bucket) {
         toast.error("region or bucket not found!");
         return false;
@@ -218,7 +211,8 @@ const Files: React.FC<FilesProps> = (props) => {
   // handle upload and download
   const handleUploadFiles = async (filePaths: string[]) => {
     if (!filePaths.length) {
-      toast.error(translate("transfer.upload.error.nothing"))
+      toast.error(translate("transfer.upload.error.nothing"));
+      return;
     }
     // check is duplicated basename to prevent create same directory
     const fileNames = filePaths.map(p => path.basename(p));
@@ -332,7 +326,7 @@ const Files: React.FC<FilesProps> = (props) => {
 
       <FileContent
         viewStyle={viewStyle}
-        loading={props.prepareLoading || loadingFiles}
+        loading={loadingFiles}
         availableStorageClasses={availableStorageClasses}
         data={files}
         hasMore={Boolean(fileListMarker)}

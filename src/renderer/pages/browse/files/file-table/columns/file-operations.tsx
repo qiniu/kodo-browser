@@ -1,7 +1,9 @@
 import React from "react";
-import {Button} from "react-bootstrap";
 
+import {useI18n} from "@renderer/modules/i18n";
 import {FileItem} from "@renderer/modules/qiniu-client";
+
+import TooltipButton from "@renderer/components/tooltip-button";
 
 import {OperationName, RowCellDataProps} from "../../types";
 
@@ -13,6 +15,8 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellProps> = ({
   rowData: file,
   onAction,
 }) => {
+  const {translate} = useI18n();
+
   const isFile = FileItem.isItemFile(file);
   const isDirectory = FileItem.isItemFolder(file);
   const canRestore = isFile && ["Archive", "DeepArchive"].includes(file.storageClass);
@@ -20,62 +24,67 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellProps> = ({
     <>
       {
         !isDirectory && canRestore &&
-        <Button
+        <TooltipButton
+          iconClassName="bi bi-fire"
+          tooltipPlacement="top"
+          tooltipContent={translate("common.restore")}
           variant="icon-dark"
           className="me-1"
           onClick={e => {
             e.stopPropagation();
             onAction(OperationName.Restore, file);
           }}
-        >
-          <i className="bi bi-fire"/>
-        </Button>
+        />
       }
-      <Button
+      <TooltipButton
+        iconClassName="bi bi-download"
+        tooltipPlacement="top"
+        tooltipContent={translate("common.downloaded")}
         variant="icon-dark"
         className="me-1"
         onClick={e => {
           e.stopPropagation();
           onAction(OperationName.Download, file);
         }}
-      >
-        <i className="bi bi-download"/>
-      </Button>
+      />
       {
         isFile &&
-        <Button
+        <TooltipButton
+          iconClassName="bi bi-link-45deg"
+          tooltipPlacement="top"
+          tooltipContent={translate("common.extraLink")}
           variant="icon-dark"
           className="me-1"
           onClick={e => {
             e.stopPropagation();
             onAction(OperationName.GenerateLink, file);
           }}
-        >
-          <i className="bi bi-link-45deg"/>
-        </Button>
+        />
       }
       {
         isFile &&
-        <Button
+        <TooltipButton
+          iconClassName="bi bi-arrow-left-right"
+          tooltipPlacement="top"
+          tooltipContent={translate("common.changeStorageClass")}
           variant="icon-dark"
           className="me-1"
           onClick={e => {
             e.stopPropagation();
             onAction(OperationName.ChangeStorageClass, file);
           }}
-        >
-          <i className="bi bi-arrow-left-right"/>
-        </Button>
+        />
       }
-      <Button
+      <TooltipButton
+        iconClassName="bi bi-trash"
+        tooltipPlacement="top"
+        tooltipContent={translate("common.delete")}
         variant="icon-danger"
         onClick={e => {
           e.stopPropagation();
           onAction(OperationName.Delete, file);
         }}
-      >
-        <i className="bi bi-trash"/>
-      </Button>
+      />
     </>
   )
 };

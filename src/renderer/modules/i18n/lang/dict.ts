@@ -153,6 +153,13 @@ export default interface Dictionary {
       fileOperation: string,
       loadMore: string,
     },
+    restoreStatus: {
+      label: string,
+      normal: string,
+      frozen: string,
+      unfreezing: string,
+      unfrozen: string,
+    },
   },
 
   // transfer

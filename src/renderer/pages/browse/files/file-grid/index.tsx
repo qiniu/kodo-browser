@@ -53,7 +53,7 @@ const FileGrid: React.FC<FileGridProps> = ({
   const loadingMore = filesData.length > 0 && loading;
 
   const handleEndReached = () => {
-    if (!hasMore || loading) {
+    if (!hasMore || loadingMore) {
       return;
     }
     onLoadMore();

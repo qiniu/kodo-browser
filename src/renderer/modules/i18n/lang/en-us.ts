@@ -19,7 +19,7 @@ const dict: Dictionary = {
     refresh: "Refresh",
     interrupt: "Interrupt",
     notFound: "Page Not Found!",
-    noOperationalObject: "No objected selected",
+    noOperationalObject: "No object selected",
     errored: "An error has occurred",
     paused: "Paused",
 
@@ -148,6 +148,13 @@ const dict: Dictionary = {
       fileModifyDate: "Last modify date",
       fileOperation: "Operation",
       loadMore: "Load more",
+    },
+    restoreStatus: {
+      label: "Status: ",
+      normal: "Normal",
+      frozen: "Archived",
+      unfreezing: "Restoring",
+      unfrozen: "Restored",
     },
   },
 

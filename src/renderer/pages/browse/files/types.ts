@@ -11,6 +11,7 @@ export enum OperationName {
 export type FileRowData = FileItem.Item & {
   id: string,
   isSelected: boolean,
+  regionId?: string,
 };
 
 export interface RowCellDataProps<T = string> {

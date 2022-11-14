@@ -107,7 +107,7 @@ const ChangeFileStorageClass: React.FC<ModalProps & ChangeFileStorageClassProps>
     <Modal {...modalProps}>
       <Modal.Header closeButton>
         <Modal.Title>
-          <i className="bi bi-fire me-1"/>
+          <i className="bi bi-arrow-left-right me-1"/>
           {translate("modals.changeFileStorageClass.title")}
         </Modal.Title>
       </Modal.Header>

@@ -164,6 +164,7 @@ const FileContent: React.FC<FileContentProps> = ({
       {
         viewStyle === ContentViewStyle.Table
           ? <FileTable
+            regionId={regionId}
             availableStorageClasses={availableStorageClasses}
             loading={loading}
             hasMore={hasMore}

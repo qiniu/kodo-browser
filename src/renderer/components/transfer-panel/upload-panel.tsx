@@ -101,11 +101,11 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
               size="sm"
               iconClassName={classNames(
                 "bi bi-folder",
-                isSkipEmptyDirectoryUpload ? "" : "text-muted"
+                isSkipEmptyDirectoryUpload ? "text-muted" : ""
               )}
               tooltipPlacement="top"
               tooltipContent={translate("transfer.upload.toolbar.emptyDirectorySwitch")}
-              variant={isSkipEmptyDirectoryUpload ? "primary" : "outline-solid-gray-300"}
+              variant={isSkipEmptyDirectoryUpload ? "outline-solid-gray-300" : "primary"}
               onClick={handleToggleIsSkipEmptyDirectoryUpload}
             />
             <TooltipButton

@@ -67,7 +67,11 @@ const JobItem: React.FC<JobItemProps> = ({
         </TooltipText>
         <ProgressBar
           animated={[Status.Running, Status.Verifying].includes(status)}
-          now={progress.loaded * 100 / progress.total}
+          now={
+            Status.Finished === status
+              ? 100
+              : progress.loaded * 100 / progress.total
+          }
         />
       </div>
       <div className="job-item-status">

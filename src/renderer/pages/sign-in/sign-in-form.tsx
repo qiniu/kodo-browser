@@ -4,7 +4,6 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 import {useNavigate} from "react-router-dom";
 
-import * as LocalLogger from "@renderer/modules/local-logger";
 import {useI18n} from "@renderer/modules/i18n";
 import {AkItem, EndpointType, useAuth} from "@renderer/modules/auth";
 import * as AuditLog from "@renderer/modules/audit-log";
@@ -28,7 +27,6 @@ const SignInForm: React.FC<SignInFormProps> = (props) => {
   const navigate = useNavigate();
 
   const handleSignIn: SubmitHandler<SignInFormValues> = (data) => {
-    LocalLogger.info("logging in data", data);
     const p = signIn(data, data.rememberMe);
     p.then(() => {
       navigate(RoutePath.Browse);

@@ -241,10 +241,6 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             if (isDirectoryExists) {
                 return;
             }
-            const stat = await fsPromises.stat(path);
-            if (stat.isDirectory()) {
-                return;
-            }
             await fsPromises.mkdir(path);
         } catch (err: any) {
             this.config.onError?.(err);

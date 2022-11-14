@@ -1,5 +1,5 @@
 import path from "path";
-import fs, {Stats} from "fs";
+import fs, {Stats, promises as fsPromises} from "fs";
 
 import lodash from "lodash";
 // @ts-ignore
@@ -75,31 +75,19 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                     }
                     remoteKey = remoteKey.startsWith("/") ? remoteKey.slice(1) : remoteKey;
 
-                    // if enable skip empty directory upload.
-                    const remoteDirectoryKey = path.dirname(remoteKey) + "/";
-                    if (remoteDirectoryKey !== "./" && !directoryToCreate.get(remoteDirectoryKey)) {
-                        const flightKey = destInfo.regionId + destInfo.bucketName + remoteDirectoryKey;
-                        this.createDirectoryWithSingleFlight(
-                            flightKey,
-                            qiniuClient,
-                            {
-                                region: destInfo.regionId,
-                                bucketName: destInfo.bucketName,
-                                key: remoteDirectoryKey,
-                                directoryName: path.basename(remoteDirectoryKey),
-                            },
-                        )
-                            .then(data => this.afterCreateDirectory(data));
-                        directoryToCreate.set(remoteDirectoryKey, true);
-                    }
-
                     if (statsWithName.isDirectory()) {
-                        //  we need to determine whether the directory is empty.
-                        //  and in this electron version(nodejs v10.x) read the directory again
-                        //  is too waste. so we create later.
-                        //  if we are nodejs > v12.12，use opendir API to determine empty.
-                        if (!this.config.isSkipEmptyDirectory && !directoryToCreate.get(remoteDirectoryKey)) {
-                            const remoteDirectoryKey = remoteKey + "/";
+                        const remoteDirectoryKey = remoteKey + "/";
+                        let shouldCreateDirectory = false;
+                        if (this.config.isSkipEmptyDirectory) {
+                            const dir = await fsPromises.opendir(walkingPathname);
+                            if (await dir.read() !== null) {
+                                shouldCreateDirectory = true;
+                            }
+                            dir.close();
+                        } else if (!directoryToCreate.get(remoteDirectoryKey)) {
+                            shouldCreateDirectory = true;
+                        }
+                        if (shouldCreateDirectory) {
                             const flightKey = destInfo.regionId + destInfo.bucketName + remoteDirectoryKey;
                             this.createDirectoryWithSingleFlight(
                                 flightKey,

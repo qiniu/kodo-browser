@@ -202,37 +202,37 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
           statingFiles
             ? <LoadingHolder/>
             : <ul className="scroll-max-vh-40">
-                {
-                  showFiles.map(fileShowItem => (
-                    <li key={fileShowItem.path}>
-                      {
-                        fileShowItem.isDir
-                          ? <>
-                            <i className="bi bi-folder-fill me-1 text-yellow"/>
-                            {fileShowItem.path}
-                          </>
-                          : <>
-                            <i className="bi bi-file-earmark me-1"/>
-                            {fileShowItem.basename}
-                          </>
-                      }
-                    </li>
-                  ))
-                }
-                {
-                  memoFilePaths.length > showFiles.length
-                    ? <li>
-                      <Translate
-                        i18nKey="modals.uploadConfirm.previewList.more"
-                        data={previewListI18nData}
-                        slots={{
-                          total: v => <b>{v}</b>
-                        }}
-                      />
-                    </li>
-                    : null
-                }
-              </ul>
+              {
+                showFiles.map(fileShowItem => (
+                  <li key={fileShowItem.path}>
+                    {
+                      fileShowItem.isDir
+                        ? <>
+                          <i className="bi bi-folder-fill me-1 text-yellow"/>
+                          {fileShowItem.path}
+                        </>
+                        : <>
+                          <i className="bi bi-file-earmark me-1"/>
+                          {fileShowItem.basename}
+                        </>
+                    }
+                  </li>
+                ))
+              }
+              {
+                memoFilePaths.length > showFiles.length
+                  ? <li>
+                    <Translate
+                      i18nKey="modals.uploadConfirm.previewList.more"
+                      data={previewListI18nData}
+                      slots={{
+                        total: v => <b>{v}</b>
+                      }}
+                    />
+                  </li>
+                  : null
+              }
+            </ul>
         }
         <Form onSubmit={handleSubmit(handleSubmitUploadFiles)}>
           <fieldset
@@ -249,33 +249,37 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
                 />
               </Col>
             </Form.Group>
-            <Form.Group as={Row} className="mb-3" controlId="storageClassKodoName">
-              <Form.Label className="text-end" column sm={4}>
-                {translate("modals.uploadConfirm.form.storageClassKodoName.label")}
-              </Form.Label>
-              <Col className="mt-2" sm={7}>
-                {
-                  memoStorageClasses.map(storageClass => (
-                    <Form.Check
-                      {...register("storageClassKodoName")}
-                      id={`storageClassKodoName-${storageClass.kodoName}`}
-                      key={storageClass.kodoName}
-                      type="radio"
-                      label={storageClass.nameI18n[currentLanguage]}
-                      value={storageClass.kodoName}
-                    />
-                  ))
-                }
-                <Form.Text>
-                  {
-                    memoStorageClasses
-                      .find(storageClasses =>
-                        storageClasses.kodoName === watch("storageClassKodoName"))
-                      ?.billingI18n[currentLanguage]
-                  }
-                </Form.Text>
-              </Col>
-            </Form.Group>
+            {
+              !memoStorageClasses.length
+                ? null
+                : <Form.Group as={Row} className="mb-3" controlId="storageClassKodoName">
+                  <Form.Label className="text-end" column sm={4}>
+                    {translate("modals.uploadConfirm.form.storageClassKodoName.label")}
+                  </Form.Label>
+                  <Col className="mt-2" sm={7}>
+                    {
+                      memoStorageClasses.map(storageClass => (
+                        <Form.Check
+                          {...register("storageClassKodoName")}
+                          id={`storageClassKodoName-${storageClass.kodoName}`}
+                          key={storageClass.kodoName}
+                          type="radio"
+                          label={storageClass.nameI18n[currentLanguage]}
+                          value={storageClass.kodoName}
+                        />
+                      ))
+                    }
+                    <Form.Text>
+                      {
+                        memoStorageClasses
+                          .find(storageClasses =>
+                            storageClasses.kodoName === watch("storageClassKodoName"))
+                          ?.billingI18n[currentLanguage]
+                      }
+                    </Form.Text>
+                  </Col>
+                </Form.Group>
+            }
           </fieldset>
         </Form>
       </Modal.Body>

@@ -57,7 +57,7 @@ export async function listFiles(
                         size: item.size,
                         storageClass: item.storageClass,
                         lastModified: item.lastModified,
-                        withinFourHours: (new Date().getTime() - item.lastModified.getTime()) <= 4 * Duration.Hour,
+                        withinFourHours: (Date.now() - item.lastModified.getTime()) <= 4 * Duration.Hour,
                     });
                 }
             });

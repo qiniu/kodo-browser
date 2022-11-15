@@ -152,6 +152,7 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
             {translate("common.extraLink")}
           </Button>
           <Button
+            hidden={!memoStorageClasses.length}
             size="sm"
             className="me-1"
             variant="outline-solid-gray-300"

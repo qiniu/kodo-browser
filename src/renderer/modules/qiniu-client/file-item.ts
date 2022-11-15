@@ -58,7 +58,7 @@ export function toItemFromObjectInfo(obj: ObjectInfo): Item {
                 size: obj.size,
                 storageClass: obj.storageClass,
                 lastModified: obj.lastModified,
-                withinFourHours: (new Date().getTime() - obj.lastModified.getTime()) <= 4 * Duration.Hour,
+                withinFourHours: (Date.now() - obj.lastModified.getTime()) <= 4 * Duration.Hour,
             };
         case ItemType.Directory:
             return {

@@ -74,12 +74,12 @@ const FileTooltip: React.FC<RowCellDataProps> = ({
   );
 };
 
-export interface FileNameCellProps {
+export interface FileNameCellCallbackProps {
   onClickFile: (file: FileItem.Item) => void,
   onDoubleClickFile: (file: FileItem.Item) => void,
 }
 
-const FileName: React.FC<RowCellDataProps & FileNameCellProps> = ({
+const FileName: React.FC<RowCellDataProps & FileNameCellCallbackProps> = ({
   rowData: file,
   cellData: fileName,
   onClickFile,

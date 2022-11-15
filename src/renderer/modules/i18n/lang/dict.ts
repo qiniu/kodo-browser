@@ -329,6 +329,7 @@ export default interface Dictionary {
       removeAllButton: string,
       activeAkButton: string,
       removeAkButton: string,
+      currentUser: string,
       table: {
         endpoint: string,
         accessKeyId: string,

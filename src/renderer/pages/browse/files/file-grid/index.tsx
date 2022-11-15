@@ -1,13 +1,13 @@
 import React, {useMemo} from "react";
 import classNames from "classnames";
 import AutoResizer from "react-virtualized-auto-sizer";
-import {FixedSizeGrid as Grid} from "react-window";
 
 import StorageClass from "@common/models/storage-class";
 
 import {FileItem} from "@renderer/modules/qiniu-client";
 
 import EmptyHolder from "@renderer/components/empty-holder";
+import BaseGrid from "@renderer/components/base-grid";
 
 import {LOAD_MORE_THRESHOLD} from "../const";
 import {FileRowData} from "../types";
@@ -18,7 +18,6 @@ import "./file-grid.scss";
 
 const CELL_WIDTH = 240;
 const CELL_HEIGHT = 78;
-const SCROLL_BAR_WIDTH = 20;
 
 interface FileGridProps {
   availableStorageClasses?: Record<string, StorageClass>,
@@ -52,55 +51,46 @@ const FileGrid: React.FC<FileGridProps> = ({
 
   const loadingMore = filesData.length > 0 && loading;
 
-  const handleEndReached = () => {
+  const handleReachEnd = () => {
     if (!hasMore || loadingMore) {
       return;
     }
     onLoadMore();
   };
 
+  // render
   return (
     <div className="no-selectable file-grid w-100 h-100">
       <AutoResizer>
         {({width, height}) => {
-          const columnCount = Math.floor((width - SCROLL_BAR_WIDTH) / CELL_WIDTH);
-          const rowCount = Math.ceil(filesData.length / columnCount);
           return (
-            <Grid
-              className="base-grid"
+            <BaseGrid
               height={height}
               width={width}
+              itemData={filesData}
               columnWidth={CELL_WIDTH}
-              columnCount={columnCount}
               rowHeight={CELL_HEIGHT}
-              rowCount={rowCount}
-              onScroll={({scrollTop}) => {
-                const contentHeight = CELL_HEIGHT * rowCount;
-                const heightToReachBottom = contentHeight - (height + scrollTop);
-                if (heightToReachBottom < LOAD_MORE_THRESHOLD) {
-                  handleEndReached();
-                }
-              }}
-            >
-              {
+              endReachedThreshold={LOAD_MORE_THRESHOLD}
+              onEndReached={handleReachEnd}
+              emptyRender={<EmptyHolder loading={loading}/>}
+              overlayRender={<OverlayHolder loadingMore={loadingMore}/>}
+              cellRender={
                 ({
-                  rowIndex,
-                  columnIndex,
+                  data,
                   style,
                 }) => {
-                  const d = filesData[rowIndex * columnCount + columnIndex];
-                  if (!d) {
+                  if (!data) {
                     return (<div hidden style={style}/>);
                   }
                   return (
                     <div
                       className={classNames("base-cell p-1", {
-                        "bg-primary bg-opacity-10": d.isSelected,
+                        "bg-primary bg-opacity-10": data.isSelected,
                       })}
                       style={style}
                     >
                       <FileCell
-                        data={d}
+                        data={data}
                         onClick={f => onSelectFiles([f], !f.isSelected)}
                         onDoubleClick={onDoubleClickFile}
                       />
@@ -108,18 +98,10 @@ const FileGrid: React.FC<FileGridProps> = ({
                   )
                 }
               }
-            </Grid>
+            />
           );
         }}
       </AutoResizer>
-      {
-        !filesData.length &&
-        <EmptyHolder loading={loading}/>
-      }
-      {
-        loadingMore &&
-        <OverlayHolder loadingMore={loadingMore}/>
-      }
     </div>
   );
 };

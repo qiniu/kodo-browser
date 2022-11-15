@@ -9,17 +9,17 @@ import {getLang, translate} from "@renderer/modules/i18n";
 import {FileItem} from "@renderer/modules/qiniu-client";
 
 import {FileRowData} from "../../types";
-import FileName, {FileNameCellProps} from "./file-name";
+import FileName, {FileNameCellCallbackProps} from "./file-name";
 import FileCheckbox, {FileCheckboxCellProps, FileCheckboxHeader, FileCheckboxHeaderProps} from "./file-checkbox";
-import FileOperations, {FileOperationsCellProps} from "./file-operations";
+import FileOperations, {FileOperationsCellCallbackProps} from "./file-operations";
 
 type GetFileTableColumnsProps = {
     availableStorageClasses?: Record<string, StorageClass>
   }
-  & FileNameCellProps
+  & FileNameCellCallbackProps
   & FileCheckboxHeaderProps
   & FileCheckboxCellProps
-  & FileOperationsCellProps;
+  & FileOperationsCellCallbackProps;
 
 export function getColumns({
   availableStorageClasses,
@@ -30,7 +30,12 @@ export function getColumns({
   onAction,
 }: GetFileTableColumnsProps): ColumnShape<FileRowData>[] {
   const currentLanguage = getLang();
-  return [
+
+  const hasAvailableStorageClasses =
+    availableStorageClasses &&
+    Object.keys(availableStorageClasses).length;
+
+  const result: ColumnShape<FileRowData>[] = [
     {
       key: "__selection__",
       headerRenderer: () => (
@@ -73,17 +78,6 @@ export function getColumns({
           : translate("common.directory"),
     },
     {
-      key: "fileStorageClass",
-      title: translate("browse.fileTable.fileStorageClass"),
-      width: 128,
-      flexGrow: 1,
-      dataGetter: ({rowData: file}) =>
-        FileItem.isItemFile(file)
-          ? availableStorageClasses?.[file.storageClass].nameI18n[currentLanguage]
-          ?? file.storageClass
-          : "-"
-    },
-    {
       key: "fileModifyDate",
       title: translate("browse.fileTable.fileModifyDate"),
       width: 192,
@@ -100,6 +94,7 @@ export function getColumns({
       flexGrow: 1,
       cellRenderer: ({rowData, cellData}) => (
         <FileOperations
+          canChangeStorageClass={Boolean(hasAvailableStorageClasses)}
           rowData={rowData}
           cellData={cellData}
           onAction={onAction}
@@ -107,4 +102,21 @@ export function getColumns({
       ),
     },
   ];
+
+  if (hasAvailableStorageClasses) {
+    result.splice(2, 0, {
+        key: "fileStorageClass",
+        title: translate("browse.fileTable.fileStorageClass"),
+        width: 128,
+        flexGrow: 1,
+        dataGetter: ({rowData: file}) =>
+          FileItem.isItemFile(file)
+            ? availableStorageClasses[file.storageClass].nameI18n[currentLanguage]
+            ?? file.storageClass
+            : "-"
+      },
+    );
+  }
+
+  return result;
 }

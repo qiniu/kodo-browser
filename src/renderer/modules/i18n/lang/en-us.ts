@@ -323,6 +323,7 @@ const dict: Dictionary = {
       removeAllButton: "Clear Histories",
       activeAkButton: "Active",
       removeAkButton: "Remove",
+      currentUser: "(current)",
       table: {
         endpoint: "Endpoint",
         accessKeyId: "AccessKeyId",
@@ -419,7 +420,7 @@ const dict: Dictionary = {
           },
           loadFilesNumberPerPage: {
             label: "Files loading count",
-            hint: "Range：1-1000",
+            hint: "Range：10-1000",
           },
           autoUpgrade: {
             label: "Auto update",

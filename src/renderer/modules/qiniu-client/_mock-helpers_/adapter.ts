@@ -163,7 +163,7 @@ export function transObjectInfoToFileItem(item: ObjectInfo): FileItem.Item {
         lastModified: item.lastModified,
         size: item.size,
         storageClass: item.storageClass,
-        withinFourHours: (new Date().getTime() - item.lastModified.getTime()) <= 4 * Duration.Hour,
+        withinFourHours: (Date.now() - item.lastModified.getTime()) <= 4 * Duration.Hour,
     };
 }
 

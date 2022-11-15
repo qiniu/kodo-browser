@@ -323,6 +323,7 @@ const dict: Dictionary = {
             removeAllButton: "歴史を空にする",
             activeAkButton: "利用",
             removeAkButton: "削除",
+            currentUser: "（利用中）",
             table: {
                 endpoint: "Endpoint",
                 accessKeyId: "AccessKeyId",
@@ -419,7 +420,7 @@ const dict: Dictionary = {
                     },
                     loadFilesNumberPerPage: {
                         label: "ファイル リストの 1 ページの読み込み数",
-                        hint: "範囲：1-1000",
+                        hint: "範囲：10-1000",
                     },
                     autoUpgrade: {
                         label: "自動更新",

@@ -323,6 +323,7 @@ const dict: Dictionary = {
       removeAllButton: "清空历史",
       activeAkButton: "使用",
       removeAkButton: "删除",
+      currentUser: "（使用中）",
       table: {
         endpoint: "Endpoint",
         accessKeyId: "AccessKeyId",
@@ -419,7 +420,7 @@ const dict: Dictionary = {
           },
           loadFilesNumberPerPage: {
             label: "文件列表单次加载数目",
-            hint: "范围：1-1000",
+            hint: "范围：10-1000",
           },
           autoUpgrade: {
             label: "自动更新",

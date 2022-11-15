@@ -331,12 +331,17 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
               <i className="bi bi-fire me-1"/>
               {translate("common.restore")}
             </Dropdown.Item>
-            <Dropdown.Item
-              onClick={handleShowChangeFilesStorageClass}
-            >
-              <i className="bi bi-arrow-left-right me-1"/>
-              {translate("common.changeStorageClass")}
-            </Dropdown.Item>
+            {
+              !availableStorageClasses ||
+              !Object.keys(availableStorageClasses).length
+                ? null
+                : <Dropdown.Item
+                  onClick={handleShowChangeFilesStorageClass}
+                >
+                  <i className="bi bi-arrow-left-right me-1"/>
+                  {translate("common.changeStorageClass")}
+                </Dropdown.Item>
+            }
           </DropdownButton>
         </ButtonGroup>
 

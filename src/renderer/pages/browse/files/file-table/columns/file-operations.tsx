@@ -7,12 +7,18 @@ import TooltipButton from "@renderer/components/tooltip-button";
 
 import {OperationName, RowCellDataProps} from "../../types";
 
-export interface FileOperationsCellProps {
+export interface FileOperationsCellCallbackProps {
   onAction: (action: OperationName, file: FileItem.Item) => void,
 }
 
-const FileOperations: React.FC<RowCellDataProps & FileOperationsCellProps> = ({
+const FileOperations: React.FC<
+  RowCellDataProps & FileOperationsCellCallbackProps &
+  {
+    canChangeStorageClass: boolean,
+  }
+> = ({
   rowData: file,
+  canChangeStorageClass,
   onAction,
 }) => {
   const {translate} = useI18n();
@@ -62,7 +68,7 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellProps> = ({
         />
       }
       {
-        isFile &&
+        isFile && canChangeStorageClass &&
         <TooltipButton
           iconClassName="bi bi-arrow-left-right"
           tooltipPlacement="top"

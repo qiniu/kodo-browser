@@ -49,7 +49,15 @@ const FieldsExternalPath: React.FC = () => {
             {...register("loadFilesNumberPerPage", {
               valueAsNumber: true,
               required: true,
-              min: 1,
+              /*
+               * The min can't be 1,
+               *   because when list a subdirectory, list API will return the subdirectory itself first.
+               *   so we can't get any files in the subdirectory,
+               *   and the ui component will get nothing to render, and will not trigger load more forever.
+               * And the min can't be too large, such as 100,
+               *   because list API is too slow in some private cloud.
+               */
+              min: 10,
               max: 1000,
             })}
             type="number"

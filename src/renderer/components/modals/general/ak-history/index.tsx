@@ -14,7 +14,7 @@ interface AkHistoryProps {
 
 const AkHistory: React.FC<ModalProps & AkHistoryProps> = (props) => {
   const {translate} = useI18n();
-  const {akHistory, deleteHistory, clearHistory} = useAuth();
+  const {akHistory, currentUser, deleteHistory, clearHistory} = useAuth();
 
   const {
     onActiveAk,
@@ -55,6 +55,10 @@ const AkHistory: React.FC<ModalProps & AkHistoryProps> = (props) => {
                 ? akHistory.map(item => (
                   <AkTableRow
                     key={item.accessKey + item.accessSecret}
+                    isCurrentUser={
+                      currentUser?.accessKey === item.accessKey &&
+                      currentUser.accessSecret === item.accessSecret
+                    }
                     data={item}
                     onActive={onActiveAk}
                     onDelete={deleteHistory}

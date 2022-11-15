@@ -7,18 +7,18 @@ import {AkItem} from "@renderer/modules/auth";
 
 interface AkTableRowProps {
   data: AkItem,
+  isCurrentUser?: boolean,
   onActive?: (item: AkItem) => void,
   onDelete?: (item: AkItem) => void,
 }
 
-const AkTableRow: React.FC<AkTableRowProps> = (props) => {
+const AkTableRow: React.FC<AkTableRowProps> = ({
+  data,
+  isCurrentUser,
+  onActive,
+  onDelete,
+}) => {
   const {translate} = useI18n();
-
-  const {
-    data,
-    onActive,
-    onDelete,
-  } = props;
 
   return (
     <tr>
@@ -28,18 +28,20 @@ const AkTableRow: React.FC<AkTableRowProps> = (props) => {
       <td className="align-middle fs-075em">{data.description}</td>
       <td className="align-middle text-nowrap">
         {
-          onActive
-            ? <Button variant="lite-primary" size="sm" onClick={() => onActive(data)}>
-              {translate("modals.akHistory.activeAkButton")}
-            </Button>
-            : null
+          !onActive
+            ? null
+            : isCurrentUser
+              ? <small>{translate("modals.akHistory.currentUser")}</small>
+              : <Button variant="lite-primary" size="sm" onClick={() => onActive(data)}>
+                {translate("modals.akHistory.activeAkButton")}
+              </Button>
         }
         {
-          onDelete
-            ? <Button variant="lite-danger" size="sm" onClick={() => onDelete(data)}>
+          !onDelete
+            ? null
+            : <Button variant="lite-danger" size="sm" onClick={() => onDelete(data)}>
               {translate("modals.akHistory.removeAkButton")}
             </Button>
-            : null
         }
       </td>
     </tr>

@@ -2,21 +2,26 @@ import React, {useEffect, useState} from "react";
 import {Region} from "kodo-s3-adapter-sdk";
 import {toast} from "react-hot-toast";
 
+import {BackendMode} from "@common/qiniu";
+
 import * as LocalLogger from "@renderer/modules/local-logger";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {useKodoNavigator} from "@renderer/modules/kodo-address";
 import {BucketItem, getRegions, listAllBuckets, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 import {Provider as FileOperationProvider} from "@renderer/modules/file-operation";
 
-import Buckets from "./buckets";
-import Files from "./files";
 import LoadingHolder from "@renderer/components/loading-holder";
 
+import Buckets from "./buckets";
+import Files from "./files";
+
 interface ContentsProps {
+  externalRegionId?: string,
   toggleRefresh?: boolean,
 }
 
 const Contents: React.FC<ContentsProps> = ({
+  externalRegionId,
   toggleRefresh,
 }) => {
   const {currentUser} = useAuth();
@@ -87,11 +92,26 @@ const Contents: React.FC<ContentsProps> = ({
     }
   }, [toggleRefresh]);
 
-  const bucket = bucketName ? bucketsMap.get(bucketName) : undefined;
-  const region = bucket?.regionId ? regionsMap.get(bucket?.regionId) : undefined;
+  // calc bucket and region
+  let bucket = bucketName ? bucketsMap.get(bucketName) : undefined;
+  if (!bucket && externalRegionId && bucketName) {
+    bucket = {
+      id: bucketName,
+      name: bucketName,
+      // can't get create data of an external bucket.
+      createDate: new Date(NaN),
+      regionId: externalRegionId,
+      preferBackendMode: BackendMode.S3,
+    };
+  }
+  const region = bucket?.regionId ? regionsMap.get(bucket.regionId) : undefined;
 
+  // render
   return (
-    <FileOperationProvider bucketGrantedPermission={bucket?.grantedPermission}>
+    <FileOperationProvider
+      bucketGrantedPermission={bucket?.grantedPermission}
+      bucketPreferBackendMode={bucket?.preferBackendMode}
+    >
       <div
         style={{
           position: "relative",

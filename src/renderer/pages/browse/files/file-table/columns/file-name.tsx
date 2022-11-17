@@ -8,6 +8,7 @@ import {useI18n} from "@renderer/modules/i18n";
 import {useAuth} from "@renderer/modules/auth";
 import {FileItem} from "@renderer/modules/qiniu-client";
 import useFrozenInfo from "@renderer/modules/qiniu-client-hooks/use-frozen-info";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 import TooltipText from "@renderer/components/tooltip-text";
 
@@ -38,6 +39,8 @@ const FileTooltip: React.FC<RowCellDataProps> = ({
 }) => {
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
+
   const {
     frozenInfo,
     fetchFrozenInfo,
@@ -46,6 +49,7 @@ const FileTooltip: React.FC<RowCellDataProps> = ({
     regionId: file.regionId,
     bucketName: file.bucket,
     filePath: file.path.toString(),
+    preferBackendMode,
   });
 
   const canRestore = FileItem.isItemFile(file) && ["Archive", "DeepArchive"].includes(file.storageClass);

@@ -4,9 +4,13 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
 import StorageClass from "@common/models/storage-class";
+import {BackendMode} from "@common/qiniu";
+
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem, setStorageClass} from "@/renderer/modules/qiniu-client";
+import {useFileOperation} from "@renderer/modules/file-operation";
+
 import {ChangeStorageClassForm, ChangeStorageClassFormData} from "@renderer/components/forms";
 
 import {OperationDoneRecallFn} from "../types";
@@ -33,6 +37,7 @@ const ChangeFileStorageClass: React.FC<ModalProps & ChangeFileStorageClassProps>
 
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -75,6 +80,8 @@ const ChangeFileStorageClass: React.FC<ModalProps & ChangeFileStorageClassProps>
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
       storageClasses: memoStorageClasses,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
 
     const p = setStorageClass(

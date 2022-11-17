@@ -1,5 +1,5 @@
 import { Path as QiniuPath } from "qiniu-path/dist/src/path";
-import {FileItem} from "@renderer/modules/qiniu-client/index";
+import * as FileItem from "./file-item";
 
 import { FileExtensionType, getFileType } from './file-item';
 

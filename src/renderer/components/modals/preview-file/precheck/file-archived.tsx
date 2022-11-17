@@ -3,10 +3,13 @@ import {Button} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
+import {BackendMode} from "@common/qiniu";
+
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
-import useFrozenInfo from "@renderer/modules/qiniu-client-hooks/use-frozen-info";
 import {restoreFile} from "@renderer/modules/qiniu-client";
+import useFrozenInfo from "@renderer/modules/qiniu-client-hooks/use-frozen-info";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 import {RestoreForm, RestoreFormData} from "@renderer/components/forms";
@@ -27,6 +30,7 @@ const FileArchived: React.FC<PropsWithChildren<FileArchivedProps>> = (props) => 
 
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // frozen info
   const {
@@ -37,6 +41,7 @@ const FileArchived: React.FC<PropsWithChildren<FileArchivedProps>> = (props) => 
     regionId: regionId,
     bucketName: bucketName,
     filePath: filePath,
+    preferBackendMode,
   });
 
   // restore form
@@ -60,6 +65,8 @@ const FileArchived: React.FC<PropsWithChildren<FileArchivedProps>> = (props) => 
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
 
     const p = restoreFile(

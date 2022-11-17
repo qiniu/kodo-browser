@@ -3,10 +3,12 @@ import {Button, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 
 import StorageClass from "@common/models/storage-class";
+import {BackendMode} from "@common/qiniu";
+
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {deleteFiles, FileItem, stopDeleteFiles} from "@renderer/modules/qiniu-client";
-import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import {useFileOperation} from "@renderer/modules/file-operation";
 import * as AuditLog from "@renderer/modules/audit-log";
 
 import {useSubmitModal} from "@renderer/components/modals/hooks";
@@ -42,6 +44,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
 
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -89,6 +92,8 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
       storageClasses: storageClasses,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     setBatchProgressState({
       status: BatchTaskStatus.Running,
@@ -160,7 +165,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
                   memoFileItems.map(fileItem => (
                     <li key={fileItem.path.toString()}>
                       {
-                        isItemFolder(fileItem)
+                        FileItem.isItemFolder(fileItem)
                           ? <i className="bi bi-folder-fill me-1 text-yellow"/>
                           : <i className="bi bi-file-earmark me-1"/>
                       }

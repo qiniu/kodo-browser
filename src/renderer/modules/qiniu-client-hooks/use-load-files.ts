@@ -1,10 +1,24 @@
 import {DependencyList, useEffect, useRef, useState} from "react";
 import {toast} from "react-hot-toast";
 
+import {BackendMode} from "@common/qiniu";
+
 import StorageClass from "@common/models/storage-class";
 import {AkItem, EndpointType} from "@renderer/modules/auth";
 import {FileItem, listFiles} from "@renderer/modules/qiniu-client";
 import * as LocalLogger from "@renderer/modules/local-logger";
+
+interface useLoadFilesProps {
+  user: AkItem | null,
+  currentAddressPath: string,
+  regionId?: string,
+  bucketName?: string,
+  storageClasses?: StorageClass[],
+  pageSize?: number,
+  shouldAutoReload?: () => boolean,
+  autoReloadDeps?: DependencyList,
+  preferBackendMode?: BackendMode,
+}
 
 export default function useLoadFiles({
   user,
@@ -15,16 +29,8 @@ export default function useLoadFiles({
   pageSize = 500,
   shouldAutoReload,
   autoReloadDeps = [],
-}: {
-  user: AkItem | null,
-  currentAddressPath: string,
-  regionId?: string,
-  bucketName?: string,
-  storageClasses?: StorageClass[],
-  pageSize?: number,
-  shouldAutoReload?: () => boolean,
-  autoReloadDeps?: DependencyList,
-}) {
+  preferBackendMode,
+}: useLoadFilesProps) {
   async function loadFiles(
     path: string,
     marker?: string,
@@ -53,6 +59,8 @@ export default function useLoadFiles({
       id: user.accessKey,
       secret: user.accessSecret,
       isPublicCloud: user.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
 
       maxKeys: pageSize,
       minKeys: pageSize,

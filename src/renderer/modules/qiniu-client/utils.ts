@@ -6,7 +6,7 @@ import * as AppConfig from "@common/const/app-config";
 import * as KodoNav from "@renderer/const/kodo-nav";
 
 import {debugRequest, debugResponse, GetAdapterOptionParam, getDefaultClient} from './common'
-import {checkFileExists, checkFolderExists} from "@renderer/modules/qiniu-client/files";
+import {checkFileExists, checkFolderExists} from "./files";
 
 export async function isQueryRegionAPIAvailable(ucUrl: string): Promise<boolean> {
     try {

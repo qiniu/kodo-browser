@@ -4,6 +4,8 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
 import StorageClass from "@common/models/storage-class";
+import {BackendMode} from "@common/qiniu";
+
 import {FileRename} from "@renderer/const/patterns";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
@@ -14,7 +16,7 @@ import {
   moveOrCopyFiles,
   stopMoveOrCopyFiles
 } from "@renderer/modules/qiniu-client";
-import {isItemFile, isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import {useFileOperation} from "@renderer/modules/file-operation";
 import * as AuditLog from "@renderer/modules/audit-log";
 
 import {usePromiseConfirm} from "@renderer/components/lite-confirm";
@@ -54,6 +56,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
 
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   const [replaceConfirmState, toggleReplaceConfirm] = usePromiseConfirm();
 
@@ -113,6 +116,8 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     return checkFileOrDirectoryExists(
       memoRegionId,
@@ -130,6 +135,8 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     AuditLog.log(AuditLog.Action.MoveOrCopyFile, {
       regionId: memoRegionId,
@@ -158,6 +165,8 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
       storageClasses: memoStorageClasses,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     setBatchProgressState({
       status: BatchTaskStatus.Running,
@@ -217,7 +226,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
       return;
     }
     let toPath = `${memoBasePath}${data.fileName}`;
-    if (isItemFolder(memoFileItem)) {
+    if (FileItem.isItemFolder(memoFileItem)) {
       toPath += "/";
     }
     const p = checkExists(toPath)
@@ -233,7 +242,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
       })
       .then(shouldContinue => {
         if (shouldContinue) {
-          if (isItemFolder(memoFileItem)) {
+          if (FileItem.isItemFolder(memoFileItem)) {
             return renameDirectory(memoFileItem, toPath);
           } else {
             return renameFile(memoFileItem, toPath);
@@ -242,7 +251,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
         return Promise.reject();
       })
       .then(() => {
-        if (isItemFile(memoFileItem)) {
+        if (FileItem.isItemFile(memoFileItem)) {
           modalProps.onHide?.();
         }
         onRenamedFile({

@@ -17,7 +17,7 @@ import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem, signatureUrls} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
-import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {
   BatchProgress,
@@ -57,6 +57,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
 
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // batch operation progress states
   const [batchProgressState, setBatchProgressState] = useBatchProgress();
@@ -93,6 +94,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     regionId: memoRegionId,
     bucketName: memoBucketName,
     canS3Domain: memoCanS3Domain,
+    preferBackendMode,
   });
 
   // state when generate succeed
@@ -142,7 +144,10 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
       storageClasses: memoStorageClasses,
-      preferS3Adapter: domain?.backendMode === BackendMode.S3,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter:
+        preferBackendMode === BackendMode.S3 ||
+        domain?.backendMode === BackendMode.S3,
     };
     return signatureUrls(
       memoRegionId,
@@ -255,7 +260,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
                   memoFileItems.map(fileItem => (
                     <li key={fileItem.path.toString()}>
                       {
-                        isItemFolder(fileItem)
+                        FileItem.isItemFolder(fileItem)
                           ? <i className="bi bi-folder-fill me-1 text-yellow"/>
                           : <i className="bi bi-file-earmark me-1"/>
                       }

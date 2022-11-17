@@ -40,7 +40,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "build",
-    "src/renderer-ng"
+    "build"
   ]
 }

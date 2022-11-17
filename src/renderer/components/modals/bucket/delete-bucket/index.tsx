@@ -2,10 +2,13 @@ import React, {useMemo} from "react";
 import {Button, Modal, ModalProps} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 
+import {BackendMode} from "@common/qiniu";
+
 import {Translate, useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {deleteBucket} from "@renderer/modules/qiniu-client";
 import * as AuditLog from "@renderer/modules/audit-log";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {useSubmitModal} from "../../hooks";
 
@@ -23,6 +26,7 @@ const DeleteBucket: React.FC<ModalProps & DeleteBucketProps> = ({
 }) => {
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -55,6 +59,8 @@ const DeleteBucket: React.FC<ModalProps & DeleteBucketProps> = ({
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     const p = deleteBucket(
       memoRegionId,

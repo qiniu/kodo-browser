@@ -31,7 +31,8 @@ interface useLoadDomainsProps {
   regionId?: string,
   bucketName?: string,
   shouldAutoReload?: () => boolean,
-  canS3Domain: boolean
+  canS3Domain: boolean,
+  preferBackendMode?: BackendMode,
 }
 
 export default function useLoadDomains({
@@ -40,6 +41,7 @@ export default function useLoadDomains({
   bucketName,
   shouldAutoReload,
   canS3Domain,
+  preferBackendMode,
 }: useLoadDomainsProps) {
   async function loadDomains() {
     if (!user) {
@@ -72,7 +74,7 @@ export default function useLoadDomains({
         backendMode: BackendMode.Kodo,
       }));
 
-    if (canS3Domain) {
+    if (canS3Domain || preferBackendMode === BackendMode.S3) {
       domains.unshift(NON_OWNED_DOMAIN);
     }
 

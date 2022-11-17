@@ -1,6 +1,8 @@
 import {useState} from "react";
 import {toast} from "react-hot-toast";
 
+import {BackendMode} from "@common/qiniu";
+
 import {getFrozenInfo} from "@renderer/modules/qiniu-client";
 import {AkItem, EndpointType} from "@renderer/modules/auth";
 
@@ -15,6 +17,7 @@ interface useFrozenInfoProps {
   regionId?: string,
   bucketName?: string,
   filePath?: string,
+  preferBackendMode?: BackendMode,
 }
 
 const useFrozenInfo = ({
@@ -22,6 +25,7 @@ const useFrozenInfo = ({
   regionId,
   bucketName,
   filePath,
+  preferBackendMode,
 }: useFrozenInfoProps) => {
   const [frozenInfo, setFrozenInfo] = useState<FrozenInfo>({
     isLoading: true,
@@ -40,6 +44,8 @@ const useFrozenInfo = ({
       id: user.accessKey,
       secret: user.accessSecret,
       isPublicCloud: user.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
 
     getFrozenInfo(

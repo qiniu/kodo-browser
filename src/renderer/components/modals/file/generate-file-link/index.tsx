@@ -5,10 +5,11 @@ import {SubmitHandler, useForm} from "react-hook-form";
 import {BackendMode} from "@common/qiniu"
 
 import usePortal from "@renderer/modules/hooks/use-portal";
-import {FileItem, signatureUrl} from "@renderer/modules/qiniu-client";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {FileItem, signatureUrl} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {
   GenerateLinkForm,
@@ -34,6 +35,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
 }) => {
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -62,6 +64,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
     regionId: memoRegionId,
     bucketName: memoBucketName,
     canS3Domain: memoCanS3Domain,
+    preferBackendMode,
   });
 
   // state when generate succeed
@@ -87,7 +90,10 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      preferS3Adapter: data.domain?.backendMode === BackendMode.S3,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter:
+        preferBackendMode === BackendMode.S3 ||
+        data.domain?.backendMode === BackendMode.S3,
     };
 
     const domain = data.domain?.name === NON_OWNED_DOMAIN.name

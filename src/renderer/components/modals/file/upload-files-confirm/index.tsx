@@ -12,6 +12,7 @@ import StorageClass from "@common/models/storage-class";
 import {Translate, useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {privateEndpointPersistence} from "@renderer/modules/qiniu-client";
+import {useFileOperation} from "@renderer/modules/file-operation";
 import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
 import * as AuditLog from "@renderer/modules/audit-log";
 
@@ -63,6 +64,8 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
 }) => {
   const {currentLanguage, translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
+
   const customizedEndpoint = useMemo(() => {
     return currentUser?.endpointType === EndpointType.Public
       ? {
@@ -161,7 +164,9 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
           label: r.label,
           s3Urls: [r.endpoint],
         })),
-        backendMode: currentUser.endpointType === EndpointType.Public ? BackendMode.Kodo : BackendMode.S3
+        backendMode:
+          preferBackendMode ??
+          currentUser.endpointType === EndpointType.Public ? BackendMode.Kodo : BackendMode.S3
       },
     });
     modalProps.onHide?.();

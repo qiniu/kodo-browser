@@ -4,10 +4,13 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
 
+import {BackendMode} from "@common/qiniu";
+
 import {DirectoryName} from "@renderer/const/patterns";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {useI18n} from "@renderer/modules/i18n";
 import {createFolder} from "@renderer/modules/qiniu-client";
+import {useFileOperation} from "@renderer/modules/file-operation";
 import * as AuditLog from "@renderer/modules/audit-log";
 
 import {OperationDoneRecallFn} from "../types";
@@ -34,6 +37,7 @@ const CreateDirectoryFile: React.FC<ModalProps & CreateDirectoryFileProps> = (pr
 
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -74,6 +78,8 @@ const CreateDirectoryFile: React.FC<ModalProps & CreateDirectoryFileProps> = (pr
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     }
     const prefix = qiniuPathConvertor.fromQiniuPath(`${memoBasePath}${data.directoryName}/`);
 

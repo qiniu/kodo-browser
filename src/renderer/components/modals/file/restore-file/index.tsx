@@ -3,10 +3,13 @@ import {Button, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
-import {FileItem, restoreFile} from "@renderer/modules/qiniu-client";
+import {BackendMode} from "@common/qiniu";
+
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {FileItem, restoreFile} from "@renderer/modules/qiniu-client";
 import useFrozenInfo from "@renderer/modules/qiniu-client-hooks/use-frozen-info";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {RestoreForm, RestoreFormData} from "@renderer/components/forms";
 
@@ -26,6 +29,7 @@ const RestoreFile: React.FC<ModalProps & RestoreFileProps> = (props) => {
 
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -47,6 +51,7 @@ const RestoreFile: React.FC<ModalProps & RestoreFileProps> = (props) => {
     regionId: memoRegionId,
     bucketName: memoBucketName,
     filePath: memoFileItem?.path.toString(),
+    preferBackendMode,
   });
 
   // restore form
@@ -74,6 +79,8 @@ const RestoreFile: React.FC<ModalProps & RestoreFileProps> = (props) => {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
 
     const p = restoreFile(

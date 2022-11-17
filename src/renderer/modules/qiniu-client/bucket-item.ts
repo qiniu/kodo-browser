@@ -1,8 +1,11 @@
+import {BackendMode} from "@common/qiniu";
+
 export interface BucketItem {
   id: string;
   name: string;
   createDate: Date;
   regionId?: string;
   regionName?: string,
-  grantedPermission?: 'readonly' | 'readwrite';
+  grantedPermission?: 'readonly' | 'readwrite',
+  preferBackendMode?: BackendMode,
 }

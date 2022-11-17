@@ -2,6 +2,7 @@ import {useState} from "react";
 import {toast} from "react-hot-toast";
 import {ObjectInfo} from "kodo-s3-adapter-sdk/dist/adapter";
 
+import {BackendMode} from "@common/qiniu";
 import StorageClass from "@common/models/storage-class";
 
 import {AkItem, EndpointType} from "@renderer/modules/auth";
@@ -18,6 +19,7 @@ interface useHeadFileProps {
   bucketName?: string,
   filePath?: string,
   storageClasses?: StorageClass[],
+  preferBackendMode?: BackendMode,
 }
 
 const useHeadFile = ({
@@ -26,6 +28,7 @@ const useHeadFile = ({
   bucketName,
   filePath,
   storageClasses,
+  preferBackendMode,
 }: useHeadFileProps) => {
   const [headFileState, setHeadFileState] = useState<HeadFileState>({
     isLoading: true,
@@ -45,6 +48,8 @@ const useHeadFile = ({
       secret: user.accessSecret,
       isPublicCloud: user.endpointType === EndpointType.Public,
       storageClasses: storageClasses,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
 
     headFile(

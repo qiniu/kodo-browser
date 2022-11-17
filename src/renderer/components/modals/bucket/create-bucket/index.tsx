@@ -4,12 +4,15 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
 import ACL from "@renderer/const/acl";
+import {BackendMode} from "@common/qiniu";
+
 import {BucketName as BucketNamePattern} from "@renderer/const/patterns";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {createBucket} from "@renderer/modules/qiniu-client";
 import useLoadRegions from "@renderer/modules/qiniu-client-hooks/use-load-regions";
 import * as AuditLog from "@renderer/modules/audit-log";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 interface CreateBucketProps {
   onCreatedBucket: () => void,
@@ -27,6 +30,7 @@ const CreateBucket: React.FC<ModalProps & CreateBucketProps> = ({
 }) => {
   const {currentLanguage, translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   const {
     handleSubmit,
@@ -71,6 +75,8 @@ const CreateBucket: React.FC<ModalProps & CreateBucketProps> = ({
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     const p = createBucket(
       data.regionId,

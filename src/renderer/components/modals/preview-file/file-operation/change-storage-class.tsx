@@ -4,10 +4,12 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
 import StorageClass from "@common/models/storage-class";
+import {BackendMode} from "@common/qiniu";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem, setStorageClass} from "@renderer/modules/qiniu-client";
+import {useFileOperation} from "@renderer/modules/file-operation";
 import useHeadFile from "@renderer/modules/qiniu-client-hooks/use-head-file";
 
 import LoadingHolder from "@renderer/components/loading-holder";
@@ -36,6 +38,7 @@ const ChangeStorageClass: React.FC<ChangeStorageClassProps> = ({
 }) => {
   const {translate} = useI18n();
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // fetch file info
   const {
@@ -47,6 +50,7 @@ const ChangeStorageClass: React.FC<ChangeStorageClassProps> = ({
     bucketName,
     filePath: fileItem.path.toString(),
     storageClasses,
+    preferBackendMode,
   });
 
   useEffect(() => {
@@ -80,6 +84,8 @@ const ChangeStorageClass: React.FC<ChangeStorageClassProps> = ({
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
       storageClasses,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
 
     const p = setStorageClass(

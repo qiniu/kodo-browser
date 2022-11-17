@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useLocation} from "react-router-dom";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {KodoAddress} from "@renderer/modules/kodo-address";
+import {BookmarkItem, ExternalPathItem} from "@renderer/modules/kodo-address";
 import Settings, {OnChangeCallback, SettingKey} from "@renderer/modules/settings";
 
 import Top from "@renderer/components/top";
@@ -18,7 +18,7 @@ import AboutMenuItem from "./about-menu-item";
 import ExternalPathManager from "@renderer/components/modals/general/external-path-manager";
 
 interface TopMenuProps {
-  onActiveKodoAddress: (kodoAddress: KodoAddress) => void,
+  onActiveKodoAddress: (kodoAddress: BookmarkItem | ExternalPathItem) => void,
 }
 
 const TopMenu: React.FC<TopMenuProps> = ({

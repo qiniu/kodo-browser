@@ -14,13 +14,13 @@ import Browse from "@renderer/pages/browse";
 import SignOut from "@renderer/pages/sign-out";
 import SwitchUser from "@renderer/pages/switch-user";
 
-import {KodoAddress} from "@renderer/modules/kodo-address";
+import {BookmarkItem, ExternalPathItem} from "@renderer/modules/kodo-address";
 
 const App: React.FC = () => {
   const location = useLocation();
   const locationState = location.state as { backgroundLocation?: Location };
 
-  const [activeKodoAddress, setActiveKodoAddress] = useState<KodoAddress | null>(null);
+  const [activeKodoAddress, setActiveKodoAddress] = useState<BookmarkItem | ExternalPathItem | null>(null);
 
   return (
     <I18nProvider>

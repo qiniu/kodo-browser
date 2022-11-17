@@ -6,6 +6,7 @@ import {BackendMode} from "@common/qiniu"
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem, signatureUrl} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {
   GenerateLinkForm,
@@ -31,6 +32,7 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
   submitButtonPortal,
 }) => {
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // domains loader
   const {
@@ -44,6 +46,7 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
     regionId,
     bucketName,
     canS3Domain,
+    preferBackendMode,
   });
 
   // form for generating file link
@@ -67,7 +70,10 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      preferS3Adapter: data.domain?.backendMode === BackendMode.S3,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter:
+        preferBackendMode === BackendMode.S3 ||
+        data.domain?.backendMode === BackendMode.S3,
     };
 
     const domain = data.domain?.name === NON_OWNED_DOMAIN.name

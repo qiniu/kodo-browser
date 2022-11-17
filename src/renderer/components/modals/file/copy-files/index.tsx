@@ -4,6 +4,8 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
 import StorageClass from "@common/models/storage-class";
+import {BackendMode} from "@common/qiniu";
+
 import {FileRename} from "@renderer/const/patterns";
 import {Translate, useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
@@ -13,7 +15,7 @@ import {
   stopMoveOrCopyFiles,
   checkFileOrDirectoryExists,
 } from "@renderer/modules/qiniu-client";
-import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import {useFileOperation} from "@renderer/modules/file-operation";
 import * as AuditLog from "@renderer/modules/audit-log";
 
 import {
@@ -58,6 +60,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
   };
 
   const {currentUser} = useAuth();
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // form to create a duplication for copying one file to same base path.
   const {
@@ -140,6 +143,8 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     return checkFileOrDirectoryExists(
       memoRegionId,
@@ -159,6 +164,8 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
       storageClasses: memoStorageClasses,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     setBatchProgressState({
       status: BatchTaskStatus.Running,
@@ -220,7 +227,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
     // if create a duplication
     if (memoIsDuplication) {
       let duplicationFile = `${memoBasePath}${data.fileName}`;
-      if (isItemFolder(memoFileItems[0])) {
+      if (FileItem.isItemFolder(memoFileItems[0])) {
         duplicationFile += "/";
       }
       p = checkExists(duplicationFile)
@@ -351,7 +358,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
                         memoFileItems.map(fileItem => (
                           <li key={fileItem.path.toString()}>
                             {
-                              isItemFolder(fileItem)
+                              FileItem.isItemFolder(fileItem)
                                 ? <i className="bi bi-folder-fill me-1 text-yellow"/>
                                 : <i className="bi bi-file-earmark me-1"/>
                             }

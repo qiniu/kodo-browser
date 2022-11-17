@@ -29,6 +29,7 @@ const ExternalPathTableRow: React.FC<ExternalPathTableRowProps> = ({
           className="text-link"
           onClick={() => onActive?.(data)}
         >
+          <i className="bi bi-signpost-2-fill text-brown me-1"/>
           {data.protocol}{data.path}
         </span>
       </td>

@@ -3,11 +3,13 @@ import {Button, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
+import {BackendMode} from "@common/qiniu";
+
 import StorageClass from "@common/models/storage-class";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem, restoreFiles, stopRestoreFiles} from "@renderer/modules/qiniu-client";
-import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
+import {useFileOperation} from "@renderer/modules/file-operation";
 import * as AuditLog from "@renderer/modules/audit-log";
 
 import {
@@ -17,8 +19,8 @@ import {
   ErrorFileList,
   useBatchProgress
 } from "@renderer/components/batch-progress";
-
 import {RestoreForm, RestoreFormData} from "@renderer/components/forms";
+
 import {OperationDoneRecallFn} from "../types";
 
 interface RestoreFilesProps {
@@ -43,7 +45,7 @@ const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
 
   const {translate} = useI18n();
   const {currentUser} = useAuth();
-
+  const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   // form to restore
   const restoreFormController = useForm<RestoreFormData>({
@@ -113,6 +115,8 @@ const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
       storageClasses: memoStorageClasses,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     setBatchProgressState({
       status: BatchTaskStatus.Running,
@@ -191,7 +195,7 @@ const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
                   memoFileItems.map(fileItem => (
                     <li key={fileItem.path.toString()}>
                       {
-                        isItemFolder(fileItem)
+                        FileItem.isItemFolder(fileItem)
                           ? <i className="bi bi-folder-fill me-1 text-yellow"/>
                           : <i className="bi bi-file-earmark me-1"/>
                       }

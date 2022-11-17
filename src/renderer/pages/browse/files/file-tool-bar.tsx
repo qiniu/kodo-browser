@@ -9,7 +9,7 @@ import StorageClass from "@common/models/storage-class";
 
 import {translate} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
-import * as FileItem from "@renderer/modules/qiniu-client/file-item";
+import {FileItem} from "@renderer/modules/qiniu-client";
 import {FilesOperationType, useFileOperation} from "@renderer/modules/file-operation";
 import {ContentViewStyle} from "@renderer/modules/settings";
 import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";

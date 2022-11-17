@@ -3,7 +3,8 @@ import lodash from "lodash";
 
 import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 import {
-  KodoAddress,
+  BookmarkItem,
+  ExternalPathItem,
   KodoBookmark,
   KodoNavigator,
   Provider as KodoNavigatorProvider,
@@ -17,7 +18,7 @@ import Contents from "./contents";
 import Transfer from "./transfer";
 
 interface BrowseProps {
-  activeKodoAddress?: KodoAddress | null,
+  activeKodoAddress?: BookmarkItem | ExternalPathItem | null,
 }
 
 const Browse: React.FC<BrowseProps> = ({
@@ -48,9 +49,15 @@ const Browse: React.FC<BrowseProps> = ({
   }, [currentUser]);
 
   // bookmark go to
+  const [externalRegionId, setExternalRegionId] = useState<string>()
   useEffect(() => {
     if (!kodoNavigator || !activeKodoAddress) {
       return;
+    }
+    if ("regionId" in activeKodoAddress) {
+      setExternalRegionId(activeKodoAddress.regionId);
+    } else {
+      setExternalRegionId(undefined);
     }
     kodoNavigator.goTo({
       protocol: activeKodoAddress.protocol,
@@ -77,6 +84,7 @@ const Browse: React.FC<BrowseProps> = ({
         onClickRefresh={toggleRefreshThrottled}
       />
       <Contents
+        externalRegionId={externalRegionId}
         toggleRefresh={toggleRefresh}
       />
       <Transfer

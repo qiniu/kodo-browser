@@ -14,7 +14,6 @@ import {KodoNavigator, useKodoNavigator} from "@renderer/modules/kodo-address";
 import Settings, {ContentViewStyle} from "@renderer/modules/settings";
 
 import {BucketItem, FileItem, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
-import {isItemFile, isItemFolder} from "@renderer/modules/qiniu-client/file-item";
 import {DomainAdapter, useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 import * as AuditLog from "@renderer/modules/audit-log";
@@ -36,6 +35,7 @@ interface FilesProps {
 const Files: React.FC<FilesProps> = (props) => {
   const {currentLanguage, translate} = useI18n();
   const {currentUser} = useAuth();
+
   const customizedEndpoint = useMemo(() => {
     return currentUser?.endpointType === EndpointType.Public
       ? {
@@ -92,6 +92,7 @@ const Files: React.FC<FilesProps> = (props) => {
     autoReloadDeps: [
       props.toggleRefresh,
     ],
+    preferBackendMode: props.bucket?.preferBackendMode,
   });
 
   const handleReloadFiles = ({
@@ -166,6 +167,7 @@ const Files: React.FC<FilesProps> = (props) => {
       return true;
     },
     canS3Domain: !props.bucket?.grantedPermission,
+    preferBackendMode: props.bucket?.preferBackendMode,
   });
   const [selectedDomain, setSelectedDomain] = useState<DomainAdapter | undefined>();
   useEffect(() => {
@@ -257,10 +259,10 @@ const Files: React.FC<FilesProps> = (props) => {
       bucket: f.bucket,
       key: f.path.toString(),
       name: f.name,
-      size: isItemFile(f) ? f.size : 0,
-      mtime: isItemFile(f) ? f.lastModified.getTime() : 0,
-      isDirectory: isItemFolder(f),
-      isFile: isItemFile(f),
+      size: FileItem.isItemFile(f) ? f.size : 0,
+      mtime: FileItem.isItemFile(f) ? f.lastModified.getTime() : 0,
+      isDirectory: FileItem.isItemFolder(f),
+      isFile: FileItem.isItemFile(f),
     }));
 
     toast(translate("transfer.download.hint.addingJobs"));
@@ -306,7 +308,7 @@ const Files: React.FC<FilesProps> = (props) => {
         regionId={props.region?.s3Id}
         bucketName={props.bucket?.name}
         bucketPermission={props.bucket?.grantedPermission}
-        directoriesNumber={files.filter(f => isItemFolder(f)).length}
+        directoriesNumber={files.filter(f => FileItem.isItemFolder(f)).length}
         listedFileNumber={files.length}
         hasMoreFiles={Boolean(fileListMarker)}
         selectedFiles={[...selectedFiles.values()]}

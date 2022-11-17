@@ -205,10 +205,12 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
           {
             uploadJobState &&
             <UploadPanel
+              stopped={uploadJobState.stopped}
+              failed={uploadJobState.failed}
               data={uploadJobState.list}
-              onChangeSearchText={setUploadSearchText}
-              hasMore={uploadJobState.list.length < uploadJobState.total}
+              hasMore={uploadJobState.hasMore}
               onLoadMore={handleLoadMoreUploadJobs}
+              onChangeSearchText={setUploadSearchText}
             />
           }
         </Tab>
@@ -225,10 +227,12 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
           {
             downloadJobState &&
             <DownloadPanel
+              stopped={downloadJobState.stopped}
+              failed={downloadJobState.failed}
               data={downloadJobState.list}
-              onChangeSearchText={setDownloadSearchText}
-              hasMore={downloadJobState.list.length < downloadJobState.total}
+              hasMore={downloadJobState.hasMore}
               onLoadMore={handleLoadMoreDownloadJobs}
+              onChangeSearchText={setDownloadSearchText}
             />
           }
         </Tab>

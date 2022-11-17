@@ -67,7 +67,7 @@ const DownloadJobOperation: React.FC<DownloadJobOperationProps> = ({
         />
       }
       {
-        [Status.Failed, Status.Finished, Status.Stopped].includes(status) &&
+        [Status.Failed, Status.Finished, Status.Stopped, Status.Duplicated].includes(status) &&
         <TooltipButton
           variant="danger"
           size="sm"

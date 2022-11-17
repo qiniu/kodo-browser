@@ -102,6 +102,7 @@ export interface UpdateUiDataReplyMessage {
         running: number,
         failed: number,
         stopped: number,
+        hasMore: boolean,
     },
 }
 

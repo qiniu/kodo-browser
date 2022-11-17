@@ -101,12 +101,13 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         count: number = 10,
         query?: {
             status?: Status,
-            name?: string, // TODO: Compatible with upload and download
+            name?: string,
         },
     ) {
         let list: (Job["uiData"] | undefined)[];
         if (query) {
-            list = this.jobIds.map(id => this.jobs.get(id)?.uiData)
+            list = this.jobIds
+                .map(id => this.jobs.get(id)?.uiData)
                 .filter(job => {
                     if (!job) {
                         return false;
@@ -129,14 +130,14 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
 
                     // result
                     return matchStatus && matchName;
-                })
-                .slice(pageNum * count, pageNum * count + count);
+                });
         } else {
-            list = this.jobIds.slice(pageNum * count, pageNum * count + count)
-                .map(id => this.jobs.get(id)?.uiData);
+            list = this.jobIds
+              .map(id => this.jobs.get(id)?.uiData);
         }
         return {
-            list,
+            list: list.slice(pageNum * count, pageNum * count + count),
+            hasMore: (pageNum * count + count) < list.length,
             ...this.jobsSummary,
         };
     }

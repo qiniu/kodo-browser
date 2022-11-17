@@ -1,13 +1,15 @@
-import React, {useMemo, useState} from "react";
-import {Form} from "react-bootstrap";
+import React, {useEffect, useMemo, useState} from "react";
+import {Button, Form} from "react-bootstrap";
 import classNames from "classnames";
 import AutoResizer from "react-virtualized-auto-sizer";
 import {areEqual, FixedSizeList as List, ListChildComponentProps} from 'react-window';
 
+import {Status} from "@common/models/job/types";
 import UploadJob from "@common/models/job/upload-job";
 
 import {translate} from "@renderer/modules/i18n";
 import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
+import Settings from "@renderer/modules/settings";
 
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import ConfirmModal from "@renderer/components/modals/common/confirm-modal";
@@ -16,7 +18,6 @@ import EmptyHolder from "@renderer/components/empty-holder";
 
 import JobItem from "./job-item";
 import UploadJobOperation from "./upload-job-operation";
-import Settings from "@renderer/modules/settings";
 
 import {ITEM_HEIGHT, LOAD_MORE_THRESHOLD} from "./const";
 
@@ -53,17 +54,21 @@ const Item: React.FC<ListChildComponentProps<(UploadJob["uiData"] | undefined)[]
 const MemoItem = React.memo(Item, areEqual);
 
 interface UploadPanelProps {
+  stopped: number,
+  failed: number,
   data: (UploadJob["uiData"] | undefined)[],
-  onChangeSearchText: (searchText: string) => void,
   hasMore: boolean,
   onLoadMore: () => void,
+  onChangeSearchText: (searchText: string) => void,
 }
 
 const UploadPanel: React.FC<UploadPanelProps> = ({
+  stopped,
+  failed,
   data,
-  onChangeSearchText,
   hasMore,
   onLoadMore,
+  onChangeSearchText,
 }) => {
   const [
     {
@@ -85,6 +90,14 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
     setIsSkipEmptyDirectoryUpload(!isSkipEmptyDirectoryUpload);
   };
 
+  // search state
+  const [searchText, setSearchText] = useState<string>("");
+  useEffect(
+    () => onChangeSearchText(searchText),
+    [searchText]
+  );
+
+  // render
   return (
     <>
       <div className="transfer-panel-content">
@@ -94,8 +107,33 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
             size="sm"
             type="text"
             placeholder={translate("transfer.upload.toolbar.search.holder")}
-            onChange={e => onChangeSearchText(e.target.value)}
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
           />
+          <div>
+            {
+              stopped > 0 &&
+              <Button
+                size="sm"
+                variant="icon-warning"
+                className="ms-1"
+                onClick={() => setSearchText(Status.Stopped)}
+              >
+                <i className="bi bi-info-circle-fill me-1"/>{stopped}
+              </Button>
+            }
+            {
+              failed > 0 &&
+              <Button
+                size="sm"
+                variant="icon-danger"
+                className="ms-1"
+                onClick={() => setSearchText(Status.Failed)}
+              >
+                <i className="bi bi-x-circle-fill me-1"/>{failed}
+              </Button>
+            }
+          </div>
           <div>
             <TooltipButton
               size="sm"

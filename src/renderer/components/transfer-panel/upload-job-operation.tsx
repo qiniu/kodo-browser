@@ -67,7 +67,7 @@ const UploadJobOperation: React.FC<UpJobOperationProps> = ({
         />
       }
       {
-        [Status.Failed, Status.Finished, Status.Stopped].includes(status) &&
+        [Status.Failed, Status.Finished, Status.Stopped, Status.Duplicated].includes(status) &&
           <TooltipButton
             variant="danger"
             size="sm"

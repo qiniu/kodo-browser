@@ -51,7 +51,10 @@ const BucketTable: React.FC<BucketTableProps> = ({
           <col style={{minWidth: "14rem"}}/>
         </colgroup>
         <thead>
-        <tr className="sticky-top bg-body">
+        <tr
+          className="sticky-top bg-body"
+          style={{zIndex: 1}}
+        >
           <th></th>
           <th>{translate("browse.bucketTable.bucketName")}</th>
           <th>{translate("browse.bucketTable.bucketRegion")}</th>

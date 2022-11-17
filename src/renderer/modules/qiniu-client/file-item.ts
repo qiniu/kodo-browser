@@ -269,7 +269,7 @@ export function getFileType(item: Item): FileTypeInfo {
     };
   }
 
-  const ext = item.path.extname()?.substring(1) ?? '';
+  const ext = item.path.extname()?.toLowerCase().substring(1) ?? '';
 
   switch (ext) {
     case "png":

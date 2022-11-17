@@ -45,7 +45,7 @@ const FileOperations: React.FC<
       <TooltipButton
         iconClassName="bi bi-download"
         tooltipPlacement="top"
-        tooltipContent={translate("common.downloaded")}
+        tooltipContent={translate("common.download")}
         variant="icon-dark"
         className="me-1"
         onClick={e => {

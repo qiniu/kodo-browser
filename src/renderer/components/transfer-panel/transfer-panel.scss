@@ -41,6 +41,7 @@
     & .job-item-name {
       flex: 0 0 30%;
       min-width: 30%;
+      word-break: break-all;
     }
 
     & .job-item-status {

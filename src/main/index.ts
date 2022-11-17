@@ -20,7 +20,7 @@ electronRemote.initialize();
 ///*****************************************
 const root = path.dirname(__dirname);
 const uiRoot = path.join(root, 'renderer');
-const iconRoot = path.join(root, 'renderer', 'icons')
+const brandRoot = path.join(root, 'renderer', 'static', 'brand')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -33,7 +33,7 @@ let downloadRunning = 0;
 switch (process.platform) {
 case "darwin":
   app.dock.setIcon(
-    path.join(iconRoot, "icon.png")
+    path.join(brandRoot, "qiniu.png")
   );
   break;
 case "linux":
@@ -65,7 +65,7 @@ let createWindow = () => {
     minWidth: 1280,
     minHeight: 600,
     title: "Kodo Browser",
-    icon: path.join(iconRoot, "icon.ico"),
+    icon: path.join(brandRoot, "qiniu.ico"),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -157,7 +157,7 @@ let createWindow = () => {
   }
 
   if (process.platform == "linux") {
-    opt.icon = path.join(root, "src", "renderer", "icons", "icon.png");
+    opt.icon = path.join(brandRoot, "qiniu.png");
   }
 
   // Create the browser window.   http://electron.atom.io/docs/api/browserwindow/

@@ -13,7 +13,6 @@ const pages = [
 ]
 const copies = [
   'src/renderer/static',
-  'src/renderer/icons',
 ]
 
 module.exports = {

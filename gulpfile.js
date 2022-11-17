@@ -13,7 +13,7 @@ const KICK_NAME = 'kodo-browser';
 const VERSION = pkg.version;
 const ELECTRON_VERSION = "18.3.3";
 const ROOT = __dirname;
-const ICONS = `${ROOT}/src/renderer/icons`;
+const BRAND = `${ROOT}/src/renderer/static/brand`;
 const DIST = `${ROOT}/dist`;
 const TARGET = `${ROOT}/build`;
 const RELEASE = `${ROOT}/releases`;
@@ -46,7 +46,7 @@ gulp.task("mac", done => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "darwin";
     options.arch = "x64";
-    options.icon = `${ICONS}/icon.icns`;
+    options.icon = `${BRAND}/qiniu.icns`;
 
     packager(options).then((paths) => {
       console.log("--done");
@@ -74,7 +74,7 @@ gulp.task("dmg", done => {
     appPath: `${TARGET}/${NAME}-darwin-x64/${NAME}.app`,
     name: NAME,
     title: `${NAME}, by Qiniu`,
-    icon: `${ICONS}/icon.icns`,
+    icon: `${BRAND}/qiniu.icns`,
     overwrite: true,
     debug: false,
     out: `${TARGET}/${NAME}-darwin-x64-dmg`,
@@ -97,7 +97,7 @@ gulp.task("win64", done => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "win32";
     options.arch = "x64";
-    options.icon = `${ICONS}/icon.png`;
+    options.icon = `${BRAND}/qiniu.png`;
 
     packager(options).then((paths) => {
       console.log("--done");
@@ -125,7 +125,7 @@ gulp.task("win32", done => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "win32";
     options.arch = "ia32";
-    options.icon = `${ICONS}/icon.png`;
+    options.icon = `${BRAND}/qiniu.png`;
 
     packager(options).then((paths) => {
       console.log("--done");

@@ -5,7 +5,7 @@ import pkgJson from '../../../package.json';
 
 export const app = {
     id: 'kodo-browser',
-    logo: 'icons/icon.png',
+    logo: 'static/brand/qiniu.png',
     version: pkgJson.version,
 };
 

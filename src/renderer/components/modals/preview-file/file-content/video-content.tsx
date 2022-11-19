@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from "react";
 import {toast} from "react-hot-toast";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
 import Duration, {convertDuration} from "@common/const/duration";
+import {BackendMode} from "@common/qiniu"
+
 import {signatureUrl} from "@renderer/modules/qiniu-client";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 
@@ -14,7 +16,7 @@ interface VideoContentProps {
   bucketName: string,
   filePath: string,
   fileExt: string,
-  domain?: Domain,
+  domain: DomainAdapter,
   autoplay?: boolean,
 }
 
@@ -40,13 +42,15 @@ const VideoContent: React.FC<VideoContentProps> = ({
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      preferS3Adapter: !domain,
+      preferS3Adapter: domain.backendMode === BackendMode.S3,
     };
     signatureUrl(
       regionId,
       bucketName,
       filePath,
-      domain,
+      domain.name === NON_OWNED_DOMAIN.name
+        ? undefined
+        : domain,
       convertDuration(12 * Duration.Hour, Duration.Second),
       opt,
     )

@@ -189,7 +189,7 @@ const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
               <ul className="scroll-max-vh-40">
                 {
                   memoFileItems.map(fileItem => (
-                    <li>
+                    <li key={fileItem.path.toString()}>
                       {
                         isItemFolder(fileItem)
                           ? <i className="bi bi-folder-fill me-1 text-yellow"/>

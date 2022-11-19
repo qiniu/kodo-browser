@@ -5,18 +5,17 @@ import classNames from "classnames";
 import {toast} from "react-hot-toast";
 import {Button, Col, Form, InputGroup, Row, Spinner} from "react-bootstrap";
 import {SubmitHandler, UseFormReturn} from "react-hook-form";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
 import {useI18n} from "@renderer/modules/i18n";
+import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
 
 // utils
-export const NON_OWNED_DOMAIN = "non-owned-domain";
-
 export const getSelectedDomain = (
-  domainList: Domain[],
+  domainList: DomainAdapter[],
   domainName: string,
-  defaultDomain?: Domain,
-): Domain | undefined => {
+  defaultDomain?: DomainAdapter,
+): DomainAdapter | undefined => {
   if (domainName === defaultDomain?.name) {
     return defaultDomain;
   }
@@ -30,7 +29,7 @@ export interface GenerateLinkFormData {
 }
 
 export interface GenerateLinkSubmitData extends GenerateLinkFormData {
-  domain: Domain | undefined,
+  domain: DomainAdapter | undefined,
 }
 
 // component
@@ -39,8 +38,8 @@ interface GenerateLinkFormProps {
   fileLink?: string,
   formController: UseFormReturn<GenerateLinkFormData>
   loadingDomains?: boolean,
-  domains: Domain[],
-  defaultDomain?: Domain,
+  domains: DomainAdapter[],
+  defaultDomain?: DomainAdapter,
   onReloadDomains?: () => void,
   onSubmit: SubmitHandler<GenerateLinkSubmitData>,
 
@@ -60,6 +59,7 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
 
   submitButtonPortal: SubmitButtonPortal,
 }) => {
+  const {currentUser} = useAuth();
   const {translate} = useI18n();
 
   const memoDefaultDomain = useMemo(() => defaultDomain, []);
@@ -117,50 +117,63 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
                 </Col>
               </Form.Group>
           }
-          <Form.Group as={Row} className="mb-3" controlId="domainName">
-            <Form.Label className="text-end" column sm={4}>
-              {translate("forms.generateLink.domainName.label")}
-            </Form.Label>
-            <Col sm={7}>
-              <InputGroup>
-                <Form.Select
-                  {...register("domainName")}
-                >
-                  <option value={NON_OWNED_DOMAIN}>
-                    {translate("forms.generateLink.domainName.nonOwnedDomain")}
-                  </option>
-                  {
-                    memoDefaultDomain
-                      ? <option value={memoDefaultDomain.name}>{memoDefaultDomain.name}</option>
-                      : null
-                  }
-                  {
-                    domains
-                      .filter(domain => domain.name !== memoDefaultDomain?.name)
-                      .map(domain => (
-                        <option key={domain.name} value={domain.name}>{domain.name}</option>
-                      ))
-                  }
-                </Form.Select>
-                {
-                  onReloadDomains &&
-                  <Button
-                    variant="outline-solid-gray-400"
-                    onClick={onReloadDomains}
-                  >
-                    <i
-                      className={classNames(
-                        "bi bi-arrow-repeat",
-                        {
-                          "loading-spin": loadingDomains,
-                        },
-                      )}
-                    />
-                  </Button>
-                }
-              </InputGroup>
-            </Col>
-          </Form.Group>
+          {
+            currentUser?.endpointType === EndpointType.Private
+              ? null
+              : <Form.Group as={Row} className="mb-3" controlId="domainName">
+                <Form.Label className="text-end" column sm={4}>
+                  {translate("forms.generateLink.domainName.label")}
+                </Form.Label>
+                <Col sm={7}>
+                  <InputGroup>
+                    <Form.Select
+                      {...register("domainName")}
+                    >
+                      {
+                        memoDefaultDomain
+                          ? <option value={memoDefaultDomain.name}>
+                            {
+                              memoDefaultDomain.name === NON_OWNED_DOMAIN.name
+                                ? translate("forms.generateLink.domainName.nonOwnedDomain")
+                                : memoDefaultDomain.name
+                            }
+                          </option>
+                          : null
+                      }
+                      {
+                        domains
+                          .filter(domain => domain.name !== memoDefaultDomain?.name)
+                          .map(domain => (
+                            <option key={domain.name} value={domain.name}>
+                              {
+                                domain.name === NON_OWNED_DOMAIN.name
+                                  ? translate("forms.generateLink.domainName.nonOwnedDomain")
+                                  : domain.name
+                              }
+                            </option>
+                          ))
+                      }
+                    </Form.Select>
+                    {
+                      onReloadDomains &&
+                      <Button
+                        variant="outline-solid-gray-400"
+                        onClick={onReloadDomains}
+                      >
+                        <i
+                          className={classNames(
+                            "bi bi-arrow-repeat",
+                            {
+                              "loading-spin": loadingDomains,
+                            },
+                          )}
+                        />
+                      </Button>
+                    }
+                  </InputGroup>
+                </Col>
+              </Form.Group>
+          }
           {
             selectedDomain?.private ?? true
               ? <Form.Group as={Row} className="mb-3" controlId="expireAfter">

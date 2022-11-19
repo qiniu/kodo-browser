@@ -5,7 +5,7 @@ import {toast} from "react-hot-toast";
 import * as LocalLogger from "@renderer/modules/local-logger";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {useKodoNavigator} from "@renderer/modules/kodo-address";
-import {BucketItem, getRegions, listAllBuckets} from "@renderer/modules/qiniu-client";
+import {BucketItem, getRegions, listAllBuckets, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 import {Provider as FileOperationProvider} from "@renderer/modules/file-operation";
 
 import Buckets from "./buckets";
@@ -39,7 +39,25 @@ const Contents: React.FC<ContentsProps> = ({
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
     };
-    Promise.all([getRegions(opt), listAllBuckets(opt)])
+    let regionsPromise: Promise<Region[]>;
+    if (currentUser.endpointType === EndpointType.Public) {
+      regionsPromise = getRegions(opt);
+    } else {
+      const regionsFromEndpointConfig = privateEndpointPersistence
+        .read()
+        .regions
+        .map(r => {
+          const result = new Region(r.identifier, r.identifier, r.label);
+          result.s3Urls = [r.endpoint];
+          return result
+        });
+      if (!regionsFromEndpointConfig.length) {
+        regionsPromise = getRegions(opt);
+      } else {
+        regionsPromise = Promise.resolve(regionsFromEndpointConfig);
+      }
+    }
+    Promise.all([regionsPromise, listAllBuckets(opt)])
       .then(([regions, buckets]) => {
         setRegionsMap(regions.reduce((res, r) => {
           res.set(r.s3Id, r);
@@ -73,7 +91,7 @@ const Contents: React.FC<ContentsProps> = ({
   const region = bucket?.regionId ? regionsMap.get(bucket?.regionId) : undefined;
 
   return (
-    <FileOperationProvider>
+    <FileOperationProvider bucketGrantedPermission={bucket?.grantedPermission}>
       <div
         style={{
           position: "relative",

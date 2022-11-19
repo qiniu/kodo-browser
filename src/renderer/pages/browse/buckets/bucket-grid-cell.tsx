@@ -27,6 +27,14 @@ const BucketCell: React.FC<BucketCellProps> = ({
     }
   }
 
+  // icon class name
+  let iconClassName = "bi bi-database-fill me-1 text-brown";
+  if (data.grantedPermission === "readonly") {
+    iconClassName = "bic bic-database-fill-eye me-1 text-slate";
+  } else if (data.grantedPermission === "readwrite") {
+    iconClassName = "bic bic-database-fill-pencil me-1 text-slate";
+  }
+
   return (
     <Card
       border={isSelected ? "primary" : undefined}
@@ -35,7 +43,7 @@ const BucketCell: React.FC<BucketCellProps> = ({
     >
       <Card.Img
         as="i"
-        className="text-center fa fa-database me-1 text-brown"
+        className={`text-center me-1 ${iconClassName}`}
       />
       <Card.Body>
         <Card.Title className="overflow-ellipsis-one-line w-100">

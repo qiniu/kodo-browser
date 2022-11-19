@@ -20,6 +20,7 @@ const dict: Dictionary = {
         interrupt: "中断",
         notFound: "未発見",
         noOperationalObject: "操作可能なオブジェクトがない",
+        noDomainToGet: "オブジェクトを取得するためのドメインがない",
         errored: "エラーが発生しました",
         paused: "停止しました",
 
@@ -127,6 +128,8 @@ const dict: Dictionary = {
             },
         },
         bucketTable: {
+            bucketGrantedReadOnly: "読み取り専用",
+            bucketGrantedReadWrite: "読み書き",
             bucketName: "バケット名",
             bucketRegion: "バケット領域",
             createTime: "作成時間",

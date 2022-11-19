@@ -1,9 +1,9 @@
 import React, {PropsWithChildren} from "react";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
 import StorageClass from "@common/models/storage-class";
 
 import {FileItem} from "@renderer/modules/qiniu-client";
+import {DomainAdapter} from "@renderer/modules/qiniu-client-hooks";
 
 import {OperationDoneRecallFn} from "../../file/types";
 import ChangeStorageClass from "./change-storage-class";
@@ -21,7 +21,8 @@ interface FileOperationProps {
   bucketName: string,
   basePath: string,
   fileItem: FileItem.File,
-  defaultDomain: Domain | undefined,
+  canS3Domain: boolean,
+  defaultDomain: DomainAdapter | undefined,
   storageClasses: StorageClass[],
   operationPortal: React.FC<PropsWithChildren>,
   onHideOperation: () => void,
@@ -34,6 +35,7 @@ const FileOperation: React.FC<FileOperationProps> = ({
   bucketName,
   basePath,
   fileItem,
+  canS3Domain,
   defaultDomain,
   storageClasses,
   operationPortal,
@@ -47,6 +49,7 @@ const FileOperation: React.FC<FileOperationProps> = ({
           fileItem={fileItem}
           regionId={regionId}
           bucketName={bucketName}
+          canS3Domain={canS3Domain}
           defaultDomain={defaultDomain}
           submitButtonPortal={operationPortal}
         />

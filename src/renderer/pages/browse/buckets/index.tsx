@@ -40,10 +40,16 @@ const Buckets: React.FC<BucketsProps> = ({
   };
 
   // computed state
-  const bucketsWithRegionName = buckets.map(b => ({
-    ...b,
-    regionName: regions.find(r => r.s3Id === b.regionId)?.translatedLabels?.[currentLanguage] ?? b.regionId,
-  }))
+  const bucketsWithRegionName = buckets.map(b => {
+    const region = regions.find(r => r.s3Id === b.regionId);
+    return {
+      ...b,
+      regionName:
+        region?.translatedLabels?.[currentLanguage] ??
+        region?.label ??
+        b.regionId,
+    };
+  });
 
   // render
   return (

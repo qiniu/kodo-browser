@@ -1,7 +1,9 @@
 import React, {PropsWithChildren, useMemo, useState} from "react";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
+
+import ByteSize from "@common/const/byte-size";
 
 import {FileItem} from "@renderer/modules/qiniu-client";
+import {DomainAdapter} from "@renderer/modules/qiniu-client-hooks";
 
 import FileTooLarge from "../precheck/file-too-large";
 import PictureContent from "./picture-content";
@@ -14,8 +16,9 @@ interface FileContentProps {
   regionId: string,
   bucketName: string,
   fileItem: FileItem.File,
-  fileTypeInfo?: FileItem.FileTypeInfo
-  domain?: Domain
+  fileTypeInfo?: FileItem.FileTypeInfo,
+  domain: DomainAdapter,
+  readOnly?: boolean,
   portal?: React.FC<PropsWithChildren>,
 }
 
@@ -25,6 +28,7 @@ const FileContent: React.FC<PropsWithChildren<FileContentProps>> = ({
   fileItem,
   fileTypeInfo,
   domain,
+  readOnly,
   portal,
 }) => {
   const fileType = useMemo(
@@ -76,13 +80,20 @@ const FileContent: React.FC<PropsWithChildren<FileContentProps>> = ({
     }
     case FileItem.FileExtensionType.Code:
       return (
-        <CodeContent
-          regionId={regionId}
-          bucketName={bucketName}
-          filePath={fileItem.path.toString()}
-          domain={domain}
-          portal={portal}
-        />
+        <FileTooLarge
+          fileSize={fileItem.size}
+          canForcePreview={false}
+          maxPreviewSize={5 * ByteSize.MB}
+        >
+          <CodeContent
+            regionId={regionId}
+            bucketName={bucketName}
+            filePath={fileItem.path.toString()}
+            domain={domain}
+            readOnly={readOnly}
+            portal={portal}
+          />
+        </FileTooLarge>
       );
   }
   return (

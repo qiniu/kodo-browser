@@ -1,37 +1,37 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {Button, Modal, ModalProps} from "react-bootstrap";
 import {SubmitHandler, useForm} from "react-hook-form";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
+
+import {BackendMode} from "@common/qiniu"
 
 import usePortal from "@renderer/modules/hooks/use-portal";
 import {FileItem, signatureUrl} from "@renderer/modules/qiniu-client";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
-import {useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
+import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
 
 import {
   GenerateLinkForm,
   GenerateLinkFormData,
   GenerateLinkSubmitData,
-  NON_OWNED_DOMAIN
 } from "@renderer/components/forms";
 
 interface GenerateFileLinkProps {
   regionId: string,
   bucketName: string,
   fileItem: FileItem.File | null,
-  defaultDomain?: Domain,
+  canS3Domain: boolean,
+  defaultDomain?: DomainAdapter,
 }
 
-const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = (props) => {
-  const {
-    regionId,
-    bucketName,
-    fileItem,
-    defaultDomain,
-    ...modalProps
-  } = props;
-
+const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
+  regionId,
+  bucketName,
+  fileItem,
+  canS3Domain,
+  defaultDomain,
+  ...modalProps
+}) => {
   const {translate} = useI18n();
   const {currentUser} = useAuth();
 
@@ -40,11 +40,13 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = (props) =
     memoFileItem,
     memoRegionId,
     memoBucketName,
+    memoCanS3Domain,
     memoDefaultDomain,
   } = useMemo(() => ({
     memoFileItem: fileItem,
     memoRegionId: regionId,
     memoBucketName: bucketName,
+    memoCanS3Domain: canS3Domain,
     memoDefaultDomain: defaultDomain,
   }), [modalProps.show]);
 
@@ -59,6 +61,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = (props) =
     user: currentUser,
     regionId: memoRegionId,
     bucketName: memoBucketName,
+    canS3Domain: memoCanS3Domain,
   });
 
   // state when generate succeed
@@ -68,7 +71,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = (props) =
   const generateLinkFormController = useForm<GenerateLinkFormData>({
     mode: "onChange",
     defaultValues: {
-      domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN,
+      domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
       expireAfter: 600,
     },
   });
@@ -84,14 +87,18 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = (props) =
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      preferS3Adapter: !data.domain,
+      preferS3Adapter: data.domain?.backendMode === BackendMode.S3,
     };
+
+    const domain = data.domain?.name === NON_OWNED_DOMAIN.name
+      ? undefined
+      : data.domain;
 
     return signatureUrl(
       memoRegionId,
       memoBucketName,
       memoFileItem.path.toString(),
-      data.domain,
+      domain,
       data.expireAfter,
       opt,
     )
@@ -106,7 +113,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = (props) =
   useEffect(() => {
     if (modalProps.show) {
       reset({
-        domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN,
+        domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
       });
     } else {
       setFileLink(undefined);

@@ -14,7 +14,8 @@ import FileCheckbox, {FileCheckboxCellProps, FileCheckboxHeader, FileCheckboxHea
 import FileOperations, {FileOperationsCellCallbackProps} from "./file-operations";
 
 type GetFileTableColumnsProps = {
-    availableStorageClasses?: Record<string, StorageClass>
+    availableStorageClasses?: Record<string, StorageClass>,
+    bucketGrantedPermission?: "readonly" | "readwrite"
   }
   & FileNameCellCallbackProps
   & FileCheckboxHeaderProps
@@ -104,7 +105,8 @@ export function getColumns({
   ];
 
   if (hasAvailableStorageClasses) {
-    result.splice(2, 0, {
+    // append storage class column after 3rd column
+    result.splice(3, 0, {
         key: "fileStorageClass",
         title: translate("browse.fileTable.fileStorageClass"),
         width: 128,

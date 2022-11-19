@@ -6,18 +6,21 @@ import "./code-mirror-container.scss";
 
 type EditorViewProps = {
   defaultValue: string,
+  readOnly?: boolean,
   editorRef?: MutableRefObject<Editor | undefined>
   // extensions: Extension[];
 };
 
 const EditorView: React.FC<EditorViewProps> = ({
   defaultValue,
+  readOnly,
   editorRef,
 }) => {
   const {ref: editorContainerRef, editor} = useEditorView({
     value: defaultValue,
     lineNumbers: true,
     lineWrapping: false,
+    readOnly,
   });
 
   useEffect(() => {

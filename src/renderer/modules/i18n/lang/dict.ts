@@ -19,6 +19,7 @@ export default interface Dictionary {
     interrupt: string,
     notFound: string,
     noOperationalObject: string,
+    noDomainToGet: string,
     errored: string,
     downloading: string,
     downloaded: string,
@@ -130,6 +131,8 @@ export default interface Dictionary {
       },
     },
     bucketTable: {
+      bucketGrantedReadOnly: string,
+      bucketGrantedReadWrite: string,
       bucketName: string,
       bucketRegion: string,
       createTime: string,

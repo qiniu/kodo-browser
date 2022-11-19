@@ -3,20 +3,22 @@ import {toast} from "react-hot-toast";
 import {Button, Spinner} from "react-bootstrap";
 import {Editor} from "codemirror";
 import {MergeView} from "codemirror/addon/merge/merge";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
+import {BackendMode} from "@common/qiniu"
 
-import {getContent, saveContent} from "@renderer/modules/qiniu-client";
+import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {getContent, saveContent} from "@renderer/modules/qiniu-client";
+import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
+import {DiffView, EditorView} from "@renderer/modules/codemirror";
 
 import LoadingHolder from "@renderer/components/loading-holder";
-import {EditorView, DiffView} from "@renderer/modules/codemirror";
-import {useI18n} from "@renderer/modules/i18n";
 
 interface CodeContentProps {
   regionId: string,
   bucketName: string,
   filePath: string,
-  domain?: Domain,
+  domain: DomainAdapter,
+  readOnly?: boolean,
   portal?: React.FC<PropsWithChildren>,
 }
 
@@ -25,6 +27,7 @@ const CodeContent: React.FC<CodeContentProps> = ({
   bucketName,
   filePath,
   domain,
+  readOnly,
   portal: Portal,
 }) => {
   const {translate} = useI18n();
@@ -69,13 +72,15 @@ const CodeContent: React.FC<CodeContentProps> = ({
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      preferS3Adapter: !domain,
+      preferS3Adapter: domain.backendMode === BackendMode.S3,
     };
     getContent(
       regionId,
       bucketName,
       filePath,
-      domain,
+      domain.name === NON_OWNED_DOMAIN.name
+        ? undefined
+        : domain,
       opt,
     )
       .then(contentBuffer => {
@@ -106,7 +111,8 @@ const CodeContent: React.FC<CodeContentProps> = ({
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      preferS3Adapter: !domain,
+      preferS3Adapter: domain.backendMode === BackendMode.S3,
+      preferKodoAdapter: domain.backendMode === BackendMode.Kodo,
     };
 
     const p = saveContent(
@@ -114,7 +120,9 @@ const CodeContent: React.FC<CodeContentProps> = ({
       bucketName,
       filePath,
       Buffer.from(dirtyContent),
-      domain,
+      domain.name === NON_OWNED_DOMAIN.name
+        ? undefined
+        : domain,
       opt,
     );
 
@@ -132,7 +140,7 @@ const CodeContent: React.FC<CodeContentProps> = ({
       success: translate("common.submitted"),
       error: err => `${translate("common.failed")}: ${err}`,
     });
-  }
+  };
   // ---
 
   return (
@@ -144,6 +152,7 @@ const CodeContent: React.FC<CodeContentProps> = ({
             : !isShowDiff
               ? <EditorView
                 defaultValue={codeContent}
+                readOnly={readOnly}
                 editorRef={editorRef}
               />
               : <DiffView

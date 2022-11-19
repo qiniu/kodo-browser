@@ -65,7 +65,7 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
         {
           !customize.disable.createBucket &&
           <Button className="text-white" variant="info" size="sm" onClick={handleClickCreateBucket}>
-            <i className="bi bi-plus-lg me-1"/>
+            <i className="bi bi-database-add me-1"/>
             {translate("browse.bucketToolbar.createBucketButton")}
           </Button>
         }
@@ -77,7 +77,10 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-              <Dropdown.Item onClick={handleClickDeleteBucket}>
+              <Dropdown.Item
+                disabled={selectedBucket?.grantedPermission === "readonly"}
+                onClick={handleClickDeleteBucket}
+              >
                 <i className="bi bi-x-lg me-1 text-danger"/>
                 {translate("browse.bucketToolbar.moreOperation.deleteBucketButton")}
               </Dropdown.Item>

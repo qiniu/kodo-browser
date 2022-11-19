@@ -16,6 +16,7 @@ export interface FileOperation {
 }
 
 const FileOperationContext = createContext<{
+  bucketGrantedPermission?: 'readonly' | 'readwrite',
   fileOperation: FileOperation | null,
   setFileOperation: (operation: FileOperation | null) => void,
 }>({
@@ -24,8 +25,10 @@ const FileOperationContext = createContext<{
 });
 
 export const Provider: React.FC<PropsWithChildren<{
+  bucketGrantedPermission?: 'readonly' | 'readwrite',
   defaultFileOperation?: FileOperation,
 }>> = ({
+  bucketGrantedPermission,
   defaultFileOperation = null,
   children,
 }) => {
@@ -33,6 +36,7 @@ export const Provider: React.FC<PropsWithChildren<{
 
   return (
     <FileOperationContext.Provider value={{
+      bucketGrantedPermission,
       fileOperation,
       setFileOperation,
     }}>

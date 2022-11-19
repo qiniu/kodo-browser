@@ -4,9 +4,7 @@ import {dialog as electronDialog} from '@electron/remote'
 import React, {useEffect, useMemo, useState} from "react";
 import {toast} from "react-hot-toast";
 import {Region} from "kodo-s3-adapter-sdk";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
-import {BackendMode} from "@common/qiniu";
 import StorageClass from "@common/models/storage-class";
 
 import * as LocalLogger from "@renderer/modules/local-logger";
@@ -17,7 +15,7 @@ import Settings, {ContentViewStyle} from "@renderer/modules/settings";
 
 import {BucketItem, FileItem, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 import {isItemFile, isItemFolder} from "@renderer/modules/qiniu-client/file-item";
-import {useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
+import {DomainAdapter, useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 import * as AuditLog from "@renderer/modules/audit-log";
 
@@ -167,8 +165,14 @@ const Files: React.FC<FilesProps> = (props) => {
       setSelectedFiles(new Map());
       return true;
     },
+    canS3Domain: !props.bucket?.grantedPermission,
   });
-  const [selectDomain, setSelectDomain] = useState<Domain | undefined>();
+  const [selectedDomain, setSelectedDomain] = useState<DomainAdapter | undefined>();
+  useEffect(() => {
+    setSelectedDomain(prevDomain =>
+      domains.find(d => d.name === prevDomain?.name) ?? domains[0]
+    );
+  }, [domains]);
 
   // search by prefix
   const searchPrefix = currentAddress.path.slice(
@@ -228,7 +232,11 @@ const Files: React.FC<FilesProps> = (props) => {
     const currentRegion = props.region;
     const currentBucket = props.bucket;
     if (!currentRegion || !currentBucket || !currentUser) {
-      return
+      return;
+    }
+    if (!selectedDomain) {
+      toast.error(translate("common.noDomainToGet"));
+      return;
     }
 
     // select save path
@@ -268,7 +276,7 @@ const Files: React.FC<FilesProps> = (props) => {
       downloadOptions: {
         region: currentRegion.s3Id,
         bucket: currentBucket.name,
-        domain: selectDomain,
+        domain: selectedDomain,
         isOverwrite: Settings.overwriteDownload,
         storageClasses: currentRegion.storageClasses,
         // userNatureLanguage needs mid-dash but i18n using lo_dash
@@ -285,9 +293,9 @@ const Files: React.FC<FilesProps> = (props) => {
           label: r.label,
           s3Urls: [r.endpoint],
         })),
-        backendMode: selectDomain ? BackendMode.Kodo : BackendMode.S3
+        backendMode: selectedDomain.backendMode,
       },
-    })
+    });
   };
 
   return (
@@ -297,6 +305,7 @@ const Files: React.FC<FilesProps> = (props) => {
         availableStorageClasses={availableStorageClasses}
         regionId={props.region?.s3Id}
         bucketName={props.bucket?.name}
+        bucketPermission={props.bucket?.grantedPermission}
         directoriesNumber={files.filter(f => isItemFolder(f)).length}
         listedFileNumber={files.length}
         hasMoreFiles={Boolean(fileListMarker)}
@@ -304,8 +313,8 @@ const Files: React.FC<FilesProps> = (props) => {
 
         loadingDomains={loadingDomains}
         domains={domains}
-        selectDomain={selectDomain}
-        onChangeSelectDomain={setSelectDomain}
+        selectedDomain={selectedDomain}
+        onChangeDomain={setSelectedDomain}
         onReloadDomains={loadDomains}
 
         defaultSearchText={searchPrefix}
@@ -338,18 +347,20 @@ const Files: React.FC<FilesProps> = (props) => {
         basePath={basePath}
         regionId={props.region?.s3Id}
         bucketName={props.bucket?.name}
-        selectDomain={selectDomain}
+        selectDomain={selectedDomain}
         onReloadFiles={handleReloadFiles}
       />
-
-      <DropZone
-        className="files-upload-zone bg-body bg-opacity-75"
-        enterText={translate("transfer.upload.dropZone.enter")}
-        overText={translate("transfer.upload.dropZone.over")}
-        disabled={isShowAnyModal}
-        onDropped={handleUploadFiles}
-      />
-
+      {
+        props.bucket?.grantedPermission === "readonly"
+          ? null
+          : <DropZone
+            className="files-upload-zone bg-body bg-opacity-75"
+            enterText={translate("transfer.upload.dropZone.enter")}
+            overText={translate("transfer.upload.dropZone.over")}
+            disabled={isShowAnyModal}
+            onDropped={handleUploadFiles}
+          />
+      }
       {
         !props.region || !props.bucket
           ? null

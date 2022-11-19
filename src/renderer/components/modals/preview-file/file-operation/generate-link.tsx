@@ -1,22 +1,24 @@
 import React, {PropsWithChildren, useState} from "react";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
-import {FileItem, signatureUrl} from "@renderer/modules/qiniu-client";
 import {SubmitHandler, useForm} from "react-hook-form";
+
+import {BackendMode} from "@common/qiniu"
+
 import {EndpointType, useAuth} from "@renderer/modules/auth";
-import {useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
+import {FileItem, signatureUrl} from "@renderer/modules/qiniu-client";
+import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
 
 import {
   GenerateLinkForm,
   GenerateLinkFormData,
   GenerateLinkSubmitData,
-  NON_OWNED_DOMAIN
 } from "@renderer/components/forms";
 
 interface GenerateLinkProps {
   regionId: string,
   bucketName: string,
   fileItem: FileItem.File,
-  defaultDomain?: Domain,
+  canS3Domain: boolean,
+  defaultDomain?: DomainAdapter,
   submitButtonPortal?: React.FC<PropsWithChildren>,
 }
 
@@ -24,6 +26,7 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
   regionId,
   bucketName,
   fileItem,
+  canS3Domain,
   defaultDomain,
   submitButtonPortal,
 }) => {
@@ -40,13 +43,14 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
     user: currentUser,
     regionId,
     bucketName,
+    canS3Domain,
   });
 
   // form for generating file link
   const generateLinkFormController = useForm<GenerateLinkFormData>({
     mode: "onChange",
     defaultValues: {
-      domainName: defaultDomain?.name ?? NON_OWNED_DOMAIN,
+      domainName: defaultDomain?.name ?? NON_OWNED_DOMAIN.name,
       expireAfter: 600,
     },
   });
@@ -63,14 +67,18 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      preferS3Adapter: !data.domain,
+      preferS3Adapter: data.domain?.backendMode === BackendMode.S3,
     };
+
+    const domain = data.domain?.name === NON_OWNED_DOMAIN.name
+      ? undefined
+      : data.domain;
 
     return signatureUrl(
       regionId,
       bucketName,
       fileItem.path.toString(),
-      data.domain,
+      domain,
       data.expireAfter,
       opt,
     )

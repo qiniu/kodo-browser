@@ -20,6 +20,7 @@ const dict: Dictionary = {
     interrupt: "Interrupt",
     notFound: "Page Not Found!",
     noOperationalObject: "No object selected",
+    noDomainToGet: "No domain to get object",
     errored: "An error has occurred",
     paused: "Paused",
 
@@ -127,6 +128,8 @@ const dict: Dictionary = {
       },
     },
     bucketTable: {
+      bucketGrantedReadOnly: "Read Only",
+      bucketGrantedReadWrite: "Read Write",
       bucketName: "Bucket name",
       bucketRegion: "Bucket region",
       createTime: "Create time",

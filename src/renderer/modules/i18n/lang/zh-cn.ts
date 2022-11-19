@@ -20,6 +20,7 @@ const dict: Dictionary = {
     interrupt: "中断",
     notFound: "来到了无牛问津的地方",
     noOperationalObject: "未选择操作对象",
+    noDomainToGet: "没有可用的域名获取对象",
     errored: "发生错误",
     paused: "已暂停",
 
@@ -127,6 +128,8 @@ const dict: Dictionary = {
       },
     },
     bucketTable: {
+      bucketGrantedReadOnly: "授权只读",
+      bucketGrantedReadWrite: "授权读写",
       bucketName: "Bucket 名称",
       bucketRegion: "Bucket 区域",
       createTime: "创建时间",

@@ -8,21 +8,22 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 import moment from "moment";
 import csvStringify from "csv-stringify";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
 import StorageClass from "@common/models/storage-class";
+import {BackendMode} from "@common/qiniu"
 
 import usePortal from "@renderer/modules/hooks/use-portal";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem, signatureUrls} from "@renderer/modules/qiniu-client";
-import {useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
+import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
 import {isItemFolder} from "@renderer/modules/qiniu-client/file-item";
 
 import {
   BatchProgress,
   BatchTaskStatus,
-  ErroredFileOperation, ErrorFileList,
+  ErroredFileOperation,
+  ErrorFileList,
   useBatchProgress
 } from "@renderer/components/batch-progress";
 
@@ -30,7 +31,6 @@ import {
   GenerateLinkForm,
   GenerateLinkFormData,
   GenerateLinkSubmitData,
-  NON_OWNED_DOMAIN
 } from "@renderer/components/forms";
 
 interface GenerateFileLinksProps {
@@ -39,7 +39,8 @@ interface GenerateFileLinksProps {
   basePath: string,
   fileItems: FileItem.Item[],
   storageClasses: StorageClass[],
-  defaultDomain?: Domain,
+  canS3Domain: boolean,
+  defaultDomain?: DomainAdapter,
 }
 
 const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props) => {
@@ -49,6 +50,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     basePath,
     fileItems,
     storageClasses,
+    canS3Domain,
     defaultDomain,
     ...modalProps
   } = props;
@@ -67,6 +69,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     memoBucketName,
     memoBasePath,
     memoStorageClasses,
+    memoCanS3Domain,
     memoDefaultDomain,
   } = useMemo(() => ({
     memoFileItems: modalProps.show ? fileItems : [],
@@ -74,6 +77,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     memoBucketName: bucketName,
     memoBasePath: basePath,
     memoStorageClasses: storageClasses,
+    memoCanS3Domain: canS3Domain,
     memoDefaultDomain: defaultDomain,
   }), [modalProps.show]);
 
@@ -88,6 +92,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     user: currentUser,
     regionId: memoRegionId,
     bucketName: memoBucketName,
+    canS3Domain: memoCanS3Domain,
   });
 
   // state when generate succeed
@@ -103,9 +108,9 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
   const generateLinkFormController = useForm<GenerateLinkFormData>({
     mode: "onChange",
     defaultValues: {
-      domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN,
+      domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
       expireAfter: 600,
-    }
+    },
   });
 
   const {reset} = generateLinkFormController;
@@ -117,7 +122,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     });
   }
 
-  const generateAndSaveFileLinks = (domain: Domain | undefined, expireAfter: number, targetDirectoryPath: string): Promise<string> => {
+  const generateAndSaveFileLinks = (domain: DomainAdapter | undefined, expireAfter: number, targetDirectoryPath: string): Promise<string> => {
     if (!currentUser) {
       return Promise.reject();
     }
@@ -137,13 +142,15 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
       storageClasses: memoStorageClasses,
-      preferS3Adapter: !domain,
+      preferS3Adapter: domain?.backendMode === BackendMode.S3,
     };
     return signatureUrls(
       memoRegionId,
       memoBucketName,
       memoFileItems,
-      domain,
+      domain?.name === NON_OWNED_DOMAIN.name
+        ? undefined
+        : domain,
       expireAfter,
       (progress) => {
         setBatchProgressState({
@@ -162,9 +169,9 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
         setErroredFileOperations(batchErrors.map<ErroredFileOperation>(batchError => ({
           fileType: batchError.item.itemType,
           path: batchError.item.path.toString().slice(memoBasePath.length),
-          errorMessage: batchError.error.translated_message
-            || batchError.error.message
-            || batchError.error.code,
+          errorMessage: batchError.error.translated_message ||
+            batchError.error.message ||
+            batchError.error.code,
         })));
         return filePath;
       })
@@ -214,7 +221,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
   useEffect(() => {
     if (modalProps.show) {
       reset({
-        domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN,
+        domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
       });
     } else {
       setCsvFilePath(null);
@@ -293,7 +300,8 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
                   </Form.Group>
               }
               {
-                batchProgressState.status === BatchTaskStatus.Standby
+                batchProgressState.status === BatchTaskStatus.Standby ||
+                batchProgressState.status === BatchTaskStatus.Ended
                   ? null
                   : <BatchProgress
                     status={batchProgressState.status}

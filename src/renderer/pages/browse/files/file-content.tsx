@@ -1,10 +1,13 @@
 import React from "react";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
+import {toast} from "react-hot-toast";
 
 import StorageClass from "@common/models/storage-class";
-import {FileItem} from "@renderer/modules/qiniu-client";
+
+import {useI18n} from "@renderer/modules/i18n";
 import {useKodoNavigator} from "@renderer/modules/kodo-address";
 import {ContentViewStyle} from "@renderer/modules/settings";
+import {FileItem} from "@renderer/modules/qiniu-client";
+import {DomainAdapter} from "@renderer/modules/qiniu-client-hooks";
 
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import {OperationDoneRecallFn} from "@renderer/components/modals/file/types";
@@ -17,6 +20,7 @@ import PreviewFile from "@renderer/components/modals/preview-file";
 import {OperationName} from "./types";
 import FileTable from "./file-table";
 import FileGrid from "./file-grid";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 interface FileContentProps {
   viewStyle: ContentViewStyle,
@@ -33,7 +37,7 @@ interface FileContentProps {
   basePath?: string,
   regionId?: string,
   bucketName?: string,
-  selectDomain?: Domain,
+  selectDomain?: DomainAdapter,
   onReloadFiles: OperationDoneRecallFn,
 }
 
@@ -53,7 +57,9 @@ const FileContent: React.FC<FileContentProps> = ({
   selectDomain,
   onReloadFiles,
 }) => {
+  const {translate} = useI18n();
   const {currentAddress, goTo} = useKodoNavigator();
+  const {bucketGrantedPermission} = useFileOperation();
 
   // modal states
   const [
@@ -148,6 +154,10 @@ const FileContent: React.FC<FileContentProps> = ({
         onDownloadFile(file);
         break;
       case OperationName.GenerateLink:
+        if (!selectDomain) {
+          toast.error(translate("common.noDomainToGet"));
+          break;
+        }
         FileItem.isItemFile(file) && handleClickGeneratingLink({fileItem: file});
         break;
       case OperationName.ChangeStorageClass:
@@ -176,10 +186,15 @@ const FileContent: React.FC<FileContentProps> = ({
               FileItem.isItemFolder(f) &&
               changePathByDirectory(f)
             }
-            onDoubleClickFile={f =>
-              FileItem.isItemFile(f) &&
-              handleClickPreviewFile({fileItem: f})
-            }
+            onDoubleClickFile={f => {
+              if (FileItem.isItemFile(f)) {
+                if (!selectDomain) {
+                  toast.error(translate("common.noDomainToGet"));
+                  return;
+                }
+                handleClickPreviewFile({fileItem: f});
+              }
+            }}
             onAction={handleFileOperation}
           />
           : <FileGrid
@@ -191,6 +206,10 @@ const FileContent: React.FC<FileContentProps> = ({
             onSelectFiles={onSelectFiles}
             onDoubleClickFile={f => {
               if (FileItem.isItemFile(f)) {
+                if (!selectDomain) {
+                  toast.error(translate("common.noDomainToGet"));
+                  return;
+                }
                 handleClickPreviewFile({fileItem: f});
               }
               if (FileItem.isItemFolder(f)) {
@@ -227,6 +246,7 @@ const FileContent: React.FC<FileContentProps> = ({
               regionId={regionId}
               bucketName={bucketName}
               fileItem={fileItemForGeneratingLink}
+              canS3Domain={!bucketGrantedPermission}
               defaultDomain={selectDomain}
             />
             <ChangeFileStorageClass
@@ -242,19 +262,24 @@ const FileContent: React.FC<FileContentProps> = ({
                 handleHideChangeFileStorageClass({fileItem: null});
               }}
             />
-            <PreviewFile
-              size="lg"
-              show={isShowPreviewFile}
-              onHide={() => handleHidePreviewFile({fileItem: null})}
-              regionId={regionId}
-              bucketName={bucketName}
-              basePath={basePath}
-              fileItem={fileItemForPreview}
-              storageClasses={Object.values(availableStorageClasses)}
-              domain={selectDomain}
-              onClickDownload={onDownloadFile}
-              onOperationDone={onReloadFiles}
-            />
+            {
+              !selectDomain
+                ? null
+                : <PreviewFile
+                  size="lg"
+                  show={isShowPreviewFile}
+                  onHide={() => handleHidePreviewFile({fileItem: null})}
+                  regionId={regionId}
+                  bucketName={bucketName}
+                  basePath={basePath}
+                  fileItem={fileItemForPreview}
+                  storageClasses={Object.values(availableStorageClasses)}
+                  canS3Domain={!bucketGrantedPermission}
+                  domain={selectDomain}
+                  onClickDownload={onDownloadFile}
+                  onOperationDone={onReloadFiles}
+                />
+            }
           </>
       }
     </>

@@ -18,7 +18,7 @@ export default interface Dictionary {
     refresh: string,
     interrupt: string,
     notFound: string,
-    noOperationalObject: string,
+    noObjectSelected: string,
     noDomainToGet: string,
     errored: string,
     downloading: string,
@@ -34,8 +34,8 @@ export default interface Dictionary {
     delete: string,
     rename: string,
     more: string,
-    extraLink: string,
-    extraLinks: string,
+    exportLink: string,
+    exportLinks: string,
     restore: string,
     changeStorageClass: string,
   },
@@ -330,7 +330,7 @@ export default interface Dictionary {
     akHistory: {
       title: string,
       removeAllButton: string,
-      activeAkButton: string,
+      useAkButton: string,
       removeAkButton: string,
       currentUser: string,
       table: {

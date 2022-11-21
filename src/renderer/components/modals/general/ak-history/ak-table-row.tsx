@@ -33,7 +33,7 @@ const AkTableRow: React.FC<AkTableRowProps> = ({
             : isCurrentUser
               ? <small>{translate("modals.akHistory.currentUser")}</small>
               : <Button variant="lite-primary" size="sm" onClick={() => onActive(data)}>
-                {translate("modals.akHistory.activeAkButton")}
+                {translate("modals.akHistory.useAkButton")}
               </Button>
         }
         {

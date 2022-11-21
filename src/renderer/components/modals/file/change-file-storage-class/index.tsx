@@ -122,7 +122,7 @@ const ChangeFileStorageClass: React.FC<ModalProps & ChangeFileStorageClassProps>
         {
           !memoFileItem
             ? <div>
-              {translate("common.noOperationalObject")}
+              {translate("common.noObjectSelected")}
             </div>
             : <ChangeStorageClassForm
               fileName={memoFileItem.name}

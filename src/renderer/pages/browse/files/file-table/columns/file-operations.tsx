@@ -62,7 +62,7 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellCallbackProp
           : <TooltipButton
             iconClassName="bi bi-link-45deg"
             tooltipPlacement="top"
-            tooltipContent={translate("common.extraLink")}
+            tooltipContent={translate("common.exportLink")}
             variant="icon-dark"
             className="me-1"
             onClick={e => {

@@ -282,7 +282,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
         {
           !memoFileItem
             ? <div>
-              {translate("common.noOperationalObject")}
+              {translate("common.noObjectSelected")}
             </div>
             : <>
               <Form onSubmit={handleSubmit(handleSubmitRenameFile)}>

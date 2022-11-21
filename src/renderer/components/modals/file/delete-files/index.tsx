@@ -154,7 +154,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
         {
           !memoFileItems.length
             ? <div>
-              {translate("common.noOperationalObject")}
+              {translate("common.noObjectSelected")}
             </div>
             : <>
               <div className="text-danger">

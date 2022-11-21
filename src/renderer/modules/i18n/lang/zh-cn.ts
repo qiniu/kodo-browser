@@ -19,7 +19,7 @@ const dict: Dictionary = {
     refresh: "刷新",
     interrupt: "中断",
     notFound: "来到了无牛问津的地方",
-    noOperationalObject: "未选择操作对象",
+    noObjectSelected: "未选择操作对象",
     noDomainToGet: "没有可用的域名获取对象",
     errored: "发生错误",
     paused: "已暂停",
@@ -35,8 +35,8 @@ const dict: Dictionary = {
     rename: "重命名",
     delete: "删除",
     more: "更多",
-    extraLink: "导出外链",
-    extraLinks: "导出外链",
+    exportLink: "导出外链",
+    exportLinks: "导出外链",
     restore: "解冻",
     changeStorageClass: "更改存储类型",
   },
@@ -79,7 +79,7 @@ const dict: Dictionary = {
       },
       accessKeySecret: {
         holder: "请输入 AccessKeySecret",
-        label: "AccessKeySecret",
+        label: "AccessKeySecret：",
         feedback: {
           required: "AccessKeySecret 不能为空"
         },
@@ -121,7 +121,7 @@ const dict: Dictionary = {
       createBucketButton: "新建 Bucket",
       moreOperation: {
         toggleButton: "更多",
-        deleteBucketButton: "删除 Bucket",
+        deleteBucketButton: "删除",
       },
       search: {
         holder: "Bucket 名称",
@@ -265,7 +265,7 @@ const dict: Dictionary = {
       },
       fileLink: {
         label: "文件链接：",
-        copied: "已复制文件链接",
+        copied: "已复制",
       },
     },
     restore: {
@@ -324,7 +324,7 @@ const dict: Dictionary = {
     akHistory: {
       title: "AK 历史",
       removeAllButton: "清空历史",
-      activeAkButton: "使用",
+      useAkButton: "使用",
       removeAkButton: "删除",
       currentUser: "（使用中）",
       table: {
@@ -561,12 +561,12 @@ const dict: Dictionary = {
 
     deleteFiles: {
       title: "删除文件",
-      description: "将要删除以下文件",
+      description: "将要删除以下文件或目录",
     },
 
     copyFiles: {
       title: "复制文件",
-      description: "将${operation}以下文件到当前目录下（如有相同的文件或目录则覆盖）",
+      description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {
           label: "副本文件名：",
@@ -581,7 +581,7 @@ const dict: Dictionary = {
 
     moveFiles: {
       title: "移动文件",
-      description: "将${operation}以下文件到当前目录下（如有相同的文件或目录则覆盖）",
+      description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {
           label: "新的文件名：",
@@ -596,7 +596,7 @@ const dict: Dictionary = {
 
     changeFilesStorageClass: {
       title: "修改文件存储类型",
-      description: "将修改以下目录或文件的存储类型",
+      description: "将修改以下文件或目录的存储类型",
     },
 
     changeFileStorageClass: {
@@ -605,7 +605,7 @@ const dict: Dictionary = {
 
     restoreFiles: {
       title: "解冻文件",
-      description: "将解冻以下目录或文件：",
+      description: "将解冻以下文件或目录：",
     },
 
     restoreFile: {

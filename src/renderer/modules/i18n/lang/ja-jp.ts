@@ -19,7 +19,7 @@ const dict: Dictionary = {
         refresh: "更新",
         interrupt: "中断",
         notFound: "未発見",
-        noOperationalObject: "操作可能なオブジェクトがない",
+        noObjectSelected: "操作可能なオブジェクトがない",
         noDomainToGet: "オブジェクトを取得するためのドメインがない",
         errored: "エラーが発生しました",
         paused: "停止しました",
@@ -35,8 +35,8 @@ const dict: Dictionary = {
         rename: "名前を変更",
         delete: "削除",
         more: "もっと",
-        extraLink: "ダウンロードアドレスを取得する",
-        extraLinks: "ダウンロードリンクのエクスポート",
+        exportLink: "ダウンロードアドレスを取得する",
+        exportLinks: "ダウンロードリンクのエクスポート",
         restore: "リストア",
         changeStorageClass: "ストレージクラスを設定する",
     },
@@ -62,7 +62,7 @@ const dict: Dictionary = {
         setHomeSuccess: "ホームページの設定は成功",
         setBookmark: "ブックマークに保存",
         setBookmarkSuccess: "ブックマークの追加は成功しました",
-        deleteBookmark: "削除",
+        deleteBookmark: "ブックマーク削除",
         deleteBookmarkSuccess: "ブックマークの削除は成功",
     },
 
@@ -79,7 +79,7 @@ const dict: Dictionary = {
             },
             accessKeySecret: {
                 holder: "AccessKeySecret",
-                label: "AccessKeySecret",
+                label: "AccessKeySecret：",
                 feedback: {
                     required: "AccessKeySecret 空にすることはできません"
                 },
@@ -95,7 +95,7 @@ const dict: Dictionary = {
                 holder: "オプション、最大20単語",
                 label: "説明：",
                 feedback: {
-                    maxLength: "メモが長すぎる場合は、最大 20 語または文字です",
+                    maxLength: "最大20単語",
                 },
             },
             rememberMe: {
@@ -167,27 +167,27 @@ const dict: Dictionary = {
             startButton: "開始",
             removeButton: "削除",
             retryButton: "リトライ",
-            retryWithOverwriteButton: "上書きの再試行",
+            retryWithOverwriteButton: "リトライ オーバーライト",
             status: {
                 finished: "完了",
                 failed: "失敗",
                 stopped: "停止",
                 waiting: "待っている",
                 running: "ランニング",
-                duplicated: "繰り返します",
+                duplicated: "すでに存在",
                 verifying: "検証中",
             },
             removeConfirmOk: "削除",
             unknownError: "不明なエラーです",
-            fileDuplicated: "ファイルは既に存在します",
+            fileDuplicated: "ファイルは既に存在",
         },
         upload: {
             dropZone: {
-                enter: "ここにドラッグして、上記のパス",
-                over: "上記のパスを緩める",
+                enter: "Drag here to upload",
+                over: "Release to upload",
             },
             dialog: {
-                title: "[ファイルのアップロード] を選択します",
+                title: "[ファイルのアップロード] を選択",
             },
             hint: {
                 addingJobs: "ダウンロードキューに追加中…",
@@ -201,21 +201,21 @@ const dict: Dictionary = {
                 search: {
                     holder: "名前またはステータスによるフィルタリング",
                 },
-                emptyDirectorySwitch: "空のディレクトリをアップロードするかどうか",
+                emptyDirectorySwitch: "空のディレクトリのアップロードを許可/禁止する",
                 startAllButton: "すべて開始",
                 cleanupButton: "クリア完了",
                 removeAllButton: "すべてクリア",
             },
             removeAllConfirm: {
-                title: "すべてのアップロード タスクを削除します",
-                content: "すべてのアップロード タスクを削除しますか?",
-                ok: "削除します",
+                title: "すべてクリア",
+                content: "すべてのアップロードタスクをクリアしますか？",
+                ok: "削除",
                 cancel: "キャンセル",
             },
         },
         download: {
             dialog: {
-                title: "ダウンロード先を選択します",
+                title: "ダウンロード先を選択",
             },
             hint: {
                 addingJobs: "ダウンロードキューに追加中…",
@@ -231,9 +231,9 @@ const dict: Dictionary = {
                 removeAllButton: "すべてクリア",
             },
             removeAllConfirm: {
-                title: "すべてのダウンロード タスクを削除します",
-                content: "すべてのダウンロード タスクを削除しますか?",
-                ok: "削除します",
+                title: "すべてクリア",
+                content: "すべてのダウンロードタスクをクリアしてもよろしいですか？",
+                ok: "削除",
                 cancel: "キャンセル",
             },
         },
@@ -265,22 +265,22 @@ const dict: Dictionary = {
             },
             fileLink: {
                 label: "ファイル リンク：",
-                copied: "ファイル リンクがコピーされました",
+                copied: "もうクリップボードにコピー",
             },
         },
         restore: {
             frozen: {
                 loading: "ファイル復元ステータスの確認",
                 normal: "ファイルストレージタイプを復元する必要はありません",
-                unfreezing: "ファイルは回復中です。しばらくお待ちください",
-                unfrozen: "ファイルは復元され、再度実行する必要はありません",
+                unfreezing: "アーカイブファイルが回復しています、しばらくお待ちください",
+                unfrozen: "アーカイブが復元されました、再度実行する必要はありません",
                 unknown: "不明な復元ステータス",
             },
             fileName: {
                 label: "名前：",
             },
             days: {
-                label: "復元日数：",
+                label: "日々：",
             },
         },
     },
@@ -323,8 +323,8 @@ const dict: Dictionary = {
 
         akHistory: {
             title: "AKの歴史",
-            removeAllButton: "歴史を空にする",
-            activeAkButton: "利用",
+            removeAllButton: "AK履歴削除",
+            useAkButton: "利用",
             removeAkButton: "削除",
             currentUser: "（利用中）",
             table: {
@@ -359,12 +359,12 @@ const dict: Dictionary = {
                         hint: "単位：MB，範囲：8 MB - 100 MB",
                     },
                     maxUploadConcurrency: {
-                        label: "アップロード タスクの最大数：",
+                        label: "アップロードの最大同時処理数：",
                         hint: "範囲：1-10",
                     },
                     enabledUploadSpeedLimit: {
-                        label: "制限速度をアップロードします：",
-                        hint: "（アップロード制限機能を起動します）",
+                        label: "アップロード速度制限：",
+                        hint: "（アップロード速度制限を有効にする）",
                     },
                     uploadSpeedLimit: {
                         label: "単一のファイル速度制限をアップロードする：",
@@ -388,12 +388,12 @@ const dict: Dictionary = {
                         hint: "単位：MB，範囲：8 MB - 100 MB",
                     },
                     maxDownloadConcurrency: {
-                        label: "ダウンロード タスクの最大数：",
+                        label: "ダウンロードの最大同時処理数：",
                         hint: "範囲：1-10",
                     },
                     enabledDownloadSpeedLimit: {
-                        label: "制限速度をダウンロードします：",
-                        hint: "（启动下载限速功能）",
+                        label: "ダウンロード速度制限：",
+                        hint: "（ダウンロード速度制限を有効にする）",
                     },
                     downloadSpeedLimit: {
                         label: "単一のファイル速度制限をダウンロードする：",
@@ -418,11 +418,11 @@ const dict: Dictionary = {
                         hint: "デバッグログを開くかどうか",
                     },
                     enabledLoadFilesOnTouchEnd: {
-                        label: "ファイルリストが底を打ってロードされます",
-                        hint: "（タッチボトムは、より多くをロードします）",
+                        label: "ステップごとのファイルリストのロード",
+                        hint: "（ステップバイステップモードでファイルリストの読み込みを有効にする）",
                     },
                     loadFilesNumberPerPage: {
-                        label: "ファイル リストの 1 ページの読み込み数",
+                        label: "一度にロードされるファイルの数",
                         hint: "範囲：10-1000",
                     },
                     autoUpgrade: {
@@ -448,10 +448,10 @@ const dict: Dictionary = {
 
         externalPathManager: {
             title: "外部パス管理",
-            addButton: "追加します",
-            removeButton: "削除します",
+            addButton: "追加",
+            removeButton: "削除",
             error: {
-                duplicated: "パスは既に存在します",
+                duplicated: "パスは既に存在",
             },
             form: {
                 region: {
@@ -461,12 +461,12 @@ const dict: Dictionary = {
                     }
                 },
                 path: {
-                    label: "パス：",
+                    label: "外部パス：",
                     holder: "Bucket/Object-Prefix",
                     feedback: {
                         required: "パスを入力する必要があります",
                     },
-                    hint: "Bucket Policy によって付与されたアクセス許可の Bucket または Bucket の下のパスのいずれかを入力するには、承認者が指定する必要があります",
+                    hint: "付与者から提供されたバケットポリシーを通じて許可されたバケットまたはバケットの下のパスを入力します",
                 },
             },
             table: {
@@ -482,22 +482,22 @@ const dict: Dictionary = {
             updateApp: {
                 checking: "新しいバージョンを確認しています……",
                 alreadyLatest: "既に最新バージョンです！",
-                foundLatest: "新しいバージョンが見つかりました",
+                foundLatest: "新しいバージョンを見つけました",
                 changeLogsTitle: "リリースノート：",
                 operationButton: {
-                    start: "ダウンロードを開始します",
-                    resume: "ダウンロードを続行します",
-                    pause: "ダウンロードを一時停止します",
-                    showItemInDir: "ファイルが開かれている場所",
+                    start: "更新を開始",
+                    resume: "ダウンロードを続行",
+                    pause: "一時停止ダウンロード",
+                    showItemInDir: "ファイルエクスプローラーでの表示",
                 },
             },
         },
 
         createBucket: {
-            title: "Bucket を作成します",
+            title: "バケットの作成",
             form: {
                 bucketName: {
-                    label: "バケット名：",
+                    label: "名前：",
                     holder: "バケット名",
                     tips: "3〜63文字で構成され、小文字、数字、ダッシュを含めることができ、小文字または数字で開始および終了する必要があります",
                     feedback: {
@@ -506,13 +506,13 @@ const dict: Dictionary = {
                     },
                 },
                 region: {
-                    label: "バケット領域：",
+                    label: "領域：",
                     feedback: {
                         required: "ゾーンを選択する必要があります",
                     },
                 },
                 acl: {
-                    label: "ACL アクセス許可：",
+                    label: "ACL：",
                     options: {
                         inherit: "バケツからの継承",
                         publicReadWrite: "公開可読は書く",
@@ -527,7 +527,7 @@ const dict: Dictionary = {
         },
 
         deleteBucket: {
-            title: "Bucket を削除します",
+            title: "Bucket 削除",
             content: "Bucket バケット名：${bucketName}，このバケットを削除してもよろしいですか？",
             submit: "削除",
         },
@@ -555,17 +555,17 @@ const dict: Dictionary = {
             },
             replaceConfirm: {
                 description: "同じ名前のファイルは既にカバーされていますか？",
-                yes: "カバー",
+                yes: "OK",
             },
         },
 
         deleteFiles: {
-            title: "ファイルを削除します",
+            title: "ファイルを削除",
             description: "将要删除以下文件",
         },
 
         copyFiles: {
-            title: "ファイルをコピーします",
+            title: "ファイルをコピー",
             description: "このディレクトリに${operation}  (同じファイルまたはディレクトリが対象となります)",
             form: {
                 fileName: {
@@ -575,12 +575,12 @@ const dict: Dictionary = {
             },
             replaceConfirm: {
                 description: "同じ名前のファイルは既にカバーされていますか？",
-                yes: "カバー",
+                yes: "OK",
             },
         },
 
         moveFiles: {
-            title: "ファイルを移動します",
+            title: "ファイルを移動",
             description: "このディレクトリに${operation}  (同じファイルまたはディレクトリが対象となります)",
             form: {
                 fileName: {
@@ -590,7 +590,7 @@ const dict: Dictionary = {
             },
             replaceConfirm: {
                 description: "同じ名前のファイルは既にカバーされていますか？",
-                yes: "カバー",
+                yes: "OK",
             },
         },
 
@@ -604,23 +604,23 @@ const dict: Dictionary = {
         },
 
         restoreFiles: {
-            title: "ファイルの復元",
+            title: "リストア",
             description: "次のディレクトリまたはファイルがフリーズ解除されます：",
         },
 
         restoreFile: {
-            title: "ファイルの復元",
+            title: "リストア",
         },
 
         generateFileLinks: {
             title: "ダウンロードリンクのエクスポート",
             description: "次のファイルの外部チェーンがエクスポートされます",
             csvFile: {
-                label: "ファイルの場所をエクスポートします：",
-                suffix: "ファイルが開かれている場所",
+                label: "ファイルの場所をエクスポート：",
+                suffix: "ファイルエクスプローラーでの表示",
             },
             selectLocalPathDialog: {
-                title: "エクスポート先を選択します",
+                title: "エクスポート先を選択",
             },
         },
 
@@ -631,13 +631,13 @@ const dict: Dictionary = {
         uploadConfirm: {
             title: "ファイルのアップロード",
             previewList: {
-                title: "次のファイルまたはディレクトリがアップロードされます",
+                title: "ファイルやディレクトリの選択",
                 more: "… 合計 ${total} 個のファイル/ディレクトリ",
             },
             form: {
                 isOverwrite: {
                     label: "上書き：",
-                    hint: "（この時間だけ）",
+                    hint: "（今回の上書き）",
                 },
                 storageClassKodoName: {
                     label: "保管タイプ：",
@@ -651,7 +651,7 @@ const dict: Dictionary = {
             preCheck: {
                 archived: {
                     description: "プレビューまたはダウンロードするためにアーカイブを復元する必要があります。",
-                    restore: "復元",
+                    restore: "リストア",
                 },
                 tooLarge: {
                     noPreview: "現在のファイルが大きすぎる（>${maxPreviewSize}），プレビューできません",
@@ -662,10 +662,10 @@ const dict: Dictionary = {
             content: {
                 code: {
                     showDiffView: "セーブ",
-                    saveContent: "保存を確認します",
+                    saveContent: "保存を確認",
                 },
                 others: {
-                    description: "\"このファイルをプレビューできません。",
+                    description: "このファイルをプレビューできません。",
                     openAsText: "テキストで開きます",
                 }
             },

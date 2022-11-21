@@ -101,7 +101,7 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
       <Modal.Body className="p-0">
         {
           !memoFileItem
-            ? translate("common.noOperationalObject")
+            ? translate("common.noObjectSelected")
             : <>
               <div className="text-bg-info bg-opacity-25 p-1">
                 {ADDR_KODO_PROTOCOL}{memoFileItem.bucket}/{memoFileItem.path.toString()}
@@ -160,7 +160,7 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
                 onClick={() => setFileOperation(FileOperationType.GenerateLink)}
               >
                 <i className="bi bi-link-45deg me-1"/>
-                {translate("common.extraLink")}
+                {translate("common.exportLink")}
               </Button>
               <Button
                 hidden={!memoStorageClasses.length}

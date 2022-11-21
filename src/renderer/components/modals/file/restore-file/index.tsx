@@ -125,7 +125,7 @@ const RestoreFile: React.FC<ModalProps & RestoreFileProps> = (props) => {
         {
           !memoFileItem
             ? <div>
-              {translate("common.noOperationalObject")}
+              {translate("common.noObjectSelected")}
             </div>
             : <RestoreForm
               fileName={memoFileItem.name}

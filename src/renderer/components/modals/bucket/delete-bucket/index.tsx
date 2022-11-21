@@ -93,7 +93,7 @@ const DeleteBucket: React.FC<ModalProps & DeleteBucketProps> = ({
       <Modal.Body>
         {
           !memoBucketName || !memoRegionId
-            ? translate("common.noOperationalObject")
+            ? translate("common.noObjectSelected")
             : <Translate
               data={contentI18nData}
               i18nKey="modals.deleteBucket.content"

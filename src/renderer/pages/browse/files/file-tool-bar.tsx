@@ -339,7 +339,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
                 }}
               >
                 <i className="bi bi-link-45deg me-1"/>
-                {translate("common.extraLinks")}
+                {translate("common.exportLinks")}
               </Dropdown.Item>
               <Dropdown.Item
                 onClick={handleShowRestoreFiles}

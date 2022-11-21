@@ -10,6 +10,7 @@ import * as AuditLog from "@renderer/modules/audit-log";
 import RoutePath from "@renderer/pages/route-path";
 
 import "./sign-in-form.scss";
+import TooltipText from "@renderer/components/tooltip-text";
 
 export interface SignInFormValues extends AkItem {
   rememberMe: boolean,
@@ -154,7 +155,14 @@ const SignInForm: React.FC<SignInFormProps> = (props) => {
           <Col sm={{span: 5, offset: 4}}>
             <Form.Check
               {...register("rememberMe")}
-              label={translate("signIn.form.rememberMe.label")}
+              label={
+                <>
+                  {translate("signIn.form.rememberMe.label")}
+                  <TooltipText tooltipContent={translate("signIn.form.rememberMe.hint")}>
+                    <i className="bi bi-question-circle-fill ms-1"/>
+                  </TooltipText>
+                </>
+              }
             />
           </Col>
           <Col sm={{span: 2}}>

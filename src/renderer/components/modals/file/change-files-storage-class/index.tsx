@@ -187,7 +187,7 @@ const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProp
         {
           !memoFileItems.length
             ? <div>
-              {translate("common.noOperationalObject")}
+              {translate("common.noObjectSelected")}
             </div>
             : <>
               <div className="text-danger">

@@ -19,7 +19,7 @@ const dict: Dictionary = {
     refresh: "Refresh",
     interrupt: "Interrupt",
     notFound: "Page Not Found!",
-    noOperationalObject: "No object selected",
+    noObjectSelected: "No object selected",
     noDomainToGet: "No domain to get object",
     errored: "An error has occurred",
     paused: "Paused",
@@ -35,15 +35,15 @@ const dict: Dictionary = {
     rename: "Rename",
     delete: "Delete",
     more: "More",
-    extraLink: "Export extra link",
-    extraLinks: "Export extra links",
+    exportLink: "Export Download Link",
+    exportLinks: "Export Download Links",
     restore: "Restore",
-    changeStorageClass: "Change storage class",
+    changeStorageClass: "Set Storage Class",
   },
 
   top: {
     files: "Files",
-    externalPath: "ExternalPath",
+    externalPath: "External Link",
     settings: "Settings",
     bookmarks: "Bookmarks",
     about: "About",
@@ -60,9 +60,9 @@ const dict: Dictionary = {
     goHome: "Go Home",
     setHome: "Set Home",
     setHomeSuccess: "Saved homepage successfully",
-    setBookmark: "Set Bookmark",
+    setBookmark: "Bookmark This Address",
     setBookmarkSuccess: "Saved bookmark successfully",
-    deleteBookmark: "Remove bookmarks",
+    deleteBookmark: "Remove This From Bookmarks",
     deleteBookmarkSuccess: "Remove bookmarks successfully",
   },
 
@@ -72,14 +72,14 @@ const dict: Dictionary = {
     form: {
       accessKeyId: {
         holder: "AccessKeyId",
-        label: "AccessKeyId：",
+        label: "AccessKeyId:",
         feedback: {
           required: "AccessKeyId is required",
         }
       },
       accessKeySecret: {
         holder: "AccessKeySecret",
-        label: "AccessKeySecret",
+        label: "AccessKeySecret:",
         feedback: {
           required: "AccessKeySecret is required"
         },
@@ -118,13 +118,13 @@ const dict: Dictionary = {
 
   browse: {
     bucketToolbar: {
-      createBucketButton: "Create bucket",
+      createBucketButton: "Create Bucket",
       moreOperation: {
-        toggleButton: "more",
-        deleteBucketButton: "Delete bucket",
+        toggleButton: "More",
+        deleteBucketButton: "Delete",
       },
       search: {
-        holder: "Bucket name",
+        holder: "Bucket Name",
       },
     },
     bucketTable: {
@@ -147,9 +147,9 @@ const dict: Dictionary = {
     fileTable: {
       fileName: "Name",
       fileTypeOrSize: "Type/Size",
-      fileStorageClass: "Storage class",
-      fileModifyDate: "Last modify date",
-      fileOperation: "Operation",
+      fileStorageClass: "Storage Class",
+      fileModifyDate: "Last Modify Date",
+      fileOperation: "Actions",
       loadMore: "Load more",
     },
     restoreStatus: {
@@ -187,7 +187,7 @@ const dict: Dictionary = {
         over: "Release to upload",
       },
       dialog: {
-        title: "Select upload file",
+        title: "Select upload files",
       },
       hint: {
         addingJobs: "Adding to upload queue…",
@@ -242,45 +242,45 @@ const dict: Dictionary = {
   forms: {
     changeStorageClass: {
       fileName: {
-        label: "File Name：",
+        label: "File Name:",
       },
       currentStorageClass: {
-        label: "Current storage class：",
+        label: "Current storage class:",
       },
       storageClassKodoName: {
-        label: "Storage Class：",
+        label: "Storage Class:",
       },
     },
     generateLink: {
       fileName: {
-        label: "File Name：",
+        label: "File Name:",
       },
       domainName: {
-        label: "Domain Name：",
+        label: "Domain Name:",
         nonOwnedDomain: "No owned domain name",
       },
       expireAfter: {
-        label: "Validity period：",
-        suffix: "Second",
+        label: "Validity period:",
+        suffix: "Seconds",
       },
       fileLink: {
-        label: "File Link：",
-        copied: "The file link was copied",
+        label: "File Link:",
+        copied: "Copied",
       },
     },
     restore: {
       frozen: {
         loading: "Checking file restore status",
         normal: "The file storage type does not need to be restored",
-        unfreezing: "File is recovering, please be patient ...",
+        unfreezing: "File is recovering, please be patient……",
         unfrozen: "The file is restored and does not need to be done again",
         unknown: "Unknown restored status",
       },
       fileName: {
-        label: "File Name：",
+        label: "File Name:",
       },
       days: {
-        label: "Restore days：",
+        label: "Restore days:",
       },
     },
   },
@@ -324,7 +324,7 @@ const dict: Dictionary = {
     akHistory: {
       title: "AK History",
       removeAllButton: "Clear Histories",
-      activeAkButton: "Active",
+      useAkButton: "Use",
       removeAkButton: "Remove",
       currentUser: "(current)",
       table: {
@@ -332,12 +332,12 @@ const dict: Dictionary = {
         accessKeyId: "AccessKeyId",
         accessKeySecret: "AccessKeySecret",
         description: "Description",
-        operation: "Operations",
+        operation: "Actions",
       },
     },
 
     releaseNote: {
-      title: "Changes",
+      title: "Release Notes",
     },
 
     settings: {
@@ -347,28 +347,28 @@ const dict: Dictionary = {
         legend: "Upload",
         form: {
           resumeUpload: {
-            label: "Breakpoint Upload：",
-            hint: "（Start breakpoint upload feature）",
+            label: "Resume Upload:",
+            hint: "(Enable resume upload)",
           },
           multipartUploadThreshold: {
-            label: "Multipart upload threshold：",
-            hint: "Unit：MB，Range：10 MB - 1000 MB",
+            label: "Multipart upload threshold:",
+            hint: "Unit: MB, Range: 10 MB - 1000 MB",
           },
           multipartUploadPartSize: {
-            label: "Multipart upload part size：",
-            hint: "Unit：MB，Range：8 MB - 100 MB",
+            label: "Multipart upload part size:",
+            hint: "Unit: MB, Range: 8 MB - 100 MB",
           },
           maxUploadConcurrency: {
-            label: "Maximum number of upload tasks：",
-            hint: "Range：1-10",
+            label: "Maximum number of upload tasks:",
+            hint: "Range: 1-10",
           },
           enabledUploadSpeedLimit: {
-            label: "Upload speed limit：",
-            hint: "（Enable upload speed limit）",
+            label: "Upload speed limit:",
+            hint: "(Enable upload speed limit)",
           },
           uploadSpeedLimit: {
-            label: "Upload single file speed limit：",
-            hint: "Unit：KB/s，Range：1 KB/s - 102400 KB/s",
+            label: "Upload single file speed limit:",
+            hint: "Unit：KB/s, Range：1 KB/s - 102400 KB/s",
           },
         },
       },
@@ -376,37 +376,37 @@ const dict: Dictionary = {
         legend: "Download",
         form: {
           resumeDownload: {
-            label: "Breakpoint Download：",
-            hint: "（Enable Breakpoint feature）",
+            label: "Resume Download:",
+            hint: "(Enable Breakpoint feature)",
           },
           multipartDownloadThreshold: {
-            label: "Multipart download threshold：",
-            hint: "Unit：MB，Range：10 MB - 1000 MB",
+            label: "Multipart download threshold:",
+            hint: "Unit: MB, Range: 10 MB - 1000 MB",
           },
           multipartDownloadPartSize: {
-            label: "Multipart download part size：",
-            hint: "Unit：MB，Range：8 MB - 100 MB",
+            label: "Multipart download part size:",
+            hint: "Unit: MB, Range: 8 MB - 100 MB",
           },
           maxDownloadConcurrency: {
-            label: "Maximum number of download tasks：",
-            hint: "Range：1-10",
+            label: "Maximum number of download tasks:",
+            hint: "Range: 1-10",
           },
           enabledDownloadSpeedLimit: {
-            label: "Download speed limit：",
-            hint: "（Enable download speed limit）",
+            label: "Download speed limit:",
+            hint: "(Enable download speed limit)",
           },
           downloadSpeedLimit: {
-            label: "Download single file speed limit：",
-            hint: "Unit：KB/s，Range：1 KB/s - 102400 KB/s",
+            label: "Download single file speed limit:",
+            hint: "Unit: KB/s, Range: 1 KB/s - 102400 KB/s",
           },
         },
       },
       externalPath: {
-        legend: "External Path",
+        legend: "External Link",
         form: {
           enabled: {
-            label: "External Path",
-            hint: "（Enable External Path）"
+            label: "External Link",
+            hint: "(Enable External Link)"
           },
         },
       },
@@ -419,7 +419,7 @@ const dict: Dictionary = {
           },
           enabledLoadFilesOnTouchEnd: {
             label: "File list load more on touch end",
-            hint: "（Enable file list load more on touch end）",
+            hint: "(Enable file list load more on touch end)",
           },
           loadFilesNumberPerPage: {
             label: "Files loading count",
@@ -442,14 +442,14 @@ const dict: Dictionary = {
       table: {
         url: "URL",
         createTime: "Create Time",
-        operation: "Operation",
+        operation: "Actions",
       }
     },
 
     externalPathManager: {
       title: "External Path Manager",
       addButton: "Add",
-      removeButton: "Delete",
+      removeButton: "Remove",
       error: {
         duplicated: "The path is existed!",
       },
@@ -472,15 +472,15 @@ const dict: Dictionary = {
       table: {
         path: "External Path",
         regionName: "Region Name",
-        operation: "Operation",
+        operation: "Actions",
       },
     },
 
     about: {
       title: "About",
-      openSourceAddress: "Open Source Address：",
+      openSourceAddress: "Open Source: ",
       updateApp: {
-        checking: "Checking new version...",
+        checking: "Checking new version……",
         alreadyLatest: "You're up to date!",
         foundLatest: "A new version is available!",
         changeLogsTitle: "Changes:",
@@ -497,7 +497,7 @@ const dict: Dictionary = {
       title: "Create Bucket",
       form: {
         bucketName: {
-          label: "Name：",
+          label: "Name:",
           holder: "Bucket Name",
           tips: "Consists of 3 to 63 characters, can contain lowercase letters, numbers, and dashes, and must begin and end with a lowercase letter or number",
           feedback: {
@@ -506,16 +506,16 @@ const dict: Dictionary = {
           },
         },
         region: {
-          label: "Region：",
+          label: "Region:",
           feedback: {
             required: "Must select a region",
           },
         },
         acl: {
-          label: "ACL Permission：",
+          label: "ACL Permission:",
           options: {
             inherit: "Inherit From Bucket",
-            publicReadWrite: "Public Read Write",
+            publicReadWrite: "Public Read and Write",
             publicRead: "Public Read",
             private: "Private",
           },
@@ -528,7 +528,7 @@ const dict: Dictionary = {
 
     deleteBucket: {
       title: "Delete Bucket",
-      content: "Bucket Name：${bucketName}， Are you sure you want to delete this bucket？",
+      content: "Bucket Name：${bucketName},  Are you sure you want to delete this bucket？",
       submit: "Delete",
     },
 
@@ -536,7 +536,7 @@ const dict: Dictionary = {
       title: "Create Directory",
       form: {
         directoryName: {
-          label: "Directory Name：",
+          label: "Directory Name:",
           hint: "Directory name cannot be included /",
         },
       },
@@ -546,66 +546,66 @@ const dict: Dictionary = {
       title: "Rename",
       form: {
         baseDirectory: {
-          label: "Base Directory：",
+          label: "Directory:",
         },
         fileName: {
-          label: "Rename：",
-          hint: "Cannot start or end with / ， and there cannot be consecutive / in between",
+          label: "Rename:",
+          hint: "Cannot start or end with / ,  and there cannot be consecutive / in between",
         },
       },
       replaceConfirm: {
-        description: "Has the file of the same name already covered?",
-        yes: "Covered",
+        description: "Already has the same name file, replace?",
+        yes: "Replace",
       },
     },
 
     deleteFiles: {
       title: "Delete Files",
-      description: "The following file will be deleted",
+      description: "The following files or directories will be deleted:",
     },
 
     copyFiles: {
       title: "Copy Files",
-      description: "The following files will be ${operation} to the current directory（Overwrite if there are identical files or directories）",
+      description: "The following files or directories will be ${operation} to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {
-          label: "Duplicate Name：",
-          hint: "Cannot start or end with / ， and there cannot be consecutive / in between"
+          label: "Duplicate Name:",
+          hint: "Cannot start or end with / , and there cannot be consecutive / in between"
         },
       },
       replaceConfirm: {
-        description: "Has the file of the same name already covered?",
-        yes: "Covered",
+        description: "Already has the same name file, replace?",
+        yes: "Replace",
       },
     },
 
     moveFiles: {
-      title: "移动文件",
-      description: "将${operation}以下文件到当前目录下（如有相同的文件或目录则覆盖）",
+      title: "Move Files",
+      description: "The following files or directories will be ${operation} to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {
-          label: "新的文件名：",
-          hint: "不能以 / 开头或结尾，中间不能存在连续的 /"
+          label: "New Name:",
+          hint: "Cannot start or end with / , and there cannot be consecutive / in between"
         },
       },
       replaceConfirm: {
-        description: "Has the file of the same name already covered?",
-        yes: "Covered",
+        description: "Already has the same name file, replace?",
+        yes: "Replace",
       },
     },
 
     changeFilesStorageClass: {
-      title: "Change files storage class",
-      description: "The storage type of the following directories or files will be updated",
+      title: "Set Storage Class",
+      description: "The storage class of the following files or directories will be updated:",
     },
 
     changeFileStorageClass: {
-      title: "Change file storage class",
+      title: "Set Storage Class",
     },
 
     restoreFiles: {
       title: "Restore Files",
-      description: "The following directory or file will be restored：",
+      description: "The following files or directories will be restored:",
     },
 
     restoreFile: {
@@ -614,59 +614,59 @@ const dict: Dictionary = {
 
     generateFileLinks: {
       title: "Export Download Links",
-      description: "Download links to the following files will be exported",
+      description: "Download links of the following files will be exported:",
       csvFile: {
-        label: "Export file location：",
-        suffix: "Open the location of the file",
+        label: "Export file location:",
+        suffix: "Show File in Directory",
       },
       selectLocalPathDialog: {
-        title: "Select local path dialog",
+        title: "Select Export Path",
       },
     },
 
     generateFileLink: {
-      title: "Export Download Links",
+      title: "Export Download Link",
     },
 
     uploadConfirm: {
       title: "Upload Files",
       previewList: {
-        title: "The following files or directories are uploaded",
+        title: "The following files or directories will upload:",
         more: "… total ${total} files/directories",
       },
       form: {
         isOverwrite: {
-          label: "Overwrite：",
-          hint: "（Only this time）",
+          label: "Overwrite:",
+          hint: "(Only this time)",
         },
         storageClassKodoName: {
-          label: "Storage Class：",
+          label: "Storage Class:",
         },
       },
     },
 
     preview: {
       title: "Preview",
-      back: "Go back to the preview",
+      back: "Back to Preview",
       preCheck: {
         archived: {
           description: "Archive need to be restored in order to preview or download.",
           restore: "Restoring",
         },
         tooLarge: {
-          noPreview: "The current file is too large（>${maxPreviewSize}），can not preview",
-          previewWarning: "The current file is too large（>${maxPreviewSize}），so the preview may take longer to load and may incur corresponding traffic costs.",
+          noPreview: "The current file is too large(>${maxPreviewSize}), can not preview",
+          previewWarning: "The current file is too large(>${maxPreviewSize}), so the preview may take longer to load and may incur corresponding traffic costs.",
           forcePreview: "Continue",
         },
       },
       content: {
         code: {
           showDiffView: "Save",
-          saveContent: "Save confirmed",
+          saveContent: "Upload",
         },
         others: {
           description: "Can not preview this file.",
-          openAsText: "Try to open as a text file",
+          openAsText: "Try to open as a text file.",
         }
       },
       error: {

@@ -273,7 +273,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
         {
           !memoFileItems.length
             ? <div>
-              {translate("common.noOperationalObject")}
+              {translate("common.noObjectSelected")}
             </div>
             : <>
               {

@@ -316,6 +316,7 @@ const dict: Dictionary = {
           holder: "请输入 Endpoint",
           feedback: {
             required: "必须输入 Endpoint",
+            pattern: "Endpoint 必须以 http(s):// 开头",
           },
         },
       },

@@ -2,8 +2,9 @@
 import React, {useState} from "react";
 import {Card, Col, Container, Row} from "react-bootstrap";
 
-// contexts
+// modules
 import {useI18n} from "@renderer/modules/i18n";
+import {privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 
 // modals
 import {useDisplayModal} from "@renderer/components/modals/hooks";
@@ -40,7 +41,18 @@ const SignIn: React.FC = () => {
 
   // local states
   const [formDefaultValues, setFormDefaultValues] = useState<SignInFormValues>();
+  const [isValidPrivateEndpointSetting, setIsValidPrivateEndpointSetting] = useState(
+    privateEndpointPersistence.validate()
+  );
 
+  // event handler
+  const handleSavedPrivateEndpointSetting = () => {
+    setIsValidPrivateEndpointSetting(
+      privateEndpointPersistence.validate()
+    );
+  };
+
+  // render
   return (
     <Container>
       <Row>
@@ -51,6 +63,7 @@ const SignIn: React.FC = () => {
             <Card.Body>
               <SignInForm
                 defaultValues={formDefaultValues}
+                isInvalidPrivateEndpointSetting={!isValidPrivateEndpointSetting}
                 onClickPrivateEndpointSetting={handleClickPrivateEndpointSetting}
                 onClickAccessKeyHistory={handleClickAccessKeyHistory}
               />
@@ -63,6 +76,7 @@ const SignIn: React.FC = () => {
         show={isShowPrivateEndpointSetting}
         dialogClassName="modal-720p"
         onHide={handleHidePrivateEndpointSetting}
+        onSaved={handleSavedPrivateEndpointSetting}
       />
       <AkHistory
         show={isShowAccessKeyHistory}

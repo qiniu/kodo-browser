@@ -139,6 +139,12 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
       to: memoDestPath,
       from: memoFilePaths,
     });
+
+    let backendMode = preferBackendMode;
+    if (!backendMode) {
+      backendMode = currentUser.endpointType === EndpointType.Public ? BackendMode.Kodo : BackendMode.S3;
+    }
+
     ipcUploadManager.addJobs({
       filePathnameList: memoFilePaths,
       destInfo: {
@@ -164,9 +170,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
           label: r.label,
           s3Urls: [r.endpoint],
         })),
-        backendMode:
-          preferBackendMode ??
-          currentUser.endpointType === EndpointType.Public ? BackendMode.Kodo : BackendMode.S3
+        backendMode,
       },
     });
     modalProps.onHide?.();

@@ -140,7 +140,7 @@ const dict: Dictionary = {
         holder: "Filter by name prefix",
       },
       domain: {
-        nonOwnedDomain: "Non owned domain",
+        nonOwnedDomain: "Non-owned domain",
         refreshTooltip: "Refresh",
       },
     },
@@ -257,7 +257,7 @@ const dict: Dictionary = {
       },
       domainName: {
         label: "Domain Name:",
-        nonOwnedDomain: "No owned domain name",
+        nonOwnedDomain: "Non-owned domain name",
       },
       expireAfter: {
         label: "Validity period:",
@@ -297,7 +297,7 @@ const dict: Dictionary = {
           holder: "UC URL",
           feedback: {
             required: "UC URL is required",
-            pattern: "UC URL is not start with http(s)://",
+            pattern: "UC URL require start with http(s)://",
           }
         },
         regionIdentifier: {
@@ -316,6 +316,7 @@ const dict: Dictionary = {
           holder: "Endpoint",
           feedback: {
             required: "Endpoint is required",
+            pattern: "Endpoint require start with http(s)://",
           },
         },
       },
@@ -347,8 +348,8 @@ const dict: Dictionary = {
         legend: "Upload",
         form: {
           resumeUpload: {
-            label: "Resume Upload:",
-            hint: "(Enable resume upload)",
+            label: "Multipart Upload:",
+            hint: "(Enable multipart upload)",
           },
           multipartUploadThreshold: {
             label: "Multipart upload threshold:",
@@ -376,8 +377,8 @@ const dict: Dictionary = {
         legend: "Download",
         form: {
           resumeDownload: {
-            label: "Resume Download:",
-            hint: "(Enable Breakpoint feature)",
+            label: "Multipart Download:",
+            hint: "(Enable multipart upload)",
           },
           multipartDownloadThreshold: {
             label: "Multipart download threshold:",

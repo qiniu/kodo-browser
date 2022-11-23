@@ -27,7 +27,12 @@ const DownloadJobOperation: React.FC<DownloadJobOperationProps> = ({
         <Button
           size="sm"
           variant="lite-danger"
-          onClick={() => ipcDownloadManager.removeJob({jobId})}
+          onClick={() => {
+            ipcDownloadManager.removeJob({jobId});
+            // need to reset to false, because
+            // the state will be member by react window for reusing
+            setIsShowRemoveConfirm(false);
+          }}
         >
           {translate("transfer.jobItem.removeConfirmOk")}
         </Button>

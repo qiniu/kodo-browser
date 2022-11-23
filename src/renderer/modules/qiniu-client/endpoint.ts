@@ -1,6 +1,7 @@
+import {HttpUrl} from "@renderer/const/patterns";
 import {localFile} from "@renderer/modules/persistence";
 
-interface RegionSetting {
+export interface RegionSetting {
   /* s3 id */
   identifier: string,
   label: string,
@@ -57,6 +58,14 @@ class PrivateEndpointPersistence {
           endpoint: r.endpoint,
         })),
     };
+  }
+
+  validate(): boolean {
+    const data = this.read();
+    if (!data.ucUrl || !data.ucUrl.match(HttpUrl)) {
+      return false;
+    }
+    return true;
   }
 }
 

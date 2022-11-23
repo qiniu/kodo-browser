@@ -384,7 +384,7 @@ class Settings {
 
   // stepByStepLoadingFiles
   get stepByStepLoadingFiles(): number {
-    return parseInt(localStorage.getItem(SettingStorageKey.StepByStepLoadingFiles) || "0");
+    return parseInt(localStorage.getItem(SettingStorageKey.StepByStepLoadingFiles) || "1");
   }
   set stepByStepLoadingFiles(v: number) {
     localStorage.setItem(SettingStorageKey.StepByStepLoadingFiles, v.toString());

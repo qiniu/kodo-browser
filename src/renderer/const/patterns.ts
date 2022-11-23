@@ -16,3 +16,5 @@ export const BucketName = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
  * not include /
  */
 export const DirectoryName = /^[^\/]+$/
+
+export const HttpUrl = /^https?:\/\//

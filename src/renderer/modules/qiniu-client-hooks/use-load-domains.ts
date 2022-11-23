@@ -67,6 +67,8 @@ export default function useLoadDomains({
       id: user.accessKey,
       secret: user.accessSecret,
       isPublicCloud: user.endpointType === EndpointType.Public,
+      preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
+      preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
     const domains: DomainAdapter[] = (await listDomains(regionId, bucketName, opt))
       .map(d => ({

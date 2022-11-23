@@ -27,7 +27,12 @@ const UploadJobOperation: React.FC<UpJobOperationProps> = ({
         <Button
           size="sm"
           variant="lite-danger"
-          onClick={() => ipcUploadManager.removeJob({jobId})}
+          onClick={() => {
+            ipcUploadManager.removeJob({jobId});
+            // need to reset to false, because
+            // the state will be member by react window for reusing
+            setIsShowRemoveConfirm(false);
+          }}
         >
           {translate("transfer.jobItem.removeConfirmOk")}
         </Button>

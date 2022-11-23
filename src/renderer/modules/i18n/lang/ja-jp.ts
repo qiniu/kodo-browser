@@ -316,6 +316,7 @@ const dict: Dictionary = {
                     holder: "Endpoint を入力してください",
                     feedback: {
                         required: "Endpoint を入力する必要があります",
+                        pattern: "Endpoint は http(s):// で始まる必要があります"
                     },
                 },
             },

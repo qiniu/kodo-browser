@@ -1,12 +1,15 @@
 import {Button, Col, Form, FormControlProps, Row} from "react-bootstrap";
 import React from "react";
+import {FieldErrors} from "react-hook-form";
 
 import {useI18n} from "@renderer/modules/i18n";
+import {RegionSetting} from "@renderer/modules/qiniu-client";
 
 // the other way to implement this is using useController
 interface RegionInputsProps {
   id: string,
   groupNameSuffix: string | number,
+  errors?: FieldErrors<RegionSetting>,
   regionIdentifierControlProps: FormControlProps,
   regionNameControlProps: FormControlProps,
   regionEndpointControlProps: FormControlProps,
@@ -16,6 +19,7 @@ interface RegionInputsProps {
 const RegionInputs: React.FC<RegionInputsProps> = ({
   id,
   groupNameSuffix,
+  errors,
   regionIdentifierControlProps,
   regionNameControlProps,
   regionEndpointControlProps,
@@ -75,7 +79,7 @@ const RegionInputs: React.FC<RegionInputsProps> = ({
             placeholder={translate("modals.privateCloudSettings.form.regionEndpoint.holder")}
           />
           <Form.Control.Feedback type="invalid">
-            {translate("modals.privateCloudSettings.form.regionEndpoint.feedback.required")}
+            {errors?.endpoint?.message}
           </Form.Control.Feedback>
         </Col>
       </Form.Group>

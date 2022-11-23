@@ -26,7 +26,8 @@ const App: React.FC = () => {
     <I18nProvider>
       <AuthProvider>
         <TopMenu
-          onActiveKodoAddress={setActiveKodoAddress}
+          // set a new object to make react rerender
+          onActiveKodoAddress={item => setActiveKodoAddress({...item})}
         />
         <Routes location={locationState?.backgroundLocation ?? location}>
           <Route path={RoutePath.Root} element={<SignIn/>}/>

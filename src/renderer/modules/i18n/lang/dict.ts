@@ -323,6 +323,7 @@ export default interface Dictionary {
           holder: string,
           feedback: {
             required: string,
+            pattern: string
           },
         },
       },

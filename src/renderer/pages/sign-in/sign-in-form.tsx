@@ -11,6 +11,7 @@ import RoutePath from "@renderer/pages/route-path";
 
 import "./sign-in-form.scss";
 import TooltipText from "@renderer/components/tooltip-text";
+import classNames from "classnames";
 
 export interface SignInFormValues extends AkItem {
   rememberMe: boolean,
@@ -18,11 +19,17 @@ export interface SignInFormValues extends AkItem {
 
 interface SignInFormProps {
   defaultValues?: SignInFormValues,
+  isInvalidPrivateEndpointSetting: boolean,
   onClickPrivateEndpointSetting: () => void,
   onClickAccessKeyHistory: () => void,
 }
 
-const SignInForm: React.FC<SignInFormProps> = (props) => {
+const SignInForm: React.FC<SignInFormProps> = ({
+  defaultValues,
+  isInvalidPrivateEndpointSetting,
+  onClickPrivateEndpointSetting,
+  onClickAccessKeyHistory,
+}) => {
   const {translate} = useI18n();
   const {signIn} = useAuth();
   const navigate = useNavigate();
@@ -51,12 +58,12 @@ const SignInForm: React.FC<SignInFormProps> = (props) => {
     },
   } = useForm<SignInFormValues>({
     mode: "onBlur",
-    defaultValues: props.defaultValues,
+    defaultValues: defaultValues,
   });
 
   useEffect(() => {
-    reset(props.defaultValues);
-  }, [props.defaultValues]);
+    reset(defaultValues);
+  }, [defaultValues]);
 
   return (
     <Form className="sign-in-form" onSubmit={handleSubmit(handleSignIn)}>
@@ -82,9 +89,11 @@ const SignInForm: React.FC<SignInFormProps> = (props) => {
                 className="d-flex justify-content-center align-items-center"
               >
                 <Button
-                  variant="link"
-                  className="private-endpoint-setting"
-                  onClick={props.onClickPrivateEndpointSetting}
+                  variant={isInvalidPrivateEndpointSetting ? "btn-lite-danger" : "link"}
+                  className={classNames("private-endpoint-setting", {
+                    "invalid-text": isInvalidPrivateEndpointSetting,
+                  })}
+                  onClick={onClickPrivateEndpointSetting}
                 >
                   <i className="bi bi-gear-fill"/>
                 </Button>
@@ -169,7 +178,7 @@ const SignInForm: React.FC<SignInFormProps> = (props) => {
             <Button
               variant="link"
               size="sm"
-              onClick={props.onClickAccessKeyHistory}
+              onClick={onClickAccessKeyHistory}
             >
               {translate("signIn.accessKeyHistory")}
             </Button>
@@ -181,7 +190,10 @@ const SignInForm: React.FC<SignInFormProps> = (props) => {
         <Col sm={{span: 7, offset: 4}}>
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={
+              isSubmitting ||
+              (watch("endpointType") === EndpointType.Private && isInvalidPrivateEndpointSetting)
+            }
           >
             {
               isSubmitting

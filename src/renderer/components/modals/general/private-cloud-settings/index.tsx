@@ -4,15 +4,22 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useFieldArray, useForm} from "react-hook-form";
 import lodash from "lodash";
 
+import {HttpUrl} from "@renderer/const/patterns";
 import {useI18n} from "@renderer/modules/i18n";
 import * as LocalLogger from "@renderer/modules/local-logger";
 import {Endpoint, isQueryRegionAPIAvailable, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 
 import RegionInputs from "./region-inputs";
 
-const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
-  const {translate} = useI18n();
+interface PrivateCloudSettingsProps {
+  onSaved: (data: Endpoint) => void,
+}
 
+const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = ({
+  onSaved,
+  ...modalProps
+}) => {
+  const {translate} = useI18n();
 
   const {
     handleSubmit,
@@ -40,6 +47,7 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
     LocalLogger.debug("save private cloud settings", data);
     privateEndpointPersistence.save(data);
     toast.success(translate("common.saved"));
+    onSaved(data);
     modalProps.onHide?.();
   };
 
@@ -103,7 +111,7 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
                     {...register("ucUrl", {
                       required: translate("modals.privateCloudSettings.form.ucUrl.feedback.required"),
                       pattern: {
-                        value: /^https?:\/\//,
+                        value: HttpUrl,
                         message: translate("modals.privateCloudSettings.form.ucUrl.feedback.pattern"),
                       },
                       onChange: e => handleChangeUcUrlDebounced(e.target.value),
@@ -125,6 +133,7 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
                     key={field.id}
                     id={field.id}
                     groupNameSuffix={index + 1}
+                    errors={errors.regions?.[index]}
                     onRemove={
                       isQueryApiAvailable
                         ? () => {
@@ -146,7 +155,11 @@ const PrivateCloudSettings: React.FC<ModalProps> = (modalProps) => {
                       ...register(
                         `regions.${index}.endpoint`,
                         {
-                          required: true,
+                          required: translate("modals.privateCloudSettings.form.regionEndpoint.feedback.required"),
+                          pattern: {
+                            value: HttpUrl,
+                            message: translate("modals.privateCloudSettings.form.regionEndpoint.feedback.pattern"),
+                          },
                         },
                       ),
                       isInvalid: Boolean(errors?.regions?.[index]?.endpoint),

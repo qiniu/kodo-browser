@@ -5,8 +5,43 @@ import {BackendMode} from "@common/qiniu";
 
 import StorageClass from "@common/models/storage-class";
 import {AkItem, EndpointType} from "@renderer/modules/auth";
-import {FileItem, listFiles} from "@renderer/modules/qiniu-client";
+import {FileItem, listFiles, ListFilesOption, ListFilesResult} from "@renderer/modules/qiniu-client";
 import * as LocalLogger from "@renderer/modules/local-logger";
+
+async function* loadFilesGen(
+  seriesId: string,
+  regionId: string,
+  bucketName: string,
+  path: string,
+  opt: ListFilesOption,
+) {
+  let marker: string | undefined = undefined;
+  while (true) {
+    const res: ListFilesResult = await listFiles(
+      regionId,
+      bucketName,
+      path,
+      marker,
+      opt,
+    );
+    if (!res.marker) {
+      return {
+        ...res,
+        seriesId,
+        bucketName,
+        path,
+      };
+    } else {
+      yield {
+        ...res,
+        seriesId,
+        bucketName,
+        path,
+      };
+      marker = res.marker;
+    }
+  }
+}
 
 interface useLoadFilesProps {
   user: AkItem | null,
@@ -18,6 +53,7 @@ interface useLoadFilesProps {
   shouldAutoReload?: () => boolean,
   autoReloadDeps?: DependencyList,
   preferBackendMode?: BackendMode,
+  defaultLoadAll?: boolean,
 }
 
 export default function useLoadFiles({
@@ -30,11 +66,19 @@ export default function useLoadFiles({
   shouldAutoReload,
   autoReloadDeps = [],
   preferBackendMode,
+  defaultLoadAll = false,
 }: useLoadFilesProps) {
-  async function loadFiles(
+
+  const [loading, setLoading] = useState(true);
+  const [files, setFiles] = useState<FileItem.Item[]>([]);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const currentAddressRef = useRef(currentAddressPath);
+  const loadFileIterator = useRef<ReturnType<typeof loadFilesGen>>();
+  const loadSeriesId = useRef(Date.now().toString());
+
+  const getFilesIterator = (
     path: string,
-    marker?: string,
-  ) {
+  ) => {
     if (!user) {
       return;
     }
@@ -50,11 +94,6 @@ export default function useLoadFiles({
       return;
     }
 
-    setLoading(true);
-    if (!marker) {
-      setFiles([]);
-    }
-
     const opt = {
       id: user.accessKey,
       secret: user.accessSecret,
@@ -66,44 +105,67 @@ export default function useLoadFiles({
       minKeys: pageSize,
       storageClasses: storageClasses,
     }
-    const res = await listFiles(
+
+    loadSeriesId.current = Date.now().toString();
+    return loadFilesGen(
+      loadSeriesId.current,
       regionId,
       bucketName,
       path,
-      marker,
       opt,
     );
+  };
 
-    // if loadPath != currentPath, abort result.
-    if (currentAddressPath !== currentAddressRef.current) {
+  const loadMore = async (shouldClear: boolean = false): Promise<boolean> => {
+    if (!loadFileIterator.current) {
+      return true;
+    }
+    setLoading(true);
+    const {value: res, done} = await loadFileIterator.current.next();
+    // abort result, load series not match.
+    if (res && res.seriesId !== loadSeriesId.current) {
+      return true;
+    }
+    // abort result, when load path not equal current path.
+    if (res && `${res.bucketName}/${res.path}` !== currentAddressPath) {
+      return true;
+    }
+    if (res) {
+      if (shouldClear) {
+        setFiles(res.data);
+      } else {
+        setFiles(files => files.concat(res.data));
+      }
+    }
+    setHasMore(!done);
+    setLoading(false);
+    return done ?? true;
+  };
+
+  const reload = async (path: string, loadAll: boolean = defaultLoadAll) => {
+    loadFileIterator.current = getFilesIterator(path);
+    if (!loadFileIterator.current) {
       return;
     }
-
-    if (!marker) {
-      setFiles(res.data);
-    } else {
-      setFiles(files.concat(res.data));
+    setFiles([]);
+    let done = await loadMore(true);
+    if (loadAll && !done) {
+      while (!done) {
+        done = await loadMore();
+      }
     }
-    setListMarker(res.marker);
-    setLoading(false);
-  }
-
-
-  const [loading, setLoading] = useState(true);
-  const [listMarker, setListMarker] = useState<string | undefined>();
-  const [files, setFiles] = useState<FileItem.Item[]>([]);
-  const currentAddressRef = useRef(currentAddressPath);
+  };
 
   useEffect(() => {
     currentAddressRef.current = currentAddressPath;
     if (shouldAutoReload && !shouldAutoReload()) {
-      setListMarker(undefined);
-      setFiles([]);
       setLoading(false);
+      setFiles([]);
+      setHasMore(false)
       return;
     }
     const searchPath = currentAddressPath.slice(`${bucketName}/`.length);
-    loadFiles(
+    reload(
       searchPath,
     )
       .catch(err => {
@@ -120,9 +182,10 @@ export default function useLoadFiles({
   return {
     loadFilesState: {
       loading,
-      listMarker,
       files,
+      hasMore,
     },
-    loadFiles,
+    reload,
+    loadMore,
   }
 }

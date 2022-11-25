@@ -93,7 +93,10 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
     memoStorageClasses,
   } = useMemo(() => {
     if (modalProps.show) {
-      const isDuplication = fileItems.length === 1 && originBasePath === basePath;
+      const isDuplication =
+        fileItems.length === 1 &&
+        fileItems[0].bucket === bucketName &&
+        originBasePath === basePath;
       return {
         memoFileItems: fileItems,
         memoIsDuplication: isDuplication,

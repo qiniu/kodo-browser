@@ -8,12 +8,12 @@ import * as FileItem from "./file-item";
 import { GetAdapterOptionParam, getDefaultClient } from "./common"
 
 // listFiles
-interface ListFilesOption extends GetAdapterOptionParam {
+export interface ListFilesOption extends GetAdapterOptionParam {
     storageClasses: StorageClass[],
     maxKeys?: number,
     minKeys?: number,
 }
-interface ListFilesResult {
+export interface ListFilesResult {
     data: FileItem.Item[],
     marker?: string,
 }

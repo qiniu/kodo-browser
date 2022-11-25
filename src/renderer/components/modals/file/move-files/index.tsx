@@ -93,7 +93,10 @@ const MoveFiles: React.FC<ModalProps & MoveFilesProps> = (props) => {
     memoStorageClasses,
   } = useMemo(() => {
     if (modalProps.show) {
-      const isRename = fileItems.length === 1 && originBasePath === basePath;
+      const isRename =
+        fileItems.length === 1 &&
+        fileItems[0].bucket === bucketName &&
+        originBasePath === basePath;
       return {
         memoFileItems: fileItems,
         memoIsRename: isRename,

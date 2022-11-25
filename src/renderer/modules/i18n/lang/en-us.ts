@@ -562,12 +562,12 @@ const dict: Dictionary = {
 
     deleteFiles: {
       title: "Delete Files",
-      description: "The following files or directories will be deleted:",
+      description: "Delete the following files or directories:",
     },
 
     copyFiles: {
       title: "Copy Files",
-      description: "The following files or directories will be ${operation} to current directory(The same name file or directory will be replaced):",
+      description: "${operation} the following files or directories to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {
           label: "Duplicate Name:",
@@ -582,7 +582,7 @@ const dict: Dictionary = {
 
     moveFiles: {
       title: "Move Files",
-      description: "The following files or directories will be ${operation} to current directory(The same name file or directory will be replaced):",
+      description: "${operation} the following files or directories to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {
           label: "New Name:",
@@ -597,7 +597,7 @@ const dict: Dictionary = {
 
     changeFilesStorageClass: {
       title: "Set Storage Class",
-      description: "The storage class of the following files or directories will be updated:",
+      description: "Set the storage class of the following files or directories:",
     },
 
     changeFileStorageClass: {
@@ -606,7 +606,7 @@ const dict: Dictionary = {
 
     restoreFiles: {
       title: "Restore Files",
-      description: "The following files or directories will be restored:",
+      description: "Restore the following files or directories:",
     },
 
     restoreFile: {
@@ -615,7 +615,7 @@ const dict: Dictionary = {
 
     generateFileLinks: {
       title: "Export Download Links",
-      description: "Download links of the following files will be exported:",
+      description: "Export download links of the following files:",
       csvFile: {
         label: "Export file location:",
         suffix: "Show File in Directory",
@@ -632,7 +632,7 @@ const dict: Dictionary = {
     uploadConfirm: {
       title: "Upload Files",
       previewList: {
-        title: "The following files or directories will upload:",
+        title: "Upload the following files or directories:",
         more: "… total ${total} files/directories",
       },
       form: {

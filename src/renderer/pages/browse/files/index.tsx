@@ -70,10 +70,11 @@ const Files: React.FC<FilesProps> = (props) => {
   const {
     loadFilesState: {
       loading: loadingFiles,
-      listMarker: fileListMarker,
+      hasMore: hasMoreFiles,
       files,
     },
-    loadFiles,
+    reload: reloadFiles,
+    loadMore: loadMoreFiles,
   } = useLoadFiles({
     user: currentUser,
     regionId: props.region?.s3Id,
@@ -93,6 +94,7 @@ const Files: React.FC<FilesProps> = (props) => {
       props.toggleRefresh,
     ],
     preferBackendMode: props.bucket?.preferBackendMode,
+    defaultLoadAll: !Settings.stepByStepLoadingFiles,
   });
 
   const handleReloadFiles = ({
@@ -107,8 +109,9 @@ const Files: React.FC<FilesProps> = (props) => {
     if (basePath === undefined || originBasePath !== basePath) {
       return;
     }
-    loadFiles(
+    reloadFiles(
       basePath,
+      !Settings.stepByStepLoadingFiles,
     )
       .catch(err => {
         toast.error(err.toString());
@@ -120,21 +123,12 @@ const Files: React.FC<FilesProps> = (props) => {
     if (basePath === undefined) {
       return;
     }
-    loadFiles(
-      basePath,
-      fileListMarker,
-    )
+    loadMoreFiles()
       .catch(err => {
         toast.error(err.toString());
         LocalLogger.error(err);
       });
   };
-
-  useEffect(() => {
-    if (fileListMarker && !Settings.stepByStepLoadingFiles) {
-      handleLoadMore();
-    }
-  }, [fileListMarker]);
 
   // available storage classes
   const availableStorageClasses = useMemo<Record<string, StorageClass> | undefined>(() => {
@@ -310,7 +304,7 @@ const Files: React.FC<FilesProps> = (props) => {
         bucketPermission={props.bucket?.grantedPermission}
         directoriesNumber={files.filter(f => FileItem.isItemFolder(f)).length}
         listedFileNumber={files.length}
-        hasMoreFiles={Boolean(fileListMarker)}
+        hasMoreFiles={hasMoreFiles}
         selectedFiles={[...selectedFiles.values()]}
 
         loadingDomains={loadingDomains}
@@ -340,7 +334,7 @@ const Files: React.FC<FilesProps> = (props) => {
         loading={loadingFiles}
         availableStorageClasses={availableStorageClasses}
         data={files}
-        hasMore={Boolean(fileListMarker)}
+        hasMore={hasMoreFiles}
         onLoadMore={handleLoadMore}
         selectedFiles={selectedFiles}
         onSelectFiles={handleChangeSelectedFiles}

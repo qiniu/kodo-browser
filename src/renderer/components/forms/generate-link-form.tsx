@@ -10,6 +10,8 @@ import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
 
+export const DEFAULT_EXPIRE_AFTER = 600;
+
 // utils
 export const getSelectedDomain = (
   domainList: DomainAdapter[],

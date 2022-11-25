@@ -27,6 +27,8 @@ import ChangeFilesStorageClass from "@renderer/components/modals/file/change-fil
 import GenerateFileLinks from "@renderer/components/modals/file/generate-file-links";
 import {toast} from "react-hot-toast";
 
+const MAX_FILE_LIST_SIZE = 9999;
+
 interface FileToolBarProps {
   basePath?: string,
   availableStorageClasses?: Record<string, StorageClass>,
@@ -442,7 +444,8 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
             />
             <InputGroup.Text>
               <i className="bi bi-search me-1"/>
-              {listedFileNumber}{hasMoreFiles ? "+" : null}
+              {Math.min(listedFileNumber, MAX_FILE_LIST_SIZE)}
+              {(listedFileNumber > MAX_FILE_LIST_SIZE || hasMoreFiles) ? "+" : null}
             </InputGroup.Text>
           </InputGroup>
           <ButtonGroup size="sm" className="ms-1">

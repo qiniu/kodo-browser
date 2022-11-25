@@ -607,13 +607,13 @@ describe("test settings.ts", () => {
 
         // stepByStepLoadingFiles
         it("stepByStepLoadingFiles getter", () => {
-            expect(Settings.stepByStepLoadingFiles).toBe(0);
+            expect(Settings.stepByStepLoadingFiles).toBe(1);
         });
         it("stepByStepLoadingFiles setter", () => {
-            Settings.stepByStepLoadingFiles = 1;
-            expect(Settings.stepByStepLoadingFiles).toBe(1);
             Settings.stepByStepLoadingFiles = 0;
             expect(Settings.stepByStepLoadingFiles).toBe(0);
+            Settings.stepByStepLoadingFiles = 1;
+            expect(Settings.stepByStepLoadingFiles).toBe(1);
         });
 
         // filesLoadingSize
@@ -677,7 +677,7 @@ describe("test settings.ts", () => {
                 downloadSpeedLimit: "2048",
                 "overwrite-downloading": "true",
                 externalPathEnabled: "1",
-                stepByStepLoadingFiles: "1",
+                stepByStepLoadingFiles: "0",
                 filesLoadingSize: "600",
                 navHistoriesLength: "110",
                 lang: "en-US",
@@ -887,13 +887,13 @@ describe("test settings.ts", () => {
 
         // stepByStepLoadingFiles
         it("stepByStepLoadingFiles getter", () => {
-            expect(Settings.stepByStepLoadingFiles).toBe(1);
+            expect(Settings.stepByStepLoadingFiles).toBe(0);
         });
         it("stepByStepLoadingFiles setter", () => {
-            Settings.stepByStepLoadingFiles = 0;
-            expect(Settings.stepByStepLoadingFiles).toBe(0);
             Settings.stepByStepLoadingFiles = 1;
             expect(Settings.stepByStepLoadingFiles).toBe(1);
+            Settings.stepByStepLoadingFiles = 0;
+            expect(Settings.stepByStepLoadingFiles).toBe(0);
         });
 
         // filesLoadingSize

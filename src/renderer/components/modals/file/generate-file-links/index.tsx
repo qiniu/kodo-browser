@@ -28,6 +28,7 @@ import {
 } from "@renderer/components/batch-progress";
 
 import {
+  DEFAULT_EXPIRE_AFTER,
   GenerateLinkForm,
   GenerateLinkFormData,
   GenerateLinkSubmitData,
@@ -111,7 +112,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     mode: "onChange",
     defaultValues: {
       domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
-      expireAfter: 600,
+      expireAfter: DEFAULT_EXPIRE_AFTER,
     },
   });
 
@@ -227,6 +228,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     if (modalProps.show) {
       reset({
         domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
+        expireAfter: DEFAULT_EXPIRE_AFTER,
       });
     } else {
       setCsvFilePath(null);

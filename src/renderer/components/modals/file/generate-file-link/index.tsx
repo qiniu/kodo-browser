@@ -12,6 +12,7 @@ import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules
 import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {
+  DEFAULT_EXPIRE_AFTER,
   GenerateLinkForm,
   GenerateLinkFormData,
   GenerateLinkSubmitData,
@@ -75,7 +76,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
     mode: "onChange",
     defaultValues: {
       domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
-      expireAfter: 600,
+      expireAfter: DEFAULT_EXPIRE_AFTER,
     },
   });
 
@@ -120,6 +121,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
     if (modalProps.show) {
       reset({
         domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
+        expireAfter: DEFAULT_EXPIRE_AFTER,
       });
     } else {
       setFileLink(undefined);

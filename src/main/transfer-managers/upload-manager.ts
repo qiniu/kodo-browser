@@ -54,9 +54,9 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
 
         for (const filePathname of filePathnameList) {
             const directoryToCreate = new Map<string, boolean>();
-            const remoteBaseDirectory = destInfo.key.endsWith("/")
-                ? destInfo.key.slice(0, -1)
-                : destInfo.key;
+            // remoteBaseDirectory maybe "", means upload to bucket root
+            // meybe "/", means upload to "bucket//"
+            const remoteBaseDirectory = destInfo.key;
             const localBaseDirectory = path.dirname(filePathname);
 
             await walk(
@@ -67,13 +67,11 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                         return;
                     }
 
-                    // remoteKey should be "path/to/file" not "/path/to/file"
-                    let remoteKey = remoteBaseDirectory + walkingPathname.slice(localBaseDirectory.length);
+                    let remoteKey = remoteBaseDirectory + walkingPathname.slice(localBaseDirectory.length + 1);
                     // for windows path
                     if (path.sep === "\\") {
                         remoteKey = remoteKey.replace(/\\/g, "/");
                     }
-                    remoteKey = remoteKey.startsWith("/") ? remoteKey.slice(1) : remoteKey;
 
                     if (statsWithName.isDirectory()) {
                         const remoteDirectoryKey = remoteKey + "/";

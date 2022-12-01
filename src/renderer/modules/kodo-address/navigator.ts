@@ -63,11 +63,11 @@ export class KodoNavigator {
     if (!bucketName) {
       return undefined;
     }
-    let baseRightPosition = this.current.path.length;
+    let basePath = this.current.path;
     if (!this.current.path.endsWith("/")) {
-      baseRightPosition = this.current.path.lastIndexOf("/") + 1;
+      basePath = KodoNavigator.getBaseDir(basePath);
     }
-    return this.current.path.slice(`${bucketName}/`.length, baseRightPosition);
+    return basePath.slice(`${bucketName}/`.length);
   }
 
   goTo(kodoAddress?: KodoAddress) {

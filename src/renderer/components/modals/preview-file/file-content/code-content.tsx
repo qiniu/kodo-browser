@@ -20,6 +20,7 @@ interface CodeContentProps {
   domain: DomainAdapter,
   readOnly?: boolean,
   portal?: React.FC<PropsWithChildren>,
+  onSaved?: () => void,
 }
 
 const CodeContent: React.FC<CodeContentProps> = ({
@@ -29,6 +30,7 @@ const CodeContent: React.FC<CodeContentProps> = ({
   domain,
   readOnly,
   portal: Portal,
+  onSaved,
 }) => {
   const {translate} = useI18n();
   const {currentUser} = useAuth();
@@ -130,6 +132,7 @@ const CodeContent: React.FC<CodeContentProps> = ({
       .then(() => {
         setCodeContent(dirtyContent);
         setIsShowDiff(false);
+        onSaved?.();
       })
       .finally(() => {
         setIsSavingContent(false);
@@ -197,7 +200,7 @@ const CodeContent: React.FC<CodeContentProps> = ({
         </Portal>
       }
     </>
-  )
+  );
 };
 
 export default CodeContent;

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {KeyboardEventHandler, useEffect, useState} from "react";
 import {InputGroup, Form} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 
@@ -51,6 +51,21 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
     b.path === address.path
   );
 
+  // handlers
+  const handleSubmitAddress: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.code !== "Enter") {
+      return;
+    }
+    let path = e.target.value;
+    const [bucketName] = path.split("/", 1);
+    const key = path.slice(`${bucketName}/`.length)
+    goTo({
+      protocol: address.protocol,
+      path: `${bucketName}/${key}`,
+    });
+  }
+
+  // render
   return (
     <div className="m-1">
       <InputGroup size="sm">
@@ -108,15 +123,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
               path: e.target.value,
             })
           }}
-          onKeyUp={e => {
-            if (e.code !== "Enter") {
-              return;
-            }
-            goTo({
-              protocol: address.protocol,
-              path: e.target.value,
-            });
-          }}
+          onKeyUp={handleSubmitAddress}
           aria-label="Kodo Navigator Input"
         />
         <TooltipButton

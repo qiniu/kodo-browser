@@ -50,16 +50,34 @@ const Contents: React.FC<ContentsProps> = ({
     } else {
       const regionsFromEndpointConfig = privateEndpointPersistence
         .read()
-        .regions
-        .map(r => {
-          const result = new Region(r.identifier, r.identifier, r.label);
-          result.s3Urls = [r.endpoint];
-          return result
-        });
+        .regions;
       if (!regionsFromEndpointConfig.length) {
         regionsPromise = getRegions(opt);
       } else {
-        regionsPromise = Promise.resolve(regionsFromEndpointConfig);
+        regionsPromise = getRegions(opt)
+          .then(regionsFromFetch => {
+            return regionsFromEndpointConfig.map(r => {
+              const storageClasses = regionsFromFetch
+                .find(i => i.s3Id === r.identifier)?.storageClasses ?? []
+              const result = new Region(
+                r.identifier,
+                r.identifier,
+                r.label,
+                {},
+                storageClasses,
+              );
+              result.s3Urls = [r.endpoint];
+              return result
+            });
+          })
+          .catch(() => {
+            return regionsFromEndpointConfig
+              .map(r => {
+                const result = new Region(r.identifier, r.identifier, r.label);
+                result.s3Urls = [r.endpoint];
+                return result
+              });
+          });
       }
     }
     Promise.all([regionsPromise, listAllBuckets(opt)])

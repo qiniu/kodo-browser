@@ -150,7 +150,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
       destInfo: {
         regionId: memoRegionId,
         bucketName: memoBucketName,
-        key: memoDestPath.endsWith("/") ? memoDestPath : memoDestPath + "/",
+        key: memoDestPath,
       },
       uploadOptions: {
         isOverwrite: data.isOverwrite,

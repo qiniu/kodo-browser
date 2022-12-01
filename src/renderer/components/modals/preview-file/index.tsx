@@ -6,9 +6,10 @@ import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 import StorageClass from "@common/models/storage-class";
 
 import {useI18n} from "@renderer/modules/i18n";
+import {useAuth} from "@renderer/modules/auth";
 import usePortal from "@renderer/modules/hooks/use-portal";
 import {FileItem} from "@renderer/modules/qiniu-client";
-import {DomainAdapter} from "@renderer/modules/qiniu-client-hooks";
+import {DomainAdapter, useHeadFile} from "@renderer/modules/qiniu-client-hooks";
 import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {OperationDoneRecallFn} from "../file/types";
@@ -43,7 +44,8 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
   } = props;
 
   const {translate} = useI18n();
-  const {bucketGrantedPermission} = useFileOperation();
+  const {currentUser} = useAuth();
+  const {bucketGrantedPermission, bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   const {
     memoRegionId,
@@ -64,6 +66,18 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
   }), [modalProps.show]);
 
   const {
+    headFileState,
+    fetchFileInfo,
+  } = useHeadFile({
+    user: currentUser,
+    regionId: memoRegionId,
+    bucketName: memoBucketName,
+    filePath: memoFileItem?.path.toString(),
+    storageClasses: memoStorageClasses,
+    preferBackendMode,
+  });
+
+  const {
     ref: contentPortalRef,
     portal: contentPortal,
   } = usePortal();
@@ -77,7 +91,7 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
 
   useEffect(() => {
     if (modalProps.show) {
-
+      fetchFileInfo();
     } else {
       setFileOperation(FileOperationType.None);
     }
@@ -90,9 +104,9 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
           <i className="bi bi-eye me-1"/>
           {translate("modals.preview.title")}
           {
-            memoFileItem
+            headFileState.fileInfo
               ? <small>
-                ({byteSizeFormat(memoFileItem.size)})
+                ({byteSizeFormat(headFileState.fileInfo.size)})
               </small>
               : null
           }
@@ -120,6 +134,10 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
                       domain={memoDomain}
                       readOnly={bucketGrantedPermission === "readonly"}
                       portal={contentPortal}
+                      onFileChange={() => {
+                        fetchFileInfo();
+                        onOperationDone({originBasePath: memoBasePath});
+                      }}
                     />
                   </FileArchived>
                   : <FileOperation

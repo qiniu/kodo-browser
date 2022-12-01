@@ -127,7 +127,9 @@ export default function useLoadFiles({
       return true;
     }
     // abort result, when load path not equal current path.
-    if (res && `${res.bucketName}/${res.path}` !== currentAddressPath) {
+    const [currentBucketName] = currentAddressPath.split("/", 1);
+    const currentPath = currentAddressPath.slice(`${currentBucketName}/`.length)
+    if (res && `${res.bucketName}/${res.path}` !== `${currentBucketName}/${currentPath}`) {
       return true;
     }
     if (res) {

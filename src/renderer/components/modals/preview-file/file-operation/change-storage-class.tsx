@@ -10,7 +10,7 @@ import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem, setStorageClass} from "@renderer/modules/qiniu-client";
 import {useFileOperation} from "@renderer/modules/file-operation";
-import useHeadFile from "@renderer/modules/qiniu-client-hooks/use-head-file";
+import {useHeadFile} from "@renderer/modules/qiniu-client-hooks";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 

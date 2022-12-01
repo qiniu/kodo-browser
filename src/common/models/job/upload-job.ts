@@ -229,7 +229,10 @@ export default class UploadJob extends TransferJob {
             if (err === Uploader.userCanceledError) {
                 return;
             }
-            if (err.toString().includes("no such uploadId")) {
+            if (
+              err.toString().includes("no such uploadId") ||
+              err.toString().includes("NoSuchUpload")
+            ) {
               this.uploadedId = "";
               this.uploadedParts = [];
             }

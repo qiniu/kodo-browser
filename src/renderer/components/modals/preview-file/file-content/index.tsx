@@ -20,6 +20,7 @@ interface FileContentProps {
   domain: DomainAdapter,
   readOnly?: boolean,
   portal?: React.FC<PropsWithChildren>,
+  onFileChange?: () => void,
 }
 
 const FileContent: React.FC<PropsWithChildren<FileContentProps>> = ({
@@ -30,6 +31,7 @@ const FileContent: React.FC<PropsWithChildren<FileContentProps>> = ({
   domain,
   readOnly,
   portal,
+  onFileChange,
 }) => {
   const fileType = useMemo(
     () => fileTypeInfo ?? FileItem.getFileType(fileItem),
@@ -92,6 +94,7 @@ const FileContent: React.FC<PropsWithChildren<FileContentProps>> = ({
             domain={domain}
             readOnly={readOnly}
             portal={portal}
+            onSaved={onFileChange}
           />
         </FileTooLarge>
       );

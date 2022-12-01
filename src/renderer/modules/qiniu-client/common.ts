@@ -127,25 +127,19 @@ function getAdapterOption(opt: GetAdapterOptionParam): AdapterOption {
         appVersion: AppConfig.app.version,
         // TODO: get from @renderer/modules/settings or pass by opt
         appNatureLanguage: localStorage.getItem("lang") as NatureLanguage ?? 'zh-CN',
+        regions: [],
     };
     let result: AdapterOption;
     if (opt.isPublicCloud) {
         result = {
             ...baseResult,
             ucUrl: undefined,
-            regions: [],
         };
     } else {
         const privateEndpoint = privateEndpointPersistence.read();
         result = {
             ...baseResult,
             ucUrl: privateEndpoint.ucUrl,
-            regions: privateEndpoint.regions.map(r => {
-                const region = new Region('', r.identifier, r.label);
-                region.ucUrls = [privateEndpoint.ucUrl];
-                region.s3Urls = [r.endpoint];
-                return region;
-            }),
             // disable uplog when use customize cloud
             // because there isn't a valid access key of uplog
             uplogBufferSize: -1,

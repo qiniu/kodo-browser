@@ -622,6 +622,9 @@ const dict: Dictionary = {
             },
             selectLocalPathDialog: {
                 title: "エクスポート先を選択",
+                error: {
+                    cancelOrNoSelected: "キャンセル、保存場所が選択されていない",
+                },
             },
         },
 

@@ -622,6 +622,9 @@ const dict: Dictionary = {
       },
       selectLocalPathDialog: {
         title: "Select Export Path",
+        error: {
+          cancelOrNoSelected: "canceled or not select any path to save",
+        },
       },
     },
 

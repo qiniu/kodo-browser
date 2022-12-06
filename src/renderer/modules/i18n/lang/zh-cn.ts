@@ -622,6 +622,9 @@ const dict: Dictionary = {
       },
       selectLocalPathDialog: {
         title: "选择导出位置",
+        error: {
+          cancelOrNoSelected: "用户取消或未选择存储路径",
+        },
       },
     },
 

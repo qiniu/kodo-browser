@@ -621,6 +621,9 @@ export default interface Dictionary {
       },
       selectLocalPathDialog: {
         title: string,
+        error: {
+          cancelOrNoSelected: string,
+        },
       },
     },
 

@@ -196,7 +196,9 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     const p = dialogSavePath()
       .then(({filePaths, canceled}) => {
         if (canceled || !filePaths?.length) {
-          return Promise.reject();
+          return Promise.reject(
+            translate("modals.generateFileLinks.selectLocalPathDialog.error.cancelOrNoSelected")
+          );
         }
         const targetDirectory = filePaths[0].replace(/(\/*$)/g, '');
 

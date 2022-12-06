@@ -66,6 +66,20 @@ const Files: React.FC<FilesProps> = (props) => {
     }
   };
 
+  // search by prefix
+  const searchPrefix = currentAddress.path.slice(
+    currentAddress.path.lastIndexOf("/") + 1
+  );
+  const handleSearchPrefix = (prefix: string) => {
+    const baseDirPath = currentAddress.path.endsWith("/")
+      ? currentAddress.path
+      : KodoNavigator.getBaseDir(currentAddress.path);
+    goTo({
+      protocol: currentAddress.protocol,
+      path: `${baseDirPath}${prefix}`,
+    });
+  };
+
   // files loader
   const {
     loadFilesState: {
@@ -106,11 +120,15 @@ const Files: React.FC<FilesProps> = (props) => {
       m.clear();
       return new Map(m);
     });
-    if (basePath === undefined || originBasePath !== basePath) {
+    let p = basePath;
+    if (p === undefined || originBasePath !== basePath) {
       return;
     }
+    if (searchPrefix) {
+      p = `${basePath}${searchPrefix}`
+    }
     reloadFiles(
-      basePath,
+      p,
       !Settings.stepByStepLoadingFiles,
     )
       .catch(err => {
@@ -169,20 +187,6 @@ const Files: React.FC<FilesProps> = (props) => {
       domains.find(d => d.name === prevDomain?.name) ?? domains[0]
     );
   }, [domains]);
-
-  // search by prefix
-  const searchPrefix = currentAddress.path.slice(
-    currentAddress.path.lastIndexOf("/") + 1
-  );
-  const handleSearchPrefix = (prefix: string) => {
-    const baseDirPath = currentAddress.path.endsWith("/")
-      ? currentAddress.path
-      : KodoNavigator.getBaseDir(currentAddress.path);
-    goTo({
-      protocol: currentAddress.protocol,
-      path: `${baseDirPath}${prefix}`,
-    });
-  };
 
   // view style
   const [viewStyle, setViewStyle] = useState(Settings.contentViewStyle);

@@ -13,18 +13,18 @@ interface TransferProps {
 const Transfer: React.FC<TransferProps> = ({
   onRefresh,
 }) => {
-  const {currentAddress} = useKodoNavigator();
+  const {bucketName, basePath} = useKodoNavigator();
 
   const handleUploadJobComplete = (data: JobCompletedReplyMessage["data"]["jobUiData"]) => {
     const baseDir = KodoNavigator.getBaseDir(`${data.to.bucket}/${data.to.key}`);
-    if (currentAddress.path === baseDir) {
+    if (`${bucketName}/${basePath}` === baseDir) {
       onRefresh();
     }
   };
 
   const handleCreatedDirectory = (data: CreatedDirectoryReplyMessage["data"]) => {
     const baseDir = KodoNavigator.getBaseDir(`${data.bucket}/${data.directoryKey}`);
-    if (currentAddress.path === baseDir) {
+    if (`${bucketName}/${basePath}` === baseDir) {
       onRefresh();
     }
   };

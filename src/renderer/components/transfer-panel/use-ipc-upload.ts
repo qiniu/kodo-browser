@@ -19,6 +19,14 @@ import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-
 
 import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
 
+function handleOffline() {
+  ipcUploadManager.stopJobsByOffline();
+}
+
+function handleOnline() {
+  ipcUploadManager.startJobsByOnline();
+}
+
 interface UploadConfig {
   resumable: boolean,
   maxConcurrency: number,
@@ -87,6 +95,19 @@ const useIpcUpload = ({
       }
     }
   }, [onAddedJobs, onJobCompleted, onCreatedDirectory]);
+
+  // handle offline/online
+  // the kodo-s3-adapter-sdk will take a long time to reconnect,
+  // after network change in some network environment.
+  // so handle it manually
+  useEffect(() => {
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+    };
+  }, []);
 
   // subscribe IPC events of upload and make sure there is a valid configuration
   useEffect(() => {

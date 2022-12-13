@@ -41,6 +41,8 @@ export enum DownloadAction {
     StartAllJobs = "StartAllJobs",
     StopAllJobs = "StopAllJobs",
     RemoveAllJobs = "RemoveAllJobs",
+    StopJobsByOffline = "StopJobsByOffline",
+    StartJobsByOnline = "StartJobsByOnline",
 
     // common
     UpdateUiData = "UpdateUiData",
@@ -161,6 +163,16 @@ export interface StopAllJobsMessage {
     data?: {},
 }
 
+export interface StopJobsByOfflineMessage {
+    action: DownloadAction.StopJobsByOffline,
+    data?: {},
+}
+
+export interface StartJobsByOnlineMessage {
+    action: DownloadAction.StartJobsByOnline,
+    data?: {},
+}
+
 export interface RemoveAllJobsMessage {
     action: DownloadAction.RemoveAllJobs,
     data?: {},
@@ -186,6 +198,8 @@ export type DownloadMessage = UpdateConfigMessage
     | StartAllJobsMessage
     | StopAllJobsMessage
     | RemoveAllJobsMessage
+    | StopJobsByOfflineMessage
+    | StartJobsByOnlineMessage
 
 export type DownloadReplyMessage = UpdateUiDataReplyMessage
     | AddedJobsReplyMessage
@@ -271,6 +285,20 @@ export class DownloadActionFns {
     stopAllJobs() {
         this.ipc.send(this.channel, {
             action: DownloadAction.StopAllJobs,
+            data: {},
+        });
+    }
+
+    stopJobsByOffline() {
+        this.ipc.send(this.channel, {
+            action: DownloadAction.StopJobsByOffline,
+            data: {},
+        });
+    }
+
+    startJobsByOnline() {
+        this.ipc.send(this.channel, {
+            action: DownloadAction.StartJobsByOnline,
             data: {},
         });
     }

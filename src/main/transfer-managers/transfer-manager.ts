@@ -1,10 +1,9 @@
 import fs from "fs";
 
 import TransferJob from "@common/models/job/transfer-job";
-import {isLocalPath} from "@common/models/job/types";
+import {isLocalPath, Status} from "@common/models/job/types";
 
 import ByteSize from "@common/const/byte-size";
-import {Status} from "@common/models/job/types";
 import {ClientOptions} from "@common/qiniu";
 
 interface OptionalConfig<Job extends TransferJob> {
@@ -42,6 +41,8 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     protected jobs: Map<string, Job> = new Map<string, Job>()
     protected jobIds: string[] = []
     protected config: OptionalConfig<Job> & Opt
+
+    private offlineJobIds: string[] = []
 
     protected constructor(config: TransferManagerConfig<Job, Opt>) {
         this.config = {
@@ -226,6 +227,29 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         this.stopAllJobs();
         this.jobIds = [];
         this.jobs.clear();
+    }
+
+    stopJobsByOffline(): void {
+        for (const [jobId, job] of this.jobs) {
+            if ([Status.Running, Status.Waiting].includes(job.status)) {
+                job.stop();
+                if (job.status === Status.Running) {
+                    this.running -= 1;
+                }
+                this.offlineJobIds.push(jobId);
+            }
+        }
+    }
+
+    startJobsByOnline(): void {
+        for (const jobId of this.offlineJobIds) {
+            const job = this.jobs.get(jobId);
+            if (job) {
+                job.wait();
+            }
+        }
+        this.offlineJobIds = [];
+        this.scheduleJobs();
     }
 
     protected _persistJobs(): void {

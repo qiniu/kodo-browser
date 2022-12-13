@@ -18,6 +18,14 @@ import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-downl
 
 import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
 
+function handleOffline() {
+  ipcDownloadManager.stopJobsByOffline();
+}
+
+function handleOnline() {
+  ipcDownloadManager.startJobsByOnline();
+}
+
 interface DownloadConfig {
   resumable: boolean,
   maxConcurrency: number,
@@ -57,6 +65,20 @@ const useIpcDownload = ({
   const [pageNum, setPageNum] = useState<number>(0);
   const [queryCount, setQueryCount] = useState<number>(initQueryCount);
   const [jobState, setJobState] = useState<UpdateUiDataReplyMessage["data"]>();
+
+
+  // handle offline/online
+  // the kodo-s3-adapter-sdk will take a long time to reconnect,
+  // after network change in some network environment.
+  // so handle it manually
+  useEffect(() => {
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+    };
+  }, []);
 
   // subscribe IPC events of download and make sure there is a valid configuration
   useEffect(() => {

@@ -129,6 +129,14 @@ process.on("message", (message: DownloadMessage) => {
             downloadManager.stopAllJobs();
             break;
         }
+        case DownloadAction.StopJobsByOffline: {
+            downloadManager.stopJobsByOffline();
+            break;
+        }
+        case DownloadAction.StartJobsByOnline: {
+            downloadManager.startJobsByOnline();
+            break;
+        }
         case DownloadAction.RemoveAllJobs: {
             downloadManager.removeAllJobs();
             downloadManager.persistJobs(true);

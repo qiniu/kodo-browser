@@ -32,6 +32,8 @@ export enum UploadAction {
     CleanupJobs = "CleanupJobs",
     StartAllJobs = "StartAllJobs",
     StopAllJobs = "StopAllJobs",
+    StopJobsByOffline = "StopJobsByOffline",
+    StartJobsByOnline = "StartJobsByOnline",
     RemoveAllJobs = "RemoveAllJobs",
 
     // common
@@ -152,6 +154,16 @@ export interface StopAllJobsMessage {
     data?: {},
 }
 
+export interface StopJobsByOfflineMessage {
+  action: UploadAction.StopJobsByOffline,
+  data?: {},
+}
+
+export interface StartJobsByOnlineMessage {
+  action: UploadAction.StartJobsByOnline,
+  data?: {},
+}
+
 export interface RemoveAllJobsMessage {
     action: UploadAction.RemoveAllJobs,
     data?: {},
@@ -184,6 +196,8 @@ export type UploadMessage = UpdateConfigMessage
     | CleanupJobMessage
     | StartAllJobsMessage
     | StopAllJobsMessage
+    | StopJobsByOfflineMessage
+    | StartJobsByOnlineMessage
     | RemoveAllJobsMessage
 
 export type UploadReplyMessage = UpdateUiDataReplyMessage
@@ -272,6 +286,20 @@ export class UploadActionFns {
     stopAllJobs() {
         this.ipc.send(this.channel, {
             action: UploadAction.StopAllJobs,
+            data: {},
+        });
+    }
+
+    stopJobsByOffline() {
+        this.ipc.send(this.channel, {
+            action: UploadAction.StopJobsByOffline,
+            data: {},
+        });
+    }
+
+    startJobsByOnline() {
+        this.ipc.send(this.channel, {
+            action: UploadAction.StartJobsByOnline,
             data: {},
         });
     }

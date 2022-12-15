@@ -567,6 +567,7 @@ const dict: Dictionary = {
 
     copyFiles: {
       title: "复制文件",
+      hintFiltered: "禁止同目录复制，当前目录的复制已被过滤",
       description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {
@@ -582,6 +583,7 @@ const dict: Dictionary = {
 
     moveFiles: {
       title: "移动文件",
+      hintFiltered: "禁止同目录移动，当前目录的复制已被过滤",
       description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {

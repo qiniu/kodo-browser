@@ -26,7 +26,8 @@ import {
 } from "@renderer/components/batch-progress";
 import {usePromiseConfirm} from "@renderer/components/lite-confirm";
 
-import {OperationDoneRecallFn} from "@renderer/components/modals/file/types";
+import {OperationDoneRecallFn} from "../types";
+import {isRecursiveDirectory} from "../utils"
 
 interface CopyFilesProps {
   regionId: string,
@@ -85,6 +86,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
   // cache operation states prevent props update after modal opened.
   const {
     memoFileItems,
+    memoIsFiltered,
     memoIsDuplication,
     // memoOriginBasePath,
     memoRegionId,
@@ -97,8 +99,10 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
         fileItems.length === 1 &&
         fileItems[0].bucket === bucketName &&
         originBasePath === basePath;
+      const filteredItems = fileItems.filter(item => !isRecursiveDirectory(item, basePath));
       return {
-        memoFileItems: fileItems,
+        memoFileItems: filteredItems,
+        memoIsFiltered: filteredItems.length !== fileItems.length,
         memoIsDuplication: isDuplication,
         memoOriginBasePath: originBasePath,
         memoRegionId: regionId,
@@ -109,6 +113,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
     } else {
       return {
         memoFileItems: [],
+        memoIsFiltered: false,
         memoIsDuplication: false,
         memoOriginBasePath: originBasePath,
         memoRegionId: regionId,
@@ -272,126 +277,134 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
           {translate("modals.copyFiles.title")}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body className="p-0">
         {
-          !memoFileItems.length
-            ? <div>
-              {translate("common.noObjectSelected")}
-            </div>
-            : <>
-              {
-                memoIsDuplication
-                  ? <>
-                    <Form onSubmit={handleSubmit(handleSubmitCopyFiles)}>
-                      <fieldset
-                        disabled={isSubmitting || [BatchTaskStatus.Running, BatchTaskStatus.Ended].includes(batchProgressState.status)}
-                      >
-                        <Form.Group as={Row} className="mb-3" controlId="fileName">
-                          <Form.Label className="text-end" column sm={4}>
-                            {translate("modals.copyFiles.form.fileName.label")}
-                          </Form.Label>
-                          <Col sm={7}>
-                            <Form.Control
-                              {...register("fileName", {
-                                validate: v => {
-                                  if (!memoIsDuplication) {
-                                    return true;
-                                  }
-                                  if (!v) {
-                                    return false;
-                                  }
-                                  if (v === memoFileItems[0].name) {
-                                    return false;
-                                  }
-                                  return FileRename.test(v);
-                                },
-                              })}
-                              type="text"
-                              isInvalid={Boolean(errors.fileName)}
-                              autoFocus
-                            />
-                            <Form.Text
-                              className={
-                                Boolean(errors.fileName)
-                                  ? "text-danger"
-                                  : ""
-                              }
-                            >
-                              {translate("modals.copyFiles.form.fileName.hint")}
-                            </Form.Text>
-                          </Col>
-                        </Form.Group>
-                      </fieldset>
-                    </Form>
-                    {
-                      replaceConfirmState.isShowConfirm
-                        ? <div className="d-flex">
-                          <div>{translate("modals.copyFiles.replaceConfirm.description")}</div>
-                          <Button
-                            className="ms-auto"
-                            variant="lite-primary"
-                            size="sm"
-                            onClick={() => replaceConfirmState.handleConfirm(true)}
-                          >
-                            {translate("modals.copyFiles.replaceConfirm.yes")}
-                          </Button>
-                          <Button
-                            variant="lite-danger"
-                            size="sm"
-                            onClick={() => replaceConfirmState.handleConfirm(false)}
-                          >
-                            {translate("common.cancel")}
-                          </Button>
-                        </div>
-                        : null
-                    }
-                  </>
-                  : <>
-                    <div>
-                      <Translate
-                        i18nKey="modals.copyFiles.description"
-                        data={contentI18nData}
-                        slots={{
-                          operation: v => <code key="operation">{v}</code>,
-                        }}
-                      />
-                    </div>
-                    <ul className="scroll-max-vh-40">
-                      {
-                        memoFileItems.map(fileItem => (
-                          <li key={fileItem.path.toString()}>
-                            {
-                              FileItem.isItemFolder(fileItem)
-                                ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                                : <i className="bi bi-file-earmark me-1"/>
-                            }
-                            {fileItem.name}
-                          </li>
-                        ))
-                      }
-                    </ul>
-                  </>
-              }
-              {
-                batchProgressState.status === BatchTaskStatus.Standby
-                  ? null
-                  : <BatchProgress
-                    status={batchProgressState.status}
-                    total={batchProgressState.total}
-                    finished={batchProgressState.finished}
-                    errored={batchProgressState.errored}
-                    onClickInterrupt={handleInterrupt}
-                  />
-              }
-              {
-                erroredFileOperations.length > 0
-                  ? <ErrorFileList
-                    data={erroredFileOperations}
-                  />
-                  : null
-              }
-            </>
+          memoIsFiltered &&
+          <div className="text-bg-warning bg-opacity-25 px-3 py-1">
+            {translate("modals.copyFiles.hintFiltered")}
+          </div>
         }
+        <div className="p-3">
+          {
+            !memoFileItems.length
+              ? <div>
+                {translate("common.noObjectSelected")}
+              </div>
+              : <>
+                {
+                  memoIsDuplication
+                    ? <>
+                      <Form onSubmit={handleSubmit(handleSubmitCopyFiles)}>
+                        <fieldset
+                          disabled={isSubmitting || [BatchTaskStatus.Running, BatchTaskStatus.Ended].includes(batchProgressState.status)}
+                        >
+                          <Form.Group as={Row} className="mb-3" controlId="fileName">
+                            <Form.Label className="text-end" column sm={4}>
+                              {translate("modals.copyFiles.form.fileName.label")}
+                            </Form.Label>
+                            <Col sm={7}>
+                              <Form.Control
+                                {...register("fileName", {
+                                  validate: v => {
+                                    if (!memoIsDuplication) {
+                                      return true;
+                                    }
+                                    if (!v) {
+                                      return false;
+                                    }
+                                    if (v === memoFileItems[0].name) {
+                                      return false;
+                                    }
+                                    return FileRename.test(v);
+                                  },
+                                })}
+                                type="text"
+                                isInvalid={Boolean(errors.fileName)}
+                                autoFocus
+                              />
+                              <Form.Text
+                                className={
+                                  Boolean(errors.fileName)
+                                    ? "text-danger"
+                                    : ""
+                                }
+                              >
+                                {translate("modals.copyFiles.form.fileName.hint")}
+                              </Form.Text>
+                            </Col>
+                          </Form.Group>
+                        </fieldset>
+                      </Form>
+                      {
+                        replaceConfirmState.isShowConfirm
+                          ? <div className="d-flex">
+                            <div>{translate("modals.copyFiles.replaceConfirm.description")}</div>
+                            <Button
+                              className="ms-auto"
+                              variant="lite-primary"
+                              size="sm"
+                              onClick={() => replaceConfirmState.handleConfirm(true)}
+                            >
+                              {translate("modals.copyFiles.replaceConfirm.yes")}
+                            </Button>
+                            <Button
+                              variant="lite-danger"
+                              size="sm"
+                              onClick={() => replaceConfirmState.handleConfirm(false)}
+                            >
+                              {translate("common.cancel")}
+                            </Button>
+                          </div>
+                          : null
+                      }
+                    </>
+                    : <>
+                      <div>
+                        <Translate
+                          i18nKey="modals.copyFiles.description"
+                          data={contentI18nData}
+                          slots={{
+                            operation: v => <code key="operation">{v}</code>,
+                          }}
+                        />
+                      </div>
+                      <ul className="scroll-max-vh-40">
+                        {
+                          memoFileItems.map(fileItem => (
+                            <li key={fileItem.path.toString()}>
+                              {
+                                FileItem.isItemFolder(fileItem)
+                                  ? <i className="bi bi-folder-fill me-1 text-yellow"/>
+                                  : <i className="bi bi-file-earmark me-1"/>
+                              }
+                              {fileItem.name}
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </>
+                }
+                {
+                  batchProgressState.status === BatchTaskStatus.Standby
+                    ? null
+                    : <BatchProgress
+                      status={batchProgressState.status}
+                      total={batchProgressState.total}
+                      finished={batchProgressState.finished}
+                      errored={batchProgressState.errored}
+                      onClickInterrupt={handleInterrupt}
+                    />
+                }
+                {
+                  erroredFileOperations.length > 0
+                    ? <ErrorFileList
+                      data={erroredFileOperations}
+                    />
+                    : null
+                }
+              </>
+          }
+        </div>
       </Modal.Body>
       <Modal.Footer>
         {

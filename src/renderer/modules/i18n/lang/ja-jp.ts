@@ -567,6 +567,7 @@ const dict: Dictionary = {
 
         copyFiles: {
             title: "ファイルをコピー",
+            hintFiltered: "自分自身へのディレクトリのコピーの禁止，一部の無効な項目を除去。",
             description: "このディレクトリに${operation}  (同じファイルまたはディレクトリが対象となります)",
             form: {
                 fileName: {
@@ -582,6 +583,7 @@ const dict: Dictionary = {
 
         moveFiles: {
             title: "ファイルを移動",
+            hintFiltered: "自分自身へのディレクトリの移動の禁止，一部の無効な項目を除去。",
             description: "このディレクトリに${operation}  (同じファイルまたはディレクトリが対象となります)",
             form: {
                 fileName: {

@@ -566,6 +566,7 @@ export default interface Dictionary {
 
     copyFiles: {
       title: string,
+      hintFiltered: string,
       description: string,
       form: {
         fileName: {
@@ -581,6 +582,7 @@ export default interface Dictionary {
 
     moveFiles: {
       title: string,
+      hintFiltered: string,
       description: string,
       form: {
         fileName: {

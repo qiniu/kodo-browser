@@ -28,7 +28,7 @@ import {
   useBatchProgress
 } from "@renderer/components/batch-progress";
 
-import {OperationDoneRecallFn} from "@renderer/components/modals/file/types";
+import {OperationDoneRecallFn} from "../types";
 
 interface RenameFileProps {
   regionId: string,

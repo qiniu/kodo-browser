@@ -567,6 +567,7 @@ const dict: Dictionary = {
 
     copyFiles: {
       title: "Copy Files",
+      hintFiltered: "Copy directory to itself is forbidden. The list is filtered.",
       description: "${operation} the following files or directories to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {
@@ -582,6 +583,7 @@ const dict: Dictionary = {
 
     moveFiles: {
       title: "Move Files",
+      hintFiltered: "Move directory to itself is forbidden. The list is filtered.",
       description: "${operation} the following files or directories to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {

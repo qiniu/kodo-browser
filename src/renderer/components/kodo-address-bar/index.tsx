@@ -61,7 +61,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
     const key = path.slice(`${bucketName}/`.length)
     goTo({
       protocol: address.protocol,
-      path: `${bucketName}/${key}`,
+      path: !bucketName ? "" : `${bucketName}/${key}`,
     });
   }
 

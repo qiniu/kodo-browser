@@ -144,23 +144,31 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     }
 
     waitJob(jobId: string): void {
-        this.jobs.get(jobId)?.wait();
-        this.running -= 1;
+        const job = this.jobs.get(jobId);
+        if (!job){
+            return;
+        }
+        job.wait();
         this.scheduleJobs();
     }
 
     startJob(jobId: string, options?: any): void {
-        this.jobs.get(jobId)?.start(options)
+        const job = this.jobs.get(jobId);
+        if (!job) {
+          return;
+        }
+        job.start(options)
             .finally(() => {
                 this.afterJobDone(jobId);
             });
-
-        this.running += 1;
     }
 
     stopJob(jobId: string): void {
-        this.jobs.get(jobId)?.stop();
-        this.running -= 1;
+        const job = this.jobs.get(jobId);
+        if (!job) {
+            return;
+        }
+        job.stop();
         this.scheduleJobs();
     }
 
@@ -169,11 +177,15 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         if (indexToRemove < 0) {
             return;
         }
-        this.jobs.get(jobId)
-            ?.stop();
         this.jobIds.splice(indexToRemove, 1);
+
+        const job = this.jobs.get(jobId);
+        if (!job) {
+          return;
+        }
+        job.stop();
+
         this.jobs.delete(jobId);
-        this.running -= 1;
         this.scheduleJobs();
     }
 
@@ -217,9 +229,6 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
                     return;
                 }
                 job.stop();
-                if (job.status === Status.Running) {
-                    this.running -= 1;
-                }
             });
     }
 
@@ -233,9 +242,6 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         for (const [jobId, job] of this.jobs) {
             if ([Status.Running, Status.Waiting].includes(job.status)) {
                 job.stop();
-                if (job.status === Status.Running) {
-                    this.running -= 1;
-                }
                 this.offlineJobIds.push(jobId);
             }
         }
@@ -290,7 +296,6 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
             if (job?.status !== Status.Waiting) {
                 continue;
             }
-            this.running += 1;
             job.start()
                 .finally(() => {
                     this.afterJobDone(job.id);
@@ -302,9 +307,15 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         }
     }
 
-    private afterJobDone(id: string): void {
+    protected handleJobStatusChange(status: Status, prev: Status) {
+      if (status === Status.Running) {
+        this.running += 1;
+      } else if (prev === Status.Running) {
         this.running -= 1;
-        this.running = Math.max(0, this.running);
+      }
+    }
+
+    private afterJobDone(id: string): void {
         this.scheduleJobs();
         this.config.onJobDone?.(id, this.jobs.get(id));
     }

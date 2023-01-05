@@ -214,6 +214,9 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
 
             userNatureLanguage: uploadOptions.userNatureLanguage,
 
+            onStatusChange: (status, prev) => {
+                this.handleJobStatusChange(status, prev);
+            },
             onProgress: () => {
                 this.persistJobs();
             },
@@ -222,7 +225,7 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             },
             onCompleted: () => {
                 this.persistJobs();
-            }
+            },
         });
 
         this.addJob(job);
@@ -293,6 +296,20 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                         uploadSpeedLimit: this.config.speedLimit,
                         isDebug: this.config.isDebug,
                         userNatureLanguage: uploadOptions.userNatureLanguage,
+                    },
+                    {
+                        onStatusChange: (status, prev) => {
+                            this.handleJobStatusChange(status, prev);
+                        },
+                        onProgress: () => {
+                            this.persistJobs();
+                        },
+                        onPartCompleted: () => {
+                            this.persistJobs();
+                        },
+                        onCompleted: () => {
+                            this.persistJobs();
+                        },
                     },
                 );
 

@@ -46,7 +46,7 @@ interface OptionalOptions extends DownloadOptions {
         resumable?: boolean, // what's difference from resumeDownload?
     },
 
-    onStatusChange?: (status: Status) => void,
+    onStatusChange?: (status: Status, prev: Status) => void,
     onProgress?: (prog: DownloadJob["prog"]) => void,
 }
 
@@ -98,7 +98,11 @@ export default class DownloadJob extends TransferJob {
             overwrite: boolean,
             isDebug: boolean,
             userNatureLanguage: NatureLanguage,
-        }
+        },
+        callbacks: {
+            onStatusChange?: OptionalOptions["onStatusChange"],
+            onProgress?: OptionalOptions["onProgress"],
+        } = {},
     ): DownloadJob {
         return new DownloadJob({
             id,
@@ -121,6 +125,8 @@ export default class DownloadJob extends TransferJob {
             isDebug: downloadOptions.isDebug,
 
             userNatureLanguage: downloadOptions.userNatureLanguage,
+
+            ...callbacks,
         });
     }
 
@@ -354,8 +360,8 @@ export default class DownloadJob extends TransferJob {
         return this;
     }
 
-    protected handleStatusChange() {
-        this.options.onStatusChange?.(this.status);
+    protected handleStatusChange(status:Status, prev:Status) {
+        this.options.onStatusChange?.(status, prev);
     }
 
     private handleProgress(downloaded: number, total: number): void {

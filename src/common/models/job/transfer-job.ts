@@ -106,13 +106,14 @@ export default abstract class TransferJob {
     abstract wait(): this
     abstract get persistInfo(): any
 
-    protected abstract handleStatusChange(): void
+    protected abstract handleStatusChange(status: Status, prev: Status): void
 
     // TypeScript specification (8.4.3) says...
     // > Accessors for the same member name must specify the same accessibility
     protected set _status(value: Status) {
+        const prev = this.__status;
         this.__status = value;
-        this.handleStatusChange();
+        this.handleStatusChange(value, prev);
 
         if (
             [

@@ -53,7 +53,7 @@ interface OptionalOptions extends UploadOptions {
         resumable?: boolean,
     },
 
-    onStatusChange?: (status: Status) => void,
+    onStatusChange?: (status: Status, prev: Status) => void,
     onProgress?: (prog: UploadJob["prog"]) => void,
     onPartCompleted?: (part: Part) => void,
     onCompleted?: () => void,
@@ -120,6 +120,12 @@ export default class UploadJob extends TransferJob {
             isDebug: boolean,
             userNatureLanguage: NatureLanguage,
         },
+        callbacks: {
+            onStatusChange?: OptionalOptions["onStatusChange"],
+            onProgress?: OptionalOptions["onProgress"],
+            onPartCompleted?: OptionalOptions["onPartCompleted"],
+            onCompleted?: OptionalOptions["onCompleted"],
+        } = {},
     ): UploadJob {
         return new UploadJob({
             id,
@@ -149,6 +155,8 @@ export default class UploadJob extends TransferJob {
             isDebug: uploadOptions.isDebug,
 
             userNatureLanguage: uploadOptions.userNatureLanguage,
+
+            ...callbacks,
         });
     }
 
@@ -370,8 +378,8 @@ export default class UploadJob extends TransferJob {
         };
     }
 
-    protected handleStatusChange() {
-        this.options.onStatusChange?.(this.status);
+    protected handleStatusChange(status: Status, prev: Status) {
+        this.options.onStatusChange?.(status, prev);
     }
 
     private handleProgress(uploaded: number, total: number) {

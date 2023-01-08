@@ -62,7 +62,11 @@ export default function useLoadRegions({
         } catch (e) {
           regions = regionsFromEndpointConfig
             .map(r => {
-              const result = new Region(r.identifier, r.identifier, r.label);
+              const result = new Region(
+                r.identifier,
+                r.identifier,
+                r.label,
+              );
               result.s3Urls = [r.endpoint];
               return result
             });

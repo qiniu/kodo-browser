@@ -148,7 +148,8 @@ const CreateBucket: React.FC<ModalProps & CreateBucketProps> = ({
                         >
                           {loadRegionsState.regions.map(r => (
                             <option key={r.s3Id} value={r.s3Id}>
-                              {r.translatedLabels?.[currentLanguage] ?? r.label}
+                              {/* may empty string, so use `||` instead of `??` */}
+                              {r.translatedLabels?.[currentLanguage] || r.label || r.s3Id}
                             </option>
                           ))}
                         </Form.Select>

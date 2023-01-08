@@ -79,7 +79,8 @@ const BucketTableRow: React.FC<BucketTableRowProps> = ({
           </span>
         </TooltipText>
       </td>
-      <td>{bucket.regionName ?? bucket.regionId}</td>
+      {/* may empty string, so use `||` instead of `??` */}
+      <td>{bucket.regionName || bucket.regionId}</td>
       <td>{moment(bucket.createDate).format("YYYY-MM-DD HH:mm:ss")}</td>
     </tr>
   )

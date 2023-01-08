@@ -31,6 +31,13 @@ const JobItem: React.FC<JobItemProps> = ({
     speed,
     estimatedDuration,
   } = data;
+
+  // when upload by form, progress.total of upload uses form length.
+  // it's size bigger than the size of file.
+  const progressTotal = isLocalPath(from) ? (from.size || 0) : progress.total;
+  const progressLoaded = Math.min(progress.loaded, progressTotal);
+
+  // render
   return (
     <div className={`job-item job-status-${status.toLowerCase()}`}>
       <div className="job-item-name">
@@ -70,7 +77,7 @@ const JobItem: React.FC<JobItemProps> = ({
           now={
             Status.Finished === status
               ? 100
-              : progress.loaded * 100 / progress.total
+              : progressLoaded * 100 / progressTotal
           }
         />
       </div>
@@ -84,10 +91,10 @@ const JobItem: React.FC<JobItemProps> = ({
       <div className="job-item-progress-text overflow-ellipsis">
         {
           Status.Running === status
-            ? `${byteSizeFormat(progress.loaded)}/`
+            ? `${byteSizeFormat(progressLoaded)}/`
             : null
         }
-        {byteSizeFormat(progress.total)}
+        {byteSizeFormat(progressTotal)}
         {
           Status.Running === status
             ? `, ${durationFormat(estimatedDuration)}`

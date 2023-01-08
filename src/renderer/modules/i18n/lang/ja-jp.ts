@@ -258,6 +258,9 @@ const dict: Dictionary = {
             domainName: {
                 label: "ドメイン名：",
                 nonOwnedDomain: "所有ドメイン名はありません",
+                feedback: {
+                    emptyFileNameByS3Hint: "空のファイル名と所有ドメイン名はありませんでは利用できません",
+                },
             },
             expireAfter: {
                 label: "有効期間：",
@@ -567,7 +570,7 @@ const dict: Dictionary = {
 
         copyFiles: {
             title: "ファイルをコピー",
-            hintFiltered: "自分自身へのディレクトリのコピーの禁止，一部の無効な項目を除去。",
+            hintFiltered: "自分自身へや空のファイル名のディレクトリのコピーの禁止，一部の無効な項目を除去。",
             description: "このディレクトリに${operation}  (同じファイルまたはディレクトリが対象となります)",
             form: {
                 fileName: {
@@ -583,7 +586,7 @@ const dict: Dictionary = {
 
         moveFiles: {
             title: "ファイルを移動",
-            hintFiltered: "自分自身へのディレクトリの移動の禁止，一部の無効な項目を除去。",
+            hintFiltered: "自分自身へや空のファイル名のディレクトリの移動の禁止，一部の無効な項目を除去。",
             description: "このディレクトリに${operation}  (同じファイルまたはディレクトリが対象となります)",
             form: {
                 fileName: {
@@ -618,6 +621,7 @@ const dict: Dictionary = {
         generateFileLinks: {
             title: "ダウンロードリンクのエクスポート",
             description: "次のファイルの外部チェーンがエクスポートされます",
+            hintFiltered: "ファイル名が空のファイルのリンクをエクスポートできない，一部の無効な項目を除去。",
             csvFile: {
                 label: "ファイルの場所をエクスポート：",
                 suffix: "ファイルエクスプローラーでの表示",
@@ -676,6 +680,7 @@ const dict: Dictionary = {
                 }
             },
             error: {
+                emptyFileNameByS3Hint: "空のファイル名と所有ドメイン名はありませんでは利用できません",
                 failedGenerateLink: "プレビュー リンクの取得に失敗しました",
                 failedGetContent: "ファイルの内容の取得に失敗しました",
                 contentNotChanged: "内容は修正していません",

@@ -258,6 +258,9 @@ const dict: Dictionary = {
       domainName: {
         label: "Domain Name:",
         nonOwnedDomain: "Non-owned domain name",
+        feedback: {
+          emptyFileNameByS3Hint: "Can't export download link of a file with empty name by non-owned domain.",
+        },
       },
       expireAfter: {
         label: "Validity period:",
@@ -567,7 +570,7 @@ const dict: Dictionary = {
 
     copyFiles: {
       title: "Copy Files",
-      hintFiltered: "Copy directory to itself is forbidden. The list is filtered.",
+      hintFiltered: "Copy directory to itself or empty name file is forbidden. The list is filtered.",
       description: "${operation} the following files or directories to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {
@@ -583,7 +586,7 @@ const dict: Dictionary = {
 
     moveFiles: {
       title: "Move Files",
-      hintFiltered: "Move directory to itself is forbidden. The list is filtered.",
+      hintFiltered: "Move directory to itself or empty name file is forbidden. The list is filtered.",
       description: "${operation} the following files or directories to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {
@@ -618,6 +621,7 @@ const dict: Dictionary = {
     generateFileLinks: {
       title: "Export Download Links",
       description: "Export download links of the following files:",
+      hintFiltered: "Can't export download link of a file with empty name, filtered.",
       csvFile: {
         label: "Export file location:",
         suffix: "Show File in Directory",
@@ -676,6 +680,7 @@ const dict: Dictionary = {
         }
       },
       error: {
+        emptyFileNameByS3Hint: "Can't preview a file with empty name by non-owned domain",
         failedGenerateLink: "Failed to get preview link",
         failedGetContent: "Failed to get file contents",
         contentNotChanged: "The content is not modified",

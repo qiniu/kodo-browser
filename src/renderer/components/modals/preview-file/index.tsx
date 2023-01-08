@@ -14,6 +14,7 @@ import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {OperationDoneRecallFn} from "../file/types";
 import FileArchived from "./precheck/file-archived";
+import FileEmptyName from "./precheck/file-empty-name";
 import FileContent from "./file-content";
 import FileOperation, {FileOperationType} from "./file-operation";
 
@@ -122,24 +123,29 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
               </div>
               {
                 fileOperation === FileOperationType.None
-                  ? <FileArchived
-                    regionId={memoRegionId}
-                    bucketName={memoBucketName}
-                    filePath={memoFileItem.path.toString()}
-                  >
-                    <FileContent
-                      regionId={memoRegionId}
-                      bucketName={memoBucketName}
-                      fileItem={memoFileItem}
-                      domain={memoDomain}
-                      readOnly={bucketGrantedPermission === "readonly"}
-                      portal={contentPortal}
-                      onFileChange={() => {
-                        fetchFileInfo();
-                        onOperationDone({originBasePath: memoBasePath});
-                      }}
-                    />
-                  </FileArchived>
+                  ? <FileEmptyName
+                      backendMode={memoDomain.backendMode}
+                      fileName={memoFileItem.name}
+                    >
+                      <FileArchived
+                        regionId={memoRegionId}
+                        bucketName={memoBucketName}
+                        filePath={memoFileItem.path.toString()}
+                      >
+                        <FileContent
+                          regionId={memoRegionId}
+                          bucketName={memoBucketName}
+                          fileItem={memoFileItem}
+                          domain={memoDomain}
+                          readOnly={bucketGrantedPermission === "readonly"}
+                          portal={contentPortal}
+                          onFileChange={() => {
+                            fetchFileInfo();
+                            onOperationDone({originBasePath: memoBasePath});
+                          }}
+                        />
+                    </FileArchived>
+                  </FileEmptyName>
                   : <FileOperation
                     fileOperationType={fileOperation}
                     regionId={memoRegionId}

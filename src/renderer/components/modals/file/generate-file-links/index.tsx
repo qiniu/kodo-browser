@@ -67,21 +67,26 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
   // cache operation states prevent props update after modal opened.
   const {
     memoFileItems,
+    memoIsFiltered,
     memoRegionId,
     memoBucketName,
     memoBasePath,
     memoStorageClasses,
     memoCanS3Domain,
     memoDefaultDomain,
-  } = useMemo(() => ({
-    memoFileItems: modalProps.show ? fileItems : [],
-    memoRegionId: regionId,
-    memoBucketName: bucketName,
-    memoBasePath: basePath,
-    memoStorageClasses: storageClasses,
-    memoCanS3Domain: canS3Domain,
-    memoDefaultDomain: defaultDomain,
-  }), [modalProps.show]);
+  } = useMemo(() => {
+    const filteredItems = fileItems.filter(f => f.name?.length > 0);
+    return {
+      memoFileItems: modalProps.show ? filteredItems : [],
+      memoIsFiltered: filteredItems.length !== fileItems.length,
+      memoRegionId: regionId,
+      memoBucketName: bucketName,
+      memoBasePath: basePath,
+      memoStorageClasses: storageClasses,
+      memoCanS3Domain: canS3Domain,
+      memoDefaultDomain: defaultDomain,
+    };
+  }, [modalProps.show]);
 
   // domains loader
   const {
@@ -249,85 +254,93 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
           {translate("modals.generateFileLinks.title")}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body className="p-0">
         {
-          !memoFileItems.length
-            ? <div>
-              {translate("common.noObjectSelected")}
-            </div>
-            : <>
-              <div className="text-danger">
-                {translate("modals.generateFileLinks.description")}
-              </div>
-              <ul className="scroll-max-vh-40">
-                {
-                  memoFileItems.map(fileItem => (
-                    <li key={fileItem.path.toString()}>
-                      {
-                        FileItem.isItemFolder(fileItem)
-                          ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                          : <i className="bi bi-file-earmark me-1"/>
-                      }
-                      {fileItem.name}
-                    </li>
-                  ))
-                }
-              </ul>
-              <GenerateLinkForm
-                formController={generateLinkFormController}
-                loadingDomains={loadingDomains}
-                domains={domains}
-                defaultDomain={memoDefaultDomain}
-                onReloadDomains={loadDomains}
-                onSubmit={handleSubmitGenerateFileLinks}
-                submitButtonPortal={submitButtonPortal}
-              />
-              {
-                !csvFilePath
-                  ? null
-                  : <Form.Group as={Row} className="mb-3" controlId="csvFile">
-                    <Form.Label className="text-end" column sm={4}>
-                      {translate("modals.generateFileLinks.csvFile.label")}
-                    </Form.Label>
-                    <Col sm={7}>
-                      <InputGroup>
-                        <Form.Control
-                          type="text"
-                          value={csvFilePath}
-                          readOnly
-                        />
-                        <Button
-                          variant="info"
-                          onClick={handleClickShowItemInDirectory}
-                        >
-                          <span className="text-white">
-                            {translate("modals.generateFileLinks.csvFile.suffix")}
-                          </span>
-                        </Button>
-                      </InputGroup>
-                    </Col>
-                  </Form.Group>
-              }
-              {
-                batchProgressState.status === BatchTaskStatus.Standby ||
-                batchProgressState.status === BatchTaskStatus.Ended
-                  ? null
-                  : <BatchProgress
-                    status={batchProgressState.status}
-                    total={batchProgressState.total}
-                    finished={batchProgressState.finished}
-                    errored={batchProgressState.errored}
-                  />
-              }
-              {
-                !erroredFileOperations.length
-                  ? null
-                  : <ErrorFileList
-                    data={erroredFileOperations}
-                  />
-              }
-            </>
+          memoIsFiltered &&
+          <div className="text-bg-warning bg-opacity-25 px-3 py-1">
+            {translate("modals.generateFileLinks.hintFiltered")}
+          </div>
         }
+        <div className="p-3">
+          {
+            !memoFileItems.length
+              ? <div>
+                {translate("common.noObjectSelected")}
+              </div>
+              : <>
+                <div className="text-danger">
+                  {translate("modals.generateFileLinks.description")}
+                </div>
+                <ul className="scroll-max-vh-40">
+                  {
+                    memoFileItems.map(fileItem => (
+                      <li key={fileItem.path.toString()}>
+                        {
+                          FileItem.isItemFolder(fileItem)
+                            ? <i className="bi bi-folder-fill me-1 text-yellow"/>
+                            : <i className="bi bi-file-earmark me-1"/>
+                        }
+                        {fileItem.name}
+                      </li>
+                    ))
+                  }
+                </ul>
+                <GenerateLinkForm
+                  formController={generateLinkFormController}
+                  loadingDomains={loadingDomains}
+                  domains={domains}
+                  defaultDomain={memoDefaultDomain}
+                  onReloadDomains={loadDomains}
+                  onSubmit={handleSubmitGenerateFileLinks}
+                  submitButtonPortal={submitButtonPortal}
+                />
+                {
+                  !csvFilePath
+                    ? null
+                    : <Form.Group as={Row} className="mb-3" controlId="csvFile">
+                      <Form.Label className="text-end" column sm={4}>
+                        {translate("modals.generateFileLinks.csvFile.label")}
+                      </Form.Label>
+                      <Col sm={7}>
+                        <InputGroup>
+                          <Form.Control
+                            type="text"
+                            value={csvFilePath}
+                            readOnly
+                          />
+                          <Button
+                            variant="info"
+                            onClick={handleClickShowItemInDirectory}
+                          >
+                            <span className="text-white">
+                              {translate("modals.generateFileLinks.csvFile.suffix")}
+                            </span>
+                          </Button>
+                        </InputGroup>
+                      </Col>
+                    </Form.Group>
+                }
+                {
+                  batchProgressState.status === BatchTaskStatus.Standby ||
+                  batchProgressState.status === BatchTaskStatus.Ended
+                    ? null
+                    : <BatchProgress
+                      status={batchProgressState.status}
+                      total={batchProgressState.total}
+                      finished={batchProgressState.finished}
+                      errored={batchProgressState.errored}
+                    />
+                }
+                {
+                  !erroredFileOperations.length
+                    ? null
+                    : <ErrorFileList
+                      data={erroredFileOperations}
+                    />
+                }
+              </>
+          }
+        </div>
       </Modal.Body>
       <Modal.Footer>
         {

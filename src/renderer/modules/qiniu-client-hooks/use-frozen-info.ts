@@ -32,7 +32,7 @@ const useFrozenInfo = ({
   });
 
   const fetchFrozenInfo = () => {
-    if (!user || !regionId || !bucketName || !filePath) {
+    if (!user || !regionId || !bucketName || filePath === undefined) {
       return;
     }
 

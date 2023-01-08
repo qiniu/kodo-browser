@@ -1,5 +1,5 @@
 import path from "path";
-import fs, {promises as fsPromises, constants as fsConstants} from "fs";
+import fs, {constants as fsConstants, promises as fsPromises} from "fs";
 
 import lodash from "lodash";
 import {Downloader} from "kodo-s3-adapter-sdk";
@@ -221,6 +221,12 @@ export default class DownloadJob extends TransferJob {
     async start(): Promise<void> {
         if (this.status === Status.Running || this.status === Status.Finished) {
             return;
+        }
+
+        if (!this.options.to.name) {
+          this.message = "Can't download a file with an empty name!";
+          this._status = Status.Failed;
+          return;
         }
 
         this.message = "";

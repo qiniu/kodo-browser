@@ -57,7 +57,7 @@ const FileArchived: React.FC<PropsWithChildren<FileArchivedProps>> = (props) => 
   } = restoreFormController;
 
   const handleSubmitRestoreFile: SubmitHandler<RestoreFormData> = (data) => {
-    if (!filePath || !currentUser) {
+    if (!currentUser || filePath === undefined) {
       return;
     }
 

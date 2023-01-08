@@ -264,6 +264,9 @@ export default interface Dictionary {
       domainName: {
         label: string,
         nonOwnedDomain: string,
+        feedback: {
+          emptyFileNameByS3Hint: string,
+        }
       },
       expireAfter: {
         label: string,
@@ -617,6 +620,7 @@ export default interface Dictionary {
     generateFileLinks: {
       title: string,
       description: string,
+      hintFiltered: string,
       csvFile: {
         label: string,
         suffix: string,
@@ -675,6 +679,7 @@ export default interface Dictionary {
         }
       },
       error: {
+        emptyFileNameByS3Hint: string,
         failedGenerateLink: string,
         failedGetContent: string,
         contentNotChanged: string,

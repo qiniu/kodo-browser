@@ -258,6 +258,9 @@ const dict: Dictionary = {
       domainName: {
         label: "域名：",
         nonOwnedDomain: "不使用自有域名",
+        feedback: {
+          emptyFileNameByS3Hint: "空名文件不可使用非自有域名导出外链",
+        },
       },
       expireAfter: {
         label: "有效期：",
@@ -567,7 +570,7 @@ const dict: Dictionary = {
 
     copyFiles: {
       title: "复制文件",
-      hintFiltered: "禁止同目录复制，当前目录的复制已被过滤",
+      hintFiltered: "禁止同目录或空名文件复制，当前复制已被过滤",
       description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {
@@ -583,7 +586,7 @@ const dict: Dictionary = {
 
     moveFiles: {
       title: "移动文件",
-      hintFiltered: "禁止同目录移动，当前目录的复制已被过滤",
+      hintFiltered: "禁止同目录或空名文件移动，当前移动已被过滤",
       description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {
@@ -618,6 +621,7 @@ const dict: Dictionary = {
     generateFileLinks: {
       title: "导出外链",
       description: "将导出以下文件的外链",
+      hintFiltered: "空名文件不可导出外链，已过滤",
       csvFile: {
         label: "导出文件位置：",
         suffix: "打开文件所在位置",
@@ -676,6 +680,7 @@ const dict: Dictionary = {
         }
       },
       error: {
+        emptyFileNameByS3Hint: "无法使用非自有域名预览空名文件",
         failedGenerateLink: "获取预览链接失败",
         failedGetContent: "获取文件内容失败",
         contentNotChanged: "内容没有修改",

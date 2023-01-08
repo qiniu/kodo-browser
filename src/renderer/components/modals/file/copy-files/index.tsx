@@ -99,7 +99,10 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
         fileItems.length === 1 &&
         fileItems[0].bucket === bucketName &&
         originBasePath === basePath;
-      const filteredItems = fileItems.filter(item => !isRecursiveDirectory(item, basePath));
+      const filteredItems = fileItems.filter(item =>
+        !isRecursiveDirectory(item, basePath) &&
+        item.name?.length > 0
+      );
       return {
         memoFileItems: filteredItems,
         memoIsFiltered: filteredItems.length !== fileItems.length,
@@ -127,6 +130,9 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
   // reset states when open/close modal.
   useEffect(() => {
     if (modalProps.show) {
+      if (!memoFileItems.length) {
+        return;
+      }
       reset({
         fileName: memoIsDuplication ? memoFileItems[0].name : "",
       });

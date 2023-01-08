@@ -66,7 +66,7 @@ const CodeContent: React.FC<CodeContentProps> = ({
   const [contentLoading, setContentLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!currentUser || !filePath) {
+    if (!currentUser || filePath === undefined) {
       return;
     }
 

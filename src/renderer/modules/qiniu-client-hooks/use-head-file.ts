@@ -35,7 +35,7 @@ const useHeadFile = ({
   });
 
   const fetchFileInfo = () => {
-    if (!user || !regionId || !bucketName || !filePath || !storageClasses) {
+    if (!user || !regionId || !bucketName || filePath === undefined || !storageClasses) {
       return;
     }
 

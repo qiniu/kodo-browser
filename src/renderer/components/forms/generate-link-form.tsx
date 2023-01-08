@@ -1,11 +1,12 @@
 import {clipboard} from "electron";
 
-import React, {PropsWithChildren, useMemo} from "react";
+import React, {PropsWithChildren, useEffect, useMemo} from "react";
 import classNames from "classnames";
 import {toast} from "react-hot-toast";
 import {Button, Col, Form, InputGroup, Row, Spinner} from "react-bootstrap";
 import {SubmitHandler, UseFormReturn} from "react-hook-form";
 
+import {BackendMode} from "@common/qiniu";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
@@ -71,11 +72,18 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
     handleSubmit,
     register,
     watch,
+    trigger,
     formState: {
+      errors,
+      isValid,
       isSubmitting,
       isSubmitSuccessful,
     },
   } = formController;
+
+  useEffect(() => {
+    trigger();
+  }, []);
 
   const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> =
     (data, event) =>
@@ -92,6 +100,13 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
     toast.success(translate("forms.generateLink.fileLink.copied"));
   };
 
+  const validateDomain = (domainName: string) => {
+    const domain = getSelectedDomain(domains, domainName, memoDefaultDomain);
+    if (domain?.backendMode === BackendMode.S3 && !fileName) {
+      return translate("forms.generateLink.domainName.feedback.emptyFileNameByS3Hint");
+    }
+    return true;
+  }
 
   // some calculate state
   const selectedDomain = getSelectedDomain(domains, watch("domainName"), memoDefaultDomain);
@@ -104,7 +119,7 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
           disabled={isSubmitting || isSubmitSuccessful}
         >
           {
-            !fileName
+            fileName === undefined
               ? null
               : <Form.Group as={Row} className="mb-3" controlId="fileName">
                 <Form.Label className="text-end" column sm={4}>
@@ -127,9 +142,12 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
                   {translate("forms.generateLink.domainName.label")}
                 </Form.Label>
                 <Col sm={7}>
-                  <InputGroup>
+                  <InputGroup hasValidation>
                     <Form.Select
-                      {...register("domainName")}
+                      {...register("domainName", {
+                        validate: validateDomain
+                      })}
+                      isInvalid={Boolean(errors.domainName)}
                     >
                       {
                         memoDefaultDomain
@@ -172,6 +190,9 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
                         />
                       </Button>
                     }
+                    <Form.Control.Feedback type="invalid">
+                      {errors.domainName?.message}
+                    </Form.Control.Feedback>
                   </InputGroup>
                 </Col>
               </Form.Group>
@@ -228,7 +249,7 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
             <Button
               variant="primary"
               size="sm"
-              disabled={isSubmitting}
+              disabled={!isValid || isSubmitting}
               onClick={handleSubmit(handleSubmitGenerateFileLink)}
             >
               {

@@ -24,13 +24,15 @@ interface OptionalOptions {
         loaded: number, // Bytes
         resumable?: boolean,
     },
+    timeoutBaseDuration: number, // ms
+    retry: number,
 
     userNatureLanguage: NatureLanguage,
 }
 
 export type Options = RequiredOptions & Partial<OptionalOptions>
 
-const DEFATUL_OPTIONS: OptionalOptions = {
+const DEFAULT_OPTIONS: OptionalOptions = {
     id: "",
 
     status: Status.Waiting,
@@ -39,12 +41,15 @@ const DEFATUL_OPTIONS: OptionalOptions = {
         total: 0,
         loaded: 0,
     },
+    timeoutBaseDuration: 3 * Duration.Second,
+    retry: 3,
 
     userNatureLanguage: "zh-CN",
 }
 
 export default abstract class TransferJob {
     protected readonly options: Readonly<RequiredOptions & OptionalOptions>
+    protected retriedTimes: number = 0
 
     readonly id: string
 
@@ -66,7 +71,7 @@ export default abstract class TransferJob {
             ? config.id
             : `j-${Date.now()}-${Math.random().toString().substring(2)}`;
 
-        this.options = lodash.merge({}, DEFATUL_OPTIONS, config);
+        this.options = lodash.merge({}, DEFAULT_OPTIONS, config);
 
         this.__status = this.options.status;
         this.message = this.options.message;
@@ -104,9 +109,14 @@ export default abstract class TransferJob {
     abstract start(options?: any): Promise<void>
     abstract stop(): this
     abstract wait(): this
+    protected abstract retry(): Promise<void>
     abstract get persistInfo(): any
 
     protected abstract handleStatusChange(status: Status, prev: Status): void
+
+    protected get shouldRetry(): boolean {
+        return this.retriedTimes < this.options.retry;
+    }
 
     // TypeScript specification (8.4.3) says...
     // > Accessors for the same member name must specify the same accessibility
@@ -155,6 +165,14 @@ export default abstract class TransferJob {
 
         this.lastLoaded = this.prog.loaded;
         this.lastTimestamp = nowTimestamp;
+    }
+
+    protected async backoff() {
+        const backoffDuration = Math.min(
+            this.options.timeoutBaseDuration << this.retriedTimes,
+            Duration.Minute,
+        )
+        await new Promise(resolve => setTimeout(resolve, backoffDuration));
     }
 
     private stopSpeedCounter() {

@@ -7,6 +7,7 @@ import {Adapter, Domain, ObjectHeader, StorageClass} from "kodo-s3-adapter-sdk/d
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
+import Duration from "@common/const/duration";
 
 import {LocalPath, RemotePath, Status} from "./types";
 import TransferJob from "./transfer-job";
@@ -45,6 +46,8 @@ interface OptionalOptions extends DownloadOptions {
         loaded: number,
         resumable?: boolean, // what's difference from resumeDownload?
     },
+    timeoutBaseDuration: number, // ms
+    retry: number,
 
     onStatusChange?: (status: Status, prev: Status) => void,
     onProgress?: (prog: DownloadJob["prog"]) => void,
@@ -66,6 +69,8 @@ const DEFAULT_OPTIONS: OptionalOptions = {
         loaded: 0,
         resumable: false,
     },
+    timeoutBaseDuration: Duration.Second,
+    retry: 3,
 
     message: "",
     isDebug: false,
@@ -185,6 +190,7 @@ export default class DownloadJob extends TransferJob {
         this.handleProgress = this.handleProgress.bind(this);
         this.handleHeader = this.handleHeader.bind(this);
         this.handlePartGet = this.handlePartGet.bind(this);
+        this.handleDownloadError = this.handleDownloadError.bind(this);
     }
 
     get uiData() {
@@ -252,11 +258,7 @@ export default class DownloadJob extends TransferJob {
                 targetKey: this.options.from.key,
             },
         ).catch(err => {
-            if (err === Downloader.userCanceledError) {
-                return;
-            }
-            this._status = Status.Failed;
-            this.message = err.toString();
+            return this.handleDownloadError(err);
         });
     }
 
@@ -291,8 +293,6 @@ export default class DownloadJob extends TransferJob {
                     ? this.prog.loaded
                     : 0,
                 partSize: this.options.multipartDownloadSize,
-                chunkTimeout: 30000,
-                retriesOnSameOffset: 10,
                 downloadThrottleOption: this.options.downloadSpeedLimit
                     ? {
                         rate: this.options.downloadSpeedLimit,
@@ -366,6 +366,42 @@ export default class DownloadJob extends TransferJob {
         return this;
     }
 
+    protected async retry() {
+        if (!this.shouldRetry) {
+            return;
+        }
+
+        this.retriedTimes += 1;
+        // maybe not reconnected, so backoff.
+        await this.backoff();
+        if (this.status !== Status.Running) {
+            // handle user may cancel job while backoff
+            return;
+        }
+
+        // stop no progress downloader
+        this.downloader?.abort();
+        this.downloader = undefined;
+
+        // create client
+        const qiniuClient = createQiniuClient(this.options.clientOptions, {
+            userNatureLanguage: this.options.userNatureLanguage,
+            isDebug: this.options.isDebug,
+        });
+
+        // retry upload
+        await qiniuClient.enter(
+            "downloadFile",
+            this.startDownload,
+            {
+                targetBucket: this.options.from.bucket,
+                targetKey: this.options.from.key,
+            },
+        ).catch(err => {
+            return this.handleDownloadError(err);
+        });
+    }
+
     protected handleStatusChange(status:Status, prev:Status) {
         this.options.onStatusChange?.(status, prev);
     }
@@ -417,5 +453,19 @@ export default class DownloadJob extends TransferJob {
             throw Error(`Can't download to ${this.options.to}: Permission denied`);
         }
         await fsPromises.mkdir(baseDirPath, {recursive: true})
+    }
+
+    private async handleDownloadError(err: Error) {
+        if (err === Downloader.userCanceledError) {
+            return;
+        }
+
+        if (err === Downloader.chunkTimeoutError && this.shouldRetry) {
+            await this.retry();
+            return;
+        }
+
+        this._status = Status.Failed;
+        this.message = err.toString();
     }
 }

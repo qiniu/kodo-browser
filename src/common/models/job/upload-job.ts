@@ -268,45 +268,48 @@ export default class UploadJob extends TransferJob {
         const fileHandle = await fsPromises.open(this.options.from.path, "r");
         const fileCrc32Hex = await crc32Async(this.options.from.path);
 
-        await this.uploader.putObjectFromFile(
-            this.options.region,
-            {
-                bucket: this.options.to.bucket,
-                key: this.options.to.key,
-                storageClassName: this.options.storageClassName,
-            },
-            fileHandle,
-            this.options.from.size,
-            this.options.from.name,
-            {
-                filePath: this.options.from.path,
-                crc32: parseInt(fileCrc32Hex, 16).toString(),
-                header: {
-                    contentType: mime.getType(this.options.from.path),
+        try {
+            await this.uploader.putObjectFromFile(
+                this.options.region,
+                {
+                    bucket: this.options.to.bucket,
+                    key: this.options.to.key,
+                    storageClassName: this.options.storageClassName,
                 },
-                recovered: this.uploadedId && this.uploadedParts
-                    ? {
-                        uploadId: this.uploadedId,
-                        parts: this.uploadedParts,
-                    }
-                    : undefined,
-                uploadThreshold: this.options.multipartUploadThreshold,
-                partSize: this.options.multipartUploadSize,
-                putCallback: {
-                    partsInitCallback: this.handlePartsInit,
-                    partPutCallback: this.handlePartPutted,
-                    progressCallback: this.handleProgress,
-                },
-                uploadThrottleOption: this.options.uploadSpeedLimit > 0
-                    ? {
-                        rate: this.options.uploadSpeedLimit,
-                    }
-                    : undefined,
-            }
-        );
+                fileHandle,
+                this.options.from.size,
+                this.options.from.name,
+                {
+                    filePath: this.options.from.path,
+                    crc32: parseInt(fileCrc32Hex, 16).toString(),
+                    header: {
+                        contentType: mime.getType(this.options.from.path),
+                    },
+                    recovered: this.uploadedId && this.uploadedParts
+                        ? {
+                            uploadId: this.uploadedId,
+                            parts: this.uploadedParts,
+                        }
+                        : undefined,
+                    uploadThreshold: this.options.multipartUploadThreshold,
+                    partSize: this.options.multipartUploadSize,
+                    putCallback: {
+                        partsInitCallback: this.handlePartsInit,
+                        partPutCallback: this.handlePartPutted,
+                        progressCallback: this.handleProgress,
+                    },
+                    uploadThrottleOption: this.options.uploadSpeedLimit > 0
+                        ? {
+                            rate: this.options.uploadSpeedLimit,
+                        }
+                        : undefined,
+                }
+            );
+        } finally {
+            await fileHandle.close();
+        }
 
         this._status = Status.Finished;
-        await fileHandle.close();
         this.options.onCompleted?.();
     }
 

@@ -36,7 +36,7 @@ export function durationFormat(ms: number): string {
   }
 
   if (ms < Duration.Second) {
-    return ms + "ms";
+    return Math.ceil(ms) + "ms";
   }
 
   const t = [];

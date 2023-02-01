@@ -43,6 +43,8 @@ describe("test duration", () => {
 
         it("param ms", () => {
             expect(durationFormat(Duration.Millisecond)).toBe("1ms");
+            expect(durationFormat(0.1 * Duration.Millisecond)).toBe("1ms");
+            expect(durationFormat(10.5 * Duration.Millisecond)).toBe("11ms");
             expect(durationFormat(Duration.Second - 1)).toBe("999ms");
         });
 

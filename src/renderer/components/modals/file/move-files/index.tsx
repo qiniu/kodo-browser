@@ -88,7 +88,7 @@ const MoveFiles: React.FC<ModalProps & MoveFilesProps> = (props) => {
     memoFileItems,
     memoIsFiltered,
     memoIsRename,
-    // memoOriginBasePath,
+    memoOriginBasePath,
     memoRegionId,
     memoBucketName,
     memoBasePath,
@@ -219,7 +219,7 @@ const MoveFiles: React.FC<ModalProps & MoveFilesProps> = (props) => {
       .then(batchErrors => {
         setErroredFileOperations(batchErrors.map<ErroredFileOperation>(batchError => ({
           fileType: batchError.item.itemType,
-          path: batchError.item.path.toString().slice(memoBasePath.length),
+          path: batchError.item.path.toString().slice(memoOriginBasePath.length),
           errorMessage: batchError.error.translated_message
             || batchError.error.message
             || batchError.error.code,

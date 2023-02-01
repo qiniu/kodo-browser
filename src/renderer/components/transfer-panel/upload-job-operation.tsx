@@ -61,7 +61,7 @@ const UploadJobOperation: React.FC<UpJobOperationProps> = ({
         />
       }
       {
-        resumable && Status.Stopped === status &&
+        Status.Stopped === status &&
         <TooltipButton
           variant="success"
           size="sm"

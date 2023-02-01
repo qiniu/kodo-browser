@@ -61,7 +61,7 @@ const DownloadJobOperation: React.FC<DownloadJobOperationProps> = ({
         />
       }
       {
-        resumable && Status.Stopped === status &&
+        Status.Stopped === status &&
         <TooltipButton
           variant="success"
           size="sm"

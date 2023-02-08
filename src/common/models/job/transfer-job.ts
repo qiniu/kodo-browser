@@ -108,7 +108,7 @@ export default abstract class TransferJob {
 
     abstract start(options?: any): Promise<void>
     abstract stop(): this
-    abstract wait(): this
+    abstract wait(options?: any): this
     protected abstract retry(): Promise<void>
     abstract get persistInfo(): any
 

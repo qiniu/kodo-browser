@@ -143,12 +143,12 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         };
     }
 
-    waitJob(jobId: string): void {
+    waitJob(jobId: string, options?: any): void {
         const job = this.jobs.get(jobId);
         if (!job){
             return;
         }
-        job.wait();
+        job.wait(options);
         this.scheduleJobs();
     }
 

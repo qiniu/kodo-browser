@@ -332,11 +332,19 @@ export default class UploadJob extends TransferJob {
         return this;
     }
 
-    wait(): this {
+    wait(
+        options?: {
+            forceOverwrite: boolean,
+        },
+    ): this {
         if (this.status === Status.Waiting) {
             return this;
         }
         this._status = Status.Waiting;
+
+        if (options?.forceOverwrite) {
+            this.isForceOverwrite = true;
+        }
 
         if (this.options.isDebug) {
             console.log(`Pending ${this.options.from.path}`);

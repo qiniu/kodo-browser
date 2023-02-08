@@ -101,14 +101,12 @@ const UploadJobOperation: React.FC<UpJobOperationProps> = ({
               : translate("transfer.jobItem.retryButton")
           }
           onClick={() => {
-            Status.Duplicated === status
-              ? ipcUploadManager.startJob({
-                jobId,
-                options: {
-                  forceOverwrite: true,
-                },
-              })
-              : ipcUploadManager.waitJob({jobId: jobId})
+            ipcUploadManager.waitJob({
+              jobId,
+              options: {
+                forceOverwrite: Status.Duplicated === status,
+              },
+            })
           }}
         />
       }

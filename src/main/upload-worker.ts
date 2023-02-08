@@ -107,7 +107,7 @@ process.on("message", (message: UploadMessage) => {
             break;
         }
         case UploadAction.WaitJob: {
-            uploadManager.waitJob(message.data.jobId);
+            uploadManager.waitJob(message.data.jobId, message.data.options);
             break;
         }
         case UploadAction.StartJob: {

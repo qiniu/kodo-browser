@@ -119,6 +119,9 @@ export interface WaitJobMessage {
     action: UploadAction.WaitJob,
     data: {
         jobId: string,
+        options?: {
+            forceOverwrite: boolean,
+        },
     },
 }
 

@@ -81,30 +81,38 @@ function BaseGrid<T>(props: BaseGridProps<T>) {
           }
         }}
       </FixedSizeGrid>
-      {
-        (() => {
-          if (!props.itemData.length && props.emptyRender) {
-            if (typeof props.emptyRender === "function") {
-              return props.emptyRender();
-            } else {
-              return props.emptyRender;
+      <div
+        style={{
+          position: "absolute",
+          inset: "0 0 0 0",
+          pointerEvents: "none",
+        }}
+      >
+        {
+          (() => {
+            if (!props.itemData.length && props.emptyRender) {
+              if (typeof props.emptyRender === "function") {
+                return props.emptyRender();
+              } else {
+                return props.emptyRender;
+              }
             }
-          }
-          return null;
-        })()
-      }
-      {
-        (() => {
-          if (props.overlayRender) {
-            if (typeof props.overlayRender === "function") {
-              return props.overlayRender();
-            } else {
-              return props.overlayRender;
+            return null;
+          })()
+        }
+        {
+          (() => {
+            if (props.overlayRender) {
+              if (typeof props.overlayRender === "function") {
+                return props.overlayRender();
+              } else {
+                return props.overlayRender;
+              }
             }
-          }
-          return null;
-        })()
-      }
+            return null;
+          })()
+        }
+      </div>
     </div>
   );
 }

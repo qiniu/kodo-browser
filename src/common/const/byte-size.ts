@@ -31,6 +31,7 @@ export function byteSizeFormat(n: number, isApproximate = true): string {
   }
 
   if (left > 0) {
+    left = Math.round(left)
     t.push(left + "B");
     if (isApproximate) return left + "B";
   }

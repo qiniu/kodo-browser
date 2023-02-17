@@ -1,5 +1,3 @@
-import {promises as fsPromises} from "fs";
-
 // @ts-ignore
 import mime from "mime";
 import lodash from "lodash";
@@ -12,9 +10,8 @@ import {ClientOptions, createQiniuClient} from "@common/qiniu";
 import Duration from "@common/const/duration";
 import ByteSize from "@common/const/byte-size";
 
-import {LocalPath, RemotePath, Status, UploadedPart} from "./types";
+import {LocalPath, ProgressCallbackParams, RemotePath, Status, UploadedPart} from "./types";
 import TransferJob from "./transfer-job";
-import crc32Async from "@common/models/job/crc32";
 
 // if change options, remember to check `get persistInfo()`
 interface RequiredOptions {
@@ -215,8 +212,6 @@ export default class UploadJob extends TransferJob {
         this.message = "";
         this._status = Status.Running;
 
-        this.startSpeedCounter();
-
         if (options?.forceOverwrite) {
             this.isForceOverwrite = true;
         }
@@ -265,49 +260,41 @@ export default class UploadJob extends TransferJob {
 
         // upload
         this.uploader = new Uploader(client);
-        const fileHandle = await fsPromises.open(this.options.from.path, "r");
-        const fileCrc32Hex = await crc32Async(this.options.from.path);
 
-        try {
-            await this.uploader.putObjectFromFile(
-                this.options.region,
-                {
-                    bucket: this.options.to.bucket,
-                    key: this.options.to.key,
-                    storageClassName: this.options.storageClassName,
+        await this.uploader.putObjectFromFile(
+            this.options.region,
+            {
+                bucket: this.options.to.bucket,
+                key: this.options.to.key,
+                storageClassName: this.options.storageClassName,
+            },
+            this.options.from.path,
+            this.options.from.size,
+            this.options.from.name,
+            {
+                header: {
+                    contentType: mime.getType(this.options.from.path),
                 },
-                fileHandle,
-                this.options.from.size,
-                this.options.from.name,
-                {
-                    filePath: this.options.from.path,
-                    crc32: parseInt(fileCrc32Hex, 16).toString(),
-                    header: {
-                        contentType: mime.getType(this.options.from.path),
-                    },
-                    recovered: this.uploadedId && this.uploadedParts
-                        ? {
-                            uploadId: this.uploadedId,
-                            parts: this.uploadedParts,
-                        }
-                        : undefined,
-                    uploadThreshold: this.options.multipartUploadThreshold,
-                    partSize: this.options.multipartUploadSize,
-                    putCallback: {
-                        partsInitCallback: this.handlePartsInit,
-                        partPutCallback: this.handlePartPutted,
-                        progressCallback: this.handleProgress,
-                    },
-                    uploadThrottleOption: this.options.uploadSpeedLimit > 0
-                        ? {
-                            rate: this.options.uploadSpeedLimit,
-                        }
-                        : undefined,
-                }
-            );
-        } finally {
-            await fileHandle.close();
-        }
+                recovered: this.uploadedId && this.uploadedParts
+                    ? {
+                        uploadId: this.uploadedId,
+                        parts: this.uploadedParts,
+                    }
+                    : undefined,
+                uploadThreshold: this.options.multipartUploadThreshold,
+                partSize: this.options.multipartUploadSize,
+                putCallback: {
+                    partsInitCallback: this.handlePartsInit,
+                    partPutCallback: this.handlePartPutted,
+                    progressCallback: this.handleProgress,
+                },
+                uploadThrottleOption: this.options.uploadSpeedLimit > 0
+                    ? {
+                        rate: this.options.uploadSpeedLimit,
+                    }
+                    : undefined,
+            }
+        );
 
         this._status = Status.Finished;
         this.options.onCompleted?.();
@@ -437,18 +424,12 @@ export default class UploadJob extends TransferJob {
         this.options.onStatusChange?.(status, prev);
     }
 
-    private handleProgress(uploaded: number, total: number) {
+    protected handleProgress(p: ProgressCallbackParams) {
         if (!this.uploader) {
             return;
         }
-
-        // set prog, callback and calculate speed
-        this.prog.loaded = uploaded;
-        this.prog.total = total;
-
+        super.handleProgress(p);
         this.options.onProgress?.(lodash.merge({}, this.prog));
-
-        this.speedCount(this.options.uploadSpeedLimit);
     }
 
     private handlePartsInit(initInfo: RecoveredOption) {

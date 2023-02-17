@@ -9,7 +9,7 @@ import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
 import Duration from "@common/const/duration";
 
-import {LocalPath, RemotePath, Status} from "./types";
+import {LocalPath, ProgressCallbackParams, RemotePath, Status} from "./types";
 import TransferJob from "./transfer-job";
 
 interface RequiredOptions {
@@ -238,8 +238,6 @@ export default class DownloadJob extends TransferJob {
         this.message = "";
         this._status = Status.Running;
 
-        this.startSpeedCounter();
-
         if (this.options.isDebug) {
             console.log(`Try downloading kodo://${this.options.from.bucket}/${this.options.from.key} to ${this.options.to.path}`);
         }
@@ -406,16 +404,14 @@ export default class DownloadJob extends TransferJob {
         this.options.onStatusChange?.(status, prev);
     }
 
-    private handleProgress(downloaded: number, total: number): void {
+    protected handleProgress(p: ProgressCallbackParams): void {
         if (!this.downloader) {
             return;
         }
-        this.prog.loaded = downloaded;
-        this.prog.total = total;
+
+        super.handleProgress(p);
 
         this.options.onProgress?.(lodash.merge({}, this.prog));
-
-        this.speedCount(this.options.downloadSpeedLimit);
     }
 
     private handleHeader(_objectHeader: ObjectHeader): void {

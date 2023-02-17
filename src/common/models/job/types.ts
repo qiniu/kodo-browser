@@ -28,6 +28,13 @@ export interface RemotePath {
     mtime?: number, // ms timestamp
 }
 
+export interface ProgressCallbackParams {
+  transferred: number,
+  total: number,
+  speed: number,
+  eta: number,
+}
+
 export function isLocalPath(p: LocalPath | RemotePath): p is LocalPath {
     return p.hasOwnProperty("name");
 }

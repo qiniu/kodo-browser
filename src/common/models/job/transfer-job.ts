@@ -4,7 +4,7 @@ import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 import Duration from "@common/const/duration";
 import {ClientOptions} from "@common/qiniu";
 
-import {LocalPath, RemotePath, Status} from "./types";
+import {LocalPath, ProgressCallbackParams, RemotePath, Status} from "./types";
 
 interface RequiredOptions {
     clientOptions: ClientOptions,
@@ -56,10 +56,8 @@ export default abstract class TransferJob {
     // - for UI -
     private __status: Status
     // speed
-    private lastTimestamp = 0 // ms
-    private lastLoaded = 0 // Bytes
-    private speed: number = 0 // Bytes/s
-    private estimatedTime: number = 0 // timestamp
+    protected speed: number = 0 // Bytes/s
+    protected estimatedDuration: number = 0 // timestamp
     // message
     message: string
 
@@ -79,8 +77,6 @@ export default abstract class TransferJob {
         this.prog = {
             ...this.options.prog,
         }
-
-        this.speedCount = lodash.throttle(this.speedCount.bind(this), Duration.Second);
     }
 
     get status(): Status {
@@ -100,8 +96,8 @@ export default abstract class TransferJob {
             message: this.message,
             progress: this.prog,
             speed: this.speed,
-            estimatedTime: this.estimatedTime,
-            estimatedDuration: this.estimatedTime - Date.now(),
+            estimatedTime: Date.now() + this.estimatedDuration,
+            estimatedDuration: this.estimatedDuration,
         }
     }
 
@@ -124,47 +120,21 @@ export default abstract class TransferJob {
         const prev = this.__status;
         this.__status = value;
         this.handleStatusChange(value, prev);
-
-        if (
-            [
-                Status.Failed,
-                Status.Stopped,
-                Status.Finished,
-                Status.Duplicated,
-            ].includes(this.status)
-        ) {
-            this.stopSpeedCounter();
-        }
     }
 
-    protected startSpeedCounter() {
-        this.stopSpeedCounter();
-
-        this.lastTimestamp = Date.now();
-        this.lastLoaded = this.prog.loaded;
-    }
-
-    // call me on progress
-    protected speedCount(speedLimit: number) {
-        if (this.isNotRunning) {
-            this.stopSpeedCounter();
-            return;
-        }
-
-        const nowTimestamp = Date.now();
-        const currentSpeedByMs = (this.prog.loaded - this.lastLoaded) / (nowTimestamp - this.lastTimestamp);
-
-        this.speed = Math.round(currentSpeedByMs * Duration.Second);
-        if (speedLimit > 0) {
-            this.speed = Math.min(this.speed, speedLimit);
-        }
-        this.estimatedTime = Date.now() + Math.max(
-            Math.round(this.prog.total - this.prog.loaded) / currentSpeedByMs,
-            0,
-        );
-
-        this.lastLoaded = this.prog.loaded;
-        this.lastTimestamp = nowTimestamp;
+    protected handleProgress({
+      transferred,
+      total,
+      speed,
+      eta,
+    }: ProgressCallbackParams) {
+      if (this.isNotRunning) {
+        return;
+      }
+      this.prog.loaded = transferred;
+      this.prog.total = total;
+      this.speed = speed * 1000; // Bytes/ms -> Bytes/s
+      this.estimatedDuration = eta;
     }
 
     protected async backoff() {
@@ -173,12 +143,5 @@ export default abstract class TransferJob {
             Duration.Minute,
         )
         await new Promise(resolve => setTimeout(resolve, backoffDuration));
-    }
-
-    private stopSpeedCounter() {
-        this.speed = 0;
-        this.estimatedTime = 0;
-        this.lastTimestamp = 0;
-        this.lastLoaded = 0;
     }
 }

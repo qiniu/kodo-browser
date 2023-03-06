@@ -351,15 +351,15 @@ const dict: Dictionary = {
                 legend: "アップロード",
                 form: {
                     resumeUpload: {
-                        label: "ブレークポイントのアップロード：",
-                        hint: "（ファイルブレークポイントアップロード機能を有効にする）",
+                        label: "断点アップロード：",
+                        hint: "（断点アップロードを有効にする）",
                     },
                     multipartUploadThreshold: {
-                        label: "シャードアップロードのしきい値：",
+                        label: "断点アップロードファイル閾値：",
                         hint: "単位：MB，範囲：10 MB - 1000 MB",
                     },
                     multipartUploadPartSize: {
-                        label: "シャード アップロード のサイズ：",
+                        label: "シ断点アップロードスライスサイズ：",
                         hint: "単位：MB，範囲：8 MB - 100 MB",
                     },
                     maxUploadConcurrency: {
@@ -380,15 +380,15 @@ const dict: Dictionary = {
                 legend: "ダウンロード",
                 form: {
                     resumeDownload: {
-                        label: "ブレークポイントのダウンロード：",
-                        hint: "（ブレークポイントのダウンロードを有効にする）",
+                        label: "断点ダウンロード：",
+                        hint: "（断点ダウンロードを有効にする）",
                     },
                     multipartDownloadThreshold: {
-                        label: "シャード ダウンロードのしきい値：",
+                        label: "断点ダウンロードファイル閾値：",
                         hint: "単位：MB，範囲：10 MB - 1000 MB",
                     },
                     multipartDownloadPartSize: {
-                        label: "シャード ダウンロード サイズ：",
+                        label: "断点ダウンロードスライスサイズ：",
                         hint: "単位：MB，範囲：8 MB - 100 MB",
                     },
                     maxDownloadConcurrency: {

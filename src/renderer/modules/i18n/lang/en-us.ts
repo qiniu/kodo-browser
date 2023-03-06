@@ -380,15 +380,15 @@ const dict: Dictionary = {
         legend: "Download",
         form: {
           resumeDownload: {
-            label: "Multipart Download:",
+            label: "Resume Download:",
             hint: "(Enable multipart upload)",
           },
           multipartDownloadThreshold: {
-            label: "Multipart download threshold:",
+            label: "Resume download threshold:",
             hint: "Unit: MB, Range: 10 MB - 1000 MB",
           },
           multipartDownloadPartSize: {
-            label: "Multipart download part size:",
+            label: "Resume download part size:",
             hint: "Unit: MB, Range: 8 MB - 100 MB",
           },
           maxDownloadConcurrency: {

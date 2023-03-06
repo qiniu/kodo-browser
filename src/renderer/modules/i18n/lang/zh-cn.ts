@@ -384,11 +384,11 @@ const dict: Dictionary = {
             hint: "（启动断点下载功能）",
           },
           multipartDownloadThreshold: {
-            label: "分片下载阈值：",
+            label: "断点下载阈值：",
             hint: "单位：MB，范围：10 MB - 1000 MB",
           },
           multipartDownloadPartSize: {
-            label: "分片下载片大小：",
+            label: "断点下载片大小：",
             hint: "单位：MB，范围：8 MB - 100 MB",
           },
           maxDownloadConcurrency: {

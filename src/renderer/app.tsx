@@ -43,12 +43,13 @@ const App: React.FC = () => {
           position="bottom-left"
           reverseOrder={false}
           toastOptions={{
+            className: "hot-toast",
             loading: {
               icon: (<Spinner animation="border" size="sm"/>),
             },
             success: {
               // TODO: alert-success style is overwritten
-              className: "alert alert-success",
+              className: "hot-toast alert-success",
               iconTheme: {
                 primary: "var(--bs-success)",
                 secondary: "var(--bs-light)",
@@ -56,7 +57,7 @@ const App: React.FC = () => {
             },
             error: {
               // TODO: alert-danger style is overwritten
-              className: "alert alert-danger",
+              className: "hot-toast alert-danger",
               iconTheme: {
                 primary: "var(--bs-danger)",
                 secondary: "var(--bs-light)",

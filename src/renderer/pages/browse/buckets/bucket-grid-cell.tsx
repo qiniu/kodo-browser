@@ -50,7 +50,7 @@ const BucketCell: React.FC<BucketCellProps> = ({
           {data.name}
         </Card.Title>
         <Card.Subtitle className="text-secondary">
-          {data.regionName ?? data.regionId}
+          {data.regionName || data.regionId}
         </Card.Subtitle>
       </Card.Body>
       {

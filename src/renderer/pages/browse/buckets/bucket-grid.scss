@@ -4,6 +4,8 @@
     flex-wrap: wrap;
     align-content: flex-start;
     overflow: auto;
+    // 1.4rem is the padding-bottom of base-grid
+    height: calc(100% - 1.4rem);
   }
 
   & .base-cell {

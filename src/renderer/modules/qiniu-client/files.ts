@@ -257,6 +257,7 @@ export async function saveContent(
             content,
             basename,
             {
+                contentType: headers.contentType,
                 metadata: headers.metadata,
             }
         );

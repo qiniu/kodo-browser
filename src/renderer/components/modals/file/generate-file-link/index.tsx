@@ -143,6 +143,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
               {translate("common.noObjectSelected")}
             </div>
             : <GenerateLinkForm
+              filePath={memoFileItem.path.toString()}
               fileName={memoFileItem.name}
               fileLink={fileLink}
               formController={generateLinkFormController}

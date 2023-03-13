@@ -37,8 +37,10 @@ export interface GenerateLinkSubmitData extends GenerateLinkFormData {
 
 // component
 interface GenerateLinkFormProps {
-  fileName?: string,
+  filePath?: string,
+  fileName?: string, // only for show text
   fileLink?: string,
+  validateDomainName?: boolean
   formController: UseFormReturn<GenerateLinkFormData>
   loadingDomains?: boolean,
   domains: DomainAdapter[],
@@ -51,8 +53,10 @@ interface GenerateLinkFormProps {
 }
 
 const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
+  filePath,
   fileName,
   fileLink,
+  validateDomainName = true,
   formController,
   loadingDomains,
   domains,
@@ -101,8 +105,11 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
   };
 
   const validateDomain = (domainName: string) => {
+    if (!validateDomainName) {
+      return true;
+    }
     const domain = getSelectedDomain(domains, domainName, memoDefaultDomain);
-    if (domain?.backendMode === BackendMode.S3 && !fileName) {
+    if (domain?.backendMode === BackendMode.S3 && !filePath) {
       return translate("forms.generateLink.domainName.feedback.emptyFileNameByS3Hint");
     }
     return true;

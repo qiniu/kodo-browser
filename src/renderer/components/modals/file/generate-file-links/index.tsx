@@ -286,6 +286,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
                   }
                 </ul>
                 <GenerateLinkForm
+                  validateDomainName={false}
                   formController={generateLinkFormController}
                   loadingDomains={loadingDomains}
                   domains={domains}

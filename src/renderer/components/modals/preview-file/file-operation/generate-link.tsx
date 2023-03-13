@@ -96,6 +96,7 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
   return (
     <div className="p-4">
       <GenerateLinkForm
+        filePath={fileItem.path.toString()}
         fileLink={fileLink}
         formController={generateLinkFormController}
         loadingDomains={loadingDomains}

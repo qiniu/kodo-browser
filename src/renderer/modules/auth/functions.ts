@@ -20,14 +20,16 @@ export async function signIn(akItem: AkItem, remember: boolean) {
   currentUser = akItem;
   if (remember) {
     authPersistence.save(akItem);
-    if (history.some(
+    const foundIndex = history.findIndex(
       ak =>
         ak.accessKey === akItem.accessKey &&
         ak.accessSecret === akItem.accessSecret
-    )) {
-      return;
+    );
+    if (foundIndex < 0) {
+      history.push(akItem);
+    } else {
+      history[foundIndex] = akItem;
     }
-    history.push(akItem);
     authPersistence.saveHistory(history);
   }
 }

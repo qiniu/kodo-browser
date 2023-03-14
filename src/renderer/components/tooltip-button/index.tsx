@@ -1,7 +1,9 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Button, OverlayTrigger, Tooltip} from "react-bootstrap";
 import {Placement} from "react-bootstrap/types";
 import {ButtonProps} from "react-bootstrap/Button";
+
+let hideOthersTooltip = () => {};
 
 interface TooltipButtonProps {
   iconClassName: string,
@@ -19,15 +21,32 @@ const TooltipButton: React.FC<ButtonProps & TooltipButtonProps> = (props) => {
     ...buttonProps
   } = props;
 
-  // fix always show tip when disabled false->true
-  const showTip = show === undefined
-    ? buttonProps.disabled ? false : undefined
-    : show;
+  const [showTip, setShowTip] = useState<boolean>();
+
+  useEffect(() => {
+    handleToggleTooltip(show);
+  }, [show]);
+
+  const handleToggleTooltip = (nextShow?: boolean) => {
+    if (buttonProps.disabled) {
+      setShowTip(false);
+      return;
+    }
+
+    // only keep one tooltip.
+    // prevent tips overlap each other if them too close.
+    if (nextShow) {
+      hideOthersTooltip();
+      hideOthersTooltip = () => { setShowTip(false); };
+    }
+    setShowTip(nextShow);
+  }
 
   return (
     <OverlayTrigger
       show={showTip}
       placement={tooltipPlacement ?? "auto"}
+      onToggle={handleToggleTooltip}
       overlay={
         <Tooltip>
           {tooltipContent}
@@ -35,7 +54,7 @@ const TooltipButton: React.FC<ButtonProps & TooltipButtonProps> = (props) => {
       }
     >
       <Button variant="outline-solid-gray-300" {...buttonProps}>
-        <i className={iconClassName}/>
+        <i className={iconClassName} />
       </Button>
     </OverlayTrigger>
   )

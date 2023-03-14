@@ -17,6 +17,8 @@ const dict: Dictionary = {
     success: "Success",
     failed: "Failed",
     refresh: "Refresh",
+    refreshing: "Refreshing",
+    refreshed: "Refreshed",
     interrupt: "Interrupt",
     notFound: "Page Not Found!",
     noObjectSelected: "No object selected",

@@ -17,6 +17,8 @@ const dict: Dictionary = {
         success: "成功",
         failed: "失敗",
         refresh: "更新",
+        refreshing: "更新中",
+        refreshed: "正常に更新",
         interrupt: "中断",
         notFound: "未発見",
         noObjectSelected: "操作可能なオブジェクトがない",

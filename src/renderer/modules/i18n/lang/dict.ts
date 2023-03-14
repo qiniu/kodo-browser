@@ -16,6 +16,8 @@ export default interface Dictionary {
     success: string,
     failed: string,
     refresh: string,
+    refreshing: string,
+    refreshed: string,
     interrupt: string,
     notFound: string,
     noObjectSelected: string,

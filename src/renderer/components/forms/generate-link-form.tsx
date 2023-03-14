@@ -45,7 +45,7 @@ interface GenerateLinkFormProps {
   loadingDomains?: boolean,
   domains: DomainAdapter[],
   defaultDomain?: DomainAdapter,
-  onReloadDomains?: () => void,
+  onReloadDomains?: () => Promise<void>,
   onSubmit: SubmitHandler<GenerateLinkSubmitData>,
 
   // portal
@@ -88,6 +88,17 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
   useEffect(() => {
     trigger();
   }, []);
+
+  const handleReloadDomains = () => {
+    if (!onReloadDomains) {
+      return
+    }
+    toast.promise(onReloadDomains(), {
+      loading: translate("common.refreshing"),
+      success: translate("common.refreshed"),
+      error: err => `${translate("common.failed")}: ${err}`,
+    });
+  };
 
   const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> =
     (data, event) =>
@@ -185,7 +196,7 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
                       onReloadDomains &&
                       <Button
                         variant="outline-solid-gray-400"
-                        onClick={onReloadDomains}
+                        onClick={handleReloadDomains}
                       >
                         <i
                           className={classNames(

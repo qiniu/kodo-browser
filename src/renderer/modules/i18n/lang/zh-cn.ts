@@ -17,6 +17,8 @@ const dict: Dictionary = {
     success: "成功",
     failed: "失败",
     refresh: "刷新",
+    refreshing: "刷新中",
+    refreshed: "已刷新",
     interrupt: "中断",
     notFound: "来到了无牛问津的地方",
     noObjectSelected: "未选择操作对象",

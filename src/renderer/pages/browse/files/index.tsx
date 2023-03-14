@@ -188,6 +188,14 @@ const Files: React.FC<FilesProps> = (props) => {
     );
   }, [domains]);
 
+  const handleReloadDomains = () => {
+    toast.promise(loadDomains(), {
+      loading: translate("common.refreshing"),
+      success: translate("common.refreshed"),
+      error: err => `${translate("common.failed")}: ${err}`,
+    });
+  };
+
   // view style
   const [viewStyle, setViewStyle] = useState(Settings.contentViewStyle);
   const handleChangeViewStyle = (style: ContentViewStyle) => {
@@ -315,7 +323,7 @@ const Files: React.FC<FilesProps> = (props) => {
         domains={domains}
         selectedDomain={selectedDomain}
         onChangeDomain={setSelectedDomain}
-        onReloadDomains={loadDomains}
+        onReloadDomains={handleReloadDomains}
 
         defaultSearchText={searchPrefix}
         onSearch={handleSearchPrefix}

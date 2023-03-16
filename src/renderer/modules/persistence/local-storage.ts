@@ -4,6 +4,7 @@ type JSONValue = string
   | number
   | boolean
   | null
+  | undefined
   | JSONValue[]
   | {[k: string | number]: JSONValue};
 

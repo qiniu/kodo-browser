@@ -56,8 +56,9 @@ const SwitchUser: React.FC = () => {
       <div>
         <LoadingHolder text={translate("switchUser.title")}/>
       </div>
-      <div className="text-secondary">
-        ({akItem.description || akItem.accessKey})
+      <div className="text-secondary text-center">
+        {akItem.accessKey}<br/>
+        {akItem.description?.trim() && `(${akItem.description})`}
       </div>
     </div>
   );

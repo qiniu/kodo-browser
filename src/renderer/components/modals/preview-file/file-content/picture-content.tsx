@@ -66,7 +66,7 @@ const PictureContent: React.FC<PictureContentProps> = ({
   }, [filePath]);
 
   return (
-    <div className="h-60v d-flex flex-column align-items-center">
+    <div className="h-60v d-flex flex-column align-items-center position-relative">
       <Image
         className="box-fit-contain"
         src={imgSrc}
@@ -74,7 +74,7 @@ const PictureContent: React.FC<PictureContentProps> = ({
       />
       {
         imgLoading
-          ? <LoadingHolder/>
+          ? <LoadingHolder className="position-absolute"/>
           : null
       }
     </div>

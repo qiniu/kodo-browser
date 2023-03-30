@@ -140,6 +140,16 @@ function getAdapterOption(opt: GetAdapterOptionParam): AdapterOption {
         result = {
             ...baseResult,
             ucUrl: privateEndpoint.ucUrl,
+            regions: privateEndpoint.regions.map(rSetting => {
+              const r = new Region(
+                "",
+                rSetting.identifier,
+                rSetting.label || rSetting.identifier,
+              );
+              r.s3Urls = [rSetting.endpoint];
+              r.ucUrls = [privateEndpoint.ucUrl];
+              return r;
+            }),
             // disable uplog when use customize cloud
             // because there isn't a valid access key of uplog
             uplogBufferSize: -1,

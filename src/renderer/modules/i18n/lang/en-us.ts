@@ -267,10 +267,14 @@ const dict: Dictionary = {
       expireAfter: {
         label: "Validity period:",
         suffix: "Seconds",
+        hint: "Range ${min}-${max}"
       },
       fileLink: {
         label: "File Link:",
         copied: "Copied",
+      },
+      errors: {
+        domainNotFound: "The domain selected not found!"
       },
     },
     restore: {

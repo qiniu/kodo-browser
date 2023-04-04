@@ -273,10 +273,14 @@ export default interface Dictionary {
       expireAfter: {
         label: string,
         suffix: string,
+        hint: string,
       },
       fileLink: {
         label: string,
         copied: string,
+      },
+      errors: {
+        domainNotFound: string,
       },
     },
     restore: {

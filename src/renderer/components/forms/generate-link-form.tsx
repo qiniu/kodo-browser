@@ -3,13 +3,14 @@ import {clipboard} from "electron";
 import React, {PropsWithChildren, useEffect, useMemo} from "react";
 import classNames from "classnames";
 import {toast} from "react-hot-toast";
-import {Button, Col, Form, InputGroup, Row, Spinner} from "react-bootstrap";
+import {Alert, Button, Col, Form, InputGroup, Row, Spinner} from "react-bootstrap";
 import {SubmitHandler, UseFormReturn} from "react-hook-form";
 
 import {BackendMode} from "@common/qiniu";
-import {useI18n} from "@renderer/modules/i18n";
+import {Translate, useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
+import Duration from "@common/const/duration";
 
 export const DEFAULT_EXPIRE_AFTER = 600;
 
@@ -216,24 +217,49 @@ const GenerateLinkForm: React.FC<GenerateLinkFormProps> = ({
               </Form.Group>
           }
           {
-            selectedDomain?.private ?? true
-              ? <Form.Group as={Row} className="mb-3" controlId="expireAfter">
-                <Form.Label className="text-end" column sm={4}>
-                  {translate("forms.generateLink.expireAfter.label")}
-                </Form.Label>
-                <Col sm={7}>
-                  <InputGroup>
-                    <Form.Control
-                      {...register("expireAfter", {valueAsNumber: true})}
-                      type="number"
-                    />
-                    <InputGroup.Text>
-                      {translate("forms.generateLink.expireAfter.suffix")}
-                    </InputGroup.Text>
-                  </InputGroup>
-                </Col>
-              </Form.Group>
-              : null
+            !selectedDomain
+              ? <Alert>
+                {translate("forms.generateLink.errors.domainNotFound")}
+              </Alert>
+              : selectedDomain.private
+                ? <Form.Group as={Row} className="mb-3" controlId="expireAfter">
+                  <Form.Label className="text-end" column sm={4}>
+                    {translate("forms.generateLink.expireAfter.label")}
+                  </Form.Label>
+                  <Col sm={7}>
+                    <InputGroup>
+                      <Form.Control
+                        {...register("expireAfter", {
+                          valueAsNumber: true,
+                          required: true,
+                          min: 1,
+                          max: selectedDomain.linkMaxLifetime / Duration.Second,
+                        })}
+                        type="number"
+                        isInvalid={Boolean(errors.expireAfter)}
+                      />
+                      <InputGroup.Text>
+                        {translate("forms.generateLink.expireAfter.suffix")}
+                      </InputGroup.Text>
+                    </InputGroup>
+                    <Form.Text
+                      className={
+                        Boolean(errors.expireAfter)
+                          ? "text-danger"
+                          : ""
+                      }
+                    >
+                      <Translate
+                        i18nKey="forms.generateLink.expireAfter.hint"
+                        data={{
+                          min: "1",
+                          max: (selectedDomain.linkMaxLifetime / Duration.Second).toString(),
+                        }}
+                      />
+                    </Form.Text>
+                  </Col>
+                </Form.Group>
+                : null
           }
         </fieldset>
         {

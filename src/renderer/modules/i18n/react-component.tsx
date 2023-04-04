@@ -8,7 +8,7 @@ import {useI18n} from "./react-context";
 interface TranslateProps<T extends Record<string, string>> {
   i18nKey: PropsPath<Dictionary>,
   data: T,
-  slots: Record<keyof T, (value: string) => React.ReactNode>
+  slots?: Record<keyof T, (value: string) => React.ReactNode>
 }
 
 export const Translate = <T extends Record<string, string>>(props: TranslateProps<T>): JSX.Element => {
@@ -29,7 +29,7 @@ export const Translate = <T extends Record<string, string>>(props: TranslateProp
               return (
                 <React.Fragment key={snippet.value}>
                   {
-                    slots[snippet.value]
+                    slots?.[snippet.value]
                       ? slots[snippet.value](data[snippet.value])
                       : data[snippet.value]
                   }

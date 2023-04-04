@@ -2,15 +2,20 @@ import {useEffect, useState} from "react";
 import {toast} from "react-hot-toast";
 import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
+import Duration from "@common/const/duration";
 import {BackendMode} from "@common/qiniu";
 
 import * as LocalLogger from "@renderer/modules/local-logger";
 import {AkItem, EndpointType} from "@renderer/modules/auth";
 import {listDomains} from "@renderer/modules/qiniu-client";
 
+const S3_LINK_MAX_LIFETIME = 7 * Duration.Day;
+const KODO_LINK_MAX_LIFETIME = 365 * Duration.Day;
+
 // for kodo domain and s3 domain
 export interface DomainAdapter extends Domain {
   backendMode: BackendMode,
+  linkMaxLifetime: number, // ms
 }
 
 export const NON_OWNED_DOMAIN: DomainAdapter = {
@@ -18,7 +23,8 @@ export const NON_OWNED_DOMAIN: DomainAdapter = {
   protocol: "",
   private: true,
   type: "normal",
-  backendMode: BackendMode.S3
+  backendMode: BackendMode.S3,
+  linkMaxLifetime: S3_LINK_MAX_LIFETIME,
 };
 
 interface LoadDomainsState {
@@ -74,6 +80,7 @@ export default function useLoadDomains({
       .map(d => ({
         ...d,
         backendMode: BackendMode.Kodo,
+        linkMaxLifetime: KODO_LINK_MAX_LIFETIME,
       }));
 
     if (canS3Domain || preferBackendMode === BackendMode.S3) {

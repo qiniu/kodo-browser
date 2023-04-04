@@ -267,11 +267,15 @@ const dict: Dictionary = {
             expireAfter: {
                 label: "有効期間：",
                 suffix: "s",
+                hint: "範囲 ${min}-${max}",
             },
             fileLink: {
                 label: "ファイル リンク：",
                 copied: "もうクリップボードにコピー",
             },
+            errors: {
+                domainNotFound: "選択されたドメインが見つかりません",
+            }
         },
         restore: {
             frozen: {

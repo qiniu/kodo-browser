@@ -42,7 +42,7 @@ const DEFAULT_OPTIONS: OptionalOptions = {
         loaded: 0,
     },
     timeoutBaseDuration: 3 * Duration.Second,
-    retry: 3,
+    retry: 10,
 
     userNatureLanguage: "zh-CN",
 }

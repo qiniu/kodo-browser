@@ -9,7 +9,8 @@ import * as LocalLogger from "@renderer/modules/local-logger";
 import {AkItem, EndpointType} from "@renderer/modules/auth";
 import {listDomains} from "@renderer/modules/qiniu-client";
 
-const S3_LINK_MAX_LIFETIME = 7 * Duration.Day;
+const S3_LINK_MAX_LIFETIME = 1 * Duration.Day;
+const PVT_S3_LINK_MAX_LIFETIME = 7 * Duration.Day;
 const KODO_LINK_MAX_LIFETIME = 365 * Duration.Day;
 
 // for kodo domain and s3 domain
@@ -38,6 +39,7 @@ interface useLoadDomainsProps {
   bucketName?: string,
   shouldAutoReload?: () => boolean,
   canS3Domain: boolean,
+  s3LinkMaxLifeTime?: number,
   preferBackendMode?: BackendMode,
 }
 
@@ -84,7 +86,13 @@ export default function useLoadDomains({
       }));
 
     if (canS3Domain || preferBackendMode === BackendMode.S3) {
-      domains.unshift(NON_OWNED_DOMAIN);
+      const s3Domain = {
+        ...NON_OWNED_DOMAIN,
+      };
+      if (user.endpointType === EndpointType.Private) {
+        s3Domain.linkMaxLifetime = PVT_S3_LINK_MAX_LIFETIME;
+      }
+      domains.unshift(s3Domain);
     }
 
     setLoadDomainsState({

@@ -39,7 +39,6 @@ interface useLoadDomainsProps {
   bucketName?: string,
   shouldAutoReload?: () => boolean,
   canS3Domain: boolean,
-  s3LinkMaxLifeTime?: number,
   preferBackendMode?: BackendMode,
 }
 

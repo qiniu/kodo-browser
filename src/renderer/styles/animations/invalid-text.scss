@@ -1,0 +1,11 @@
+@keyframes invalid-color {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.invalid-text {
+  color: var(--bs-danger) !important;
+  opacity: 1;
+  animation: invalid-color 1s linear infinite;
+}

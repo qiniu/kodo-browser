@@ -1,0 +1,10 @@
+.drop-zone {
+  border: .5rem dashed var(--bs-border-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & * {
+    pointer-events: none;
+  }
+}

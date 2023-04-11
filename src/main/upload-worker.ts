@@ -1,12 +1,12 @@
 import {Region} from "kodo-s3-adapter-sdk";
 
 import {
-    AddedJobsReplyMessage,
-    CreatedDirectoryReplyMessage,
-    JobCompletedReplyMessage,
-    UpdateUiDataReplyMessage,
-    UploadAction,
-    UploadMessage
+  AddedJobsReplyMessage,
+  CreatedDirectoryReplyMessage,
+  JobCompletedReplyMessage,
+  UpdateUiDataReplyMessage,
+  UploadAction,
+  UploadMessage
 } from "@common/ipc-actions/upload";
 import {Status} from "@common/models/job/types";
 import UploadJob from "@common/models/job/upload-job";
@@ -43,7 +43,7 @@ process.on("message", (message: UploadMessage) => {
                             serializedRegion.s3Id,
                             serializedRegion.label,
                         );
-                        r.ucUrls = serializedRegion.ucUrls;
+                        r.ucUrls =  [message.data.clientOptions.ucUrl];
                         r.s3Urls = serializedRegion.s3Urls;
                         return r;
                     }),
@@ -66,7 +66,7 @@ process.on("message", (message: UploadMessage) => {
                             serializedRegion.s3Id,
                             serializedRegion.label,
                         );
-                        r.ucUrls = serializedRegion.ucUrls;
+                        r.ucUrls = [message.data.clientOptions.ucUrl];
                         r.s3Urls = serializedRegion.s3Urls;
                         return r;
                     }),
@@ -107,7 +107,7 @@ process.on("message", (message: UploadMessage) => {
             break;
         }
         case UploadAction.WaitJob: {
-            uploadManager.waitJob(message.data.jobId);
+            uploadManager.waitJob(message.data.jobId, message.data.options);
             break;
         }
         case UploadAction.StartJob: {
@@ -129,6 +129,14 @@ process.on("message", (message: UploadMessage) => {
         }
         case UploadAction.StopAllJobs: {
             uploadManager.stopAllJobs();
+            break;
+        }
+        case UploadAction.StopJobsByOffline: {
+            uploadManager.stopJobsByOffline();
+            break;
+        }
+        case UploadAction.StartJobsByOnline: {
+            uploadManager.startJobsByOnline();
             break;
         }
         case UploadAction.RemoveAllJobs: {

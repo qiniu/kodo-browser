@@ -1,5 +1,5 @@
 import path from "path";
-import fs, {promises as fsPromises, constants as fsConstants} from "fs";
+import fs, {constants as fsConstants, promises as fsPromises} from "fs";
 
 import lodash from "lodash";
 import {Downloader} from "kodo-s3-adapter-sdk";
@@ -7,8 +7,9 @@ import {Adapter, Domain, ObjectHeader, StorageClass} from "kodo-s3-adapter-sdk/d
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
+import Duration from "@common/const/duration";
 
-import {LocalPath, RemotePath, Status} from "./types";
+import {LocalPath, ProgressCallbackParams, RemotePath, Status} from "./types";
 import TransferJob from "./transfer-job";
 
 interface RequiredOptions {
@@ -45,8 +46,10 @@ interface OptionalOptions extends DownloadOptions {
         loaded: number,
         resumable?: boolean, // what's difference from resumeDownload?
     },
+    timeoutBaseDuration: number, // ms
+    retry: number,
 
-    onStatusChange?: (status: Status) => void,
+    onStatusChange?: (status: Status, prev: Status) => void,
     onProgress?: (prog: DownloadJob["prog"]) => void,
 }
 
@@ -66,6 +69,8 @@ const DEFAULT_OPTIONS: OptionalOptions = {
         loaded: 0,
         resumable: false,
     },
+    timeoutBaseDuration: Duration.Second,
+    retry: 3,
 
     message: "",
     isDebug: false,
@@ -98,7 +103,11 @@ export default class DownloadJob extends TransferJob {
             overwrite: boolean,
             isDebug: boolean,
             userNatureLanguage: NatureLanguage,
-        }
+        },
+        callbacks: {
+            onStatusChange?: OptionalOptions["onStatusChange"],
+            onProgress?: OptionalOptions["onProgress"],
+        } = {},
     ): DownloadJob {
         return new DownloadJob({
             id,
@@ -121,6 +130,8 @@ export default class DownloadJob extends TransferJob {
             isDebug: downloadOptions.isDebug,
 
             userNatureLanguage: downloadOptions.userNatureLanguage,
+
+            ...callbacks,
         });
     }
 
@@ -179,11 +190,13 @@ export default class DownloadJob extends TransferJob {
         this.handleProgress = this.handleProgress.bind(this);
         this.handleHeader = this.handleHeader.bind(this);
         this.handlePartGet = this.handlePartGet.bind(this);
+        this.handleDownloadError = this.handleDownloadError.bind(this);
     }
 
     get uiData() {
         return {
             ...super.uiData,
+            from: this.options.from,
             to: this.options.to,
         }
     }
@@ -216,10 +229,14 @@ export default class DownloadJob extends TransferJob {
             return;
         }
 
+        if (!this.options.to.name) {
+          this.message = "Can't download a file with an empty name!";
+          this._status = Status.Failed;
+          return;
+        }
+
         this.message = "";
         this._status = Status.Running;
-
-        this.startSpeedCounter();
 
         if (this.options.isDebug) {
             console.log(`Try downloading kodo://${this.options.from.bucket}/${this.options.from.key} to ${this.options.to.path}`);
@@ -239,11 +256,7 @@ export default class DownloadJob extends TransferJob {
                 targetKey: this.options.from.key,
             },
         ).catch(err => {
-            if (err === Downloader.userCanceledError) {
-                return;
-            }
-            this._status = Status.Failed;
-            this.message = err.toString();
+            return this.handleDownloadError(err);
         });
     }
 
@@ -278,8 +291,6 @@ export default class DownloadJob extends TransferJob {
                     ? this.prog.loaded
                     : 0,
                 partSize: this.options.multipartDownloadSize,
-                chunkTimeout: 30000,
-                retriesOnSameOffset: 10,
                 downloadThrottleOption: this.options.downloadSpeedLimit
                     ? {
                         rate: this.options.downloadSpeedLimit,
@@ -353,20 +364,54 @@ export default class DownloadJob extends TransferJob {
         return this;
     }
 
-    protected handleStatusChange() {
-        this.options.onStatusChange?.(this.status);
+    protected async retry() {
+        if (!this.shouldRetry) {
+            return;
+        }
+
+        this.retriedTimes += 1;
+        // maybe not reconnected, so backoff.
+        await this.backoff();
+        if (this.status !== Status.Running) {
+            // handle user may cancel job while backoff
+            return;
+        }
+
+        // stop no progress downloader
+        this.downloader?.abort();
+        this.downloader = undefined;
+
+        // create client
+        const qiniuClient = createQiniuClient(this.options.clientOptions, {
+            userNatureLanguage: this.options.userNatureLanguage,
+            isDebug: this.options.isDebug,
+        });
+
+        // retry upload
+        await qiniuClient.enter(
+            "downloadFile",
+            this.startDownload,
+            {
+                targetBucket: this.options.from.bucket,
+                targetKey: this.options.from.key,
+            },
+        ).catch(err => {
+            return this.handleDownloadError(err);
+        });
     }
 
-    private handleProgress(downloaded: number, total: number): void {
+    protected handleStatusChange(status:Status, prev:Status) {
+        this.options.onStatusChange?.(status, prev);
+    }
+
+    protected handleProgress(p: ProgressCallbackParams): void {
         if (!this.downloader) {
             return;
         }
-        this.prog.loaded = downloaded;
-        this.prog.total = total;
+
+        super.handleProgress(p);
 
         this.options.onProgress?.(lodash.merge({}, this.prog));
-
-        this.speedCount(this.options.downloadSpeedLimit);
     }
 
     private handleHeader(_objectHeader: ObjectHeader): void {
@@ -404,5 +449,19 @@ export default class DownloadJob extends TransferJob {
             throw Error(`Can't download to ${this.options.to}: Permission denied`);
         }
         await fsPromises.mkdir(baseDirPath, {recursive: true})
+    }
+
+    private async handleDownloadError(err: Error) {
+        if (err === Downloader.userCanceledError) {
+            return;
+        }
+
+        if (err === Downloader.chunkTimeoutError && this.shouldRetry) {
+            await this.retry();
+            return;
+        }
+
+        this._status = Status.Failed;
+        this.message = err.toString();
     }
 }

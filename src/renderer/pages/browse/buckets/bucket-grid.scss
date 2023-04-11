@@ -1,0 +1,33 @@
+.bucket-grid {
+  & .base-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    overflow: auto;
+    // 1.4rem is the padding-bottom of base-grid
+    height: calc(100% - 1.4rem);
+  }
+
+  & .base-cell {
+    flex: 0 0 240px;
+    min-width: 0;
+    height: 78px;
+  }
+
+  & .bucket-cell {
+    position: relative;
+
+    & i.card-img {
+      margin-left: 0.25rem;
+      font-size: 2.5rem;
+    }
+
+    & .selected-mark {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+  }
+}

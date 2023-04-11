@@ -1,0 +1,69 @@
+@mixin button-lite-variant(
+  $color,
+) {
+  --#{$prefix}btn-color: #{$color};
+  --#{$prefix}btn-border-color: none;
+  --#{$prefix}btn-hover-color: #{$color};
+  --#{$prefix}btn-hover-bg: none;
+  --#{$prefix}btn-hover-border-color: none;
+  --#{$prefix}btn-focus-shadow-rgb: #{to-rgb($color)};
+  --#{$prefix}btn-active-color: #{$color};
+  --#{$prefix}btn-active-bg: none;
+  --#{$prefix}btn-active-border-color: none;
+  --#{$prefix}btn-active-shadow: #{$btn-active-box-shadow};
+  --#{$prefix}btn-disabled-color: #{$color};
+  --#{$prefix}btn-disabled-bg: none;
+  --#{$prefix}btn-disabled-border-color: none;
+  --#{$prefix}gradient: none;
+}
+
+@mixin button-outline-solid-variant(
+  $color,
+  $active-background: none,
+  $active-border: $color
+) {
+  --#{$prefix}btn-color: inherit;
+  --#{$prefix}btn-border-color: #{$color};
+  --#{$prefix}btn-hover-color: inherit;
+  --#{$prefix}btn-hover-bg: #{$active-background};
+  --#{$prefix}btn-hover-border-color: #{$active-border};
+  --#{$prefix}btn-focus-shadow-rgb: #{to-rgb($color)};
+  --#{$prefix}btn-active-color: inherit;
+  --#{$prefix}btn-active-bg: #{$active-background};
+  --#{$prefix}btn-active-border-color: #{$active-border};
+  --#{$prefix}btn-active-shadow: #{$btn-active-box-shadow};
+  --#{$prefix}btn-disabled-color: #{$color};
+  --#{$prefix}btn-disabled-bg: none;
+  --#{$prefix}btn-disabled-border-color: none;
+  --#{$prefix}gradient: none;
+}
+
+.btn {
+  @each $color, $value in $theme-colors {
+    &.btn-lite-#{$color} {
+      @if $color == "light" {
+      } @else if $color == "dark" {
+      } @else {
+        @include button-lite-variant($value);
+        text-decoration-line: underline;
+      }
+    }
+
+    &.btn-outline-solid-#{$color} {
+      @include button-outline-solid-variant($value);
+    }
+
+    &.btn-icon-#{$color} {
+      @include button-lite-variant($value);
+      --#{$prefix}btn-line-height: 1;
+      --#{$prefix}btn-padding-x: 0.25rem;
+      --#{$prefix}btn-padding-y: 0.25rem;
+    }
+  }
+  @each $color, $value in $grays {
+    &.btn-outline-solid-gray-#{$color} {
+      @include button-outline-solid-variant($value, $gray-200);
+    }
+  }
+
+}

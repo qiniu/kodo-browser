@@ -1,18 +1,19 @@
 // main config
-const paths = require('./paths')
+const paths = require("./paths");
 
 module.exports = function(webpackEnv) {
-  const isEnvDevelopment = webpackEnv.development
-  const isEnvProduction = webpackEnv.production
+  const isEnvDevelopment = webpackEnv.development;
+  const isEnvProduction = webpackEnv.production;
 
   return {
-    target: 'electron-main',
-    mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
+    target: "electron-main",
+    mode: isEnvProduction ? "production" : isEnvDevelopment && "development",
     resolve: {
       alias: {
-        '@common': paths.appCommon,
+        "@common": paths.appCommon,
+        "@main": paths.appMain,
       },
-      extensions: ['.ts', '.js'],
+      extensions: [".ts", ".js"],
     },
     entry: {
       main: paths.appMainIndex,
@@ -20,10 +21,10 @@ module.exports = function(webpackEnv) {
       uploader: paths.appMainUploader,
     },
     output: {
-      filename: '[name]-bundle.js',
+      filename: "[name]-bundle.js",
       chunkFilename: isEnvProduction
-        ? '[name].chunk.[chunkhash:8].js'
-        : isEnvDevelopment && '[name].chunk.js',
+        ? "[name].chunk.[chunkhash:8].js"
+        : isEnvDevelopment && "[name].chunk.js",
       path: paths.appBuildMain,
       clean: true,
     },
@@ -37,14 +38,14 @@ module.exports = function(webpackEnv) {
         chunks: "all",
         cacheGroups: {
           libs: {
-            name: 'chunk-libs',
+            name: "chunk-libs",
             test: /[\\/]node_modules[\\/]/,
             priority: 20,
-            chunks: 'initial' // only package third parties that are initially dependent
+            chunks: "initial", // only package third parties that are initially dependent
           },
         },
       },
       minimize: isEnvProduction,
     },
-  }
-}
+  };
+};

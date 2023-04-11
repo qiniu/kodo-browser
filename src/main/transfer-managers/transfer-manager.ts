@@ -1,10 +1,9 @@
 import fs from "fs";
 
 import TransferJob from "@common/models/job/transfer-job";
-import {isLocalPath} from "@common/models/job/types";
+import {isLocalPath, Status} from "@common/models/job/types";
 
 import ByteSize from "@common/const/byte-size";
-import {Status} from "@common/models/job/types";
 import {ClientOptions} from "@common/qiniu";
 
 interface OptionalConfig<Job extends TransferJob> {
@@ -42,6 +41,8 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     protected jobs: Map<string, Job> = new Map<string, Job>()
     protected jobIds: string[] = []
     protected config: OptionalConfig<Job> & Opt
+
+    private offlineJobIds: string[] = []
 
     protected constructor(config: TransferManagerConfig<Job, Opt>) {
         this.config = {
@@ -101,12 +102,13 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         count: number = 10,
         query?: {
             status?: Status,
-            name?: string, // TODO: Compatible with upload and download
+            name?: string,
         },
     ) {
         let list: (Job["uiData"] | undefined)[];
         if (query) {
-            list = this.jobIds.map(id => this.jobs.get(id)?.uiData)
+            list = this.jobIds
+                .map(id => this.jobs.get(id)?.uiData)
                 .filter(job => {
                     if (!job) {
                         return false;
@@ -129,36 +131,44 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
 
                     // result
                     return matchStatus && matchName;
-                })
-                .slice(pageNum * count, pageNum * count + count);
+                });
         } else {
-            list = this.jobIds.slice(pageNum * count, pageNum * count + count)
-                .map(id => this.jobs.get(id)?.uiData);
+            list = this.jobIds
+              .map(id => this.jobs.get(id)?.uiData);
         }
         return {
-            list,
+            list: list.slice(pageNum * count, pageNum * count + count),
+            hasMore: (pageNum * count + count) < list.length,
             ...this.jobsSummary,
         };
     }
 
-    waitJob(jobId: string): void {
-        this.jobs.get(jobId)?.wait();
-        this.running -= 1;
+    waitJob(jobId: string, options?: any): void {
+        const job = this.jobs.get(jobId);
+        if (!job){
+            return;
+        }
+        job.wait(options);
         this.scheduleJobs();
     }
 
     startJob(jobId: string, options?: any): void {
-        this.jobs.get(jobId)?.start(options)
+        const job = this.jobs.get(jobId);
+        if (!job) {
+          return;
+        }
+        job.start(options)
             .finally(() => {
                 this.afterJobDone(jobId);
             });
-
-        this.running += 1;
     }
 
     stopJob(jobId: string): void {
-        this.jobs.get(jobId)?.stop();
-        this.running -= 1;
+        const job = this.jobs.get(jobId);
+        if (!job) {
+            return;
+        }
+        job.stop();
         this.scheduleJobs();
     }
 
@@ -167,11 +177,15 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         if (indexToRemove < 0) {
             return;
         }
-        this.jobs.get(jobId)
-            ?.stop();
         this.jobIds.splice(indexToRemove, 1);
+
+        const job = this.jobs.get(jobId);
+        if (!job) {
+          return;
+        }
+        job.stop();
+
         this.jobs.delete(jobId);
-        this.running -= 1;
         this.scheduleJobs();
     }
 
@@ -215,9 +229,6 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
                     return;
                 }
                 job.stop();
-                if (job.status === Status.Running) {
-                    this.running -= 1;
-                }
             });
     }
 
@@ -225,6 +236,26 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         this.stopAllJobs();
         this.jobIds = [];
         this.jobs.clear();
+    }
+
+    stopJobsByOffline(): void {
+        for (const [jobId, job] of this.jobs) {
+            if ([Status.Running, Status.Waiting].includes(job.status)) {
+                job.stop();
+                this.offlineJobIds.push(jobId);
+            }
+        }
+    }
+
+    startJobsByOnline(): void {
+        for (const jobId of this.offlineJobIds) {
+            const job = this.jobs.get(jobId);
+            if (job) {
+                job.wait();
+            }
+        }
+        this.offlineJobIds = [];
+        this.scheduleJobs();
     }
 
     protected _persistJobs(): void {
@@ -265,7 +296,6 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
             if (job?.status !== Status.Waiting) {
                 continue;
             }
-            this.running += 1;
             job.start()
                 .finally(() => {
                     this.afterJobDone(job.id);
@@ -277,9 +307,15 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         }
     }
 
-    private afterJobDone(id: string): void {
+    protected handleJobStatusChange(status: Status, prev: Status) {
+      if (status === Status.Running) {
+        this.running += 1;
+      } else if (prev === Status.Running) {
         this.running -= 1;
-        this.running = Math.max(0, this.running);
+      }
+    }
+
+    private afterJobDone(id: string): void {
         this.scheduleJobs();
         this.config.onJobDone?.(id, this.jobs.get(id));
     }

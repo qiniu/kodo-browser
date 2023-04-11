@@ -13,7 +13,6 @@ const pages = [
 ]
 const copies = [
   'src/renderer/static',
-  'src/renderer/icons',
 ]
 
 module.exports = {
@@ -34,8 +33,7 @@ module.exports = {
 
   appRenderer: resolveApp('src/renderer'),
   appBuildRenderer: resolveApp('dist/renderer'),
-  appRendererIndex: resolveApp('src/renderer/index.js'),
-  appRendererTemplateMappings: resolveApp('src/renderer/app-module/templates/url-tpl-mappings'),
+  appRendererIndex: resolveApp('src/renderer/index.tsx'),
   appRendererComponents: resolveApp('src/renderer/components'),
   appRendererCopies: copies.map(resolveApp)
 }

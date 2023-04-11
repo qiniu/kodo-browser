@@ -1,0 +1,57 @@
+.w-10 {
+  width: 10% !important;
+}
+
+.w-15 {
+  width: 15% !important;
+}
+
+.mxw-25 {
+  max-width: 25% !important;
+}
+
+.mxw-50 {
+  max-width: 50% !important;
+}
+
+.mnw-50 {
+  min-width: 50% !important;
+}
+
+.h-50v {
+  height: 50vh !important;
+}
+
+.h-60v {
+  height: 60vh !important;
+}
+
+.mxh-50v {
+  max-height: 50vh !important;
+}
+
+.mxh-60v {
+  max-height: 60vh !important;
+}
+
+.transition-box-size {
+  transition-property: margin, padding, width, height, border;
+  transition-duration: .3s;
+  transition-timing-function: ease;
+}
+
+.box-fit-contain {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.clickable {
+  --clickable-focus-shadow-rgb: var(--bs-primary-rgb);
+  --clickable-focus-box-shadow: 0 0 0 0.25rem rgba(var(--clickable-focus-shadow-rgb), .5);
+  cursor: pointer;
+
+  &:focus {
+    box-shadow: var(--clickable-focus-box-shadow);
+  }
+}

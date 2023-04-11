@@ -1,0 +1,48 @@
+.no-selectable {
+  user-select: none;
+}
+
+.text-link {
+  color: var(--bs-link-color);
+  cursor: pointer;
+
+  &:hover, &:focus {
+    color: var(--bs-link-hover-color);
+    text-decoration: underline;
+  }
+  &.disable {
+    color: var(--bs-gray-600);
+  }
+}
+
+@each $color, $_ in $colors {
+  .text-#{$color} {
+    color: var(--bs-#{$color});
+  }
+}
+
+.text-brown {
+  color: #8a6d3b;
+}
+
+.text-slate {
+  color: #748b89
+}
+
+.overflow-ellipsis {
+  --line-num: 1;
+  display: -webkit-box;
+  overflow: hidden;
+  word-break: break-all;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--line-num);
+}
+
+.overflow-ellipsis-one-line {
+  display: inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  word-break: break-all;
+  vertical-align: bottom;
+}

@@ -1,7 +1,7 @@
 import {IpcRenderer} from "electron";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
-import {ClientOptions} from "@common/qiniu";
+import {ClientOptionsSerialized} from "@common/qiniu";
 import StorageClass from "@common/models/storage-class";
 import UploadJob from "@common/models/job/upload-job";
 import {Status} from "@common/models/job/types";
@@ -32,6 +32,8 @@ export enum UploadAction {
     CleanupJobs = "CleanupJobs",
     StartAllJobs = "StartAllJobs",
     StopAllJobs = "StopAllJobs",
+    StopJobsByOffline = "StopJobsByOffline",
+    StartJobsByOnline = "StartJobsByOnline",
     RemoveAllJobs = "RemoveAllJobs",
 
     // common
@@ -61,7 +63,7 @@ export interface UpdateConfigMessage {
 export interface LoadPersistJobsMessage {
     action: UploadAction.LoadPersistJobs,
     data: {
-        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
+        clientOptions: Pick<ClientOptionsSerialized, "accessKey" | "secretKey" | "ucUrl" | "regions">,
         uploadOptions: Pick<UploadOptions, "userNatureLanguage">,
     },
 }
@@ -72,7 +74,7 @@ export interface AddJobsMessage {
         filePathnameList: string[],
         destInfo: DestInfo,
         uploadOptions: UploadOptions,
-        clientOptions: ClientOptions,
+        clientOptions: ClientOptionsSerialized,
     },
 }
 
@@ -102,6 +104,7 @@ export interface UpdateUiDataReplyMessage {
         running: number,
         failed: number,
         stopped: number,
+        hasMore: boolean,
     },
 }
 
@@ -116,6 +119,9 @@ export interface WaitJobMessage {
     action: UploadAction.WaitJob,
     data: {
         jobId: string,
+        options?: {
+            forceOverwrite: boolean,
+        },
     },
 }
 
@@ -151,6 +157,16 @@ export interface StopAllJobsMessage {
     data?: {},
 }
 
+export interface StopJobsByOfflineMessage {
+  action: UploadAction.StopJobsByOffline,
+  data?: {},
+}
+
+export interface StartJobsByOnlineMessage {
+  action: UploadAction.StartJobsByOnline,
+  data?: {},
+}
+
 export interface RemoveAllJobsMessage {
     action: UploadAction.RemoveAllJobs,
     data?: {},
@@ -183,6 +199,8 @@ export type UploadMessage = UpdateConfigMessage
     | CleanupJobMessage
     | StartAllJobsMessage
     | StopAllJobsMessage
+    | StopJobsByOfflineMessage
+    | StartJobsByOnlineMessage
     | RemoveAllJobsMessage
 
 export type UploadReplyMessage = UpdateUiDataReplyMessage
@@ -271,6 +289,20 @@ export class UploadActionFns {
     stopAllJobs() {
         this.ipc.send(this.channel, {
             action: UploadAction.StopAllJobs,
+            data: {},
+        });
+    }
+
+    stopJobsByOffline() {
+        this.ipc.send(this.channel, {
+            action: UploadAction.StopJobsByOffline,
+            data: {},
+        });
+    }
+
+    startJobsByOnline() {
+        this.ipc.send(this.channel, {
+            action: UploadAction.StartJobsByOnline,
             data: {},
         });
     }

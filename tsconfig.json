@@ -23,6 +23,9 @@
     "baseUrl": "src",
     "paths": {
       "@/*": [
+        "./*"
+      ],
+      "@renderer/*": [
         "renderer/*"
       ],
       "@common/*": [
@@ -31,7 +34,8 @@
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "jsx": "react"
   },
   "exclude": [
     "node_modules",

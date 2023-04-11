@@ -1,8 +1,5 @@
 type AsyncFunction = (...args: any[]) => Promise<any>;
 
-// TODO: Upgrade TypeScript to ≥4.5 to get a build-in `Awaited`.
-type Awaited<T> = T extends PromiseLike<infer U> ? U : T
-
 // `Promise<Awaited<ReturnType<T>>>` is ugly to get the right type because of
 // the deferred resolving of conditional types involving unbound type parameters in TypeScript.
 // There are many issue with it, such as

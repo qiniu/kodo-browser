@@ -2,14 +2,14 @@ on: [push, pull_request]
 name: Test Build
 jobs:
   build-on-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
       - uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '16.x'
       - name: install wine
         # https://github.com/actions/virtual-environments/issues/4589
         run: |
@@ -33,7 +33,7 @@ jobs:
           ref: ${{ github.ref }}
       - uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '16.x'
       - name: test
         run: make i test
       - name: build

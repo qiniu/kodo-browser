@@ -4,7 +4,7 @@ import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 import Duration from "@common/const/duration";
 import {ClientOptions} from "@common/qiniu";
 
-import {LocalPath, RemotePath, Status} from "./types";
+import {LocalPath, ProgressCallbackParams, RemotePath, Status} from "./types";
 
 interface RequiredOptions {
     clientOptions: ClientOptions,
@@ -24,13 +24,15 @@ interface OptionalOptions {
         loaded: number, // Bytes
         resumable?: boolean,
     },
+    timeoutBaseDuration: number, // ms
+    retry: number,
 
     userNatureLanguage: NatureLanguage,
 }
 
 export type Options = RequiredOptions & Partial<OptionalOptions>
 
-const DEFATUL_OPTIONS: OptionalOptions = {
+const DEFAULT_OPTIONS: OptionalOptions = {
     id: "",
 
     status: Status.Waiting,
@@ -39,22 +41,23 @@ const DEFATUL_OPTIONS: OptionalOptions = {
         total: 0,
         loaded: 0,
     },
+    timeoutBaseDuration: 3 * Duration.Second,
+    retry: 10,
 
     userNatureLanguage: "zh-CN",
 }
 
 export default abstract class TransferJob {
     protected readonly options: Readonly<RequiredOptions & OptionalOptions>
+    protected retriedTimes: number = 0
 
     readonly id: string
 
     // - for UI -
     private __status: Status
     // speed
-    private lastTimestamp = 0 // ms
-    private lastLoaded = 0 // Bytes
-    private speed: number = 0 // Bytes/s
-    private estimatedTime: number = 0 // timestamp
+    protected speed: number = 0 // Bytes/s
+    protected estimatedDuration: number = 0 // timestamp
     // message
     message: string
 
@@ -66,7 +69,7 @@ export default abstract class TransferJob {
             ? config.id
             : `j-${Date.now()}-${Math.random().toString().substring(2)}`;
 
-        this.options = lodash.merge({}, DEFATUL_OPTIONS, config);
+        this.options = lodash.merge({}, DEFAULT_OPTIONS, config);
 
         this.__status = this.options.status;
         this.message = this.options.message;
@@ -74,8 +77,6 @@ export default abstract class TransferJob {
         this.prog = {
             ...this.options.prog,
         }
-
-        this.speedCount = lodash.throttle(this.speedCount.bind(this), Duration.Second);
     }
 
     get status(): Status {
@@ -95,71 +96,52 @@ export default abstract class TransferJob {
             message: this.message,
             progress: this.prog,
             speed: this.speed,
-            estimatedTime: this.estimatedTime,
-            estimatedDuration: this.estimatedTime - Date.now(),
+            estimatedTime: Date.now() + this.estimatedDuration,
+            estimatedDuration: this.estimatedDuration,
         }
     }
 
 
     abstract start(options?: any): Promise<void>
     abstract stop(): this
-    abstract wait(): this
+    abstract wait(options?: any): this
+    protected abstract retry(): Promise<void>
     abstract get persistInfo(): any
 
-    protected abstract handleStatusChange(): void
+    protected abstract handleStatusChange(status: Status, prev: Status): void
+
+    protected get shouldRetry(): boolean {
+        return this.retriedTimes < this.options.retry;
+    }
 
     // TypeScript specification (8.4.3) says...
     // > Accessors for the same member name must specify the same accessibility
     protected set _status(value: Status) {
+        const prev = this.__status;
         this.__status = value;
-        this.handleStatusChange();
-
-        if (
-            [
-                Status.Failed,
-                Status.Stopped,
-                Status.Finished,
-                Status.Duplicated,
-            ].includes(this.status)
-        ) {
-            this.stopSpeedCounter();
-        }
+        this.handleStatusChange(value, prev);
     }
 
-    protected startSpeedCounter() {
-        this.stopSpeedCounter();
-
-        this.lastTimestamp = Date.now();
-        this.lastLoaded = this.prog.loaded;
+    protected handleProgress({
+      transferred,
+      total,
+      speed,
+      eta,
+    }: ProgressCallbackParams) {
+      if (this.isNotRunning) {
+        return;
+      }
+      this.prog.loaded = transferred;
+      this.prog.total = total;
+      this.speed = speed * 1000; // Bytes/ms -> Bytes/s
+      this.estimatedDuration = eta;
     }
 
-    // call me on progress
-    protected speedCount(speedLimit: number) {
-        if (this.isNotRunning) {
-            this.stopSpeedCounter();
-            return;
-        }
-
-        const nowTimestamp = Date.now();
-        const currentSpeedByMs = (this.prog.loaded - this.lastLoaded) / (nowTimestamp - this.lastTimestamp);
-
-        this.speed = Math.round(currentSpeedByMs * Duration.Second);
-        if (speedLimit > 0) {
-            this.speed = Math.min(this.speed, speedLimit);
-        }
-        this.estimatedTime = Date.now() + Math.max(
-            Math.round(this.prog.total - this.prog.loaded) / currentSpeedByMs,
-            0,
-        );
-
-        this.lastLoaded = this.prog.loaded;
-        this.lastTimestamp = nowTimestamp;
-    }
-
-    private stopSpeedCounter() {
-        this.speed = 0;
-        this.estimatedTime = 0;
-        this.lastTimestamp = 0;
-        this.lastLoaded = 0;
+    protected async backoff() {
+        const backoffDuration = Math.min(
+            this.options.timeoutBaseDuration << this.retriedTimes,
+            Duration.Minute,
+        )
+        await new Promise(resolve => setTimeout(resolve, backoffDuration));
     }
 }

@@ -1,0 +1,121 @@
+.transfer-panel-bar {
+  min-width: 8rem;
+  max-width: 12rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.8rem;
+  box-shadow: 0 0 4px var(--bs-gray-500);
+}
+
+.transfer-panel {
+  position: relative;
+  box-shadow: 0 0 20px var(--bs-gray-500);
+
+  & .transfer-panel-close-button {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
+  }
+
+  & .transfer-panel-content {
+    display: flex;
+    flex-direction: column;
+    width: 36rem;
+    height: 24rem;
+  }
+
+  & .job-list {
+    overflow: auto;
+  }
+
+  & .job-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.875em;
+    border-bottom: 1px solid var(--bs-gray-300);
+
+    & .progress {
+      --bs-progress-height: 0.5rem;
+    }
+
+    & .job-item-name {
+      flex: 0 0 30%;
+      min-width: 30%;
+      word-break: break-all;
+    }
+
+    & .job-item-status {
+      text-align: center;
+      flex: 0 0 4rem;
+    }
+
+    & .job-item-progress-text{
+      text-align: center;
+      flex: 1 0 10rem;
+      max-width: 12rem;
+    }
+
+    & .job-item-operation {
+      flex: 0 0 8rem;
+      margin-left: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      & .btn-sm {
+        --bs-btn-padding-y: 0.125rem;
+        --bs-btn-padding-x: 0.25rem;
+        --bs-btn-font-size: 0.75rem;
+        --bs-btn-border-radius: 0.25rem;
+      }
+      & .btn ~ .btn {
+        margin-left: 0.25rem;
+      }
+
+      & .bi {
+        font-weight: bolder;
+      }
+    }
+
+    // status
+    &.job-status-waiting,
+    &.job-status-stopped {
+      & .progress {
+        --bs-progress-bar-bg: var(--bs-warning);
+      }
+      & .job-item-status {
+        color: var(--bs-warning);
+      }
+    }
+
+    &.job-status-running,
+    &.job-status-verifying {
+      & .progress {
+        --bs-progress-bar-bg: var(--bs-primary);
+      }
+      & .job-item-status {
+        color: var(--bs-primary);
+      }
+    }
+
+    &.job-status-finished {
+      & .progress {
+        --bs-progress-bar-bg: var(--bs-success);
+      }
+      & .job-item-status {
+        color: var(--bs-success);
+      }
+    }
+
+    &.job-status-failed,
+    &.job-status-duplicated {
+
+      & .progress {
+        --bs-progress-bar-bg: var(--bs-danger);
+      }
+      & .job-item-status {
+        color: var(--bs-danger);
+      }
+    }
+  }
+}

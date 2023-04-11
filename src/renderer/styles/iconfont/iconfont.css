@@ -1,0 +1,23 @@
+/* these icons are comb by bootstrap icon from figma and re-export by iconfont */
+@font-face {
+  font-family: "bic"; /* Project id 3766549 */
+  src: url('@renderer/styles/iconfont/iconfont.woff2') format('woff2'),
+  url('@renderer/styles/iconfont/iconfont.woff') format('woff')
+}
+
+.bic {
+  font-family: "bic";
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.bic-database-fill-pencil:before {
+  content: "\e614";
+}
+
+.bic-database-fill-eye:before {
+  content: "\e615";
+}
+

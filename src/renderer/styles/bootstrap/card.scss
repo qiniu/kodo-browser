@@ -1,0 +1,21 @@
+.card.card-horizontal {
+  flex-direction: row;
+  align-items: center;
+
+  & .card-img {
+    flex: 0 0 3rem;
+  }
+
+  & .card-body {
+    min-width: 0;
+    padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x) var(--bs-card-spacer-y) 0;
+
+    & .card-title {
+      font-size: 1rem;
+    }
+
+    & .card-subtitle {
+      font-size: 0.875rem;
+    }
+  }
+}

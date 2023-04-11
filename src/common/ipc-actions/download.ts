@@ -2,7 +2,7 @@ import {IpcRenderer} from "electron";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
-import {ClientOptions} from "@common/qiniu";
+import {ClientOptionsSerialized} from "@common/qiniu";
 import {Status} from "@common/models/job/types";
 import DownloadJob from "@common/models/job/download-job";
 import StorageClass from "@common/models/storage-class";
@@ -41,6 +41,8 @@ export enum DownloadAction {
     StartAllJobs = "StartAllJobs",
     StopAllJobs = "StopAllJobs",
     RemoveAllJobs = "RemoveAllJobs",
+    StopJobsByOffline = "StopJobsByOffline",
+    StartJobsByOnline = "StartJobsByOnline",
 
     // common
     UpdateUiData = "UpdateUiData",
@@ -68,7 +70,7 @@ export interface UpdateConfigMessage {
 export interface LoadPersistJobsMessage {
     action: DownloadAction.LoadPersistJobs,
     data: {
-        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">
+        clientOptions: Pick<ClientOptionsSerialized, "accessKey" | "secretKey" | "ucUrl" | "regions">
         downloadOptions: Pick<DownloadOptions, "userNatureLanguage">,
     }
 }
@@ -79,7 +81,7 @@ export interface AddJobsMessage {
         remoteObjects: RemoteObject[],
         destPath: string,
         downloadOptions: DownloadOptions,
-        clientOptions: ClientOptions,
+        clientOptions: ClientOptionsSerialized,
     }
 }
 
@@ -112,6 +114,7 @@ export interface UpdateUiDataReplyMessage {
         running: number,
         failed: number,
         stopped: number,
+        hasMore: boolean,
     },
 }
 
@@ -160,6 +163,16 @@ export interface StopAllJobsMessage {
     data?: {},
 }
 
+export interface StopJobsByOfflineMessage {
+    action: DownloadAction.StopJobsByOffline,
+    data?: {},
+}
+
+export interface StartJobsByOnlineMessage {
+    action: DownloadAction.StartJobsByOnline,
+    data?: {},
+}
+
 export interface RemoveAllJobsMessage {
     action: DownloadAction.RemoveAllJobs,
     data?: {},
@@ -185,6 +198,8 @@ export type DownloadMessage = UpdateConfigMessage
     | StartAllJobsMessage
     | StopAllJobsMessage
     | RemoveAllJobsMessage
+    | StopJobsByOfflineMessage
+    | StartJobsByOnlineMessage
 
 export type DownloadReplyMessage = UpdateUiDataReplyMessage
     | AddedJobsReplyMessage
@@ -270,6 +285,20 @@ export class DownloadActionFns {
     stopAllJobs() {
         this.ipc.send(this.channel, {
             action: DownloadAction.StopAllJobs,
+            data: {},
+        });
+    }
+
+    stopJobsByOffline() {
+        this.ipc.send(this.channel, {
+            action: DownloadAction.StopJobsByOffline,
+            data: {},
+        });
+    }
+
+    startJobsByOnline() {
+        this.ipc.send(this.channel, {
+            action: DownloadAction.StartJobsByOnline,
             data: {},
         });
     }

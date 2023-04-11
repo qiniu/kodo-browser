@@ -133,7 +133,15 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                         overwrite: this.config.isOverwrite,
                         isDebug: this.config.isDebug,
                         userNatureLanguage: downloadOptions.userNatureLanguage,
-                    }
+                    },
+                  {
+                        onStatusChange: (status, prev) => {
+                            this.handleJobStatusChange(status, prev);
+                        },
+                        onProgress: () => {
+                            this.persistJobs();
+                        },
+                    },
                 );
 
                 if ([Status.Waiting, Status.Running].includes(job.status)) {
@@ -241,10 +249,6 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             if (isDirectoryExists) {
                 return;
             }
-            const stat = await fsPromises.stat(path);
-            if (stat.isDirectory()) {
-                return;
-            }
             await fsPromises.mkdir(path);
         } catch (err: any) {
             this.config.onError?.(err);
@@ -279,6 +283,13 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             isDebug: this.config.isDebug,
 
             userNatureLanguage: downloadOptions.userNatureLanguage,
+
+            onStatusChange: (status, prev) => {
+              this.handleJobStatusChange(status, prev);
+            },
+            onProgress: () => {
+                this.persistJobs();
+            },
         });
 
         this.addJob(job);

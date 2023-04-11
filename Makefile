@@ -6,38 +6,38 @@ ZIP=node ../zip.js
 i:
 	yarn install
 test:
-	npm run test
+	yarn test
 dev:
 	NODE_ENV=development electron .
 run:
-	npm run dev
+	yarn dev
 clean:
 	rm -rf dist node_modules build releases node/s3store/node_modules
 
 prod:
-	npm run prod
+	yarn prod
 watch:
-	npm run watch
+	yarn watch
 build:
-	npm run build
+	yarn build
 
 win64: build
-	npm run build:win64
-	npm run pkg:win64
+	yarn build:win64
+	yarn pkg:win64
 win32: build
-	npm run build:win32
-	npm run pkg:win32
+	yarn build:win32
+	yarn pkg:win32
 linux64: build
-	npm run build:linux64
-	npm run pkg:linux64
+	yarn build:linux64
+	yarn pkg:linux64
 linux32: build
-	npm run build:linux32
-	npm run pkg:linux32
+	yarn build:linux32
+	yarn pkg:linux32
 mac: build
-	npm run build:mac
-	npm run pkg:mac
+	yarn build:mac
+	yarn pkg:mac
 dmg: mac
-	npm run build:dmg
+	yarn build:dmg
 
 all:win32 win64 linux32 linux64 mac
 	@echo 'Done'

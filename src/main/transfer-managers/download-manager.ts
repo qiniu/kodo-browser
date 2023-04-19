@@ -121,6 +121,11 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                     return;
                 }
 
+                // some old version will persist an object message, cause type error
+                if (typeof persistedJob.message !== "string") {
+                  persistedJob.message = JSON.stringify(persistedJob.message);
+                }
+
                 const job = DownloadJob.fromPersistInfo(
                     jobId,
                     persistedJob,

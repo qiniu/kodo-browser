@@ -478,6 +478,7 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
               onCreatedDirectory={onCreatedDirectory}
             />
             <RenameFile
+              size="lg"
               show={isShowRenameFile}
               onHide={handleHideRenameFile}
               regionId={regionId}

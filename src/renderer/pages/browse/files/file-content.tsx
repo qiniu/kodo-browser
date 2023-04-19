@@ -241,6 +241,7 @@ const FileContent: React.FC<FileContentProps> = ({
               fileItem={fileItemForRestore}
             />
             <GenerateFileLink
+              size="lg"
               show={isShowGenerateFileLink}
               onHide={() => handleHideGeneratingLink({fileItem: null})}
               regionId={regionId}

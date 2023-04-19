@@ -1,0 +1,9 @@
+/* match primary color for active */
+.nav-tabs {
+  --bs-nav-tabs-link-active-color: var(--bs-link-color);
+}
+
+.nav {
+  --bs-nav-link-color: $gray-700;
+  --bs-nav-link-disabled-color: $gray-600;
+}

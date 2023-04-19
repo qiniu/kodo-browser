@@ -415,7 +415,7 @@ const dict: Dictionary = {
                 legend: "外部リンク",
                 form: {
                     enabled: {
-                        label: "外部リンク",
+                        label: "外部リンク：",
                         hint: "（外部リンクを有効にする）"
                     },
                 },
@@ -424,23 +424,23 @@ const dict: Dictionary = {
                 legend: "システム設定",
                 form: {
                     isDebug: {
-                        label: "デバッグログ",
+                        label: "デバッグログ：",
                         hint: "デバッグログを開くかどうか",
                     },
                     enabledLoadFilesOnTouchEnd: {
-                        label: "ステップごとのファイルリストのロード",
+                        label: "ステップごとのファイルリストのロード：",
                         hint: "（ステップバイステップモードでファイルリストの読み込みを有効にする）",
                     },
                     loadFilesNumberPerPage: {
-                        label: "一度にロードされるファイルの数",
+                        label: "一度にロードされるファイルの数：",
                         hint: "範囲：10-1000",
                     },
                     autoUpgrade: {
-                        label: "自動更新",
+                        label: "自動更新：",
                         hint: "自動ダウンロードパッケージ",
                     },
                     language: {
-                        label: "言語",
+                        label: "言語：",
                     },
                 },
             },

@@ -415,7 +415,7 @@ const dict: Dictionary = {
         legend: "外部路径",
         form: {
           enabled: {
-            label: "外部路径",
+            label: "外部路径：",
             hint: "（启用外部路径）"
           },
         },
@@ -424,23 +424,23 @@ const dict: Dictionary = {
         legend: "系统设置",
         form: {
           isDebug: {
-            label: "调试日志",
+            label: "调试日志：",
             hint: "是否开启调试日志",
           },
           enabledLoadFilesOnTouchEnd: {
-            label: "文件列表触底加载",
+            label: "文件列表触底加载：",
             hint: "（触底加载更多）",
           },
           loadFilesNumberPerPage: {
-            label: "文件列表单次加载数目",
+            label: "文件列表单次加载数目：",
             hint: "范围：10-1000",
           },
           autoUpgrade: {
-            label: "自动更新",
+            label: "自动更新：",
             hint: "自动下载更新包",
           },
           language: {
-            label: "语言",
+            label: "语言：",
           },
         },
       },

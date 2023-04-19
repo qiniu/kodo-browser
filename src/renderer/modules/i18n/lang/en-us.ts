@@ -415,7 +415,7 @@ const dict: Dictionary = {
         legend: "External Link",
         form: {
           enabled: {
-            label: "External Link",
+            label: "External Link:",
             hint: "(Enable External Link)"
           },
         },
@@ -424,23 +424,23 @@ const dict: Dictionary = {
         legend: "System Settings",
         form: {
           isDebug: {
-            label: "Debug",
+            label: "Debug:",
             hint: "Enable debug log",
           },
           enabledLoadFilesOnTouchEnd: {
-            label: "File list load more on touch end",
+            label: "File list load more on touch end:",
             hint: "(Enable file list load more on touch end)",
           },
           loadFilesNumberPerPage: {
-            label: "Files loading count",
+            label: "Files load size:",
             hint: "Range：10-1000",
           },
           autoUpgrade: {
-            label: "Auto update",
+            label: "Auto update:",
             hint: "Download update package automatically",
           },
           language: {
-            label: "Language",
+            label: "Language:",
           },
         },
       },

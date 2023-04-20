@@ -9,6 +9,7 @@ export enum MenuItemType {
 interface LinkItem {
   id: string,
   type: MenuItemType.Link,
+  className?: string,
   iconClassName?: string,
   text: string | ReactNode,
   active?: boolean,
@@ -18,6 +19,7 @@ interface LinkItem {
 interface DropdownItem {
   id: string,
   type: MenuItemType.Dropdown,
+  className?: string,
   text: string | ReactNode,
   items: LinkItem[],
 }

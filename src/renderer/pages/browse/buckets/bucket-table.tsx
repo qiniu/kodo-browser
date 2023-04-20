@@ -6,7 +6,6 @@ import {useKodoNavigator} from "@renderer/modules/kodo-address";
 import {BucketItem} from "@renderer/modules/qiniu-client";
 
 import EmptyHolder from "@renderer/components/empty-holder";
-import LoadingHolder from "@renderer/components/loading-holder";
 
 import BucketTableRow from "./bucket-table-row";
 
@@ -24,7 +23,7 @@ const BucketTable: React.FC<BucketTableProps> = ({
   onChangeSelectedBucket,
 }) => {
   const {translate} = useI18n();
-  const {currentAddress, goTo} = useKodoNavigator();
+  const {goTo} = useKodoNavigator();
 
   const handleClickRow = (bucket: BucketItem) => {
     if (bucket.name === selectedBucket?.name) {
@@ -36,7 +35,6 @@ const BucketTable: React.FC<BucketTableProps> = ({
 
   const handleClickBucket = (bucket: BucketItem) => {
     goTo({
-      protocol: currentAddress.protocol,
       path: `${bucket.name}/`,
     });
   };
@@ -63,19 +61,17 @@ const BucketTable: React.FC<BucketTableProps> = ({
         </thead>
         <tbody>
         {
-          loading
-            ? <LoadingHolder col={4}/>
-            : buckets.length
-              ? buckets.map(bucket => (
-                <BucketTableRow
-                  key={bucket.name}
-                  data={bucket}
-                  isSelected={selectedBucket?.name === bucket.name}
-                  onClickRow={handleClickRow}
-                  onClickBucket={handleClickBucket}
-                />
-              ))
-              : <EmptyHolder col={4}/>
+          buckets.length
+            ? buckets.map(bucket => (
+              <BucketTableRow
+                key={bucket.name}
+                data={bucket}
+                isSelected={selectedBucket?.name === bucket.name}
+                onClickRow={handleClickRow}
+                onClickBucket={handleClickBucket}
+              />
+            ))
+            : <EmptyHolder loading={loading} col={4}/>
         }
         </tbody>
       </Table>

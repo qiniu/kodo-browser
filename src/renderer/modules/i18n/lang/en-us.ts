@@ -136,6 +136,17 @@ const dict: Dictionary = {
       bucketRegion: "Bucket region",
       createTime: "Create time",
     },
+    externalPathToolBar: {
+      addExternalPath: "Add External Path",
+      search: {
+        holder: "External path name",
+      },
+    },
+    externalPathTable: {
+      path: "External Path",
+      regionName: "Region Name",
+    },
+
     fileToolbar: {
       createDirectory: "Create directory",
       search: {
@@ -456,36 +467,6 @@ const dict: Dictionary = {
       }
     },
 
-    externalPathManager: {
-      title: "External Path Manager",
-      addButton: "Add",
-      removeButton: "Remove",
-      error: {
-        duplicated: "The path is existed!",
-      },
-      form: {
-        region: {
-          label: "region:",
-          feedback: {
-            required: "Region is required",
-          },
-        },
-        path: {
-          label: "Path:",
-          holder: "Bucket/Object-Prefix",
-          feedback: {
-            required: "Path is required",
-          },
-          hint: "Fill in a bucket or a path under a bucket that is granted permission through Bucket Policy, provided by the grantor",
-        },
-      },
-      table: {
-        path: "External Path",
-        regionName: "Region Name",
-        operation: "Actions",
-      },
-    },
-
     about: {
       title: "About",
       openSourceAddress: "Open Source: ",
@@ -539,6 +520,36 @@ const dict: Dictionary = {
     deleteBucket: {
       title: "Delete Bucket",
       content: "Bucket Name：${bucketName},  Are you sure you want to delete this bucket？",
+      submit: "Delete",
+    },
+
+    addExternalPath: {
+      title: "Add External Path",
+      submit: "Add",
+      form: {
+        region: {
+          label: "Region:",
+          feedback: {
+            required: "Region is required",
+          }
+        },
+        path: {
+          label: "Path:",
+          holder: "Bucket/Object-Prefix",
+          feedback: {
+            required: "Path is required",
+          },
+          hint: "Fill in a bucket or a path under a bucket that is granted permission through Bucket Policy, provided by the grantor",
+        },
+      },
+      error: {
+        duplicated: "The path is existed!",
+      },
+    },
+
+    deleteExternalPath: {
+      title: "Delete External Path",
+      content: "External Path: ${externalPathUrl}. Region: ${regionName}. Are you sure to delete？",
       submit: "Delete",
     },
 

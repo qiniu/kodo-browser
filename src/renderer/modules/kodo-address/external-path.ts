@@ -8,6 +8,10 @@ export interface ExternalPathItem extends KodoAddress {
   regionId: string,
 }
 
+export function isExternalPathItem(address: KodoAddress): address is ExternalPathItem {
+  return "regionId" in address;
+}
+
 export interface ExternalPath {
   list: ExternalPathItem[];
 }

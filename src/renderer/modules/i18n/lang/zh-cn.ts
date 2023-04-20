@@ -136,6 +136,16 @@ const dict: Dictionary = {
       bucketRegion: "Bucket 区域",
       createTime: "创建时间",
     },
+    externalPathToolBar: {
+      addExternalPath: "添加外部路径",
+      search: {
+        holder: "外部路径",
+      },
+    },
+    externalPathTable: {
+      path: "外部路径",
+      regionName: "区域",
+    },
     fileToolbar: {
       createDirectory: "创建目录",
       search: {
@@ -456,36 +466,6 @@ const dict: Dictionary = {
       }
     },
 
-    externalPathManager: {
-      title: "外部路径管理",
-      addButton: "添加",
-      removeButton: "删除",
-      error: {
-        duplicated: "该路径已存在",
-      },
-      form: {
-        region: {
-          label: "区域：",
-          feedback: {
-            required: "必须选择一个区域",
-          }
-        },
-        path: {
-          label: "路径：",
-          holder: "Bucket/Object-Prefix",
-          feedback: {
-            required: "必须输入路径",
-          },
-          hint: "填写通过 Bucket Policy 被授予权限的某个 Bucket 或 Bucket 下的某个路径，需由授权者提供",
-        },
-      },
-      table: {
-        path: "外部路径",
-        regionName: "区域",
-        operation: "操作",
-      },
-    },
-
     about: {
       title: "关于",
       openSourceAddress: "开源地址：",
@@ -539,6 +519,36 @@ const dict: Dictionary = {
     deleteBucket: {
       title: "删除 Bucket",
       content: "Bucket 名称：${bucketName}，确定删除？",
+      submit: "删除",
+    },
+
+    addExternalPath: {
+      title: "添加外部路径",
+      submit: "添加",
+      form: {
+        region: {
+          label: "区域：",
+          feedback: {
+            required: "必须选择一个区域",
+          }
+        },
+        path: {
+          label: "路径：",
+          holder: "Bucket/Object-Prefix",
+          feedback: {
+            required: "必须输入路径",
+          },
+          hint: "填写通过 Bucket Policy 被授予权限的某个 Bucket 或 Bucket 下的某个路径，需由授权者提供",
+        },
+      },
+      error: {
+        duplicated: "该路径已存在",
+      },
+    },
+
+    deleteExternalPath: {
+      title: "删除外部路径",
+      content: "外部路径：${externalPathUrl}；\n区域：${regionName}；\n确定删除？",
       submit: "删除",
     },
 

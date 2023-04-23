@@ -1,0 +1,58 @@
+/**
+  * This is a css grid layout util with 12 columns
+  */
+
+@mixin gen-grid-span-cols(
+  $range,
+) {
+  @for $start from 1 through $range {
+    @for $span from 1 through $range - $start + 1 {
+      .grid-col-#{$start}-s#{$span} {
+        grid-column: #{$start} / span #{$span};
+      }
+    }
+  }
+}
+
+@mixin gen-grid-fill-rest-cols(
+  $range,
+) {
+  @for $start from 1 through $range {
+    .grid-col-#{$start}-fill-rest {
+      grid-column: #{$start} / -1;
+    }
+  }
+}
+
+.grid-auto {
+  --grid-gap: 1rem;
+  display: grid;
+  gap: var(--grid-gap);
+
+  @include gen-grid-span-cols(12);
+
+  @include gen-grid-fill-rest-cols(12);
+}
+
+.grid-auto.grid-form {
+  --label-min-width: 4rem;
+  --label-max-width: 12rem;
+  align-items: baseline;
+
+  /**
+    * only one label per row
+    */
+  &.label-col-1 {
+    grid-template-columns:
+      fit-content(var(--label-max-width)) repeat(11, 1fr);
+
+    label {
+      overflow-wrap: break-word;
+      word-break: break-word;
+      grid-column: 1 / span 1
+    }
+    label + * {
+      grid-column: 2 / span 11
+    }
+  }
+}

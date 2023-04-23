@@ -478,7 +478,6 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
               onCreatedDirectory={onCreatedDirectory}
             />
             <RenameFile
-              size="lg"
               show={isShowRenameFile}
               onHide={handleHideRenameFile}
               regionId={regionId}
@@ -548,7 +547,6 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
               onChangedFilesStorageClass={onChangedFilesStorageClass}
             />
             <GenerateFileLinks
-              size="lg"
               show={isShowGenerateFileLinks}
               onHide={handleHideGenerateFileLinks}
               regionId={regionId}

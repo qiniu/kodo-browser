@@ -189,6 +189,7 @@ const Contents: React.FC<ContentsProps> = ({
         style={{
           position: "relative",
           height: "calc(100vh - 6rem)",
+          ["--bs-body-font-size" as any]: "0.875rem",
         }}
         className="d-flex flex-column"
       >

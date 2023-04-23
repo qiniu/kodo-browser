@@ -113,7 +113,7 @@ const FileArchived: React.FC<PropsWithChildren<FileArchivedProps>> = (props) => 
             </div>
             : null
         }
-        <div className="mnw-50">
+        <div className="mnw-50 mb-3">
           <RestoreForm
             frozenInfo={frozenInfo}
             formController={restoreFormController}

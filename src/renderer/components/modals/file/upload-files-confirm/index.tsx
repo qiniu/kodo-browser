@@ -1,8 +1,8 @@
 import {promises as fsPromises} from "fs";
 import path from "path";
 
-import React, {useEffect, useMemo, useState} from "react";
-import {Button, Col, Form, Modal, ModalProps, Row, Spinner} from "react-bootstrap";
+import React, {Fragment, useEffect, useMemo, useState} from "react";
+import {Button, Form, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {SubmitHandler, useForm} from "react-hook-form";
 import {toast} from "react-hot-toast";
 
@@ -243,29 +243,33 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
               }
             </ul>
         }
-        <Form onSubmit={handleSubmit(handleSubmitUploadFiles)}>
+        <Form
+          className="mx-5"
+          onSubmit={handleSubmit(handleSubmitUploadFiles)}
+        >
           <fieldset
+            className="grid-auto grid-form label-col-1"
             disabled={isSubmitting}
           >
-            <Form.Group as={Row} className="mb-3" controlId="isOverwrite">
-              <Form.Label className="text-end" column sm={4}>
+            <Form.Group as={Fragment} controlId="isOverwrite">
+              <Form.Label className="text-end">
                 {translate("modals.uploadConfirm.form.isOverwrite.label")}
               </Form.Label>
-              <Col className="mt-2" sm={7}>
+              <div className="mt-2">
                 <Form.Switch
                   {...register("isOverwrite")}
                   label={translate("modals.uploadConfirm.form.isOverwrite.hint")}
                 />
-              </Col>
+              </div>
             </Form.Group>
             {
               !memoStorageClasses.length
                 ? null
-                : <Form.Group as={Row} className="mb-3" controlId="storageClassKodoName">
-                  <Form.Label className="text-end" column sm={4}>
+                : <Form.Group as={Fragment} controlId="storageClassKodoName">
+                  <Form.Label className="text-end">
                     {translate("modals.uploadConfirm.form.storageClassKodoName.label")}
                   </Form.Label>
-                  <Col className="mt-2" sm={7}>
+                  <div className="mt-2">
                     {
                       memoStorageClasses.map(storageClass => (
                         <Form.Check
@@ -286,7 +290,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
                           ?.billingI18n[currentLanguage]
                       }
                     </Form.Text>
-                  </Col>
+                  </div>
                 </Form.Group>
             }
           </fieldset>

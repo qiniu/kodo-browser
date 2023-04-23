@@ -1,5 +1,5 @@
-import React, {useEffect} from "react";
-import {Button, Col, Form, Modal, ModalProps, Row, Spinner} from "react-bootstrap";
+import React, {Fragment, useEffect} from "react";
+import {Button, Form, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {SubmitHandler, useForm} from "react-hook-form";
 import {toast} from "react-hot-toast";
 
@@ -132,17 +132,19 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <fieldset disabled={isSubmitting || loadRegionsState.loading}>
+        <Form className="mx-5">
+          <fieldset
+            className="grid-auto grid-form label-col-1"
+            disabled={isSubmitting || loadRegionsState.loading}
+          >
             <Form.Group
-              as={Row}
-              className="mb-3"
+              as={Fragment}
               controlId="regionId"
             >
-              <Form.Label className="text-end" column sm={3}>
+              <Form.Label className="text-end">
                 {translate("modals.addExternalPath.form.region.label")}
               </Form.Label>
-              <Col sm={9}>
+              <div>
                 {
                   loadRegionsState.regions.length > 0
                     ? (
@@ -170,17 +172,16 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
                       <Spinner className="me-2" animation="border" size="sm"/>
                     )
                 }
-              </Col>
+              </div>
             </Form.Group>
             <Form.Group
-              as={Row}
-              className="mb-3"
+              as={Fragment}
               controlId="path"
             >
-              <Form.Label className="text-end" column sm={3}>
+              <Form.Label className="text-end">
                 {translate("modals.addExternalPath.form.path.label")}
               </Form.Label>
-              <Col sm={9}>
+              <div>
                 <Form.Control
                   {...register("path", {
                     required: translate("modals.addExternalPath.form.path.feedback.required"),
@@ -193,7 +194,7 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
                 <Form.Text>
                   {translate("modals.addExternalPath.form.path.hint")}
                 </Form.Text>
-              </Col>
+              </div>
             </Form.Group>
           </fieldset>
         </Form>

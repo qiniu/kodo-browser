@@ -1,5 +1,5 @@
-import React, {useEffect} from "react";
-import {Col, Form, Row} from "react-bootstrap";
+import React, {Fragment, useEffect} from "react";
+import {Form} from "react-bootstrap";
 import {SubmitHandler, UseFormReturn} from "react-hook-form";
 
 import {useI18n} from "@renderer/modules/i18n";
@@ -57,47 +57,51 @@ const ChangeStorageClassForm: React.FC<ChangeStorageClassFormProps> = ({
   }, []);
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      className="mx-5"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <fieldset
+        className="grid-auto grid-form label-col-1"
         disabled={isSubmitting || isSubmitSuccessful}
       >
         {
           !fileName
             ? null
-            : <Form.Group as={Row} className="mb-3" controlId="fileName">
-              <Form.Label className="text-end" column sm={4}>
+            : <Form.Group as={Fragment} controlId="fileName">
+              <Form.Label className="text-end">
                 {translate("forms.changeStorageClass.fileName.label")}
               </Form.Label>
-              <Col sm={7}>
+              <div>
                 <Form.Control
                   plaintext
                   readOnly
                   defaultValue={fileName}
                 />
-              </Col>
+              </div>
             </Form.Group>
         }
         {
           !fileStorageClass
             ? null
-            : <Form.Group as={Row} className="mb-3" controlId="currentStorageClass">
-              <Form.Label className="text-end" column sm={4}>
+            : <Form.Group as={Fragment} controlId="currentStorageClass">
+              <Form.Label className="text-end">
                 {translate("forms.changeStorageClass.currentStorageClass.label")}
               </Form.Label>
-              <Col sm={7}>
+              <div>
                 <Form.Control
                   plaintext
                   readOnly
                   defaultValue={fileStorageClass?.nameI18n[currentLanguage] ?? defaultStorageClassKodoName}
                 />
-              </Col>
+              </div>
             </Form.Group>
         }
-        <Form.Group as={Row} className="mb-3" controlId="storageClassKodoName">
-          <Form.Label className="text-end" column sm={4}>
+        <Form.Group as={Fragment} controlId="storageClassKodoName">
+          <Form.Label className="text-end">
             {translate("forms.changeStorageClass.storageClassKodoName.label")}
           </Form.Label>
-          <Col className="mt-2" sm={7}>
+          <div>
             {
               availableStorageClasses.map(storageClass => (
                 <Form.Check
@@ -118,7 +122,7 @@ const ChangeStorageClassForm: React.FC<ChangeStorageClassFormProps> = ({
                   ?.billingI18n[currentLanguage]
               }
             </Form.Text>
-          </Col>
+          </div>
         </Form.Group>
       </fieldset>
     </Form>

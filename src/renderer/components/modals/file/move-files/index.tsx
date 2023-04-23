@@ -1,5 +1,5 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {Button, Col, Form, Modal, ModalProps, Row, Spinner} from "react-bootstrap";
+import React, {Fragment, useEffect, useMemo, useState} from "react";
+import {Button, Form, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
@@ -299,15 +299,19 @@ const MoveFiles: React.FC<ModalProps & MoveFilesProps> = (props) => {
                 {
                   memoIsRename
                     ? <>
-                      <Form onSubmit={handleSubmit(handleSubmitMoveFiles)}>
+                      <Form
+                        className="mx-5"
+                        onSubmit={handleSubmit(handleSubmitMoveFiles)}
+                      >
                         <fieldset
+                          className="grid-auto grid-form label-col-1"
                           disabled={isSubmitting || [BatchTaskStatus.Running, BatchTaskStatus.Ended].includes(batchProgressState.status)}
                         >
-                          <Form.Group as={Row} className="mb-3" controlId="fileName">
-                            <Form.Label className="text-end" column sm={4}>
+                          <Form.Group as={Fragment} controlId="fileName">
+                            <Form.Label className="text-end" column >
                               {translate("modals.moveFiles.form.fileName.label")}
                             </Form.Label>
-                            <Col sm={7}>
+                            <div>
                               <Form.Control
                                 {...register("fileName", {
                                   validate: v => {
@@ -336,7 +340,7 @@ const MoveFiles: React.FC<ModalProps & MoveFilesProps> = (props) => {
                               >
                                 {translate("modals.moveFiles.form.fileName.hint")}
                               </Form.Text>
-                            </Col>
+                            </div>
                           </Form.Group>
                         </fieldset>
                       </Form>

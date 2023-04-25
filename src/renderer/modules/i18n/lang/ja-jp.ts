@@ -466,36 +466,6 @@ const dict: Dictionary = {
             }
         },
 
-        // externalPathManager: {
-        //     title: "外部パス管理",
-        //     addButton: "追加",
-        //     removeButton: "削除",
-        //     error: {
-        //         duplicated: "パスは既に存在",
-        //     },
-        //     form: {
-        //         region: {
-        //             label: "領域：",
-        //             feedback: {
-        //                 required: "ゾーンを選択する必要があります",
-        //             }
-        //         },
-        //         path: {
-        //             label: "外部パス：",
-        //             holder: "Bucket/Object-Prefix",
-        //             feedback: {
-        //                 required: "パスを入力する必要があります",
-        //             },
-        //             hint: "付与者から提供されたバケットポリシーを通じて許可されたバケットまたはバケットの下のパスを入力します",
-        //         },
-        //     },
-        //     table: {
-        //         path: "外部パス",
-        //         regionName: "領域",
-        //         operation: "操作",
-        //     },
-        // },
-
         about: {
             title: "について",
             openSourceAddress: "オープンソース：",

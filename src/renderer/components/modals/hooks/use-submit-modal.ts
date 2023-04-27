@@ -1,8 +1,8 @@
-import {useState} from "react";
+import React, {useState} from "react";
 
 type AsyncFunction = (...args: any[]) => Promise<any> | void;
 
-type UseHandleSubmit = <T extends AsyncFunction>(fn: T, ...args: Parameters<T>) => () => (Promise<Awaited<ReturnType<T>>> | void);
+type UseHandleSubmit = <T extends AsyncFunction>(fn: T, ...args: Parameters<T>) => (e?: React.BaseSyntheticEvent) => (Promise<Awaited<ReturnType<T>>> | void);
 
 type SubmitModalHook = () => {
   state: {
@@ -17,10 +17,12 @@ const useSubmitModal: SubmitModalHook = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit: UseHandleSubmit = (fn, ...args) => {
-    return () => {
-      setIsSubmitting(true);
+    return (e) => {
+      e?.preventDefault();
+
       const p = fn(...args);
       if (p) {
+        setIsSubmitting(true);
         p.finally(() => {
           setIsSubmitting(false);
         });

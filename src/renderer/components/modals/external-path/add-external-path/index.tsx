@@ -72,11 +72,11 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
       return;
     }
 
-    const externalPaths = kodoExternalPath.read().list;
-    if (externalPaths.some(externalPath =>
-      externalPath.regionId === data.regionId &&
-      externalPath.path === data.path
-    )) {
+    if (kodoExternalPath.hasExternalPath({
+      protocol: ADDR_KODO_PROTOCOL,
+      regionId: data.regionId,
+      path: data.path,
+    })) {
       toast.error(translate("modals.addExternalPath.error.duplicated"));
       return;
     }
@@ -102,12 +102,12 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
     );
 
     p.then(() => {
-      kodoExternalPath?.addExternalPath({
+      kodoExternalPath.addExternalPath({
         regionId: data.regionId,
         protocol: ADDR_KODO_PROTOCOL,
         path: data.path,
       });
-      setExternalPaths(kodoExternalPath?.read().list ?? []);
+      setExternalPaths(kodoExternalPath.read().list ?? []);
       reset();
       AuditLog.log(AuditLog.Action.AddExternalPath, {
         regionId: data.regionId,
@@ -132,7 +132,7 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form className="mx-5">
+        <Form className="mx-5" onSubmit={handleSubmit(handleAddExternalPath)}>
           <fieldset
             className="grid-auto grid-form label-col-1"
             disabled={isSubmitting || loadRegionsState.loading}

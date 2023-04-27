@@ -80,6 +80,18 @@ export class KodoExternalPath {
     );
   }
 
+  hasExternalPath(target: ExternalPathItem): boolean {
+    if (!target.path.endsWith("/")) {
+      target.path += "/";
+    }
+    const externalPath = this.read();
+    return externalPath.list.some(externalPath => (
+      externalPath.protocol === target.protocol &&
+      externalPath.regionId === target.regionId &&
+      externalPath.path === target.path
+    ));
+  }
+
   addExternalPath(target: ExternalPathItem) {
     const externalPath = this.read();
     externalPath.list.push(target);

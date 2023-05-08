@@ -11,8 +11,8 @@ const KodoNavigatorContext = createContext<{
   basePath: string | undefined,
   goBack: () => void,
   goForward: () => void,
-  goUp: (p?: KodoAddress) => void,
-  goTo: (kodoAddress?: KodoAddress) => void,
+  goUp: KodoNavigator["goUp"],
+  goTo: KodoNavigator["goTo"],
 }>({
   currentAddress: {
     protocol: "",
@@ -25,7 +25,7 @@ const KodoNavigatorContext = createContext<{
   goBack: () => {},
   goForward: () => {},
   goUp: (_p?: KodoAddress) => {},
-  goTo: (_kodoAddress?: KodoAddress) => {},
+  goTo: (_kodoAddress: Partial<KodoAddress>) => {},
 });
 
 export const Provider: React.FC<{
@@ -60,11 +60,11 @@ export const Provider: React.FC<{
       addressHistory: addressHistory,
       bucketName: bucketName,
       basePath: basePath,
-      // wrapped functions are required because of `this`
-      goBack: () => kodoNavigator.goBack(),
-      goForward: () => kodoNavigator.goForward(),
-      goUp: (...args) => kodoNavigator.goUp(...args),
-      goTo: (...args) => kodoNavigator.goTo(...args),
+      // `bind` are required because of `this`
+      goBack: kodoNavigator.goBack.bind(kodoNavigator),
+      goForward: kodoNavigator.goForward.bind(kodoNavigator),
+      goUp: kodoNavigator.goUp.bind(kodoNavigator),
+      goTo: kodoNavigator.goTo.bind(kodoNavigator),
     }}>
       {children}
     </KodoNavigatorContext.Provider>

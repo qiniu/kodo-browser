@@ -50,7 +50,9 @@ export class KodoNavigator {
   }
 
   get current(): KodoAddress {
-    return this.history[this.currentIndex];
+    return {
+      ...this.history[this.currentIndex],
+    };
   }
 
   get bucketName(): string | undefined {
@@ -70,15 +72,29 @@ export class KodoNavigator {
     return basePath.slice(`${bucketName}/`.length);
   }
 
-  goTo(kodoAddress?: KodoAddress) {
+  goTo(kodoAddress: KodoAddress, override: true): void
+  goTo(kodoAddress: Partial<KodoAddress>, override?: false): void
+  goTo(kodoAddress: KodoAddress, override: boolean = false): void {
     const previous = this.current;
-    const next = kodoAddress ?? {
-      ...this.history[0],
-    };
+    const next: KodoAddress = override
+      ? kodoAddress
+      : {
+        ...previous,
+        ...kodoAddress,
+      };
 
+    // address may not equal by external path
+    // it will better if using protocol to tell which is which
+    const nProps = Object.keys(next);
+    const pProps = Object.keys(previous);
+    const isPropsEqual =
+      nProps.every(nKey => pProps.includes(nKey));
+
+    // check already in path
     if (
       next.protocol === previous.protocol &&
-      next.path === previous.path
+      next.path === previous.path &&
+      isPropsEqual
     ) {
       return;
     }
@@ -125,7 +141,6 @@ export class KodoNavigator {
     const current = p ?? this.current;
 
     this.goTo({
-      protocol: current.protocol,
       path: KodoNavigator.getBaseDir(current.path),
     });
   }

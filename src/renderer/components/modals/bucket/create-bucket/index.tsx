@@ -1,5 +1,5 @@
-import React, {useEffect} from "react";
-import {Button, Col, Form, Modal, ModalProps, Row, Spinner} from "react-bootstrap";
+import React, {Fragment, useEffect} from "react";
+import {Button, Form, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
@@ -104,13 +104,16 @@ const CreateBucket: React.FC<ModalProps & CreateBucketProps> = ({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <fieldset disabled={isSubmitting || loadRegionsState.loading}>
-            <Form.Group as={Row} className="mb-3" controlId="bucketName">
-              <Form.Label className="text-end" column sm={3}>
+        <Form className="mx-5">
+          <fieldset
+            className="grid-auto grid-form label-col-1"
+            disabled={isSubmitting || loadRegionsState.loading}
+          >
+            <Form.Group as={Fragment} controlId="bucketName">
+              <Form.Label className="text-end">
                 {translate("modals.createBucket.form.bucketName.label")}
               </Form.Label>
-              <Col sm={9}>
+              <div>
                 <Form.Control
                   {...register("name", {
                     required: translate("modals.createBucket.form.bucketName.feedback.required"),
@@ -129,13 +132,13 @@ const CreateBucket: React.FC<ModalProps & CreateBucketProps> = ({
                 <Form.Control.Feedback type="invalid">
                   {errors.name?.message}
                 </Form.Control.Feedback>
-              </Col>
+              </div>
             </Form.Group>
-            <Form.Group as={Row} className="mb-3" controlId="regionId">
-              <Form.Label className="text-end" column sm={3}>
+            <Form.Group as={Fragment} controlId="regionId">
+              <Form.Label className="text-end">
                 {translate("modals.createBucket.form.region.label")}
               </Form.Label>
-              <Col sm={9}>
+              <div>
                 {
                   loadRegionsState.regions.length > 0
                     ? (
@@ -162,13 +165,13 @@ const CreateBucket: React.FC<ModalProps & CreateBucketProps> = ({
                       <Spinner className="me-2" animation="border" size="sm"/>
                     )
                 }
-              </Col>
+              </div>
             </Form.Group>
-            <Form.Group as={Row} className="mb-3" controlId="acl">
-              <Form.Label className="text-end" column sm={3}>
+            <Form.Group as={Fragment} controlId="acl">
+              <Form.Label className="text-end">
                 {translate("modals.createBucket.form.acl.label")}
               </Form.Label>
-              <Col sm={9}>
+              <div>
                 <Form.Select
                   isInvalid={Boolean(errors.acl)}
                   disabled
@@ -186,7 +189,7 @@ const CreateBucket: React.FC<ModalProps & CreateBucketProps> = ({
                 <Form.Control.Feedback type="invalid">
                   {errors.acl?.message}
                 </Form.Control.Feedback>
-              </Col>
+              </div>
             </Form.Group>
           </fieldset>
         </Form>

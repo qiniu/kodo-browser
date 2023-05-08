@@ -20,7 +20,7 @@ const BucketGrid: React.FC<BucketGridProps> = ({
   selectedBucket,
   onChangeSelectedBucket,
 }) => {
-  const {currentAddress, goTo} = useKodoNavigator();
+  const {goTo} = useKodoNavigator();
 
   const handleClickCell = (bucket: BucketItem) => {
     if (bucket.name === selectedBucket?.name) {
@@ -32,7 +32,6 @@ const BucketGrid: React.FC<BucketGridProps> = ({
 
   const handleDoubleClickCell = (bucket: BucketItem) => {
     goTo({
-      protocol: currentAddress.protocol,
       path: `${bucket.name}/`,
     });
   };

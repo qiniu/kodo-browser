@@ -75,7 +75,6 @@ const Files: React.FC<FilesProps> = (props) => {
       ? currentAddress.path
       : KodoNavigator.getBaseDir(currentAddress.path);
     goTo({
-      protocol: currentAddress.protocol,
       path: `${baseDirPath}${prefix}`,
     });
   };

@@ -73,7 +73,7 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
           !customize.disable.deleteBucket &&
           <Dropdown className="d-inline ms-1">
             <Dropdown.Toggle disabled={!selectedBucket} variant="outline-solid-gray-300" size="sm">
-              {translate("browse.bucketToolbar.moreOperation.toggleButton")}
+              {translate("common.more")}
             </Dropdown.Toggle>
 
             <Dropdown.Menu>

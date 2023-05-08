@@ -140,6 +140,17 @@ export default interface Dictionary {
       createTime: string,
     }
 
+    externalPathToolBar: {
+      addExternalPath: string,
+      search: {
+        holder: string,
+      },
+    },
+    externalPathTable: {
+      path: string,
+      regionName: string,
+    },
+
     fileToolbar: {
       createDirectory: string,
       search: {
@@ -458,35 +469,6 @@ export default interface Dictionary {
         operation: string,
       }
     },
-    externalPathManager: {
-      title: string,
-      addButton: string,
-      removeButton: string,
-      error: {
-        duplicated: string,
-      },
-      form: {
-        region: {
-          label: string,
-          feedback: {
-            required: string,
-          },
-        },
-        path: {
-          label: string,
-          holder: string,
-          feedback: {
-            required: string,
-          },
-          hint: string,
-        },
-      },
-      table: {
-        path: string,
-        regionName: string,
-        operation: string,
-      },
-    },
     about: {
       title: string,
       openSourceAddress: string,
@@ -536,6 +518,36 @@ export default interface Dictionary {
       },
     },
     deleteBucket: {
+      title: string,
+      content: string,
+      submit: string,
+    },
+
+    addExternalPath: {
+      title: string,
+      submit: string,
+      form: {
+        region: {
+          label: string,
+          feedback: {
+            required: string,
+          }
+        },
+        path: {
+          label: string,
+          holder: string,
+          feedback: {
+            required: string,
+          },
+          hint: string,
+        },
+      },
+      error: {
+        duplicated: string,
+      },
+    },
+
+    deleteExternalPath: {
       title: string,
       content: string,
       submit: string,

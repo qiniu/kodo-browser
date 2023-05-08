@@ -547,7 +547,6 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
               onChangedFilesStorageClass={onChangedFilesStorageClass}
             />
             <GenerateFileLinks
-              size="lg"
               show={isShowGenerateFileLinks}
               onHide={handleHideGenerateFileLinks}
               regionId={regionId}

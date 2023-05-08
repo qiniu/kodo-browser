@@ -1,5 +1,5 @@
-import React from "react";
-import {Col, Form, Row} from "react-bootstrap";
+import React, {Fragment} from "react";
+import {Form} from "react-bootstrap";
 import {SubmitHandler, UseFormReturn} from "react-hook-form";
 
 import {useI18n} from "@renderer/modules/i18n";
@@ -33,31 +33,35 @@ const _RestoreForm: React.FC<_RestoreFormProps> = ({
   } = formController;
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      className="mx-5"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <fieldset
+        className="grid-auto grid-form label-col-1"
         disabled={isSubmitting || isSubmitSuccessful}
       >
         {
           !fileName
             ? null
-            : <Form.Group as={Row} className="mb-3" controlId="fileName">
-              <Form.Label className="text-end" column sm={4}>
+            : <Form.Group as={Fragment} controlId="fileName">
+              <Form.Label className="text-end">
                 {translate("forms.restore.fileName.label")}
               </Form.Label>
-              <Col sm={7}>
+              <div>
                 <Form.Control
                   plaintext
                   readOnly
                   defaultValue={fileName}
                 />
-              </Col>
+              </div>
             </Form.Group>
         }
-        <Form.Group as={Row} className="mb-3" controlId="days">
-          <Form.Label className="text-end" column sm={4}>
+        <Form.Group as={Fragment} controlId="days">
+          <Form.Label className="text-end">
             {translate("forms.restore.days.label")}
           </Form.Label>
-          <Col sm={7}>
+          <div>
             <Form.Select
               {...register("days")}
               autoFocus
@@ -70,7 +74,7 @@ const _RestoreForm: React.FC<_RestoreFormProps> = ({
               <option value={6}>6</option>
               <option value={7}>7</option>
             </Form.Select>
-          </Col>
+          </div>
         </Form.Group>
       </fieldset>
     </Form>

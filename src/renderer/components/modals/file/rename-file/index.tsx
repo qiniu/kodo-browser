@@ -1,5 +1,5 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {Button, Col, Form, Modal, ModalProps, Row, Spinner} from "react-bootstrap";
+import React, {Fragment, useEffect, useMemo, useState} from "react";
+import {Button, Form, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
@@ -285,27 +285,31 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
               {translate("common.noObjectSelected")}
             </div>
             : <>
-              <Form onSubmit={handleSubmit(handleSubmitRenameFile)}>
+              <Form
+                className="mx-5"
+                onSubmit={handleSubmit(handleSubmitRenameFile)}
+              >
                 <fieldset
+                  className="grid-auto grid-form label-col-1"
                   disabled={isSubmitting || [BatchTaskStatus.Running, BatchTaskStatus.Ended].includes(batchProgressState.status)}
                 >
-                  <Form.Group as={Row} className="mb-3" controlId="directoryName">
-                    <Form.Label className="text-end" column sm={4}>
+                  <Form.Group as={Fragment} controlId="directoryName">
+                    <Form.Label className="text-end">
                       {translate("modals.renameFile.form.baseDirectory.label")}
                     </Form.Label>
-                    <Col sm={7}>
+                    <div>
                       <Form.Control
                         plaintext
                         readOnly
                         defaultValue={`${memoBucketName}/${memoBasePath}`}
                       />
-                    </Col>
+                    </div>
                   </Form.Group>
-                  <Form.Group as={Row} className="mb-3" controlId="fileName">
-                    <Form.Label className="text-end" column sm={4}>
+                  <Form.Group as={Fragment} controlId="fileName">
+                    <Form.Label className="text-end">
                       {translate("modals.renameFile.form.fileName.label")}
                     </Form.Label>
-                    <Col sm={7}>
+                    <div>
                       <Form.Control
                         {...register("fileName", {
                           required: true,
@@ -329,7 +333,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
                       >
                         {translate("modals.renameFile.form.fileName.hint")}
                       </Form.Text>
-                    </Col>
+                    </div>
                   </Form.Group>
                 </fieldset>
               </Form>

@@ -8,6 +8,10 @@ export interface ExternalPathItem extends KodoAddress {
   regionId: string,
 }
 
+export function isExternalPathItem(address: KodoAddress): address is ExternalPathItem {
+  return "regionId" in address;
+}
+
 export interface ExternalPath {
   list: ExternalPathItem[];
 }
@@ -74,6 +78,18 @@ export class KodoExternalPath {
         };
       })),
     );
+  }
+
+  hasExternalPath(target: ExternalPathItem): boolean {
+    if (!target.path.endsWith("/")) {
+      target.path += "/";
+    }
+    const externalPath = this.read();
+    return externalPath.list.some(externalPath => (
+      externalPath.protocol === target.protocol &&
+      externalPath.regionId === target.regionId &&
+      externalPath.path === target.path
+    ));
   }
 
   addExternalPath(target: ExternalPathItem) {

@@ -133,8 +133,18 @@ const dict: Dictionary = {
             bucketGrantedReadOnly: "読み取り専用",
             bucketGrantedReadWrite: "読み書き",
             bucketName: "バケット名",
-            bucketRegion: "バケット領域",
+            bucketRegion: "地域名",
             createTime: "作成時間",
+        },
+        externalPathToolBar: {
+            addExternalPath: "外部パス追加",
+            search: {
+                holder: "外部パス",
+            },
+        },
+        externalPathTable: {
+            path: "外部パス",
+            regionName: "地域名",
         },
         fileToolbar: {
             createDirectory: "ディレクトリ",
@@ -415,7 +425,7 @@ const dict: Dictionary = {
                 legend: "外部リンク",
                 form: {
                     enabled: {
-                        label: "外部リンク",
+                        label: "外部リンク：",
                         hint: "（外部リンクを有効にする）"
                     },
                 },
@@ -424,23 +434,23 @@ const dict: Dictionary = {
                 legend: "システム設定",
                 form: {
                     isDebug: {
-                        label: "デバッグログ",
+                        label: "デバッグログ：",
                         hint: "デバッグログを開くかどうか",
                     },
                     enabledLoadFilesOnTouchEnd: {
-                        label: "ステップごとのファイルリストのロード",
+                        label: "ステップごとのファイルリストのロード：",
                         hint: "（ステップバイステップモードでファイルリストの読み込みを有効にする）",
                     },
                     loadFilesNumberPerPage: {
-                        label: "一度にロードされるファイルの数",
+                        label: "一度にロードされるファイルの数：",
                         hint: "範囲：10-1000",
                     },
                     autoUpgrade: {
-                        label: "自動更新",
+                        label: "自動更新：",
                         hint: "自動ダウンロードパッケージ",
                     },
                     language: {
-                        label: "言語",
+                        label: "言語：",
                     },
                 },
             },
@@ -454,36 +464,6 @@ const dict: Dictionary = {
                 createTime: "作成時間",
                 operation: "アクション",
             }
-        },
-
-        externalPathManager: {
-            title: "外部パス管理",
-            addButton: "追加",
-            removeButton: "削除",
-            error: {
-                duplicated: "パスは既に存在",
-            },
-            form: {
-                region: {
-                    label: "領域：",
-                    feedback: {
-                        required: "ゾーンを選択する必要があります",
-                    }
-                },
-                path: {
-                    label: "外部パス：",
-                    holder: "Bucket/Object-Prefix",
-                    feedback: {
-                        required: "パスを入力する必要があります",
-                    },
-                    hint: "付与者から提供されたバケットポリシーを通じて許可されたバケットまたはバケットの下のパスを入力します",
-                },
-            },
-            table: {
-                path: "外部パス",
-                regionName: "領域",
-                operation: "操作",
-            },
         },
 
         about: {
@@ -516,7 +496,7 @@ const dict: Dictionary = {
                     },
                 },
                 region: {
-                    label: "領域：",
+                    label: "地域：",
                     feedback: {
                         required: "ゾーンを選択する必要があります",
                     },
@@ -539,6 +519,36 @@ const dict: Dictionary = {
         deleteBucket: {
             title: "Bucket 削除",
             content: "Bucket バケット名：${bucketName}，このバケットを削除してもよろしいですか？",
+            submit: "削除",
+        },
+
+        addExternalPath: {
+            title: "外部パス追加",
+            submit: "追加",
+            form: {
+                region: {
+                    label: "地域：",
+                    feedback: {
+                        required: "地域選択する必要があります",
+                    }
+                },
+                path: {
+                    label: "外部パス：",
+                    holder: "Bucket/Object-Prefix",
+                    feedback: {
+                        required: "パスを入力する必要があります",
+                    },
+                    hint: "付与者から提供されたバケットポリシーを通じて許可されたバケットまたはバケットの下のパスを入力します",
+                },
+            },
+            error: {
+                duplicated: "パスは既に存在",
+            },
+        },
+
+        deleteExternalPath: {
+            title: "外部パス削除",
+            content: "外部パス：${externalPathUrl}，地域：${regionName}，この外部パスを削除してもよろしいですか？",
             submit: "削除",
         },
 
@@ -571,7 +581,7 @@ const dict: Dictionary = {
 
         deleteFiles: {
             title: "ファイルを削除",
-            description: "将要删除以下文件",
+            description: "次のディレクトリまたはファイルが削除されます：",
         },
 
         copyFiles: {

@@ -1,5 +1,5 @@
-import React, {useEffect, useMemo} from "react";
-import {Button, Col, Form, Modal, ModalProps, Row, Spinner} from "react-bootstrap";
+import React, {Fragment, useEffect, useMemo} from "react";
+import {Button, Form, Modal, ModalProps, Spinner} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
@@ -117,12 +117,15 @@ const CreateDirectoryFile: React.FC<ModalProps & CreateDirectoryFileProps> = (pr
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit(handleSubmitCreateDirectoryFile)}>
-          <fieldset disabled={isSubmitting}>
-            <Form.Group as={Row} className="mb-3" controlId="directoryName">
-              <Form.Label className="text-end" column sm={4}>
+          <fieldset
+            className="grid-auto grid-form label-col-1"
+            disabled={isSubmitting}
+          >
+            <Form.Group as={Fragment} controlId="directoryName">
+              <Form.Label className="text-end">
                 {translate("modals.createDirectory.form.directoryName.label")}
               </Form.Label>
-              <Col sm={7}>
+              <div>
                 <Form.Control
                   {...register("directoryName", {
                     required: true,
@@ -140,7 +143,7 @@ const CreateDirectoryFile: React.FC<ModalProps & CreateDirectoryFileProps> = (pr
                 >
                   {translate("modals.createDirectory.form.directoryName.hint")}
                 </Form.Text>
-              </Col>
+              </div>
             </Form.Group>
           </fieldset>
         </Form>

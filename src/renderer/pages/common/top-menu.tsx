@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from "react";
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 
 import {useI18n} from "@renderer/modules/i18n";
+import RouterPath from "@renderer/pages/route-path";
 import {BookmarkItem, ExternalPathItem} from "@renderer/modules/kodo-address";
 import Settings, {OnChangeCallback, SettingKey} from "@renderer/modules/settings";
 
@@ -15,7 +16,7 @@ import About from "@renderer/components/modals/general/about";
 import ReleaseNoteModal from "@renderer/components/modals/general/release-note-modal";
 
 import AboutMenuItem from "./about-menu-item";
-import ExternalPathManager from "@renderer/components/modals/general/external-path-manager";
+import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 
 interface TopMenuProps {
   onActiveKodoAddress: (kodoAddress: BookmarkItem | ExternalPathItem) => void,
@@ -26,6 +27,8 @@ const TopMenu: React.FC<TopMenuProps> = ({
 }) => {
   const {translate} = useI18n();
   const location = useLocation();
+  const [searchParams, _] = useSearchParams();
+  const navigate = useNavigate();
 
   const [enabledExternalPath, setEnabledExternalPath] = useState(Settings.externalPathEnabled);
   useEffect(() => {
@@ -72,16 +75,31 @@ const TopMenu: React.FC<TopMenuProps> = ({
     },
   ] = useDisplayModal();
 
-  // external path
-  const [
-    {
-      show: showExternalPathManagerModal,
-    },
-    {
-      showModal: handleClickExternalPathManager,
-      hideModal: handleHideExternalPathManager,
-    },
-  ] = useDisplayModal();
+  // witch between external mode
+  const isBrowseWithExternalMode = searchParams.has("external-mode");
+  const handleClickFiles = () => {
+    if (location.pathname.startsWith(RouterPath.Browse) && !isBrowseWithExternalMode) {
+      return;
+    }
+    navigate(RouterPath.Browse);
+    onActiveKodoAddress({
+      protocol: ADDR_KODO_PROTOCOL,
+      path: "",
+      timestamp: 0,
+    });
+  }
+
+  const handleClickExternalPath = () => {
+    if (location.pathname.startsWith(RouterPath.Browse) && isBrowseWithExternalMode) {
+      return;
+    }
+    navigate(RouterPath.Browse);
+    onActiveKodoAddress({
+      protocol: ADDR_KODO_PROTOCOL,
+      path: "",
+      regionId: "",
+    });
+  }
 
   // settings
   const [
@@ -113,13 +131,15 @@ const TopMenu: React.FC<TopMenuProps> = ({
     {
       id: "top.files",
       type: MenuItemType.Link,
-      active: location.pathname.startsWith("/browse"),
+      active: location.pathname.startsWith(RouterPath.Browse) && !isBrowseWithExternalMode,
       iconClassName: "bi bi-folder-fill me-1",
       text: translate("top.files"),
+      onClick: handleClickFiles,
     },
     {
       id: "top.settings",
       type: MenuItemType.Link,
+      className: "ms-auto",
       iconClassName: "bi bi-gear-fill me-1",
       text: translate("top.settings"),
       onClick: handleClickSettings,
@@ -138,10 +158,10 @@ const TopMenu: React.FC<TopMenuProps> = ({
       {
         id: "top.externalPath",
         type: MenuItemType.Link,
-        active: location.pathname.startsWith("/externalPath"),
+        active: location.pathname.startsWith(RouterPath.Browse) && isBrowseWithExternalMode,
         iconClassName: "bi bi-signpost-2-fill me-1",
         text: translate("top.externalPath"),
-        onClick: handleClickExternalPathManager,
+        onClick: handleClickExternalPath,
       });
   }
 
@@ -165,12 +185,6 @@ const TopMenu: React.FC<TopMenuProps> = ({
         show={showBookmarkManagerModal}
         onHide={handleHideBookmarkManager}
         onActiveBookmark={onActiveKodoAddress}
-      />
-      <ExternalPathManager
-        size="lg"
-        show={showExternalPathManagerModal}
-        onHide={handleHideExternalPathManager}
-        onActiveExternalPath={onActiveKodoAddress}
       />
       <About
         show={showAboutModal}

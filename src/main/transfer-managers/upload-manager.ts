@@ -270,6 +270,12 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                     persistedJob.uploadedParts = [];
                 }
 
+                // some old version will persist an object message, cause type error
+                if (typeof persistedJob.message !== "string") {
+                  persistedJob.message = JSON.stringify(persistedJob.message);
+                }
+
+
                 const fileStat = fs.statSync(persistedJob.from.path);
                 if (
                     fileStat.size !== persistedJob.from.size ||

@@ -22,6 +22,7 @@ function renderItems(menuList: MenuItem[]): ReactNode {
       ? <Nav.Link
         key={menuItem.id}
         active={menuItem.active}
+        className={menuItem.className}
         onClick={() => menuItem.onClick?.(menuItem)}
       >
         {
@@ -34,6 +35,7 @@ function renderItems(menuList: MenuItem[]): ReactNode {
       : <NavDropdown
         key={menuItem.id}
         id={menuItem.id}
+        className={menuItem.className}
         title={menuItem.text}
       >
         {
@@ -41,6 +43,7 @@ function renderItems(menuList: MenuItem[]): ReactNode {
             <NavDropdown.Item
               key={dropdownItem.id}
               active={dropdownItem.active}
+              className={dropdownItem.className}
               onClick={() => dropdownItem.onClick?.(dropdownItem)}
             >
               {
@@ -56,15 +59,13 @@ function renderItems(menuList: MenuItem[]): ReactNode {
   ));
 }
 
-const MenuContents: React.FC<MenuContentsProps> = (props) => {
+const MenuContents: React.FC<MenuContentsProps> = ({
+  defaultMenuItems,
+  singedInMenuItems,
+}) => {
   const {currentLanguage, setLanguage, translate} = useI18n();
   const {currentUser} = useAuth();
   const navigate = useNavigate();
-
-  const {
-    defaultMenuItems,
-    singedInMenuItems,
-  } = props;
 
   const [
     {
@@ -94,7 +95,7 @@ const MenuContents: React.FC<MenuContentsProps> = (props) => {
         <Nav className="flex-grow-1">
           {renderItems(singedInMenuItems)}
         </Nav>
-        <Nav className="ms-auto">
+        <Nav>
           <NavDropdown
             align="end"
             id="user-menu"

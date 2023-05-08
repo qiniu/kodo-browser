@@ -136,6 +136,17 @@ const dict: Dictionary = {
       bucketRegion: "Bucket region",
       createTime: "Create time",
     },
+    externalPathToolBar: {
+      addExternalPath: "Add External Path",
+      search: {
+        holder: "External path name",
+      },
+    },
+    externalPathTable: {
+      path: "External Path",
+      regionName: "Region Name",
+    },
+
     fileToolbar: {
       createDirectory: "Create directory",
       search: {
@@ -415,7 +426,7 @@ const dict: Dictionary = {
         legend: "External Link",
         form: {
           enabled: {
-            label: "External Link",
+            label: "External Link:",
             hint: "(Enable External Link)"
           },
         },
@@ -424,23 +435,23 @@ const dict: Dictionary = {
         legend: "System Settings",
         form: {
           isDebug: {
-            label: "Debug",
+            label: "Debug:",
             hint: "Enable debug log",
           },
           enabledLoadFilesOnTouchEnd: {
-            label: "File list load more on touch end",
+            label: "File list load more on touch end:",
             hint: "(Enable file list load more on touch end)",
           },
           loadFilesNumberPerPage: {
-            label: "Files loading count",
+            label: "Files load size:",
             hint: "Range：10-1000",
           },
           autoUpgrade: {
-            label: "Auto update",
+            label: "Auto update:",
             hint: "Download update package automatically",
           },
           language: {
-            label: "Language",
+            label: "Language:",
           },
         },
       },
@@ -454,36 +465,6 @@ const dict: Dictionary = {
         createTime: "Create Time",
         operation: "Actions",
       }
-    },
-
-    externalPathManager: {
-      title: "External Path Manager",
-      addButton: "Add",
-      removeButton: "Remove",
-      error: {
-        duplicated: "The path is existed!",
-      },
-      form: {
-        region: {
-          label: "region:",
-          feedback: {
-            required: "Region is required",
-          },
-        },
-        path: {
-          label: "Path:",
-          holder: "Bucket/Object-Prefix",
-          feedback: {
-            required: "Path is required",
-          },
-          hint: "Fill in a bucket or a path under a bucket that is granted permission through Bucket Policy, provided by the grantor",
-        },
-      },
-      table: {
-        path: "External Path",
-        regionName: "Region Name",
-        operation: "Actions",
-      },
     },
 
     about: {
@@ -539,6 +520,36 @@ const dict: Dictionary = {
     deleteBucket: {
       title: "Delete Bucket",
       content: "Bucket Name：${bucketName},  Are you sure you want to delete this bucket？",
+      submit: "Delete",
+    },
+
+    addExternalPath: {
+      title: "Add External Path",
+      submit: "Add",
+      form: {
+        region: {
+          label: "Region:",
+          feedback: {
+            required: "Region is required",
+          }
+        },
+        path: {
+          label: "Path:",
+          holder: "Bucket/Object-Prefix",
+          feedback: {
+            required: "Path is required",
+          },
+          hint: "Fill in a bucket or a path under a bucket that is granted permission through Bucket Policy, provided by the grantor",
+        },
+      },
+      error: {
+        duplicated: "The path is existed!",
+      },
+    },
+
+    deleteExternalPath: {
+      title: "Delete External Path",
+      content: "External Path: ${externalPathUrl}. Region: ${regionName}. Are you sure to delete？",
       submit: "Delete",
     },
 

@@ -60,7 +60,6 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
     const [bucketName] = path.split("/", 1);
     const key = path.slice(`${bucketName}/`.length)
     goTo({
-      protocol: address.protocol,
       path: !bucketName ? "" : `${bucketName}/${key}`,
     });
   }
@@ -95,7 +94,6 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
               return;
             }
             goTo({
-              protocol: address.protocol,
               path: baseDirPath,
             });
           }}
@@ -110,7 +108,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
           iconClassName="fa fa-home"
           tooltipPlacement="bottom"
           tooltipContent={translate("kodoAddressBar.goHome")}
-          onClick={() => goTo(homeAddress)}
+          onClick={() => homeAddress && goTo(homeAddress)}
         />
         <InputGroup.Text>
           {address.protocol}
@@ -119,7 +117,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
           value={address.path}
           onChange={e => {
             setAddress({
-              protocol: address.protocol,
+              ...address,
               path: e.target.value,
             })
           }}

@@ -58,7 +58,7 @@ const FileContent: React.FC<FileContentProps> = ({
   onReloadFiles,
 }) => {
   const {translate} = useI18n();
-  const {currentAddress, goTo} = useKodoNavigator();
+  const {goTo} = useKodoNavigator();
   const {bucketGrantedPermission} = useFileOperation();
 
   // modal states
@@ -140,7 +140,6 @@ const FileContent: React.FC<FileContentProps> = ({
   // handle events
   const changePathByDirectory = (file: FileItem.Folder) => {
     goTo({
-      protocol: currentAddress.protocol,
       path: `${file.bucket}/${file.path.toString()}`,
     });
   };

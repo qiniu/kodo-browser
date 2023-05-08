@@ -110,7 +110,7 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
           />
-          <div>
+          <div className="d-flex align-items-center justify-content-center">
             {
               stopped > 0 &&
               <Button

@@ -3,11 +3,12 @@ import {useEffect, useRef, useState, useSyncExternalStore} from "react";
 import {AkItem} from "@renderer/modules/auth";
 
 import {KodoAddress} from "./types";
-import {Bookmark, KodoBookmark} from "./bookmark";
+import {Bookmark, DEFAULT_HOME_ADDRESS, KodoBookmark} from "./bookmark";
 import {ExternalPathItem, KodoExternalPath} from "./external-path";
 
 const bookmarkStore = {
   data: {
+    homeAddress: DEFAULT_HOME_ADDRESS,
     list: []
   } as Bookmark,
   listeners: new Set<() => void>(),
@@ -38,6 +39,7 @@ export function useKodoBookmark(currentUser: AkItem | null) {
   useEffect(() => {
     if (!currentUser) {
       bookmarkStore.dispatch({
+        homeAddress: DEFAULT_HOME_ADDRESS,
         list: [],
       });
       return;

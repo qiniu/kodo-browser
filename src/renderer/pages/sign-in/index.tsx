@@ -59,7 +59,7 @@ const SignIn: React.FC = () => {
         <Col/>
         <Col className="sign-in-page">
           <Card>
-            <Card.Header as="h3">{translate("signIn.title")}</Card.Header>
+            <Card.Header as="h4">{translate("signIn.title")}</Card.Header>
             <Card.Body>
               <SignInForm
                 defaultValues={formDefaultValues}

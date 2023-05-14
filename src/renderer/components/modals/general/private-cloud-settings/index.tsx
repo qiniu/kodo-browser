@@ -96,7 +96,7 @@ const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = (
         <Form>
           <fieldset disabled={isSubmitting}>
             <div className="sticky-top bg-body p-3">
-              <Button variant="success" size="sm" disabled={isSubmitting} onClick={() => {
+              <Button className="text-white" variant="info" size="sm" disabled={isSubmitting} onClick={() => {
                 append({identifier: "", label: "", endpoint: ""})
               }}>
                 <i className="bi bi-plus-circle-fill me-1"/>

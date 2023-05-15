@@ -108,7 +108,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
           iconClassName="fa fa-home"
           tooltipPlacement="bottom"
           tooltipContent={translate("kodoAddressBar.goHome")}
-          onClick={() => homeAddress && goTo(homeAddress)}
+          onClick={() => goTo(homeAddress)}
         />
         <InputGroup.Text>
           {address.protocol}

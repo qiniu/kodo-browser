@@ -1,5 +1,6 @@
 import lodash from "lodash";
 
+import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 import {localFile} from "@renderer/modules/persistence";
 
 import {KodoAddress} from "./types";
@@ -9,12 +10,17 @@ export interface BookmarkItem extends KodoAddress {
 }
 
 export interface Bookmark {
-  homeAddress?: KodoAddress,
+  homeAddress: KodoAddress,
   list: BookmarkItem[],
 }
 
 export interface KodoBookmarkOptions {
   persistPath: string,
+}
+
+export const DEFAULT_HOME_ADDRESS: KodoAddress = {
+  protocol: ADDR_KODO_PROTOCOL,
+  path: "",
 }
 
 export class KodoBookmark {
@@ -34,7 +40,7 @@ export class KodoBookmark {
       .toString();
     if (!jsonStrData) {
       return {
-        homeAddress: undefined,
+        homeAddress: DEFAULT_HOME_ADDRESS,
         list: [],
       };
     }

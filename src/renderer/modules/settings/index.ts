@@ -396,9 +396,15 @@ class Settings {
 
   // filesLoadingSize
   get filesLoadingSize(): number {
-    return parseInt(localStorage.getItem(SettingStorageKey.FilesLoadingSize) || "500");
+    if (!this.stepByStepLoadingFiles) {
+      return 100;
+    }
+    return parseInt(localStorage.getItem(SettingStorageKey.FilesLoadingSize) || "100");
   }
   set filesLoadingSize(v: number) {
+    if (!this.stepByStepLoadingFiles) {
+      return;
+    }
     localStorage.setItem(SettingStorageKey.FilesLoadingSize, v.toString());
     this.trigger({
       key: SettingKey.FilesLoadingSize,

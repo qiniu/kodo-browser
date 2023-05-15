@@ -438,8 +438,8 @@ const dict: Dictionary = {
             hint: "是否开启调试日志",
           },
           enabledLoadFilesOnTouchEnd: {
-            label: "文件列表触底加载：",
-            hint: "（触底加载更多）",
+            label: "文件列表分页加载：",
+            hint: "（分页加载更多）",
           },
           loadFilesNumberPerPage: {
             label: "文件列表单次加载数目：",

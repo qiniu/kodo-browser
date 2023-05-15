@@ -8,6 +8,7 @@ const FieldsExternalPath: React.FC = () => {
   const {translate} = useI18n();
   const {
     register,
+    watch,
     formState: {
       errors,
     },
@@ -49,6 +50,7 @@ const FieldsExternalPath: React.FC = () => {
             {...register("loadFilesNumberPerPage", {
               valueAsNumber: true,
               required: true,
+              disabled: !watch("enabledLoadFilesOnTouchEnd"),
               /*
                * The min can't be 1,
                *   because when list a subdirectory, list API will return the subdirectory itself first.

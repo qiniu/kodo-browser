@@ -618,7 +618,7 @@ describe("test settings.ts", () => {
 
         // filesLoadingSize
         it("filesLoadingSize getter", () => {
-            expect(Settings.filesLoadingSize).toBe(500);
+            expect(Settings.filesLoadingSize).toBe(100);
         });
         it("filesLoadingSize setter", () => {
             Settings.filesLoadingSize = 600;
@@ -898,11 +898,12 @@ describe("test settings.ts", () => {
 
         // filesLoadingSize
         it("filesLoadingSize getter", () => {
-            expect(Settings.filesLoadingSize).toBe(600);
+            expect(Settings.filesLoadingSize).toBe(100);
         });
         it("filesLoadingSize setter", () => {
             Settings.filesLoadingSize = 500
-            expect(Settings.filesLoadingSize).toBe(500);
+            expect(Settings.filesLoadingSize).toBe(100);
+            Settings.stepByStepLoadingFiles = 1;
             Settings.filesLoadingSize = 600
             expect(Settings.filesLoadingSize).toBe(600);
         });

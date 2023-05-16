@@ -20,6 +20,8 @@ const dict: Dictionary = {
     refreshing: "刷新中",
     refreshed: "已刷新",
     interrupt: "中断",
+    retry: "重试",
+    retrying: "重试中",
     notFound: "来到了无牛问津的地方",
     noObjectSelected: "未选择操作对象",
     noDomainToGet: "没有可用的域名获取对象",
@@ -474,6 +476,7 @@ const dict: Dictionary = {
         alreadyLatest: "已是最新版！",
         foundLatest: "发现新版本",
         changeLogsTitle: "主要更新：",
+        downloadManually: "手动下载",
         operationButton: {
           start: "开始下载",
           resume: "继续下载",

@@ -20,7 +20,16 @@ const useBatchProgress = (
   initState: BatchProgressState = defaultBatchProgressState
 ): [BatchProgressState, typeof setBatchProgressState] => {
   const [batchProgressState, setState] = useState<BatchProgressState>(initState);
-  function setBatchProgressState(state: Partial<BatchProgressState>) {
+  function setBatchProgressState(
+    state: Partial<BatchProgressState> | ((state: BatchProgressState) => Partial<BatchProgressState>)
+  ) {
+    if (typeof state === "function") {
+      setState(s => ({
+        ...s,
+        ...state(s)
+      }));
+      return;
+    }
     setState(s => ({
       ...s,
       ...state,

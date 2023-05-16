@@ -19,6 +19,8 @@ export default interface Dictionary {
     refreshing: string,
     refreshed: string,
     interrupt: string,
+    retry: string,
+    retrying: string,
     notFound: string,
     noObjectSelected: string,
     noDomainToGet: string,
@@ -477,6 +479,7 @@ export default interface Dictionary {
         alreadyLatest: string,
         foundLatest: string,
         changeLogsTitle: string,
+        downloadManually: string,
         operationButton: {
           start: string,
           resume: string,

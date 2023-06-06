@@ -12,11 +12,13 @@ import Settings from "@renderer/modules/settings";
 import useDownloadUpdate from "./use-download-update";
 
 const DownloadButton: React.FC<{
+  downloadError: Error | null,
   downloadedFilePath: string | undefined,
   progressStatus: BatchTaskStatus,
   onClickStart: () => void,
   onClickPause: () => void,
 }> = ({
+  downloadError,
   downloadedFilePath,
   progressStatus,
   onClickStart,
@@ -52,6 +54,13 @@ const DownloadButton: React.FC<{
     content = translate("modals.about.updateApp.operationButton.showItemInDir");
   }
 
+  if (downloadError) {
+    variant = "info";
+    iconClassName = "bi bi-arrow-repeat me-1";
+    handleClick = onClickStart;
+    content = translate("common.retry")
+  }
+
   return (
     <Button
       size="sm"
@@ -79,9 +88,11 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
   const {
     cachedFilePath,
     cachedProgressState,
+    fetchUpdate,
     downloadLatestVersion,
     background,
   } = useDownloadUpdate();
+  const [downloadError, setDownloadError] = useState<Error | null>(null)
   const [downloadedFilePath, setDownloadFilePath] = useState(cachedFilePath);
 
   // download
@@ -89,14 +100,28 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
     setBatchProgressState({
       total: total,
       finished: loaded,
+      errored: 0,
     });
     return isGoOn.current;
   }
+
+  const handleError = (err: Error) => {
+    if (err.toString().includes("aborted")) {
+      return;
+    }
+    setDownloadError(err);
+    setBatchProgressState(s => ({
+      status: BatchTaskStatus.Ended,
+      finished: 0,
+      errored: s.finished,
+    }));
+  };
 
   const handleStart = () => {
     if (batchProgressState.status === BatchTaskStatus.Running) {
       return;
     }
+    setDownloadError(null);
     setBatchProgressState({
       status: BatchTaskStatus.Running,
     });
@@ -109,7 +134,8 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
           status: BatchTaskStatus.Ended,
         });
         setDownloadFilePath(filePath);
-      });
+      })
+      .catch(handleError);
   };
 
   const handlePause = () => {
@@ -119,11 +145,16 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
     });
   };
 
+  const handleManuelDownload = async () => {
+    const {downloadPageUrl} = await fetchUpdate();
+    await shell.openExternal(downloadPageUrl);
+  }
+
   // store and restore state
   useMount(() => {
     if (cachedProgressState) {
       setBatchProgressState(cachedProgressState);
-      if (cachedProgressState.status !== BatchTaskStatus.Standby) {
+      if (cachedProgressState.status === BatchTaskStatus.Running) {
         handleStart();
         return;
       }
@@ -139,8 +170,24 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center">
-        <div>{translate("modals.about.updateApp.foundLatest")} <span className="text-primary">v{version}</span></div>
+        <div className="me-auto">
+          {translate("modals.about.updateApp.foundLatest")}
+          <span className="text-primary ms-1">v{version}</span>
+        </div>
+        {
+          downloadError &&
+          <Button
+            className="me-1"
+            size="sm"
+            variant="link"
+            onClick={handleManuelDownload}
+          >
+            {translate("modals.about.updateApp.downloadManually")}
+            <i className="bi bi-box-arrow-up-right ms-1"/>
+          </Button>
+        }
         <DownloadButton
+          downloadError={downloadError}
           downloadedFilePath={downloadedFilePath}
           progressStatus={batchProgressState.status}
           onClickStart={handleStart}
@@ -164,6 +211,10 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
                 downloadedFilePath &&
                 <small className="text-success">{translate("common.downloaded")}</small>
               }
+              {
+                downloadError &&
+                <small className="text-danger">{translate("common.failed")}</small>
+              }
               <BatchProgress
                 status={batchProgressState.status}
                 total={batchProgressState.total}
@@ -171,6 +222,10 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
                 errored={batchProgressState.errored}
                 isPercent
               />
+              {
+                downloadError &&
+                <small className="text-danger">{downloadError.toString()}</small>
+              }
             </>
         }
       </div>

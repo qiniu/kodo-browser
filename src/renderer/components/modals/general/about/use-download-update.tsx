@@ -1,5 +1,5 @@
 // this file cached download state to keep job can run background.
-import {downloadLatestVersion} from "@renderer/modules/update-app";
+import {fetchUpdate, downloadLatestVersion} from "@renderer/modules/update-app";
 import {BatchProgressState} from "@renderer/components/batch-progress";
 
 let downloadPromise: ReturnType<typeof downloadLatestVersion> | undefined;
@@ -38,6 +38,7 @@ const useDownloadUpdate = () => {
   return {
     cachedFilePath,
     cachedProgressState,
+    fetchUpdate,
     downloadLatestVersion: _downloadLatestVersion,
     background,
   };

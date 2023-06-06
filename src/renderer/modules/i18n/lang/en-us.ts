@@ -20,6 +20,8 @@ const dict: Dictionary = {
     refreshing: "Refreshing",
     refreshed: "Refreshed",
     interrupt: "Interrupt",
+    retry: "Retry",
+    retrying: "Retrying",
     notFound: "Page Not Found!",
     noObjectSelected: "No object selected",
     noDomainToGet: "No domain to get object",
@@ -475,6 +477,7 @@ const dict: Dictionary = {
         alreadyLatest: "You're up to date!",
         foundLatest: "A new version is available!",
         changeLogsTitle: "Changes:",
+        downloadManually: "Download Manually",
         operationButton: {
           start: "Download",
           resume: "Resume",

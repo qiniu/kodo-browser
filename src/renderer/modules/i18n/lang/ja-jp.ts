@@ -20,6 +20,8 @@ const dict: Dictionary = {
         refreshing: "更新中",
         refreshed: "正常に更新",
         interrupt: "中断",
+        retry: "リトライ",
+        retrying: "リトライ中",
         notFound: "未発見",
         noObjectSelected: "操作可能なオブジェクトがない",
         noDomainToGet: "オブジェクトを取得するためのドメインがない",
@@ -474,6 +476,7 @@ const dict: Dictionary = {
                 alreadyLatest: "既に最新バージョンです！",
                 foundLatest: "新しいバージョンを見つけました",
                 changeLogsTitle: "リリースノート：",
+                downloadManually: "手動ダウンロード",
                 operationButton: {
                     start: "更新を開始",
                     resume: "ダウンロードを続行",

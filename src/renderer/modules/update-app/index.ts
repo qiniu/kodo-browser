@@ -9,9 +9,21 @@ import {upgrade} from "@renderer/customize";
 
 const CACHE_DURATION = Duration.Hour;
 
-let latestVersion: string = "";
-let latestDownloadUrl: string = "";
-let lastCheckTimestamp: number = 0;
+interface UpdateInfo {
+  referer: string,
+  downloadPageUrl: string,
+  latestVersion: string,
+  latestDownloadUrl: string,
+  lastCheckTimestamp: number,
+}
+
+let cachedUpdateInfo: UpdateInfo = {
+  referer: "",
+  downloadPageUrl: "",
+  latestVersion: "",
+  latestDownloadUrl: "",
+  lastCheckTimestamp: 0,
+}
 
 function compareVersion(current: string, latest: string) {
   const arr = current.split(".");
@@ -33,27 +45,60 @@ function compareVersion(current: string, latest: string) {
 }
 
 export async function fetchReleaseNote(version: string): Promise<string> {
-  const resp = await fetch(`${upgrade.release_notes_url}${version}.md`);
-  if (Math.floor(resp.status / 100) !== 2) {
+  const resp = await new Promise<request.Response>((resolve, reject) => {
+    request.get(
+      {
+        url: `${upgrade.release_notes_url}${version}.md`,
+      },
+      (error, response) => {
+        if(error) {
+          reject(error);
+          return;
+        }
+        resolve(response);
+      });
+  });
+  if (Math.floor(resp.statusCode / 100) !== 2) {
     return "Not Found";
   }
-  return resp.text();
+  return resp.body;
+}
+
+
+export async function fetchUpdate(): Promise<UpdateInfo> {
+  if (Date.now() - cachedUpdateInfo.lastCheckTimestamp <= CACHE_DURATION) {
+    return cachedUpdateInfo;
+  }
+  const resp = await new Promise<request.Response>((resolve, reject) => {
+    request.get(
+      {
+        url: upgrade.check_url,
+      },
+      (error, response) => {
+        if (error || Math.floor(response.statusCode / 100) !== 2) {
+          reject(error);
+          return;
+        }
+        resolve(response);
+      }
+    );
+  });
+  const respJson = JSON.parse(resp.body);
+  cachedUpdateInfo = {
+    referer: respJson.referer,
+    downloadPageUrl: respJson["download_page"],
+    latestVersion: respJson.version,
+    latestDownloadUrl: respJson.downloads[process.platform][process.arch],
+    lastCheckTimestamp: 0,
+  };
+  return cachedUpdateInfo;
 }
 
 /**
  * return null if there isn't a new version
  */
 export async function fetchLatestVersion(currentVersion: string): Promise<string | null> {
-  if (Date.now() - lastCheckTimestamp <= CACHE_DURATION) {
-    return compareVersion(currentVersion, latestVersion) < 0
-      ? latestVersion
-      : null;
-  }
-  const resp = await fetch(upgrade.check_url);
-  const respJson = await resp.json();
-  lastCheckTimestamp = Date.now();
-  latestVersion = respJson.version;
-  latestDownloadUrl = respJson.downloads[process.platform][process.arch];
+  const {latestVersion} = await fetchUpdate();
   return compareVersion(currentVersion, latestVersion) < 0
     ? latestVersion
     : null;
@@ -102,9 +147,7 @@ export async function downloadLatestVersion({
   // if return false will stop download
   onProgress: (loaded: number, total: number) => boolean,
 }): Promise<string> {
-  if (!latestDownloadUrl || Date.now() - lastCheckTimestamp <= CACHE_DURATION) {
-    await fetchLatestVersion("");
-  }
+  const {latestDownloadUrl, referer} = await fetchUpdate();
 
   const fileName = decodeURIComponent(path.basename(latestDownloadUrl));
   const to = path.join(toDirectory, fileName);
@@ -125,7 +168,12 @@ export async function downloadLatestVersion({
 
   // get remote file info
   const response = await new Promise<Response>((resolve, reject) => {
-    request.head(latestDownloadUrl)
+    request.head({
+      url: latestDownloadUrl,
+      headers: {
+        "Referer": referer,
+      },
+    })
       .on("error", reject)
       .on("response", resolve);
   });
@@ -146,16 +194,21 @@ export async function downloadLatestVersion({
 
   // download file
   let downloadedSize = tempFileSize;
-  const fileWriter = fs.createWriteStream(downloadedFilePath, {
-    // old code is `flags: ...`. maybe it's a mistake
-    // mode: fs.constants.O_CREAT | fs.constants.O_WRONLY | fs.constants.O_NONBLOCK,
-    start: downloadedSize,
-  });
   await new Promise((resolve, reject) => {
+    const fileWriter = fs.createWriteStream(downloadedFilePath, {
+      start: downloadedSize,
+    });
+    fileWriter.on("error", err => {
+      if (req) {
+        req.abort();
+      }
+      reject(err);
+    });
     const req = request({
       url: latestDownloadUrl,
       headers: {
-        "Range": `bytes=${downloadedSize}-`
+        "Range": `bytes=${downloadedSize}-`,
+        "Referer": referer,
       },
     });
     req.on("error", reject)

@@ -199,3 +199,32 @@ gulp.task("linux32zip", done => {
   archive.directory(`${TARGET}/${NAME}-linux-ia32`, false);
   archive.finalize().then(done);
 });
+
+gulp.task("mac-arm64", done => {
+  console.log(`--package ${NAME}-darwin-arm64`);
+
+  plugins.run(`rm -rf ${TARGET}/${NAME}-darwin-arm64`).exec(() => {
+    let options = Object.assign({}, packagerOptions);
+    options.platform = "darwin";
+    options.arch = "arm64";
+    options.icon = `${BRAND}/qiniu.icns`;
+
+    packager(options).then((paths) => {
+      console.log("--done");
+      done();
+    }, (errs) => {
+      console.error(errs);
+    });
+  });
+});
+
+gulp.task("macarmzip", done => {
+  console.log(`--package ${KICK_NAME}-darwin-arm64-v${VERSION}.zip`);
+  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-darwin-arm64-v${VERSION}.zip`);
+  var archive = archiver('zip', { zlib: { level: 9 } });
+  archive.on('error', (err) => { throw err; });
+  archive.pipe(outputZip);
+  archive.directory(`${TARGET}/${NAME}-darwin-arm64/${NAME}.app`, `${NAME}.app`);
+  archive.finalize().then(done);
+});
+

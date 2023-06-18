@@ -88,8 +88,8 @@ export async function fetchUpdate(): Promise<UpdateInfo> {
     referer: respJson.referer,
     downloadPageUrl: respJson["download_page"],
     latestVersion: respJson.version,
-    latestDownloadUrl: respJson.downloads[process.platform][process.arch],
-    lastCheckTimestamp: 0,
+    latestDownloadUrl: respJson.downloads?.[process.platform]?.[process.arch] ?? "",
+    lastCheckTimestamp: Date.now(),
   };
   return cachedUpdateInfo;
 }
@@ -98,7 +98,10 @@ export async function fetchUpdate(): Promise<UpdateInfo> {
  * return null if there isn't a new version
  */
 export async function fetchLatestVersion(currentVersion: string): Promise<string | null> {
-  const {latestVersion} = await fetchUpdate();
+  const {latestVersion, latestDownloadUrl} = await fetchUpdate();
+  if (!latestDownloadUrl) {
+    return null;
+  }
   return compareVersion(currentVersion, latestVersion) < 0
     ? latestVersion
     : null;

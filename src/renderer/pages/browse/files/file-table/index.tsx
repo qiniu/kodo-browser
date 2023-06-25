@@ -7,8 +7,9 @@ import StorageClass from "@common/models/storage-class";
 import {FileItem} from "@renderer/modules/qiniu-client";
 import EmptyHolder from "@renderer/components/empty-holder";
 
-import {LOAD_MORE_THRESHOLD} from "../const"
+import {LOAD_MORE_THRESHOLD, TABLE_ROW_HEIGHT} from "../const"
 import {OperationName, FileRowData} from "../types";
+import AutoFillFirstView from "../auto-fill-first-view";
 import OverlayHolder from "../overlay-holder";
 import {getColumns} from "./columns";
 import "./file-table.scss";
@@ -61,6 +62,7 @@ const FileTable: React.FC<FileTableProps> = ({
     onAction,
   });
 
+  // load more
   const handleEndReached = () => {
     if (!hasMore || loadingMore) {
       return;
@@ -72,31 +74,38 @@ const FileTable: React.FC<FileTableProps> = ({
     <div className="no-selectable file-base-table w-100 h-100">
       <AutoResizer>
         {({width, height}) => (
-          <BaseTable
-            className="bt-bordered"
-            // select all will not work, if ignoreFunctionInColumnCompare
-            // see https://github.com/Autodesk/react-base-table#closure-problem-in-custom-renderers
-            ignoreFunctionInColumnCompare={false}
-            width={width}
+          <AutoFillFirstView
             height={height}
-            data={rowData}
-            columns={columns}
-            headerHeight={34}
-            rowHeight={34}
-            // estimatedRowHeight={32}
-            rowClassName={({rowData, rowIndex}) => classNames({
-              "bg-highlight bg-opacity-50": !rowData.isSelected && Boolean(rowData.withinFourHours),
-              "bg-primary bg-opacity-10": rowData.isSelected,
-              "row-striped": rowIndex % 2 === 1,
-            })}
-            rowProps={({rowData}) => ({
-              onClick: () => onSelectFiles([rowData], !rowData.isSelected),
-            })}
-            onEndReachedThreshold={LOAD_MORE_THRESHOLD}
-            onEndReached={handleEndReached}
-            emptyRenderer={<EmptyHolder loading={loading}/>}
-            overlayRenderer={<OverlayHolder loadingMore={loadingMore}/>}
-          />
+            rowData={rowData}
+            rowHeight={TABLE_ROW_HEIGHT}
+            onLoadMore={handleEndReached}
+          >
+            <BaseTable
+              className="bt-bordered"
+              // select all will not work, if ignoreFunctionInColumnCompare
+              // see https://github.com/Autodesk/react-base-table#closure-problem-in-custom-renderers
+              ignoreFunctionInColumnCompare={false}
+              width={width}
+              height={height}
+              data={rowData}
+              columns={columns}
+              headerHeight={TABLE_ROW_HEIGHT}
+              rowHeight={TABLE_ROW_HEIGHT}
+              // estimatedRowHeight={32}
+              rowClassName={({rowData, rowIndex}) => classNames({
+                "bg-highlight bg-opacity-50": !rowData.isSelected && Boolean(rowData.withinFourHours),
+                "bg-primary bg-opacity-10": rowData.isSelected,
+                "row-striped": rowIndex % 2 === 1,
+              })}
+              rowProps={({rowData}) => ({
+                onClick: () => onSelectFiles([rowData], !rowData.isSelected),
+              })}
+              onEndReachedThreshold={LOAD_MORE_THRESHOLD}
+              onEndReached={handleEndReached}
+              emptyRenderer={<EmptyHolder loading={loading}/>}
+              overlayRenderer={<OverlayHolder loadingMore={loadingMore}/>}
+            />
+          </AutoFillFirstView>
         )}
       </AutoResizer>
     </div>

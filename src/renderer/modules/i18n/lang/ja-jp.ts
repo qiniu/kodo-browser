@@ -43,6 +43,7 @@ const dict: Dictionary = {
         exportLinks: "ダウンロードリンクのエクスポート",
         restore: "リストア",
         changeStorageClass: "ストレージクラスを設定する",
+        clickToRetry: "再試行",
     },
 
     top: {
@@ -165,6 +166,7 @@ const dict: Dictionary = {
             fileModifyDate: "最終更新日",
             fileOperation: "アクション",
             loadMore: "もっと読み込む...",
+            loadMoreFailed: "読み込みが失敗しました，"
         },
         restoreStatus: {
             label: "解凍状態：",

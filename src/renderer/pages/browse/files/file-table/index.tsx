@@ -19,6 +19,7 @@ interface FileTableProps {
   availableStorageClasses?: Record<string, StorageClass>,
   loading: boolean,
   hasMore: boolean,
+  loadMoreFailed: boolean,
   onLoadMore: () => void,
   data: FileItem.Item[],
   selectedFiles: Map<string, FileItem.Item>,
@@ -33,6 +34,7 @@ const FileTable: React.FC<FileTableProps> = ({
   availableStorageClasses,
   loading,
   hasMore,
+  loadMoreFailed,
   onLoadMore,
   data,
   selectedFiles,
@@ -63,7 +65,7 @@ const FileTable: React.FC<FileTableProps> = ({
   });
 
   // load more
-  const handleEndReached = () => {
+  const handleLoadMore = () => {
     if (!hasMore || loadingMore) {
       return;
     }
@@ -78,7 +80,7 @@ const FileTable: React.FC<FileTableProps> = ({
             height={height}
             rowData={rowData}
             rowHeight={TABLE_ROW_HEIGHT}
-            onLoadMore={handleEndReached}
+            onLoadMore={handleLoadMore}
           >
             <BaseTable
               className="bt-bordered"
@@ -101,9 +103,15 @@ const FileTable: React.FC<FileTableProps> = ({
                 onClick: () => onSelectFiles([rowData], !rowData.isSelected),
               })}
               onEndReachedThreshold={LOAD_MORE_THRESHOLD}
-              onEndReached={handleEndReached}
+              onEndReached={handleLoadMore}
               emptyRenderer={<EmptyHolder loading={loading}/>}
-              overlayRenderer={<OverlayHolder loadingMore={loadingMore}/>}
+              overlayRenderer={
+                <OverlayHolder
+                  loadingMore={loadingMore}
+                  loadMoreFailed={loadMoreFailed}
+                  onLoadMoreManually={handleLoadMore}
+                />
+              }
             />
           </AutoFillFirstView>
         )}

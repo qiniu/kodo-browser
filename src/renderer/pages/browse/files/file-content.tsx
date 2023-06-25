@@ -28,6 +28,7 @@ interface FileContentProps {
   availableStorageClasses?: Record<string, StorageClass>,
   data: FileItem.Item[],
   hasMore: boolean,
+  loadMoreFailed: boolean,
   onLoadMore: () => void,
   selectedFiles: Map<string, FileItem.Item>,
   onSelectFiles: (file: FileItem.Item[], checked: boolean) => void,
@@ -47,6 +48,7 @@ const FileContent: React.FC<FileContentProps> = ({
   availableStorageClasses,
   data,
   hasMore,
+  loadMoreFailed,
   onLoadMore,
   selectedFiles,
   onSelectFiles,
@@ -177,6 +179,7 @@ const FileContent: React.FC<FileContentProps> = ({
             availableStorageClasses={availableStorageClasses}
             loading={loading}
             hasMore={hasMore}
+            loadMoreFailed={loadMoreFailed}
             onLoadMore={onLoadMore}
             data={data}
             selectedFiles={selectedFiles}
@@ -199,6 +202,7 @@ const FileContent: React.FC<FileContentProps> = ({
           : <FileGrid
             loading={loading}
             hasMore={hasMore}
+            loadMoreFailed={loadMoreFailed}
             onLoadMore={onLoadMore}
             data={data}
             selectedFiles={selectedFiles}

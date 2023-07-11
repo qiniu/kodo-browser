@@ -6,6 +6,7 @@ const gulp = require("gulp"),
   createDMG = require('electron-installer-dmg'),
   archiver = require('archiver'),
   fs = require("fs"),
+  path = require("path"),
   pkg = require("./package");
 
 const NAME = 'Kodo Browser';
@@ -13,6 +14,8 @@ const KICK_NAME = 'kodo-browser';
 const VERSION = pkg.version;
 const ELECTRON_VERSION = "18.3.3";
 const ROOT = __dirname;
+// https://github.com/qiniu/kodo-browser/issues/135
+const WIN_NO_SANDBOX_NAME = "no-sandbox-shortcut.cmd";
 const BRAND = `${ROOT}/src/renderer/static/brand`;
 const DIST = `${ROOT}/dist`;
 const TARGET = `${ROOT}/build`;
@@ -59,8 +62,8 @@ gulp.task("mac", done => {
 
 gulp.task("maczip", done => {
   console.log(`--package ${KICK_NAME}-darwin-x64-v${VERSION}.zip`);
-  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-darwin-x64-v${VERSION}.zip`);
-  var archive = archiver('zip', { zlib: { level: 9 } });
+  const outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-darwin-x64-v${VERSION}.zip`);
+  const archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
   archive.directory(`${TARGET}/${NAME}-darwin-x64/${NAME}.app`, `${NAME}.app`);
@@ -92,14 +95,19 @@ gulp.task("dmg", done => {
 
 gulp.task("win64", done => {
   console.log(`--package ${NAME}-win32-x64`);
+  const targetDir = path.resolve(TARGET, `./${NAME}-win32-x64`);
 
-  plugins.run(`rm -rf ${TARGET}/${NAME}-win32-x64`).exec(() => {
+  plugins.run(`rm -rf ${targetDir}`).exec(() => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "win32";
     options.arch = "x64";
     options.icon = `${BRAND}/qiniu.png`;
 
     packager(options).then((paths) => {
+      fs.copyFileSync(
+        path.resolve(ROOT, `./${WIN_NO_SANDBOX_NAME}`),
+        path.resolve(targetDir, `./${WIN_NO_SANDBOX_NAME}`)
+      );
       console.log("--done");
       done();
     }, (errs) => {
@@ -110,24 +118,30 @@ gulp.task("win64", done => {
 
 gulp.task("win64zip", done => {
   console.log(`--package ${KICK_NAME}-win32-x64-v${VERSION}.zip`);
-  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-win32-x64-v${VERSION}.zip`);
-  var archive = archiver('zip', { zlib: { level: 9 } });
+  const inputDir = `${TARGET}/${NAME}-win32-x64`;
+  const outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-win32-x64-v${VERSION}.zip`);
+  const archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
-  archive.directory(`${TARGET}/${NAME}-win32-x64`, false);
+  archive.directory(inputDir, false);
   archive.finalize().then(done);
 });
 
 gulp.task("win32", done => {
   console.log(`--package ${NAME}-win32-ia32`);
+  const targetDir = path.resolve(TARGET, `./${NAME}-win32-ia32`);
 
-  plugins.run(`rm -rf ${TARGET}/${NAME}-win32-ia32`).exec(() => {
+  plugins.run(`rm -rf ${targetDir}`).exec(() => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "win32";
     options.arch = "ia32";
     options.icon = `${BRAND}/qiniu.png`;
 
     packager(options).then((paths) => {
+      fs.copyFileSync(
+        path.resolve(ROOT, `./${WIN_NO_SANDBOX_NAME}`),
+        path.resolve(targetDir, `./${WIN_NO_SANDBOX_NAME}`)
+      );
       console.log("--done");
       done();
     }, (errs) => {
@@ -138,11 +152,12 @@ gulp.task("win32", done => {
 
 gulp.task("win32zip", done => {
   console.log(`--package ${KICK_NAME}-win32-x86-v${VERSION}.zip`);
-  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-win32-x86-v${VERSION}.zip`);
-  var archive = archiver('zip', { zlib: { level: 9 } });
+  const inputDir = `${TARGET}/${NAME}-win32-ia32`;
+  const outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-win32-x86-v${VERSION}.zip`);
+  const archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
-  archive.directory(`${TARGET}/${NAME}-win32-ia32`, false);
+  archive.directory(inputDir, false);
   archive.finalize().then(done);
 });
 
@@ -165,8 +180,8 @@ gulp.task("linux64", done => {
 
 gulp.task("linux64zip", done => {
   console.log(`--package ${KICK_NAME}-linux-x64-v${VERSION}.zip`);
-  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-linux-x64-v${VERSION}.zip`);
-  var archive = archiver('zip', { zlib: { level: 9 } });
+  const outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-linux-x64-v${VERSION}.zip`);
+  const archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
   archive.directory(`${TARGET}/${NAME}-linux-x64`, false);
@@ -192,10 +207,11 @@ gulp.task("linux32", done => {
 
 gulp.task("linux32zip", done => {
   console.log(`--package ${KICK_NAME}-linux-x86-v${VERSION}.zip`);
-  var outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-linux-x86-v${VERSION}.zip`);
-  var archive = archiver('zip', { zlib: { level: 9 } });
+  const inputDir = `${TARGET}/${NAME}-linux-ia32`;
+  const outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-linux-x86-v${VERSION}.zip`);
+  const archive = archiver('zip', { zlib: { level: 9 } });
   archive.on('error', (err) => { throw err; });
   archive.pipe(outputZip);
-  archive.directory(`${TARGET}/${NAME}-linux-ia32`, false);
+  archive.directory(inputDir, false);
   archive.finalize().then(done);
 });

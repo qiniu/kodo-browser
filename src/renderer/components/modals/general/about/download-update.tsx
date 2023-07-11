@@ -12,7 +12,7 @@ import Settings from "@renderer/modules/settings";
 import useDownloadUpdate from "./use-download-update";
 
 const DownloadButton: React.FC<{
-  downloadError: Error | null,
+  downloadError?: Error,
   downloadedFilePath: string | undefined,
   progressStatus: BatchTaskStatus,
   onClickStart: () => void,
@@ -85,14 +85,15 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
 
   const isGoOn = useRef(true);
   const [batchProgressState, setBatchProgressState] = useBatchProgress();
+  const [downloadError, setDownloadError] = useState<Error>()
   const {
+    cachedError,
     cachedFilePath,
     cachedProgressState,
     fetchUpdate,
     downloadLatestVersion,
     background,
   } = useDownloadUpdate();
-  const [downloadError, setDownloadError] = useState<Error | null>(null)
   const [downloadedFilePath, setDownloadFilePath] = useState(cachedFilePath);
 
   // download
@@ -121,7 +122,7 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
     if (batchProgressState.status === BatchTaskStatus.Running) {
       return;
     }
-    setDownloadError(null);
+    setDownloadError(undefined);
     setBatchProgressState({
       status: BatchTaskStatus.Running,
     });
@@ -159,12 +160,15 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
         return;
       }
     }
+    if (cachedError) {
+      setDownloadError(cachedError);
+    }
     if (Settings.autoUpgrade) {
       handleStart();
     }
   });
   useUnmount(() => {
-    background(batchProgressState);
+    background(batchProgressState, downloadError);
   });
 
   return (

@@ -9,20 +9,18 @@ import {FileItem} from "@renderer/modules/qiniu-client";
 import EmptyHolder from "@renderer/components/empty-holder";
 import BaseGrid from "@renderer/components/base-grid";
 
-import {LOAD_MORE_THRESHOLD} from "../const";
+import {LOAD_MORE_THRESHOLD, GRID_CELL_WIDTH, GRID_CELL_HEIGHT} from "../const";
 import {FileRowData} from "../types";
 // import {OperationName} from "../types";
 import OverlayHolder from "../overlay-holder";
 import FileCell from "./file-cell";
 import "./file-grid.scss";
 
-const CELL_WIDTH = 240;
-const CELL_HEIGHT = 78;
-
 interface FileGridProps {
   availableStorageClasses?: Record<string, StorageClass>,
   loading: boolean,
   hasMore: boolean,
+  loadMoreFailed: boolean,
   onLoadMore: () => void,
   data: FileItem.Item[],
   selectedFiles: Map<string, FileItem.Item>,
@@ -35,6 +33,7 @@ interface FileGridProps {
 const FileGrid: React.FC<FileGridProps> = ({
   loading,
   hasMore,
+  loadMoreFailed,
   onLoadMore,
   data,
   selectedFiles,
@@ -51,12 +50,21 @@ const FileGrid: React.FC<FileGridProps> = ({
 
   const loadingMore = filesData.length > 0 && loading;
 
-  const handleReachEnd = () => {
+  const handleLoadMore = () => {
     if (!hasMore || loadingMore) {
       return;
     }
     onLoadMore();
   };
+
+  const handleEndReached = () => {
+    // use the `loadMoreFailed` to make the behavior as same as `file-table`
+    // by `file-table` can only trigger `EndReached` only once if failed.
+    if (loadMoreFailed) {
+      return;
+    }
+    handleLoadMore();
+  }
 
   // render
   return (
@@ -68,12 +76,18 @@ const FileGrid: React.FC<FileGridProps> = ({
               height={height}
               width={width}
               itemData={filesData}
-              columnWidth={CELL_WIDTH}
-              rowHeight={CELL_HEIGHT}
+              columnWidth={GRID_CELL_WIDTH}
+              rowHeight={GRID_CELL_HEIGHT}
               endReachedThreshold={LOAD_MORE_THRESHOLD}
-              onEndReached={handleReachEnd}
+              onEndReached={handleEndReached}
               emptyRender={<EmptyHolder loading={loading}/>}
-              overlayRender={<OverlayHolder loadingMore={loadingMore}/>}
+              overlayRender={
+                <OverlayHolder
+                  loadingMore={loadingMore}
+                  loadMoreFailed={loadMoreFailed}
+                  onLoadMoreManually={handleLoadMore}
+                />
+              }
               cellRender={
                 ({
                   data,

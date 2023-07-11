@@ -1,12 +1,27 @@
 import {DependencyList, useEffect, useRef, useState} from "react";
 import {toast} from "react-hot-toast";
 
+import StorageClass from "@common/models/storage-class";
 import {BackendMode} from "@common/qiniu";
 
-import StorageClass from "@common/models/storage-class";
 import {AkItem, EndpointType} from "@renderer/modules/auth";
 import {FileItem, listFiles, ListFilesOption, ListFilesResult} from "@renderer/modules/qiniu-client";
 import * as LocalLogger from "@renderer/modules/local-logger";
+
+// load files generator function
+interface LoadFilesBaseResult {
+  seriesId: string,
+  bucketName: string,
+  path: string,
+}
+
+type LoadFilesSuccessResult = LoadFilesBaseResult & ListFilesResult & {
+  error: null,
+};
+type LoadFilesFailedResult = LoadFilesBaseResult & {
+  error: Error,
+};
+type LoadFilesResult = LoadFilesSuccessResult | LoadFilesFailedResult;
 
 async function* loadFilesGen(
   seriesId: string,
@@ -14,35 +29,43 @@ async function* loadFilesGen(
   bucketName: string,
   path: string,
   opt: ListFilesOption,
-) {
+): AsyncGenerator<LoadFilesResult, LoadFilesResult> {
   let marker: string | undefined = undefined;
   while (true) {
-    const res: ListFilesResult = await listFiles(
-      regionId,
-      bucketName,
-      path,
-      marker,
-      opt,
-    );
-    if (!res.marker) {
-      return {
+    try {
+      const res: ListFilesResult = await listFiles(
+        regionId,
+        bucketName,
+        path,
+        marker,
+        opt,
+      );
+      const result = {
         ...res,
         seriesId,
         bucketName,
         path,
+        error: null,
       };
-    } else {
-      yield {
-        ...res,
+      if (!res.marker) {
+        return result;
+      } else {
+        yield result;
+        marker = res.marker;
+      }
+    } catch (err: any) {
+      const result = {
+        error: err,
         seriesId,
         bucketName,
         path,
-      };
-      marker = res.marker;
+      }
+      yield result;
     }
   }
 }
 
+// react hooks
 interface useLoadFilesProps {
   user: AkItem | null,
   currentAddressPath: string,
@@ -70,6 +93,7 @@ export default function useLoadFiles({
 }: useLoadFilesProps) {
 
   const [loading, setLoading] = useState(true);
+  const [loadMoreFailed, setLoadMoreFailed] = useState(false);
   const [files, setFiles] = useState<FileItem.Item[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const currentAddressRef = useRef(currentAddressPath);
@@ -120,19 +144,26 @@ export default function useLoadFiles({
     if (!loadFileIterator.current) {
       return true;
     }
+    setLoadMoreFailed(false);
     setLoading(true);
     const {value: res, done} = await loadFileIterator.current.next();
-    // abort result, load series not match.
+    // abort result by load series not match.
     if (res && res.seriesId !== loadSeriesId.current) {
       return true;
     }
-    // abort result, when load path not equal current path.
+    // abort result by load path not equal current path.
     const [currentBucketName] = currentAddressPath.split("/", 1);
     const currentPath = currentAddressPath.slice(`${currentBucketName}/`.length)
     if (res && `${res.bucketName}/${res.path}` !== `${currentBucketName}/${currentPath}`) {
       return true;
     }
-    if (res) {
+    // abort result by load failed
+    if (res && res.error) {
+      setLoading(false);
+      setLoadMoreFailed(true);
+      throw res.error;
+    }
+    if (res && res.data) {
       if (shouldClear) {
         setFiles(res.data);
       } else {
@@ -186,6 +217,7 @@ export default function useLoadFiles({
       loading,
       files,
       hasMore,
+      loadMoreFailed,
     },
     reload,
     loadMore,

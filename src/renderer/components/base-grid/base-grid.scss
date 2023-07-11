@@ -12,4 +12,10 @@
       --bt-cell-accent-bg: var(--bg-cell-hover-bg);
     }
   }
+
+  .base-overlay {
+    position: absolute;
+    inset: 0 0 0 0;
+    pointer-events: none;
+  }
 }

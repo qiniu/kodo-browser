@@ -1,6 +1,8 @@
 import React, {CSSProperties, useEffect, useRef} from "react";
 import {FixedSizeGrid, FixedSizeGridProps} from "react-window";
 
+import "./base-grid.scss";
+
 const SCROLL_BAR_WIDTH = 20;
 const DEFAULT_REACH_END_THRESHOLD = 0;
 
@@ -81,13 +83,7 @@ function BaseGrid<T>(props: BaseGridProps<T>) {
           }
         }}
       </FixedSizeGrid>
-      <div
-        style={{
-          position: "absolute",
-          inset: "0 0 0 0",
-          pointerEvents: "none",
-        }}
-      >
+      <div className="base-overlay">
         {
           (() => {
             if (!props.itemData.length && props.emptyRender) {

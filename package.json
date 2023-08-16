@@ -1,6 +1,6 @@
 {
   "name": "kodo-browser",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "Apache-2.0",
   "author": {
     "name": "Rong Zhou",
@@ -112,7 +112,7 @@
     "form-data": "^4.0.0",
     "js-base64": "^3.4.5",
     "js-md5": "^0.7.3",
-    "kodo-s3-adapter-sdk": "0.3.0",
+    "kodo-s3-adapter-sdk": "0.3.1",
     "lodash": "^4.17.21",
     "mime": "^2.3.1",
     "moment": "^2.22.2",

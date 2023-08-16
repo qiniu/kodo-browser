@@ -43,6 +43,7 @@ const dict: Dictionary = {
     exportLinks: "导出外链",
     restore: "解冻",
     changeStorageClass: "更改存储类型",
+    clickToRetry: "点击重试",
   },
 
   top: {
@@ -165,6 +166,7 @@ const dict: Dictionary = {
       fileModifyDate: "最后修改时间",
       fileOperation: "操作",
       loadMore: "加载更多",
+      loadMoreFailed: "加载更多失败，",
     },
     restoreStatus: {
       label: "解冻状态：",

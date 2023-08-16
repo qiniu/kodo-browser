@@ -84,6 +84,7 @@ const Files: React.FC<FilesProps> = (props) => {
     loadFilesState: {
       loading: loadingFiles,
       hasMore: hasMoreFiles,
+      loadMoreFailed: loadMoreFilesFailed,
       files,
     },
     reload: reloadFiles,
@@ -346,6 +347,7 @@ const Files: React.FC<FilesProps> = (props) => {
         availableStorageClasses={availableStorageClasses}
         data={files}
         hasMore={hasMoreFiles}
+        loadMoreFailed={loadMoreFilesFailed}
         onLoadMore={handleLoadMore}
         selectedFiles={selectedFiles}
         onSelectFiles={handleChangeSelectedFiles}

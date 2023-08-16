@@ -42,6 +42,7 @@ export default interface Dictionary {
     exportLinks: string,
     restore: string,
     changeStorageClass: string,
+    clickToRetry: string,
   },
 
   // top
@@ -170,6 +171,7 @@ export default interface Dictionary {
       fileModifyDate: string,
       fileOperation: string,
       loadMore: string,
+      loadMoreFailed: string,
     },
     restoreStatus: {
       label: string,

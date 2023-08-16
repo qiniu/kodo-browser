@@ -43,6 +43,7 @@ const dict: Dictionary = {
     exportLinks: "Export Download Links",
     restore: "Restore",
     changeStorageClass: "Set Storage Class",
+    clickToRetry: "Click to retry",
   },
 
   top: {
@@ -166,6 +167,7 @@ const dict: Dictionary = {
       fileModifyDate: "Last Modify Date",
       fileOperation: "Actions",
       loadMore: "Load more",
+      loadMoreFailed: "Load more failed. ",
     },
     restoreStatus: {
       label: "Status: ",

@@ -31,14 +31,30 @@ jobs:
         with:
           ref: ${{ github.ref }}
       - id: vars
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
       - uses: actions/setup-node@v1
         with:
           node-version: '16.x'
+      - name: Prepare qshell
+        run: |
+          set -e
+          wget -qLO /tmp/qshell-v2.11.0-linux-amd64.tar.gz https://devtools.qiniu.com/qshell-v2.11.0-linux-amd64.tar.gz
+          tar xf /tmp/qshell-v2.11.0-linux-amd64.tar.gz
+          rm /tmp/qshell-v2.11.0-linux-amd64.tar.gz
+          ./qshell account -- "$PUBLISH_ACCESS_KEY" "$PUBLISH_SECRET_KEY" default
+        env:
+          PUBLISH_ACCESS_KEY: ${{ secrets.PUBLISH_ACCESS_KEY }}
+          PUBLISH_SECRET_KEY: ${{ secrets.PUBLISH_SECRET_KEY }}
       - name: test
         run: make i test
       - name: build
         run: make linux64
+      - name: Upload Release Asset to Qiniu
+        run: |
+          set -e
+          ./qshell rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodo-browser-Linux-x64-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-linux-x64-${{ steps.vars.outputs.tag }}.zip"
+        env:
+          PUBLISH_BUCKET_NAME: ${{ secrets.PUBLISH_BUCKET_NAME }}
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -49,8 +65,8 @@ jobs:
           asset_path: ./build/kodo-browser-linux-x64-${{ steps.vars.outputs.tag }}.zip
           asset_name: kodo-browser-linux-x64-${{ steps.vars.outputs.tag }}.zip
           asset_content_type: application/zip
-  release-win-amd64:
-    name: release for win/amd64
+  release-windows-amd64-x64:
+    name: release for windows/amd64 & windows/x86
     runs-on: windows-latest
     needs: create_release
     steps:
@@ -58,17 +74,34 @@ jobs:
         with:
           ref: ${{ github.ref }}
       - id: vars
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
         shell: bash
       - uses: actions/setup-node@v1
         with:
           node-version: '16.x'
+      - name: Prepare qshell
+        run: |
+          set -e
+          curl -s -o ./qshell-v2.11.0-windows-amd64.zip https://devtools.qiniu.com/qshell-v2.11.0-windows-amd64.zip
+          unzip ./qshell-v2.11.0-windows-amd64.zip
+          ./qshell account -- "$PUBLISH_ACCESS_KEY" "$PUBLISH_SECRET_KEY" default
+        env:
+          PUBLISH_ACCESS_KEY: ${{ secrets.PUBLISH_ACCESS_KEY }}
+          PUBLISH_SECRET_KEY: ${{ secrets.PUBLISH_SECRET_KEY }}
+        shell: bash
       - name: test
         run: make i test
       - name: build
-        run: make win64
+        run: make win64 win32
+      - name: Upload Release Asset to Qiniu
+        run: |
+          set -e
+          ./qshell.exe rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodo-browser-Windows-x64-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-win32-x64-${{ steps.vars.outputs.tag }}.zip"
+          ./qshell.exe rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodo-browser-Windows-x32-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-win32-x86-${{ steps.vars.outputs.tag }}.zip"
+        shell: bash
+        env:
+          PUBLISH_BUCKET_NAME: ${{ secrets.PUBLISH_BUCKET_NAME }}
       - name: Upload Release Asset
-        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,6 +109,15 @@ jobs:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
           asset_path: ./build/kodo-browser-win32-x64-${{ steps.vars.outputs.tag }}.zip
           asset_name: kodo-browser-win32-x64-${{ steps.vars.outputs.tag }}.zip
+          asset_content_type: application/zip
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./build/kodo-browser-win32-x86-${{ steps.vars.outputs.tag }}.zip
+          asset_name: kodo-browser-win32-x86-${{ steps.vars.outputs.tag }}.zip
           asset_content_type: application/zip
   release-darwin-amd64:
     name: release for darwin/amd64
@@ -86,14 +128,29 @@ jobs:
         with:
           ref: ${{ github.ref }}
       - id: vars
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
       - uses: actions/setup-node@v1
         with:
           node-version: '16.x'
+      - name: Prepare qshell
+        run: |
+          set -e
+          wget -qLO /tmp/qshell-v2.11.0-linux-amd64.tar.gz https://devtools.qiniu.com/qshell-v2.11.0-darwin-amd64.tar.gz
+          tar xf /tmp/qshell-v2.11.0-linux-amd64.tar.gz
+          ./qshell account -- "$PUBLISH_ACCESS_KEY" "$PUBLISH_SECRET_KEY" default
+        env:
+          PUBLISH_ACCESS_KEY: ${{ secrets.PUBLISH_ACCESS_KEY }}
+          PUBLISH_SECRET_KEY: ${{ secrets.PUBLISH_SECRET_KEY }}
       - name: test
         run: make i test
       - name: build
         run: make mac
+      - name: Upload Release Asset to Qiniu
+        run: |
+          set -e
+          ./qshell rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodo-browser-Mac OS-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-darwin-x64-${{ steps.vars.outputs.tag }}.zip"
+        env:
+          PUBLISH_BUCKET_NAME: ${{ secrets.PUBLISH_BUCKET_NAME }}
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1

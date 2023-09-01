@@ -152,6 +152,7 @@ const dict: Dictionary = {
 
     fileToolbar: {
       createDirectory: "Create directory",
+      uploadDirectory: "Upload directory",
       search: {
         holder: "Filter by name prefix",
       },

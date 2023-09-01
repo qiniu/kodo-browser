@@ -156,6 +156,7 @@ export default interface Dictionary {
 
     fileToolbar: {
       createDirectory: string,
+      uploadDirectory: string,
       search: {
         holder: string,
       },

@@ -151,6 +151,7 @@ const dict: Dictionary = {
         },
         fileToolbar: {
             createDirectory: "ディレクトリ",
+            uploadDirectory: "フォルダをアップロード",
             search: {
                 holder: "名前プレフィックスをフィルタリングする",
             },

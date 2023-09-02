@@ -311,7 +311,7 @@ const dict: Dictionary = {
 
   modals: {
     privateCloudSettings: {
-      title: "Region Settings",
+      title: "Custom Settings",
       region: "Region",
       appendRegionButton: "Add region",
       removeRegionButton: "Remove",
@@ -323,6 +323,12 @@ const dict: Dictionary = {
             required: "UC URL is required",
             pattern: "UC URL require start with http(s)://",
           }
+        },
+        regionsSwitch: {
+          label: "Custom Regions:",
+          hint: {
+            disabled: "Querying regions by UC is unavailable",
+          },
         },
         regionIdentifier: {
           label: "Region ID:",

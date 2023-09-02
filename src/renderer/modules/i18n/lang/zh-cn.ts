@@ -310,7 +310,7 @@ const dict: Dictionary = {
 
   modals: {
     privateCloudSettings: {
-      title: "区域设置",
+      title: "自定义设置",
       region: "区域",
       appendRegionButton: "添加区域",
       removeRegionButton: "删除",
@@ -322,6 +322,12 @@ const dict: Dictionary = {
             required: "必须输入 UC 服务 URL",
             pattern: "UC 服务 URL 必须以 http(s):// 开头",
           }
+        },
+        regionsSwitch: {
+          label: "区域设置：",
+          hint: {
+            disabled: "UC 服务不支持自动查询区域",
+          },
         },
         regionIdentifier: {
           label: "区域 ID：",

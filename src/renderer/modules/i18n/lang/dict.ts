@@ -331,6 +331,12 @@ export default interface Dictionary {
             pattern: string,
           },
         },
+        regionsSwitch: {
+          label: string,
+          hint: {
+            disabled: string,
+          },
+        },
         regionIdentifier: {
           label: string,
           holder: string,

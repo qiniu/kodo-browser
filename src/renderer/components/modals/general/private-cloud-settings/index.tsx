@@ -24,7 +24,6 @@ const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = (
   const {
     handleSubmit,
     control,
-    getValues,
     setValue,
     register,
     reset,
@@ -45,45 +44,123 @@ const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = (
 
   const handleSavePrivateCloudSettings: SubmitHandler<Endpoint> = (data) => {
     LocalLogger.debug("save private cloud settings", data);
-    privateEndpointPersistence.save(data);
+    privateEndpointPersistence.save({
+      ucUrl: data.ucUrl,
+      regions: hasCustomRegions
+        ? data.regions
+        : [],
+    });
     toast.success(translate("common.saved"));
     onSaved(data);
     modalProps.onHide?.();
   };
 
   useEffect(() => {
-    reset(privateEndpointPersistence.read());
+    const endpoint = privateEndpointPersistence.read();
+    if (endpoint.regions.length) {
+      setHasCustomRegions(true);
+    }
+    reset(endpoint);
   }, [modalProps.show]);
 
   // check query region available
-  // inheritance from old code.
-  // seems useless,
-  // because Region.query only be used in kodo,
-  // but private cloud only s3.
   const [debouncedUcUrl, setDebouncedUcUrl] = useState<string>("");
   const handleChangeUcUrlDebounced = useCallback(lodash.debounce((v: string) => {
     setDebouncedUcUrl(v);
-  }, 500), []);
-  const [isQueryApiAvailable, setIsQueryApiAvailable] = useState<boolean>(false);
+  }, 300, {leading: false, trailing: true}), []);
+  const [isQueryApiAvailable, setIsQueryApiAvailable] = useState<boolean>(true);
   useEffect(() => {
-    if (errors.ucUrl) {
+    if (errors.ucUrl || !debouncedUcUrl) {
       return;
     }
     isQueryRegionAPIAvailable(debouncedUcUrl)
       .then(available => {
         setIsQueryApiAvailable(available);
-        if (!available && !getValues("regions").length) {
-          setValue("regions", [{
-            identifier: "",
-            label: "",
-            endpoint: "",
-          }]);
-        }
+        setHasCustomRegions(true);
       });
-  }, [debouncedUcUrl])
+  }, [debouncedUcUrl]);
 
+  // custom regions switch
+  const [hasCustomRegions, setHasCustomRegions] = useState(false);
+  const handleChangeCustomRegions = () => {
+    setHasCustomRegions(v => !v);
+  };
+  useEffect(() => {
+    if (hasCustomRegions && !fields.length) {
+      setValue("regions", [{
+        identifier: "",
+        label: "",
+        endpoint: "",
+      }]);
+    }
+  }, [hasCustomRegions, fields.length, setValue]);
 
   // render
+  const renderRegionFields = () => {
+    if (!hasCustomRegions) {
+      return null;
+    }
+    return (
+      <div className="px-3">
+        {
+          fields.map((field, index) => (
+            <RegionInputs
+              key={field.id}
+              id={field.id}
+              groupNameSuffix={index + 1}
+              errors={errors.regions?.[index]}
+              onRemove={
+                fields.length > 1
+                  ? () => {
+                    remove(index)
+                  }
+                  : undefined
+              }
+              regionIdentifierControlProps={{
+                ...register(
+                  `regions.${index}.identifier`,
+                  {
+                    required: true,
+                  },
+                ),
+                isInvalid: Boolean(errors?.regions?.[index]?.identifier),
+              }}
+              regionNameControlProps={register(`regions.${index}.label`)}
+              regionEndpointControlProps={{
+                ...register(
+                  `regions.${index}.endpoint`,
+                  {
+                    required: translate("modals.privateCloudSettings.form.regionEndpoint.feedback.required"),
+                    pattern: {
+                      value: HttpUrl,
+                      message: translate("modals.privateCloudSettings.form.regionEndpoint.feedback.pattern"),
+                    },
+                  },
+                ),
+                isInvalid: Boolean(errors?.regions?.[index]?.endpoint),
+              }}
+            />
+          ))
+        }
+
+        <div className="row px-3 pb-3 sticky-bottom bg-body">
+          <Button
+            variant="info"
+            className="text-white"
+            size="sm"
+            disabled={isSubmitting}
+            onClick={() => {
+              append({identifier: "", label: "", endpoint: ""})
+            }}
+          >
+            <i className="bi bi-plus-circle-fill me-1"/>
+            {translate("modals.privateCloudSettings.appendRegionButton")}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Modal {...modalProps}>
       <Modal.Header closeButton>
@@ -96,12 +173,6 @@ const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = (
         <Form>
           <fieldset disabled={isSubmitting}>
             <div className="sticky-top bg-body p-3">
-              <Button className="text-white" variant="info" size="sm" disabled={isSubmitting} onClick={() => {
-                append({identifier: "", label: "", endpoint: ""})
-              }}>
-                <i className="bi bi-plus-circle-fill me-1"/>
-                {translate("modals.privateCloudSettings.appendRegionButton")}
-              </Button>
               <Form.Group as={Row} className="mb-3" controlId="privateCloudSettingUcUrl">
                 <Form.Label className="text-end" column sm={4}>
                   <span className="text-danger">*</span>{translate("modals.privateCloudSettings.form.ucUrl.label")}
@@ -125,49 +196,26 @@ const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = (
                   </Form.Control.Feedback>
                 </Col>
               </Form.Group>
-            </div>
-            <div className="px-3 pb-3">
-              {
-                fields.map((field, index) => (
-                  <RegionInputs
-                    key={field.id}
-                    id={field.id}
-                    groupNameSuffix={index + 1}
-                    errors={errors.regions?.[index]}
-                    onRemove={
-                      isQueryApiAvailable
-                        ? () => {
-                          remove(index)
-                        }
-                        : undefined
-                    }
-                    regionIdentifierControlProps={{
-                      ...register(
-                        `regions.${index}.identifier`,
-                        {
-                          required: true,
-                        },
-                      ),
-                      isInvalid: Boolean(errors?.regions?.[index]?.identifier),
-                    }}
-                    regionNameControlProps={register(`regions.${index}.label`)}
-                    regionEndpointControlProps={{
-                      ...register(
-                        `regions.${index}.endpoint`,
-                        {
-                          required: translate("modals.privateCloudSettings.form.regionEndpoint.feedback.required"),
-                          pattern: {
-                            value: HttpUrl,
-                            message: translate("modals.privateCloudSettings.form.regionEndpoint.feedback.pattern"),
-                          },
-                        },
-                      ),
-                      isInvalid: Boolean(errors?.regions?.[index]?.endpoint),
-                    }}
+              <Form.Group as={Row} controlId="customRegionsSwitch">
+                <Form.Label className="text-end" column sm={4}>
+                  {translate("modals.privateCloudSettings.form.regionsSwitch.label")}
+                </Form.Label>
+                <Col sm={7} className="d-flex align-items-center">
+                  <Form.Switch
+                    disabled={!isQueryApiAvailable}
+                    checked={hasCustomRegions}
+                    onChange={handleChangeCustomRegions}
                   />
-                ))
-              }
+                  {
+                    !isQueryApiAvailable &&
+                    <span className="text-secondary small">
+                      {translate("modals.privateCloudSettings.form.regionsSwitch.hint.disabled")}
+                    </span>
+                  }
+                </Col>
+              </Form.Group>
             </div>
+            {renderRegionFields()}
           </fieldset>
         </Form>
       </Modal.Body>

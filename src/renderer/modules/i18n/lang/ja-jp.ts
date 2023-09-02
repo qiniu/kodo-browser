@@ -310,7 +310,7 @@ const dict: Dictionary = {
 
     modals: {
         privateCloudSettings: {
-            title: "地域設定",
+            title: "カスタム設定",
             region: "地域",
             appendRegionButton: "地域を追加",
             removeRegionButton: "削除",
@@ -323,6 +323,12 @@ const dict: Dictionary = {
                         pattern: "UC サービス URL は http(s):// で始まる必要があります",
                     }
                 },
+              regionsSwitch: {
+                  label: "地域設定：",
+                  hint: {
+                      disabled: "UC による地域のクエリは利用できません",
+                  },
+              },
                 regionIdentifier: {
                     label: "地域 ID：",
                     holder: "地域 ID を入力してください",

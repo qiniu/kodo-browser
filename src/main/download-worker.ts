@@ -1,11 +1,11 @@
 import {Region} from "kodo-s3-adapter-sdk";
 
 import {
-    AddedJobsReplyMessage,
-    DownloadAction,
-    DownloadMessage,
-    JobCompletedReplyMessage,
-    UpdateUiDataReplyMessage
+  AddedJobsReplyMessage,
+  DownloadAction,
+  DownloadMessage,
+  JobCompletedReplyMessage,
+  UpdateUiDataReplyMessage
 } from "@common/ipc-actions/download";
 import {Status} from "@common/models/job/types";
 import DownloadJob from "@common/models/job/download-job";
@@ -152,29 +152,15 @@ process.on("message", (message: DownloadMessage) => {
 let isCleanup = false;
 function handleExit() {
     if (isCleanup) {
-        return Promise.resolve();
+        return;
     }
 
     isCleanup = true;
 
     downloadManager.stopAllJobs({
-        matchStatus: [Status.Waiting],
+        matchStatus: [Status.Running, Status.Waiting],
     });
-
-    return new Promise<void>((resolve, reject) => {
-        try {
-            // resolve inflight jobs persisted status not correct
-            setTimeout(() => {
-                downloadManager.stopAllJobs({
-                    matchStatus: [Status.Running],
-                });
-                downloadManager.persistJobs(true);
-                resolve();
-            }, 2000);
-        } catch {
-            reject()
-        }
-    });
+    downloadManager.persistJobs(true);
 }
 
 
@@ -183,10 +169,8 @@ process.on("exit", () => {
 });
 
 process.on("SIGTERM", () => {
-    handleExit()
-        .then(() => {
-            process.exit(0);
-        });
+    handleExit();
+    process.exit(0);
 });
 
 function handleJobDone(jobId: string, job?: DownloadJob) {

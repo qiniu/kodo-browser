@@ -162,7 +162,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
           onReloadDomains={loadDomains}
         />
         {
-          domain?.private &&
+          (domain?.private || domain?.protected) &&
           <ExpireAfterField
             control={control}
             maxValue={domain.linkMaxLifetime}

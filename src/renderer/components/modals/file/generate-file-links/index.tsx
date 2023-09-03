@@ -257,6 +257,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     }
   }, [modalProps.show]);
 
+  // render
   return (
     <Modal {...modalProps}>
       <Modal.Header closeButton>
@@ -310,7 +311,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
                     onReloadDomains={loadDomains}
                   />
                   {
-                    domain?.private &&
+                    (domain?.private || domain?.protected) &&
                     <ExpireAfterField
                       control={control}
                       maxValue={domain.linkMaxLifetime}
@@ -374,7 +375,9 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
       </Modal.Body>
       <Modal.Footer>
         {
-          !memoFileItems.length || batchProgressState.status === BatchTaskStatus.Ended
+          !memoFileItems.length ||
+          batchProgressState.status === BatchTaskStatus.Ended ||
+          domain?.protected
             ? null
             : <span ref={submitButtonRef}/>
         }

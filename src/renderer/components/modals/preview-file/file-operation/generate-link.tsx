@@ -123,7 +123,7 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
           onReloadDomains={loadDomains}
         />
         {
-          domain?.private &&
+          (domain?.private || domain?.protected) &&
           <ExpireAfterField
             control={control}
             maxValue={domain.linkMaxLifetime}

@@ -1,10 +1,10 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {Button, Modal, ModalProps} from "react-bootstrap";
 import {SubmitHandler, useForm} from "react-hook-form";
+import lodash from "lodash";
 
 import {BackendMode} from "@common/qiniu"
 
-import usePortal from "@renderer/modules/hooks/use-portal";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem, signatureUrl} from "@renderer/modules/qiniu-client";
@@ -13,10 +13,13 @@ import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {
   DEFAULT_EXPIRE_AFTER,
-  GenerateLinkForm,
   GenerateLinkFormData,
-  GenerateLinkSubmitData,
-} from "@renderer/components/forms";
+  GenerateLinkForm,
+  DomainNameField,
+  ExpireAfterField,
+  FileLinkField,
+  FileNameField,
+} from "@renderer/components/forms/generate-link-form";
 
 interface GenerateFileLinkProps {
   regionId: string,
@@ -69,20 +72,23 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
   });
 
   // state when generate succeed
-  const [fileLink, setFileLink] = useState<string>();
+  const [fileLink, setFileLink] = useState<string>('');
 
   // form for generating file link
-  const generateLinkFormController = useForm<GenerateLinkFormData>({
-    mode: "onChange",
-    defaultValues: {
-      domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
-      expireAfter: DEFAULT_EXPIRE_AFTER,
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: {
+      isSubmitting,
     },
+  } = useForm<GenerateLinkFormData>({
+    mode: "onChange",
   });
 
-  const {reset} = generateLinkFormController;
-
-  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkSubmitData> = (data) => {
+  // generate file link result
+  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> = (data) => {
     if (!memoFileItem || !currentUser) {
       return;
     }
@@ -113,20 +119,62 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
         setFileLink(fileUrl.toString());
       });
   };
-
-  const {ref: submitButtonRef, portal: submitButtonPortal} = usePortal();
+  const generateFileLinkDebounced = useCallback(lodash.debounce(() => {
+    handleSubmit(handleSubmitGenerateFileLink)();
+  }, 500), [handleSubmit, handleSubmitGenerateFileLink]);
 
   // reset states when open/close modal
   useEffect(() => {
     if (modalProps.show) {
       reset({
-        domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
+        domain: memoDefaultDomain ?? NON_OWNED_DOMAIN,
         expireAfter: DEFAULT_EXPIRE_AFTER,
       });
     } else {
-      setFileLink(undefined);
+      setFileLink('');
     }
   }, [modalProps.show]);
+
+  // watch form values
+  const [domain, expireAfter] = watch(["domain", "expireAfter"]);
+  useEffect(() => {
+    generateFileLinkDebounced();
+  }, [domain, expireAfter]);
+
+  // render
+  const renderModalBody = () => {
+    if (!memoFileItem) {
+      return (
+        <div>{translate("common.noObjectSelected")}</div>
+      )
+    }
+    return (
+      <GenerateLinkForm>
+        <FileNameField
+          fileName={memoFileItem.name}
+        />
+        <DomainNameField
+          control={control}
+          isEmptyPath={!Boolean(memoFileItem.path.toString())}
+          defaultDomain={memoDefaultDomain}
+          domains={domains}
+          loadingDomains={loadingDomains}
+          onReloadDomains={loadDomains}
+        />
+        {
+          domain?.private &&
+          <ExpireAfterField
+            control={control}
+            maxValue={domain.linkMaxLifetime}
+          />
+        }
+        <FileLinkField
+          fileLink={fileLink}
+          loading={isSubmitting}
+        />
+      </GenerateLinkForm>
+    );
+  };
 
   return (
     <Modal {...modalProps}>
@@ -137,31 +185,9 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {
-          !memoFileItem
-            ? <div>
-              {translate("common.noObjectSelected")}
-            </div>
-            : <GenerateLinkForm
-              filePath={memoFileItem.path.toString()}
-              fileName={memoFileItem.name}
-              fileLink={fileLink}
-              formController={generateLinkFormController}
-              loadingDomains={loadingDomains}
-              domains={domains}
-              defaultDomain={memoDefaultDomain}
-              onReloadDomains={loadDomains}
-              onSubmit={handleSubmitGenerateFileLink}
-              submitButtonPortal={submitButtonPortal}
-            />
-        }
+        {renderModalBody()}
       </Modal.Body>
       <Modal.Footer>
-        {
-          !memoFileItem
-            ? null
-            : <span ref={submitButtonRef}/>
-        }
         <Button
           variant="light"
           size="sm"

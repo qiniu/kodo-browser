@@ -1,5 +1,6 @@
-import React, {PropsWithChildren, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {SubmitHandler, useForm} from "react-hook-form";
+import lodash from "lodash";
 
 import {BackendMode} from "@common/qiniu"
 
@@ -9,10 +10,12 @@ import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules
 import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {
+  DomainNameField,
+  ExpireAfterField,
+  FileLinkField,
   GenerateLinkForm,
   GenerateLinkFormData,
-  GenerateLinkSubmitData,
-} from "@renderer/components/forms";
+} from "@renderer/components/forms/generate-link-form";
 
 interface GenerateLinkProps {
   regionId: string,
@@ -20,7 +23,6 @@ interface GenerateLinkProps {
   fileItem: FileItem.File,
   canS3Domain: boolean,
   defaultDomain?: DomainAdapter,
-  submitButtonPortal?: React.FC<PropsWithChildren>,
 }
 
 const GenerateLink: React.FC<GenerateLinkProps> =({
@@ -29,7 +31,6 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
   fileItem,
   canS3Domain,
   defaultDomain,
-  submitButtonPortal,
 }) => {
   const {currentUser} = useAuth();
   const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
@@ -50,18 +51,25 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
   });
 
   // form for generating file link
-  const generateLinkFormController = useForm<GenerateLinkFormData>({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: {
+      isSubmitting,
+    },
+  } = useForm<GenerateLinkFormData>({
     mode: "onChange",
     defaultValues: {
-      domainName: defaultDomain?.name ?? NON_OWNED_DOMAIN.name,
+      domain: defaultDomain ?? NON_OWNED_DOMAIN,
       expireAfter: 600,
     },
   });
 
   // state when generate succeed
-  const [fileLink, setFileLink] = useState<string>();
+  const [fileLink, setFileLink] = useState("");
 
-  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkSubmitData> = (data) => {
+  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> = (data) => {
     if (!fileItem || !currentUser) {
       return;
     }
@@ -92,20 +100,40 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
         setFileLink(fileUrl.toString());
       });
   };
+  const generateFileLinkDebounced = useCallback(lodash.debounce(() => {
+    handleSubmit(handleSubmitGenerateFileLink)();
+  }, 500), [handleSubmit, handleSubmitGenerateFileLink]);
 
+  // watch form values
+  const [domain, expireAfter] = watch(["domain", "expireAfter"]);
+  useEffect(() => {
+    generateFileLinkDebounced();
+  }, [domain, expireAfter]);
+
+  // render
   return (
     <div className="p-4">
-      <GenerateLinkForm
-        filePath={fileItem.path.toString()}
-        fileLink={fileLink}
-        formController={generateLinkFormController}
-        loadingDomains={loadingDomains}
-        domains={domains}
-        defaultDomain={defaultDomain}
-        onReloadDomains={loadDomains}
-        onSubmit={handleSubmitGenerateFileLink}
-        submitButtonPortal={submitButtonPortal}
-      />
+      <GenerateLinkForm>
+        <DomainNameField
+          control={control}
+          isEmptyPath={!Boolean(fileItem.path.toString())}
+          defaultDomain={defaultDomain}
+          domains={domains}
+          loadingDomains={loadingDomains}
+          onReloadDomains={loadDomains}
+        />
+        {
+          domain?.private &&
+          <ExpireAfterField
+            control={control}
+            maxValue={domain.linkMaxLifetime}
+          />
+        }
+        <FileLinkField
+          fileLink={fileLink}
+          loading={isSubmitting}
+        />
+      </GenerateLinkForm>
     </div>
   );
 };

@@ -2,10 +2,11 @@ import path from "path";
 import fs from "fs";
 import {dialog as electronDialog, shell as electronShell} from '@electron/remote'
 
-import React, {useEffect, useMemo, useState} from "react";
-import {Button, Col, Form, InputGroup, Modal, ModalProps, Row} from "react-bootstrap";
+import React, {Fragment, useEffect, useMemo, useState} from "react";
+import {Button, Form, InputGroup, Modal, ModalProps} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
+import classNames from "classnames";
 import moment from "moment";
 import csvStringify from "csv-stringify";
 
@@ -29,10 +30,11 @@ import {
 
 import {
   DEFAULT_EXPIRE_AFTER,
-  GenerateLinkForm,
   GenerateLinkFormData,
-  GenerateLinkSubmitData,
-} from "@renderer/components/forms";
+  GenerateLinkForm,
+  DomainNameField,
+  ExpireAfterField,
+} from "@renderer/components/forms/generate-link-form";
 
 interface GenerateFileLinksProps {
   regionId: string,
@@ -104,7 +106,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
   });
 
   // state when generate succeed
-  const [csvFilePath, setCsvFilePath] = useState<string | null>(null);
+  const [csvFilePath, setCsvFilePath] = useState<string>("");
   const handleClickShowItemInDirectory = () => {
     if (!csvFilePath) {
       return;
@@ -113,15 +115,20 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
   };
 
   // form for generating file links
-  const generateLinkFormController = useForm<GenerateLinkFormData>({
-    mode: "onChange",
-    defaultValues: {
-      domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
-      expireAfter: DEFAULT_EXPIRE_AFTER,
+  const {
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    formState: {
+      isValid,
+      isSubmitting,
     },
+  } = useForm<GenerateLinkFormData>({
+    mode: "onChange",
   });
 
-  const {reset} = generateLinkFormController;
+  const [domain] = watch(["domain"]);
 
   const dialogSavePath = () => {
     return electronDialog.showOpenDialog({
@@ -130,7 +137,11 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     });
   }
 
-  const generateAndSaveFileLinks = (domain: DomainAdapter | undefined, expireAfter: number, targetDirectoryPath: string): Promise<string> => {
+  const generateAndSaveFileLinks = (
+    domain: DomainAdapter | undefined,
+    expireAfter: number,
+    targetDirectoryPath: string
+  ): Promise<string> => {
     if (!currentUser) {
       return Promise.reject();
     }
@@ -193,7 +204,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
       });
   }
 
-  const handleSubmitGenerateFileLinks: SubmitHandler<GenerateLinkSubmitData> = (data) => {
+  const handleSubmitGenerateFileLinks: SubmitHandler<GenerateLinkFormData> = (data) => {
     if (!memoFileItems.length || !currentUser) {
       return;
     }
@@ -234,11 +245,11 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
   useEffect(() => {
     if (modalProps.show) {
       reset({
-        domainName: memoDefaultDomain?.name ?? NON_OWNED_DOMAIN.name,
+        domain: memoDefaultDomain ?? NON_OWNED_DOMAIN,
         expireAfter: DEFAULT_EXPIRE_AFTER,
       });
     } else {
-      setCsvFilePath(null);
+      setCsvFilePath("");
       setBatchProgressState({
         status: BatchTaskStatus.Standby,
       });
@@ -286,41 +297,59 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
                   }
                 </ul>
                 <GenerateLinkForm
-                  validateDomainName={false}
-                  formController={generateLinkFormController}
-                  loadingDomains={loadingDomains}
-                  domains={domains}
-                  defaultDomain={memoDefaultDomain}
-                  onReloadDomains={loadDomains}
-                  onSubmit={handleSubmitGenerateFileLinks}
+                  onSubmit={handleSubmit(handleSubmitGenerateFileLinks)}
+                  isValid={isValid}
+                  isSubmitting={isSubmitting}
                   submitButtonPortal={submitButtonPortal}
-                />
-                {
-                  !csvFilePath
-                    ? null
-                    : <Form.Group as={Row} className="mb-3" controlId="csvFile">
-                      <Form.Label className="text-end" column sm={4}>
-                        {translate("modals.generateFileLinks.csvFile.label")}
-                      </Form.Label>
-                      <Col sm={7}>
-                        <InputGroup>
-                          <Form.Control
-                            type="text"
-                            value={csvFilePath}
-                            readOnly
-                          />
-                          <Button
-                            variant="info"
-                            onClick={handleClickShowItemInDirectory}
-                          >
-                            <span className="text-white">
-                              {translate("modals.generateFileLinks.csvFile.suffix")}
-                            </span>
-                          </Button>
-                        </InputGroup>
-                      </Col>
-                    </Form.Group>
-                }
+                >
+                  <DomainNameField
+                    control={control}
+                    defaultDomain={memoDefaultDomain}
+                    domains={domains}
+                    loadingDomains={loadingDomains}
+                    onReloadDomains={loadDomains}
+                  />
+                  {
+                    domain?.private &&
+                    <ExpireAfterField
+                      control={control}
+                      maxValue={domain.linkMaxLifetime}
+                    />
+                  }
+                  <Form.Group as={Fragment} controlId="csvFile">
+                    <Form.Label
+                      className={classNames(
+                        "text-end",
+                        {
+                          "invisible-no-h": !csvFilePath
+                        }
+                      )}
+                    >
+                      {translate("modals.generateFileLinks.csvFile.label")}
+                    </Form.Label>
+                    <div
+                      className={classNames({
+                        "invisible-no-h": !csvFilePath
+                      })}
+                    >
+                      <InputGroup>
+                        <Form.Control
+                          type="text"
+                          value={csvFilePath}
+                          readOnly
+                        />
+                        <Button
+                          variant="info"
+                          onClick={handleClickShowItemInDirectory}
+                        >
+                        <span className="text-white">
+                          {translate("modals.generateFileLinks.csvFile.suffix")}
+                        </span>
+                        </Button>
+                      </InputGroup>
+                    </div>
+                  </Form.Group>
+                </GenerateLinkForm>
                 {
                   batchProgressState.status === BatchTaskStatus.Standby ||
                   batchProgressState.status === BatchTaskStatus.Ended

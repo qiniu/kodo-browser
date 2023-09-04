@@ -8,7 +8,7 @@ import {BackendMode} from "@common/qiniu";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
-import {FileItem, setStorageClass} from "@/renderer/modules/qiniu-client";
+import {FileItem, setStorageClass} from "@renderer/modules/qiniu-client";
 import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {ChangeStorageClassForm, ChangeStorageClassFormData} from "@renderer/components/forms";

@@ -1,10 +1,12 @@
 // libs
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Card, Col, Container, Row} from "react-bootstrap";
 
 // modules
 import {useI18n} from "@renderer/modules/i18n";
 import {privateEndpointPersistence} from "@renderer/modules/qiniu-client";
+import * as DefaultDict from "@renderer/modules/default-dict";
+import {EndpointType} from "@renderer/modules/auth";
 
 // modals
 import {useDisplayModal} from "@renderer/components/modals/hooks";
@@ -40,10 +42,24 @@ const SignIn: React.FC = () => {
   ] = useDisplayModal();
 
   // local states
-  const [formDefaultValues, setFormDefaultValues] = useState<SignInFormValues>();
-  const [isValidPrivateEndpointSetting, setIsValidPrivateEndpointSetting] = useState(
-    privateEndpointPersistence.validate()
-  );
+  const [formDefaultValues, setFormDefaultValues] = useState<SignInFormValues>({
+    endpointType: EndpointType.Public,
+    accessKey: "",
+    accessSecret: "",
+    rememberMe: false,
+  });
+  const [isValidPrivateEndpointSetting, setIsValidPrivateEndpointSetting] = useState(false);
+  useEffect(() => {
+    const endpointType = Object.values(EndpointType)
+      .find(t => t === DefaultDict.get("LOGIN_ENDPOINT_TYPE"))
+    setFormDefaultValues(v => ({
+      ...v,
+      endpointType: endpointType ?? EndpointType.Public,
+    }))
+    setIsValidPrivateEndpointSetting(
+      privateEndpointPersistence.validate()
+    );
+  }, []);
 
   // event handler
   const handleSavedPrivateEndpointSetting = () => {

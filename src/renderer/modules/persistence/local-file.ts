@@ -43,7 +43,7 @@ export class LocalFile implements Persistence {
     fs.writeFileSync(p, v);
   }
 
-  read(key: string, decode?: (d: Buffer) => Buffer): Buffer {
+  readable(key: string): boolean {
     let p = this.getPath(key);
 
     let canRead = true;
@@ -53,8 +53,14 @@ export class LocalFile implements Persistence {
       canRead = false;
     }
 
+    return canRead;
+  }
+
+  read(key: string, decode?: (d: Buffer) => Buffer): Buffer {
+    let p = this.getPath(key);
+
     let result: Buffer = Buffer.alloc(0);
-    if (canRead) {
+    if (this.readable(key)) {
       result = fs.readFileSync(p);
     }
 
@@ -81,7 +87,7 @@ export class LocalFile implements Persistence {
     LocalLogger.warn("LocalFilePersistence can't clear()!");
   }
 
-  private getPath(key: string): string {
+  getPath(key: string): string {
     return LocalFile.getFilePath(this.cwd, key);
   }
 }

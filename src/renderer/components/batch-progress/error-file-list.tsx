@@ -39,7 +39,7 @@ const ErrorFileList: React.FC<ErroredFileOperationListProps> = (props) => {
                   ? <i className="bi bi-folder-fill me-1 text-yellow"/>
                   : <i className="bi bi-file-earmark me-1"/>
               }
-              <span className="me-1">{erroredFile.path}</span>
+              <span className="me-1 text-break-all">{erroredFile.path}</span>
               <OverlayTrigger
                 overlay={
                   <Tooltip>

@@ -199,10 +199,10 @@ const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProp
                     <li key={fileItem.path.toString()}>
                       {
                         FileItem.isItemFolder(fileItem)
-                          ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                          : <i className="bi bi-file-earmark me-1"/>
+                          ? <i className="bi bi-folder-fill text-yellow"/>
+                          : <i className="bi bi-file-earmark"/>
                       }
-                      {fileItem.name}
+                      <span className="ms-1 text-break-all">{fileItem.name}</span>
                     </li>
                   ))
                 }

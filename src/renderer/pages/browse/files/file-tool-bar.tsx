@@ -2,6 +2,7 @@ import {dialog as electronDialog} from "@electron/remote";
 
 import React, {useCallback, useEffect, useState} from "react";
 import {Button, ButtonGroup, Dropdown, DropdownButton, Form, InputGroup} from "react-bootstrap";
+import {toast} from "react-hot-toast";
 import classNames from "classnames";
 import lodash from "lodash";
 
@@ -25,7 +26,6 @@ import MoveFiles from "@renderer/components/modals/file/move-files";
 import RestoreFiles from "@renderer/components/modals/file/restore-files";
 import ChangeFilesStorageClass from "@renderer/components/modals/file/change-files-storage-class";
 import GenerateFileLinks from "@renderer/components/modals/file/generate-file-links";
-import {toast} from "react-hot-toast";
 
 const MAX_FILE_LIST_SIZE = 9999;
 
@@ -331,18 +331,21 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
                 <i className="bi bi-trash me-1 text-danger"/>
                 {translate("common.delete")}
               </Dropdown.Item>
-              <Dropdown.Item
-                onClick={() => {
-                  if (!domains.length) {
-                    toast.error(translate("common.noDomainToGet"));
-                    return;
-                  }
-                  handleShowGenerateFileLinks();
-                }}
-              >
-                <i className="bi bi-link-45deg me-1"/>
-                {translate("common.exportLinks")}
-              </Dropdown.Item>
+              {
+                !selectedDomain?.protected &&
+                <Dropdown.Item
+                  onClick={() => {
+                    if (!domains.length) {
+                      toast.error(translate("common.noDomainToGet"));
+                      return;
+                    }
+                    handleShowGenerateFileLinks();
+                  }}
+                >
+                  <i className="bi bi-link-45deg me-1"/>
+                  {translate("common.exportLinks")}
+                </Dropdown.Item>
+              }
               <Dropdown.Item
                 onClick={handleShowRestoreFiles}
                 hidden={bucketGrantedPermission === "readonly"}

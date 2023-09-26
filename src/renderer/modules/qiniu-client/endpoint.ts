@@ -16,11 +16,7 @@ export interface Endpoint {
 
 const DEFAULT_ENDPOINT: Endpoint = {
   ucUrl: "",
-  regions: [{
-    identifier: "",
-    label: "",
-    endpoint: "",
-  }],
+  regions: [],
 };
 
 class PrivateEndpointPersistence {

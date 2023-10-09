@@ -151,6 +151,7 @@ const dict: Dictionary = {
     },
     fileToolbar: {
       createDirectory: "创建目录",
+      uploadDirectory: "上传目录",
       search: {
         holder: "按名称前缀过滤",
       },

@@ -152,15 +152,23 @@ process.on("message", (message: DownloadMessage) => {
 let isCleanup = false;
 function handleExit() {
     if (isCleanup) {
-        return;
+        return Promise.resolve();
     }
 
     isCleanup = true;
-
     downloadManager.stopAllJobs({
         matchStatus: [Status.Running, Status.Waiting],
     });
-    downloadManager.persistJobs(true);
+
+    return new Promise<void>(resolve => {
+        const timer = setInterval(() => {
+            if (!downloadManager.running) {
+                clearInterval(timer);
+                downloadManager.persistJobs(true);
+                resolve();
+            }
+        }, 100);
+    });
 }
 
 
@@ -169,11 +177,16 @@ process.on("exit", () => {
 });
 
 process.on("SIGTERM", () => {
-    handleExit();
-    process.exit(0);
+    handleExit()
+        .then(() => {
+            process.exit(0);
+        });
 });
 
 function handleJobDone(jobId: string, job?: DownloadJob) {
+    if (!process.connected) {
+        return;
+    }
     if (job?.status === Status.Finished) {
         const jobCompletedReplyMessage: JobCompletedReplyMessage = {
             action: DownloadAction.JobCompleted,

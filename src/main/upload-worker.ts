@@ -153,7 +153,7 @@ process.on("message", (message: UploadMessage) => {
 let isCleanup = false;
 function handleExit() {
     if (isCleanup) {
-        return;
+        return Promise.resolve();
     }
 
     isCleanup = true;
@@ -161,7 +161,16 @@ function handleExit() {
     uploadManager.stopAllJobs({
         matchStatus: [Status.Running, Status.Waiting],
     });
-    uploadManager.persistJobs(true);
+
+    return new Promise<void>(resolve => {
+        const timer = setInterval(() => {
+            if (!uploadManager.running) {
+                clearInterval(timer);
+                uploadManager.persistJobs(true);
+                resolve();
+            }
+        }, 100);
+    });
 }
 
 
@@ -171,10 +180,15 @@ process.on("exit", () => {
 
 process.on("SIGTERM", () => {
     handleExit()
-    process.exit(0);
+        .then(() => {
+            process.exit(0);
+        });
 });
 
 function handleJobDone(jobId: string, job?: UploadJob) {
+    if (!process.connected) {
+        return;
+    }
     if (job?.status === Status.Finished) {
         const jobCompletedReplyMessage: JobCompletedReplyMessage = {
             action: UploadAction.JobCompleted,
@@ -188,6 +202,9 @@ function handleJobDone(jobId: string, job?: UploadJob) {
 }
 
 function handleCreatedDirectory(bucket: string, directoryKey: string) {
+    if (!process.connected) {
+        return;
+    }
     const createdDirectoryReplyMessage: CreatedDirectoryReplyMessage = {
         action: UploadAction.CreatedDirectory,
         data: {

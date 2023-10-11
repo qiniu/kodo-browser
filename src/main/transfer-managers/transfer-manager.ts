@@ -37,7 +37,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     abstract persistJobs(force: boolean): void
     abstract loadJobsFromStorage(clientOptions: ClientOptions, options: any): void
 
-    private running: number = 0
+    private _running: number = 0
     protected jobs: Map<string, Job> = new Map<string, Job>()
     protected jobIds: string[] = []
     protected config: OptionalConfig<Job> & Opt
@@ -49,6 +49,10 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
             ...defaultTransferManagerConfig,
             ...config,
         };
+    }
+
+    get running() {
+      return this._running;
     }
 
     get jobsLength() {
@@ -250,7 +254,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     startJobsByOnline(): void {
         for (const jobId of this.offlineJobIds) {
             const job = this.jobs.get(jobId);
-            if (job) {
+            if (job && job.status === Status.Stopped) {
                 job.wait();
             }
         }
@@ -286,7 +290,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
             console.log(`[JOB] max: ${this.config.maxConcurrency}, cur: ${this.running}, jobs: ${this.jobIds.length}`);
         }
 
-        this.running = Math.max(0, this.running);
+        this._running = Math.max(0, this.running);
         if (this.running >= this.config.maxConcurrency) {
             return;
         }
@@ -308,10 +312,14 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     }
 
     protected handleJobStatusChange(status: Status, prev: Status) {
+      if (prev === status) {
+        return;
+      }
+
       if (status === Status.Running) {
-        this.running += 1;
+        this._running += 1;
       } else if (prev === Status.Running) {
-        this.running -= 1;
+        this._running -= 1;
       }
     }
 

@@ -276,6 +276,11 @@ export default class DownloadJob extends TransferJob {
         );
         this.options.to.path = this.tempFilePath.slice(0, -DownloadJob.TempFileExt.length);
 
+        // check stopped
+        if (this.status === Status.Stopped) {
+            return;
+        }
+
         // download
         this.downloader = new Downloader(client);
         await this.downloader.getObjectToFile(
@@ -315,16 +320,22 @@ export default class DownloadJob extends TransferJob {
     }
 
     stop(): this {
-        if (this.status === Status.Stopped) {
+        // only `Waiting`, `Running` job could be stopped.
+        if (
+            ![
+              Status.Waiting,
+              Status.Running,
+            ].includes(this.status)
+        ) {
             return this;
         }
-        this._status = Status.Stopped;
 
         if (this.options.isDebug) {
             console.log(`Pausing ${this.options.from.key}`);
         }
 
         if (!this.downloader) {
+            this._status = Status.Stopped;
             return this;
         }
         this.downloader.abort();
@@ -453,6 +464,7 @@ export default class DownloadJob extends TransferJob {
 
     private async handleDownloadError(err: Error) {
         if (err === Downloader.userCanceledError) {
+            this._status = Status.Stopped;
             return;
         }
 

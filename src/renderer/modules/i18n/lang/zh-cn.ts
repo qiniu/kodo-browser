@@ -126,6 +126,7 @@ const dict: Dictionary = {
       createBucketButton: "新建 Bucket",
       moreOperation: {
         toggleButton: "更多",
+        updateBucketRemarkButton: "编辑备注",
         deleteBucketButton: "删除",
       },
       search: {
@@ -524,6 +525,19 @@ const dict: Dictionary = {
           feedback: {
             required: "必须选择一个 ACL 权限",
           },
+        },
+      },
+    },
+
+    updateBucketRemark: {
+      title: "编辑 Bucket 备注",
+      form: {
+        bucketName: {
+          label: "名称：",
+        },
+        bucketRemark: {
+          label: "备注：",
+          holder: "最多不超过 100 个字符",
         },
       },
     },

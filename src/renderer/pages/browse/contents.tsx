@@ -117,7 +117,15 @@ const Contents: React.FC<ContentsProps> = ({
         LocalLogger.error(err);
       });
   };
-  const handleReloadBuckets = () => {
+  const handleReloadBuckets = (bucket?: BucketItem) => {
+    if (bucket) {
+      setBucketsMap(bucketsMap => {
+        const v = new Map(bucketsMap);
+        v.set(bucket.name, bucket);
+        return v;
+      });
+      return;
+    }
     loadRegionsAndBuckets();
   }
   useEffect(() => {

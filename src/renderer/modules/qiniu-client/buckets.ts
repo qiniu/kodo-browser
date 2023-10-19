@@ -22,3 +22,11 @@ export async function deleteBucket(region: string, bucket: string, opt: GetAdapt
         targetBucket: bucket,
     });
 }
+
+export async function updateBucketRemark(bucket: string, remark: string, opt: GetAdapterOptionParam): Promise<void> {
+  await getDefaultClient(opt).enter("updateBucketRemark", async client => {
+    await client.updateBucketRemark(bucket, remark);
+  }, {
+    targetBucket: bucket,
+  });
+}

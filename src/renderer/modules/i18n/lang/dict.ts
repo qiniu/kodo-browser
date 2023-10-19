@@ -129,6 +129,7 @@ export default interface Dictionary {
       createBucketButton: string,
       moreOperation: {
         toggleButton: string,
+        updateBucketRemarkButton: string,
         deleteBucketButton: string,
       },
       search: {
@@ -529,6 +530,20 @@ export default interface Dictionary {
         },
       },
     },
+
+    updateBucketRemark: {
+      title: string,
+      form: {
+        bucketName: {
+          label: string,
+        },
+        bucketRemark: {
+          label: string,
+          holder: string,
+        }
+      }
+    },
+
     deleteBucket: {
       title: string,
       content: string,

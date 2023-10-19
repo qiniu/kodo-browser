@@ -126,6 +126,7 @@ const dict: Dictionary = {
       createBucketButton: "Create Bucket",
       moreOperation: {
         toggleButton: "More",
+        updateBucketRemarkButton: "Update Remark",
         deleteBucketButton: "Delete",
       },
       search: {
@@ -525,6 +526,19 @@ const dict: Dictionary = {
           feedback: {
             required: "Must select ACL permission",
           },
+        },
+      },
+    },
+
+    updateBucketRemark: {
+      title: "Update Bucket Remark",
+      form: {
+        bucketName: {
+          label: "Name:",
+        },
+        bucketRemark: {
+          label: "Remark:",
+          holder: "Max 100 characters",
         },
       },
     },

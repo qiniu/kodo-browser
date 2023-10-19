@@ -9,6 +9,7 @@ import {BucketItem} from "@renderer/modules/qiniu-client";
 import {ContentViewStyle} from "@renderer/modules/settings";
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import CreateBucket from "@renderer/components/modals/bucket/create-bucket";
+import UpdateBucketRemark from "@renderer/components/modals/bucket/update-bucket-remark";
 import DeleteBucket from "@renderer/components/modals/bucket/delete-bucket";
 
 interface BucketToolBarProps {
@@ -18,6 +19,7 @@ interface BucketToolBarProps {
   viewStyle: ContentViewStyle,
   onChangeView: (style: ContentViewStyle) => void,
   onCreatedBucket: () => void,
+  onUpdatedBucketRemark: (bucket: BucketItem) => void,
   onDeletedBucket: () => void,
 }
 
@@ -28,6 +30,7 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
   viewStyle,
   onChangeView,
   onCreatedBucket,
+  onUpdatedBucketRemark,
   onDeletedBucket,
 }) => {
   const {translate} = useI18n();
@@ -50,7 +53,17 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
 
   const [
     {
-      show:isShowDeleteBucket,
+      show: isShowUpdateBucketRemark,
+    },
+    {
+      showModal: handleClickUpdateBucketRemark,
+      hideModal: handleHideUpdateBucketRemark,
+    },
+  ] = useDisplayModal();
+
+  const [
+    {
+      show: isShowDeleteBucket,
     },
     {
       showModal: handleClickDeleteBucket,
@@ -69,14 +82,20 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
             {translate("browse.bucketToolbar.createBucketButton")}
           </Button>
         }
-        {
-          !customize.disable.deleteBucket &&
-          <Dropdown className="d-inline ms-1">
-            <Dropdown.Toggle disabled={!selectedBucket} variant="outline-solid-gray-300" size="sm">
-              {translate("common.more")}
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu>
+        <Dropdown className="d-inline ms-1">
+          <Dropdown.Toggle disabled={!selectedBucket} variant="outline-solid-gray-300" size="sm">
+            {translate("common.more")}
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            <Dropdown.Item
+              disabled={selectedBucket?.grantedPermission === "readonly"}
+              onClick={handleClickUpdateBucketRemark}
+            >
+              <i className="bi bi-pencil me-1"/>
+              {translate("browse.bucketToolbar.moreOperation.updateBucketRemarkButton")}
+            </Dropdown.Item>
+            {
+              !customize.disable.deleteBucket &&
               <Dropdown.Item
                 disabled={selectedBucket?.grantedPermission === "readonly"}
                 onClick={handleClickDeleteBucket}
@@ -84,9 +103,9 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
                 <i className="bi bi-x-lg me-1 text-danger"/>
                 {translate("browse.bucketToolbar.moreOperation.deleteBucketButton")}
               </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        }
+            }
+          </Dropdown.Menu>
+        </Dropdown>
         <InputGroup size="sm" className="ms-auto w-25">
           <Form.Control
             type="text"
@@ -118,6 +137,12 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
         show={isShowCreateBucket}
         onHide={handleHideCreateBucket}
         onCreatedBucket={onCreatedBucket}
+      />
+      <UpdateBucketRemark
+        show={isShowUpdateBucketRemark}
+        onHide={handleHideUpdateBucketRemark}
+        bucketItem={selectedBucket}
+        onUpdatedBucketRemark={onUpdatedBucketRemark}
       />
       <DeleteBucket
         show={isShowDeleteBucket}

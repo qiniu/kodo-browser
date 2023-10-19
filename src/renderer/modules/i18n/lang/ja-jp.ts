@@ -126,6 +126,7 @@ const dict: Dictionary = {
             createBucketButton: "バケットの作成",
             moreOperation: {
                 toggleButton: "さらに",
+                updateBucketRemarkButton: "備考編集",
                 deleteBucketButton: "削除",
             },
             search: {
@@ -524,6 +525,19 @@ const dict: Dictionary = {
                     feedback: {
                         required: "ACL アクセス許可を選択する必要があります",
                     },
+                },
+            },
+        },
+
+        updateBucketRemark: {
+            title: "バケットの備考編集",
+            form: {
+                bucketName: {
+                    label: "名前：",
+                },
+                bucketRemark: {
+                    label: "備考：",
+                    holder: "最大100単語",
                 },
             },
         },

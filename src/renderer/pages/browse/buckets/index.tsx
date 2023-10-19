@@ -13,7 +13,7 @@ interface BucketsProps {
   data: BucketItem[],
   regions: Region[],
   loading: boolean,
-  onOperatedBucket: () => void,
+  onOperatedBucket: (bucket?: BucketItem) => void,
 }
 
 const Buckets: React.FC<BucketsProps> = ({
@@ -51,6 +51,14 @@ const Buckets: React.FC<BucketsProps> = ({
     };
   });
 
+  // handle operatedBucket
+  const handleOperatedBucket = (bucket?: BucketItem) => {
+    if (bucket && bucket.name === selectedBucket?.name) {
+      setSelectedBucket(bucket);
+    }
+    onOperatedBucket(bucket);
+  };
+
   // render
   return (
     <>
@@ -60,8 +68,9 @@ const Buckets: React.FC<BucketsProps> = ({
         viewStyle={viewStyle}
         onChangeView={handleChangeViewStyle}
         onSearch={handleSearchBucket}
-        onCreatedBucket={onOperatedBucket}
-        onDeletedBucket={onOperatedBucket}
+        onCreatedBucket={handleOperatedBucket}
+        onUpdatedBucketRemark={handleOperatedBucket}
+        onDeletedBucket={handleOperatedBucket}
       />
       {
         viewStyle === ContentViewStyle.Table

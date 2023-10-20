@@ -164,8 +164,8 @@ describe("test qiniu-client/buckets.ts", () => {
             const [ enterParamsName ] = MockedS3Adapter.prototype.enter.mock.calls[0];
             expect(enterParamsName).toBe("updateBucketRemark");
             expect(MockedS3Adapter.prototype.updateBucketRemark).toBeCalledWith(
-              "bucket-kodo-browser-Kodo-updateRemark",
-              "remark-kodo-browser-Kodo-updateRemark",
+              "bucket-kodo-browser-S3-updateRemark",
+              "remark-kodo-browser-S3-updateRemark",
             );
         });
     });

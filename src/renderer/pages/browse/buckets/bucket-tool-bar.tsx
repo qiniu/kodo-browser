@@ -83,12 +83,16 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
           </Button>
         }
         <Dropdown className="d-inline ms-1">
-          <Dropdown.Toggle disabled={!selectedBucket} variant="outline-solid-gray-300" size="sm">
+          <Dropdown.Toggle
+            disabled={!selectedBucket || Boolean(selectedBucket.grantedPermission)}
+            variant="outline-solid-gray-300"
+            size="sm"
+          >
             {translate("common.more")}
           </Dropdown.Toggle>
           <Dropdown.Menu>
             <Dropdown.Item
-              disabled={selectedBucket?.grantedPermission === "readonly"}
+              disabled={Boolean(selectedBucket?.grantedPermission)}
               onClick={handleClickUpdateBucketRemark}
             >
               <i className="bi bi-pencil me-1"/>
@@ -97,7 +101,7 @@ const BucketToolBar: React.FC<BucketToolBarProps> = ({
             {
               !customize.disable.deleteBucket &&
               <Dropdown.Item
-                disabled={selectedBucket?.grantedPermission === "readonly"}
+                disabled={Boolean(selectedBucket?.grantedPermission)}
                 onClick={handleClickDeleteBucket}
               >
                 <i className="bi bi-x-lg me-1 text-danger"/>

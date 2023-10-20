@@ -136,7 +136,7 @@ const dict: Dictionary = {
         bucketTable: {
             bucketGrantedReadOnly: "読み取り専用",
             bucketGrantedReadWrite: "読み書き",
-            bucketName: "バケット名",
+            bucketName: "バケット名/備考",
             bucketRegion: "地域名",
             createTime: "作成時間",
         },

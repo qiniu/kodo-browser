@@ -136,7 +136,7 @@ const dict: Dictionary = {
     bucketTable: {
       bucketGrantedReadOnly: "授权只读",
       bucketGrantedReadWrite: "授权读写",
-      bucketName: "Bucket 名称",
+      bucketName: "Bucket 名称 / 备注",
       bucketRegion: "Bucket 区域",
       createTime: "创建时间",
     },

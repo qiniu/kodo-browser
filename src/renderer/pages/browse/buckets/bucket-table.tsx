@@ -41,7 +41,13 @@ const BucketTable: React.FC<BucketTableProps> = ({
 
   return (
     <Form className="overflow-auto w-100 h-100">
-      <Table size="sm" striped bordered hover>
+      <Table
+        className="bucket-table"
+        size="sm"
+        striped
+        bordered
+        hover
+      >
         <colgroup>
           <col style={{width: "2rem"}}/>
           <col/>

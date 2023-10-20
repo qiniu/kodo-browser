@@ -159,22 +159,17 @@ function handleExit() {
     isCleanup = true;
 
     uploadManager.stopAllJobs({
-        matchStatus: [Status.Waiting],
+        matchStatus: [Status.Running, Status.Waiting],
     });
 
-    return new Promise<void>((resolve, reject) => {
-        try {
-            // resolve inflight jobs persisted status not correct
-            setTimeout(() => {
-                uploadManager.stopAllJobs({
-                    matchStatus: [Status.Running],
-                });
+    return new Promise<void>(resolve => {
+        const timer = setInterval(() => {
+            if (!uploadManager.running) {
+                clearInterval(timer);
                 uploadManager.persistJobs(true);
                 resolve();
-            }, 2000);
-        } catch {
-            reject()
-        }
+            }
+        }, 100);
     });
 }
 
@@ -191,6 +186,9 @@ process.on("SIGTERM", () => {
 });
 
 function handleJobDone(jobId: string, job?: UploadJob) {
+    if (!process.connected) {
+        return;
+    }
     if (job?.status === Status.Finished) {
         const jobCompletedReplyMessage: JobCompletedReplyMessage = {
             action: UploadAction.JobCompleted,
@@ -204,6 +202,9 @@ function handleJobDone(jobId: string, job?: UploadJob) {
 }
 
 function handleCreatedDirectory(bucket: string, directoryKey: string) {
+    if (!process.connected) {
+        return;
+    }
     const createdDirectoryReplyMessage: CreatedDirectoryReplyMessage = {
         action: UploadAction.CreatedDirectory,
         data: {

@@ -15,6 +15,7 @@ export function mockAdapterFactory(adapterName: string) {
     mockedClient.prototype.listBuckets = jest.fn();
     mockedClient.prototype.createBucket = jest.fn();
     mockedClient.prototype.deleteBucket = jest.fn();
+    mockedClient.prototype.updateBucketRemark = jest.fn();
 
     // utils
     mockedClient.prototype.listDomains = jest.fn();

@@ -51,7 +51,6 @@ const FileOperation: React.FC<FileOperationProps> = ({
           bucketName={bucketName}
           canS3Domain={canS3Domain}
           defaultDomain={defaultDomain}
-          submitButtonPortal={operationPortal}
         />
       );
     case FileOperationType.ChangeStorageClass:

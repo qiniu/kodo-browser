@@ -126,6 +126,7 @@ const dict: Dictionary = {
       createBucketButton: "新建 Bucket",
       moreOperation: {
         toggleButton: "更多",
+        updateBucketRemarkButton: "编辑备注",
         deleteBucketButton: "删除",
       },
       search: {
@@ -135,7 +136,7 @@ const dict: Dictionary = {
     bucketTable: {
       bucketGrantedReadOnly: "授权只读",
       bucketGrantedReadWrite: "授权读写",
-      bucketName: "Bucket 名称",
+      bucketName: "Bucket 名称 / 备注",
       bucketRegion: "Bucket 区域",
       createTime: "创建时间",
     },
@@ -151,6 +152,7 @@ const dict: Dictionary = {
     },
     fileToolbar: {
       createDirectory: "创建目录",
+      uploadDirectory: "上传目录",
       search: {
         holder: "按名称前缀过滤",
       },
@@ -310,7 +312,7 @@ const dict: Dictionary = {
 
   modals: {
     privateCloudSettings: {
-      title: "区域设置",
+      title: "自定义设置",
       region: "区域",
       appendRegionButton: "添加区域",
       removeRegionButton: "删除",
@@ -322,6 +324,12 @@ const dict: Dictionary = {
             required: "必须输入 UC 服务 URL",
             pattern: "UC 服务 URL 必须以 http(s):// 开头",
           }
+        },
+        regionsSwitch: {
+          label: "区域设置：",
+          hint: {
+            disabled: "UC 服务不支持自动查询区域",
+          },
         },
         regionIdentifier: {
           label: "区域 ID：",
@@ -517,6 +525,19 @@ const dict: Dictionary = {
           feedback: {
             required: "必须选择一个 ACL 权限",
           },
+        },
+      },
+    },
+
+    updateBucketRemark: {
+      title: "编辑 Bucket 备注",
+      form: {
+        bucketName: {
+          label: "名称：",
+        },
+        bucketRemark: {
+          label: "备注：",
+          holder: "最多不超过 100 个字符",
         },
       },
     },

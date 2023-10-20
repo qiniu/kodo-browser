@@ -1,5 +1,6 @@
 import {HttpUrl} from "@renderer/const/patterns";
 import {localFile} from "@renderer/modules/persistence";
+import * as DefaultDict from "@renderer/modules/default-dict";
 
 export interface RegionSetting {
   /* s3 id */
@@ -15,11 +16,7 @@ export interface Endpoint {
 
 const DEFAULT_ENDPOINT: Endpoint = {
   ucUrl: "",
-  regions: [{
-    identifier: "",
-    label: "",
-    endpoint: "",
-  }],
+  regions: [],
 };
 
 class PrivateEndpointPersistence {
@@ -45,7 +42,7 @@ class PrivateEndpointPersistence {
         .read(PrivateEndpointPersistence.ConfigFile)
         .toString();
     if (!jsonStrData) {
-      return DEFAULT_ENDPOINT;
+      return DefaultDict.get("PRIVATE_ENDPOINT") ?? DEFAULT_ENDPOINT;
     }
     let data = JSON.parse(jsonStrData);
     return {

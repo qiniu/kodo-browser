@@ -360,10 +360,7 @@ app.on("window-all-closed", () => {
   // to stay active until the user quits explicitly with Cmd + Q
   //if (process.platform !== 'darwin') {
 
-  // resolve inflight jobs persisted status not correct
-  setTimeout(() => {
-    app.quit();
-  }, 3000);
+  app.quit();
   //}
 });
 

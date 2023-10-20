@@ -52,7 +52,7 @@ jobs:
       - name: Upload Release Asset to Qiniu
         run: |
           set -e
-          ./qshell rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodo-browser-Linux-x64-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-linux-x64-${{ steps.vars.outputs.tag }}.zip"
+          ./qshell rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodobrowser/client/kodo-browser-Linux-x64-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-linux-x64-${{ steps.vars.outputs.tag }}.zip"
         env:
           PUBLISH_BUCKET_NAME: ${{ secrets.PUBLISH_BUCKET_NAME }}
       - name: Upload Release Asset
@@ -96,8 +96,8 @@ jobs:
       - name: Upload Release Asset to Qiniu
         run: |
           set -e
-          ./qshell.exe rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodo-browser-Windows-x64-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-win32-x64-${{ steps.vars.outputs.tag }}.zip"
-          ./qshell.exe rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodo-browser-Windows-x32-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-win32-x86-${{ steps.vars.outputs.tag }}.zip"
+          ./qshell.exe rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodobrowser/client/kodo-browser-Windows-x64-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-win32-x64-${{ steps.vars.outputs.tag }}.zip"
+          ./qshell.exe rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodobrowser/client/kodo-browser-Windows-x86-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-win32-x86-${{ steps.vars.outputs.tag }}.zip"
         shell: bash
         env:
           PUBLISH_BUCKET_NAME: ${{ secrets.PUBLISH_BUCKET_NAME }}
@@ -148,7 +148,7 @@ jobs:
       - name: Upload Release Asset to Qiniu
         run: |
           set -e
-          ./qshell rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodo-browser-Mac OS-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-darwin-x64-${{ steps.vars.outputs.tag }}.zip"
+          ./qshell rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodobrowser/client/kodo-browser-Mac OS-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-darwin-x64-${{ steps.vars.outputs.tag }}.zip"
         env:
           PUBLISH_BUCKET_NAME: ${{ secrets.PUBLISH_BUCKET_NAME }}
       - name: Upload Release Asset

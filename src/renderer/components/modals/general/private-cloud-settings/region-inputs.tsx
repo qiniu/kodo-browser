@@ -29,7 +29,7 @@ const RegionInputs: React.FC<RegionInputsProps> = ({
 
   return (
     <>
-      <Row className="justify-content-between sticky-top bg-body" style={{top: "7.3125rem"}}>
+      <Row className="justify-content-between sticky-top bg-body" style={{top: "7.75rem"}}>
         <Col>{translate("modals.privateCloudSettings.region")}{groupNameSuffix}</Col>
         {
           onRemove &&

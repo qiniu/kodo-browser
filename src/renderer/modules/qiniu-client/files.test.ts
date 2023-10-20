@@ -42,6 +42,7 @@ describe("test qiniu-client/files.ts", () => {
     const mockDomain: Domain = {
         name: "r06vedq0w.hd-bkt.clouddn.com",
         private: true,
+        protected: false,
         protocol: "http",
         type: "test",
     };

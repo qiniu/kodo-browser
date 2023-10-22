@@ -14,7 +14,7 @@ import {LogLevel} from "@renderer/modules/local-logger";
 import {useAuth} from "@renderer/modules/auth";
 import {appPreferences, useEndpointConfig} from "@renderer/modules/user-config-store";
 
-import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
+import {JOB_NUMS_PER_QUERY, QUERY_INTERVAL} from "./const";
 import useIpcUpload from "./use-ipc-upload";
 import UploadPanel from "./upload-panel";
 import useIpcDownload from "./use-ipc-download";
@@ -56,7 +56,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
   // upload state
   const {
     jobState: uploadJobState,
-    setSearchText: setUploadSearchText,
+    setJobsQuery: setUploadJobsQuery,
     setQueryCount: setUploadQueryCount,
   } = useIpcUpload({
     endpoint: endpointConfigData,
@@ -93,12 +93,12 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
 
   const handleLoadMoreUploadJobs = useCallback(lodash.debounce(() => {
     setUploadQueryCount(v => v + JOB_NUMS_PER_QUERY);
-  }, LAPSE_PER_QUERY, {leading: true, trailing: false}), []);
+  }, QUERY_INTERVAL, {leading: true, trailing: false}), []);
 
   // download state
   const {
     jobState: downloadJobState,
-    setSearchText: setDownloadSearchText,
+    setJobsQuery: setDownloadJobsQuery,
     setQueryCount: setDownloadQueryCount,
   } = useIpcDownload({
     endpoint: endpointConfigData,
@@ -134,7 +134,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
 
   const handleLoadMoreDownloadJobs = useCallback(lodash.debounce(() => {
     setDownloadQueryCount(v => v + JOB_NUMS_PER_QUERY);
-  }, LAPSE_PER_QUERY, {leading: true, trailing: false}), []);
+  }, QUERY_INTERVAL, {leading: true, trailing: false}), []);
 
   // reset ipc jobs number for save performance
   useEffect(() => {
@@ -196,7 +196,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
               data={uploadJobState.list}
               hasMore={uploadJobState.hasMore}
               onLoadMore={handleLoadMoreUploadJobs}
-              onChangeSearchText={setUploadSearchText}
+              onChangeSearchQuery={setUploadJobsQuery}
             />
           }
         </Tab>
@@ -218,7 +218,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
               data={downloadJobState.list}
               hasMore={downloadJobState.hasMore}
               onLoadMore={handleLoadMoreDownloadJobs}
-              onChangeSearchText={setDownloadSearchText}
+              onChangeSearchQuery={setDownloadJobsQuery}
             />
           }
         </Tab>

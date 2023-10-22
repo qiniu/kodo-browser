@@ -3,7 +3,6 @@ import {ipcRenderer, IpcRendererEvent} from "electron";
 import {useEffect, useRef, useState} from "react";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
-import {Status} from "@common/models/job/types";
 import {
   AddedJobsReplyMessage,
   UploadAction,
@@ -11,13 +10,14 @@ import {
   JobCompletedReplyMessage,
   UpdateUiDataReplyMessage,
   CreatedDirectoryReplyMessage,
+  UpdateUiDataMessage,
 } from "@common/ipc-actions/upload";
 
 import {AkItem} from "@renderer/modules/auth";
 import {Endpoint} from "@renderer/modules/qiniu-client";
 import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
 
-import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
+import {JOB_NUMS_PER_QUERY, QUERY_INTERVAL} from "./const";
 
 function handleOffline() {
   ipcUploadManager.stopJobsByOffline();
@@ -42,6 +42,8 @@ export interface UploadConfig {
   userNatureLanguage: NatureLanguage,
 }
 
+type JobsQuery = UpdateUiDataMessage['data']['query'];
+
 export interface UseIpcUploadProps {
   endpoint: Endpoint,
   user: AkItem | null,
@@ -65,7 +67,7 @@ const useIpcUpload = ({
   onJobCompleted = () => {},
   onCreatedDirectory = () => {},
 }: UseIpcUploadProps) => {
-  const [searchText, setSearchText] = useState<string>("");
+  const [jobsQuery, setJobsQuery] = useState<JobsQuery>({});
   const [pageNum, setPageNum] = useState<number>(0);
   const [queryCount, setQueryCount] = useState<number>(initQueryCount);
   const [jobState, setJobState] = useState<UpdateUiDataReplyMessage["data"]>();
@@ -156,36 +158,23 @@ const useIpcUpload = ({
   // this may be deprecated in the future.
   useEffect(() => {
     const uploaderTimer = setInterval(() => {
-      let query;
-      if (searchText) {
-        const searchTextTrimmed = searchText.trim();
-        if ((Object.values(Status) as string[]).includes(searchTextTrimmed)) {
-          query = {
-            status: searchTextTrimmed as Status,
-          };
-        } else {
-          query = {
-            name: searchTextTrimmed,
-          };
-        }
-      }
       ipcUploadManager.updateUiData({
         pageNum: pageNum,
         count: queryCount,
-        query: query,
+        query: jobsQuery,
       });
-    }, LAPSE_PER_QUERY);
+    }, QUERY_INTERVAL);
 
     return () => {
       clearInterval(uploaderTimer);
     };
-  }, [searchText, queryCount]);
+  }, [jobsQuery, queryCount]);
 
   return {
     pageNum,
     queryCount,
     jobState,
-    setSearchText,
+    setJobsQuery,
     setPageNum,
     setQueryCount,
   }

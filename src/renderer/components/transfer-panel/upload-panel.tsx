@@ -60,7 +60,7 @@ interface UploadPanelProps {
   data: (UploadJob["uiData"] | undefined)[],
   hasMore: boolean,
   onLoadMore: () => void,
-  onChangeSearchText: (searchText: string) => void,
+  onChangeSearchQuery: (query: {status?: Status, name?: string}) => void,
 }
 
 const UploadPanel: React.FC<UploadPanelProps> = ({
@@ -69,7 +69,7 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
   data,
   hasMore,
   onLoadMore,
-  onChangeSearchText,
+  onChangeSearchQuery,
 }) => {
   const [
     {
@@ -98,26 +98,57 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
       });
   };
 
-  // search state
-  const [searchText, setSearchText] = useState<string>("");
-  useEffect(
-    () => onChangeSearchText(searchText),
-    [searchText]
-  );
+  // handle search change
+  const [searchQuery, setSearchQuery] = useState<{status?: Status, name?: string}>({});
+  useEffect(() => {
+    onChangeSearchQuery(searchQuery);
+  }, [searchQuery]);
+  const handleChangeSearchStatus = (statusText?: string) => {
+    const status = statusText && (Object.values(Status) as string[]).includes(statusText)
+      ? statusText as Status
+      : undefined;
+    setSearchQuery(q => ({
+      ...q,
+      status,
+    }));
+  };
+  const handleChangeSearchName = (name: string) => {
+    setSearchQuery(q => ({
+      ...q,
+      name,
+    }));
+  };
 
   // render
   return (
     <>
       <div className="transfer-panel-content">
         <div className="d-flex justify-content-between p-1 border-bottom">
-          <Form.Control
-            className="w-50"
-            size="sm"
-            type="text"
-            placeholder={translate("transfer.upload.toolbar.search.holder")}
-            value={searchText}
-            onChange={e => setSearchText(e.target.value)}
-          />
+          <div className="d-flex">
+            <Form.Select
+              className="me-1"
+              style={{
+                width: "6.5rem",
+              }}
+              size="sm"
+              value={searchQuery.status}
+              onChange={e => handleChangeSearchStatus(e.target.value)}
+            >
+              <option value="all">{translate("common.all")}</option>
+              <option value={Status.Running}>{translate("transfer.jobItem.status.running")}</option>
+              <option value={Status.Waiting}>{translate("transfer.jobItem.status.waiting")}</option>
+              <option value={Status.Stopped}>{translate("transfer.jobItem.status.stopped")}</option>
+              <option value={Status.Finished}>{translate("transfer.jobItem.status.finished")}</option>
+              <option value={Status.Failed}>{translate("transfer.jobItem.status.failed")}</option>
+            </Form.Select>
+            <Form.Control
+              size="sm"
+              type="text"
+              placeholder={translate("transfer.upload.toolbar.search.holder")}
+              value={searchQuery.name}
+              onChange={e => handleChangeSearchName(e.target.value)}
+            />
+          </div>
           <div className="d-flex align-items-center justify-content-center">
             {
               stopped > 0 &&
@@ -125,7 +156,7 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
                 size="sm"
                 variant="icon-warning"
                 className="ms-1"
-                onClick={() => setSearchText(Status.Stopped)}
+                onClick={() => handleChangeSearchStatus(Status.Stopped)}
               >
                 <i className="bi bi-info-circle-fill me-1"/>{stopped}
               </Button>
@@ -136,7 +167,7 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
                 size="sm"
                 variant="icon-danger"
                 className="ms-1"
-                onClick={() => setSearchText(Status.Failed)}
+                onClick={() => handleChangeSearchStatus(Status.Failed)}
               >
                 <i className="bi bi-x-circle-fill me-1"/>{failed}
               </Button>

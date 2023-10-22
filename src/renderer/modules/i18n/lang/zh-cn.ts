@@ -6,6 +6,7 @@ const dict: Dictionary = {
     empty: "暂无数据",
     ok: "确认",
     cancel: "取消",
+    all: "全部",
     close: "关闭",
     save: "保存",
     saving: "保存中",
@@ -224,7 +225,7 @@ const dict: Dictionary = {
       },
       toolbar: {
         search: {
-          holder: "根据名称或状态搜索",
+          holder: "根据名称搜索",
         },
         emptyDirectorySwitch: "是否空目录上传",
         startAllButton: "启动全部",
@@ -248,7 +249,7 @@ const dict: Dictionary = {
       },
       toolbar: {
         search: {
-          holder: "根据名称或状态搜索",
+          holder: "根据名称搜索",
         },
         overwriteSwitch: "是否覆盖下载",
         startAllButton: "启动全部",

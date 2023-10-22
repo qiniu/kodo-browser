@@ -6,6 +6,7 @@ const dict: Dictionary = {
     empty: "Empty",
     ok: "OK",
     cancel: "Cancel",
+    all: "All",
     close: "Close",
     save: "Save",
     saving: "Saving",
@@ -225,7 +226,7 @@ const dict: Dictionary = {
       },
       toolbar: {
         search: {
-          holder: "Filter by name or status",
+          holder: "Filter by name",
         },
         emptyDirectorySwitch: "Allow uploading empty folder",
         startAllButton: "Start All",
@@ -249,7 +250,7 @@ const dict: Dictionary = {
       },
       toolbar: {
         search: {
-          holder: "Filter by name or status",
+          holder: "Filter by name",
         },
         overwriteSwitch: "Overwrite download",
         startAllButton: "Start All",

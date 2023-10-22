@@ -6,6 +6,7 @@ const dict: Dictionary = {
         empty: "現時点ではデータがありません",
         ok: "OK",
         cancel: "キャンセル",
+        all: "全て",
         close: "クローズ",
         save: "保存",
         saving: "保存する",
@@ -197,8 +198,8 @@ const dict: Dictionary = {
                 finished: "完了",
                 failed: "失敗",
                 stopped: "停止",
-                waiting: "待っている",
-                running: "ランニング",
+                waiting: "待機中",
+                running: "実行中",
                 duplicated: "すでに存在",
                 verifying: "検証中",
             },
@@ -224,7 +225,7 @@ const dict: Dictionary = {
             },
             toolbar: {
                 search: {
-                    holder: "名前またはステータスによるフィルタリング",
+                    holder: "名前によるフィルタリング",
                 },
                 emptyDirectorySwitch: "空のディレクトリのアップロードを許可/禁止する",
                 startAllButton: "すべて開始",
@@ -248,7 +249,7 @@ const dict: Dictionary = {
             },
             toolbar: {
                 search: {
-                    holder: "名前またはステータスによるフィルタリング",
+                    holder: "名前によるフィルタリング",
                 },
                 overwriteSwitch: "ダウンロードを上書きするかどうか",
                 startAllButton: "すべて開始",

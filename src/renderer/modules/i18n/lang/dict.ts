@@ -5,6 +5,7 @@ export default interface Dictionary {
     empty: string,
     ok: string,
     cancel: string,
+    all: string,
     close: string,
     save: string,
     saving: string,

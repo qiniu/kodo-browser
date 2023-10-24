@@ -172,6 +172,7 @@ export default interface Dictionary {
       fileStorageClass: string,
       fileModifyDate: string,
       fileOperation: string,
+      emptyHint: string,
       loadMore: string,
       loadMoreFailed: string,
     },

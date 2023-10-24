@@ -167,6 +167,7 @@ const dict: Dictionary = {
       fileStorageClass: "存储类型",
       fileModifyDate: "最后修改时间",
       fileOperation: "操作",
+      emptyHint: "拖拽本地文件或目录至此处即可上传",
       loadMore: "加载更多",
       loadMoreFailed: "加载更多失败，",
     },

@@ -168,6 +168,7 @@ const dict: Dictionary = {
       fileStorageClass: "Storage Class",
       fileModifyDate: "Last Modify Date",
       fileOperation: "Actions",
+      emptyHint: "Drop local files or directors to here to upload",
       loadMore: "Load more",
       loadMoreFailed: "Load more failed. ",
     },
@@ -202,8 +203,8 @@ const dict: Dictionary = {
     },
     upload: {
       dropZone: {
-        enter: "Drag here to upload",
-        over: "Release to upload",
+        enter: "Drag to here to upload",
+        over: "Drop to upload",
       },
       dialog: {
         title: "Select upload files",

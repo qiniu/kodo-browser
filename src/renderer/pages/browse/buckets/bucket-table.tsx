@@ -50,7 +50,7 @@ const BucketTable: React.FC<BucketTableProps> = ({
       >
         <colgroup>
           <col style={{width: "2rem"}}/>
-          <col/>
+          <col style={{width: "40rem"}}/>
           <col style={{minWidth: "12rem"}}/>
           <col style={{minWidth: "14rem"}}/>
         </colgroup>

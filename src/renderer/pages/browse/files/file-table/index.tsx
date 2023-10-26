@@ -4,6 +4,7 @@ import classNames from "classnames";
 
 import StorageClass from "@common/models/storage-class";
 
+import {useI18n} from "@renderer/modules/i18n";
 import {FileItem} from "@renderer/modules/qiniu-client";
 import EmptyHolder from "@renderer/components/empty-holder";
 
@@ -43,6 +44,7 @@ const FileTable: React.FC<FileTableProps> = ({
   onDoubleClickFile,
   onAction,
 }) => {
+  const {translate} = useI18n();
   const rowData: FileRowData[] = useMemo(() =>
     data.map(item => ({
         ...item,
@@ -104,7 +106,27 @@ const FileTable: React.FC<FileTableProps> = ({
               })}
               onEndReachedThreshold={LOAD_MORE_THRESHOLD}
               onEndReached={handleLoadMore}
-              emptyRenderer={<EmptyHolder loading={loading}/>}
+              emptyRenderer={
+                <EmptyHolder
+                  icon={
+                    <i
+                      className="bi bi-inbox"
+                      style={{
+                        fontSize: '4rem',
+                        lineHeight: 1,
+                      }}
+                    />
+                  }
+                  subtitle={
+                    <span
+                      className="text-body mt-2"
+                    >
+                      {translate("browse.fileTable.emptyHint")}
+                    </span>
+                  }
+                  loading={loading}
+                />
+              }
               overlayRenderer={
                 <OverlayHolder
                   loadingMore={loadingMore}

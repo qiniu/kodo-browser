@@ -4,42 +4,10 @@ import classNames from "classnames";
 import moment from "moment";
 
 import {BucketItem} from "@renderer/modules/qiniu-client";
-import TooltipText from "@renderer/components/tooltip-text";
 import {useI18n} from "@renderer/modules/i18n";
+import useIsOverflow from "@renderer/modules/hooks/use-is-overflow";
+import TooltipText from "@renderer/components/tooltip-text";
 import Duration from "@common/const/duration";
-
-interface BucketNameTooltipProps {
-  bucket: BucketItem
-}
-
-const BucketNameTooltip: React.FC<BucketNameTooltipProps> = ({
-  bucket,
-}) => {
-  const {translate} = useI18n();
-
-  // granted permission text
-  let grantedPermissionTip: string | null = null
-  if (bucket.grantedPermission === "readonly") {
-    grantedPermissionTip = translate("browse.bucketTable.bucketGrantedReadOnly");
-  } else if (bucket.grantedPermission === "readwrite") {
-    grantedPermissionTip = translate("browse.bucketTable.bucketGrantedReadWrite");
-  }
-
-  return (
-    <>
-      <div className="text-start">
-        {bucket.name}
-        {
-          grantedPermissionTip &&
-          <span className="text-info">（{grantedPermissionTip}）</span>
-        }
-      </div>
-      <div className="text-start">
-        <small className="text-secondary">{bucket.remark}</small>
-      </div>
-    </>
-  );
-};
 
 interface BucketTableRowProps {
   data: BucketItem,
@@ -54,6 +22,8 @@ const BucketTableRow: React.FC<BucketTableRowProps> = ({
   onClickRow,
   onClickBucket,
 }) => {
+  const {translate} = useI18n();
+
   // icon class name
   let iconClassName = "bi bi-database-fill me-1 text-brown";
   if (bucket.grantedPermission === "readonly") {
@@ -61,6 +31,24 @@ const BucketTableRow: React.FC<BucketTableRowProps> = ({
   } else if (bucket.grantedPermission === "readwrite") {
     iconClassName = "bic bic-database-fill-pencil me-1 text-slate";
   }
+
+  // granted permission text
+  let grantedPermissionTip: string | null = null
+  if (bucket.grantedPermission === "readonly") {
+    grantedPermissionTip = translate("browse.bucketTable.bucketGrantedReadOnly");
+  } else if (bucket.grantedPermission === "readwrite") {
+    grantedPermissionTip = translate("browse.bucketTable.bucketGrantedReadWrite");
+  }
+
+  // is overflow
+  const {
+    ref: bucketRemarkRef,
+    isOverflow: bucketRemarkIsOverflow,
+  } = useIsOverflow();
+  const {
+    ref: bucketNameRef,
+    isOverflow: bucketNameIsOverflow,
+  } = useIsOverflow();
 
   // render
   return (
@@ -77,24 +65,38 @@ const BucketTableRow: React.FC<BucketTableRowProps> = ({
           }}
         />
       </td>
-      <td>
-        <TooltipText
-          tooltipPlacement="right"
-          delay={{
-            show: Duration.Second,
-            hide: 0,
-          }}
-          tooltipContent={<BucketNameTooltip bucket={bucket}/>}
-        >
-          <div
-            className="d-inline-flex flex-column"
+      {/* The `line height: 0` fixes height incorrect of row causing by `overflow-ellipsis-inline` */}
+      <td style={{lineHeight: 0}}>
+        <div>
+          <TooltipText
+            disabled={!bucket.grantedPermission && !bucketNameIsOverflow}
+            tooltipPlacement="right"
+            delay={{
+              show: Duration.Second,
+              hide: 0,
+            }}
+            tooltipContent={
+              <div className="text-start">
+                {
+                  bucketNameIsOverflow &&
+                  <div className="text-break-all">
+                    {bucket.name}
+                  </div>
+                }
+                <div className="text-info">
+                  {grantedPermissionTip}
+                </div>
+              </div>
+            }
           >
             <span
               tabIndex={0}
-              className="text-link overflow-ellipsis"
+              className="text-link overflow-ellipsis-inline"
               style={{
                 ["--line-num" as any]: bucket.remark ? 1 : 2,
+                lineHeight: "var(--bs-body-line-height)",
               }}
+              ref={bucketNameRef}
               onKeyUp={e => {
                 if (e.code === "Space") {
                   e.stopPropagation();
@@ -109,16 +111,26 @@ const BucketTableRow: React.FC<BucketTableRowProps> = ({
               <i className={iconClassName}/>
               {bucket.name}
             </span>
-            {
-              bucket.remark &&
+          </TooltipText>
+        </div>
+        {
+          bucket.remark &&
+          <div>
+            <TooltipText
+              disabled={!bucketRemarkIsOverflow}
+              tooltipPlacement="right"
+              tooltipContent={<div className="text-start">{bucket.remark}</div>}
+            >
               <small
-                className="text-secondary overflow-ellipsis"
+                ref={bucketRemarkRef}
+                className="text-secondary overflow-ellipsis-inline"
+                style={{lineHeight: "var(--bs-body-line-height)"}}
               >
                 {bucket.remark}
               </small>
-            }
+            </TooltipText>
           </div>
-        </TooltipText>
+        }
       </td>
       {/* may empty string, so use `||` instead of `??` */}
       <td className="align-middle">{bucket.regionName || bucket.regionId}</td>

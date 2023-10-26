@@ -376,8 +376,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
       <Modal.Footer>
         {
           !memoFileItems.length ||
-          batchProgressState.status === BatchTaskStatus.Ended ||
-          domain?.protected
+          batchProgressState.status === BatchTaskStatus.Ended
             ? null
             : <span ref={submitButtonRef}/>
         }

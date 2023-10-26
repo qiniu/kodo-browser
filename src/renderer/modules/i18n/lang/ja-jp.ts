@@ -167,6 +167,7 @@ const dict: Dictionary = {
             fileStorageClass: "保管タイプ",
             fileModifyDate: "最終更新日",
             fileOperation: "アクション",
+            emptyHint: "ここにファイルやフォルダをドラッグ＆ドロップしてアップロード",
             loadMore: "もっと読み込む...",
             loadMoreFailed: "読み込みが失敗しました，"
         },
@@ -201,8 +202,8 @@ const dict: Dictionary = {
         },
         upload: {
             dropZone: {
-                enter: "Drag here to upload",
-                over: "Release to upload",
+                enter: "ここにドラッグしてアップロード",
+                over: "ドロップしてアップロード",
             },
             dialog: {
                 title: "[ファイルのアップロード] を選択",

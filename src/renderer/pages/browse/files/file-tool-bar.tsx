@@ -349,21 +349,18 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
                 <i className="bi bi-trash me-1 text-danger"/>
                 {translate("common.delete")}
               </Dropdown.Item>
-              {
-                !selectedDomain?.protected &&
-                <Dropdown.Item
-                  onClick={() => {
-                    if (!domains.length) {
-                      toast.error(translate("common.noDomainToGet"));
-                      return;
-                    }
-                    handleShowGenerateFileLinks();
-                  }}
-                >
-                  <i className="bi bi-link-45deg me-1"/>
-                  {translate("common.exportLinks")}
-                </Dropdown.Item>
-              }
+              <Dropdown.Item
+                onClick={() => {
+                  if (!domains.length) {
+                    toast.error(translate("common.noDomainToGet"));
+                    return;
+                  }
+                  handleShowGenerateFileLinks();
+                }}
+              >
+                <i className="bi bi-link-45deg me-1"/>
+                {translate("common.exportLinks")}
+              </Dropdown.Item>
               <Dropdown.Item
                 onClick={handleShowRestoreFiles}
                 hidden={bucketGrantedPermission === "readonly"}

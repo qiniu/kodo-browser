@@ -5,11 +5,15 @@ import {useI18n} from "@renderer/modules/i18n";
 import LoadingHolder from "../loading-holder";
 
 interface EmptyHolderProps {
+  icon?: React.ReactElement,
+  subtitle?: React.ReactElement,
   loading?: boolean,
   col?: number,
 }
 
 const EmptyHolder: React.FC<EmptyHolderProps> = ({
+  icon = null,
+  subtitle = null,
   loading,
   col,
 }) => {
@@ -24,14 +28,22 @@ const EmptyHolder: React.FC<EmptyHolderProps> = ({
   if (col) {
     return (
       <tr>
-        <td className="text-center text-muted" colSpan={col}>{translate("common.empty")}</td>
+        <td className="text-center text-body text-opacity-25" colSpan={col}>
+          <div className="d-flex flex-column justify-content-center align-items-center">
+            {icon}
+            <span>{translate("common.empty")}</span>
+            {subtitle}
+          </div>
+        </td>
       </tr>
     );
   }
 
   return (
-    <div className="d-flex justify-content-center align-items-center text-muted w-100 h-100">
-      {translate("common.empty")}
+    <div className="d-flex flex-column justify-content-center align-items-center text-body text-opacity-25 w-100 h-100">
+      {icon}
+      <span>{translate("common.empty")}</span>
+      {subtitle}
     </div>
   );
 };

@@ -69,7 +69,7 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
   // state when generate succeed
   const [fileLink, setFileLink] = useState("");
 
-  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> = (data) => {
+  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> = useCallback(data => {
     if (!fileItem || !currentUser) {
       return;
     }
@@ -99,7 +99,7 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
       .then(fileUrl => {
         setFileLink(fileUrl.toString());
       });
-  };
+  }, [currentUser, regionId, bucketName, fileItem, setFileLink]);
   const generateFileLinkDebounced = useCallback(lodash.debounce(() => {
     handleSubmit(handleSubmitGenerateFileLink)();
   }, 500), [handleSubmit, handleSubmitGenerateFileLink]);

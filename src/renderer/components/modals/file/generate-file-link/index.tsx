@@ -88,7 +88,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
   });
 
   // generate file link result
-  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> = (data) => {
+  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> = useCallback(data => {
     if (!memoFileItem || !currentUser) {
       return;
     }
@@ -118,7 +118,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
       .then(fileUrl => {
         setFileLink(fileUrl.toString());
       });
-  };
+  }, [currentUser, memoFileItem, memoRegionId, memoBucketName, setFileLink]);
   const generateFileLinkDebounced = useCallback(lodash.debounce(() => {
     handleSubmit(handleSubmitGenerateFileLink)();
   }, 500), [handleSubmit, handleSubmitGenerateFileLink]);

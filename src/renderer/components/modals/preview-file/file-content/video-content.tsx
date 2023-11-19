@@ -42,7 +42,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
       isPublicCloud: currentUser.endpointType === EndpointType.Public,
-      preferS3Adapter: domain.backendMode === BackendMode.S3,
+      preferS3Adapter: domain.apiScope === BackendMode.S3,
     };
     signatureUrl(
       regionId,

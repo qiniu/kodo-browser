@@ -46,7 +46,7 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
     user: currentUser,
     regionId,
     bucketName,
-    canS3Domain,
+    canDefaultS3Domain: canS3Domain,
     preferBackendMode,
   });
 
@@ -81,7 +81,7 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter:
         preferBackendMode === BackendMode.S3 ||
-        data.domain?.backendMode === BackendMode.S3,
+        data.domain?.apiScope === BackendMode.S3,
     };
 
     const domain = data.domain?.name === NON_OWNED_DOMAIN.name

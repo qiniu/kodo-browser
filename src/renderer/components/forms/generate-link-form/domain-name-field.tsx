@@ -31,7 +31,7 @@ const DomainNameField: React.FC<DomainNameFieldProps> = ({
   const {translate} = useI18n();
 
   const validateDomain = (domainAdapter?: DomainAdapter) => {
-    if (isEmptyPath && domainAdapter?.backendMode === BackendMode.S3) {
+    if (isEmptyPath && domainAdapter?.apiScope === BackendMode.S3) {
       return translate("forms.generateLink.domainName.feedback.emptyFileNameByS3Hint");
     }
     return true;

@@ -5,6 +5,7 @@ export interface LaunchConfigSetupOptions {
 export interface LaunchConfig {
   preferredEndpointType?: string,
   defaultPrivateEndpointConfig?: DefaultPrivateEndpointConfig,
+  disable: DisableFunctions,
 }
 
 export interface DefaultPrivateEndpointConfig {
@@ -14,6 +15,10 @@ export interface DefaultPrivateEndpointConfig {
     label?: string,
     endpoint: string,
   }[],
+}
+
+export interface DisableFunctions {
+  nonOwnedDomain?: boolean,
 }
 
 export interface LaunchConfigPlugin {

@@ -6,6 +6,7 @@ import {LocalFile, serializer} from "@renderer/modules/persistence";
 import {LaunchConfigPlugin} from "./types";
 import DefaultPrivateEndpoint from "./default-private-endpoint";
 import PreferredEndpointType from "./preferred-endpoint-type";
+import DisableFunctions from "@renderer/modules/launch-config/disable-functions";
 
 class LaunchConfig {
   static basePath = path.dirname(app.getPath("exe"));
@@ -22,17 +23,16 @@ class LaunchConfig {
       if (!data) {
         return;
       }
-      const plugins: LaunchConfigPlugin[] = [
-        new PreferredEndpointType(),
-        new DefaultPrivateEndpoint(),
-      ];
-      plugins.forEach(plugin => {
-        plugin.setup({
-          launchConfig: data,
-        });
+    const plugins: LaunchConfigPlugin[] = [
+      new PreferredEndpointType(),
+      new DefaultPrivateEndpoint(),
+      new DisableFunctions(),
+    ];
+    plugins.forEach(plugin => {
+      plugin.setup({
+        launchConfig: data,
       });
-    })
-
+    });})
   }
 }
 

@@ -1,7 +1,7 @@
 export interface FormComponentBaseProps<T = string> {
-  onChange: (val?: T) => void,
-  onBlur: (val?: T) => void,
   name: string,
+  onChange?: (val?: T) => void,
+  onBlur?: (val?: T) => void,
   required?: boolean,
   disabled?: boolean,
 

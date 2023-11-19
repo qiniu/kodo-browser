@@ -275,11 +275,15 @@ const dict: Dictionary = {
       fileName: {
         label: "File Name:",
       },
+      domainType: {
+        cdn: "CDN",
+        origin: "Origin",
+      },
       domainName: {
         label: "Domain Name:",
         nonOwnedDomain: "Non-owned domain name",
         feedback: {
-          emptyFileNameByS3Hint: "Can't export download link of a file with empty name by non-owned domain.",
+          emptyFileNameByS3Hint: "Can't export download link of a file with empty name by s3 domain.",
         },
       },
       expireAfter: {
@@ -724,7 +728,7 @@ const dict: Dictionary = {
         }
       },
       error: {
-        emptyFileNameByS3Hint: "Can't preview a file with empty name by non-owned domain",
+        emptyFileNameByS3Hint: "Can't preview a file with empty name by S3 domain",
         failedGenerateLink: "Failed to get preview link",
         failedGetContent: "Failed to get file contents",
         contentNotChanged: "The content is not modified",

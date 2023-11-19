@@ -281,6 +281,10 @@ export default interface Dictionary {
       fileName: {
         label: string,
       },
+      domainType: {
+        cdn: string,
+        origin: string
+      },
       domainName: {
         label: string,
         nonOwnedDomain: string,

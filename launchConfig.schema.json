@@ -46,6 +46,16 @@
           "uniqueItems": true
         }
       }
+    },
+    "disable": {
+      "description": "To disable some functions.",
+      "type": "object",
+      "properties": {
+        "nonOwnedDomain": {
+          "description": "To disable using non-owned domain for preview and generate link.",
+          "type": "boolean"
+        }
+      }
     }
   }
 }

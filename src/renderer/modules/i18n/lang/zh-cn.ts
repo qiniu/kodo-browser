@@ -274,11 +274,15 @@ const dict: Dictionary = {
       fileName: {
         label: "文件名：",
       },
+      domainType: {
+        cdn: "CDN 域名",
+        origin: "源站域名",
+      },
       domainName: {
         label: "域名：",
         nonOwnedDomain: "不使用自有域名",
         feedback: {
-          emptyFileNameByS3Hint: "空名文件不可使用非自有域名导出外链",
+          emptyFileNameByS3Hint: "空名文件不可使用 S3 域名导出外链",
         },
       },
       expireAfter: {
@@ -723,7 +727,7 @@ const dict: Dictionary = {
         }
       },
       error: {
-        emptyFileNameByS3Hint: "无法使用非自有域名预览空名文件",
+        emptyFileNameByS3Hint: "无法使用 S3 域名预览空名文件",
         failedGenerateLink: "获取预览链接失败",
         failedGetContent: "获取文件内容失败",
         contentNotChanged: "内容没有修改",

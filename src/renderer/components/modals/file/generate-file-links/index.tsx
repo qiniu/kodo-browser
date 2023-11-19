@@ -101,7 +101,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     user: currentUser,
     regionId: memoRegionId,
     bucketName: memoBucketName,
-    canS3Domain: memoCanS3Domain,
+    canDefaultS3Domain: memoCanS3Domain,
     preferBackendMode,
   });
 
@@ -164,7 +164,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter:
         preferBackendMode === BackendMode.S3 ||
-        domain?.backendMode === BackendMode.S3,
+        domain?.apiScope === BackendMode.S3,
     };
     return signatureUrls(
       memoRegionId,

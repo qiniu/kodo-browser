@@ -6,6 +6,7 @@ import {toast} from "react-hot-toast";
 import {Region} from "kodo-s3-adapter-sdk";
 
 import StorageClass from "@common/models/storage-class";
+import {BackendMode} from "@common/qiniu";
 
 import * as LocalLogger from "@renderer/modules/local-logger";
 import {useI18n} from "@renderer/modules/i18n";
@@ -186,7 +187,7 @@ const Files: React.FC<FilesProps> = (props) => {
       setSelectedFiles(new Map());
       return true;
     },
-    canS3Domain: !props.bucket?.grantedPermission,
+    canDefaultS3Domain: !props.bucket?.grantedPermission,
     preferBackendMode: props.bucket?.preferBackendMode,
   });
   const [selectedDomain, setSelectedDomain] = useState<DomainAdapter | undefined>();
@@ -308,7 +309,7 @@ const Files: React.FC<FilesProps> = (props) => {
           label: r.label,
           s3Urls: [r.endpoint],
         })),
-        backendMode: selectedDomain.backendMode,
+        backendMode: selectedDomain.apiScope as BackendMode,
       },
     });
   };

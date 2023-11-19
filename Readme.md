@@ -137,6 +137,7 @@ kodo-browser/
 
 * 禁止创建 Bucket
 * 禁止删除 Bucket
+* 禁止使用自有域名
 * 配置升级检测地址
 
 ## 6. 启动配置项
@@ -154,6 +155,8 @@ kodo-browser/
 * `defaultPrivateEndpointConfig`，私有云服务默认地址；
     * `ucUrl`，Bucket 管理服务地址，必须；
     * `regions`，区域信息，对于较新的私有云可选，详细请向管理员询问；
+* `disable`，禁止某些功能；
+    * `nonOwnedDomain`，非自有域名；
 
 例如以下配置将修改默认登录私有云指定服务端：
 

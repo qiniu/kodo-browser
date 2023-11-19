@@ -11,6 +11,7 @@ interface Dict {
       endpoint: string,
     }[],
   },
+  DISABLE_NON_OWNED_DOMAIN?: boolean,
 }
 
 const dict: Dict = {};

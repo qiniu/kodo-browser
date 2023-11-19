@@ -274,11 +274,15 @@ const dict: Dictionary = {
             fileName: {
                 label: "名前：",
             },
+            domainType: {
+                cdn: "CDN",
+                origin: "配信元サーバー",
+            },
             domainName: {
                 label: "ドメイン名：",
                 nonOwnedDomain: "所有ドメイン名はありません",
                 feedback: {
-                    emptyFileNameByS3Hint: "空のファイル名と所有ドメイン名はありませんでは利用できません",
+                    emptyFileNameByS3Hint: "空のファイル名と S3 ドメイン名はありませんでは利用できません",
                 },
             },
             expireAfter: {
@@ -723,7 +727,7 @@ const dict: Dictionary = {
                 }
             },
             error: {
-                emptyFileNameByS3Hint: "空のファイル名と所有ドメイン名はありませんでは利用できません",
+                emptyFileNameByS3Hint: "空のファイル名と S3 ドメイン名はありませんでは利用できません",
                 failedGenerateLink: "プレビュー リンクの取得に失敗しました",
                 failedGetContent: "ファイルの内容の取得に失敗しました",
                 contentNotChanged: "内容は修正していません",

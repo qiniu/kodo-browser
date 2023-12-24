@@ -1,3 +1,6 @@
+/*
+* Change some default values which are hard coded in project
+* */
 interface Dict {
   LOGIN_ENDPOINT_TYPE?: string,
   PRIVATE_ENDPOINT?: {

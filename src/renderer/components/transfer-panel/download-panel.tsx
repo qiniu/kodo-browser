@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useState, useSyncExternalStore} from "react";
 import {Button, Form} from "react-bootstrap";
 import classNames from "classnames";
 import AutoResizer from "react-virtualized-auto-sizer";
@@ -8,8 +8,8 @@ import {Status} from "@common/models/job/types";
 import DownloadJob from "@common/models/job/download-job";
 
 import {translate} from "@renderer/modules/i18n";
+import {appPreferences} from "@renderer/modules/user-config-store";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
-import Settings from "@renderer/modules/settings";
 
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import ConfirmModal from "@renderer/components/modals/common/confirm-modal";
@@ -71,6 +71,14 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
   onLoadMore,
   onChangeSearchText,
 }) => {
+  const {
+    state: appPreferencesState,
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
+
   const [
     {
       show: isShowRemoveAllConfirmModal
@@ -81,13 +89,9 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
     },
   ] = useDisplayModal();
 
-  const defaultIsOverwriteDownload = useMemo(() => {
-    return Settings.overwriteDownload;
-  }, []);
-  const [isOverwriteDownload, setIsOverwriteDownload] = useState<boolean>(defaultIsOverwriteDownload);
+  const isOverwriteDownload = appPreferencesData.overwriteDownloadEnabled;
   const handleToggleIsOverwriteDownload = () => {
-    Settings.overwriteDownload = !isOverwriteDownload;
-    setIsOverwriteDownload(!isOverwriteDownload);
+    appPreferences.set("overwriteDownloadEnabled", !isOverwriteDownload);
   };
 
   // search state
@@ -141,6 +145,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
                 "bi bi-file-earmark-arrow-down-fill",
                 isOverwriteDownload ? "" : "text-muted"
               )}
+              loading={!appPreferencesState.initialized}
               tooltipPlacement="top"
               tooltipContent={translate("transfer.download.toolbar.overwriteSwitch")}
               variant={isOverwriteDownload ? "primary" : "outline-solid-gray-300"}

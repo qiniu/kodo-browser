@@ -8,9 +8,9 @@ import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 import {useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import * as AuditLog from "@renderer/modules/audit-log";
-import {useKodoExternalPath} from "@renderer/modules/kodo-address";
+import {useExternalPath} from "@renderer/modules/user-config-store";
 import {listFiles} from "@renderer/modules/qiniu-client";
-import useLoadRegions from "@renderer/modules/qiniu-client-hooks/use-load-regions";
+import {useLoadRegions} from "@renderer/modules/qiniu-client-hooks";
 
 interface AddExternalPathFormDate {
   path: string,
@@ -18,7 +18,7 @@ interface AddExternalPathFormDate {
 }
 
 interface AddExternalPathProps {
-  onAddedExternalPath: () => void,
+  onAddedExternalPath?: () => void,
 }
 
 const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
@@ -50,11 +50,10 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
 
   // external path
   const {
-    externalPathState: {
-      kodoExternalPath,
-    },
-    setExternalPaths,
-  } = useKodoExternalPath(currentUser);
+    externalPathState,
+    hasExternalPath,
+    addExternalPath,
+  } = useExternalPath(currentUser);
 
   // add external path form
   const {
@@ -68,11 +67,11 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
   } = useForm<AddExternalPathFormDate>();
 
   const handleAddExternalPath: SubmitHandler<AddExternalPathFormDate> = (data) => {
-    if (!currentUser || !kodoExternalPath) {
+    if (!currentUser || externalPathState.initialized) {
       return;
     }
 
-    if (kodoExternalPath.hasExternalPath({
+    if (hasExternalPath({
       protocol: ADDR_KODO_PROTOCOL,
       regionId: data.regionId,
       path: data.path,
@@ -102,20 +101,21 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
     );
 
     p.then(() => {
-      kodoExternalPath.addExternalPath({
+      return addExternalPath({
         regionId: data.regionId,
         protocol: ADDR_KODO_PROTOCOL,
         path: data.path,
       });
-      setExternalPaths(kodoExternalPath.read().list ?? []);
-      reset();
-      AuditLog.log(AuditLog.Action.AddExternalPath, {
-        regionId: data.regionId,
-        path: ADDR_KODO_PROTOCOL + data.path,
+    })
+      .then(() => {
+        reset();
+        AuditLog.log(AuditLog.Action.AddExternalPath, {
+          regionId: data.regionId,
+          path: ADDR_KODO_PROTOCOL + data.path,
+        });
+        onAddedExternalPath?.();
+        modalProps.onHide?.();
       });
-      modalProps.onHide?.();
-      onAddedExternalPath();
-    });
 
     return toast.promise(p, {
       loading: translate("common.submitting"),

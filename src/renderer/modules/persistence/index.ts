@@ -1,4 +1,4 @@
-export {default as browserLocalStorage} from "./local-storage";
-export {default as localFile} from "./local-file";
-export * from "./local-file";
-export * from "./types";
+export * as serializer from "./serializer";
+export {default as Persistence} from "./persistence";
+export {default as BrowserStorage} from "./browser-storage";
+export {default as LocalFile} from "./local-file";

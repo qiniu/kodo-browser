@@ -4,14 +4,14 @@ import {toast} from "react-hot-toast";
 
 import {Translate, useI18n} from "@renderer/modules/i18n";
 import {useAuth} from "@renderer/modules/auth";
-import {ExternalPathItem, useKodoExternalPath} from "@renderer/modules/kodo-address";
+import {ExternalPathItem, useExternalPath} from "@renderer/modules/user-config-store";
 
 import {useSubmitModal} from "../../hooks";
 
 interface DeleteExternalPathProps {
   externalPath: ExternalPathItem | null,
   regionName?: string,
-  onDeletedExternalPath: () => void,
+  onDeletedExternalPath?: () => void,
 }
 
 const DeleteExternalPath: React.FC<ModalProps & DeleteExternalPathProps> = ({
@@ -24,10 +24,8 @@ const DeleteExternalPath: React.FC<ModalProps & DeleteExternalPathProps> = ({
   const {currentUser} = useAuth();
 
   const {
-    externalPathState: {
-      kodoExternalPath,
-    },
-  } = useKodoExternalPath(currentUser);
+    deleteExternalPath,
+  } = useExternalPath(currentUser);
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -55,14 +53,20 @@ const DeleteExternalPath: React.FC<ModalProps & DeleteExternalPathProps> = ({
   } = useSubmitModal();
 
   const handleSubmitDeleteExternalPath = () => {
-    if (!currentUser || !kodoExternalPath || !memoExternalPath) {
+    if (!currentUser || !memoExternalPath) {
       return;
     }
 
-    kodoExternalPath.deleteExternalPath(memoExternalPath);
-    toast.success("删除成功");
-    onDeletedExternalPath();
-    modalProps.onHide?.();
+    const p = deleteExternalPath(memoExternalPath);
+    p.then(() => {
+      onDeletedExternalPath?.();
+      modalProps.onHide?.();
+    })
+    return toast.promise(p, {
+      loading: translate("common.submitting"),
+      success: translate("common.submitted"),
+      error: err => `${translate("common.failed")}: ${err}`,
+    });
   }
 
   return (

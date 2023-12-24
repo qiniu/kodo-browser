@@ -27,7 +27,7 @@ function handleOnline() {
   ipcUploadManager.startJobsByOnline();
 }
 
-interface UploadConfig {
+export interface UploadConfig {
   resumable: boolean,
   maxConcurrency: number,
   multipartSize: number, // Bytes
@@ -41,7 +41,7 @@ interface UploadConfig {
   userNatureLanguage: NatureLanguage,
 }
 
-interface UseIpcUploadProps {
+export interface UseIpcUploadProps {
   endpoint: Endpoint,
   user: AkItem | null,
   config: UploadConfig,
@@ -108,6 +108,14 @@ const useIpcUpload = ({
       window.removeEventListener("online", handleOnline);
     };
   }, []);
+
+  // auto update config
+  const sortedConfigValues = Object.entries(config)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(item => item[1]);
+  useEffect(() => {
+    ipcUploadManager.updateConfig(config);
+  }, sortedConfigValues);
 
   // subscribe IPC events of upload and make sure there is a valid configuration
   useEffect(() => {

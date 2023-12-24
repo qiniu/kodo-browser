@@ -1,8 +1,9 @@
 import React from "react";
 import {Col, Form, Row} from "react-bootstrap";
+import {useFormContext} from "react-hook-form";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {useFormContext} from "react-hook-form";
+import {AppPreferencesData} from "@renderer/modules/user-config-store";
 
 const FieldsUpload: React.FC = () => {
   const {translate} = useI18n();
@@ -12,7 +13,7 @@ const FieldsUpload: React.FC = () => {
     formState: {
       errors,
     },
-  } = useFormContext();
+  } = useFormContext<AppPreferencesData>();
 
   return (
     <fieldset>
@@ -23,7 +24,7 @@ const FieldsUpload: React.FC = () => {
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
           <Form.Switch
-            {...register("enabledResumeUpload")}
+            {...register("resumeUploadEnabled")}
             label={translate("modals.settings.upload.form.resumeUpload.hint")}
           />
         </Col>
@@ -112,7 +113,7 @@ const FieldsUpload: React.FC = () => {
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
           <Form.Switch
-            {...register("enabledUploadSpeedLimit")}
+            {...register("uploadSpeedLimitEnabled")}
             label={translate("modals.settings.upload.form.enabledUploadSpeedLimit.hint")}
           />
         </Col>
@@ -123,19 +124,19 @@ const FieldsUpload: React.FC = () => {
         </Form.Label>
         <Col sm={6}>
           <Form.Control
-            {...register("uploadSpeedLimit", {
+            {...register("uploadSpeedLimitKbPerSec", {
               valueAsNumber: true,
               required: true,
               min: 1,
               max: 102400,
-              disabled: !watch("enabledUploadSpeedLimit")
+              disabled: !watch("uploadSpeedLimitEnabled")
             })}
             type="number"
-            isInvalid={Boolean(errors.uploadSpeedLimit)}
+            isInvalid={Boolean(errors.uploadSpeedLimitKbPerSec)}
           />
           <Form.Text
             className={
-              Boolean(errors.uploadSpeedLimit)
+              Boolean(errors.uploadSpeedLimitKbPerSec)
                 ? "text-danger"
                 : ""
             }

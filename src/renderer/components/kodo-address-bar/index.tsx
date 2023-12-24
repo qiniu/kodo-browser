@@ -7,7 +7,7 @@ import {useAuth} from "@renderer/modules/auth";
 import {KodoAddress, KodoNavigator, useKodoNavigator} from "@renderer/modules/kodo-address";
 
 import TooltipButton from "@renderer/components/tooltip-button";
-import {useKodoBookmark} from "@renderer/modules/kodo-address/react-hooks";
+import {useBookmarkPath} from "@renderer/modules/user-config-store";
 
 interface KodoAddressBarProps {
   onClickRefresh: () => void,
@@ -37,14 +37,15 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
   }, [currentAddress]);
 
   const {
-    bookmarkState: {
+    bookmarkPathState,
+    bookmarkPathData: {
       homeAddress,
       list: bookmarks,
     },
     setHome,
     deleteBookmark,
     addBookmark,
-  } = useKodoBookmark(currentUser);
+  } = useBookmarkPath(currentUser);
 
   const isActiveBookmark = bookmarks.some(b =>
     b.protocol === address.protocol &&
@@ -52,6 +53,29 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
   );
 
   // handlers
+  const handleSetHome = async () => {
+    try {
+      await setHome(address);
+      toast.success(translate("kodoAddressBar.setHomeSuccess"))
+    } catch (e: any) {
+      toast.error(e.toString());
+    }
+  };
+
+  const handleToggleBookmark = async () => {
+    try {
+      if (isActiveBookmark) {
+        await deleteBookmark(address);
+        toast.success(translate("kodoAddressBar.deleteBookmarkSuccess"));
+      } else {
+        await addBookmark(address);
+        toast.success(translate("kodoAddressBar.setBookmarkSuccess"));
+      }
+    } catch (e: any) {
+      toast.error(e.toString());
+    }
+  };
+
   const handleSubmitAddress: KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.code !== "Enter") {
       return;
@@ -128,12 +152,10 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
           iconClassName="fa fa-bookmark"
           tooltipPlacement="bottom"
           tooltipContent={translate("kodoAddressBar.setHome")}
-          onClick={() => {
-            setHome(address);
-            toast.success(translate("kodoAddressBar.setHomeSuccess"))
-          }}
+          onClick={handleSetHome}
         />
         <TooltipButton
+          loading={!bookmarkPathState.initialized}
           iconClassName={
             isActiveBookmark
               ? "bi bi-star-fill text-yellow"
@@ -145,15 +167,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
               ? translate("kodoAddressBar.deleteBookmark")
               : translate("kodoAddressBar.setBookmark")
           }
-          onClick={() => {
-            if (isActiveBookmark) {
-              deleteBookmark(address);
-              toast.success(translate("kodoAddressBar.deleteBookmarkSuccess"));
-            } else {
-              addBookmark(address);
-              toast.success(translate("kodoAddressBar.setBookmarkSuccess"));
-            }
-          }}
+          onClick={handleToggleBookmark}
         />
       </InputGroup>
     </div>

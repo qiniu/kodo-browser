@@ -1,15 +1,16 @@
 import React, {ReactNode} from "react";
+import {useNavigate} from "react-router-dom";
 import {Form, Nav, NavDropdown} from "react-bootstrap";
 
 import {LangName, useI18n} from "@renderer/modules/i18n";
+import {appPreferences} from "@renderer/modules/user-config-store";
 import {AkItem, useAuth} from "@renderer/modules/auth";
 
-import {MenuItem, MenuItemType} from "./menu-item";
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import AkHistory from "@renderer/components/modals/general/ak-history";
-import {useNavigate} from "react-router-dom";
 import RoutePath from "@renderer/pages/route-path";
-import Settings from "@renderer/modules/settings";
+
+import {MenuItem, MenuItemType} from "./menu-item";
 
 interface MenuContentsProps {
   defaultMenuItems: MenuItem[],
@@ -148,8 +149,8 @@ const MenuContents: React.FC<MenuContentsProps> = ({
           size="sm"
           defaultValue={currentLanguage}
           onChange={e => {
-            Settings.language = e.target.value as LangName;
             setLanguage(e.target.value as LangName);
+            appPreferences.set("language", e.target.value as LangName);
           }}
         >
           <option value={LangName.ZH_CN}>中文</option>

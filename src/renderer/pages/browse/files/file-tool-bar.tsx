@@ -12,7 +12,7 @@ import {translate} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem} from "@renderer/modules/qiniu-client";
 import {FilesOperationType, useFileOperation} from "@renderer/modules/file-operation";
-import {ContentViewStyle} from "@renderer/modules/settings";
+import {ContentViewStyle} from "@renderer/modules/user-config-store";
 import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
 
 import TooltipButton from "@renderer/components/tooltip-button";

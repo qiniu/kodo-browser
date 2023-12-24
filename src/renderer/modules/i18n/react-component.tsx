@@ -1,6 +1,7 @@
 import React from "react";
 
-import {PropsPath} from "./types";
+import {PropsPath} from "@common/utility-types";
+
 import Dictionary from "./lang/dict";
 import {splitVariables} from "./core";
 import {useI18n} from "./react-context";

@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from "react";
+import {toast} from "react-hot-toast";
 import {Region} from "kodo-s3-adapter-sdk";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {useAuth} from "@renderer/modules/auth";
-import {useKodoExternalPath} from "@renderer/modules/kodo-address";
+import {useExternalPath} from "@renderer/modules/user-config-store";
 
 import ExternalPathToolBar from "./external-path-tool-bar";
 import ExternalPathTable from "./external-path-table";
@@ -18,7 +19,7 @@ const ExternalPaths: React.FC<ExternalPathsProps> = ({
   toggleRefresh,
   regions,
 }) => {
-  const {currentLanguage} = useI18n();
+  const {currentLanguage, translate} = useI18n();
   const {currentUser} = useAuth();
 
   const [selectedPath, setSelectedPath] = useState<ExternalPathRowData | null>(null);
@@ -30,24 +31,20 @@ const ExternalPaths: React.FC<ExternalPathsProps> = ({
   };
 
   const {
-    externalPathState: {
-      kodoExternalPath,
-      externalPaths,
-    },
-    setExternalPaths,
-  } = useKodoExternalPath(currentUser);
+    externalPathState,
+    externalPathData,
+    loadFromPersistence,
+  } = useExternalPath(currentUser);
 
-  const refreshTable = () => {
-    if (!kodoExternalPath) {
-      return;
-    }
-    setExternalPaths(kodoExternalPath.read().list);
-  };
-
-  useEffect(refreshTable, [toggleRefresh]);
+  useEffect(() => {
+    loadFromPersistence()
+      .catch(err => {
+        toast.error(`${translate("common.failed")}: ${err}`);
+      });
+  }, [toggleRefresh]);
 
   // computed state
-  const pathsToRender = externalPaths
+  const pathsToRender = externalPathData.list
     .filter(p => p.path.includes(pathSearchText))
     .map(p => {
       const region = regions.find(r => r.s3Id === p.regionId);
@@ -65,11 +62,9 @@ const ExternalPaths: React.FC<ExternalPathsProps> = ({
       <ExternalPathToolBar
         selectedPath={selectedPath}
         onSearch={handleSearchPath}
-        onAddedExternalPath={refreshTable}
-        onDeletedExternalPath={refreshTable}
       />
       <ExternalPathTable
-        loading={false}
+        loading={externalPathState.loadingPersistence}
         data={pathsToRender}
         selectedExternalPath={selectedPath}
         onChangeSelectedExternalPath={setSelectedPath}

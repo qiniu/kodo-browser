@@ -1,8 +1,9 @@
 import React from "react";
 import {Col, Form, Row} from "react-bootstrap";
+import {useFormContext} from "react-hook-form";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {useFormContext} from "react-hook-form";
+import {AppPreferencesData} from "@renderer/modules/user-config-store";
 
 const FieldsDownload: React.FC = () => {
   const {translate} = useI18n();
@@ -12,7 +13,7 @@ const FieldsDownload: React.FC = () => {
     formState: {
       errors,
     },
-  } = useFormContext();
+  } = useFormContext<AppPreferencesData>();
 
   return (
     <fieldset>
@@ -23,7 +24,7 @@ const FieldsDownload: React.FC = () => {
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
           <Form.Switch
-            {...register("enabledResumeDownload")}
+            {...register("resumeDownloadEnabled")}
             label={translate("modals.settings.download.form.resumeDownload.hint")}
           />
         </Col>
@@ -112,7 +113,7 @@ const FieldsDownload: React.FC = () => {
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
           <Form.Switch
-            {...register("enabledDownloadSpeedLimit")}
+            {...register("downloadSpeedLimitEnabled")}
             label={translate("modals.settings.download.form.enabledDownloadSpeedLimit.hint")}
           />
         </Col>
@@ -123,19 +124,19 @@ const FieldsDownload: React.FC = () => {
         </Form.Label>
         <Col sm={6}>
           <Form.Control
-            {...register("downloadSpeedLimit", {
+            {...register("downloadSpeedLimitKbPerSec", {
               valueAsNumber: true,
               required: true,
               min: 1,
               max: 102400,
-              disabled: !watch("enabledDownloadSpeedLimit")
+              disabled: !watch("downloadSpeedLimitEnabled")
             })}
             type="number"
-            isInvalid={Boolean(errors.downloadSpeedLimit)}
+            isInvalid={Boolean(errors.downloadSpeedLimitKbPerSec)}
           />
           <Form.Text
             className={
-              Boolean(errors.downloadSpeedLimit)
+              Boolean(errors.downloadSpeedLimitKbPerSec)
                 ? "text-danger"
                 : ""
             }

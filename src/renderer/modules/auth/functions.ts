@@ -4,12 +4,21 @@ import * as LocalLogger from "@renderer/modules/local-logger";
 import * as QiniuClient from "@renderer/modules/qiniu-client";
 
 import {AkItem, EndpointType} from "./types";
-import {authPersistence} from "./persister";
+import {authPersistence} from "./persistence";
 
-let currentUser: AkItem | null = authPersistence.read();
-let history: AkItem[] = authPersistence.readHistory();
+let currentUser: AkItem | null = null;
+let history: AkItem[] = [];
 
-LocalLogger.debug("load ak history", currentUser, history);
+export async function loadPersistence() {
+  [currentUser, history] = await Promise.all([
+    authPersistence.read(),
+    authPersistence.readHistory(),
+  ]);
+  if (!Array.isArray(history)) {
+    history = [];
+  }
+  LocalLogger.debug("load ak history", currentUser, history);
+}
 
 export async function signIn(akItem: AkItem, remember: boolean) {
   await QiniuClient.listAllBuckets({
@@ -19,7 +28,7 @@ export async function signIn(akItem: AkItem, remember: boolean) {
   });
   currentUser = akItem;
   if (remember) {
-    authPersistence.save(akItem);
+    await authPersistence.save(akItem);
     const foundIndex = history.findIndex(
       ak =>
         ak.accessKey === akItem.accessKey &&
@@ -30,13 +39,13 @@ export async function signIn(akItem: AkItem, remember: boolean) {
     } else {
       history[foundIndex] = akItem;
     }
-    authPersistence.saveHistory(history);
+    await authPersistence.saveHistory(history);
   }
 }
 
-export function signOut() {
+export async function signOut() {
   currentUser = null;
-  authPersistence.clear();
+  await authPersistence.clear();
 }
 
 export function getCurrentUser(): AkItem | null {
@@ -47,17 +56,17 @@ export function getHistory(): AkItem[] {
   return history;
 }
 
-export function deleteHistory(target: AkItem) {
+export async function deleteHistory(target: AkItem) {
   lodash.remove(
     history,
     akItem =>
       akItem.accessKey === target.accessKey &&
       akItem.accessSecret === target.accessSecret
   );
-  authPersistence.saveHistory(history);
+  await authPersistence.saveHistory(history);
 }
 
-export function clearHistory() {
+export async function clearHistory() {
   history = [];
-  authPersistence.clearHistory();
+  await authPersistence.clearHistory();
 }

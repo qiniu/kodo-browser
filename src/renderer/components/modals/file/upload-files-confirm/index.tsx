@@ -11,10 +11,10 @@ import StorageClass from "@common/models/storage-class";
 
 import {Translate, useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
-import {privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 import {useFileOperation} from "@renderer/modules/file-operation";
 import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
 import * as AuditLog from "@renderer/modules/audit-log";
+import {useEndpointConfig} from "@renderer/modules/user-config-store";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 
@@ -66,14 +66,9 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
   const {currentUser} = useAuth();
   const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
-  const customizedEndpoint = useMemo(() => {
-    return currentUser?.endpointType === EndpointType.Public
-      ? {
-        ucUrl: "",
-        regions: [],
-      }
-      : privateEndpointPersistence.read()
-  }, [currentUser?.endpointType]);
+  const {
+    endpointConfigData,
+  } = useEndpointConfig(currentUser);
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -163,8 +158,8 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
       clientOptions: {
         accessKey: currentUser.accessKey,
         secretKey: currentUser.accessSecret,
-        ucUrl: customizedEndpoint.ucUrl,
-        regions: customizedEndpoint.regions.map(r => ({
+        ucUrl: endpointConfigData.ucUrl,
+        regions: endpointConfigData.regions.map(r => ({
           id: "",
           s3Id: r.identifier,
           label: r.label,

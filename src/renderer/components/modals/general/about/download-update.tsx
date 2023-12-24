@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState, useSyncExternalStore} from "react";
 import {Button} from "react-bootstrap";
 import {shell} from "electron";
 
@@ -7,7 +7,7 @@ import {BatchProgress, BatchTaskStatus, useBatchProgress} from "@renderer/compon
 import useMount from "@renderer/modules/hooks/use-mount";
 import useUnmount from "@renderer/modules/hooks/use-unmount";
 import {useI18n} from "@renderer/modules/i18n";
-import Settings from "@renderer/modules/settings";
+import {appPreferences} from "@renderer/modules/user-config-store";
 
 import useDownloadUpdate from "./use-download-update";
 
@@ -163,13 +163,25 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
     if (cachedError) {
       setDownloadError(cachedError);
     }
-    if (Settings.autoUpgrade) {
-      handleStart();
-    }
   });
   useUnmount(() => {
     background(batchProgressState, downloadError);
   });
+
+  // auto upgrade
+  const {
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
+  useEffect(() => {
+    if (appPreferencesData.autoUpdateAppEnabled) {
+      handleStart();
+    } else if (isGoOn.current) {
+      handlePause();
+    }
+  }, [appPreferencesData.autoUpdateAppEnabled]);
 
   return (
     <div>

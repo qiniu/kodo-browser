@@ -12,8 +12,8 @@ import {ExternalPathRowData} from "./external-path-table-row";
 interface ExternalPathToolBarProps {
   selectedPath: ExternalPathRowData | null,
   onSearch: (target: string) => void,
-  onAddedExternalPath: () => void,
-  onDeletedExternalPath: () => void,
+  onAddedExternalPath?: () => void,
+  onDeletedExternalPath?: () => void,
 }
 
 const ExternalPathToolBar: React.FC<ExternalPathToolBarProps> = ({

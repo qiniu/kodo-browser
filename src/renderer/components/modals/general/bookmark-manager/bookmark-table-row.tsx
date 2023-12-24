@@ -3,7 +3,7 @@ import {Button} from "react-bootstrap";
 import moment from "moment";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {BookmarkItem} from "@renderer/modules/kodo-address";
+import {BookmarkItem} from "@renderer/modules/user-config-store";
 
 interface BookmarkTableRowProps {
   data: BookmarkItem,

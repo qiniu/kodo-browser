@@ -1,5 +1,6 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useState, useSyncExternalStore} from "react";
 import {Button, Form} from "react-bootstrap";
+import {toast} from "react-hot-toast";
 import classNames from "classnames";
 import AutoResizer from "react-virtualized-auto-sizer";
 import {areEqual, FixedSizeList as List, ListChildComponentProps} from 'react-window';
@@ -8,8 +9,8 @@ import {Status} from "@common/models/job/types";
 import UploadJob from "@common/models/job/upload-job";
 
 import {translate} from "@renderer/modules/i18n";
+import {appPreferences} from "@renderer/modules/user-config-store";
 import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
-import Settings from "@renderer/modules/settings";
 
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import ConfirmModal from "@renderer/components/modals/common/confirm-modal";
@@ -81,13 +82,20 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
   ] = useDisplayModal();
 
 
-  const defaultIsSkipEmptyDirectoryUpload = useMemo(() => {
-    return Settings.skipEmptyDirectoryUpload;
-  }, []);
-  const [isSkipEmptyDirectoryUpload, setIsSkipEmptyDirectoryUpload] = useState<boolean>(defaultIsSkipEmptyDirectoryUpload);
+  const {
+    state: appPreferencesState,
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
+
+  const isSkipEmptyDirectoryUpload = appPreferencesData.skipEmptyDirectoryUpload;
   const handleToggleIsSkipEmptyDirectoryUpload = () => {
-    Settings.skipEmptyDirectoryUpload = !isSkipEmptyDirectoryUpload;
-    setIsSkipEmptyDirectoryUpload(!isSkipEmptyDirectoryUpload);
+    appPreferences.set("skipEmptyDirectoryUpload", !isSkipEmptyDirectoryUpload)
+      .catch(err => {
+        toast.error(`${translate("common.failed")}: ${err}`);
+      });
   };
 
   // search state
@@ -141,6 +149,7 @@ const UploadPanel: React.FC<UploadPanelProps> = ({
                 "bi bi-folder",
                 isSkipEmptyDirectoryUpload ? "text-muted" : ""
               )}
+              loading={!appPreferencesState.initialized}
               tooltipPlacement="top"
               tooltipContent={translate("transfer.upload.toolbar.emptyDirectorySwitch")}
               variant={isSkipEmptyDirectoryUpload ? "outline-solid-gray-300" : "primary"}

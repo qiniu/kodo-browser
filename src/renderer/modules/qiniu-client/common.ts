@@ -1,14 +1,14 @@
-import { KODO_MODE, Qiniu, Region, S3_MODE } from "kodo-s3-adapter-sdk"
-import { NatureLanguage } from "kodo-s3-adapter-sdk/dist/uplog";
-import { Kodo as KodoAdapter } from "kodo-s3-adapter-sdk/dist/kodo"
-import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3"
-import { RegionService } from "kodo-s3-adapter-sdk/dist/region_service";
+import {KODO_MODE, Qiniu, Region, S3_MODE} from "kodo-s3-adapter-sdk"
+import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
+import {Kodo as KodoAdapter} from "kodo-s3-adapter-sdk/dist/kodo"
+import {S3 as S3Adapter} from "kodo-s3-adapter-sdk/dist/s3"
+import {RegionService} from "kodo-s3-adapter-sdk/dist/region_service";
 
 
 import * as AppConfig from "@common/const/app-config";
 import * as LocalLogger from "@renderer/modules/local-logger";
-
-import {privateEndpointPersistence} from "./endpoint";
+import {EndpointType} from "@renderer/modules/auth";
+import {appPreferences, getEndpointConfig} from "@renderer/modules/user-config-store";
 
 export function debugRequest(mode: string) {
     return (request: any) => {
@@ -125,8 +125,7 @@ function getAdapterOption(opt: GetAdapterOptionParam): AdapterOption {
         secretKey: opt.secret,
         appName: AppConfig.app.id,
         appVersion: AppConfig.app.version,
-        // TODO: get from @renderer/modules/settings or pass by opt
-        appNatureLanguage: localStorage.getItem("lang") as NatureLanguage ?? 'zh-CN',
+        appNatureLanguage: appPreferences.get("language").replace("_", "-") as NatureLanguage ?? 'zh-CN',
         regions: [],
     };
     let result: AdapterOption;
@@ -136,19 +135,24 @@ function getAdapterOption(opt: GetAdapterOptionParam): AdapterOption {
             ucUrl: undefined,
         };
     } else {
-        const privateEndpoint = privateEndpointPersistence.read();
+        const endpointConfig = getEndpointConfig({
+            accessKey: opt.id,
+            accessSecret: opt.secret,
+            endpointType: EndpointType.Private,
+        });
+        const privateEndpoint = endpointConfig.getAll();
         result = {
             ...baseResult,
             ucUrl: privateEndpoint.ucUrl,
             regions: privateEndpoint.regions.map(rSetting => {
-              const r = new Region(
-                "",
-                rSetting.identifier,
-                rSetting.label || rSetting.identifier,
-              );
-              r.s3Urls = [rSetting.endpoint];
-              r.ucUrls = [privateEndpoint.ucUrl];
-              return r;
+                const r = new Region(
+                    "",
+                    rSetting.identifier,
+                    rSetting.label || rSetting.identifier,
+                );
+                r.s3Urls = [rSetting.endpoint];
+                r.ucUrls = [privateEndpoint.ucUrl];
+                return r;
             }),
             // disable uplog when use customize cloud
             // because there isn't a valid access key of uplog

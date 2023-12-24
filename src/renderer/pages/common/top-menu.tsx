@@ -1,10 +1,11 @@
-import React, {useEffect, useState} from "react";
+import React, {useSyncExternalStore} from "react";
 import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 
+import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
+
 import {useI18n} from "@renderer/modules/i18n";
+import {BookmarkItem, ExternalPathItem, appPreferences} from "@renderer/modules/user-config-store";
 import RouterPath from "@renderer/pages/route-path";
-import {BookmarkItem, ExternalPathItem} from "@renderer/modules/kodo-address";
-import Settings, {OnChangeCallback, SettingKey} from "@renderer/modules/settings";
 
 import Top from "@renderer/components/top";
 import {MenuItem, MenuItemType} from "@renderer/components/top/menu-item";
@@ -16,7 +17,6 @@ import About from "@renderer/components/modals/general/about";
 import ReleaseNoteModal from "@renderer/components/modals/general/release-note-modal";
 
 import AboutMenuItem from "./about-menu-item";
-import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 
 interface TopMenuProps {
   onActiveKodoAddress: (kodoAddress: BookmarkItem | ExternalPathItem) => void,
@@ -29,18 +29,14 @@ const TopMenu: React.FC<TopMenuProps> = ({
   const location = useLocation();
   const [searchParams, _] = useSearchParams();
   const navigate = useNavigate();
-
-  const [enabledExternalPath, setEnabledExternalPath] = useState(Settings.externalPathEnabled);
-  useEffect(() => {
-    const handleChangeExternalPath: OnChangeCallback = ({key, value}) => {
-      if (key === SettingKey.ExternalPathEnabled) {
-        setEnabledExternalPath(value);
-      }
-    }
-    Settings.onChange(handleChangeExternalPath);
-
-    return () => Settings.offChange(handleChangeExternalPath);
-  }, [])
+  const {
+    state: appPreferencesState,
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
+  const externalPathEnabled = appPreferencesState.initialized && appPreferencesData.externalPathEnabled;
 
   // release note
   const [
@@ -153,7 +149,7 @@ const TopMenu: React.FC<TopMenuProps> = ({
     },
     aboutItem,
   ];
-  if (enabledExternalPath) {
+  if (externalPathEnabled) {
     singedInMenuItems.splice(1, 0,
       {
         id: "top.externalPath",

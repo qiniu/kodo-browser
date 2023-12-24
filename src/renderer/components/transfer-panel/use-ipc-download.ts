@@ -17,6 +17,7 @@ import {Endpoint} from "@renderer/modules/qiniu-client";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 
 import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
+import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
 
 function handleOffline() {
   ipcDownloadManager.stopJobsByOffline();
@@ -80,6 +81,14 @@ const useIpcDownload = ({
     };
   }, []);
 
+  // auto update config
+  const sortedConfigValues = Object.entries(config)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(item => item[1]);
+  useEffect(() => {
+    ipcUploadManager.updateConfig(config);
+  }, sortedConfigValues);
+
   // subscribe IPC events of download and make sure there is a valid configuration
   useEffect(() => {
     const downloadReplyHandler = (_event: IpcRendererEvent, message: DownloadReplyMessage) => {
@@ -100,7 +109,6 @@ const useIpcDownload = ({
     };
 
     ipcRenderer.on("DownloaderManager-reply", downloadReplyHandler);
-    ipcDownloadManager.updateConfig(config);
 
     return () => {
       ipcRenderer.off("DownloaderManager-reply", downloadReplyHandler);

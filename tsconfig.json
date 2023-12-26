@@ -22,8 +22,8 @@
     "moduleResolution": "node",
     "baseUrl": "src",
     "paths": {
-      "@/*": [
-        "./*"
+      "@main/*": [
+        "main/*"
       ],
       "@renderer/*": [
         "renderer/*"

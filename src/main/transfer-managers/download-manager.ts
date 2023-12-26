@@ -1,13 +1,11 @@
 import path from "path";
-import fs, {promises as fsPromises, constants as fsConstants} from "fs";
+import {promises as fsPromises, constants as fsConstants} from "fs";
 
-import lodash from "lodash";
 import sanitizeFilename from "sanitize-filename";
 import {Adapter, ListedObjects} from "kodo-s3-adapter-sdk/dist/adapter";
 
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
 import DownloadJob from "@common/models/job/download-job";
-import {Status} from "@common/models/job/types";
 import {DownloadOptions, RemoteObject} from "@common/ipc-actions/download";
 
 import TransferManager, {TransferManagerConfig} from "./transfer-manager";
@@ -79,7 +77,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                             name: walkingObject.name,
                             path: localPath,
                         };
-                        this.createDownloadJob(from, to, clientOptions, downloadOptions);
+                        await this.createDownloadJob(from, to, clientOptions, downloadOptions);
 
                         // post add job
                         hooks?.jobsAdding?.();
@@ -91,64 +89,67 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         hooks?.jobsAdded?.();
     }
 
-    persistJobs(force: boolean = false): void {
-        if (force) {
-            this._persistJobs();
-            return;
-        }
-        this._persistJobsThrottle();
-    }
-
-    loadJobsFromStorage(
+    async loadJobsFromStorage(
         clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
         downloadOptions: Pick<DownloadOptions, "userNatureLanguage">,
-    ): void {
+    ): Promise<void> {
         if (!this.config.persistPath) {
             return;
         }
-        const persistedJobs: Record<string, DownloadJob["persistInfo"]> =
-            JSON.parse(fs.readFileSync(this.config.persistPath, "utf-8"));
+        this.persistStore = await this.persistStore;
+        for await (const [jobId, persistedJob] of this.persistStore.iter()) {
+            if (!persistedJob || this.jobs.get(jobId)) {
+                return;
+            }
 
-        Object.entries(persistedJobs)
-            .forEach(([jobId, persistedJob]) => {
-                if (this.jobs.get(jobId)) {
-                    return;
-                }
+            await this.loadJob(
+                jobId,
+                persistedJob,
+                clientOptions,
+                downloadOptions,
+            );
+        }
+    }
 
-                // some old version will persist an object message, cause type error
-                if (typeof persistedJob.message !== "string") {
-                  persistedJob.message = JSON.stringify(persistedJob.message);
-                }
+    private async loadJob(
+        jobId: string,
+        persistedJob: DownloadJob["persistInfo"],
+        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
+        downloadOptions: Pick<DownloadOptions, "userNatureLanguage">,
+    ): Promise<void> {
+        if (this.jobs.get(jobId)) {
+            return;
+        }
 
-                const job = DownloadJob.fromPersistInfo(
-                    jobId,
-                    persistedJob,
-                    {
-                        ...clientOptions,
-                        backendMode: persistedJob.backendMode,
-                    },
-                    {
-                        downloadSpeedLimit: this.config.speedLimit,
-                        overwrite: this.config.isOverwrite,
-                        isDebug: this.config.isDebug,
-                        userNatureLanguage: downloadOptions.userNatureLanguage,
-                    },
-                  {
-                        onStatusChange: (status, prev) => {
-                            this.handleJobStatusChange(status, prev);
-                        },
-                        onProgress: () => {
-                            this.persistJobs();
-                        },
-                    },
-                );
+        // some old version will persist an object message, cause type error
+        if (typeof persistedJob.message !== "string") {
+            persistedJob.message = JSON.stringify(persistedJob.message);
+        }
 
-                if ([Status.Waiting, Status.Running].includes(job.status)) {
-                    job.stop();
-                }
+        const job = DownloadJob.fromPersistInfo(
+            jobId,
+            persistedJob,
+            {
+                ...clientOptions,
+                backendMode: persistedJob.backendMode,
+            },
+            {
+                downloadSpeedLimit: this.config.speedLimit,
+                overwrite: this.config.isOverwrite,
+                isDebug: this.config.isDebug,
+                userNatureLanguage: downloadOptions.userNatureLanguage,
+            },
+            {
+                onStatusChange: (status, prev) => {
+                    this.handleJobStatusChange(status, prev);
+                },
+                onProgress: () => {
+                    this.persistJob(job.id, job.persistInfo);
+                },
+            },
+        );
 
-                this.addJob(job);
-            });
+        this._addJob(job);
     }
 
     removeJob(jobId: string) {
@@ -158,12 +159,12 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         super.removeJob(jobId);
     }
 
-    removeAllJobs() {
+    async removeAllJobs() {
         this.stopAllJobs();
         this.jobs.forEach(job => {
             job.tryCleanupDownloadFile();
         })
-        super.removeAllJobs();
+        await super.removeAllJobs();
     }
 
     private async walkRemoteObject(
@@ -254,12 +255,12 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         }
     }
 
-    private createDownloadJob(
+    private async createDownloadJob(
         from: Required<DownloadJob["options"]["from"]>,
         to: DownloadJob["options"]["to"],
         clientOptions: ClientOptions,
         downloadOptions: DownloadOptions,
-    ): void {
+    ): Promise<void> {
         const job = new DownloadJob({
             from: from,
             to: to,
@@ -284,15 +285,13 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             userNatureLanguage: downloadOptions.userNatureLanguage,
 
             onStatusChange: (status, prev) => {
-              this.handleJobStatusChange(status, prev);
+                this.handleJobStatusChange(status, prev);
             },
-            onProgress: () => {
-                this.persistJobs();
-            },
+            onPartCompleted: () => {
+                this.persistJob(job.id, job.persistInfo);
+            }
         });
 
-        this.addJob(job);
+        await this.addJob(job);
     }
-
-    private _persistJobsThrottle = lodash.throttle(this._persistJobs, 1000);
 }

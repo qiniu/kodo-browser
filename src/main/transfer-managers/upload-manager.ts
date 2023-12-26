@@ -1,7 +1,6 @@
 import path from "path";
-import fs, {Stats, promises as fsPromises} from "fs";
+import {Stats, promises as fsPromises} from "fs";
 
-import lodash from "lodash";
 // @ts-ignore
 import Walk from "@root/walk";
 import {Adapter} from "kodo-s3-adapter-sdk/dist/adapter";
@@ -9,7 +8,6 @@ import {Adapter} from "kodo-s3-adapter-sdk/dist/adapter";
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
 import {DestInfo, UploadOptions} from "@common/ipc-actions/upload";
 import UploadJob from "@common/models/job/upload-job";
-import {Status} from "@common/models/job/types";
 
 import {MAX_MULTIPART_COUNT, MIN_MULTIPART_SIZE} from "./boundary-const";
 import TransferManager, {TransferManagerConfig} from "./transfer-manager";
@@ -228,117 +226,104 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             onStatusChange: (status, prev) => {
                 this.handleJobStatusChange(status, prev);
             },
-            onProgress: () => {
-                this.persistJobs();
-            },
             onPartCompleted: () => {
-                this.persistJobs();
-            },
-            onCompleted: () => {
-                this.persistJobs();
+                this.persistJob(job.id, job.persistInfo);
             },
         });
 
         this.addJob(job);
     }
 
-    public persistJobs(force: boolean = false): void {
-        if (force) {
-            this._persistJobs();
-            return;
-        }
-        this._persistJobsThrottle();
-    }
-
-    public loadJobsFromStorage(
+    async loadJobsFromStorage(
         clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
         uploadOptions: Pick<UploadOptions, "userNatureLanguage">,
-    ): void {
+    ): Promise<void> {
         if (!this.config.persistPath) {
             return;
         }
-        const persistedJobs: Record<string, UploadJob["persistInfo"]> =
-            JSON.parse(fs.readFileSync(this.config.persistPath, "utf-8"));
-        Object.entries(persistedJobs)
-            .forEach(([jobId, persistedJob]) => {
-                if (this.jobs.get(jobId)) {
-                    return;
-                }
+        this.persistStore = await this.persistStore;
+        for await (const [jobId, persistedJob] of this.persistStore.iter()) {
+            if (!persistedJob || this.jobs.get(jobId)) {
+                return;
+            }
 
-                if (!persistedJob.from) {
-                    this.config.onError?.(new Error("load jobs from storage error: lost job.from"));
-                    return;
-                }
-
-                if (!fs.existsSync(persistedJob.from.path)) {
-                    this.config.onError?.(new Error(`load jobs from storage error: local file not found\nfile path: ${persistedJob.from.path}`));
-                    return;
-                }
-
-                // TODO: Is the `if` useless? Why `size` or `mtime` doesn't exist?
-                if (!persistedJob.from?.size || !persistedJob.from?.mtime) {
-                    persistedJob.prog.loaded = 0;
-                    persistedJob.uploadedParts = [];
-                }
-
-                // some old version will persist an object message, cause type error
-                if (typeof persistedJob.message !== "string") {
-                  persistedJob.message = JSON.stringify(persistedJob.message);
-                }
-
-
-                const fileStat = fs.statSync(persistedJob.from.path);
-                if (
-                    fileStat.size !== persistedJob.from.size ||
-                    Math.floor(fileStat.mtimeMs) !== persistedJob.from.mtime
-                ) {
-                    persistedJob.from.size = fileStat.size;
-                    persistedJob.from.mtime = Math.floor(fileStat.mtimeMs);
-                    persistedJob.prog.loaded = 0;
-                    persistedJob.prog.total = fileStat.size;
-                    persistedJob.uploadedParts = [];
-                }
-
-                // resumable
-                persistedJob.prog.resumable = this.config.resumable && persistedJob.from.size > this.config.multipartThreshold;
-
-                const job = UploadJob.fromPersistInfo(
-                    jobId,
-                    persistedJob,
-                    {
-                        ...clientOptions,
-                        backendMode: persistedJob.backendMode,
-                    },
-                    {
-                        uploadSpeedLimit: this.config.speedLimit,
-                        isDebug: this.config.isDebug,
-                        userNatureLanguage: uploadOptions.userNatureLanguage,
-                    },
-                    {
-                        onStatusChange: (status, prev) => {
-                            this.handleJobStatusChange(status, prev);
-                        },
-                        onProgress: () => {
-                            this.persistJobs();
-                        },
-                        onPartCompleted: () => {
-                            this.persistJobs();
-                        },
-                        onCompleted: () => {
-                            this.persistJobs();
-                        },
-                    },
-                );
-
-                if ([Status.Waiting, Status.Running].includes(job.status)) {
-                    job.stop();
-                }
-
-                this.addJob(job);
-            });
+            await this.loadJob(
+                jobId,
+                persistedJob,
+                clientOptions,
+                uploadOptions,
+            );
+        }
     }
 
-    private _persistJobsThrottle = lodash.throttle(this._persistJobs, 1000);
+    private async loadJob(
+        jobId: string,
+        persistedJob: UploadJob["persistInfo"],
+        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
+        uploadOptions: Pick<UploadOptions, "userNatureLanguage">,
+    ): Promise<void> {
+        if (!persistedJob.from) {
+            this.config.onError?.(new Error("load jobs from storage error: lost job.from"));
+            return;
+        }
+
+        try {
+            await fsPromises.access(persistedJob.from.path)
+        } catch {
+            this.config.onError?.(new Error(`load jobs from storage error: local file not found\nfile path: ${persistedJob.from.path}`));
+            return
+        }
+
+        // TODO: Is the `if` useless? Why `size` or `mtime` doesn't exist?
+        if (!persistedJob.from?.size || !persistedJob.from?.mtime) {
+            persistedJob.prog.loaded = 0;
+            persistedJob.uploadedParts = [];
+        }
+
+        // some old version will persist an object message, causing type error
+        if (typeof persistedJob.message !== "string") {
+            persistedJob.message = JSON.stringify(persistedJob.message);
+        }
+
+        const fileStat = await fsPromises.stat(persistedJob.from.path);
+        if (
+            fileStat.size !== persistedJob.from.size ||
+            Math.floor(fileStat.mtimeMs) !== persistedJob.from.mtime
+        ) {
+            persistedJob.from.size = fileStat.size;
+            persistedJob.from.mtime = Math.floor(fileStat.mtimeMs);
+            persistedJob.prog.loaded = 0;
+            persistedJob.prog.total = fileStat.size;
+            persistedJob.uploadedParts = [];
+        }
+
+        // resumable
+        persistedJob.prog.resumable = this.config.resumable && persistedJob.from.size > this.config.multipartThreshold;
+
+        const job = UploadJob.fromPersistInfo(
+            jobId,
+            persistedJob,
+            {
+                ...clientOptions,
+                backendMode: persistedJob.backendMode,
+            },
+            {
+                uploadSpeedLimit: this.config.speedLimit,
+                isDebug: this.config.isDebug,
+                userNatureLanguage: uploadOptions.userNatureLanguage,
+            },
+            {
+                onStatusChange: (status, prev) => {
+                    this.handleJobStatusChange(status, prev);
+                },
+                onPartCompleted: () => {
+                    this.persistJob(job.id, job.persistInfo);
+                },
+            },
+        );
+
+        this._addJob(job);
+    }
 
     private afterCreateDirectory({
         bucket,

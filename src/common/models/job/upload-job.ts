@@ -99,7 +99,7 @@ type PersistInfo = {
     // when restart job from break point with different backendMode.
     backendMode: RequiredOptions["clientOptions"]["backendMode"],
     prog: OptionalOptions["prog"],
-    status: OptionalOptions["status"],
+    status: Exclude<OptionalOptions["status"], Status.Waiting | Status.Running>,
     message: OptionalOptions["message"],
     uploadedId: OptionalOptions["uploadedId"],
     // ugly. if we can do some break changes, make it be
@@ -405,9 +405,18 @@ export default class UploadJob extends TransferJob {
     }
 
     get persistInfo(): PersistInfo {
+        let persistStatus = this.status;
+        if (persistStatus === Status.Waiting || persistStatus === Status.Running) {
+            persistStatus = Status.Stopped;
+        }
         return {
             from: this.options.from,
-            storageClasses: this.options.storageClasses,
+            // filter storage class i18n info
+            storageClasses: this.options.storageClasses.map(c => ({
+              kodoName: c.kodoName,
+              fileType: c.fileType,
+              s3Name: c.s3Name,
+            })),
             region: this.options.region,
             to: this.options.to,
             overwrite: this.options.overwrite,
@@ -420,7 +429,7 @@ export default class UploadJob extends TransferJob {
                 total: this.prog.total,
                 resumable: this.prog.resumable
             },
-            status: this.status,
+            status: persistStatus,
             message: this.message,
             uploadedId: this.uploadedId,
             uploadedParts: this.uploadedParts.map((part) => {

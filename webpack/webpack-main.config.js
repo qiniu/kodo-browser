@@ -4,8 +4,14 @@ const paths = require("./paths");
 module.exports = function(webpackEnv) {
   const isEnvDevelopment = webpackEnv.development;
   const isEnvProduction = webpackEnv.production;
+  const shouldUseSourceMap = webpackEnv.sourcemap;
 
   return {
+    devtool: isEnvProduction
+      ? shouldUseSourceMap
+        ? "source-map"
+        : false
+      : isEnvDevelopment && "source-map",
     target: "electron-main",
     mode: isEnvProduction ? "production" : isEnvDevelopment && "development",
     resolve: {
@@ -30,6 +36,11 @@ module.exports = function(webpackEnv) {
     },
     module: {
       rules: [
+        {
+          test: /\.js$/,
+          enforce: "pre",
+          use: ["source-map-loader"],
+        },
         { test: /\.ts$/, loader: "ts-loader" },
       ],
     },
@@ -47,5 +58,8 @@ module.exports = function(webpackEnv) {
       },
       minimize: isEnvProduction,
     },
+    ignoreWarnings: [
+      /Failed to parse source map/,
+    ],
   };
 };

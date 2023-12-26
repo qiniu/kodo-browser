@@ -51,6 +51,7 @@ interface OptionalOptions extends DownloadOptions {
 
     onStatusChange?: (status: Status, prev: Status) => void,
     onProgress?: (prog: DownloadJob["prog"]) => void,
+    onPartCompleted?: (partSize: number) => void,
 }
 
 type Options = RequiredOptions & Partial<OptionalOptions>
@@ -86,7 +87,7 @@ type PersistInfo = {
     backendMode: RequiredOptions["clientOptions"]["backendMode"],
     domain: OptionalOptions["domain"],
     prog: OptionalOptions["prog"],
-    status: OptionalOptions["status"],
+    status: Exclude<OptionalOptions["status"], Status.Waiting | Status.Running>,
     message: OptionalOptions["message"],
     multipartDownloadThreshold: OptionalOptions["multipartDownloadThreshold"],
     multipartDownloadSize: OptionalOptions["multipartDownloadSize"],
@@ -189,7 +190,7 @@ export default class DownloadJob extends TransferJob {
         this.startDownload = this.startDownload.bind(this);
         this.handleProgress = this.handleProgress.bind(this);
         this.handleHeader = this.handleHeader.bind(this);
-        this.handlePartGet = this.handlePartGet.bind(this);
+        this.handlePartGot = this.handlePartGot.bind(this);
         this.handleDownloadError = this.handleDownloadError.bind(this);
     }
 
@@ -202,6 +203,10 @@ export default class DownloadJob extends TransferJob {
     }
 
     get persistInfo(): PersistInfo {
+        let persistStatus = this.status;
+        if (persistStatus === Status.Waiting || persistStatus === Status.Running) {
+          persistStatus = Status.Stopped;
+        }
         return {
             // read-only info
             region: this.options.region,
@@ -217,7 +222,7 @@ export default class DownloadJob extends TransferJob {
                 total: this.prog.total,
                 resumable: this.prog.resumable
             },
-            status: this.status,
+            status: persistStatus,
             message: this.message,
             multipartDownloadThreshold: this.options.multipartDownloadThreshold,
             multipartDownloadSize: this.options.multipartDownloadSize,
@@ -303,7 +308,7 @@ export default class DownloadJob extends TransferJob {
                     : undefined,
                 getCallback: {
                     headerCallback: this.handleHeader,
-                    partGetCallback: this.handlePartGet,
+                    partGetCallback: this.handlePartGot,
                     progressCallback: this.handleProgress,
                 },
             },
@@ -432,11 +437,11 @@ export default class DownloadJob extends TransferJob {
         // useless?
     }
 
-    private handlePartGet(_partSize: number): void {
+    private handlePartGot(partSize: number): void {
         if (!this.downloader) {
             return;
         }
-        // useless?
+        this.options.onPartCompleted?.(partSize)
     }
 
     private async checkAndCreateBaseDir(filePath: string) {

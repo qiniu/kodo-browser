@@ -1,10 +1,10 @@
-import fs from "fs";
+import ByteSize from "@common/const/byte-size";
+import {ClientOptions} from "@common/qiniu";
 
 import TransferJob from "@common/models/job/transfer-job";
 import {isLocalPath, Status} from "@common/models/job/types";
 
-import ByteSize from "@common/const/byte-size";
-import {ClientOptions} from "@common/qiniu";
+import {DataStore, getDataStoreOrCreate} from "@main/kv-store";
 
 interface OptionalConfig<Job extends TransferJob> {
     // transfer options
@@ -34,10 +34,15 @@ const defaultTransferManagerConfig: OptionalConfig<TransferJob> = {
 export type TransferManagerConfig<Job extends TransferJob, Opt = {}> = Partial<OptionalConfig<Job>> & Opt
 
 export default abstract class TransferManager<Job extends TransferJob, Opt = {}> {
-    abstract persistJobs(force: boolean): void
     abstract loadJobsFromStorage(clientOptions: ClientOptions, options: any): void
 
-    private _running: number = 0
+    private jobsStatusSummary: Record<Status, number> = Object.values(Status)
+        .reduce((r, v) => {
+            r[v] = 0;
+            return r;
+        }, {} as Record<Status, number>)
+
+    protected persistStore: DataStore<Job["persistInfo"]> | Promise<DataStore<Job["persistInfo"]>>
     protected jobs: Map<string, Job> = new Map<string, Job>()
     protected jobIds: string[] = []
     protected config: OptionalConfig<Job> & Opt
@@ -49,14 +54,18 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
             ...defaultTransferManagerConfig,
             ...config,
         };
+        this.persistStore = getDataStoreOrCreate<Job["persistInfo"]>({
+          workingDirectory: this.config.persistPath,
+        });
     }
 
     get running() {
-      return this._running;
+        return this.jobsStatusSummary[Status.Running];
     }
 
     get jobsLength() {
-        return this.jobs.size;
+        return Object.values(this.jobsStatusSummary)
+            .reduce((r, i) => r + i);
     }
 
     get jobsSummary(): {
@@ -66,30 +75,11 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         failed: number,
         stopped: number,
     } {
-        let finished = 0;
-        let failed = 0;
-        let stopped = 0;
-        this.jobIds.forEach(id => {
-            switch (this.jobs.get(id)?.status) {
-                case Status.Finished: {
-                    finished += 1;
-                    break;
-                }
-                case Status.Failed: {
-                    failed += 1;
-                    break;
-                }
-                case Status.Stopped: {
-                    stopped += 1;
-                    break;
-                }
-            }
-        });
         return {
-            failed,
-            finished,
-            stopped,
-            running: this.running,
+            failed: this.jobsStatusSummary[Status.Failed],
+            finished: this.jobsStatusSummary[Status.Finished],
+            stopped: this.jobsStatusSummary[Status.Stopped],
+            running: this.jobsStatusSummary[Status.Running],
             total: this.jobsLength,
         }
     }
@@ -190,6 +180,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         job.stop();
 
         this.jobs.delete(jobId);
+        this.persistJob(jobId, null)
         this.scheduleJobs();
     }
 
@@ -236,10 +227,12 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
             });
     }
 
-    removeAllJobs(): void {
+    async removeAllJobs() {
         this.stopAllJobs();
         this.jobIds = [];
         this.jobs.clear();
+        this.persistStore = await this.persistStore
+        await this.persistStore.clear()
     }
 
     stopJobsByOffline(): void {
@@ -262,27 +255,15 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         this.scheduleJobs();
     }
 
-    protected _persistJobs(): void {
-        if (!this.config.persistPath) {
-            return;
-        }
-        const persistData: Record<string, Job["persistInfo"]> = {};
-        this.jobIds.forEach(id => {
-            const job = this.jobs.get(id);
-            if (!job || job.status === Status.Finished) {
-                return;
-            }
-            persistData[id] = job.persistInfo;
-        });
-        fs.writeFileSync(
-            this.config.persistPath,
-            JSON.stringify(persistData),
-        );
-    }
-
-    protected addJob(job: Job) {
+    protected _addJob(job: Job): void {
         this.jobs.set(job.id, job);
         this.jobIds.push(job.id);
+    }
+
+    protected async addJob(job: Job): Promise<void> {
+        this._addJob(job)
+        this.persistStore = await this.persistStore;
+        await this.persistStore.set(job.id, job.persistInfo);
     }
 
     protected scheduleJobs(): void {
@@ -290,7 +271,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
             console.log(`[JOB] max: ${this.config.maxConcurrency}, cur: ${this.running}, jobs: ${this.jobIds.length}`);
         }
 
-        this._running = Math.max(0, this.running);
+        this.jobsStatusSummary[Status.Running] = Math.max(0, this.running);
         if (this.running >= this.config.maxConcurrency) {
             return;
         }
@@ -311,20 +292,35 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         }
     }
 
-    protected handleJobStatusChange(status: Status, prev: Status) {
-      if (prev === status) {
+    protected async persistJob<T>(jobId: string, persistInfo: T | null) {
+        this.persistStore = await this.persistStore;
+        if (persistInfo) {
+          await this.persistStore.set(jobId, persistInfo);
+        } else {
+          await this.persistStore.del(jobId);
+        }
+    }
+
+    protected handleJobStatusChange(curr: Status, prev: Status) {
+      if (prev === curr) {
         return;
       }
 
-      if (status === Status.Running) {
-        this._running += 1;
-      } else if (prev === Status.Running) {
-        this._running -= 1;
-      }
+      this.jobsStatusSummary[prev] -= 1;
+      this.jobsStatusSummary[curr] += 1;
     }
 
     private afterJobDone(id: string): void {
+        if (this.offlineJobIds.some(offlineId => offlineId === id)) {
+            return;
+        }
         this.scheduleJobs();
-        this.config.onJobDone?.(id, this.jobs.get(id));
+        const job = this.jobs.get(id);
+        if (!job || job?.status === Status.Finished) {
+            this.persistJob(id, null)
+        } else {
+            this.persistJob(job.id, job.persistInfo)
+        }
+        this.config.onJobDone?.(id, job);
     }
 }

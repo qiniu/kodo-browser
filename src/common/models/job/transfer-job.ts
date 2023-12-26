@@ -47,6 +47,18 @@ const DEFAULT_OPTIONS: OptionalOptions = {
     userNatureLanguage: "zh-CN",
 }
 
+const MAX_LOOP_ID_COUNTER = 10000;
+let loopIdCounter = Math.floor(Math.random() * MAX_LOOP_ID_COUNTER);
+
+// The `loopIdCounterStr` is required to make sure the order of jobs.
+function genId(): string {
+  const loopIdCounterStr = loopIdCounter.toString()
+    .padStart(Math.ceil(Math.log10(MAX_LOOP_ID_COUNTER)), "0");
+  const result = `j-${Date.now()}-${loopIdCounterStr}`;
+  loopIdCounter = (loopIdCounter + 1) % MAX_LOOP_ID_COUNTER;
+  return result
+}
+
 export default abstract class TransferJob {
     protected readonly options: Readonly<RequiredOptions & OptionalOptions>
     protected retriedTimes: number = 0
@@ -67,7 +79,7 @@ export default abstract class TransferJob {
     protected constructor(config: Options) {
         this.id = config.id
             ? config.id
-            : `j-${Date.now()}-${Math.random().toString().substring(2)}`;
+            : genId();
 
         this.options = lodash.merge({}, DEFAULT_OPTIONS, config);
 

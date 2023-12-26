@@ -24,7 +24,6 @@ module.exports = function(webpackEnv) {
     mode: isEnvProduction ? "production" : isEnvDevelopment && "development",
     resolve: {
       alias: {
-        "@": paths.appSrc,
         "@common": paths.appCommon,
         "@renderer": paths.appRenderer,
       },

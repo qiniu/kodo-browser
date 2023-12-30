@@ -36,27 +36,25 @@ export type TransferManagerConfig<Job extends TransferJob, Opt = {}> = Partial<O
 export default abstract class TransferManager<Job extends TransferJob, Opt = {}> {
     abstract loadJobsFromStorage(clientOptions: ClientOptions, options: any): void
 
-    private jobsStatusSummary: Record<Status, number> = Object.values(Status)
-        .reduce((r, v) => {
-            r[v] = 0;
-            return r;
-        }, {} as Record<Status, number>)
-
-    protected persistStore: DataStore<Job["persistInfo"]> | Promise<DataStore<Job["persistInfo"]>>
     protected jobs: Map<string, Job> = new Map<string, Job>()
     protected jobIds: string[] = []
     protected config: OptionalConfig<Job> & Opt
 
+    private jobsStatusSummary: Record<Status, number> = Object.values(Status)
+      .reduce((r, v) => {
+        r[v] = 0;
+        return r;
+      }, {} as Record<Status, number>)
+    private persistStore?: DataStore<Job["persistInfo"]>
+
     private offlineJobIds: string[] = []
+
 
     protected constructor(config: TransferManagerConfig<Job, Opt>) {
         this.config = {
             ...defaultTransferManagerConfig,
             ...config,
         };
-        this.persistStore = getDataStoreOrCreate<Job["persistInfo"]>({
-          workingDirectory: this.config.persistPath,
-        });
     }
 
     get running() {
@@ -82,6 +80,19 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
             running: this.jobsStatusSummary[Status.Running],
             total: this.jobsLength,
         }
+    }
+
+    async getPersistStore(): Promise<DataStore<Job["persistInfo"]> | undefined> {
+        if (this.persistStore?.workingDirectory === this.config.persistPath) {
+          return this.persistStore;
+        }
+        if (!this.config.persistPath) {
+          return;
+        }
+        this.persistStore = await getDataStoreOrCreate<Job["persistInfo"]>({
+            workingDirectory: this.config.persistPath,
+        });
+        return this.persistStore;
     }
 
     updateConfig(config: Partial<TransferManagerConfig<Job, Opt>>) {
@@ -177,7 +188,11 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         if (!job) {
           return;
         }
-        job.stop();
+        if (job.status === Status.Stopped) {
+          this.jobsStatusSummary[Status.Stopped] -= 1;
+        } else {
+          job.stop();
+        }
 
         this.jobs.delete(jobId);
         this.persistJob(jobId, null)
@@ -231,8 +246,11 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         this.stopAllJobs();
         this.jobIds = [];
         this.jobs.clear();
-        this.persistStore = await this.persistStore
-        await this.persistStore.clear()
+        Object.keys(this.jobsStatusSummary).forEach(k => {
+          this.jobsStatusSummary[k as Status] = 0;
+        });
+        const persistStore = await this.getPersistStore();
+        await persistStore?.clear()
     }
 
     stopJobsByOffline(): void {
@@ -258,12 +276,13 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     protected _addJob(job: Job): void {
         this.jobs.set(job.id, job);
         this.jobIds.push(job.id);
+        this.jobsStatusSummary[job.status] += 1;
     }
 
     protected async addJob(job: Job): Promise<void> {
         this._addJob(job)
-        this.persistStore = await this.persistStore;
-        await this.persistStore.set(job.id, job.persistInfo);
+        const persistStore = await this.getPersistStore();
+        await persistStore?.set(job.id, job.persistInfo);
     }
 
     protected scheduleJobs(): void {
@@ -293,21 +312,26 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     }
 
     protected async persistJob<T>(jobId: string, persistInfo: T | null) {
-        this.persistStore = await this.persistStore;
+        const persistStore = await this.getPersistStore();
+        if (!persistStore) {
+          return;
+        }
         if (persistInfo) {
-          await this.persistStore.set(jobId, persistInfo);
+          await persistStore.set(jobId, persistInfo);
         } else {
-          await this.persistStore.del(jobId);
+          await persistStore.del(jobId);
         }
     }
 
-    protected handleJobStatusChange(curr: Status, prev: Status) {
+    protected handleJobStatusChange(id: string, curr: Status, prev: Status) {
       if (prev === curr) {
         return;
       }
 
       this.jobsStatusSummary[prev] -= 1;
-      this.jobsStatusSummary[curr] += 1;
+      if (this.jobs.has(id)) {
+        this.jobsStatusSummary[curr] += 1;
+      }
     }
 
     private afterJobDone(id: string): void {

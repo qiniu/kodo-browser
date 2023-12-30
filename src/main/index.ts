@@ -245,7 +245,6 @@ ipcMain.on("UploaderManager", (event, message) => {
         path.join(root, "main", "uploader-bundle.js"),
         // is there a better way to pass parameters?
         ['--config-json', JSON.stringify({
-          resumeUpload: true,
           maxConcurrency: 5,
           // ...
         })],
@@ -283,7 +282,9 @@ ipcMain.on("DownloaderManager", (event, message) => {
     downloaderProcess = fork(
         path.join(root, "main", "downloader-bundle.js"),
         // is there a better way to pass parameters?
-        ['--config-json', JSON.stringify({resumeUpload: true, maxConcurrency: 5})],
+        ['--config-json', JSON.stringify({
+          maxConcurrency: 5,
+        })],
         {
           cwd: root,
           silent: false,

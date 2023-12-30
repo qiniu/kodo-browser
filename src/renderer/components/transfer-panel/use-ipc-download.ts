@@ -17,7 +17,6 @@ import {Endpoint} from "@renderer/modules/qiniu-client";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 
 import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
-import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
 
 function handleOffline() {
   ipcDownloadManager.stopJobsByOffline();
@@ -86,7 +85,7 @@ const useIpcDownload = ({
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(item => item[1]);
   useEffect(() => {
-    ipcUploadManager.updateConfig(config);
+    ipcDownloadManager.updateConfig(config);
   }, sortedConfigValues);
 
   // subscribe IPC events of download and make sure there is a valid configuration

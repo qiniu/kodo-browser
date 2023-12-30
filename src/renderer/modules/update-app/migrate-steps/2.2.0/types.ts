@@ -145,3 +145,98 @@ export type ExternalPath = {
     regionId: string,
   }[],
 }
+
+export type OldUploadJobPersistInfo = {
+  from: {
+    name: string,
+    path: string,
+    size?: number, // bytes
+    mtime?: number, // ms timestamp
+  },
+  storageClasses: {
+    fileType: number,
+    kodoName: string,
+    s3Name: string,
+  }[],
+  region: string,
+  to: {
+    bucket: string,
+    key: string,
+  },
+  overwrite: boolean,
+  storageClassName: string,
+  backendMode: "kodo" | "s3",
+  prog: {
+    total: number, // Bytes
+    loaded: number, // Bytes
+    resumable?: boolean,
+  },
+  status: "waiting"
+    | "running"
+    | "stopped"
+    | "finished"
+    | "failed"
+    | "duplicated"
+    | "verifying",
+  message: string | Record<string, any>,
+  uploadedId: string,
+  uploadedParts: {
+    PartNumber: number,
+    ETag: string,
+  }[],
+  multipartUploadThreshold: number,
+  multipartUploadSize: number,
+}
+
+export type UploadJobPersistInfo = Omit<OldUploadJobPersistInfo, "uploadedParts"> & {
+  uploadedParts: {
+    partNumber: number,
+    etag: string,
+  }[],
+}
+
+export type OldDownloadJobPersistInfo = {
+  storageClasses: {
+    fileType: number,
+    kodoName: string,
+    s3Name: string,
+  }[],
+  region: string,
+  to: {
+    name: string,
+    path: string,
+  },
+  from: {
+    bucket: string,
+    key: string,
+    size?: number, // bytes
+    mtime?: number, // ms timestamp
+  },
+  backendMode: "kodo" | "s3",
+  domain?: {
+    name: string,
+    protocol: string,
+    private: boolean,
+    protected: boolean,
+    type: 'cdn' | 'origin' | 'others',
+    apiScope: 'kodo' | 's3',
+  },
+  prog: {
+    total: number, // Bytes
+    loaded: number, // Bytes
+    resumable?: boolean,
+  },
+  status: "waiting"
+    | "running"
+    | "stopped"
+    | "finished"
+    | "failed"
+    | "duplicated"
+    | "verifying",
+  message: string | Record<string, any>,
+  multipartUploadThreshold: number,
+  multipartUploadSize: number,
+}
+
+export type DownloadJobPersistInfo = OldDownloadJobPersistInfo & {
+}

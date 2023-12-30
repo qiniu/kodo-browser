@@ -81,6 +81,32 @@ const FieldsUpload: React.FC = () => {
           </Form.Text>
         </Col>
       </Form.Group>
+      <Form.Group as={Row} className="mb-3" controlId="multipartUploadConcurrency">
+        <Form.Label className="text-end" column sm={5}>
+          {translate("modals.settings.upload.form.multipartUploadConcurrency.label")}
+        </Form.Label>
+        <Col sm={6}>
+          <Form.Control
+            {...register("multipartUploadConcurrency", {
+              valueAsNumber: true,
+              required: true,
+              min: 1,
+              max: 5,
+            })}
+            type="number"
+            isInvalid={Boolean(errors.multipartUploadConcurrency)}
+          />
+          <Form.Text
+            className={
+              Boolean(errors.multipartUploadConcurrency)
+                ? "text-danger"
+                : ""
+            }
+          >
+            {translate("modals.settings.upload.form.multipartUploadConcurrency.hint")}
+          </Form.Text>
+        </Col>
+      </Form.Group>
       <Form.Group as={Row} className="mb-3" controlId="maxUploadConcurrency">
         <Form.Label className="text-end" column sm={5}>
           {translate("modals.settings.upload.form.maxUploadConcurrency.label")}

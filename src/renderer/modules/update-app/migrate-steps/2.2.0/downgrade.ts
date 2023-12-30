@@ -2,15 +2,22 @@ import path from "path";
 import os from "os";
 import fsPromises from "fs/promises";
 
+import {getDataStoreOrCreate} from "@main/kv-store";
+
 import {
   AkHistory,
-  appPreferenceKeys,
   AppPreferencesData,
   BookmarksContent,
-  ExternalPath, OldAkHistory,
+  DownloadJobPersistInfo,
+  ExternalPath,
+  OldAkHistory,
   OldBookmarksContent,
+  OldDownloadJobPersistInfo,
   OldExternalPath,
+  OldUploadJobPersistInfo,
   SettingStorageKey,
+  UploadJobPersistInfo,
+  appPreferenceKeys,
 } from "./types";
 
 const configPath = path.join(os.homedir(), ".kodo-browser");
@@ -189,15 +196,51 @@ async function migrateExternalPaths(ak: string, filePath: string) {
   await fsPromises.unlink(filePath);
 }
 
+function isUploadJob(
+  oldInfo: UploadJobPersistInfo | DownloadJobPersistInfo
+): oldInfo is UploadJobPersistInfo {
+  return Object.hasOwn(oldInfo, "uploadedParts");
+}
+
+function migrateJobInfo(
+  info: UploadJobPersistInfo | DownloadJobPersistInfo,
+): OldUploadJobPersistInfo | OldDownloadJobPersistInfo {
+  let oldInfo: OldUploadJobPersistInfo | OldDownloadJobPersistInfo;
+  if (isUploadJob(info)) {
+    oldInfo = {
+      ...info,
+      uploadedParts: info.uploadedParts.map(p => ({
+        PartNumber: p.partNumber,
+        ETag: p.etag,
+      })),
+    };
+  } else {
+    oldInfo = {
+      ...info,
+    };
+  }
+  return oldInfo;
+}
+
 async function migrateTransferJobs(
   ak: string,
   filePath: string,
   type: "upprog" | "downprog",
 ) {
-  await fsPromises.rename(
-    filePath,
+  const dataStore = await getDataStoreOrCreate<UploadJobPersistInfo | DownloadJobPersistInfo>({
+    workingDirectory: filePath,
+  });
+  const oldContent: Record<string, OldUploadJobPersistInfo | OldDownloadJobPersistInfo> = {};
+  for await (const [id, data] of dataStore.iter()) {
+    if (data) {
+      oldContent[id] = migrateJobInfo(data);
+    }
+  }
+  await fsPromises.writeFile(
     path.join(configPath, `${type}_${ak}.json`),
+    JSON.stringify(oldContent),
   );
+  await dataStore.close();
 }
 
 export default async function () {
@@ -221,12 +264,12 @@ export default async function () {
     );
     await migrateTransferJobs(
       matchRes.groups["ak"],
-      path.join(configPath, fName, "upload_progress.json"),
+      path.join(configPath, fName, "upload_progress"),
       "upprog",
     );
     await migrateTransferJobs(
       matchRes.groups["ak"],
-      path.join(configPath, fName, "download_progress.json"),
+      path.join(configPath, fName, "download_progress"),
       "downprog",
     );
   }

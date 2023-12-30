@@ -400,6 +400,10 @@ export default interface Dictionary {
             label: string,
             hint: string,
           },
+          multipartUploadConcurrency: {
+            label: string,
+            hint: string,
+          },
           maxUploadConcurrency: {
             label: string,
             hint: string,

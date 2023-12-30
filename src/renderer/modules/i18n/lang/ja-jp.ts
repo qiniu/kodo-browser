@@ -395,6 +395,10 @@ const dict: Dictionary = {
                         label: "シ断点アップロードスライスサイズ：",
                         hint: "単位：MB，範囲：8 MB - 100 MB",
                     },
+                    multipartUploadConcurrency: {
+                        label: "断点アップロードの並發處理数：",
+                        hint: "範囲：1-5",
+                    },
                     maxUploadConcurrency: {
                         label: "アップロードの最大同時処理数：",
                         hint: "範囲：1-10",

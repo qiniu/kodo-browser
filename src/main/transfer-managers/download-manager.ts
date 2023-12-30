@@ -93,11 +93,11 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
         downloadOptions: Pick<DownloadOptions, "userNatureLanguage">,
     ): Promise<void> {
-        if (!this.config.persistPath) {
+        const persistStore = await this.getPersistStore();
+        if (!persistStore) {
             return;
         }
-        this.persistStore = await this.persistStore;
-        for await (const [jobId, persistedJob] of this.persistStore.iter()) {
+        for await (const [jobId, persistedJob] of persistStore.iter()) {
             if (!persistedJob || this.jobs.get(jobId)) {
                 return;
             }
@@ -121,11 +121,6 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             return;
         }
 
-        // some old version will persist an object message, cause type error
-        if (typeof persistedJob.message !== "string") {
-            persistedJob.message = JSON.stringify(persistedJob.message);
-        }
-
         const job = DownloadJob.fromPersistInfo(
             jobId,
             persistedJob,
@@ -141,7 +136,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             },
             {
                 onStatusChange: (status, prev) => {
-                    this.handleJobStatusChange(status, prev);
+                    this.handleJobStatusChange(job.id, status, prev);
                 },
                 onProgress: () => {
                     this.persistJob(job.id, job.persistInfo);
@@ -285,7 +280,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             userNatureLanguage: downloadOptions.userNatureLanguage,
 
             onStatusChange: (status, prev) => {
-                this.handleJobStatusChange(status, prev);
+                this.handleJobStatusChange(job.id, status, prev);
             },
             onPartCompleted: () => {
                 this.persistJob(job.id, job.persistInfo);

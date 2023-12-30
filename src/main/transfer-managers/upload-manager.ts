@@ -19,7 +19,8 @@ interface StatsWithName extends Stats {
 }
 
 interface Config {
-    isSkipEmptyDirectory: boolean;
+    multipartConcurrency: number,
+    isSkipEmptyDirectory: boolean,
 
     onCreatedDirectory?: (bucket: string, directoryKey: string) => void,
 }
@@ -200,6 +201,9 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             }
         }
 
+        // part concurrency
+        const partConcurrency = this.config.multipartConcurrency;
+
         const job = new UploadJob({
             from: from,
             to: to,
@@ -218,13 +222,14 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
 
             multipartUploadThreshold: this.config.multipartThreshold,
             multipartUploadSize: partSize,
+            multipartUploadConcurrency: partConcurrency,
             uploadSpeedLimit: this.config.speedLimit,
             isDebug: this.config.isDebug,
 
             userNatureLanguage: uploadOptions.userNatureLanguage,
 
             onStatusChange: (status, prev) => {
-                this.handleJobStatusChange(status, prev);
+                this.handleJobStatusChange(job.id, status, prev);
             },
             onPartCompleted: () => {
                 this.persistJob(job.id, job.persistInfo);
@@ -238,12 +243,12 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
         clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
         uploadOptions: Pick<UploadOptions, "userNatureLanguage">,
     ): Promise<void> {
-        if (!this.config.persistPath) {
+        const persistStore = await this.getPersistStore();
+        if (!persistStore) {
             return;
         }
-        this.persistStore = await this.persistStore;
-        for await (const [jobId, persistedJob] of this.persistStore.iter()) {
-            if (!persistedJob || this.jobs.get(jobId)) {
+        for await (const [jobId, persistedJob] of persistStore.iter()) {
+            if (!persistedJob || this.jobs.has(jobId)) {
                 return;
             }
 
@@ -280,11 +285,6 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             persistedJob.uploadedParts = [];
         }
 
-        // some old version will persist an object message, causing type error
-        if (typeof persistedJob.message !== "string") {
-            persistedJob.message = JSON.stringify(persistedJob.message);
-        }
-
         const fileStat = await fsPromises.stat(persistedJob.from.path);
         if (
             fileStat.size !== persistedJob.from.size ||
@@ -308,13 +308,14 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                 backendMode: persistedJob.backendMode,
             },
             {
+                multipartConcurrency: this.config.multipartConcurrency,
                 uploadSpeedLimit: this.config.speedLimit,
                 isDebug: this.config.isDebug,
                 userNatureLanguage: uploadOptions.userNatureLanguage,
             },
             {
                 onStatusChange: (status, prev) => {
-                    this.handleJobStatusChange(status, prev);
+                    this.handleJobStatusChange(job.id, status, prev);
                 },
                 onPartCompleted: () => {
                     this.persistJob(job.id, job.persistInfo);

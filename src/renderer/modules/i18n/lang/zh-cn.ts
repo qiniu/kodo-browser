@@ -395,6 +395,10 @@ const dict: Dictionary = {
             label: "分片上传片大小：",
             hint: "单位：MB，范围：8 MB - 100 MB",
           },
+          multipartUploadConcurrency: {
+            label: "分片上传并发数：",
+            hint: "范围：1-5",
+          },
           maxUploadConcurrency: {
             label: "最大上传任务数：",
             hint: "范围：1-10",

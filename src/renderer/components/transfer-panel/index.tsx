@@ -65,6 +65,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
       resumable: appPreferencesData.resumeUploadEnabled,
       maxConcurrency: appPreferencesData.maxUploadConcurrency,
       multipartSize: appPreferencesData.multipartUploadPartSize * ByteSize.MB,
+      multipartConcurrency: appPreferencesData.multipartUploadConcurrency,
       multipartThreshold: appPreferencesData.multipartUploadThreshold * ByteSize.MB,
       speedLimit: appPreferencesData.uploadSpeedLimitEnabled
         ? appPreferencesData.uploadSpeedLimitKbPerSec * ByteSize.KB
@@ -74,7 +75,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
       persistPath: path.resolve(
         config_path,
         `profile_${currentUser?.accessKey ?? "kodo-browser"}`,
-        "upload_prog.json",
+        "upload_prog",
       ),
       // userNatureLanguage needs mid-dash but i18n using lo_dash
       // @ts-ignore
@@ -115,7 +116,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
       persistPath: path.resolve(
         config_path,
         `profile_${currentUser?.accessKey ?? "kodo-browser"}`,
-        "download_prog.json",
+        "download_prog",
       ),
       // userNatureLanguage needs mid-dash but i18n using lo_dash
       // @ts-ignore

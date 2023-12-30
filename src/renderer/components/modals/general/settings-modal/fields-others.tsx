@@ -20,12 +20,12 @@ const _SwitchLogLevel: React.ForwardRefRenderFunction<unknown, FormSwitchProps<L
 }, ref) => {
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     const value = event.target.checked;
-    onChange(value ? LogLevel.Debug : LogLevel.Error);
+    onChange?.(value ? LogLevel.Debug : LogLevel.Error);
   }
 
   const handleBlur: FocusEventHandler<HTMLInputElement> = (event) => {
     const value = event.target.checked;
-    onBlur(value ? LogLevel.Debug : LogLevel.Error);
+    onBlur?.(value ? LogLevel.Debug : LogLevel.Error);
   }
 
   return (

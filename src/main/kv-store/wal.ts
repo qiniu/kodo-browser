@@ -48,7 +48,7 @@ export default class WriteAheadLogging<T> {
     this._appendingFH.then(f => this._appendingFH = f);
   }
 
-  async destroy(): Promise<void> {
+  async close(): Promise<void> {
     this._baseLogSize = null;
     this._changedLogSize = 0;
     this._appendingFH = await this._appendingFH;
@@ -103,9 +103,9 @@ export default class WriteAheadLogging<T> {
     this._changedLogSize += 1;
   }
 
-  async getAll(): Promise<Record<string, T>> {
+  async getAll(): Promise<Record<string, T | null>> {
     let logSize = 0;
-    const result: Record<string, T> = {};
+    const result: Record<string, T | null> = {};
     for await (const record of this.iter()) {
       logSize += 1;
       switch (record.type) {
@@ -113,7 +113,7 @@ export default class WriteAheadLogging<T> {
           result[record.key] = record.data;
           break;
         case RecordType.Delete:
-          delete result[record.key];
+          result[record.key] = null;
           break;
       }
     }
@@ -130,7 +130,7 @@ export default class WriteAheadLogging<T> {
   }: IterOptions = {}): AsyncGenerator<LogRecord<T>> {
     let rl: readline.Interface | undefined;
     try {
-      const rl = readline.createInterface({
+      rl = readline.createInterface({
         input: fs.createReadStream(this.filePath),
       });
       for await (const l of rl) {

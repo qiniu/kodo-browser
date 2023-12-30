@@ -7364,7 +7364,7 @@ klona@^2.0.4, klona@^2.0.5:
   resolved "https://registry.yarnpkg.com/klona/-/klona-2.0.5.tgz#d166574d90076395d9963aa7a928fabb8d76afbc"
   integrity sha512-pJiBpiXMbt7dkzXe8Ghj/u4FfXOOa98fPW+bihOJ4SjnoijweJrNThJfd3ifXpXhREjpoF2mZVH1GfS9LV3kHQ==
 
-kodo-s3-adapter-sdk@0.4.2:
+kodo-s3-adapter-sdk@0.5.0:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.4.2.tgz#d160ff82d825689a211c078a57c73e0e70b84c29"
   integrity sha512-aOwZBTfd0pSRJa1iqLoLET9ZpCA+qQ6o8icmAywidyakajse0vTdofg4EnfW/nc/en35KsLZmKeFIMljZDiJ5w==

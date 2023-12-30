@@ -31,6 +31,7 @@ export interface UploadConfig {
   resumable: boolean,
   maxConcurrency: number,
   multipartSize: number, // Bytes
+  multipartConcurrency: number,
   multipartThreshold: number, // Bytes
   speedLimit: number, // Bytes/s
   isDebug: boolean,
@@ -122,7 +123,6 @@ const useIpcUpload = ({
     const uploadReplyHandler =
       (event: IpcRendererEvent, message: UploadReplyMessage) => uploadReplyHandlerRef.current?.(event, message);
     ipcRenderer.on("UploaderManager-reply", uploadReplyHandler);
-    ipcUploadManager.updateConfig(config);
 
     return () => {
       ipcRenderer.off("UploaderManager-reply", uploadReplyHandler);

@@ -2,15 +2,21 @@ import path from "path";
 import os from "os";
 import fsPromises from "fs/promises";
 
+import {getDataStoreOrCreate} from "@main/kv-store";
+
 import {
-  SettingStorageKey,
-  AppPreferencesData,
-  OldBookmarksContent,
-  BookmarksContent,
-  OldExternalPath,
-  ExternalPath,
   AkHistory,
+  AppPreferencesData,
+  BookmarksContent,
+  DownloadJobPersistInfo,
+  ExternalPath,
   OldAkHistory,
+  OldBookmarksContent,
+  OldDownloadJobPersistInfo,
+  OldExternalPath,
+  OldUploadJobPersistInfo,
+  SettingStorageKey,
+  UploadJobPersistInfo,
 } from "./types";
 
 const configPath = path.join(os.homedir(), ".kodo-browser");
@@ -177,15 +183,69 @@ async function migrateExternalPaths(ak: string, filePath: string) {
   await fsPromises.unlink(filePath);
 }
 
+const MAX_LOOP_ID_COUNTER = 10000;
+let loopIdCounter = Math.floor(Math.random() * MAX_LOOP_ID_COUNTER);
+
+function isUploadJob(
+  oldInfo: OldUploadJobPersistInfo | OldDownloadJobPersistInfo
+): oldInfo is OldUploadJobPersistInfo {
+  return Object.hasOwn(oldInfo, "uploadedParts");
+}
+
+function migrateJobInfo(
+  oldId: string,
+  oldInfo: OldUploadJobPersistInfo | OldDownloadJobPersistInfo,
+): [string, UploadJobPersistInfo | DownloadJobPersistInfo] {
+  const [, ts] = oldId.split('-', 2);
+  const loopIdCounterStr = loopIdCounter.toString()
+    .padStart(Math.ceil(Math.log10(MAX_LOOP_ID_COUNTER)), "0");
+  const id = `j-${ts}-${loopIdCounterStr}`;
+  loopIdCounter = (loopIdCounter + 1) % MAX_LOOP_ID_COUNTER;
+  let info: UploadJobPersistInfo | DownloadJobPersistInfo;
+  if (isUploadJob(oldInfo)) {
+    info = {
+      ...oldInfo,
+      uploadedParts: oldInfo.uploadedParts.map(p => ({
+        partNumber: p.PartNumber,
+        etag: p.ETag,
+      })),
+    };
+  } else {
+    info = {
+      ...oldInfo,
+    }
+  }
+  info.message = typeof oldInfo.message === "string"
+    ? oldInfo.message
+    : JSON.stringify(oldInfo.message)
+  info.status = ["waiting", "running"].includes(oldInfo.status)
+    ? "stopped"
+    : oldInfo.status;
+  info.storageClasses = oldInfo.storageClasses.map(c => ({
+    kodoName: c.kodoName,
+    fileType: c.fileType,
+    s3Name: c.s3Name,
+  }));
+  return [id, info];
+}
+
 async function migrateTransferJobs(
   ak: string,
   filePath: string,
   type: "upload_prog" | "download_prog",
 ) {
-  await fsPromises.rename(
-    filePath,
-    path.join(configPath, `profile_${ak}`, `${type}.json`),
-  );
+  const basedir = path.join(configPath, `profile_${ak}`, type);
+  const contentBuf = await fsPromises.readFile(filePath);
+  const oldContent = JSON.parse(contentBuf.toString()) as Record<string, OldUploadJobPersistInfo | OldDownloadJobPersistInfo>;
+  const dataStore = await getDataStoreOrCreate<UploadJobPersistInfo | DownloadJobPersistInfo>({
+    workingDirectory: basedir,
+  });
+  for (const [oldId, oldInfo] of Object.entries(oldContent)) {
+    const [id, info] = migrateJobInfo(oldId, oldInfo);
+    await dataStore.set(id, info);
+  }
+  await dataStore.compact(true);
+  await dataStore.close();
 }
 
 export default async function () {

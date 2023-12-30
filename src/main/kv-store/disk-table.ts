@@ -58,9 +58,13 @@ export class DiskTable<T> {
     this._readingFH = await this.getReadingFH();
   }
 
-  async destroy() {
+  async close() {
     const fh = await this.getReadingFH();
     await fh.close();
+  }
+
+  async has(key: string): Promise<boolean> {
+    return this.indexMap.has(key);
   }
 
   async get(key: string): Promise<T | undefined> {

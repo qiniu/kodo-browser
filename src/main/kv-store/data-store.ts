@@ -1,3 +1,7 @@
+/*
+* remember backup this for migrator when make breaking changes.
+* */
+import {constants as fsConstants} from "fs";
 import fsPromises from "fs/promises";
 import path from "path";
 
@@ -19,8 +23,13 @@ interface DataStoreOptions<T> {
   diskTable: DiskTable<T>,
 }
 
+interface IterAndRes<T> {
+  iter: AsyncGenerator<[string, T | null], void> | Generator<[string, T | null], void> | undefined,
+  res: IteratorResult<[string, T | null], void>,
+}
+
 export class DataStore<T> {
-  private readonly workingDirectory: string;
+  readonly workingDirectory: string;
   private memTable: MemTable<T>;
   private memTableReadonly: MemTableReadonly<T> | null;
   private diskTable: DiskTable<T>;
@@ -67,17 +76,16 @@ export class DataStore<T> {
     ]);
     this.memTableChangesSize = this.memTable.size;
     if (this.memTableReadonly?.size) {
-      // TODO: should await?
       this.compactPromise = this.compact();
     }
   }
 
-  async destroy() {
+  async close() {
     await Promise.all([
-      this.memTable.destroy(),
-      this.memTableReadonly?.destroy(),
-      this.diskTable.destroy(),
-    ])
+      this.memTable.close(),
+      this.memTableReadonly?.close(),
+      this.diskTable.close(),
+    ]);
   }
 
   async get(key: string): Promise<T | undefined> {
@@ -86,12 +94,12 @@ export class DataStore<T> {
       this.memTableReadonly,
       this.diskTable,
     ]) {
-      const result = await table?.get(key)
-      if (result) {
-        return result
+      const result = await table?.get(key);
+      if (await table?.has(key)) {
+        return result;
       }
     }
-    return
+    return;
   }
 
   async set(key: string, data: T): Promise<void> {
@@ -101,17 +109,17 @@ export class DataStore<T> {
   }
 
   async del(key: string): Promise<void> {
-    await this.memTable.del(key)
+    await this.memTable.del(key);
     this.memTableChangesSize += 1;
     this.compact()
   }
 
   async clear(): Promise<void> {
-    const oldMeta = this.meta
-    const tables = await initDataStore<T>(this.workingDirectory)
-    this.memTable = tables.memTable
-    this.memTableReadonly = tables.memTableReadonly
-    this.diskTable = tables.diskTable
+    const oldMeta = this.meta;
+    const tables = await initDataStore<T>(this.workingDirectory);
+    this.memTable = tables.memTable;
+    this.memTableReadonly = tables.memTableReadonly;
+    this.diskTable = tables.diskTable;
     await Promise.all([
       fsPromises.unlink(oldMeta.memTableWALPath),
       oldMeta.memTableReadonlyWALPath && fsPromises.unlink(oldMeta.memTableReadonlyWALPath),
@@ -121,7 +129,6 @@ export class DataStore<T> {
 
   get meta(): FrameMetaData {
     return {
-      // TODO: version?
       memTableWALPath: this.memTable.wal.filePath,
       memTableReadonlyWALPath: this.memTableReadonly?.wal.filePath,
       diskTableFilePath: this.diskTable.filePath,
@@ -137,34 +144,47 @@ export class DataStore<T> {
     let memReadonlyIterResult = memReadonlyIter?.next() ?? {value: undefined, done: true};
     let diskIterResult = await diskIter.next();
 
-    const listOfIterAndRes: {
-      iter: AsyncGenerator<[string, T | null], void> | Generator<[string, T | null], void> | undefined,
-      res: IteratorResult<[string, T | null], void>,
-    }[] = [
+    const listOfIterAndRes: IterAndRes<T>[] = [
+      {iter: undefined, res: {value: undefined, done: true}},
       {iter: memIter, res: memIterResult},
       {iter: memReadonlyIter, res: memReadonlyIterResult},
       {iter: diskIter, res: diskIterResult},
     ];
 
     while (true) {
-      const iterAndRes = listOfIterAndRes.reduce((r, c) => {
-        if (r.res.done || c.res.done) {
-          return c
+      // `await listOfIterAndRes.reduce(async () => {})` doesn't work as expecting
+      // maybe some bugs on node v16, because same code is working great on v18.18
+      let [lastIterAndRes] = listOfIterAndRes;
+      for (let i = 1; i < listOfIterAndRes.length; i += 1) {
+        const curr = listOfIterAndRes[i];
+        if (lastIterAndRes.res.done) {
+          lastIterAndRes = curr;
+          continue;
         }
-        const {value: [rk]} = r.res
-        const {value: [ik]} = c.res
-        if (rk <= ik) {
-          return r
-        } else {
-          return c
+        if (curr.res.done) {
+          continue;
         }
-      });
-      if (iterAndRes.res.done) {
+        const {value: [lastK]} = lastIterAndRes.res;
+        const {value: [currK]} = curr.res;
+        if (lastK === currK) {
+          curr.res = await curr.iter?.next() ?? listOfIterAndRes[0].res;
+          continue;
+        }
+        if (lastK > currK) {
+          lastIterAndRes = curr;
+        }
+      }
+
+      if (lastIterAndRes.res.done) {
         break;
       }
 
-      yield iterAndRes.res.value;
-      iterAndRes.res = await iterAndRes.iter?.next() ?? {value: undefined, done: true};
+      const [id, data] = lastIterAndRes.res.value;
+      // only returns the data not deleted
+      if (data) {
+        yield [id, data];
+      }
+      lastIterAndRes.res = await lastIterAndRes.iter?.next() ?? listOfIterAndRes[0].res;
     }
   }
 
@@ -228,8 +248,9 @@ export class DataStore<T> {
     );
 
     // clean old files
-    await diskTableOld.destroy();
+    await diskTableOld.close();
     let walFilePathOld = this.memTableReadonly.wal.filePath;
+    await this.memTableReadonly.close();
     this.memTableReadonly = null;
     await Promise.all([
       fsPromises.unlink(diskTableOld.filePath),
@@ -327,7 +348,7 @@ export async function getDataStoreOrCreate<T>({
   thresholdDuration = 10000,
   thresholdSize = 1000,
   thresholdLogSize = 10000,
-}: CreateDataFrameOptions) {
+}: CreateDataFrameOptions): Promise<DataStore<T>> {
   const frameMeta = await getFrameMeta(
     path.join(workingDirectory, DB_META_FILE)
   );
@@ -370,6 +391,11 @@ export async function getDataStoreOrCreate<T>({
 }
 
 async function initDataStore<T>(workingDirectory: string) {
+  try {
+    await fsPromises.access(workingDirectory, fsConstants.F_OK);
+  } catch {
+    await fsPromises.mkdir(workingDirectory, {recursive: true});
+  }
   const memTable = new MemTable<T>({
     wal: path.join(workingDirectory, `wal-${Date.now()}.jsonl`),
   });

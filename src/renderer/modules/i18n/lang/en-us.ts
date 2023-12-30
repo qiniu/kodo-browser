@@ -396,6 +396,10 @@ const dict: Dictionary = {
             label: "Multipart upload part size:",
             hint: "Unit: MB, Range: 8 MB - 100 MB",
           },
+          multipartUploadConcurrency: {
+            label: "Multipart upload Concurrency:",
+            hint: "Range: 1-5",
+          },
           maxUploadConcurrency: {
             label: "Maximum number of upload tasks:",
             hint: "Range: 1-10",

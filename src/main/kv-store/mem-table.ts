@@ -36,8 +36,8 @@ export class MemTableReadonly<T> {
     this.nodes = nodes;
   }
 
-  async destroy(): Promise<void> {
-    await this.wal.destroy();
+  async close(): Promise<void> {
+    await this.wal.close();
     this.nodes = new Map();
   }
 
@@ -61,7 +61,7 @@ export class MemTableReadonly<T> {
     if (sorted) {
       entries = Array
         .from(this.nodes.entries())
-        .sort(([[a]], [[b]]) => {
+        .sort(([a], [b]) => {
           if (a === b) {
             return 0
           } else {

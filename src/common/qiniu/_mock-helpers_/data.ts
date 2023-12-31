@@ -13,7 +13,11 @@ const mockDataOfRegionBase = {
     rsfUrls: [],
     apiUrls: [],
     s3Urls: [],
+    ttl: 86400,
+    createTime: Date.now(),
+    validate: true,
 };
+
 export const mockDataOfGetAllRegions: Region[] = [
     {
         ...mockDataOfRegionBase,

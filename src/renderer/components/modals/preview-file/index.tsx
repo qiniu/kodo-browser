@@ -93,11 +93,12 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
 
   useEffect(() => {
     if (modalProps.show) {
-      fetchFileInfo();
     } else {
       setFileOperation(FileOperationType.None);
     }
   }, [modalProps.show]);
+
+  const fileSize = headFileState.fileInfo?.size ?? memoFileItem?.size;
 
   return (
     <Modal {...modalProps}>
@@ -106,10 +107,8 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
           <i className="bi bi-eye me-1"/>
           {translate("modals.preview.title")}
           {
-            headFileState.fileInfo
-              ? <small>
-                ({byteSizeFormat(headFileState.fileInfo.size)})
-              </small>
+            fileSize
+              ? <small>({byteSizeFormat(fileSize)})</small>
               : null
           }
         </Modal.Title>

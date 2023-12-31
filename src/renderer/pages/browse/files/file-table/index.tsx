@@ -1,4 +1,4 @@
-import React, {useMemo} from "react";
+import React, {MouseEvent, useMemo, useRef} from "react";
 import BaseTable, {AutoResizer} from "react-base-table";
 import classNames from "classnames";
 
@@ -45,22 +45,24 @@ const FileTable: React.FC<FileTableProps> = ({
   onAction,
 }) => {
   const {translate} = useI18n();
-  const rowData: FileRowData[] = useMemo(() =>
-    data.map(item => ({
+  const rowsData: FileRowData[] = useMemo(() =>
+    data.map((item, index) => ({
         ...item,
         id: item.path.toString(),
         isSelected: selectedFiles.has(item.path.toString()),
         regionId,
+        _index: index,
       })
     ), [data, selectedFiles, regionId]);
 
-  const isSelectedAll = rowData.length > 0 && selectedFiles.size === rowData.length;
-  const loadingMore = rowData.length > 0 && loading;
+  const isSelectedAll = rowsData.length > 0 && selectedFiles.size === rowsData.length;
+  const lastClickIndexRef = useRef<number | undefined>();
+  const loadingMore = rowsData.length > 0 && loading;
 
   const columns = getColumns({
     availableStorageClasses,
     isSelectedAll: isSelectedAll,
-    onToggleSelectAll: (checked: boolean) => onSelectFiles(rowData, checked),
+    onToggleSelectAll: (checked: boolean) => onSelectFiles(rowsData, checked),
     onClickFile,
     onDoubleClickFile,
     onAction,
@@ -80,7 +82,7 @@ const FileTable: React.FC<FileTableProps> = ({
         {({width, height}) => (
           <AutoFillFirstView
             height={height}
-            rowData={rowData}
+            rowData={rowsData}
             rowHeight={TABLE_ROW_HEIGHT}
             onLoadMore={handleLoadMore}
           >
@@ -91,7 +93,7 @@ const FileTable: React.FC<FileTableProps> = ({
               ignoreFunctionInColumnCompare={false}
               width={width}
               height={height}
-              data={rowData}
+              data={rowsData}
               columns={columns}
               headerHeight={TABLE_ROW_HEIGHT}
               rowHeight={TABLE_ROW_HEIGHT}
@@ -102,7 +104,17 @@ const FileTable: React.FC<FileTableProps> = ({
                 "row-striped": rowIndex % 2 === 1,
               })}
               rowProps={({rowData}) => ({
-                onClick: () => onSelectFiles([rowData], !rowData.isSelected),
+                onClick: (e: MouseEvent) => {
+                  if (e.shiftKey && lastClickIndexRef.current !== undefined) {
+                    const [start, end] = lastClickIndexRef.current <= rowData._index
+                      ? [lastClickIndexRef.current, rowData._index]
+                      : [rowData._index, lastClickIndexRef.current];
+                    onSelectFiles(rowsData.slice(start, end + 1), !rowData.isSelected);
+                  } else {
+                    onSelectFiles([rowData], !rowData.isSelected);
+                  }
+                  lastClickIndexRef.current = rowData._index;
+                },
               })}
               onEndReachedThreshold={LOAD_MORE_THRESHOLD}
               onEndReached={handleLoadMore}

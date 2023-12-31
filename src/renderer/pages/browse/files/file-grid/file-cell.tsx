@@ -1,4 +1,4 @@
-import React, {MouseEventHandler} from "react";
+import React, {MouseEvent, MouseEventHandler} from "react";
 import {Card} from "react-bootstrap";
 import classNames from "classnames";
 
@@ -9,12 +9,13 @@ import {FileItem} from "@renderer/modules/qiniu-client";
 export type CellData = FileItem.Item & {
   id: string,
   isSelected: boolean,
+  _index: number,
 }
 
 interface FileCellProps {
   data: CellData,
-  onClick: (f: CellData) => void,
-  onDoubleClick: (f: CellData) => void,
+  onClick: (event: MouseEvent, f: CellData) => void,
+  onDoubleClick: (event: MouseEvent, f: CellData) => void,
 }
 
 const FileCell: React.FC<FileCellProps> = ({
@@ -27,10 +28,10 @@ const FileCell: React.FC<FileCellProps> = ({
   const handleClick: MouseEventHandler = (e) => {
     switch (e.detail) {
       case 1: {
-        return onClick(data);
+        return onClick(e, data);
       }
       case 2: {
-        return onDoubleClick(data);
+        return onDoubleClick(e, data);
       }
     }
   }

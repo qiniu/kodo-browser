@@ -1,4 +1,4 @@
-import React, {useMemo} from "react";
+import React, {MouseEvent, useMemo, useRef} from "react";
 import classNames from "classnames";
 import AutoResizer from "react-virtualized-auto-sizer";
 
@@ -14,7 +14,7 @@ import {LOAD_MORE_THRESHOLD, GRID_CELL_WIDTH, GRID_CELL_HEIGHT} from "../const";
 import {FileRowData} from "../types";
 // import {OperationName} from "../types";
 import OverlayHolder from "../overlay-holder";
-import FileCell from "./file-cell";
+import FileCell, {CellData} from "./file-cell";
 import "./file-grid.scss";
 
 interface FileGridProps {
@@ -44,10 +44,11 @@ const FileGrid: React.FC<FileGridProps> = ({
   const {translate} = useI18n();
 
   const filesData: FileRowData[] = useMemo(() =>
-    data.map(item => ({
+    data.map((item, index) => ({
         ...item,
         id: item.path.toString(),
         isSelected: selectedFiles.has(item.path.toString()),
+        _index: index,
       })
     ), [data, selectedFiles]);
 
@@ -68,6 +69,19 @@ const FileGrid: React.FC<FileGridProps> = ({
     }
     handleLoadMore();
   }
+
+  const lastClickIndex = useRef<number | undefined>();
+  const handleClickCell = (e: MouseEvent, d: CellData) => {
+    if (e.shiftKey && lastClickIndex.current) {
+      const [start, end] = lastClickIndex.current <= d._index
+        ? [lastClickIndex.current, d._index]
+        : [d._index, lastClickIndex.current];
+      onSelectFiles(filesData.slice(start, end + 1), !d.isSelected);
+    } else {
+      onSelectFiles([d], !d.isSelected);
+    }
+    lastClickIndex.current = d._index;
+  };
 
   // render
   return (
@@ -128,8 +142,8 @@ const FileGrid: React.FC<FileGridProps> = ({
                     >
                       <FileCell
                         data={data}
-                        onClick={f => onSelectFiles([f], !f.isSelected)}
-                        onDoubleClick={onDoubleClickFile}
+                        onClick={handleClickCell}
+                        onDoubleClick={(_, d) => onDoubleClickFile(d)}
                       />
                     </div>
                   )

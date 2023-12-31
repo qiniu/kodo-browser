@@ -43,6 +43,7 @@ const dict: Dictionary = {
     exportLinks: "导出外链",
     restore: "解冻",
     changeStorageClass: "更改存储类型",
+    unknownStorageClass: "未知存储类型",
     clickToRetry: "点击重试",
   },
 

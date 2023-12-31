@@ -166,7 +166,7 @@ const Files: React.FC<FilesProps> = (props) => {
       res[storageClass.kodoName] = storageClass;
       return res;
     }, {});
-  }, [props.region?.storageClasses]);
+  }, [props.region?.storageClasses?.length]);
 
   // domains loader and selector
   const {

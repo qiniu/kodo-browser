@@ -42,6 +42,7 @@ export default interface Dictionary {
     exportLinks: string,
     restore: string,
     changeStorageClass: string,
+    unknownStorageClass: string,
     clickToRetry: string,
   },
 

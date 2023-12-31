@@ -43,6 +43,7 @@ const dict: Dictionary = {
         exportLinks: "ダウンロードリンクのエクスポート",
         restore: "リストア",
         changeStorageClass: "ストレージクラスを設定する",
+        unknownStorageClass: "不明なストレージクラス",
         clickToRetry: "再試行",
     },
 

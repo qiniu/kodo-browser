@@ -43,6 +43,7 @@ const dict: Dictionary = {
     exportLinks: "Export Download Links",
     restore: "Restore",
     changeStorageClass: "Set Storage Class",
+    unknownStorageClass: "Unknown Storage Class",
     clickToRetry: "Click to retry",
   },
 

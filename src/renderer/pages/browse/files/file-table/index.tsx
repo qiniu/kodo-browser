@@ -45,17 +45,45 @@ const FileTable: React.FC<FileTableProps> = ({
   onAction,
 }) => {
   const {translate} = useI18n();
-  const rowsData: FileRowData[] = useMemo(() =>
-    data.map((item, index) => ({
+  const {
+    rowsData,
+    prefixHitNum,
+    bothHitNum,
+  }: {
+    rowsData: FileRowData[],
+    prefixHitNum: number,
+    bothHitNum: number,
+  } = useMemo(() => {
+    const prefixPaths = Array.from(selectedFiles.keys());
+    let prefixHitNum = 0;
+    let bothHitNum = 0;
+    const rowsData = data.map((item, index) => {
+      const itemPath = item.path.toString();
+      const prefixHit = prefixPaths.some(p => itemPath.startsWith(p));
+      const selectHit = selectedFiles.has(itemPath) && !FileItem.isItemPrefix(selectedFiles.get(itemPath));
+      if (prefixHit) {
+        prefixHitNum += 1;
+      }
+      if (prefixHit && selectHit) {
+        bothHitNum += 1;
+      }
+      return {
         ...item,
-        id: item.path.toString(),
-        isSelected: selectedFiles.has(item.path.toString()),
+        id: itemPath,
+        isSelected: prefixHit || selectHit,
         regionId,
         _index: index,
-      })
-    ), [data, selectedFiles, regionId]);
+      };
+    });
+    return {
+      rowsData,
+      prefixHitNum,
+      bothHitNum,
+    };
+  }, [data, selectedFiles, regionId]);
 
-  const isSelectedAll = rowsData.length > 0 && selectedFiles.size === rowsData.length;
+  const selectedTotal = selectedFiles.size + prefixHitNum - bothHitNum;
+  const isSelectedAll = rowsData.length > 0 && selectedTotal === rowsData.length;
   const lastClickIndexRef = useRef<number | undefined>();
   const loadingMore = rowsData.length > 0 && loading;
 

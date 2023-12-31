@@ -28,6 +28,7 @@ import {usePromiseConfirm} from "@renderer/components/lite-confirm";
 
 import {OperationDoneRecallFn} from "../types";
 import {isRecursiveDirectory} from "../utils"
+import FileList from "../common/file-list";
 
 interface CopyFilesProps {
   regionId: string,
@@ -374,20 +375,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
                           }}
                         />
                       </div>
-                      <ul className="scroll-max-vh-40">
-                        {
-                          memoFileItems.map(fileItem => (
-                            <li key={fileItem.path.toString()}>
-                              {
-                                FileItem.isItemFolder(fileItem)
-                                  ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                                  : <i className="bi bi-file-earmark me-1"/>
-                              }
-                              {fileItem.name}
-                            </li>
-                          ))
-                        }
-                      </ul>
+                      <FileList data={memoFileItems} className="scroll-max-vh-40"/>
                     </>
                 }
                 {

@@ -161,6 +161,11 @@ const dict: Dictionary = {
         nonOwnedDomain: "不使用自有域名",
         refreshTooltip: "刷新",
       },
+      selectPrefix: {
+        select: "选择当前路径所有项目，包括未加载的内容",
+        selected: "已选择当前路径所有项目，包括未加载的内容。",
+        clear: "清空选择",
+      },
     },
     fileTable: {
       fileName: "名称",

@@ -162,6 +162,11 @@ const dict: Dictionary = {
         nonOwnedDomain: "Non-owned domain",
         refreshTooltip: "Refresh",
       },
+      selectPrefix: {
+        select: "Selects all in the current path, including unloaded items.",
+        selected: "Selected all, including unloaded items.",
+        clear: "Clear select",
+      },
     },
     fileTable: {
       fileName: "Name",

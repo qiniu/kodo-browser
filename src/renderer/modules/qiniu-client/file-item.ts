@@ -4,6 +4,7 @@ import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
 import Duration from "@common/const/duration";
 
 export enum ItemType {
+    Prefix = "prefix",
     Directory = "folder",
     File = "file",
 }
@@ -24,15 +25,26 @@ export interface File extends ItemBase {
 export interface Folder extends ItemBase {
     itemType: ItemType.Directory,
 }
-
-export type Item  = File | Folder;
-
-export function isItemFile(item: Item): item is File {
-    return item.itemType === ItemType.File;
+export interface Prefix extends ItemBase {
+    itemType: ItemType.Prefix,
 }
 
-export function isItemFolder(item: Item): item is Folder {
-    return item.itemType === ItemType.Directory;
+export type Item  = File | Folder | Prefix;
+
+export function isItemFile(item?: Item): item is File {
+    return item?.itemType === ItemType.File;
+}
+
+export function isItemFolder(item?: Item): item is Folder {
+    return item?.itemType === ItemType.Directory;
+}
+
+export function isItemPrefix(item?: Item): item is Prefix {
+    return item?.itemType === ItemType.Prefix;
+}
+
+export function isItemType<T extends Item>(item: Item, types: T["itemType"][]): item is T {
+  return types.some(t => t === item.itemType);
 }
 
 export function toItemFromObjectInfo(obj: ObjectInfo): Item {

@@ -161,6 +161,11 @@ const dict: Dictionary = {
                 nonOwnedDomain: "所有ドメイン名はありません",
                 refreshTooltip: "リフレッシュ",
             },
+            selectPrefix: {
+                select: "すべてのアイテムを選択，未読み込みのコンテンツを含む",
+                selected: "すべてのアイテムを選択済み，未読み込みのコンテンツを含む。",
+                clear: "選択をクリア",
+            },
         },
         fileTable: {
             fileName: "名前",

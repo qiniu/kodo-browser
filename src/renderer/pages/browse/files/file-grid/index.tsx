@@ -43,14 +43,27 @@ const FileGrid: React.FC<FileGridProps> = ({
 }) => {
   const {translate} = useI18n();
 
-  const filesData: FileRowData[] = useMemo(() =>
-    data.map((item, index) => ({
+  const {
+    filesData,
+  }: {
+    filesData: FileRowData[],
+  } = useMemo(() => {
+    const prefixPaths = Array.from(selectedFiles.keys());
+    const filesData = data.map((item, index) => {
+      const itemPath = item.path.toString();
+      const prefixHit = prefixPaths.some(p => itemPath.startsWith(p));
+      const selectHit = selectedFiles.has(itemPath) && !FileItem.isItemPrefix(selectedFiles.get(itemPath));
+      return {
         ...item,
-        id: item.path.toString(),
-        isSelected: selectedFiles.has(item.path.toString()),
+        id: itemPath,
+        isSelected: prefixHit || selectHit,
         _index: index,
-      })
-    ), [data, selectedFiles]);
+      };
+    });
+    return {
+      filesData,
+    };
+  }, [data, selectedFiles]);
 
   const loadingMore = filesData.length > 0 && loading;
 

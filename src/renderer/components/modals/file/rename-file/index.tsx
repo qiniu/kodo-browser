@@ -34,7 +34,7 @@ interface RenameFileProps {
   regionId: string,
   bucketName: string,
   basePath: string,
-  fileItem?: FileItem.Item,
+  fileItem?: FileItem.File | FileItem.Folder,
   storageClasses: StorageClass[],
   onRenamedFile: OperationDoneRecallFn,
 }

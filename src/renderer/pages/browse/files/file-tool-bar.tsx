@@ -1,4 +1,5 @@
 import {dialog as electronDialog} from "@electron/remote";
+import OpenDialogOptions = Electron.OpenDialogOptions;
 
 import React, {useCallback, useEffect, useState} from "react";
 import {Button, ButtonGroup, Dropdown, DropdownButton, Form, InputGroup} from "react-bootstrap";
@@ -26,7 +27,8 @@ import MoveFiles from "@renderer/components/modals/file/move-files";
 import RestoreFiles from "@renderer/components/modals/file/restore-files";
 import ChangeFilesStorageClass from "@renderer/components/modals/file/change-files-storage-class";
 import GenerateFileLinks from "@renderer/components/modals/file/generate-file-links";
-import OpenDialogOptions = Electron.OpenDialogOptions;
+
+import SelectPrefix from "./select-prefix";
 
 const MAX_FILE_LIST_SIZE = 9999;
 // check if an Electron app is running on macOS
@@ -42,6 +44,8 @@ interface FileToolBarProps {
   listedFileNumber: number,
   hasMoreFiles: boolean,
   selectedFiles: FileItem.Item[],
+  couldShowSelectPrefix: boolean,
+  onSelectPrefix: (prefix: FileItem.Prefix[], checked: boolean) => void,
 
   loadingDomains: boolean,
   domains: DomainAdapter[],
@@ -75,6 +79,8 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     listedFileNumber,
     hasMoreFiles,
     selectedFiles,
+    couldShowSelectPrefix,
+    onSelectPrefix,
 
     loadingDomains,
     domains,
@@ -315,7 +321,11 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
             </Button>
             <Button
               variant="outline-solid-gray-300"
-              disabled={selectedFiles.length !== 1 || bucketGrantedPermission === "readonly"}
+              disabled={
+                selectedFiles.length !== 1 ||
+                selectedFiles.some(FileItem.isItemPrefix) ||
+                bucketGrantedPermission === "readonly"
+              }
               onClick={handleShowRenameFile}
             >
               <i className="bi bi-pencil me-1"/>
@@ -385,7 +395,12 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
                   onClick={handleClickPaste}
                 >
                   <i className="bi bi-clipboard2-check me-1"/>
-                  {translate("common.paste")}({fileOperation.files.length})
+                  <span>{translate("common.paste")}</span>
+                  {
+                    fileOperation.files.some(FileItem.isItemPrefix)
+                      ? null
+                      : <span>({fileOperation.files.length})</span>
+                  }
                 </Button>
                 <Button
                   className="p-1"
@@ -463,6 +478,14 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
       </div>
 
       {
+        couldShowSelectPrefix &&
+        <SelectPrefix
+          selectedFiles={selectedFiles}
+          onSelectPrefixes={onSelectPrefix}
+        />
+      }
+
+      {
         regionId === undefined || bucketName === undefined || basePath === undefined || availableStorageClasses === undefined
           ? null
           : <>
@@ -481,7 +504,12 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
               storageClasses={Object.values(availableStorageClasses)}
               bucketName={bucketName}
               basePath={basePath}
-              fileItem={selectedFiles[0]}
+              fileItem={
+                selectedFiles.find<FileItem.File | FileItem.Folder>(
+                  (i): i is FileItem.File | FileItem.Folder =>
+                    FileItem.isItemType<FileItem.File | FileItem.Folder>(i, [FileItem.ItemType.File, FileItem.ItemType.Directory])
+                )
+              }
               onRenamedFile={onRenamedFile}
             />
             <DeleteFiles
@@ -559,5 +587,6 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     </>
   )
 };
+
 
 export default FileToolBar;

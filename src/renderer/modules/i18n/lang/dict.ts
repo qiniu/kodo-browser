@@ -166,6 +166,11 @@ export default interface Dictionary {
         nonOwnedDomain: string,
         refreshTooltip: string,
       },
+      selectPrefix: {
+        select: string,
+        selected: string,
+        clear: string,
+      },
     },
     fileTable: {
       fileName: string,

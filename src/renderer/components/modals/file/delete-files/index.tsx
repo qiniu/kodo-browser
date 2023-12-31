@@ -21,6 +21,7 @@ import {
 } from "@renderer/components/batch-progress";
 
 import {OperationDoneRecallFn} from "../types";
+import FileList from "../common/file-list";
 
 interface DeleteFilesProps {
   regionId: string,
@@ -160,20 +161,7 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
               <div className="text-danger">
                 {translate("modals.deleteFiles.description")}
               </div>
-              <ul className="scroll-max-vh-40">
-                {
-                  memoFileItems.map(fileItem => (
-                    <li key={fileItem.path.toString()}>
-                      {
-                        FileItem.isItemFolder(fileItem)
-                          ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                          : <i className="bi bi-file-earmark me-1"/>
-                      }
-                      {fileItem.name}
-                    </li>
-                  ))
-                }
-              </ul>
+              <FileList data={memoFileItems} className="scroll-max-vh-40"/>
             </>
         }
         {

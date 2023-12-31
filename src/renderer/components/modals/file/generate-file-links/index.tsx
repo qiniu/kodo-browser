@@ -35,6 +35,7 @@ import {
   DomainNameField,
   ExpireAfterField,
 } from "@renderer/components/forms/generate-link-form";
+import FileList from "../common/file-list";
 
 interface GenerateFileLinksProps {
   regionId: string,
@@ -283,20 +284,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
                 <div className="text-danger">
                   {translate("modals.generateFileLinks.description")}
                 </div>
-                <ul className="scroll-max-vh-40">
-                  {
-                    memoFileItems.map(fileItem => (
-                      <li key={fileItem.path.toString()}>
-                        {
-                          FileItem.isItemFolder(fileItem)
-                            ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                            : <i className="bi bi-file-earmark me-1"/>
-                        }
-                        {fileItem.name}
-                      </li>
-                    ))
-                  }
-                </ul>
+                <FileList data={memoFileItems} className="scroll-max-vh-40"/>
                 <GenerateLinkForm
                   onSubmit={handleSubmit(handleSubmitGenerateFileLinks)}
                   isValid={isValid}

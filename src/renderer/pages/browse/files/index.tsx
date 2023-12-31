@@ -125,10 +125,7 @@ const Files: React.FC<FilesProps> = (props) => {
   }: {
     originBasePath: string,
   }) => {
-    setSelectedFiles(m => {
-      m.clear();
-      return new Map(m);
-    });
+    setSelectedFiles(new Map());
     let p = basePath;
     if (p === undefined || originBasePath !== basePath) {
       return;
@@ -184,7 +181,6 @@ const Files: React.FC<FilesProps> = (props) => {
         toast.error("region or bucket not found!");
         return false;
       }
-      setSelectedFiles(new Map());
       return true;
     },
     canDefaultS3Domain: !props.bucket?.grantedPermission,
@@ -326,6 +322,15 @@ const Files: React.FC<FilesProps> = (props) => {
         listedFileNumber={files.length}
         hasMoreFiles={hasMoreFiles}
         selectedFiles={[...selectedFiles.values()]}
+        couldShowSelectPrefix={
+          Array.from(selectedFiles.values()).some(FileItem.isItemPrefix) ||
+          (
+            hasMoreFiles &&
+            files.length > 0 &&
+            selectedFiles.size === files.length
+          )
+        }
+        onSelectPrefix={handleChangeSelectedFiles}
 
         loadingDomains={loadingDomains}
         domains={domains}

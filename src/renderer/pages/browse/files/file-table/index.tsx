@@ -54,7 +54,9 @@ const FileTable: React.FC<FileTableProps> = ({
     prefixHitNum: number,
     bothHitNum: number,
   } = useMemo(() => {
-    const prefixPaths = Array.from(selectedFiles.keys());
+    const prefixPaths = Array.from(selectedFiles.values())
+      .filter(FileItem.isItemPrefix)
+      .map(p => p.path.toString());
     let prefixHitNum = 0;
     let bothHitNum = 0;
     const rowsData = data.map((item, index) => {

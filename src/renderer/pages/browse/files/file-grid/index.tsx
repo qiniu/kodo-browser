@@ -48,7 +48,9 @@ const FileGrid: React.FC<FileGridProps> = ({
   }: {
     filesData: FileRowData[],
   } = useMemo(() => {
-    const prefixPaths = Array.from(selectedFiles.keys());
+    const prefixPaths = Array.from(selectedFiles.values())
+      .filter(FileItem.isItemPrefix)
+      .map(p => p.path.toString());
     const filesData = data.map((item, index) => {
       const itemPath = item.path.toString();
       const prefixHit = prefixPaths.some(p => itemPath.startsWith(p));

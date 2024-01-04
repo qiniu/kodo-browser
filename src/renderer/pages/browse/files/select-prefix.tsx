@@ -25,7 +25,7 @@ const SelectPrefix: React.FC<SelectPrefixProps> = ({
     return currentAddress.path.slice(`${bucketName}/`.length);
   }, [currentAddress.path, bucketName]);
 
-  if (!bucketName || !currentPrefix) {
+  if (!bucketName || currentPrefix === undefined) {
     return null;
   }
 

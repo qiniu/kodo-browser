@@ -188,8 +188,8 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         if (!job) {
           return;
         }
-        if (job.status === Status.Stopped) {
-          this.jobsStatusSummary[Status.Stopped] -= 1;
+        if ([Status.Stopped, Status.Finished].includes(job.status)) {
+          this.jobsStatusSummary[job.status] -= 1;
         } else {
           job.stop();
         }

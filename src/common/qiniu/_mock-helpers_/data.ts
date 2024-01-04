@@ -15,7 +15,7 @@ const mockDataOfRegionBase = {
     s3Urls: [],
     ttl: 86400,
     createTime: Date.now(),
-    validate: true,
+    validated: true,
 };
 
 export const mockDataOfGetAllRegions: Region[] = [

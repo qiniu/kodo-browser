@@ -58,18 +58,20 @@ const DomainNameSelect: React.ForwardRefRenderFunction<unknown, DomainNameSelect
       onBlur={handleBlur}
     >
       {
-        groupedDomains['others'].map(domainAdapter => (
-          <option
-            key={domainAdapter.name}
-            value={domainAdapter.name}
-          >
-            {
-              domainAdapter.name === NON_OWNED_DOMAIN.name
-                ? translate("forms.generateLink.domainName.nonOwnedDomain")
-                : domainAdapter.name
-            }
-          </option>
-        ))
+        !Array.isArray(groupedDomains['others'])
+          ? null
+          : groupedDomains['others'].map(domainAdapter => (
+            <option
+              key={domainAdapter.name}
+              value={domainAdapter.name}
+            >
+              {
+                domainAdapter.name === NON_OWNED_DOMAIN.name
+                  ? translate("forms.generateLink.domainName.nonOwnedDomain")
+                  : domainAdapter.name
+              }
+            </option>
+          ))
       }
       {
         groupedDomainsOrder.map(domainType => {

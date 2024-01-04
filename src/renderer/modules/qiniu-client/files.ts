@@ -752,8 +752,6 @@ export async function deleteFiles(
     });
 
     function _deleteItems<T extends FileItem.Item>(_client: Adapter, items: T[]): Promise<PartialObjectError[]> {
-        // console.log("lihs debug: delete", items.map(i => i.path.toString()));
-        // return Promise.resolve([]);
         return _client.deleteObjects(
             region,
             bucket,

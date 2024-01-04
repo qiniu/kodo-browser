@@ -131,8 +131,8 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
               onChange={e => handleChangeSearchStatus(e.target.value)}
             >
               <option value="all">{translate("common.all")}</option>
-              <option value={Status.Running}>{translate("transfer.jobItem.status.running")}</option>
               <option value={Status.Waiting}>{translate("transfer.jobItem.status.waiting")}</option>
+              <option value={Status.Running}>{translate("transfer.jobItem.status.running")}</option>
               <option value={Status.Stopped}>{translate("transfer.jobItem.status.stopped")}</option>
               <option value={Status.Finished}>{translate("transfer.jobItem.status.finished")}</option>
               <option value={Status.Failed}>{translate("transfer.jobItem.status.failed")}</option>

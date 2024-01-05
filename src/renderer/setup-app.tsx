@@ -37,9 +37,7 @@ const SetupApp: React.FC<SetupAppProps> = ({
             Error! (v{app.version})
           </Alert.Heading>
           <p>{err.message}</p>
-          <p>
-            <pre style={{whiteSpace: "pre-wrap"}}>{err.stack}</pre>
-          </p>
+          <pre style={{whiteSpace: "pre-wrap"}}>{err.stack}</pre>
         </Alert>
       </div>
     );

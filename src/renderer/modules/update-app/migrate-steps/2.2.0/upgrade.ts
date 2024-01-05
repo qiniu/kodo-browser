@@ -21,83 +21,135 @@ import {
 
 const configPath = path.join(os.homedir(), ".kodo-browser");
 
-const old2new: Record<
-  SettingStorageKey,
-  (v: string) => Partial<AppPreferencesData>
-> = {
-  [SettingStorageKey.IsDebug]: v => ({
-    // v === 0 is not debug, meaning log level error(4)
-    logLevel: !parseInt(v) ? 4 : 1,
-  }),
-  [SettingStorageKey.AutoUpgrade]: v => ({
-    autoUpdateAppEnabled: Boolean(parseInt(v)),
-  }),
+export default async function () {
+  await migratePreferences();
 
-  // upload
-  [SettingStorageKey.ResumeUpload]: v => ({
-    resumeUploadEnabled: Boolean(parseInt(v)),
-  }),
-  [SettingStorageKey.MaxUploadConcurrency]: v => ({
-    maxUploadConcurrency: parseInt(v),
-  }),
-  [SettingStorageKey.MultipartUploadSize]: v => ({
-    multipartUploadPartSize: parseInt(v),
-  }),
-  [SettingStorageKey.MultipartUploadThreshold]: v => ({
-    multipartUploadThreshold: parseInt(v),
-  }),
-  [SettingStorageKey.UploadSpeedLimitEnabled]: v => ({
-    uploadSpeedLimitEnabled: Boolean(parseInt(v)),
-  }),
-  [SettingStorageKey.UploadSpeedLimit]: v => ({
-    uploadSpeedLimitKbPerSec: parseInt(v),
-  }),
-  [SettingStorageKey.SkipEmptyDirectoryUpload]: v => ({
-    skipEmptyDirectoryUpload: v === "true",
-  }),
+  // below migrate date in config path.
+  // if config path isn't existing, no data need to migrate
+  try {
+    await fsPromises.access(configPath);
+  } catch (err: any) {
+    if (err.code === "ENOENT") {
+      return;
+    }
+    throw err;
+  }
 
-  // download
-  [SettingStorageKey.ResumeDownload]: v => ({
-    resumeDownloadEnabled: Boolean(parseInt(v)),
-  }),
-  [SettingStorageKey.MaxDownloadConcurrency]: v => ({
-    maxDownloadConcurrency: parseInt(v),
-  }),
-  [SettingStorageKey.MultipartDownloadSize]: v => ({
-    multipartDownloadPartSize: parseInt(v),
-  }),
-  [SettingStorageKey.MultipartDownloadThreshold]: v => ({
-    multipartDownloadThreshold: parseInt(v),
-  }),
-  [SettingStorageKey.DownloadSpeedLimitEnabled]: v => ({
-    downloadSpeedLimitEnabled: Boolean(parseInt(v)),
-  }),
-  [SettingStorageKey.DownloadSpeedLimit]: v => ({
-    downloadSpeedLimitKbPerSec: parseInt(v),
-  }),
-  [SettingStorageKey.OverwriteDownload]: v => ({
-    overwriteDownloadEnabled: v === "true",
-  }),
+  await migrateAkHistory();
 
-  // others
-  [SettingStorageKey.ExternalPathEnabled]: v => ({
-    externalPathEnabled: Boolean(parseInt(v)),
-  }),
-  [SettingStorageKey.StepByStepLoadingFiles]: v => ({
-    filesItemLazyLoadEnabled: Boolean(parseInt(v)),
-  }),
-  [SettingStorageKey.FilesLoadingSize]: v => ({
-    filesItemLoadSize: parseInt(v),
-  }),
-  [SettingStorageKey.Language]: v => ({
-    language: v.replace("-", "_") as any,
-  }),
-  [SettingStorageKey.IsListView]: v => ({
-    contentViewStyle: v === "true" ? "table" : "grid",
-  }),
+  const filenames = await fsPromises.readdir(configPath)
+  const ex = /(?<type>bookmarks|external_paths|upprog|downprog)_(?<ak>.+).json/;
+  for (const fName of filenames) {
+    const matchRes = fName.match(ex);
+    if (!matchRes || !matchRes.groups?.["ak"]) {
+      continue;
+    }
+    const ak = matchRes.groups["ak"];
+    const filePath = path.join(configPath, fName);
+    if (ak === "undefined") {
+      await fsPromises.unlink(filePath);
+      continue;
+    }
+    const profileDirPath = path.join(configPath, `profile_${ak}`);
+    try {
+      await fsPromises.access(profileDirPath);
+    } catch {
+      await fsPromises.mkdir(profileDirPath);
+    }
+    switch (matchRes.groups?.["type"]) {
+      case "bookmarks":
+        await migrateBookmarks(ak, filePath);
+        break;
+      case "external_paths":
+        await migrateExternalPaths(ak, filePath);
+        break;
+      case "upprog":
+        await migrateTransferJobs(ak, filePath, "upload_prog");
+        break;
+      case "downprog":
+        await migrateTransferJobs(ak, filePath, "download_prog");
+        break;
+    }
+  }
 }
 
 async function migratePreferences() {
+  const old2new: Record<
+    SettingStorageKey,
+    (v: string) => Partial<AppPreferencesData>
+  > = {
+    [SettingStorageKey.IsDebug]: v => ({
+      // v === 0 is not debug, meaning log level error(4)
+      logLevel: !parseInt(v) ? 4 : 1,
+    }),
+    [SettingStorageKey.AutoUpgrade]: v => ({
+      autoUpdateAppEnabled: Boolean(parseInt(v)),
+    }),
+
+    // upload
+    [SettingStorageKey.ResumeUpload]: v => ({
+      resumeUploadEnabled: Boolean(parseInt(v)),
+    }),
+    [SettingStorageKey.MaxUploadConcurrency]: v => ({
+      maxUploadConcurrency: parseInt(v),
+    }),
+    [SettingStorageKey.MultipartUploadSize]: v => ({
+      multipartUploadPartSize: parseInt(v),
+    }),
+    [SettingStorageKey.MultipartUploadThreshold]: v => ({
+      multipartUploadThreshold: parseInt(v),
+    }),
+    [SettingStorageKey.UploadSpeedLimitEnabled]: v => ({
+      uploadSpeedLimitEnabled: Boolean(parseInt(v)),
+    }),
+    [SettingStorageKey.UploadSpeedLimit]: v => ({
+      uploadSpeedLimitKbPerSec: parseInt(v),
+    }),
+    [SettingStorageKey.SkipEmptyDirectoryUpload]: v => ({
+      skipEmptyDirectoryUpload: v === "true",
+    }),
+
+    // download
+    [SettingStorageKey.ResumeDownload]: v => ({
+      resumeDownloadEnabled: Boolean(parseInt(v)),
+    }),
+    [SettingStorageKey.MaxDownloadConcurrency]: v => ({
+      maxDownloadConcurrency: parseInt(v),
+    }),
+    [SettingStorageKey.MultipartDownloadSize]: v => ({
+      multipartDownloadPartSize: parseInt(v),
+    }),
+    [SettingStorageKey.MultipartDownloadThreshold]: v => ({
+      multipartDownloadThreshold: parseInt(v),
+    }),
+    [SettingStorageKey.DownloadSpeedLimitEnabled]: v => ({
+      downloadSpeedLimitEnabled: Boolean(parseInt(v)),
+    }),
+    [SettingStorageKey.DownloadSpeedLimit]: v => ({
+      downloadSpeedLimitKbPerSec: parseInt(v),
+    }),
+    [SettingStorageKey.OverwriteDownload]: v => ({
+      overwriteDownloadEnabled: v === "true",
+    }),
+
+    // others
+    [SettingStorageKey.ExternalPathEnabled]: v => ({
+      externalPathEnabled: Boolean(parseInt(v)),
+    }),
+    [SettingStorageKey.StepByStepLoadingFiles]: v => ({
+      filesItemLazyLoadEnabled: Boolean(parseInt(v)),
+    }),
+    [SettingStorageKey.FilesLoadingSize]: v => ({
+      filesItemLoadSize: parseInt(v),
+    }),
+    [SettingStorageKey.Language]: v => ({
+      language: v.replace("-", "_") as any,
+    }),
+    [SettingStorageKey.IsListView]: v => ({
+      contentViewStyle: v === "true" ? "table" : "grid",
+    }),
+  }
+
   let preferences: Partial<AppPreferencesData> = {};
   for (const k of Object.values(SettingStorageKey)) {
     const v = localStorage.getItem(k);
@@ -109,6 +161,14 @@ async function migratePreferences() {
       ...old2new[k](v),
     };
     localStorage.removeItem(k);
+  }
+  if (!Object.keys(performance).length) {
+    return;
+  }
+  try {
+    await fsPromises.access(configPath);
+  } catch {
+    await fsPromises.mkdir(configPath);
   }
   const confFilePath = path.join(configPath, "app_preferences.json");
   await fsPromises.writeFile(confFilePath, JSON.stringify(preferences));
@@ -246,44 +306,4 @@ async function migrateTransferJobs(
   }
   await dataStore.compact(true);
   await dataStore.close();
-}
-
-export default async function () {
-  await migratePreferences();
-  await migrateAkHistory();
-
-  const filenames = await fsPromises.readdir(configPath)
-  const ex = /(?<type>bookmarks|external_paths|upprog|downprog)_(?<ak>.+).json/;
-  for (const fName of filenames) {
-    const matchRes = fName.match(ex);
-    if (!matchRes || !matchRes.groups?.["ak"]) {
-      continue;
-    }
-    const ak = matchRes.groups["ak"];
-    const filePath = path.join(configPath, fName);
-    if (ak === "undefined") {
-      await fsPromises.unlink(filePath);
-      continue;
-    }
-    const profileDirPath = path.join(configPath, `profile_${ak}`);
-    try {
-      await fsPromises.access(profileDirPath);
-    } catch {
-      await fsPromises.mkdir(profileDirPath);
-    }
-    switch (matchRes.groups?.["type"]) {
-      case "bookmarks":
-        await migrateBookmarks(ak, filePath);
-        break;
-      case "external_paths":
-        await migrateExternalPaths(ak, filePath);
-        break;
-      case "upprog":
-        await migrateTransferJobs(ak, filePath, "upload_prog");
-        break;
-      case "downprog":
-        await migrateTransferJobs(ak, filePath, "download_prog");
-        break;
-    }
-  }
 }

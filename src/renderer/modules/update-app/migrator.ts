@@ -3,7 +3,7 @@ import {compareVersion} from "./utils";
 interface MigratorOptions {
   prevVersionGetter: () => Promise<string>,
   currVersionGetter: () => Promise<string>,
-  currVersionSetter: (version: string) => Promise<void>,
+  prevVersionSetter: (version: string) => Promise<void>,
 }
 
 export interface MigrateStep {
@@ -15,17 +15,17 @@ export interface MigrateStep {
 export class Migrator {
   private prevVersionGetter: () => Promise<string>
   private currVersionGetter: () => Promise<string>
-  private currVersionSetter: (version: string) => Promise<void>
+  private prevVersionSetter: (version: string) => Promise<void>
   private migrateSteps: MigrateStep[]
 
   constructor({
     prevVersionGetter,
     currVersionGetter,
-    currVersionSetter,
+    prevVersionSetter,
   }: MigratorOptions) {
     this.prevVersionGetter = prevVersionGetter;
     this.currVersionGetter = currVersionGetter;
-    this.currVersionSetter = currVersionSetter;
+    this.prevVersionSetter = prevVersionSetter;
     this.migrateSteps = [];
   }
 
@@ -51,7 +51,7 @@ export class Migrator {
       .sort((a, b) => compareVersion(a.version, b.version));
     for (const upStep of upSteps) {
       await upStep.up?.();
-      await this.currVersionSetter(upStep.version);
+      await this.prevVersionSetter(upStep.version);
     }
   }
 
@@ -73,7 +73,7 @@ export class Migrator {
       .sort((a, b) => -compareVersion(a.version, b.version));
     for (const downStep of downSteps) {
       await downStep.down?.();
-      await this.currVersionSetter(downStep.version);
+      await this.prevVersionSetter(downStep.version);
     }
   }
 }

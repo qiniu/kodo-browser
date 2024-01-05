@@ -30,8 +30,13 @@ async function currVersionGetter(): Promise<string> {
   return app.version;
 }
 
-async function currVersionSetter(version: string): Promise<void> {
+async function prevVersionSetter(version: string): Promise<void> {
   const currVersionFilePath = path.join(config_path, ".prev_version");
+  try {
+    await fsPromises.access(config_path);
+  } catch {
+    await fsPromises.mkdir(config_path, {recursive: true});
+  }
   await fsPromises.writeFile(currVersionFilePath, version);
 }
 
@@ -52,7 +57,7 @@ export async function getMigrator(): Promise<Migrator> {
   const result = new Migrator({
     prevVersionGetter,
     currVersionGetter,
-    currVersionSetter,
+    prevVersionSetter,
   });
 
   const migrateSteps = await import("./migrate-steps");

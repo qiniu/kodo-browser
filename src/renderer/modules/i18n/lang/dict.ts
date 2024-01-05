@@ -224,6 +224,7 @@ export default interface Dictionary {
       hint: {
         addingJobs: string,
         addedJobs: string,
+        addedJobsErrored: string,
       },
       error: {
         nothing: string,

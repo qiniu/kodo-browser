@@ -219,6 +219,7 @@ const dict: Dictionary = {
       hint: {
         addingJobs: "Adding to upload queue…",
         addedJobs: "All files have been added to the upload queue",
+        addedJobsErrored: "Some files haven't add to the upload queue by access errored",
       },
       error: {
         nothing: "No files were found to upload",

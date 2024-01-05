@@ -1,5 +1,5 @@
 import path from "path";
-import {Stats, promises as fsPromises} from "fs";
+import {Dir, Stats, promises as fsPromises} from "fs";
 
 // @ts-ignore
 import Walk from "@root/walk";
@@ -39,7 +39,7 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
         uploadOptions: UploadOptions,
         hooks?: {
             jobsAdding?: () => void,
-            jobsAdded?: () => void,
+            jobsAdded?: (succeed: string[], failed: string[]) => void,
         },
     ) {
         const qiniuClient = createQiniuClient(
@@ -53,19 +53,24 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             withFileStats: true,
         });
 
+        // true means all sub items added
+        // false means some sub item(s) not added
+        const walkResult: Record<string, boolean> = {};
+
         for (const filePathname of filePathnameList) {
             const directoryToCreate = new Map<string, boolean>();
             // remoteBaseDirectory maybe "", means upload to bucket root
-            // meybe "/", means upload to "bucket//"
+            // maybe "/", means upload to "bucket//"
             const remoteBaseDirectory = destInfo.key;
             const localBaseDirectory = path.dirname(filePathname);
 
             await walk(
                 filePathname,
-                async (err: Error, walkingPathname: string, statsWithName: StatsWithName): Promise<void> => {
+                async (err: Error, walkingPathname: string, statsWithName: StatsWithName): Promise<void | boolean> => {
                     if (err) {
-                        this.config.onError?.(err);
-                        return;
+                        walkResult[filePathname] = false;
+                        // this return will stop walking current dir.
+                        return false;
                     }
 
                     let relativePathname = path.relative(localBaseDirectory, walkingPathname);
@@ -87,11 +92,17 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                         const remoteDirectoryKey = remoteKey + path.posix.sep;
                         let shouldCreateDirectory = false;
                         if (this.config.isSkipEmptyDirectory) {
-                            const dir = await fsPromises.opendir(walkingPathname);
-                            if (await dir.read() !== null) {
-                                shouldCreateDirectory = true;
+                            let dir: Dir | undefined;
+                            try {
+                                dir = await fsPromises.opendir(walkingPathname);
+                                if (await dir.read() !== null) {
+                                    shouldCreateDirectory = true;
+                                }
+                            } catch {
+                                // operation maybe not permitted, the error will be handled by above.
+                            } finally {
+                                dir?.close();
                             }
-                            dir.close();
                         } else if (!directoryToCreate.get(remoteDirectoryKey)) {
                             shouldCreateDirectory = true;
                         }
@@ -131,8 +142,19 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                     }
                 },
             );
+
+            if (walkResult[filePathname] === undefined) {
+                walkResult[filePathname] = true;
+            }
         }
-        hooks?.jobsAdded?.();
+
+        const [walkSucceed, walkFailed] = Object.entries(walkResult)
+            .reduce((res, [pathname, succeed]) => {
+                const [s, f] = res;
+                succeed ? s.push(pathname) : f.push(pathname);
+                return res;
+            }, [[] as string[], [] as string[]]);
+        hooks?.jobsAdded?.(walkSucceed, walkFailed);
     }
 
     /**

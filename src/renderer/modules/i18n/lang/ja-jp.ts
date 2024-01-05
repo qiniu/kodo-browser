@@ -218,6 +218,7 @@ const dict: Dictionary = {
             hint: {
                 addingJobs: "ダウンロードキューに追加中…",
                 addedJobs: "すべて追加されました",
+                addedJobsErrored: "アクセスエラーのため、一部のファイルがアップロードキューに追加されませんでした",
             },
             error: {
                 nothing: "アップロードできるファイルは見つかりませんでした",

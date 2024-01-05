@@ -218,6 +218,7 @@ const dict: Dictionary = {
       hint: {
         addingJobs: "正在添加到上传队列…",
         addedJobs: "已全部添加至上传队列",
+        addedJobsErrored: "由于访问错误，部分文件未添加至上传队列",
       },
       error: {
         nothing: "没有发现任何可以上传的文件",

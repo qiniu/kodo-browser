@@ -81,8 +81,12 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
       // @ts-ignore
       userNatureLanguage: currentLanguage.replace("_", "-"),
     },
-    onAddedJobs: () => {
-      toast.success(translate("transfer.upload.hint.addedJobs"));
+    onAddedJobs: ({erroredFilePathnameList}) => {
+      if (erroredFilePathnameList.length) {
+        toast.error(translate("transfer.upload.hint.addedJobsErrored"));
+      } else {
+        toast.success(translate("transfer.upload.hint.addedJobs"));
+      }
       setOpenPanelName(PanelName.Upload);
     },
     onJobCompleted: ({jobUiData}) => onUploadJobComplete(jobUiData),

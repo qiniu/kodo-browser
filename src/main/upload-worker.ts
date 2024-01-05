@@ -72,12 +72,13 @@ process.on("message", (message: UploadMessage) => {
                 },
                 message.data.uploadOptions,
                 {
-                    jobsAdded: () => {
+                    jobsAdded: (succeed, failed) => {
                         const replyMessage: AddedJobsReplyMessage = {
                             action: UploadAction.AddedJobs,
                             data: {
-                                filePathnameList: message.data.filePathnameList,
+                                filePathnameList: succeed,
                                 destInfo: message.data.destInfo,
+                                erroredFilePathnameList: failed,
                             },
                         };
                         process.send?.(replyMessage);

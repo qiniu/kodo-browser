@@ -120,12 +120,15 @@ export interface GetAdapterOptionParam {
 }
 
 function getAdapterOption(opt: GetAdapterOptionParam): AdapterOption {
+    const appNatureLanguage: NatureLanguage = appPreferences.state.initialized
+        ? appPreferences.get("language").replace("_", "-") as NatureLanguage
+        : "zh-CN";
     let baseResult = {
         accessKey: opt.id,
         secretKey: opt.secret,
         appName: AppConfig.app.id,
         appVersion: AppConfig.app.version,
-        appNatureLanguage: appPreferences.get("language").replace("_", "-") as NatureLanguage ?? 'zh-CN',
+        appNatureLanguage: appNatureLanguage,
         regions: [],
     };
     let result: AdapterOption;
@@ -135,6 +138,9 @@ function getAdapterOption(opt: GetAdapterOptionParam): AdapterOption {
             ucUrl: undefined,
         };
     } else {
+        // change to async to ensure await get the private endpoint config.
+        // the private endpoint is working exactly correct for now,
+        // because it's loaded before app start
         const endpointConfig = getEndpointConfig({
             accessKey: opt.id,
             accessSecret: opt.secret,

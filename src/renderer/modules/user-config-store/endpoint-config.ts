@@ -7,6 +7,7 @@ import {Endpoint} from "@renderer/modules/qiniu-client";
 import {LocalFile, serializer} from "@renderer/modules/persistence";
 
 import UserConfigStore from "./user-config-store";
+import handleLoadError from "@renderer/modules/user-config-store/error-handler";
 
 const DEFAULT_ENDPOINT: Endpoint = {
   ucUrl: "",
@@ -31,6 +32,7 @@ export function getEndpointConfig(akItem: AkItem | null) {
       filePath: `config.json`,
       serializer: new serializer.JSONSerializer(),
     }),
+    onLoadError: handleLoadError,
   });
   privateEndpointConfig.watchPersistence();
   return privateEndpointConfig;

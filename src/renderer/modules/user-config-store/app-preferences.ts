@@ -3,6 +3,7 @@ import {LangName} from "@renderer/modules/i18n";
 import {serializer, LocalFile} from "@renderer/modules/persistence";
 
 import UserConfigStore from "./user-config-store";
+import handleLoadError from "@renderer/modules/user-config-store/error-handler";
 
 export enum ContentViewStyle {
   Table = "table",
@@ -82,6 +83,7 @@ const appPreferences = new UserConfigStore<AppPreferencesData>({
     filePath: "app_preferences.json",
     serializer: new serializer.JSONSerializer(),
   }),
+  onLoadError: handleLoadError,
 });
 
 export default appPreferences;

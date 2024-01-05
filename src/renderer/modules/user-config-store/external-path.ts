@@ -1,11 +1,13 @@
 import path from "path";
 
+import {useMemo, useSyncExternalStore} from "react";
+
+import {LocalFile, serializer} from "@renderer/modules/persistence";
 import {KodoAddress} from "@renderer/modules/kodo-address";
+import {AkItem} from "@renderer/modules/auth";
 
 import UserConfigStore from "./user-config-store";
-import {AkItem} from "@renderer/modules/auth";
-import {LocalFile, serializer} from "@renderer/modules/persistence";
-import {useMemo, useSyncExternalStore} from "react";
+import handleLoadError from "@renderer/modules/user-config-store/error-handler";
 
 export interface ExternalPathItem extends KodoAddress {
   regionId: string,
@@ -42,6 +44,7 @@ function getExternalPath(akItem: AkItem | null) {
       filePath: path.join(`profile_${akItem.accessKey}`, "bookmarks.json"),
       serializer: new serializer.JSONSerializer(),
     }),
+    onLoadError: handleLoadError,
   });
   cacheMap.set(akItem.accessKey, result);
   return result;

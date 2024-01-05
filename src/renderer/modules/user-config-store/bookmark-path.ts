@@ -8,6 +8,7 @@ import {LocalFile, serializer} from "@renderer/modules/persistence";
 import {KodoAddress} from "@renderer/modules/kodo-address";
 
 import UserConfigStore from "./user-config-store";
+import handleLoadError from "@renderer/modules/user-config-store/error-handler";
 
 export interface BookmarkItem extends KodoAddress {
   timestamp: number, // ms
@@ -45,6 +46,7 @@ function getBookmarkPath(akItem: AkItem | null) {
       filePath: path.join(`profile_${akItem.accessKey}`, "bookmarks.json"),
       serializer: new serializer.JSONSerializer(),
     }),
+    onLoadError: handleLoadError,
   });
   cacheMap.set(akItem.accessKey, result);
   return result;

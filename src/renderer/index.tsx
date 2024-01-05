@@ -10,6 +10,7 @@ import {MemoryRouter as Router} from "react-router-dom";
 
 // create a RoutePath.Root page and check auth state will be more beautiful
 import {getCurrentUser} from "./modules/auth";
+import {getEndpointConfig} from "./modules/user-config-store";
 
 import setupApp from "./setup-app";
 import RoutePath from "./pages/route-path";
@@ -22,7 +23,11 @@ import RoutePath from "./pages/route-path";
   container.className = "h-100";
   document.body.prepend(container);
   const root = createRoot(container);
-  const isSignedIn = Boolean(getCurrentUser());
+  const currentUser = getCurrentUser();
+  const isSignedIn = currentUser !== null;
+  if (isSignedIn) {
+    await getEndpointConfig(currentUser).loadFromPersistence();
+  }
   root.render(
     <Router initialEntries={[isSignedIn ? RoutePath.Browse : RoutePath.SignIn]}>
       <App/>

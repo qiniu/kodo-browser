@@ -9,11 +9,13 @@ export interface UserConfigStoreOptions<T> {
   defaultData: T,
   persistence?: Persistence<Partial<T>>,
   manualLoadPersistence?: boolean,
+  onLoadError?: (err: Error) => void,
 }
 
 interface UserConfigStoreState {
   initialized: boolean,
   loadingPersistence: boolean,
+  loadError: Error | null,
   changedPersistenceValue: boolean,
 }
 
@@ -28,15 +30,18 @@ class UserConfigStore<T> {
   readonly persistence?: Persistence<Partial<T>>;
   private _loadPersistencePromise: Promise<void> | null = null;
   private isWatchingPersistence: boolean = false;
+  private handleLoadError?: (err: Error) => void;
 
   constructor({
     defaultData,
     persistence,
     manualLoadPersistence = false,
+    onLoadError,
   }: UserConfigStoreOptions<T>) {
     this._state = {
       initialized: false,
       loadingPersistence: false,
+      loadError: null,
       changedPersistenceValue: false,
     };
     this.defaultData = defaultData;
@@ -48,6 +53,7 @@ class UserConfigStore<T> {
     if (!this.persistence) {
       this._state.initialized = true;
     }
+    this.handleLoadError = onLoadError;
     this.handlePersistenceChange = this.handlePersistenceChange.bind(this);
   }
 
@@ -110,7 +116,7 @@ class UserConfigStore<T> {
     return this._store;
   }
 
-  loadFromPersistence(force = false) {
+  loadFromPersistence(force = false): Promise<void> {
     if (this._loadPersistencePromise && !force) {
       return this._loadPersistencePromise;
     }
@@ -127,15 +133,21 @@ class UserConfigStore<T> {
     this._store?.dispatch({
       state: this._state,
     });
-    const data = await this.persistence.load();
-    // if `data` is null, it's ok by the `lodash.merge` doing nothing
-    this.data = lodash.merge(this.data, data);
-    this._state.loadingPersistence = false;
-    this._state.initialized = true;
-    this._store?.dispatch({
-      state: this._state,
-      data: this.getAll(),
-    });
+    try {
+      const data = await this.persistence.load();
+      // if `data` is null, it's ok by the `lodash.merge` doing nothing
+      this.data = lodash.merge(this.data, data);
+      this._state.initialized = true;
+    } catch (err: any) {
+      this._state.loadError = err;
+      this.handleLoadError?.(err);
+    } finally {
+      this._state.loadingPersistence = false;
+      this._store?.dispatch({
+        state: this._state,
+        data: this.getAll(),
+      });
+    }
   }
 
   async saveToPersistence(data: Partial<T>) {

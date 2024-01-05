@@ -115,7 +115,7 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                             name: statsWithName.name,
                             path: walkingPathname,
                             size: statsWithName.size,
-                            mtime: statsWithName.mtime.getTime(),
+                            mtime: Math.floor(statsWithName.mtimeMs),
                         };
                         const to = {
                             bucket: destInfo.bucketName,

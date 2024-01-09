@@ -46,7 +46,7 @@ export default function useLoadRegions({
       isPublicCloud: user.endpointType === EndpointType.Public,
     };
 
-    let regions: Region[];
+    let regions: Region[] | undefined = undefined;
     try {
       const regionsFromFetch = await getRegions(opt)
       if (user.endpointType === EndpointType.Public) {
@@ -89,16 +89,11 @@ export default function useLoadRegions({
           }
         }
       }
-
+    } finally {
       setLoadRegionsState({
         loading: false,
-        regions,
+        regions: regions || [],
       });
-    } finally {
-      setLoadRegionsState(v => ({
-        ...v,
-        loading: false,
-      }));
     }
   }
 

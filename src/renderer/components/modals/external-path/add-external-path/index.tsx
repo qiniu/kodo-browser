@@ -33,6 +33,7 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
     loadRegionsState,
   } = useLoadRegions({
     user: currentUser,
+    shouldAutoReload: true,
   });
   useEffect(() => {
     if (!loadRegionsState.regions.length) {
@@ -146,8 +147,11 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
               </Form.Label>
               <div>
                 {
-                  loadRegionsState.regions.length > 0
+                  loadRegionsState.loading
                     ? (
+                      <Spinner className="me-2" animation="border" size="sm"/>
+                    )
+                    : (
                       <>
                         <Form.Select
                           {...register("regionId", {
@@ -167,9 +171,6 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
                           {errors.regionId?.message}
                         </Form.Control.Feedback>
                       </>
-                    )
-                    : (
-                      <Spinner className="me-2" animation="border" size="sm"/>
                     )
                 }
               </div>

@@ -94,12 +94,14 @@ export default function useExternalPath(akItem: AkItem | null) {
     ));
   };
 
+  const loadExternalPaths = () => externalPath.loadFromPersistence();
+
   return {
     externalPathState,
     externalPathData,
     hasExternalPath,
     addExternalPath,
     deleteExternalPath,
-    loadFromPersistence: externalPath.loadFromPersistence,
+    loadExternalPaths,
   };
 }

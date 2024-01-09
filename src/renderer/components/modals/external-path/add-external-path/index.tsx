@@ -54,6 +54,7 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
     externalPathState,
     hasExternalPath,
     addExternalPath,
+    loadExternalPaths,
   } = useExternalPath(currentUser);
 
   // add external path form
@@ -67,9 +68,13 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
     },
   } = useForm<AddExternalPathFormDate>();
 
-  const handleAddExternalPath: SubmitHandler<AddExternalPathFormDate> = (data) => {
-    if (!currentUser || externalPathState.initialized) {
+  const handleAddExternalPath: SubmitHandler<AddExternalPathFormDate> = async (data) => {
+    if (!currentUser) {
       return;
+    }
+
+    if (!externalPathState.initialized) {
+      await loadExternalPaths();
     }
 
     if (hasExternalPath({

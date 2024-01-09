@@ -33,11 +33,11 @@ const ExternalPaths: React.FC<ExternalPathsProps> = ({
   const {
     externalPathState,
     externalPathData,
-    loadFromPersistence,
+    loadExternalPaths,
   } = useExternalPath(currentUser);
 
   useEffect(() => {
-    loadFromPersistence()
+    loadExternalPaths()
       .catch(err => {
         toast.error(`${translate("common.failed")}: ${err}`);
       });

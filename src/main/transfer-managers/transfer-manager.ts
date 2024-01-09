@@ -188,10 +188,15 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         if (!job) {
           return;
         }
-        if ([Status.Stopped, Status.Finished].includes(job.status)) {
-          this.jobsStatusSummary[job.status] -= 1;
-        } else {
+        if (
+          [
+            Status.Waiting,
+            Status.Running,
+          ].includes(job.status)
+        ) {
           job.stop();
+        } else {
+          this.jobsStatusSummary[job.status] -= 1;
         }
 
         this.jobs.delete(jobId);
@@ -204,6 +209,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         this.jobIds = this.jobIds.filter(id => !idsToRemove.includes(id));
         idsToRemove.forEach(id => {
             this.jobs.delete(id);
+            this.jobsStatusSummary[Status.Finished] -= 1;
         });
     }
 

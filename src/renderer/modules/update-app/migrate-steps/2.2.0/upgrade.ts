@@ -176,6 +176,11 @@ async function migratePreferences() {
 
 async function migrateAkHistory() {
   const filePath = path.join(configPath, "ak_histories.json");
+    try {
+    await fsPromises.access(filePath);
+  } catch {
+    return;
+  }
   const oldContentBuf = await fsPromises.readFile(filePath);
   const oldContent: OldAkHistory = JSON.parse(oldContentBuf.toString());
   const content: AkHistory = {

@@ -455,16 +455,14 @@ export default class DownloadJob extends TransferJob {
         if (isBaseDirValid) {
             return;
         }
-        const isBaseDirExists: boolean = await fsPromises.access(
-            baseDirPath,
-            fsConstants.F_OK,
-        )
-            .then(() => true)
-            .catch(() => false);
-        if (isBaseDirExists) {
-            throw Error(`Can't download to ${this.options.to}: Permission denied`);
+        try {
+          await fsPromises.mkdir(baseDirPath, {recursive: true});
+        } catch (err: any) {
+          if (err.code === "EEXIST") {
+            return;
+          }
+          throw new Error(`Can't download to ${baseDirPath}`, {cause: err});
         }
-        await fsPromises.mkdir(baseDirPath, {recursive: true})
     }
 
     private async handleDownloadError(err: Error) {

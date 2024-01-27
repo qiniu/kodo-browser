@@ -1,7 +1,4 @@
 import { ListedObjects, ObjectInfo } from "kodo-s3-adapter-sdk/dist/adapter";
-import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
-import Duration from "@common/const/duration";
-import * as FileItem from "../file-item";
 
 export function mockAdapterFactory(adapterName: string) {
     const mockedClient = jest.fn();
@@ -142,30 +139,6 @@ export const delimiterStyleTestData = {
         .map(i => ({
             ...i
         })),
-}
-
-export function transObjectInfoToFileItem(item: ObjectInfo): FileItem.Item {
-    const qiniuPath = qiniuPathConvertor.fromQiniuPath(item.key);
-
-    if (item.key.endsWith("/")) {
-        return {
-            bucket: item.bucket,
-            itemType: FileItem.ItemType.Directory,
-            name: qiniuPath.directoryBasename() ?? "",
-            path: qiniuPath,
-        }
-    }
-
-    return {
-        bucket: item.bucket,
-        itemType: FileItem.ItemType.File,
-        name: qiniuPath.basename() ?? "",
-        path: qiniuPath,
-        lastModified: item.lastModified,
-        size: item.size,
-        storageClass: item.storageClass,
-        withinFourHours: (Date.now() - item.lastModified.getTime()) <= 4 * Duration.Hour,
-    };
 }
 
 function* idGen(i: number = 0): IterableIterator<number> {

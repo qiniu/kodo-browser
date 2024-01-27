@@ -26,8 +26,10 @@ interface Config {
     onCreatedDirectory?: (bucket: string, directoryKey: string) => void,
 }
 
+export type UploadManagerConfig = TransferManagerConfig<UploadJob, Config>;
+
 export default class UploadManager extends TransferManager<UploadJob, Config> {
-    constructor(config: TransferManagerConfig<UploadJob, Config>) {
+    constructor(config: UploadManagerConfig) {
         super(config);
     }
 
@@ -67,14 +69,23 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                         return;
                     }
 
-                    let remoteKey = remoteBaseDirectory + walkingPathname.slice(localBaseDirectory.length + 1);
+                    let relativePathname = path.relative(localBaseDirectory, walkingPathname);
                     // for windows path
-                    if (path.sep === "\\") {
-                        remoteKey = remoteKey.replace(/\\/g, "/");
+                    if (path.sep !== path.posix.sep) {
+                        relativePathname = relativePathname.replaceAll(path.sep, path.posix.sep);
+                    }
+                    let remoteKey: string
+                    if (!remoteBaseDirectory || remoteBaseDirectory.endsWith(path.posix.sep)) {
+                      remoteKey = remoteBaseDirectory + relativePathname;
+                    } else {
+                      remoteKey = [
+                        remoteBaseDirectory,
+                        relativePathname,
+                      ].join(path.posix.sep);
                     }
 
                     if (statsWithName.isDirectory()) {
-                        const remoteDirectoryKey = remoteKey + "/";
+                        const remoteDirectoryKey = remoteKey + path.posix.sep;
                         let shouldCreateDirectory = false;
                         if (this.config.isSkipEmptyDirectory) {
                             const dir = await fsPromises.opendir(walkingPathname);
@@ -126,7 +137,7 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
     }
 
     /**
-     *  best to call {@link createDirectoryWithSingleFlight}
+     * best to call {@link createDirectoryWithSingleFlight}
      */
     private async createDirectory(
         client: Adapter,

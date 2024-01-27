@@ -1,27 +1,9 @@
-import * as MockAuth from "./_mock-helpers_/auth";
-import { mocked } from "ts-jest/utils";
+import {mocked} from "ts-jest/utils";
 import mockFs from "mock-fs";
-import fs from "fs";
+import * as MockAuth from "@common/qiniu/_mock-helpers_/auth";
+import {mockDownloader} from "@common/qiniu/_mock-helpers_/downloader";
 
-jest.mock("kodo-s3-adapter-sdk", () => {
-    const mockedDownloader = jest.fn();
-    mockedDownloader.constructor = mockedDownloader;
-    mockedDownloader.prototype.getObjectToFile = function (_region: string, _obj: Object, tempFilepath: string) {
-        return new Promise(resolve => {
-            fs.copyFileSync("/path/to/dir/to-be-downloaded.txt", tempFilepath); // mock downloaded
-            setTimeout(resolve, 300)
-        });
-    };
-    mockedDownloader.prototype.getObjectToFile =
-        jest.fn(mockedDownloader.prototype.getObjectToFile);
-    mockedDownloader.prototype.abort = jest.fn();
-
-    return {
-        __esModule: true,
-        ...jest.requireActual("kodo-s3-adapter-sdk"),
-        Downloader: mockedDownloader,
-    }
-});
+jest.mock("kodo-s3-adapter-sdk", () => mockDownloader());
 
 import {Downloader} from "kodo-s3-adapter-sdk";
 

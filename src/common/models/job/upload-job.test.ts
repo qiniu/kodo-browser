@@ -1,24 +1,8 @@
-import * as MockAuth from "./_mock-helpers_/auth";
-import { mocked } from "ts-jest/utils";
+import {mocked} from "ts-jest/utils";
+import * as MockAuth from "@common/qiniu/_mock-helpers_/auth";
+import {mockUploader} from "@common/qiniu/_mock-helpers_/uploader";
 
-jest.mock("kodo-s3-adapter-sdk", () => {
-    const mockedUploader = jest.fn();
-    mockedUploader.constructor = mockedUploader;
-    mockedUploader.prototype.putObjectFromFile = function () {
-        return new Promise(resolve => {
-            setTimeout(resolve, 300)
-        });
-    };
-    mockedUploader.prototype.putObjectFromFile =
-        jest.fn(mockedUploader.prototype.putObjectFromFile);
-    mockedUploader.prototype.abort = jest.fn();
-
-    return {
-        __esModule: true,
-        ...jest.requireActual("kodo-s3-adapter-sdk"),
-        Uploader: mockedUploader,
-    }
-});
+jest.mock("kodo-s3-adapter-sdk", () => mockUploader());
 
 import {Uploader} from "kodo-s3-adapter-sdk";
 

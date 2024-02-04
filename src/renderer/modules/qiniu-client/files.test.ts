@@ -1,6 +1,5 @@
-import * as MockAuth from "./_mock-helpers_/auth";
-import * as MockAdapter from "./_mock-helpers_/adapter";
-import { transObjectInfoToFileItem } from "./_mock-helpers_/adapter";
+import * as MockAuth from "@common/qiniu/_mock-helpers_/auth";
+import * as MockAdapter from "@common/qiniu/_mock-helpers_/adapter";
 import { mocked } from "ts-jest/utils";
 
 jest.mock(
@@ -17,19 +16,48 @@ import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
 import { Kodo as KodoAdapter } from "kodo-s3-adapter-sdk/dist/kodo";
 import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3";
 import {
-    BatchCallback,
-    Domain,
-    ListedObjects,
-    ListObjectsOption,
-    ObjectGetResult,
-    ObjectHeader,
-    PartialObjectError,
-    StorageClass,
-    StorageObject
+  BatchCallback,
+  Domain,
+  ListedObjects,
+  ListObjectsOption,
+  ObjectGetResult,
+  ObjectHeader,
+  ObjectInfo,
+  PartialObjectError,
+  StorageClass,
+  StorageObject
 } from "kodo-s3-adapter-sdk/dist/adapter";
+
+import Duration from "@common/const/duration";
 
 import * as QiniuClientCommon from "./common";
 import * as QiniuClientFile from "./files";
+import * as FileItem from "./file-item";
+
+function transObjectInfoToFileItem(item: ObjectInfo): FileItem.Item {
+  const qiniuPath = qiniuPathConvertor.fromQiniuPath(item.key);
+
+  if (item.key.endsWith("/")) {
+    return {
+      bucket: item.bucket,
+      itemType: FileItem.ItemType.Directory,
+      name: qiniuPath.directoryBasename() ?? "",
+      path: qiniuPath,
+    }
+  }
+
+  return {
+    bucket: item.bucket,
+    itemType: FileItem.ItemType.File,
+    name: qiniuPath.basename() ?? "",
+    path: qiniuPath,
+    lastModified: item.lastModified,
+    size: item.size,
+    storageClass: item.storageClass,
+    withinFourHours: (Date.now() - item.lastModified.getTime()) <= 4 * Duration.Hour,
+  };
+}
+
 
 describe("test qiniu-client/files.ts", () => {
     const spiedGetDefaultClient = jest.spyOn(QiniuClientCommon, "getDefaultClient");

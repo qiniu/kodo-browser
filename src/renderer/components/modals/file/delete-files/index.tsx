@@ -158,10 +158,20 @@ const DeleteFiles: React.FC<ModalProps & DeleteFilesProps> = (props) => {
               {translate("common.noObjectSelected")}
             </div>
             : <>
-              <div className="text-danger">
-                {translate("modals.deleteFiles.description")}
-              </div>
-              <FileList data={memoFileItems} className="scroll-max-vh-40"/>
+              <FileList
+                className="scroll-max-vh-40"
+                data={memoFileItems}
+                prefixDescription={
+                  <div className="text-danger">
+                    {translate("modals.deleteFiles.prefixDescription")}
+                  </div>
+                }
+                description={
+                  <div className="text-danger">
+                    {translate("modals.deleteFiles.description")}
+                  </div>
+                }
+              />
             </>
         }
         {

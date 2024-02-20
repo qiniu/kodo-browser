@@ -12,40 +12,39 @@ const FileListItem: React.FC<FileListItemProps> = ({
   switch (data.itemType) {
     case FileItem.ItemType.Directory:
       return (
-        <li key={data.path.toString()}>
+        <li>
           <i className="bi bi-folder-fill me-1 text-yellow"/>
           {data.name}
         </li>
       );
     case FileItem.ItemType.File:
       return (
-        <li key={data.path.toString()}>
+        <li>
           <i className="bi bi-file-earmark me-1"/>
           {data.name}
         </li>
       );
     case FileItem.ItemType.Prefix:
-      let path = data.path.toString() + "*";
-      if (path.length > 50) {
-        path = path.slice(0, 25) + "..." + path.slice(-25);
-      }
       return (
-        <li key={data.path.toString()}>
-          <i className="bi bi-asterisk me-1"/>
-          {path}
+        <li>
+          {data.path.toString()}
         </li>
       );
   }
 };
 
 interface FileListProps {
-  className: string,
+  className?: string,
   data: FileItem.Item[],
+  description?: React.ReactNode,
+  prefixDescription?: React.ReactNode,
 }
 
 const FileList: React.FC<FileListProps> = ({
   className,
   data,
+  description,
+  prefixDescription,
 }) => {
   const prefixes: FileItem.Item[] = data.filter(FileItem.isItemPrefix);
   const prefixPaths = prefixes.map(p => p.path.toString());
@@ -57,13 +56,34 @@ const FileList: React.FC<FileListProps> = ({
   );
 
   return (
-    <ul className={className}>
+    <div className={className}>
       {
-        prefixes.concat(otherItems).map(fileItem => (
-          <FileListItem key={fileItem.path.toString()} data={fileItem}/>
-        ))
+        prefixes?.length > 0 &&
+        <div>
+          {prefixDescription}
+          <ul>
+            {
+              prefixes.map(fileItem => (
+                <FileListItem key={fileItem.path.toString()} data={fileItem}/>
+              ))
+            }
+          </ul>
+        </div>
       }
-    </ul>
+      {
+        otherItems?.length > 0 &&
+        <div>
+          {description}
+          <ul>
+            {
+              otherItems.map(fileItem => (
+                <FileListItem key={fileItem.name} data={fileItem}/>
+              ))
+            }
+          </ul>
+        </div>
+      }
+    </div>
   )
 }
 

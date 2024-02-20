@@ -625,12 +625,14 @@ const dict: Dictionary = {
         deleteFiles: {
             title: "ファイルを削除",
             description: "次のディレクトリまたはファイルが削除されます：",
+            prefixDescription: "次の接頭辞を持つディレクトリまたはファイルが削除されます：",
         },
 
         copyFiles: {
             title: "ファイルをコピー",
             hintFiltered: "自分自身へや空のファイル名のディレクトリのコピーの禁止，一部の無効な項目を除去。",
             description: "このディレクトリに${operation}  (同じファイルまたはディレクトリが対象となります)",
+            prefixDescription: "以下の接頭辞を持つディレクトリまたはファイルをこのディレクトリに${operation}してください  (同じファイルまたはディレクトリが対象となります)",
             form: {
                 fileName: {
                     label: "コピー ファイル名：",
@@ -647,6 +649,7 @@ const dict: Dictionary = {
             title: "ファイルを移動",
             hintFiltered: "自分自身へや空のファイル名のディレクトリの移動の禁止，一部の無効な項目を除去。",
             description: "このディレクトリに${operation}  (同じファイルまたはディレクトリが対象となります)",
+            prefixDescription: "以下の接頭辞を持つディレクトリまたはファイルをこのディレクトリに${operation}してください  (同じファイルまたはディレクトリが対象となります)",
             form: {
                 fileName: {
                     label: "新しいファイル名：",
@@ -662,6 +665,7 @@ const dict: Dictionary = {
         changeFilesStorageClass: {
             title: "ストレージクラスを設定する",
             description: "以下のディレクトリまたはファイルが更新されます",
+            prefixDescription: "以下の接頭辞を持つディレクトリまたはファイルが更新されます",
         },
 
         changeFileStorageClass: {
@@ -671,6 +675,7 @@ const dict: Dictionary = {
         restoreFiles: {
             title: "リストア",
             description: "次のディレクトリまたはファイルがフリーズ解除されます：",
+            prefixDescription: "以下の接頭辞を持つディレクトリまたはファイルがフリーズ解除されます",
         },
 
         restoreFile: {
@@ -680,6 +685,7 @@ const dict: Dictionary = {
         generateFileLinks: {
             title: "ダウンロードリンクのエクスポート",
             description: "次のファイルの外部チェーンがエクスポートされます",
+            prefixDescription: "以下の接頭辞を持つファイルの外部チェーンがエクスポートされます",
             hintFiltered: "ファイル名が空のファイルのリンクをエクスポートできない，一部の無効な項目を除去。",
             csvFile: {
                 label: "ファイルの場所をエクスポート：",

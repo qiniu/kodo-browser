@@ -188,10 +188,20 @@ const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
               {translate("common.noObjectSelected")}
             </div>
             : <>
-              <div className="text-danger">
-                {translate("modals.restoreFiles.description")}
-              </div>
-              <FileList data={memoFileItems} className="scroll-max-vh-40"/>
+              <FileList
+                className="scroll-max-vh-40"
+                data={memoFileItems}
+                prefixDescription={
+                  <div className="text-danger">
+                    {translate("modals.restoreFiles.prefixDescription")}
+                  </div>
+                }
+                description={
+                  <div className="text-danger">
+                    {translate("modals.restoreFiles.description")}
+                  </div>
+                }
+              />
               <RestoreForm
                 formController={restoreFormController}
                 onSubmit={handleSubmitRestoreFiles}

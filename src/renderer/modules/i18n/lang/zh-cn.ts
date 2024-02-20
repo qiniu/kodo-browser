@@ -625,12 +625,14 @@ const dict: Dictionary = {
     deleteFiles: {
       title: "删除文件",
       description: "将要删除以下文件或目录",
+      prefixDescription: "将要删除以下路径的所有内容",
     },
 
     copyFiles: {
       title: "复制文件",
       hintFiltered: "禁止同目录或空名文件复制，当前复制已被过滤",
       description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
+      prefixDescription: "将${operation}以下路径的所有内容到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {
           label: "副本文件名：",
@@ -647,6 +649,7 @@ const dict: Dictionary = {
       title: "移动文件",
       hintFiltered: "禁止同目录或空名文件移动，当前移动已被过滤",
       description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
+      prefixDescription: "将${operation}以下路径的所有内容到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {
           label: "新的文件名：",
@@ -662,6 +665,7 @@ const dict: Dictionary = {
     changeFilesStorageClass: {
       title: "修改文件存储类型",
       description: "将修改以下文件或目录的存储类型",
+      prefixDescription: "将修改以下路径所有内容的存储类型",
     },
 
     changeFileStorageClass: {
@@ -671,6 +675,7 @@ const dict: Dictionary = {
     restoreFiles: {
       title: "解冻文件",
       description: "将解冻以下文件或目录：",
+      prefixDescription: "将解冻以下路径的所有内容：",
     },
 
     restoreFile: {
@@ -680,6 +685,7 @@ const dict: Dictionary = {
     generateFileLinks: {
       title: "导出外链",
       description: "将导出以下文件的外链",
+      prefixDescription: "将导出以下路径所有内容的外链",
       hintFiltered: "空名文件不可导出外链，已过滤",
       csvFile: {
         label: "导出文件位置：",

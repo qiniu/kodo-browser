@@ -281,10 +281,20 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
                 {translate("common.noObjectSelected")}
               </div>
               : <>
-                <div className="text-danger">
-                  {translate("modals.generateFileLinks.description")}
-                </div>
-                <FileList data={memoFileItems} className="scroll-max-vh-40"/>
+                <FileList
+                  className="scroll-max-vh-40"
+                  data={memoFileItems}
+                  prefixDescription={
+                    <div className="text-danger">
+                      {translate("modals.generateFileLinks.prefixDescription")}
+                    </div>
+                  }
+                  description={
+                    <div>
+                      {translate("modals.generateFileLinks.description")}
+                    </div>
+                  }
+                />
                 <GenerateLinkForm
                   onSubmit={handleSubmit(handleSubmitGenerateFileLinks)}
                   isValid={isValid}

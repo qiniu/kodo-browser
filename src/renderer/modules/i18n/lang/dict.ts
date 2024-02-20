@@ -627,12 +627,14 @@ export default interface Dictionary {
     deleteFiles: {
       title: string,
       description: string,
+      prefixDescription: string,
     },
 
     copyFiles: {
       title: string,
       hintFiltered: string,
       description: string,
+      prefixDescription: string,
       form: {
         fileName: {
           label: string,
@@ -649,6 +651,7 @@ export default interface Dictionary {
       title: string,
       hintFiltered: string,
       description: string,
+      prefixDescription: string,
       form: {
         fileName: {
           label: string,
@@ -664,6 +667,7 @@ export default interface Dictionary {
     changeFilesStorageClass: {
       title: string,
       description: string,
+      prefixDescription: string,
     },
 
     changeFileStorageClass: {
@@ -673,6 +677,7 @@ export default interface Dictionary {
     restoreFiles: {
       title: string,
       description: string,
+      prefixDescription: string,
     },
 
     restoreFile: {
@@ -682,6 +687,7 @@ export default interface Dictionary {
     generateFileLinks: {
       title: string,
       description: string,
+      prefixDescription: string,
       hintFiltered: string,
       csvFile: {
         label: string,

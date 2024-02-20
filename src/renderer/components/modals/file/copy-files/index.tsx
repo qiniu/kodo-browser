@@ -366,16 +366,32 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
                       }
                     </>
                     : <>
-                      <div>
-                        <Translate
-                          i18nKey="modals.copyFiles.description"
-                          data={contentI18nData}
-                          slots={{
-                            operation: v => <code key="operation">{v}</code>,
-                          }}
-                        />
-                      </div>
-                      <FileList data={memoFileItems} className="scroll-max-vh-40"/>
+                      <FileList
+                        className="scroll-max-vh-40"
+                        data={memoFileItems}
+                        prefixDescription={
+                          <div>
+                            <Translate
+                              i18nKey="modals.copyFiles.prefixDescription"
+                              data={contentI18nData}
+                              slots={{
+                                operation: v => <code key="operation">{v}</code>,
+                              }}
+                            />
+                          </div>
+                        }
+                        description={
+                          <div>
+                            <Translate
+                              i18nKey="modals.copyFiles.description"
+                              data={contentI18nData}
+                              slots={{
+                                operation: v => <code key="operation">{v}</code>,
+                              }}
+                            />
+                          </div>
+                        }
+                      />
                     </>
                 }
                 {

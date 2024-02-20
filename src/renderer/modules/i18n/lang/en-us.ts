@@ -626,12 +626,14 @@ const dict: Dictionary = {
     deleteFiles: {
       title: "Delete Files",
       description: "Delete the following files or directories:",
+      prefixDescription: "Delete the following files with prefixes:",
     },
 
     copyFiles: {
       title: "Copy Files",
       hintFiltered: "Copy directory to itself or empty name file is forbidden. The list is filtered.",
       description: "${operation} the following files or directories to current directory(The same name file or directory will be replaced):",
+      prefixDescription: "${operation} the following files with prefixes to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {
           label: "Duplicate Name:",
@@ -648,6 +650,7 @@ const dict: Dictionary = {
       title: "Move Files",
       hintFiltered: "Move directory to itself or empty name file is forbidden. The list is filtered.",
       description: "${operation} the following files or directories to current directory(The same name file or directory will be replaced):",
+      prefixDescription: "${operation} the following files with prefixes to current directory(The same name file or directory will be replaced):",
       form: {
         fileName: {
           label: "New Name:",
@@ -663,6 +666,7 @@ const dict: Dictionary = {
     changeFilesStorageClass: {
       title: "Set Storage Class",
       description: "Set the storage class of the following files or directories:",
+      prefixDescription: "Set the storage class of the following files with prefixes:",
     },
 
     changeFileStorageClass: {
@@ -672,6 +676,7 @@ const dict: Dictionary = {
     restoreFiles: {
       title: "Restore Files",
       description: "Restore the following files or directories:",
+      prefixDescription: "Restore the following files with prefixes:",
     },
 
     restoreFile: {
@@ -681,6 +686,7 @@ const dict: Dictionary = {
     generateFileLinks: {
       title: "Export Download Links",
       description: "Export download links of the following files:",
+      prefixDescription: "Export download links of the following files with prefixes:",
       hintFiltered: "Can't export download link of a file with empty name, filtered.",
       csvFile: {
         label: "Export file location:",

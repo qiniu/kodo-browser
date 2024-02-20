@@ -191,10 +191,20 @@ const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProp
               {translate("common.noObjectSelected")}
             </div>
             : <>
-              <div className="text-danger">
-                {translate("modals.changeFilesStorageClass.description")}
-              </div>
-              <FileList data={memoFileItems} className="scroll-max-vh-40"/>
+              <FileList
+                className="scroll-max-vh-40"
+                data={memoFileItems}
+                prefixDescription={
+                  <div className="text-danger">
+                    {translate("modals.changeFilesStorageClass.prefixDescription")}
+                  </div>
+                }
+                description={
+                  <div>
+                    {translate("modals.changeFilesStorageClass.description")}
+                  </div>
+                }
+              />
               <ChangeStorageClassForm
                 formController={changeStorageClassFormController}
                 storageClasses={memoStorageClasses}

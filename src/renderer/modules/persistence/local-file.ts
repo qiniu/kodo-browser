@@ -3,6 +3,7 @@ import path from "path";
 
 import lodash from "lodash";
 
+import * as LocalLogger from "@renderer/modules/local-logger";
 import {config_path} from "@common/const/app-config";
 
 import Persistence from "./persistence";
@@ -111,6 +112,9 @@ export default class LocalFile<T> extends Persistence<T> {
           },
         );
       })
+      .catch(err => {
+        LocalLogger.error(new Error("LocalFile tryWatchBasedir failed", {cause: err}));
+      });
   }
 
   watch() {
@@ -130,7 +134,7 @@ export default class LocalFile<T> extends Persistence<T> {
         this.tryWatchBasedir();
         return;
       }
-      console.error("LocalFile watch failed:", err);
+      LocalLogger.error(new Error("LocalFile watch failed:", {cause: err}));
     }
   }
 

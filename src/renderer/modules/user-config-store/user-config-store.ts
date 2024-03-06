@@ -20,7 +20,7 @@ interface UserConfigStoreState {
 }
 
 class UserConfigStore<T> {
-  private _state: UserConfigStoreState;
+  private readonly _state: UserConfigStoreState;
   private readonly defaultData: T;
   private data: Partial<T>;
   private _store?: ExternalStore<{
@@ -90,8 +90,12 @@ class UserConfigStore<T> {
     return lodash.merge({}, this.defaultData, this.data);
   }
 
-  async setAll(val: Partial<T>) {
-    const newData = lodash.merge({}, this.data, val);
+  async setAll(val: T, partial: false): Promise<void>
+  async setAll(val: Partial<T>, partial?: true): Promise<void>
+  async setAll(val: Partial<T>, partial = true): Promise<void> {
+    const newData = partial
+      ? lodash.merge({}, this.data, val)
+      : val;
     await this.saveToPersistence(newData);
     this.data = newData;
     this._store?.dispatch({

@@ -53,7 +53,7 @@ export function useEndpointConfig(akItem: AkItem | null) {
   );
 
   const setEndpoint = (endpoint: Endpoint) => {
-    return endpointConfig.setAll(endpoint);
+    return endpointConfig.setAll(endpoint, false);
   };
 
   const endpointValid = useMemo(

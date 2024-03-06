@@ -404,7 +404,7 @@ const dict: Dictionary = {
             hint: "单位：MB，范围：8 MB - 100 MB",
           },
           multipartUploadConcurrency: {
-            label: "分片上传并发数：",
+            label: "分片上传片并发数：",
             hint: "范围：1-5",
           },
           maxUploadConcurrency: {
@@ -613,7 +613,7 @@ const dict: Dictionary = {
         },
         fileName: {
           label: "重命名：",
-          hint: "不能以 / 开头或结尾，中间不能存在连续的 /",
+          hint: "不能以 / 开头或结尾，中间不能存在连续的 /；不能与原位置相同",
         },
       },
       replaceConfirm: {
@@ -636,7 +636,7 @@ const dict: Dictionary = {
       form: {
         fileName: {
           label: "副本文件名：",
-          hint: "不能以 / 开头或结尾，中间不能存在连续的 /"
+          hint: "不能以 / 开头或结尾，中间不能存在连续的 /；不能与原位置相同"
         },
       },
       replaceConfirm: {

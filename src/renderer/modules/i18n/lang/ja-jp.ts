@@ -404,7 +404,7 @@ const dict: Dictionary = {
                         hint: "単位：MB，範囲：8 MB - 100 MB",
                     },
                     multipartUploadConcurrency: {
-                        label: "断点アップロードの並發處理数：",
+                        label: "断点アップロードの並發処理数：",
                         hint: "範囲：1-5",
                     },
                     maxUploadConcurrency: {
@@ -613,7 +613,7 @@ const dict: Dictionary = {
                 },
                 fileName: {
                     label: "名前を変更する：",
-                    hint: "/ で始まるか、または終了することはできません、 中間に連続 /",
+                    hint: "/ で始まるか、または終了することはできません、 中間に連続 /；ファイルパスは元のパスと同じであってはいけません",
                 },
             },
             replaceConfirm: {
@@ -636,7 +636,7 @@ const dict: Dictionary = {
             form: {
                 fileName: {
                     label: "コピー ファイル名：",
-                    hint: "/ で始まるか、または終了することはできません、 中間に連続 /"
+                    hint: "/ で始まるか、または終了することはできません、 中間に連続 /；ファイルパスは元のパスと同じであってはいけません"
                 },
             },
             replaceConfirm: {

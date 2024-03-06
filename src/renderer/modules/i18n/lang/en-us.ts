@@ -614,7 +614,7 @@ const dict: Dictionary = {
         },
         fileName: {
           label: "Rename:",
-          hint: "Cannot start or end with / ,  and there cannot be consecutive / in between",
+          hint: "Cannot start or end with / ,  and there cannot be consecutive / in between; Cannot be the same as original path",
         },
       },
       replaceConfirm: {
@@ -637,7 +637,7 @@ const dict: Dictionary = {
       form: {
         fileName: {
           label: "Duplicate Name:",
-          hint: "Cannot start or end with / , and there cannot be consecutive / in between"
+          hint: "Cannot start or end with / , and there cannot be consecutive / in between; Cannot be the same as original path"
         },
       },
       replaceConfirm: {

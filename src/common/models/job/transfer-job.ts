@@ -131,6 +131,10 @@ export default abstract class TransferJob {
     protected set _status(value: Status) {
         const prev = this.__status;
         this.__status = value;
+        if (value !== Status.Running) {
+          this.speed = 0;
+          this.estimatedDuration = 0;
+        }
         this.handleStatusChange(value, prev);
     }
 

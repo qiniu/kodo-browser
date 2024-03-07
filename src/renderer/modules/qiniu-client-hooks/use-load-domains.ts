@@ -11,7 +11,7 @@ import * as LocalLogger from "@renderer/modules/local-logger";
 import {AkItem, EndpointType} from "@renderer/modules/auth";
 import {listDomains} from "@renderer/modules/qiniu-client";
 
-const S3_LINK_MAX_LIFETIME = 1 * Duration.Day;
+const PUB_S3_LINK_MAX_LIFETIME = 1 * Duration.Day;
 const PVT_S3_LINK_MAX_LIFETIME = 7 * Duration.Day;
 const CUS_S3_LINK_MAX_LIFETIME = 365 * Duration.Day;
 const KODO_LINK_MAX_LIFETIME = 365 * Duration.Day;
@@ -40,7 +40,7 @@ export const NON_OWNED_DOMAIN: DomainAdapter = {
   protected: false,
   type: 'others',
   apiScope: "s3",
-  linkMaxLifetime: S3_LINK_MAX_LIFETIME,
+  linkMaxLifetime: PUB_S3_LINK_MAX_LIFETIME,
 };
 
 interface LoadDomainsState {

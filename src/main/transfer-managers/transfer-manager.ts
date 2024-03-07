@@ -186,31 +186,42 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
 
         const job = this.jobs.get(jobId);
         if (!job) {
-          return;
+            return;
         }
         if (
-          [
-            Status.Waiting,
-            Status.Running,
-          ].includes(job.status)
+            [
+                Status.Waiting,
+                Status.Running,
+            ].includes(job.status)
         ) {
-          job.stop();
-        } else {
-          this.jobsStatusSummary[job.status] -= 1;
+            job.stop();
         }
 
+        this.handleJobStatusChange(jobId, null, job.status);
         this.jobs.delete(jobId);
         this.persistJob(jobId, null)
         this.scheduleJobs();
     }
 
     cleanupJobs(): void {
-        const idsToRemove = this.jobIds.filter(id => this.jobs.get(id)?.status === Status.Finished);
-        this.jobIds = this.jobIds.filter(id => !idsToRemove.includes(id));
-        idsToRemove.forEach(id => {
-            this.jobs.delete(id);
-            this.jobsStatusSummary[Status.Finished] -= 1;
+        const jobsToRemove: Job[] = [];
+        const jobIds: string[] = [];
+        this.jobIds.forEach(id => {
+            const job = this.jobs.get(id);
+            if (!job) {
+                return;
+            }
+            if (job.status === Status.Finished) {
+                jobsToRemove.push(job);
+            } else {
+                jobIds.push(id);
+            }
         });
+        jobsToRemove.forEach(job => {
+            this.handleJobStatusChange(job.id, null, job.status);
+            this.jobs.delete(job.id);
+        })
+        this.jobIds = jobIds;
     }
 
 
@@ -282,7 +293,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     protected _addJob(job: Job): void {
         this.jobs.set(job.id, job);
         this.jobIds.push(job.id);
-        this.jobsStatusSummary[job.status] += 1;
+        this.handleJobStatusChange(job.id, job.status, null);
     }
 
     protected async addJob(job: Job): Promise<void> {
@@ -329,14 +340,18 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
         }
     }
 
-    protected handleJobStatusChange(id: string, curr: Status, prev: Status) {
+    protected handleJobStatusChange(id: string, curr: Status | null, prev: Status | null) {
       if (prev === curr) {
         return;
       }
 
-      this.jobsStatusSummary[prev] -= 1;
       if (this.jobs.has(id)) {
-        this.jobsStatusSummary[curr] += 1;
+        if (prev) {
+          this.jobsStatusSummary[prev] -= 1;
+        }
+        if (curr) {
+          this.jobsStatusSummary[curr] += 1;
+        }
       }
     }
 

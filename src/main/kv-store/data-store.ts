@@ -111,10 +111,13 @@ export class DataStore<T> {
   async del(key: string): Promise<void> {
     await this.memTable.del(key);
     this.memTableChangesSize += 1;
-    this.compact()
+    this.compact();
   }
 
   async clear(): Promise<void> {
+    if (this.compactPromise) {
+      await this.compactPromise;
+    }
     const oldMeta = this.meta;
     const tables = await initDataStore<T>(this.workingDirectory);
     this.memTable = tables.memTable;

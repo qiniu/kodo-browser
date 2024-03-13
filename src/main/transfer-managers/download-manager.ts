@@ -31,6 +31,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             jobsAdded?: () => void,
         },
     ) {
+        const abortSignal = this.addingAbortController.signal;
         const qiniuClient = createQiniuClient(
             clientOptions,
             {
@@ -42,6 +43,9 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
 
         // iterate selected objects
         for (let remoteObject of remoteObjects) {
+            if (abortSignal.aborted) {
+                return;
+            }
             // get remoteBaseDirectory
             const remoteBaseDirectory = path.posix.dirname(remoteObject.key)
 
@@ -50,10 +54,14 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                 qiniuClient,
                 downloadOptions,
                 remoteObject,
-                async (err: Error | null, walkingPath: string, walkingObject: RemoteObject) => {
+                async (err: Error | null, walkingPath: string, walkingObject: RemoteObject): Promise<void | boolean> => {
                     if (err) {
                         this.config.onError?.(err);
-                        return;
+                        return false;
+                    }
+
+                    if (abortSignal.aborted) {
+                        return false;
                     }
 
                     let relativePath = path.posix.relative(remoteBaseDirectory, walkingPath);
@@ -166,7 +174,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         client: Adapter,
         downloadOptions: DownloadOptions,
         remoteObject: RemoteObject,
-        callback: (err: Error | null, path: string, info: RemoteObject) => Promise<void>
+        callback: (err: Error | null, path: string, info: RemoteObject) => Promise<boolean | void>
     ): Promise<void> {
         if (remoteObject.isFile) {
             await callback(null, remoteObject.key, remoteObject);
@@ -174,6 +182,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         }
 
         let nextContinuationToken: string | undefined = undefined;
+        let shouldContinueWalk: boolean = true;
         // iterate fetch list
         do {
             // fetch list by next mark
@@ -196,7 +205,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                 const isDir = obj.key.endsWith("/");
                 let name = isDir ? obj.key.slice(0, -1): obj.key;
                 name = obj.key.slice(name.lastIndexOf("/") + 1);
-                await callback(null, obj.key, {
+                shouldContinueWalk = await callback(null, obj.key, {
                     region: downloadOptions.region,
                     bucket: obj.bucket,
                     key: obj.key,
@@ -205,7 +214,14 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                     size: obj.size,
                     isDirectory: isDir,
                     isFile: !isDir,
-                });
+                }) ?? shouldContinueWalk;
+                if (!shouldContinueWalk) {
+                    break;
+                }
+            }
+
+            if (!shouldContinueWalk) {
+                break;
             }
 
             // iterate subdirectories and recursive call
@@ -287,6 +303,6 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             }
         });
 
-        await this.addJob(job);
+        this.addJob(job);
     }
 }

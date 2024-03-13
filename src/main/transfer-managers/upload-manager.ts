@@ -42,6 +42,7 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             jobsAdded?: (succeed: string[], failed: string[]) => void,
         },
     ) {
+        const abortSignal = this.addingAbortController.signal;
         const qiniuClient = createQiniuClient(
             clientOptions,
             {
@@ -58,6 +59,9 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
         const walkResult: Record<string, boolean> = {};
 
         for (const filePathname of filePathnameList) {
+            if (abortSignal.aborted) {
+                return;
+            }
             const directoryToCreate = new Map<string, boolean>();
             // remoteBaseDirectory maybe "", means upload to bucket root
             // maybe "/", means upload to "bucket//"
@@ -70,6 +74,10 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                     if (err) {
                         walkResult[filePathname] = false;
                         // this return will stop walking current dir.
+                        return false;
+                    }
+
+                    if (abortSignal.aborted) {
                         return false;
                     }
 
@@ -265,11 +273,16 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
         clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
         uploadOptions: Pick<UploadOptions, "userNatureLanguage">,
     ): Promise<void> {
+        const abortSignal = this.addingAbortController.signal;
         const persistStore = await this.getPersistStore();
         if (!persistStore) {
             return;
         }
         for await (const [jobId, persistedJob] of persistStore.iter()) {
+            if (abortSignal.aborted) {
+                return;
+            }
+
             if (!persistedJob || this.jobs.has(jobId)) {
                 return;
             }

@@ -39,6 +39,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     protected jobs: Map<string, Job> = new Map<string, Job>()
     protected jobIds: string[] = []
     protected config: OptionalConfig<Job> & Opt
+    protected addingAbortController: AbortController
 
     private jobsStatusSummary: Record<Status, number> = Object.values(Status)
       .reduce((r, v) => {
@@ -55,6 +56,7 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
             ...defaultTransferManagerConfig,
             ...config,
         };
+        this.addingAbortController = new AbortController();
     }
 
     get running() {
@@ -260,6 +262,8 @@ export default abstract class TransferManager<Job extends TransferJob, Opt = {}>
     }
 
     async removeAllJobs() {
+        this.addingAbortController.abort("User removed all jobs");
+        this.addingAbortController = new AbortController();
         this.stopAllJobs();
         this.jobIds = [];
         this.jobs.clear();

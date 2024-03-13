@@ -27,6 +27,9 @@ export async function unlockFile(path: string): Promise<void> {
 
 export async function withLockFile(path: string, fn: () => Promise<void>, options?: Options) {
   await lockfile(path, options)
-  await fn()
-  await unlockFile(path)
+  try {
+    await fn()
+  } finally {
+    await unlockFile(path)
+  }
 }

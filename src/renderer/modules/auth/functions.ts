@@ -21,11 +21,16 @@ export async function loadPersistence() {
 }
 
 export async function signIn(akItem: AkItem, remember: boolean) {
-  await QiniuClient.listAllBuckets({
-    id: akItem.accessKey,
-    secret: akItem.accessSecret,
-    isPublicCloud: akItem.endpointType === EndpointType.Public,
-  });
+  try {
+    await QiniuClient.listAllBuckets({
+      id: akItem.accessKey,
+      secret: akItem.accessSecret,
+      isPublicCloud: akItem.endpointType === EndpointType.Public,
+    });
+  } catch (err) {
+    QiniuClient.clearAllCache();
+    throw err;
+  }
   currentUser = akItem;
   if (remember) {
     await authPersistence.save(akItem);

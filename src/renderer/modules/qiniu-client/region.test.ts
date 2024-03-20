@@ -1,7 +1,7 @@
 import { Region } from "kodo-s3-adapter-sdk";
-import * as MockAuth from "./_mock-helpers_/auth";
-import * as MockAdapter from "./_mock-helpers_/adapter";
-import * as MockData from "./_mock-helpers_/data";
+import * as MockAuth from "@common/qiniu/_mock-helpers_/auth";
+import * as MockAdapter from "@common/qiniu/_mock-helpers_/adapter";
+import * as MockData from "@common/qiniu/_mock-helpers_/data";
 
 jest.mock(
     "kodo-s3-adapter-sdk/dist/kodo",

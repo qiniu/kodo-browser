@@ -16,8 +16,10 @@ interface Config {
     isOverwrite: boolean;
 }
 
+export type DownloadManagerConfig = TransferManagerConfig<DownloadJob, Config>;
+
 export default class DownloadManager extends TransferManager<DownloadJob, Config> {
-    constructor(config: TransferManagerConfig<DownloadJob, Config>) {
+    constructor(config: DownloadManagerConfig) {
         super(config);
     }
 
@@ -43,11 +45,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         // iterate selected objects
         for (let remoteObject of remoteObjects) {
             // get remoteBaseDirectory
-            let remoteBaseDirectory = remoteObject.key.endsWith("/")
-                ? remoteObject.key.slice(0, -1)
-                : remoteObject.key;
-            remoteBaseDirectory = "/" + remoteBaseDirectory;
-            remoteBaseDirectory = remoteBaseDirectory.slice(1, remoteBaseDirectory.lastIndexOf("/") + 1);
+            const remoteBaseDirectory = path.posix.dirname(remoteObject.key)
 
             // walk remote
             await this.walkRemoteObject(
@@ -60,17 +58,13 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                         return;
                     }
 
-                    let relativePath = walkingPath.slice(remoteBaseDirectory.length);
-                    // for windows path
-                    if (path.sep === "\\") {
-                        relativePath = relativePath.replaceAll("/", "\\");
-                    }
+                    let relativePath = path.posix.relative(remoteBaseDirectory, walkingPath);
                     // sanitizeFilename
                     relativePath = relativePath
-                        .split(path.sep)
+                        .split(path.posix.sep)
                         .map(n => sanitizeFilename(n))
                         .join(path.sep);
-                    const localPath = destPath + relativePath;
+                    const localPath = path.join(destPath, relativePath);
 
                     if (walkingObject.isDirectory) {
                         await this.createDirectory(localPath);

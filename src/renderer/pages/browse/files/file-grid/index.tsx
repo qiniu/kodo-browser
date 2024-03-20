@@ -6,6 +6,7 @@ import StorageClass from "@common/models/storage-class";
 
 import {FileItem} from "@renderer/modules/qiniu-client";
 
+import {useI18n} from "@renderer/modules/i18n";
 import EmptyHolder from "@renderer/components/empty-holder";
 import BaseGrid from "@renderer/components/base-grid";
 
@@ -40,6 +41,8 @@ const FileGrid: React.FC<FileGridProps> = ({
   onSelectFiles,
   onDoubleClickFile,
 }) => {
+  const {translate} = useI18n();
+
   const filesData: FileRowData[] = useMemo(() =>
     data.map(item => ({
         ...item,
@@ -80,7 +83,27 @@ const FileGrid: React.FC<FileGridProps> = ({
               rowHeight={GRID_CELL_HEIGHT}
               endReachedThreshold={LOAD_MORE_THRESHOLD}
               onEndReached={handleEndReached}
-              emptyRender={<EmptyHolder loading={loading}/>}
+              emptyRender={
+                <EmptyHolder
+                  icon={
+                    <i
+                      className="bi bi-inbox"
+                      style={{
+                        fontSize: '4rem',
+                        lineHeight: 1,
+                      }}
+                    />
+                  }
+                  subtitle={
+                    <span
+                      className="text-body mt-2"
+                    >
+                      {translate("browse.fileTable.emptyHint")}
+                    </span>
+                  }
+                  loading={loading}
+                />
+              }
               overlayRender={
                 <OverlayHolder
                   loadingMore={loadingMore}

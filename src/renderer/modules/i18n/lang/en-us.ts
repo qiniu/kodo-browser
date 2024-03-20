@@ -126,6 +126,7 @@ const dict: Dictionary = {
       createBucketButton: "Create Bucket",
       moreOperation: {
         toggleButton: "More",
+        updateBucketRemarkButton: "Update Remark",
         deleteBucketButton: "Delete",
       },
       search: {
@@ -135,7 +136,7 @@ const dict: Dictionary = {
     bucketTable: {
       bucketGrantedReadOnly: "Read Only",
       bucketGrantedReadWrite: "Read Write",
-      bucketName: "Bucket name",
+      bucketName: "Bucket name / remark",
       bucketRegion: "Bucket region",
       createTime: "Create time",
     },
@@ -152,6 +153,7 @@ const dict: Dictionary = {
 
     fileToolbar: {
       createDirectory: "Create directory",
+      uploadDirectory: "Upload directory",
       search: {
         holder: "Filter by name prefix",
       },
@@ -166,6 +168,7 @@ const dict: Dictionary = {
       fileStorageClass: "Storage Class",
       fileModifyDate: "Last Modify Date",
       fileOperation: "Actions",
+      emptyHint: "Drop local files or directors to here to upload",
       loadMore: "Load more",
       loadMoreFailed: "Load more failed. ",
     },
@@ -200,8 +203,8 @@ const dict: Dictionary = {
     },
     upload: {
       dropZone: {
-        enter: "Drag here to upload",
-        over: "Release to upload",
+        enter: "Drag to here to upload",
+        over: "Drop to upload",
       },
       dialog: {
         title: "Select upload files",
@@ -311,7 +314,7 @@ const dict: Dictionary = {
 
   modals: {
     privateCloudSettings: {
-      title: "Region Settings",
+      title: "Custom Settings",
       region: "Region",
       appendRegionButton: "Add region",
       removeRegionButton: "Remove",
@@ -323,6 +326,12 @@ const dict: Dictionary = {
             required: "UC URL is required",
             pattern: "UC URL require start with http(s)://",
           }
+        },
+        regionsSwitch: {
+          label: "Custom Regions:",
+          hint: {
+            disabled: "Querying regions by UC is unavailable",
+          },
         },
         regionIdentifier: {
           label: "Region ID:",
@@ -518,6 +527,19 @@ const dict: Dictionary = {
           feedback: {
             required: "Must select ACL permission",
           },
+        },
+      },
+    },
+
+    updateBucketRemark: {
+      title: "Update Bucket Remark",
+      form: {
+        bucketName: {
+          label: "Name:",
+        },
+        bucketRemark: {
+          label: "Remark:",
+          holder: "Max 100 characters",
         },
       },
     },

@@ -23,6 +23,7 @@ export const NON_OWNED_DOMAIN: DomainAdapter = {
   name: "non-owned-domain",
   protocol: "",
   private: true,
+  protected: false,
   type: "normal",
   backendMode: BackendMode.S3,
   linkMaxLifetime: S3_LINK_MAX_LIFETIME,

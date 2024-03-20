@@ -258,6 +258,11 @@ export default class UploadJob extends TransferJob {
             }
         }
 
+        // check stopped
+        if (this.status === Status.Stopped) {
+          return;
+        }
+
         // upload
         this.uploader = new Uploader(client);
 
@@ -301,16 +306,22 @@ export default class UploadJob extends TransferJob {
     }
 
     stop(): this {
-        if (this.status === Status.Stopped) {
+        // only `Waiting`, `Running` job could be stopped.
+        if (
+          ![
+            Status.Waiting,
+            Status.Running,
+          ].includes(this.status)
+        ) {
             return this;
         }
-        this._status = Status.Stopped;
 
         if (this.options.isDebug) {
             console.log(`Pausing ${this.options.from.path}`);
         }
 
         if (!this.uploader) {
+            this._status = Status.Stopped;
             return this;
         }
         this.uploader.abort();
@@ -448,6 +459,7 @@ export default class UploadJob extends TransferJob {
 
     private async handleUploadError(err: Error) {
         if (err === Uploader.userCanceledError) {
+            this._status = Status.Stopped;
             return;
         }
         if (err === Uploader.chunkTimeoutError && this.shouldRetry) {

@@ -2,6 +2,7 @@ import {dialog as electronDialog} from "@electron/remote";
 
 import React, {useCallback, useEffect, useState} from "react";
 import {Button, ButtonGroup, Dropdown, DropdownButton, Form, InputGroup} from "react-bootstrap";
+import {toast} from "react-hot-toast";
 import classNames from "classnames";
 import lodash from "lodash";
 
@@ -25,9 +26,11 @@ import MoveFiles from "@renderer/components/modals/file/move-files";
 import RestoreFiles from "@renderer/components/modals/file/restore-files";
 import ChangeFilesStorageClass from "@renderer/components/modals/file/change-files-storage-class";
 import GenerateFileLinks from "@renderer/components/modals/file/generate-file-links";
-import {toast} from "react-hot-toast";
+import OpenDialogOptions = Electron.OpenDialogOptions;
 
 const MAX_FILE_LIST_SIZE = 9999;
+// check if an Electron app is running on macOS
+const isMac = navigator.userAgent.indexOf("Macintosh") !== -1;
 
 interface FileToolBarProps {
   basePath?: string,
@@ -143,14 +146,19 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
   }
 
   // handle upload
-  const handleClickUpload = async () => {
+  const handleClickUpload = async (isOpenDirectory = false) => {
     // select files to upload
-    const isMac = navigator.userAgent.indexOf("Macintosh") !== -1;
+    let properties: OpenDialogOptions["properties"]
+    if (isMac) {
+      properties = ["openFile", "openDirectory", "multiSelections"];
+    } else if (isOpenDirectory) {
+      properties = ["openDirectory", "multiSelections"];
+    } else {
+      properties = ["openFile", "multiSelections"];
+    }
     const {filePaths, canceled} = await electronDialog.showOpenDialog({
       title: translate("transfer.upload.dialog.title"),
-      properties: isMac
-        ? ["openFile", "openDirectory", "multiSelections"]
-        : ["openFile", "multiSelections"],
+      properties,
     });
     if (!filePaths.length || canceled) {
       return;
@@ -281,11 +289,21 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
             <Button
               variant="outline-solid-gray-300"
               disabled={bucketGrantedPermission === "readonly"}
-              onClick={handleClickUpload}
+              onClick={() => handleClickUpload()}
             >
               <i className="bi bi-cloud-upload me-1"/>
               {translate("common.upload")}
             </Button>
+            {
+              !isMac && <Button
+                variant="outline-solid-gray-300"
+                disabled={bucketGrantedPermission === "readonly"}
+                onClick={() => handleClickUpload(true)}
+              >
+                <i className="bi bi-cloud-upload me-1"/>
+                {translate("browse.fileToolbar.uploadDirectory")}
+              </Button>
+            }
             <Button
               variant="outline-solid-gray-300"
               disabled={!selectedFiles.length}

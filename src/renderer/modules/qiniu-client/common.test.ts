@@ -1,5 +1,5 @@
-import * as MockConfigFile from "./_mock-helpers_/config-file";
-import * as MockAuth from "./_mock-helpers_/auth";
+import * as MockConfigFile from "@common/qiniu/_mock-helpers_/config-file";
+import * as MockAuth from "@common/qiniu/_mock-helpers_/auth";
 
 import { RegionService } from "kodo-s3-adapter-sdk/dist/region_service";
 

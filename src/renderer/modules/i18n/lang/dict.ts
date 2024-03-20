@@ -129,6 +129,7 @@ export default interface Dictionary {
       createBucketButton: string,
       moreOperation: {
         toggleButton: string,
+        updateBucketRemarkButton: string,
         deleteBucketButton: string,
       },
       search: {
@@ -156,6 +157,7 @@ export default interface Dictionary {
 
     fileToolbar: {
       createDirectory: string,
+      uploadDirectory: string,
       search: {
         holder: string,
       },
@@ -170,6 +172,7 @@ export default interface Dictionary {
       fileStorageClass: string,
       fileModifyDate: string,
       fileOperation: string,
+      emptyHint: string,
       loadMore: string,
       loadMoreFailed: string,
     },
@@ -329,6 +332,12 @@ export default interface Dictionary {
           feedback: {
             required: string,
             pattern: string,
+          },
+        },
+        regionsSwitch: {
+          label: string,
+          hint: {
+            disabled: string,
           },
         },
         regionIdentifier: {
@@ -522,6 +531,20 @@ export default interface Dictionary {
         },
       },
     },
+
+    updateBucketRemark: {
+      title: string,
+      form: {
+        bucketName: {
+          label: string,
+        },
+        bucketRemark: {
+          label: string,
+          holder: string,
+        }
+      }
+    },
+
     deleteBucket: {
       title: string,
       content: string,

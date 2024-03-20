@@ -126,6 +126,7 @@ const dict: Dictionary = {
             createBucketButton: "バケットの作成",
             moreOperation: {
                 toggleButton: "さらに",
+                updateBucketRemarkButton: "備考編集",
                 deleteBucketButton: "削除",
             },
             search: {
@@ -135,7 +136,7 @@ const dict: Dictionary = {
         bucketTable: {
             bucketGrantedReadOnly: "読み取り専用",
             bucketGrantedReadWrite: "読み書き",
-            bucketName: "バケット名",
+            bucketName: "バケット名/備考",
             bucketRegion: "地域名",
             createTime: "作成時間",
         },
@@ -151,6 +152,7 @@ const dict: Dictionary = {
         },
         fileToolbar: {
             createDirectory: "ディレクトリ",
+            uploadDirectory: "フォルダをアップロード",
             search: {
                 holder: "名前プレフィックスをフィルタリングする",
             },
@@ -165,6 +167,7 @@ const dict: Dictionary = {
             fileStorageClass: "保管タイプ",
             fileModifyDate: "最終更新日",
             fileOperation: "アクション",
+            emptyHint: "ここにファイルやフォルダをドラッグ＆ドロップしてアップロード",
             loadMore: "もっと読み込む...",
             loadMoreFailed: "読み込みが失敗しました，"
         },
@@ -199,8 +202,8 @@ const dict: Dictionary = {
         },
         upload: {
             dropZone: {
-                enter: "Drag here to upload",
-                over: "Release to upload",
+                enter: "ここにドラッグしてアップロード",
+                over: "ドロップしてアップロード",
             },
             dialog: {
                 title: "[ファイルのアップロード] を選択",
@@ -310,7 +313,7 @@ const dict: Dictionary = {
 
     modals: {
         privateCloudSettings: {
-            title: "地域設定",
+            title: "カスタム設定",
             region: "地域",
             appendRegionButton: "地域を追加",
             removeRegionButton: "削除",
@@ -323,6 +326,12 @@ const dict: Dictionary = {
                         pattern: "UC サービス URL は http(s):// で始まる必要があります",
                     }
                 },
+              regionsSwitch: {
+                  label: "地域設定：",
+                  hint: {
+                      disabled: "UC による地域のクエリは利用できません",
+                  },
+              },
                 regionIdentifier: {
                     label: "地域 ID：",
                     holder: "地域 ID を入力してください",
@@ -517,6 +526,19 @@ const dict: Dictionary = {
                     feedback: {
                         required: "ACL アクセス許可を選択する必要があります",
                     },
+                },
+            },
+        },
+
+        updateBucketRemark: {
+            title: "バケットの備考編集",
+            form: {
+                bucketName: {
+                    label: "名前：",
+                },
+                bucketRemark: {
+                    label: "備考：",
+                    holder: "最大100単語",
                 },
             },
         },

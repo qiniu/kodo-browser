@@ -139,6 +139,43 @@ kodo-browser/
 * 禁止删除 Bucket
 * 配置升级检测地址
 
-## 6. 开源 LICENSE
+## 6. 启动配置项
+
+将在 Kodo Browser 启动时尝试读取此配置。如已定义该配置，则支持借此改变部分 Kodo Browser 初始行为； 如未定义，也不影响 Kodo Browser 正常启动。
+
+`launchConfig.json` 文件位于 Kodo Browser 可执行程序同级目录：
+
+* Windows/Linux：`kodo-browser/launchConfig.json`
+* macOS：`Kodo Browser.app/Contents/MacOS/launchConfig.json`
+
+`launchConfig.json` 的格式具体参见 [launchConfig.schema.json](launchConfig.schema.json)。当前支持以下配置：
+
+* `preferredEndpointType`，登录默认服务端类型。可用值：`public`（公有云）, `private`（私有云）；
+* `defaultPrivateEndpointConfig`，私有云服务默认地址；
+    * `ucUrl`，Bucket 管理服务地址，必须；
+    * `regions`，区域信息，对于较新的私有云可选，详细请向管理员询问；
+
+例如以下配置将修改默认登录私有云指定服务端：
+
+```json
+{
+  "$schema": "https://github.com/qiniu/kodo-browser/blob/v2.1.0/lauchConfig.schema.json",
+  "preferredEndpointType": "private",
+  "defaultPrivateEndpointConfig": {
+    "ucUrl": "http://uc.example.com",
+    "regions": [
+      {
+        "id": "cn-east-1",
+        "label": "华东",
+        "endpoint": "http://s3.example.com"
+      }
+    ]
+  }
+}
+```
+
+当前 `$schema` 字段本身对程序运行无影响，但建议书写，表明当前配置文件是参考哪一版本编写的。
+
+## 7. 开源 LICENSE
 
 [Apache License 2.0](LICENSE)

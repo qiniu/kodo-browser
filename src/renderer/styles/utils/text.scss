@@ -38,6 +38,11 @@
   -webkit-line-clamp: var(--line-num);
 }
 
+.overflow-ellipsis-inline {
+  @extend .overflow-ellipsis;
+  display: -webkit-inline-box;
+}
+
 .overflow-ellipsis-one-line {
   display: inline-block;
   text-overflow: ellipsis;
@@ -49,4 +54,8 @@
 
 .text-pre-line {
   white-space: pre-line;
+}
+
+.text-break-all {
+  word-break: break-all;
 }

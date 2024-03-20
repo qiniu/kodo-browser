@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/qiniu/kodo-browser/blob/master/lauchConfig.schema.json",
+  "title": "Kodo Browser Launch Config",
+  "description": "A config file to control the behavior in Kodo Browser Launching.",
+  "type": "object",
+  "properties": {
+    "preferredEndpointType": {
+      "description": "The default endpoint type to login.",
+      "type": "string"
+    },
+    "defaultPrivateEndpointConfig": {
+      "description": "This will generate the private endpoint config.",
+      "type": "object",
+      "properties": {
+        "required": [
+          "ucUrl"
+        ],
+        "ucUrl": {
+          "description": "The URL of Buckets Service.",
+          "type": "string"
+        },
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "required": [
+                "id",
+                "endpoint"
+              ],
+              "id": {
+                "description": "The id of region.",
+                "type": "string"
+              },
+              "label": {
+                "description": "The region name displayed on UI.",
+                "type": "string"
+              },
+              "endpoint": {
+                "description": "The URL of S3 Service.",
+                "type": "string"
+              }
+            }
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

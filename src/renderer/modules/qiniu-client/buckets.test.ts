@@ -1,5 +1,5 @@
-import * as MockAuth from "./_mock-helpers_/auth";
-import * as MockAdapter from "./_mock-helpers_/adapter";
+import * as MockAuth from "@common/qiniu/_mock-helpers_/auth";
+import * as MockAdapter from "@common/qiniu/_mock-helpers_/adapter";
 
 jest.mock(
     "kodo-s3-adapter-sdk/dist/kodo",
@@ -39,6 +39,7 @@ describe("test qiniu-client/buckets.ts", () => {
             MockedKodoAdapter.prototype.listBuckets.mockClear();
             MockedKodoAdapter.prototype.createBucket.mockClear();
             MockedKodoAdapter.prototype.deleteBucket.mockClear();
+            MockedKodoAdapter.prototype.updateBucketRemark.mockClear();
         });
 
         it("listAllBuckets", async () => {
@@ -71,11 +72,26 @@ describe("test qiniu-client/buckets.ts", () => {
                 opt,
             );
             expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
-            const [ enterParamsName ] = MockedKodoAdapter.prototype.enter.mock.calls[0]
+            const [ enterParamsName ] = MockedKodoAdapter.prototype.enter.mock.calls[0];
             expect(enterParamsName).toBe("deleteBucket");
             expect(MockedKodoAdapter.prototype.deleteBucket).toBeCalledWith(
                 "region-kodo-browser-Kodo-deleteBucket",
                 "bucket-kodo-browser-Kodo-deleteBucket",
+            );
+        });
+
+        it("updateBucketRemark", async () => {
+            await QiniuClientBuckets.updateBucketRemark(
+              "bucket-kodo-browser-Kodo-updateRemark",
+              "remark-kodo-browser-Kodo-updateRemark",
+              opt,
+            );
+            expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
+            const [ enterParamsName ] = MockedKodoAdapter.prototype.enter.mock.calls[0];
+            expect(enterParamsName).toBe("updateBucketRemark");
+            expect(MockedKodoAdapter.prototype.updateBucketRemark).toBeCalledWith(
+              "bucket-kodo-browser-Kodo-updateRemark",
+              "remark-kodo-browser-Kodo-updateRemark",
             );
         });
     });
@@ -97,6 +113,7 @@ describe("test qiniu-client/buckets.ts", () => {
             MockedS3Adapter.prototype.listBuckets.mockClear();
             MockedS3Adapter.prototype.createBucket.mockClear();
             MockedS3Adapter.prototype.deleteBucket.mockClear();
+            MockedS3Adapter.prototype.updateBucketRemark.mockClear();
         });
 
         it("listAllBuckets", async () => {
@@ -134,6 +151,21 @@ describe("test qiniu-client/buckets.ts", () => {
             expect(MockedS3Adapter.prototype.deleteBucket).toBeCalledWith(
                 "region-kodo-browser-S3-deleteBucket",
                 "bucket-kodo-browser-S3-deleteBucket",
+            );
+        });
+
+        it("updateBucketRemark", async () => {
+            await QiniuClientBuckets.updateBucketRemark(
+              "bucket-kodo-browser-S3-updateRemark",
+              "remark-kodo-browser-S3-updateRemark",
+              opt,
+            );
+            expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
+            const [ enterParamsName ] = MockedS3Adapter.prototype.enter.mock.calls[0];
+            expect(enterParamsName).toBe("updateBucketRemark");
+            expect(MockedS3Adapter.prototype.updateBucketRemark).toBeCalledWith(
+              "bucket-kodo-browser-S3-updateRemark",
+              "remark-kodo-browser-S3-updateRemark",
             );
         });
     });

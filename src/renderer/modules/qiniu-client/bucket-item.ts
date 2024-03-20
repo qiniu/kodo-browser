@@ -8,4 +8,5 @@ export interface BucketItem {
   regionName?: string,
   grantedPermission?: 'readonly' | 'readwrite',
   preferBackendMode?: BackendMode,
+  remark?: string,
 }

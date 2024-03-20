@@ -311,4 +311,5 @@ async function migrateTransferJobs(
   }
   await dataStore.compact(true);
   await dataStore.close();
+  await fsPromises.unlink(filePath);
 }

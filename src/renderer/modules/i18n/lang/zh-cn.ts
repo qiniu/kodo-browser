@@ -401,15 +401,15 @@ const dict: Dictionary = {
           },
           multipartUploadPartSize: {
             label: "分片上传片大小：",
-            hint: "单位：MB，范围：8 MB - 100 MB",
+            hint: "单位：MB，范围：${min} MB - ${max} MB",
           },
           multipartUploadConcurrency: {
             label: "分片上传片并发数：",
-            hint: "范围：1-5",
+            hint: "范围：${min}-${max}",
           },
           maxUploadConcurrency: {
             label: "最大上传任务数：",
-            hint: "范围：1-10",
+            hint: "范围：${min}-${max}",
           },
           enabledUploadSpeedLimit: {
             label: "上传限速：",
@@ -438,7 +438,7 @@ const dict: Dictionary = {
           },
           maxDownloadConcurrency: {
             label: "最大下载任务数：",
-            hint: "范围：1-10",
+            hint: "范围：${min}-${max}",
           },
           enabledDownloadSpeedLimit: {
             label: "下载限速：",

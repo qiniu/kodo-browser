@@ -401,15 +401,15 @@ const dict: Dictionary = {
                     },
                     multipartUploadPartSize: {
                         label: "シ断点アップロードスライスサイズ：",
-                        hint: "単位：MB，範囲：8 MB - 100 MB",
+                        hint: "単位：MB，範囲：${min} MB - ${max} MB",
                     },
                     multipartUploadConcurrency: {
                         label: "断点アップロードの並發処理数：",
-                        hint: "範囲：1-5",
+                        hint: "範囲：${min}-${max}",
                     },
                     maxUploadConcurrency: {
                         label: "アップロードの最大同時処理数：",
-                        hint: "範囲：1-10",
+                        hint: "範囲：${min}-${max}",
                     },
                     enabledUploadSpeedLimit: {
                         label: "アップロード速度制限：",
@@ -438,7 +438,7 @@ const dict: Dictionary = {
                     },
                     maxDownloadConcurrency: {
                         label: "ダウンロードの最大同時処理数：",
-                        hint: "範囲：1-10",
+                        hint: "範囲：${min}-${max}",
                     },
                     enabledDownloadSpeedLimit: {
                         label: "ダウンロード速度制限：",

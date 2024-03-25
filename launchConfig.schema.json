@@ -47,6 +47,28 @@
         }
       }
     },
+    "preferenceValidators": {
+      "description": "Change some validator properties for settings",
+      "type": "object",
+      "properties": {
+        "maxMultipartUploadPartSize": {
+          "description": "The max of multipart upload part size",
+          "type": "number"
+        },
+        "maxMultipartUploadConcurrency": {
+          "description": "The max of multipart upload part concurrency",
+          "type": "number"
+        },
+        "maxUploadJobConcurrency": {
+          "description": "The max of upload job concurrency",
+          "type": "number"
+        },
+        "maxDownloadJobConcurrency": {
+          "description": "The max of download job concurrency",
+          "type": "number"
+        }
+      }
+    },
     "disable": {
       "description": "To disable some functions.",
       "type": "object",

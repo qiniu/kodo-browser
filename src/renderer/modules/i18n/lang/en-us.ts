@@ -402,15 +402,15 @@ const dict: Dictionary = {
           },
           multipartUploadPartSize: {
             label: "Multipart upload part size:",
-            hint: "Unit: MB, Range: 8 MB - 100 MB",
+            hint: "Unit: MB, Range: ${min} MB - ${max} MB",
           },
           multipartUploadConcurrency: {
             label: "Multipart upload Concurrency:",
-            hint: "Range: 1-5",
+            hint: "Range: ${min}-${max}",
           },
           maxUploadConcurrency: {
             label: "Maximum number of upload tasks:",
-            hint: "Range: 1-10",
+            hint: "Range: ${min}-${max}",
           },
           enabledUploadSpeedLimit: {
             label: "Upload speed limit:",
@@ -439,7 +439,7 @@ const dict: Dictionary = {
           },
           maxDownloadConcurrency: {
             label: "Maximum number of download tasks:",
-            hint: "Range: 1-10",
+            hint: "Range: ${min}-${max}",
           },
           enabledDownloadSpeedLimit: {
             label: "Download speed limit:",

@@ -6,7 +6,8 @@ import {LocalFile, serializer} from "@renderer/modules/persistence";
 import {LaunchConfigPlugin} from "./types";
 import DefaultPrivateEndpoint from "./default-private-endpoint";
 import PreferredEndpointType from "./preferred-endpoint-type";
-import DisableFunctions from "@renderer/modules/launch-config/disable-functions";
+import DisableFunctions from "./disable-functions";
+import PreferenceValidator from "./preference-validator";
 
 class LaunchConfig {
   static basePath = path.dirname(app.getPath("exe"));
@@ -27,6 +28,7 @@ class LaunchConfig {
       new PreferredEndpointType(),
       new DefaultPrivateEndpoint(),
       new DisableFunctions(),
+      new PreferenceValidator(),
     ];
     plugins.forEach(plugin => {
       plugin.setup({

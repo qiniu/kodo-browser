@@ -2,7 +2,8 @@ import React from "react";
 import {Col, Form, Row} from "react-bootstrap";
 import {useFormContext} from "react-hook-form";
 
-import {useI18n} from "@renderer/modules/i18n";
+import {Translate, useI18n} from "@renderer/modules/i18n";
+import * as DefaultDict from "@renderer/modules/default-dict";
 import {AppPreferencesData} from "@renderer/modules/user-config-store";
 
 const FieldsDownload: React.FC = () => {
@@ -14,6 +15,13 @@ const FieldsDownload: React.FC = () => {
       errors,
     },
   } = useFormContext<AppPreferencesData>();
+
+  const fieldRanges = {
+    downloadJobConcurrency: {
+      min: 1,
+      max: DefaultDict.get("PREFERENCE_VALIDATORS")?.maxDownloadJobConcurrency || 10,
+    },
+  };
 
   return (
     <fieldset>
@@ -64,7 +72,7 @@ const FieldsDownload: React.FC = () => {
             {...register("multipartDownloadPartSize", {
               valueAsNumber: true,
               required: true,
-              min: 8,
+              min: 1,
               max: 100,
             })}
             type="number"
@@ -103,7 +111,13 @@ const FieldsDownload: React.FC = () => {
                 : ""
             }
           >
-            {translate("modals.settings.download.form.maxDownloadConcurrency.hint")}
+            <Translate
+              i18nKey="modals.settings.download.form.maxDownloadConcurrency.hint"
+              data={{
+                min: fieldRanges.downloadJobConcurrency.min.toString(),
+                max: fieldRanges.downloadJobConcurrency.max.toString(),
+              }}
+            />
           </Form.Text>
         </Col>
       </Form.Group>

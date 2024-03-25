@@ -12,6 +12,12 @@ interface Dict {
     }[],
   },
   DISABLE_NON_OWNED_DOMAIN?: boolean,
+  PREFERENCE_VALIDATORS?: {
+    maxMultipartUploadPartSize?: number,
+    maxMultipartUploadConcurrency?: number,
+    maxUploadJobConcurrency?: number,
+    maxDownloadJobConcurrency?: number,
+  },
 }
 
 const dict: Dict = {};

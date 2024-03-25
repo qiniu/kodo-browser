@@ -5,7 +5,8 @@ export interface LaunchConfigSetupOptions {
 export interface LaunchConfig {
   preferredEndpointType?: string,
   defaultPrivateEndpointConfig?: DefaultPrivateEndpointConfig,
-  disable: DisableFunctions,
+  preferenceValidators?: PreferenceValidators,
+  disable?: DisableFunctions,
 }
 
 export interface DefaultPrivateEndpointConfig {
@@ -19,6 +20,13 @@ export interface DefaultPrivateEndpointConfig {
 
 export interface DisableFunctions {
   nonOwnedDomain?: boolean,
+}
+
+export interface PreferenceValidators {
+  maxMultipartUploadPartSize?: number,
+  maxMultipartUploadConcurrency?: number,
+  maxUploadJobConcurrency?: number,
+  maxDownloadJobConcurrency?: number,
 }
 
 export interface LaunchConfigPlugin {

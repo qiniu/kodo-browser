@@ -1,89 +1,148 @@
+import {watch as fsWatch, constants as fsConstants, promises as fsPromises, FSWatcher} from "fs";
 import path from "path";
-import fs from "fs";
 
-import {config_path} from "@common/const/app-config";
+import lodash from "lodash";
+
 import * as LocalLogger from "@renderer/modules/local-logger";
+import {config_path} from "@common/const/app-config";
 
-import {Persistence} from "./types";
+import Persistence from "./persistence";
+import {Serializer} from "./serializer";
 
-type AcceptValueType = string | Buffer;
+interface LocalFileConfig<T> {
+  workingDirectory?: string,
+  filePath: string,
+  serializer: Serializer<T>
+}
 
-export class LocalFile implements Persistence {
-  static getFilePath(cwd: string, key: string) {
-    let result = key;
-    if (!path.isAbsolute(result)) {
-      result = path.resolve(cwd, result);
-    }
-    return result;
+export default class LocalFile<T> extends Persistence<T> {
+  readonly workingDirectory: string;
+  readonly filePath: string;
+  protected serializer: Serializer<T>;
+  private fileWatcher?: FSWatcher;
+
+  constructor({
+    workingDirectory = config_path,
+    filePath,
+    serializer,
+  }: LocalFileConfig<T>) {
+    super();
+    this.workingDirectory = workingDirectory;
+    this.filePath = filePath;
+    this.serializer = serializer;
+    this.handleWatch = lodash.debounce(this.handleWatch, 300).bind(this);
   }
 
-  constructor(private cwd: string = config_path) {
-    if (!fs.existsSync(cwd)) {
-      fs.mkdirSync(cwd, { recursive: true });
-    }
-  }
-
-  save<T extends AcceptValueType>(
-    key: string,
-    value: T,
-    encode?: (d: T) => T
-  ): void {
-    let p = this.getPath(key);
-
-    const folder = path.dirname(p);
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder, { recursive: true });
-    }
-
-    let v = value;
-    if (encode) {
-      v = encode(v)
-    }
-
-    fs.writeFileSync(p, v);
-  }
-
-  read(key: string, decode?: (d: Buffer) => Buffer): Buffer {
-    let p = this.getPath(key);
-
+  protected async _load(): Promise<string | null> {
     let canRead = true;
     try {
-      fs.accessSync(p, fs.constants.R_OK);
+      await fsPromises.access(this.absoluteFilePath, fsConstants.R_OK);
     } catch (_err) {
       canRead = false;
     }
 
-    let result: Buffer = Buffer.alloc(0);
-    if (canRead) {
-      result = fs.readFileSync(p);
+    if (!canRead) {
+      return null;
     }
 
-    if (decode) {
-      result = decode(result);
-    }
-    return result;
+    return (await fsPromises.readFile(this.absoluteFilePath)).toString();
   }
 
-  // be careful to use!
-  delete(key: string): void {
-    let p = this.getPath(key);
+  protected async _save(value: string): Promise<void> {
+    await this.ensureFileBaseDirectory();
+    await fsPromises.writeFile(this.absoluteFilePath, value);
+  }
 
+  private async ensureFileBaseDirectory(): Promise<void> {
+    const fileBasePath = path.dirname(this.absoluteFilePath);
+
+    let exists = true;
     try {
-      fs.accessSync(p, fs.constants.R_OK);
-    } catch (_err) {
-      return
+      await fsPromises.access(
+        fileBasePath,
+        fsConstants.F_OK
+      );
+    } catch {
+      exists = false;
     }
 
-    fs.unlinkSync(p);
+    if (!exists) {
+      await fsPromises.mkdir(fileBasePath, {recursive: true});
+    }
   }
 
-  clear(): void {
-    LocalLogger.warn("LocalFilePersistence can't clear()!");
+  // be careful to use this method! double-check the working directory and key is correct.
+  async clear(): Promise<void> {
+    try {
+      await fsPromises.unlink(this.absoluteFilePath);
+    } catch (_err) {
+      return;
+    }
   }
 
-  private getPath(key: string): string {
-    return LocalFile.getFilePath(this.cwd, key);
+  get absoluteFilePath(): string {
+    return path.resolve(this.workingDirectory, this.filePath);
+  }
+
+  handleWatch(event: string) {
+    this.triggerChange();
+    if (event === "rename") {
+      // re-watch by rename will lose watching
+      this.unwatch();
+      this.watch();
+    }
+  }
+
+  tryWatchBasedir() {
+    this.ensureFileBaseDirectory()
+      .then(() => {
+        const baseDir = path.dirname(this.absoluteFilePath);
+        const baseName = path.basename(this.absoluteFilePath);
+        this.fileWatcher = fsWatch(
+          baseDir,
+          {
+            persistent: false,
+          },
+          (event, filename) => {
+            if (event === "rename" && filename === baseName) {
+              this.triggerChange();
+              this.fileWatcher?.close();
+              this.watch();
+            }
+          },
+        );
+      })
+      .catch(err => {
+        LocalLogger.error(new Error("LocalFile tryWatchBasedir failed", {cause: err}));
+      });
+  }
+
+  watch() {
+    if (this.fileWatcher) {
+      return;
+    }
+    try {
+      this.fileWatcher = fsWatch(
+        this.absoluteFilePath,
+        {
+          persistent: false,
+        },
+        this.handleWatch,
+      );
+    } catch (err: any) {
+      if (err.code === "ENOENT") {
+        this.tryWatchBasedir();
+        return;
+      }
+      LocalLogger.error(new Error("LocalFile watch failed:", {cause: err}));
+    }
+  }
+
+  unwatch() {
+    if (!this.fileWatcher) {
+      return;
+    }
+    this.fileWatcher.close();
+    this.fileWatcher = undefined;
   }
 }
-
-export default new LocalFile();

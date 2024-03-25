@@ -1,4 +1,4 @@
-import React, {useMemo} from "react";
+import React, {MouseEvent, useMemo, useRef} from "react";
 import classNames from "classnames";
 import AutoResizer from "react-virtualized-auto-sizer";
 
@@ -14,7 +14,7 @@ import {LOAD_MORE_THRESHOLD, GRID_CELL_WIDTH, GRID_CELL_HEIGHT} from "../const";
 import {FileRowData} from "../types";
 // import {OperationName} from "../types";
 import OverlayHolder from "../overlay-holder";
-import FileCell from "./file-cell";
+import FileCell, {CellData} from "./file-cell";
 import "./file-grid.scss";
 
 interface FileGridProps {
@@ -43,13 +43,29 @@ const FileGrid: React.FC<FileGridProps> = ({
 }) => {
   const {translate} = useI18n();
 
-  const filesData: FileRowData[] = useMemo(() =>
-    data.map(item => ({
+  const {
+    filesData,
+  }: {
+    filesData: FileRowData[],
+  } = useMemo(() => {
+    const prefixPaths = Array.from(selectedFiles.values())
+      .filter(FileItem.isItemPrefix)
+      .map(p => p.path.toString());
+    const filesData = data.map((item, index) => {
+      const itemPath = item.path.toString();
+      const prefixHit = prefixPaths.some(p => itemPath.startsWith(p));
+      const selectHit = selectedFiles.has(itemPath) && !FileItem.isItemPrefix(selectedFiles.get(itemPath));
+      return {
         ...item,
-        id: item.path.toString(),
-        isSelected: selectedFiles.has(item.path.toString()),
-      })
-    ), [data, selectedFiles]);
+        id: itemPath,
+        isSelected: prefixHit || selectHit,
+        _index: index,
+      };
+    });
+    return {
+      filesData,
+    };
+  }, [data, selectedFiles]);
 
   const loadingMore = filesData.length > 0 && loading;
 
@@ -68,6 +84,19 @@ const FileGrid: React.FC<FileGridProps> = ({
     }
     handleLoadMore();
   }
+
+  const lastClickIndex = useRef<number | undefined>();
+  const handleClickCell = (e: MouseEvent, d: CellData) => {
+    if (e.shiftKey && lastClickIndex.current) {
+      const [start, end] = lastClickIndex.current <= d._index
+        ? [lastClickIndex.current, d._index]
+        : [d._index, lastClickIndex.current];
+      onSelectFiles(filesData.slice(start, end + 1), !d.isSelected);
+    } else {
+      onSelectFiles([d], !d.isSelected);
+    }
+    lastClickIndex.current = d._index;
+  };
 
   // render
   return (
@@ -128,8 +157,8 @@ const FileGrid: React.FC<FileGridProps> = ({
                     >
                       <FileCell
                         data={data}
-                        onClick={f => onSelectFiles([f], !f.isSelected)}
-                        onDoubleClick={onDoubleClickFile}
+                        onClick={handleClickCell}
+                        onDoubleClick={(_, d) => onDoubleClickFile(d)}
                       />
                     </div>
                   )

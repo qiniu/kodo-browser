@@ -1,24 +1,19 @@
-import React, {useRef, useState} from "react";
-import {Button} from "react-bootstrap";
+import React, {useEffect, useSyncExternalStore} from "react";
+import {toast} from "react-hot-toast";
+import {Button, ProgressBar} from "react-bootstrap";
 import {shell} from "electron";
 
-import {BatchProgress, BatchTaskStatus, useBatchProgress} from "@renderer/components/batch-progress";
-
-import useMount from "@renderer/modules/hooks/use-mount";
-import useUnmount from "@renderer/modules/hooks/use-unmount";
 import {useI18n} from "@renderer/modules/i18n";
-import Settings from "@renderer/modules/settings";
+import {appPreferences} from "@renderer/modules/user-config-store";
 
-import useDownloadUpdate from "./use-download-update";
+import useDownloadUpdate, {ProgressStatus} from "./use-download-update";
 
 const DownloadButton: React.FC<{
-  downloadError?: Error,
   downloadedFilePath: string | undefined,
-  progressStatus: BatchTaskStatus,
+  progressStatus: ProgressStatus,
   onClickStart: () => void,
   onClickPause: () => void,
 }> = ({
-  downloadError,
   downloadedFilePath,
   progressStatus,
   onClickStart,
@@ -26,39 +21,50 @@ const DownloadButton: React.FC<{
 }) => {
   const {translate} = useI18n();
 
-  let variant = "success"
-  let iconClassName = "bi bi-download me-1";
-  let handleClick = onClickStart;
-  let content = translate("modals.about.updateApp.operationButton.start");
+  let variant: string;
+  let iconClassName: string;
+  let handleClick: () => void = onClickStart;
+  let content: string;
 
-  if (progressStatus === BatchTaskStatus.Paused) {
-    variant = "info";
-    content = translate("modals.about.updateApp.operationButton.resume");
-  }
+  switch (progressStatus) {
+    case ProgressStatus.Standby:
+      variant = "success";
+      iconClassName = "bi bi-download me-1";
+      content = translate("modals.about.updateApp.operationButton.start");
+      break;
 
-  if (progressStatus === BatchTaskStatus.Running) {
-    variant = "warning";
-    iconClassName = "bi bi-pause me-1";
-    handleClick = onClickPause;
-    content = translate("modals.about.updateApp.operationButton.pause");
-  }
+    case ProgressStatus.Paused:
+      variant = "info";
+      iconClassName = "bi bi-download me-1";
+      content = translate("modals.about.updateApp.operationButton.resume");
+      break;
 
-  if (progressStatus === BatchTaskStatus.Ended) {
-    iconClassName = "bi bi-file-earmark-zip-fill me-1";
-    handleClick = () => {
-      if (!downloadedFilePath) {
-        return;
-      }
-      shell.showItemInFolder(downloadedFilePath);
-    };
-    content = translate("modals.about.updateApp.operationButton.showItemInDir");
-  }
+    case ProgressStatus.Running:
+      variant = "warning";
+      iconClassName = "bi bi-pause me-1";
+      handleClick = onClickPause;
+      content = translate("modals.about.updateApp.operationButton.pause");
+      break;
 
-  if (downloadError) {
-    variant = "info";
-    iconClassName = "bi bi-arrow-repeat me-1";
-    handleClick = onClickStart;
-    content = translate("common.retry")
+    case ProgressStatus.Success:
+      variant = "success";
+      iconClassName = "bi bi-file-earmark-zip-fill me-1";
+      handleClick = () => {
+        if (!downloadedFilePath) {
+          return;
+        }
+        shell.showItemInFolder(downloadedFilePath);
+      };
+      content = translate("modals.about.updateApp.operationButton.showItemInDir");
+      break;
+
+    case ProgressStatus.Failed:
+      variant = "info";
+      iconClassName = "bi bi-arrow-repeat me-1";
+      handleClick = onClickStart;
+      content = translate("common.retry");
+      break;
+
   }
 
   return (
@@ -74,6 +80,74 @@ const DownloadButton: React.FC<{
   );
 };
 
+const DownloadProgress: React.FC<{
+  progressStatus: ProgressStatus,
+  loaded: number,
+  total: number,
+  errorMessage?: string,
+}> = ({
+  progressStatus,
+  loaded,
+  total,
+  errorMessage,
+}) => {
+  const {translate} = useI18n();
+
+  if (progressStatus === ProgressStatus.Standby) {
+    return null;
+  }
+
+  let finishedPercent;
+  if (loaded && total) {
+    finishedPercent = loaded * 100 / total;
+  }
+  finishedPercent = finishedPercent || 0;
+
+  let variant;
+  let statusText;
+  let isAnimated = false;
+
+  switch (progressStatus) {
+    case ProgressStatus.Running:
+      variant = "success";
+      statusText = translate("common.downloading");
+      isAnimated = true;
+      break;
+    case ProgressStatus.Paused:
+      variant = "warning";
+      statusText = translate("common.paused");
+      break;
+    case ProgressStatus.Success:
+      variant = "success";
+      statusText = translate("common.downloaded");
+      break;
+    case ProgressStatus.Failed:
+      variant = "danger";
+      statusText = translate("common.failed");
+      break;
+  }
+
+  return (
+    <div>
+      <small className={`text-${variant}`}>{statusText}</small>
+      <div>
+        <ProgressBar
+          animated={isAnimated}
+          striped
+          variant={variant}
+        />
+        <div className="d-flex align-items-center">
+          <div>{`${finishedPercent.toFixed(2)}%`}</div>
+        </div>
+      </div>
+      {
+        errorMessage &&
+        <small className="text-danger">{errorMessage}</small>
+      }
+    </div>
+  );
+}
+
 interface DownloadUpgradeProps {
   version: string,
 }
@@ -83,67 +157,21 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
 }) => {
   const {translate} = useI18n();
 
-  const isGoOn = useRef(true);
-  const [batchProgressState, setBatchProgressState] = useBatchProgress();
-  const [downloadError, setDownloadError] = useState<Error>()
   const {
-    cachedError,
-    cachedFilePath,
-    cachedProgressState,
+    state: downloadState,
     fetchUpdate,
-    downloadLatestVersion,
-    background,
+    startDownload,
+    pauseDownload,
   } = useDownloadUpdate();
-  const [downloadedFilePath, setDownloadFilePath] = useState(cachedFilePath);
-
-  // download
-  const handleProgress = (loaded: number, total: number): boolean => {
-    setBatchProgressState({
-      total: total,
-      finished: loaded,
-      errored: 0,
-    });
-    return isGoOn.current;
-  }
-
-  const handleError = (err: Error) => {
-    if (err.toString().includes("aborted")) {
-      return;
-    }
-    setDownloadError(err);
-    setBatchProgressState(s => ({
-      status: BatchTaskStatus.Ended,
-      finished: 0,
-      errored: s.finished,
-    }));
-  };
 
   const handleStart = () => {
-    if (batchProgressState.status === BatchTaskStatus.Running) {
+    if (downloadState.status === ProgressStatus.Running) {
       return;
     }
-    setDownloadError(undefined);
-    setBatchProgressState({
-      status: BatchTaskStatus.Running,
-    });
-    isGoOn.current = true;
-    downloadLatestVersion({
-      onProgress: handleProgress,
-    })
-      .then(filePath => {
-        setBatchProgressState({
-          status: BatchTaskStatus.Ended,
-        });
-        setDownloadFilePath(filePath);
-      })
-      .catch(handleError);
-  };
-
-  const handlePause = () => {
-    isGoOn.current = false;
-    setBatchProgressState({
-      status: BatchTaskStatus.Paused,
-    });
+    startDownload()
+      .catch((err) => {
+        toast.error(err);
+      });
   };
 
   const handleManuelDownload = async () => {
@@ -151,26 +179,22 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
     await shell.openExternal(downloadPageUrl);
   }
 
-  // store and restore state
-  useMount(() => {
-    if (cachedProgressState) {
-      setBatchProgressState(cachedProgressState);
-      if (cachedProgressState.status === BatchTaskStatus.Running) {
-        handleStart();
-        return;
-      }
-    }
-    if (cachedError) {
-      setDownloadError(cachedError);
-    }
-    if (Settings.autoUpgrade) {
+  // auto upgrade
+  const {
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
+  useEffect(() => {
+    if (downloadState.status === ProgressStatus.Standby && appPreferencesData.autoUpdateAppEnabled) {
       handleStart();
+    } else if (downloadState.status === ProgressStatus.Running) {
+      pauseDownload();
     }
-  });
-  useUnmount(() => {
-    background(batchProgressState, downloadError);
-  });
+  }, [appPreferencesData.autoUpdateAppEnabled]);
 
+  // render
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center">
@@ -179,7 +203,7 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
           <span className="text-primary ms-1">v{version}</span>
         </div>
         {
-          downloadError &&
+          downloadState.status === ProgressStatus.Failed &&
           <Button
             className="me-1"
             size="sm"
@@ -191,48 +215,18 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
           </Button>
         }
         <DownloadButton
-          downloadError={downloadError}
-          downloadedFilePath={downloadedFilePath}
-          progressStatus={batchProgressState.status}
+          downloadedFilePath={downloadState.filePath}
+          progressStatus={downloadState.status}
           onClickStart={handleStart}
-          onClickPause={handlePause}
+          onClickPause={pauseDownload}
         />
       </div>
-      <div>
-        {
-          batchProgressState.status === BatchTaskStatus.Standby
-            ? null
-            : <>
-              {
-                batchProgressState.status === BatchTaskStatus.Paused &&
-                <small>{translate("common.paused")}</small>
-              }
-              {
-                batchProgressState.status === BatchTaskStatus.Running &&
-                <small className="text-success">{translate("common.downloading")}</small>
-              }
-              {
-                downloadedFilePath &&
-                <small className="text-success">{translate("common.downloaded")}</small>
-              }
-              {
-                downloadError &&
-                <small className="text-danger">{translate("common.failed")}</small>
-              }
-              <BatchProgress
-                status={batchProgressState.status}
-                total={batchProgressState.total}
-                finished={batchProgressState.finished}
-                errored={batchProgressState.errored}
-                isPercent
-              />
-              {
-                downloadError &&
-                <small className="text-danger">{downloadError.toString()}</small>
-              }
-            </>
-        }
-      </div>
+      <DownloadProgress
+        progressStatus={downloadState.status}
+        loaded={downloadState.progress?.loaded ?? 0}
+        total={downloadState.progress?.total ?? 0}
+        errorMessage={downloadState.error?.toString()}
+      />
     </div>
   );
 };

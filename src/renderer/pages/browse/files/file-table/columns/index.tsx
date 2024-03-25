@@ -113,8 +113,8 @@ export function getColumns({
         flexGrow: 1,
         dataGetter: ({rowData: file}) =>
           FileItem.isItemFile(file)
-            ? availableStorageClasses[file.storageClass].nameI18n[currentLanguage]
-            ?? file.storageClass
+            ? availableStorageClasses[file.storageClass]?.nameI18n[currentLanguage]
+              ?? translate("common.unknownStorageClass")
             : "-"
       },
     );

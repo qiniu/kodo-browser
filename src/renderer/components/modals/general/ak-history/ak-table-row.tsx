@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {Button} from "react-bootstrap";
 
 import {useI18n} from "@renderer/modules/i18n";
@@ -9,7 +9,7 @@ interface AkTableRowProps {
   data: AkItem,
   isCurrentUser?: boolean,
   onActive?: (item: AkItem) => void,
-  onDelete?: (item: AkItem) => void,
+  onDelete?: (item: AkItem) => Promise<void>,
 }
 
 const AkTableRow: React.FC<AkTableRowProps> = ({
@@ -19,6 +19,16 @@ const AkTableRow: React.FC<AkTableRowProps> = ({
   onDelete,
 }) => {
   const {translate} = useI18n();
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async (item: AkItem) => {
+    if (deleting || !onDelete) {
+      return;
+    }
+    setDeleting(true);
+    await onDelete(item);
+    setDeleting(false);
+  }
 
   return (
     <tr>
@@ -39,7 +49,7 @@ const AkTableRow: React.FC<AkTableRowProps> = ({
         {
           !onDelete
             ? null
-            : <Button variant="lite-danger" size="sm" onClick={() => onDelete(data)}>
+            : <Button variant="lite-danger" size="sm" onClick={() => handleDelete(data)}>
               {translate("modals.akHistory.removeAkButton")}
             </Button>
         }

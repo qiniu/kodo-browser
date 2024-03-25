@@ -22,6 +22,7 @@ import {
 import {RestoreForm, RestoreFormData} from "@renderer/components/forms";
 
 import {OperationDoneRecallFn} from "../types";
+import FileList from "../common/file-list";
 
 interface RestoreFilesProps {
   regionId: string,
@@ -187,23 +188,20 @@ const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
               {translate("common.noObjectSelected")}
             </div>
             : <>
-              <div className="text-danger">
-                {translate("modals.restoreFiles.description")}
-              </div>
-              <ul className="scroll-max-vh-40">
-                {
-                  memoFileItems.map(fileItem => (
-                    <li key={fileItem.path.toString()}>
-                      {
-                        FileItem.isItemFolder(fileItem)
-                          ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                          : <i className="bi bi-file-earmark me-1"/>
-                      }
-                      {fileItem.name}
-                    </li>
-                  ))
+              <FileList
+                className="scroll-max-vh-40"
+                data={memoFileItems}
+                prefixDescription={
+                  <div className="text-danger">
+                    {translate("modals.restoreFiles.prefixDescription")}
+                  </div>
                 }
-              </ul>
+                description={
+                  <div className="text-danger">
+                    {translate("modals.restoreFiles.description")}
+                  </div>
+                }
+              />
               <RestoreForm
                 formController={restoreFormController}
                 onSubmit={handleSubmitRestoreFiles}

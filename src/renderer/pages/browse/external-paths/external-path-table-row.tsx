@@ -1,7 +1,7 @@
 import React from "react";
 import {Form} from "react-bootstrap";
 
-import {ExternalPathItem} from "@renderer/modules/kodo-address";
+import {ExternalPathItem} from "@renderer/modules/user-config-store";
 
 export interface ExternalPathRowData extends ExternalPathItem{
   regionName: string,

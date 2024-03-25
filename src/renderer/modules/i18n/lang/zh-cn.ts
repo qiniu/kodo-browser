@@ -6,6 +6,7 @@ const dict: Dictionary = {
     empty: "暂无数据",
     ok: "确认",
     cancel: "取消",
+    all: "全部",
     close: "关闭",
     save: "保存",
     saving: "保存中",
@@ -43,6 +44,7 @@ const dict: Dictionary = {
     exportLinks: "导出外链",
     restore: "解冻",
     changeStorageClass: "更改存储类型",
+    unknownStorageClass: "未知存储类型",
     clickToRetry: "点击重试",
   },
 
@@ -160,6 +162,11 @@ const dict: Dictionary = {
         nonOwnedDomain: "不使用自有域名",
         refreshTooltip: "刷新",
       },
+      selectPrefix: {
+        select: "选择当前路径所有项目，包括未加载的内容",
+        selected: "已选择当前路径所有项目，包括未加载的内容。",
+        clear: "清空选择",
+      },
     },
     fileTable: {
       fileName: "名称",
@@ -211,6 +218,7 @@ const dict: Dictionary = {
       hint: {
         addingJobs: "正在添加到上传队列…",
         addedJobs: "已全部添加至上传队列",
+        addedJobsErrored: "由于访问错误，部分文件未添加至上传队列",
       },
       error: {
         nothing: "没有发现任何可以上传的文件",
@@ -218,7 +226,7 @@ const dict: Dictionary = {
       },
       toolbar: {
         search: {
-          holder: "根据名称或状态搜索",
+          holder: "根据名称搜索",
         },
         emptyDirectorySwitch: "是否空目录上传",
         startAllButton: "启动全部",
@@ -242,7 +250,7 @@ const dict: Dictionary = {
       },
       toolbar: {
         search: {
-          holder: "根据名称或状态搜索",
+          holder: "根据名称搜索",
         },
         overwriteSwitch: "是否覆盖下载",
         startAllButton: "启动全部",
@@ -274,11 +282,15 @@ const dict: Dictionary = {
       fileName: {
         label: "文件名：",
       },
+      domainType: {
+        cdn: "CDN 域名",
+        origin: "源站域名",
+      },
       domainName: {
         label: "域名：",
         nonOwnedDomain: "不使用自有域名",
         feedback: {
-          emptyFileNameByS3Hint: "空名文件不可使用非自有域名导出外链",
+          emptyFileNameByS3Hint: "空名文件不可使用 S3 域名导出外链",
         },
       },
       expireAfter: {
@@ -389,11 +401,15 @@ const dict: Dictionary = {
           },
           multipartUploadPartSize: {
             label: "分片上传片大小：",
-            hint: "单位：MB，范围：8 MB - 100 MB",
+            hint: "单位：MB，范围：${min} MB - ${max} MB",
+          },
+          multipartUploadConcurrency: {
+            label: "分片上传片并发数：",
+            hint: "范围：${min}-${max}",
           },
           maxUploadConcurrency: {
             label: "最大上传任务数：",
-            hint: "范围：1-10",
+            hint: "范围：${min}-${max}",
           },
           enabledUploadSpeedLimit: {
             label: "上传限速：",
@@ -422,7 +438,7 @@ const dict: Dictionary = {
           },
           maxDownloadConcurrency: {
             label: "最大下载任务数：",
-            hint: "范围：1-10",
+            hint: "范围：${min}-${max}",
           },
           enabledDownloadSpeedLimit: {
             label: "下载限速：",
@@ -597,7 +613,7 @@ const dict: Dictionary = {
         },
         fileName: {
           label: "重命名：",
-          hint: "不能以 / 开头或结尾，中间不能存在连续的 /",
+          hint: "不能以 / 开头或结尾，中间不能存在连续的 /；不能与原位置相同",
         },
       },
       replaceConfirm: {
@@ -609,16 +625,18 @@ const dict: Dictionary = {
     deleteFiles: {
       title: "删除文件",
       description: "将要删除以下文件或目录",
+      prefixDescription: "将要删除以下路径的所有内容",
     },
 
     copyFiles: {
       title: "复制文件",
       hintFiltered: "禁止同目录或空名文件复制，当前复制已被过滤",
       description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
+      prefixDescription: "将${operation}以下路径的所有内容到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {
           label: "副本文件名：",
-          hint: "不能以 / 开头或结尾，中间不能存在连续的 /"
+          hint: "不能以 / 开头或结尾，中间不能存在连续的 /；不能与原位置相同"
         },
       },
       replaceConfirm: {
@@ -631,6 +649,7 @@ const dict: Dictionary = {
       title: "移动文件",
       hintFiltered: "禁止同目录或空名文件移动，当前移动已被过滤",
       description: "将${operation}以下文件或目录到当前目录下（如有相同的文件或目录则覆盖）",
+      prefixDescription: "将${operation}以下路径的所有内容到当前目录下（如有相同的文件或目录则覆盖）",
       form: {
         fileName: {
           label: "新的文件名：",
@@ -646,6 +665,7 @@ const dict: Dictionary = {
     changeFilesStorageClass: {
       title: "修改文件存储类型",
       description: "将修改以下文件或目录的存储类型",
+      prefixDescription: "将修改以下路径所有内容的存储类型",
     },
 
     changeFileStorageClass: {
@@ -655,6 +675,7 @@ const dict: Dictionary = {
     restoreFiles: {
       title: "解冻文件",
       description: "将解冻以下文件或目录：",
+      prefixDescription: "将解冻以下路径的所有内容：",
     },
 
     restoreFile: {
@@ -664,6 +685,7 @@ const dict: Dictionary = {
     generateFileLinks: {
       title: "导出外链",
       description: "将导出以下文件的外链",
+      prefixDescription: "将导出以下路径所有内容的外链",
       hintFiltered: "空名文件不可导出外链，已过滤",
       csvFile: {
         label: "导出文件位置：",
@@ -723,7 +745,7 @@ const dict: Dictionary = {
         }
       },
       error: {
-        emptyFileNameByS3Hint: "无法使用非自有域名预览空名文件",
+        emptyFileNameByS3Hint: "无法使用 S3 域名预览空名文件",
         failedGenerateLink: "获取预览链接失败",
         failedGetContent: "获取文件内容失败",
         contentNotChanged: "内容没有修改",

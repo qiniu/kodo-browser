@@ -59,6 +59,7 @@ describe("test createUploadJobs", () => {
     isSkipEmptyDirectory: false,
     persistPath: "",
     resumable: false,
+    multipartConcurrency: 5,
   };
 
   const MOCKED_CLIENT_OPTIONS: ClientOptions = {

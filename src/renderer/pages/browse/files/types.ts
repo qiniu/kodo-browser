@@ -12,6 +12,7 @@ export type FileRowData = FileItem.Item & {
   id: string,
   isSelected: boolean,
   regionId?: string,
+  _index: number,
 };
 
 export interface RowCellDataProps<T = string> {

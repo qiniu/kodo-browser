@@ -35,6 +35,7 @@ import {
   DomainNameField,
   ExpireAfterField,
 } from "@renderer/components/forms/generate-link-form";
+import FileList from "../common/file-list";
 
 interface GenerateFileLinksProps {
   regionId: string,
@@ -101,7 +102,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
     user: currentUser,
     regionId: memoRegionId,
     bucketName: memoBucketName,
-    canS3Domain: memoCanS3Domain,
+    canDefaultS3Domain: memoCanS3Domain,
     preferBackendMode,
   });
 
@@ -164,7 +165,7 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter:
         preferBackendMode === BackendMode.S3 ||
-        domain?.backendMode === BackendMode.S3,
+        domain?.apiScope === BackendMode.S3,
     };
     return signatureUrls(
       memoRegionId,
@@ -280,23 +281,20 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
                 {translate("common.noObjectSelected")}
               </div>
               : <>
-                <div className="text-danger">
-                  {translate("modals.generateFileLinks.description")}
-                </div>
-                <ul className="scroll-max-vh-40">
-                  {
-                    memoFileItems.map(fileItem => (
-                      <li key={fileItem.path.toString()}>
-                        {
-                          FileItem.isItemFolder(fileItem)
-                            ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                            : <i className="bi bi-file-earmark me-1"/>
-                        }
-                        {fileItem.name}
-                      </li>
-                    ))
+                <FileList
+                  className="scroll-max-vh-40"
+                  data={memoFileItems}
+                  prefixDescription={
+                    <div className="text-danger">
+                      {translate("modals.generateFileLinks.prefixDescription")}
+                    </div>
                   }
-                </ul>
+                  description={
+                    <div>
+                      {translate("modals.generateFileLinks.description")}
+                    </div>
+                  }
+                />
                 <GenerateLinkForm
                   onSubmit={handleSubmit(handleSubmitGenerateFileLinks)}
                   isValid={isValid}

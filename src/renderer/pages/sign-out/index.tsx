@@ -28,7 +28,9 @@ const SignOut: React.FC = () => {
       setTimeout(resolve, 2300);
     })
       .then(() => {
-        signOut();
+        return signOut();
+      })
+      .then(() => {
         navigate(RoutePath.SignIn);
         AuditLog.log(AuditLog.Action.Logout, {
           from: memoCurrentUser?.accessKey ?? "",

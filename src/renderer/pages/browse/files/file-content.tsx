@@ -5,7 +5,7 @@ import StorageClass from "@common/models/storage-class";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {useKodoNavigator} from "@renderer/modules/kodo-address";
-import {ContentViewStyle} from "@renderer/modules/settings";
+import {ContentViewStyle} from "@renderer/modules/user-config-store";
 import {FileItem} from "@renderer/modules/qiniu-client";
 import {DomainAdapter} from "@renderer/modules/qiniu-client-hooks";
 

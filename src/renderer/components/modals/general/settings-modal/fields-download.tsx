@@ -1,8 +1,10 @@
 import React from "react";
 import {Col, Form, Row} from "react-bootstrap";
-
-import {useI18n} from "@renderer/modules/i18n";
 import {useFormContext} from "react-hook-form";
+
+import {Translate, useI18n} from "@renderer/modules/i18n";
+import * as DefaultDict from "@renderer/modules/default-dict";
+import {AppPreferencesData} from "@renderer/modules/user-config-store";
 
 const FieldsDownload: React.FC = () => {
   const {translate} = useI18n();
@@ -12,7 +14,14 @@ const FieldsDownload: React.FC = () => {
     formState: {
       errors,
     },
-  } = useFormContext();
+  } = useFormContext<AppPreferencesData>();
+
+  const fieldRanges = {
+    downloadJobConcurrency: {
+      min: 1,
+      max: DefaultDict.get("PREFERENCE_VALIDATORS")?.maxDownloadJobConcurrency || 10,
+    },
+  };
 
   return (
     <fieldset>
@@ -23,7 +32,7 @@ const FieldsDownload: React.FC = () => {
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
           <Form.Switch
-            {...register("enabledResumeDownload")}
+            {...register("resumeDownloadEnabled")}
             label={translate("modals.settings.download.form.resumeDownload.hint")}
           />
         </Col>
@@ -63,7 +72,7 @@ const FieldsDownload: React.FC = () => {
             {...register("multipartDownloadPartSize", {
               valueAsNumber: true,
               required: true,
-              min: 8,
+              min: 1,
               max: 100,
             })}
             type="number"
@@ -102,7 +111,13 @@ const FieldsDownload: React.FC = () => {
                 : ""
             }
           >
-            {translate("modals.settings.download.form.maxDownloadConcurrency.hint")}
+            <Translate
+              i18nKey="modals.settings.download.form.maxDownloadConcurrency.hint"
+              data={{
+                min: fieldRanges.downloadJobConcurrency.min.toString(),
+                max: fieldRanges.downloadJobConcurrency.max.toString(),
+              }}
+            />
           </Form.Text>
         </Col>
       </Form.Group>
@@ -112,7 +127,7 @@ const FieldsDownload: React.FC = () => {
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
           <Form.Switch
-            {...register("enabledDownloadSpeedLimit")}
+            {...register("downloadSpeedLimitEnabled")}
             label={translate("modals.settings.download.form.enabledDownloadSpeedLimit.hint")}
           />
         </Col>
@@ -123,19 +138,19 @@ const FieldsDownload: React.FC = () => {
         </Form.Label>
         <Col sm={6}>
           <Form.Control
-            {...register("downloadSpeedLimit", {
+            {...register("downloadSpeedLimitKbPerSec", {
               valueAsNumber: true,
               required: true,
               min: 1,
               max: 102400,
-              disabled: !watch("enabledDownloadSpeedLimit")
+              disabled: !watch("downloadSpeedLimitEnabled")
             })}
             type="number"
-            isInvalid={Boolean(errors.downloadSpeedLimit)}
+            isInvalid={Boolean(errors.downloadSpeedLimitKbPerSec)}
           />
           <Form.Text
             className={
-              Boolean(errors.downloadSpeedLimit)
+              Boolean(errors.downloadSpeedLimitKbPerSec)
                 ? "text-danger"
                 : ""
             }

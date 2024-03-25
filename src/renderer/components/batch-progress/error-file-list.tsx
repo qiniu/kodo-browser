@@ -2,7 +2,7 @@ import React from "react";
 import {OverlayTrigger, Tooltip} from "react-bootstrap";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {FileItem} from "@/renderer/modules/qiniu-client";
+import {FileItem} from "@renderer/modules/qiniu-client";
 
 export interface ErroredFileOperation {
   fileType: FileItem.ItemType,

@@ -4,6 +4,7 @@ import {Button, Modal, ModalProps} from "react-bootstrap";
 import {byteSizeFormat} from "@common/const/byte-size";
 import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 import StorageClass from "@common/models/storage-class";
+import {BackendMode} from "@common/qiniu";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {useAuth} from "@renderer/modules/auth";
@@ -92,11 +93,12 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
 
   useEffect(() => {
     if (modalProps.show) {
-      fetchFileInfo();
     } else {
       setFileOperation(FileOperationType.None);
     }
   }, [modalProps.show]);
+
+  const fileSize = headFileState.fileInfo?.size ?? memoFileItem?.size;
 
   return (
     <Modal {...modalProps}>
@@ -105,10 +107,8 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
           <i className="bi bi-eye me-1"/>
           {translate("modals.preview.title")}
           {
-            headFileState.fileInfo
-              ? <small>
-                ({byteSizeFormat(headFileState.fileInfo.size)})
-              </small>
+            fileSize
+              ? <small>({byteSizeFormat(fileSize)})</small>
               : null
           }
         </Modal.Title>
@@ -124,7 +124,7 @@ const PreviewFile: React.FC<ModalProps & PreviewFileProps> = (props) => {
               {
                 fileOperation === FileOperationType.None
                   ? <FileEmptyName
-                      backendMode={memoDomain.backendMode}
+                      backendMode={memoDomain.apiScope as BackendMode}
                       fileName={memoFileItem.name}
                     >
                       <FileArchived

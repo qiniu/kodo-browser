@@ -1,13 +1,14 @@
-import React, {useState} from "react";
+import React, {useState, useSyncExternalStore} from "react";
 import {Region} from "kodo-s3-adapter-sdk";
 
 import {BucketItem} from "@renderer/modules/qiniu-client";
 
+import {useI18n} from "@renderer/modules/i18n";
+import {appPreferences, ContentViewStyle} from "@renderer/modules/user-config-store";
+
 import BucketToolBar from "./bucket-tool-bar";
 import BucketTable from "./bucket-table";
-import {useI18n} from "@renderer/modules/i18n";
-import BucketGrid from "@renderer/pages/browse/buckets/bucket-grid";
-import Settings, {ContentViewStyle} from "@renderer/modules/settings";
+import BucketGrid from "./bucket-grid";
 
 interface BucketsProps {
   data: BucketItem[],
@@ -19,12 +20,20 @@ interface BucketsProps {
 const Buckets: React.FC<BucketsProps> = ({
   data: buckets,
   regions,
-  loading,
+  loading: propsLoading,
   onOperatedBucket,
 }) => {
   const {currentLanguage} = useI18n();
 
   const [selectedBucket, setSelectedBucket] = useState<BucketItem | null>(null);
+  const {
+    state: appPreferencesState,
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
+  const loading = propsLoading || !appPreferencesState.initialized;
 
   // search bucket
   const [bucketSearchText, setBucketSearchText] = useState("");
@@ -33,10 +42,9 @@ const Buckets: React.FC<BucketsProps> = ({
   }
 
   // view style
-  const [viewStyle, setViewStyle] = useState(Settings.contentViewStyle);
+  const viewStyle = appPreferencesData.contentViewStyle;
   const handleChangeViewStyle = (style: ContentViewStyle) => {
-    setViewStyle(style);
-    Settings.contentViewStyle = style;
+    appPreferences.set("contentViewStyle", style);
   };
 
   // computed state

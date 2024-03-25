@@ -3,7 +3,7 @@ import {Modal, ModalProps, Table} from "react-bootstrap";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {useAuth} from "@renderer/modules/auth";
-import {BookmarkItem, useKodoBookmark} from "@renderer/modules/kodo-address";
+import {BookmarkItem, useBookmarkPath} from "@renderer/modules/user-config-store";
 
 import EmptyHolder from "@renderer/components/empty-holder";
 
@@ -21,11 +21,9 @@ const BookmarkManager: React.FC<ModalProps & BookmarkManagerProps> = ({
   const {currentUser} = useAuth();
 
   const {
-    bookmarkState: {
-      list: bookmarks,
-    },
+    bookmarkPathData,
     deleteBookmark,
-  } = useKodoBookmark(currentUser);
+  } = useBookmarkPath(currentUser);
 
   return (
     <Modal {...modalProps}>
@@ -47,8 +45,8 @@ const BookmarkManager: React.FC<ModalProps & BookmarkManagerProps> = ({
             </thead>
             <tbody>
             {
-              bookmarks.length
-                ? bookmarks.map(item => (
+              bookmarkPathData.list.length
+                ? bookmarkPathData.list.map(item => (
                   <BookmarkTableRow
                     key={item.protocol + item.path}
                     data={item}

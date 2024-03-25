@@ -10,21 +10,27 @@ import {MemoryRouter as Router} from "react-router-dom";
 
 // create a RoutePath.Root page and check auth state will be more beautiful
 import {getCurrentUser} from "./modules/auth";
+import {getEndpointConfig} from "./modules/user-config-store";
 
-import * as appLife from "./app-life";
+import setupApp from "./setup-app";
 import RoutePath from "./pages/route-path";
 
-appLife.beforeStart()
-  .then(() => import("./app"))
-  .then(({default: App}) => {
-    const container = document.getElementById("kodo-browser-app");
-    const root = createRoot(container!);
-    const isSignedIn = getCurrentUser() !== null;
-    root.render(
-      <Router initialEntries={[isSignedIn ? RoutePath.Browse : RoutePath.SignIn]}>
-        <App/>
-      </Router>,
-    );
-  });
-
-window.onclose = appLife.beforeQuit;
+(async function () {
+  await setupApp();
+  const {default: App} = await import("./app");
+  const container = document.createElement("div");
+  container.id = "kodo-browser-app";
+  container.className = "h-100";
+  document.body.prepend(container);
+  const root = createRoot(container);
+  const currentUser = getCurrentUser();
+  const isSignedIn = currentUser !== null;
+  if (isSignedIn) {
+    await getEndpointConfig(currentUser).loadFromPersistence();
+  }
+  root.render(
+    <Router initialEntries={[isSignedIn ? RoutePath.Browse : RoutePath.SignIn]}>
+      <App/>
+    </Router>,
+  );
+})();

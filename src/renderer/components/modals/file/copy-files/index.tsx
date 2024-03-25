@@ -28,6 +28,7 @@ import {usePromiseConfirm} from "@renderer/components/lite-confirm";
 
 import {OperationDoneRecallFn} from "../types";
 import {isRecursiveDirectory} from "../utils"
+import FileList from "../common/file-list";
 
 interface CopyFilesProps {
   regionId: string,
@@ -365,29 +366,32 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
                       }
                     </>
                     : <>
-                      <div>
-                        <Translate
-                          i18nKey="modals.copyFiles.description"
-                          data={contentI18nData}
-                          slots={{
-                            operation: v => <code key="operation">{v}</code>,
-                          }}
-                        />
-                      </div>
-                      <ul className="scroll-max-vh-40">
-                        {
-                          memoFileItems.map(fileItem => (
-                            <li key={fileItem.path.toString()}>
-                              {
-                                FileItem.isItemFolder(fileItem)
-                                  ? <i className="bi bi-folder-fill me-1 text-yellow"/>
-                                  : <i className="bi bi-file-earmark me-1"/>
-                              }
-                              {fileItem.name}
-                            </li>
-                          ))
+                      <FileList
+                        className="scroll-max-vh-40"
+                        data={memoFileItems}
+                        prefixDescription={
+                          <div>
+                            <Translate
+                              i18nKey="modals.copyFiles.prefixDescription"
+                              data={contentI18nData}
+                              slots={{
+                                operation: v => <code key="operation">{v}</code>,
+                              }}
+                            />
+                          </div>
                         }
-                      </ul>
+                        description={
+                          <div>
+                            <Translate
+                              i18nKey="modals.copyFiles.description"
+                              data={contentI18nData}
+                              slots={{
+                                operation: v => <code key="operation">{v}</code>,
+                              }}
+                            />
+                          </div>
+                        }
+                      />
                     </>
                 }
                 {

@@ -1,12 +1,13 @@
 import React from "react";
 import {Col, Form, Row} from "react-bootstrap";
+import {useFormContext} from "react-hook-form";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {useFormContext} from "react-hook-form";
+import {AppPreferencesData} from "@renderer/modules/user-config-store";
 
 const FieldsExternalPath: React.FC = () => {
   const {translate} = useI18n();
-  const {register} = useFormContext();
+  const {register} = useFormContext<AppPreferencesData>();
 
   return (
     <fieldset>
@@ -17,7 +18,7 @@ const FieldsExternalPath: React.FC = () => {
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
           <Form.Switch
-            {...register("enabledExternalPath")}
+            {...register("externalPathEnabled")}
             label={translate("modals.settings.externalPath.form.enabled.hint")}
           />
         </Col>

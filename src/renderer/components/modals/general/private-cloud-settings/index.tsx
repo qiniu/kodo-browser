@@ -7,12 +7,14 @@ import lodash from "lodash";
 import {HttpUrl} from "@renderer/const/patterns";
 import {useI18n} from "@renderer/modules/i18n";
 import * as LocalLogger from "@renderer/modules/local-logger";
-import {Endpoint, isQueryRegionAPIAvailable, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
+import {Endpoint, isQueryRegionAPIAvailable} from "@renderer/modules/qiniu-client";
+import {useEndpointConfig} from "@renderer/modules/user-config-store";
 
 import RegionInputs from "./region-inputs";
+import LoadingHolder from "@renderer/components/loading-holder";
 
 interface PrivateCloudSettingsProps {
-  onSaved: (data: Endpoint) => void,
+  onSaved?: (data: Endpoint) => void,
 }
 
 const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = ({
@@ -20,6 +22,12 @@ const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = (
   ...modalProps
 }) => {
   const {translate} = useI18n();
+
+  const {
+    endpointConfigState,
+    endpointConfigData,
+    setEndpoint,
+  } = useEndpointConfig(null);
 
   const {
     handleSubmit,
@@ -42,26 +50,39 @@ const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = (
     name: "regions",
   });
 
+  useEffect(() => {
+    if (modalProps.show) {
+      if (endpointConfigData.regions.length) {
+        setHasCustomRegions(true);
+      }
+      reset(endpointConfigData);
+    }
+  }, [modalProps.show]);
+
+  useEffect(() => {
+    if (!endpointConfigState.loadingPersistence) {
+      reset(endpointConfigData);
+    }
+  }, [endpointConfigState.loadingPersistence]);
+
   const handleSavePrivateCloudSettings: SubmitHandler<Endpoint> = (data) => {
     LocalLogger.debug("save private cloud settings", data);
-    privateEndpointPersistence.save({
+    const p = setEndpoint({
       ucUrl: data.ucUrl,
       regions: hasCustomRegions
         ? data.regions
         : [],
     });
-    toast.success(translate("common.saved"));
-    onSaved(data);
-    modalProps.onHide?.();
+    p.then(() => {
+      onSaved?.(data);
+      modalProps.onHide?.();
+    });
+    return toast.promise(p, {
+      loading: translate("common.saving"),
+      success: translate("common.saved"),
+      error: err => `${translate("common.failed")}: ${err}`,
+    });
   };
-
-  useEffect(() => {
-    const endpoint = privateEndpointPersistence.read();
-    if (endpoint.regions.length) {
-      setHasCustomRegions(true);
-    }
-    reset(endpoint);
-  }, [modalProps.show]);
 
   // check query region available
   const [debouncedUcUrl, setDebouncedUcUrl] = useState<string>("");
@@ -96,6 +117,12 @@ const PrivateCloudSettings: React.FC<ModalProps & PrivateCloudSettingsProps> = (
   }, [hasCustomRegions, fields.length, setValue]);
 
   // render
+  if (!endpointConfigState.initialized) {
+    return (
+      <LoadingHolder/>
+    );
+  }
+
   const renderRegionFields = () => {
     if (!hasCustomRegions) {
       return null;

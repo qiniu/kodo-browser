@@ -16,6 +16,10 @@ describe("test models/job/upload-job.ts", () => {
     const MockedUploader = mocked(Uploader, true);
 
     describe("test UploadJob methods", () => {
+        beforeAll(() => {
+          console.log('calling this to prevent mock-fs cause jest console error');
+        });
+
         beforeEach(() => {
             mockFs({
                 "/path/to/dir": {

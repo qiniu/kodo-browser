@@ -6,7 +6,7 @@ import * as customize from "@renderer/customize";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {BucketItem} from "@renderer/modules/qiniu-client";
-import {ContentViewStyle} from "@renderer/modules/settings";
+import {ContentViewStyle} from "@renderer/modules/user-config-store";
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import CreateBucket from "@renderer/components/modals/bucket/create-bucket";
 import UpdateBucketRemark from "@renderer/components/modals/bucket/update-bucket-remark";

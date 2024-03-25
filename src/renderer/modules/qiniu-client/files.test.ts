@@ -72,7 +72,8 @@ describe("test qiniu-client/files.ts", () => {
         private: true,
         protected: false,
         protocol: "http",
-        type: "test",
+        type: "cdn",
+        apiScope: "kodo",
     };
     const mockOpt: QiniuClientCommon.GetAdapterOptionParam = {
         id: ENV.QINIU_ACCESS_KEY,

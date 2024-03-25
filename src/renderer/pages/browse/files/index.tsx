@@ -1,19 +1,20 @@
 import path from "path";
 
 import {dialog as electronDialog} from '@electron/remote'
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState, useSyncExternalStore} from "react";
 import {toast} from "react-hot-toast";
 import {Region} from "kodo-s3-adapter-sdk";
 
 import StorageClass from "@common/models/storage-class";
+import {BackendMode} from "@common/qiniu";
 
 import * as LocalLogger from "@renderer/modules/local-logger";
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {KodoNavigator, useKodoNavigator} from "@renderer/modules/kodo-address";
-import Settings, {ContentViewStyle} from "@renderer/modules/settings";
+import {ContentViewStyle, appPreferences, useEndpointConfig} from "@renderer/modules/user-config-store";
 
-import {BucketItem, FileItem, privateEndpointPersistence} from "@renderer/modules/qiniu-client";
+import {BucketItem, FileItem} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 import * as AuditLog from "@renderer/modules/audit-log";
@@ -36,14 +37,18 @@ const Files: React.FC<FilesProps> = (props) => {
   const {currentLanguage, translate} = useI18n();
   const {currentUser} = useAuth();
 
-  const customizedEndpoint = useMemo(() => {
-    return currentUser?.endpointType === EndpointType.Public
-      ? {
-        ucUrl: "",
-        regions: [],
-      }
-      : privateEndpointPersistence.read()
-  }, [currentUser?.endpointType]);
+  const {
+    state: appPreferencesState,
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
+
+  const {
+    endpointConfigData,
+  } = useEndpointConfig(currentUser);
+
   const {currentAddress, basePath, goTo} = useKodoNavigator();
 
   // files selector
@@ -95,8 +100,11 @@ const Files: React.FC<FilesProps> = (props) => {
     bucketName: props.bucket?.name,
     storageClasses: props.region?.storageClasses,
     currentAddressPath: currentAddress.path,
-    pageSize: Settings.filesLoadingSize,
+    pageSize: appPreferencesData.filesItemLoadSize,
     shouldAutoReload: () => {
+      if (!appPreferencesState.initialized) {
+        return false;
+      }
       if (!props.region || !props.bucket) {
         toast.error("region or bucket not found!");
         return false;
@@ -106,9 +114,10 @@ const Files: React.FC<FilesProps> = (props) => {
     },
     autoReloadDeps: [
       props.toggleRefresh,
+      appPreferencesState.initialized,
     ],
     preferBackendMode: props.bucket?.preferBackendMode,
-    defaultLoadAll: !Settings.stepByStepLoadingFiles,
+    defaultLoadAll: !appPreferencesData.filesItemLazyLoadEnabled,
   });
 
   const handleReloadFiles = ({
@@ -116,10 +125,7 @@ const Files: React.FC<FilesProps> = (props) => {
   }: {
     originBasePath: string,
   }) => {
-    setSelectedFiles(m => {
-      m.clear();
-      return new Map(m);
-    });
+    setSelectedFiles(new Map());
     let p = basePath;
     if (p === undefined || originBasePath !== basePath) {
       return;
@@ -129,7 +135,7 @@ const Files: React.FC<FilesProps> = (props) => {
     }
     reloadFiles(
       p,
-      !Settings.stepByStepLoadingFiles,
+      !appPreferencesData.filesItemLazyLoadEnabled,
     )
       .catch(err => {
         toast.error(err.toString());
@@ -157,7 +163,7 @@ const Files: React.FC<FilesProps> = (props) => {
       res[storageClass.kodoName] = storageClass;
       return res;
     }, {});
-  }, [props.region?.storageClasses]);
+  }, [props.region?.storageClasses?.length]);
 
   // domains loader and selector
   const {
@@ -175,10 +181,9 @@ const Files: React.FC<FilesProps> = (props) => {
         toast.error("region or bucket not found!");
         return false;
       }
-      setSelectedFiles(new Map());
       return true;
     },
-    canS3Domain: !props.bucket?.grantedPermission,
+    canDefaultS3Domain: !props.bucket?.grantedPermission,
     preferBackendMode: props.bucket?.preferBackendMode,
   });
   const [selectedDomain, setSelectedDomain] = useState<DomainAdapter | undefined>();
@@ -197,10 +202,9 @@ const Files: React.FC<FilesProps> = (props) => {
   };
 
   // view style
-  const [viewStyle, setViewStyle] = useState(Settings.contentViewStyle);
+  const viewStyle = appPreferencesData.contentViewStyle;
   const handleChangeViewStyle = (style: ContentViewStyle) => {
-    setViewStyle(style);
-    Settings.contentViewStyle = style;
+    appPreferences.set("contentViewStyle", style);
   };
 
   // modal state
@@ -285,7 +289,7 @@ const Files: React.FC<FilesProps> = (props) => {
         region: currentRegion.s3Id,
         bucket: currentBucket.name,
         domain: selectedDomain,
-        isOverwrite: Settings.overwriteDownload,
+        isOverwrite: appPreferencesData.overwriteDownloadEnabled,
         storageClasses: currentRegion.storageClasses,
         // userNatureLanguage needs mid-dash but i18n using lo_dash
         // @ts-ignore
@@ -294,14 +298,14 @@ const Files: React.FC<FilesProps> = (props) => {
       clientOptions: {
         accessKey: currentUser.accessKey,
         secretKey: currentUser.accessSecret,
-        ucUrl: customizedEndpoint.ucUrl,
-        regions: customizedEndpoint.regions.map(r => ({
+        ucUrl: endpointConfigData.ucUrl,
+        regions: endpointConfigData.regions.map(r => ({
           id: "",
           s3Id: r.identifier,
           label: r.label,
           s3Urls: [r.endpoint],
         })),
-        backendMode: selectedDomain.backendMode,
+        backendMode: selectedDomain.apiScope as BackendMode,
       },
     });
   };
@@ -318,6 +322,15 @@ const Files: React.FC<FilesProps> = (props) => {
         listedFileNumber={files.length}
         hasMoreFiles={hasMoreFiles}
         selectedFiles={[...selectedFiles.values()]}
+        couldShowSelectPrefix={
+          Array.from(selectedFiles.values()).some(FileItem.isItemPrefix) ||
+          (
+            hasMoreFiles &&
+            files.length > 0 &&
+            selectedFiles.size === files.length
+          )
+        }
+        onSelectPrefix={handleChangeSelectedFiles}
 
         loadingDomains={loadingDomains}
         domains={domains}

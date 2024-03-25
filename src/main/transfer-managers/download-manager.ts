@@ -1,13 +1,11 @@
 import path from "path";
-import fs, {promises as fsPromises, constants as fsConstants} from "fs";
+import {promises as fsPromises, constants as fsConstants} from "fs";
 
-import lodash from "lodash";
 import sanitizeFilename from "sanitize-filename";
 import {Adapter, ListedObjects} from "kodo-s3-adapter-sdk/dist/adapter";
 
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
 import DownloadJob from "@common/models/job/download-job";
-import {Status} from "@common/models/job/types";
 import {DownloadOptions, RemoteObject} from "@common/ipc-actions/download";
 
 import TransferManager, {TransferManagerConfig} from "./transfer-manager";
@@ -33,6 +31,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             jobsAdded?: () => void,
         },
     ) {
+        const abortSignal = this.addingAbortController.signal;
         const qiniuClient = createQiniuClient(
             clientOptions,
             {
@@ -44,6 +43,9 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
 
         // iterate selected objects
         for (let remoteObject of remoteObjects) {
+            if (abortSignal.aborted) {
+                return;
+            }
             // get remoteBaseDirectory
             const remoteBaseDirectory = path.posix.dirname(remoteObject.key)
 
@@ -52,10 +54,14 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                 qiniuClient,
                 downloadOptions,
                 remoteObject,
-                async (err: Error | null, walkingPath: string, walkingObject: RemoteObject) => {
+                async (err: Error | null, walkingPath: string, walkingObject: RemoteObject): Promise<void | boolean> => {
                     if (err) {
                         this.config.onError?.(err);
-                        return;
+                        return false;
+                    }
+
+                    if (abortSignal.aborted) {
+                        return false;
                     }
 
                     let relativePath = path.posix.relative(remoteBaseDirectory, walkingPath);
@@ -79,7 +85,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                             name: walkingObject.name,
                             path: localPath,
                         };
-                        this.createDownloadJob(from, to, clientOptions, downloadOptions);
+                        await this.createDownloadJob(from, to, clientOptions, downloadOptions);
 
                         // post add job
                         hooks?.jobsAdding?.();
@@ -91,64 +97,62 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         hooks?.jobsAdded?.();
     }
 
-    persistJobs(force: boolean = false): void {
-        if (force) {
-            this._persistJobs();
-            return;
-        }
-        this._persistJobsThrottle();
-    }
-
-    loadJobsFromStorage(
+    async loadJobsFromStorage(
         clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
         downloadOptions: Pick<DownloadOptions, "userNatureLanguage">,
-    ): void {
-        if (!this.config.persistPath) {
+    ): Promise<void> {
+        const persistStore = await this.getPersistStore();
+        if (!persistStore) {
             return;
         }
-        const persistedJobs: Record<string, DownloadJob["persistInfo"]> =
-            JSON.parse(fs.readFileSync(this.config.persistPath, "utf-8"));
+        for await (const [jobId, persistedJob] of persistStore.iter()) {
+            if (!persistedJob || this.jobs.get(jobId)) {
+                return;
+            }
 
-        Object.entries(persistedJobs)
-            .forEach(([jobId, persistedJob]) => {
-                if (this.jobs.get(jobId)) {
-                    return;
-                }
+            await this.loadJob(
+                jobId,
+                persistedJob,
+                clientOptions,
+                downloadOptions,
+            );
+        }
+    }
 
-                // some old version will persist an object message, cause type error
-                if (typeof persistedJob.message !== "string") {
-                  persistedJob.message = JSON.stringify(persistedJob.message);
-                }
+    private async loadJob(
+        jobId: string,
+        persistedJob: DownloadJob["persistInfo"],
+        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
+        downloadOptions: Pick<DownloadOptions, "userNatureLanguage">,
+    ): Promise<void> {
+        if (this.jobs.get(jobId)) {
+            return;
+        }
 
-                const job = DownloadJob.fromPersistInfo(
-                    jobId,
-                    persistedJob,
-                    {
-                        ...clientOptions,
-                        backendMode: persistedJob.backendMode,
-                    },
-                    {
-                        downloadSpeedLimit: this.config.speedLimit,
-                        overwrite: this.config.isOverwrite,
-                        isDebug: this.config.isDebug,
-                        userNatureLanguage: downloadOptions.userNatureLanguage,
-                    },
-                  {
-                        onStatusChange: (status, prev) => {
-                            this.handleJobStatusChange(status, prev);
-                        },
-                        onProgress: () => {
-                            this.persistJobs();
-                        },
-                    },
-                );
+        const job = DownloadJob.fromPersistInfo(
+            jobId,
+            persistedJob,
+            {
+                ...clientOptions,
+                backendMode: persistedJob.backendMode,
+            },
+            {
+                downloadSpeedLimit: this.config.speedLimit,
+                overwrite: this.config.isOverwrite,
+                isDebug: this.config.isDebug,
+                userNatureLanguage: downloadOptions.userNatureLanguage,
+            },
+            {
+                onStatusChange: (status, prev) => {
+                    this.handleJobStatusChange(job.id, status, prev);
+                },
+                onProgress: () => {
+                    this.persistJob(job.id, job.persistInfo);
+                },
+            },
+        );
 
-                if ([Status.Waiting, Status.Running].includes(job.status)) {
-                    job.stop();
-                }
-
-                this.addJob(job);
-            });
+        this._addJob(job);
     }
 
     removeJob(jobId: string) {
@@ -158,19 +162,19 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         super.removeJob(jobId);
     }
 
-    removeAllJobs() {
+    async removeAllJobs() {
         this.stopAllJobs();
         this.jobs.forEach(job => {
             job.tryCleanupDownloadFile();
         })
-        super.removeAllJobs();
+        await super.removeAllJobs();
     }
 
     private async walkRemoteObject(
         client: Adapter,
         downloadOptions: DownloadOptions,
         remoteObject: RemoteObject,
-        callback: (err: Error | null, path: string, info: RemoteObject) => Promise<void>
+        callback: (err: Error | null, path: string, info: RemoteObject) => Promise<boolean | void>
     ): Promise<void> {
         if (remoteObject.isFile) {
             await callback(null, remoteObject.key, remoteObject);
@@ -178,6 +182,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         }
 
         let nextContinuationToken: string | undefined = undefined;
+        let shouldContinueWalk: boolean = true;
         // iterate fetch list
         do {
             // fetch list by next mark
@@ -200,7 +205,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                 const isDir = obj.key.endsWith("/");
                 let name = isDir ? obj.key.slice(0, -1): obj.key;
                 name = obj.key.slice(name.lastIndexOf("/") + 1);
-                await callback(null, obj.key, {
+                shouldContinueWalk = await callback(null, obj.key, {
                     region: downloadOptions.region,
                     bucket: obj.bucket,
                     key: obj.key,
@@ -209,7 +214,14 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
                     size: obj.size,
                     isDirectory: isDir,
                     isFile: !isDir,
-                });
+                }) ?? shouldContinueWalk;
+                if (!shouldContinueWalk) {
+                    break;
+                }
+            }
+
+            if (!shouldContinueWalk) {
+                break;
             }
 
             // iterate subdirectories and recursive call
@@ -254,12 +266,12 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
         }
     }
 
-    private createDownloadJob(
+    private async createDownloadJob(
         from: Required<DownloadJob["options"]["from"]>,
         to: DownloadJob["options"]["to"],
         clientOptions: ClientOptions,
         downloadOptions: DownloadOptions,
-    ): void {
+    ): Promise<void> {
         const job = new DownloadJob({
             from: from,
             to: to,
@@ -284,15 +296,13 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             userNatureLanguage: downloadOptions.userNatureLanguage,
 
             onStatusChange: (status, prev) => {
-              this.handleJobStatusChange(status, prev);
+                this.handleJobStatusChange(job.id, status, prev);
             },
-            onProgress: () => {
-                this.persistJobs();
-            },
+            onPartCompleted: () => {
+                this.persistJob(job.id, job.persistInfo);
+            }
         });
 
         this.addJob(job);
     }
-
-    private _persistJobsThrottle = lodash.throttle(this._persistJobs, 1000);
 }

@@ -3,20 +3,20 @@ import {ipcRenderer, IpcRendererEvent} from "electron";
 import {useEffect, useState} from "react";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
-import {Status} from "@common/models/job/types";
 import {
   AddedJobsReplyMessage,
   DownloadAction,
   DownloadReplyMessage,
   JobCompletedReplyMessage,
-  UpdateUiDataReplyMessage
+  UpdateUiDataReplyMessage,
+  UpdateUiDataMessage,
 } from "@common/ipc-actions/download";
 
 import {AkItem} from "@renderer/modules/auth";
 import {Endpoint} from "@renderer/modules/qiniu-client";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 
-import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
+import {JOB_NUMS_PER_QUERY, QUERY_INTERVAL} from "./const";
 
 function handleOffline() {
   ipcDownloadManager.stopJobsByOffline();
@@ -40,6 +40,8 @@ interface DownloadConfig {
   userNatureLanguage: NatureLanguage,
 }
 
+type JobsQuery = UpdateUiDataMessage['data']['query'];
+
 interface UseIpcDownloadProps {
   endpoint: Endpoint,
   user: AkItem | null,
@@ -61,7 +63,7 @@ const useIpcDownload = ({
   onAddedJobs = () => {},
   onJobCompleted = () => {},
 }: UseIpcDownloadProps) => {
-  const [searchText, setSearchText] = useState<string>("");
+  const [jobsQuery, setJobsQuery] = useState<JobsQuery>({});
   const [pageNum, setPageNum] = useState<number>(0);
   const [queryCount, setQueryCount] = useState<number>(initQueryCount);
   const [jobState, setJobState] = useState<UpdateUiDataReplyMessage["data"]>();
@@ -79,6 +81,14 @@ const useIpcDownload = ({
       window.removeEventListener("online", handleOnline);
     };
   }, []);
+
+  // auto update config
+  const sortedConfigValues = Object.entries(config)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(item => item[1]);
+  useEffect(() => {
+    ipcDownloadManager.updateConfig(config);
+  }, sortedConfigValues);
 
   // subscribe IPC events of download and make sure there is a valid configuration
   useEffect(() => {
@@ -100,7 +110,6 @@ const useIpcDownload = ({
     };
 
     ipcRenderer.on("DownloaderManager-reply", downloadReplyHandler);
-    ipcDownloadManager.updateConfig(config);
 
     return () => {
       ipcRenderer.off("DownloaderManager-reply", downloadReplyHandler);
@@ -134,36 +143,23 @@ const useIpcDownload = ({
   // this may be deprecated in the future.
   useEffect(() => {
     const downloaderTimer = setInterval(() => {
-      let query;
-      if (searchText) {
-        const searchTextTrimmed = searchText.trim();
-        if ((Object.values(Status) as string[]).includes(searchTextTrimmed)) {
-          query = {
-            status: searchTextTrimmed as Status,
-          };
-        } else {
-          query = {
-            name: searchTextTrimmed,
-          };
-        }
-      }
       ipcDownloadManager.updateUiData({
         pageNum: pageNum,
         count: queryCount,
-        query: query,
+        query: jobsQuery,
       });
-    }, LAPSE_PER_QUERY);
+    }, QUERY_INTERVAL);
 
     return () => {
       clearInterval(downloaderTimer);
     };
-  }, [searchText, queryCount]);
+  }, [jobsQuery, queryCount]);
 
   return {
     pageNum,
     queryCount,
     jobState,
-    setSearchText,
+    setJobsQuery,
     setPageNum,
     setQueryCount,
   }

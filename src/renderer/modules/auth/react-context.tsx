@@ -7,9 +7,9 @@ const AuthContext = createContext<{
   currentUser: AkItem | null,
   akHistory: AkItem[],
   signIn: (akItem: AkItem, remember: boolean) => Promise<void>,
-  signOut: () => void,
-  deleteHistory: (akItem: AkItem) => void,
-  clearHistory: () => void,
+  signOut: () => Promise<void>,
+  deleteHistory: (akItem: AkItem) => Promise<void>,
+  clearHistory: () => Promise<void>,
 }>({
   currentUser: null,
   akHistory: [],
@@ -31,18 +31,18 @@ export const Provider: React.FC<{
     setHistory([...AuthFunc.getHistory()]);
   };
 
-  const signOut = () => {
-    AuthFunc.signOut();
+  const signOut = async () => {
+    await AuthFunc.signOut();
     setUser(null);
   };
 
-  const deleteHistory = (akItem: AkItem) => {
-    AuthFunc.deleteHistory(akItem);
+  const deleteHistory = async (akItem: AkItem) => {
+    await AuthFunc.deleteHistory(akItem);
     setHistory([...AuthFunc.getHistory()]);
   };
 
-  const clearHistory = () => {
-    AuthFunc.clearHistory();
+  const clearHistory = async () => {
+    await AuthFunc.clearHistory();
     setHistory([...AuthFunc.getHistory()]);
   };
 

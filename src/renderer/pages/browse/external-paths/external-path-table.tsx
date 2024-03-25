@@ -2,7 +2,8 @@ import React from "react";
 import {Form, Table} from "react-bootstrap";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {ExternalPathItem, useKodoNavigator} from "@renderer/modules/kodo-address";
+import {useKodoNavigator} from "@renderer/modules/kodo-address";
+import {ExternalPathItem} from "@renderer/modules/user-config-store";
 
 import EmptyHolder from "@renderer/components/empty-holder";
 

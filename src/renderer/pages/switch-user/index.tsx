@@ -34,7 +34,9 @@ const SwitchUser: React.FC = () => {
       setTimeout(resolve, 2500);
     })
       .then(() => {
-        signOut();
+        return signOut();
+      })
+      .then(() => {
         return signIn(akItem, true);
       })
       .then(() => {

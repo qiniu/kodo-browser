@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useMemo} from "react";
 import {useSearchParams} from "react-router-dom";
 import {Region} from "kodo-s3-adapter-sdk";
 import {toast} from "react-hot-toast";
@@ -6,15 +6,11 @@ import {toast} from "react-hot-toast";
 import {BackendMode} from "@common/qiniu";
 
 import * as LocalLogger from "@renderer/modules/local-logger";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
-import {isExternalPathItem, useKodoNavigator} from "@renderer/modules/kodo-address";
-import {
-  BucketItem,
-  GetAdapterOptionParam,
-  getRegions,
-  listAllBuckets,
-  privateEndpointPersistence
-} from "@renderer/modules/qiniu-client";
+import {useAuth} from "@renderer/modules/auth";
+import {useKodoNavigator} from "@renderer/modules/kodo-address";
+import {isExternalPathItem} from "@renderer/modules/user-config-store";
+import {BucketItem} from "@renderer/modules/qiniu-client";
+import {useLoadBuckets, useLoadRegions} from "@renderer/modules/qiniu-client-hooks";
 import {Provider as FileOperationProvider} from "@renderer/modules/file-operation";
 
 import LoadingHolder from "@renderer/components/loading-holder";
@@ -22,54 +18,6 @@ import LoadingHolder from "@renderer/components/loading-holder";
 import Buckets from "./buckets";
 import ExternalPaths from "./external-paths";
 import Files from "./files";
-
-
-/*
- * get all regions from server and merge to local regions configuration if set in private endpoint.
- */
-async function listAllRegions(endpointType: EndpointType, opt: GetAdapterOptionParam): Promise<Region[]> {
-  let regionsFromFetch: Region[];
-
-  // public
-  if (endpointType === EndpointType.Public) {
-    regionsFromFetch = await getRegions(opt);
-    return regionsFromFetch;
-  }
-
-  // private
-  const regionsFromEndpointConfig = privateEndpointPersistence
-    .read()
-    .regions;
-  if (!regionsFromEndpointConfig.length) {
-    regionsFromFetch = await getRegions(opt);
-    return regionsFromFetch;
-  }
-
-  // private add configuration
-  try {
-    regionsFromFetch = await getRegions(opt);
-  } catch {
-    return regionsFromEndpointConfig
-      .map(r => {
-        const result = new Region(r.identifier, r.identifier, r.label);
-        result.s3Urls = [r.endpoint];
-        return result
-      });
-  }
-  return regionsFromEndpointConfig.map(r => {
-    const storageClasses = regionsFromFetch
-      .find(i => i.s3Id === r.identifier)?.storageClasses ?? []
-    const region = new Region(
-      r.identifier,
-      r.identifier,
-      r.label,
-      {},
-      storageClasses,
-    );
-    region.s3Urls = [r.endpoint];
-    return region
-  });
-}
 
 interface ContentsProps {
   toggleRefresh?: boolean,
@@ -85,55 +33,46 @@ const Contents: React.FC<ContentsProps> = ({
 
   // initial regions, storage classes, buckets.
   // they will update when refresh bucket view.
-  const [loadingBucketAndRegion, setLoadingBucketAndRegion] = useState<boolean>(true);
-  const [regionsMap, setRegionsMap] = useState<Map<string, Region>>(new Map());
-  const [bucketsMap, setBucketsMap] = useState<Map<string, BucketItem>>(new Map());
-  const loadRegionsAndBuckets = () => {
-    if (!currentUser) {
-      return;
-    }
-
-    setLoadingBucketAndRegion(true);
-
-    const opt = {
-      id: currentUser.accessKey,
-      secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
-    };
-    Promise.all([listAllRegions(currentUser.endpointType, opt), listAllBuckets(opt)])
-      .then(([regions, buckets]) => {
-        setRegionsMap(regions.reduce((res, r) => {
-          res.set(r.s3Id, r);
-          return res;
-        }, new Map<string, Region>()));
-        setBucketsMap(buckets.reduce((res, b) => {
-          res.set(b.name, b);
-          return res;
-        }, new Map<string, BucketItem>()));
-        setLoadingBucketAndRegion(false);
-      })
+  const {
+    loadRegionsState,
+    loadRegions,
+  } = useLoadRegions({
+    user: currentUser,
+  });
+  const {
+    loadBucketsState,
+    loadBuckets,
+  } = useLoadBuckets({
+    user: currentUser,
+  })
+  const loadingRegionsAndBuckets = loadRegionsState.loading || loadBucketsState.loading;
+  const regionsMap = useMemo(() => {
+    const m = new Map<string, Region>();
+    loadRegionsState.regions.forEach(r => {
+      m.set(r.s3Id, r);
+    });
+    return m;
+  }, [loadRegionsState.regions]);
+  const bucketsMap = useMemo(() => {
+    const m = new Map<string, BucketItem>();
+    loadBucketsState.buckets.forEach(b => {
+      m.set(b.name, b);
+    });
+    return m;
+  }, [loadBucketsState.buckets]);
+  const loadRegionsAndBuckets = useCallback(() => {
+    Promise.all([loadRegions(), loadBuckets()])
       .catch(err => {
         toast.error(err.toString());
         LocalLogger.error(err);
       });
-  };
-  const handleReloadBuckets = (bucket?: BucketItem) => {
-    if (bucket) {
-      setBucketsMap(bucketsMap => {
-        const v = new Map(bucketsMap);
-        v.set(bucket.name, bucket);
-        return v;
-      });
-      return;
-    }
-    loadRegionsAndBuckets();
-  }
+  }, [loadRegions, loadBuckets]);
   useEffect(() => {
     loadRegionsAndBuckets();
   }, []);
   // refresh when bucket view
   useEffect(() => {
-    if (!bucketName && !loadingBucketAndRegion) {
+    if (!bucketName && !loadingRegionsAndBuckets) {
       loadRegionsAndBuckets();
     }
   }, [toggleRefresh]);
@@ -165,15 +104,15 @@ const Contents: React.FC<ContentsProps> = ({
       }
       return (
         <Buckets
-          loading={loadingBucketAndRegion}
+          loading={loadingRegionsAndBuckets}
           regions={[...regionsMap.values()]}
           data={[...bucketsMap.values()]}
-          onOperatedBucket={handleReloadBuckets}
+          onOperatedBucket={loadRegionsAndBuckets}
         />
       );
     }
 
-    if (loadingBucketAndRegion) {
+    if (loadingRegionsAndBuckets) {
       return (
         <LoadingHolder/>
       );

@@ -4,10 +4,7 @@ import lodash from "lodash";
 
 import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 import {
-  BookmarkItem,
-  ExternalPathItem, isExternalPathItem,
   KodoAddress,
-  KodoBookmark,
   KodoNavigator,
   Provider as KodoNavigatorProvider,
 } from "@renderer/modules/kodo-address";
@@ -18,9 +15,10 @@ import KodoAddressBar from "@renderer/components/kodo-address-bar";
 
 import Contents from "./contents";
 import Transfer from "./transfer";
+import {isExternalPathItem, useBookmarkPath} from "@renderer/modules/user-config-store";
 
 interface BrowseProps {
-  activeKodoAddress?: BookmarkItem | ExternalPathItem | null,
+  activeKodoAddress?: KodoAddress | null,
 }
 
 const Browse: React.FC<BrowseProps> = ({
@@ -29,6 +27,10 @@ const Browse: React.FC<BrowseProps> = ({
   const [_, setSearchParams] = useSearchParams();
 
   const {currentUser} = useAuth();
+  const {
+    bookmarkPathState,
+    bookmarkPathData,
+  } = useBookmarkPath(currentUser);
 
   const [kodoNavigator, setKodoNavigator] = useState<KodoNavigator>();
   const [toggleRefresh, setToggleRefresh] = useState<boolean>(true);
@@ -39,16 +41,13 @@ const Browse: React.FC<BrowseProps> = ({
 
   // initial kodo navigator
   useEffect(() => {
-    if (!currentUser) {
+    if (!currentUser || !bookmarkPathState.initialized) {
       return;
     }
-    const kodoBookmark = new KodoBookmark({
-      persistPath: `bookmarks_${currentUser.accessKey}.json`,
-    });
     const kodoNav = new KodoNavigator({
       defaultProtocol: ADDR_KODO_PROTOCOL,
       maxHistory: 100,
-      initAddress: kodoBookmark.read().homeAddress,
+      initAddress: bookmarkPathData.homeAddress,
     });
     const handleChangeKodoNav = ({
       current,
@@ -67,7 +66,7 @@ const Browse: React.FC<BrowseProps> = ({
     return () => {
       kodoNav.offChange(handleChangeKodoNav);
     };
-  }, [currentUser]);
+  }, [currentUser, bookmarkPathState.initialized]);
 
   // bookmark go to
   useEffect(() => {

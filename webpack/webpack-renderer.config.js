@@ -24,9 +24,10 @@ module.exports = function(webpackEnv) {
     mode: isEnvProduction ? "production" : isEnvDevelopment && "development",
     resolve: {
       alias: {
-        "@": paths.appSrc,
         "@common": paths.appCommon,
         "@renderer": paths.appRenderer,
+        // the migrator needs this. remove this when refactor `update-app` to main
+        "@main": paths.appMain
       },
       extensions: [".ts", ".tsx", ".js"],
       aliasFields: [],

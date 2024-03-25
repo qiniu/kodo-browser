@@ -69,6 +69,21 @@ export class DataStore<T> {
   }
 
   async init() {
+    // cleanup working directory
+    const frameMeta = await getFrameMeta(
+      path.join(this.workingDirectory, DB_META_FILE)
+    );
+    const keepFiles = [
+      frameMeta?.memTableWALPath,
+      frameMeta?.memTableReadonlyWALPath,
+      frameMeta?.diskTableFilePath,
+    ].filter(f => f);
+    const files = await fsPromises.readdir(this.workingDirectory);
+    const unlinkPromises = files.filter(f => !keepFiles.includes(f))
+      .map(f => fsPromises.unlink(f));
+    await Promise.all(unlinkPromises);
+
+    // initial data
     await Promise.all([
       this.memTable.init(),
       this.memTableReadonly?.init(),

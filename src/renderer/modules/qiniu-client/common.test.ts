@@ -49,6 +49,8 @@ describe("test qiniu-client/common.ts", () => {
                 accessSecret: ENV.QINIU_SECRET_KEY,
                 endpointType: EndpointType.Private,
             });
+            // await for preventing mock-fs not implements watch
+            await endpointConfig.loadFromPersistence();
             MockConfigFile.mockCustomizeConfigFile();
             await endpointConfig.loadFromPersistence();
             expect(QiniuClientCommon.clientBackendMode(opt)).toBe(S3_MODE);
@@ -86,6 +88,8 @@ describe("test qiniu-client/common.ts", () => {
                 accessSecret: ENV.QINIU_SECRET_KEY,
                 endpointType: EndpointType.Private,
             });
+            // await for preventing mock-fs not implements watch
+            await endpointConfig.loadFromPersistence();
             MockConfigFile.mockCustomizeConfigFile();
             await endpointConfig.loadFromPersistence();
             expect(QiniuClientCommon.getDefaultClient(opt).constructor).toBe(S3Adapter);

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Button, OverlayTrigger, Tooltip} from "react-bootstrap";
+import {Button, OverlayTrigger, Spinner, Tooltip} from "react-bootstrap";
 import {Placement} from "react-bootstrap/types";
 import {ButtonProps} from "react-bootstrap/Button";
 
@@ -10,6 +10,7 @@ interface TooltipButtonProps {
   tooltipPlacement?: Placement,
   tooltipContent: string,
   show?: boolean,
+  loading?: boolean,
 }
 
 const TooltipButton: React.FC<ButtonProps & TooltipButtonProps> = (props) => {
@@ -18,6 +19,7 @@ const TooltipButton: React.FC<ButtonProps & TooltipButtonProps> = (props) => {
     tooltipPlacement,
     tooltipContent,
     show,
+    loading = false,
     ...buttonProps
   } = props;
 
@@ -53,8 +55,16 @@ const TooltipButton: React.FC<ButtonProps & TooltipButtonProps> = (props) => {
         </Tooltip>
       }
     >
-      <Button variant="outline-solid-gray-300" {...buttonProps}>
-        <i className={iconClassName} />
+      <Button
+        variant="outline-solid-gray-300"
+        {...buttonProps}
+        disabled={buttonProps.disabled || loading}
+      >
+        {
+          loading
+            ? <Spinner animation="border"/>
+            : <i className={iconClassName}/>
+        }
       </Button>
     </OverlayTrigger>
   )

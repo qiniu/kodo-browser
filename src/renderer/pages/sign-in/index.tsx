@@ -4,9 +4,9 @@ import {Card, Col, Container, Row} from "react-bootstrap";
 
 // modules
 import {useI18n} from "@renderer/modules/i18n";
-import {privateEndpointPersistence} from "@renderer/modules/qiniu-client";
 import * as DefaultDict from "@renderer/modules/default-dict";
 import {EndpointType} from "@renderer/modules/auth";
+import {useEndpointConfig} from "@renderer/modules/user-config-store";
 
 // modals
 import {useDisplayModal} from "@renderer/components/modals/hooks";
@@ -20,6 +20,10 @@ import SignInForm, {SignInFormValues} from "./sign-in-form";
 const SignIn: React.FC = () => {
   // context states
   const {translate} = useI18n();
+
+  const {
+    endpointConfigState,
+  } = useEndpointConfig(null);
 
   // modal states
   const [
@@ -48,7 +52,6 @@ const SignIn: React.FC = () => {
     accessSecret: "",
     rememberMe: false,
   });
-  const [isValidPrivateEndpointSetting, setIsValidPrivateEndpointSetting] = useState(false);
   useEffect(() => {
     const endpointType = Object.values(EndpointType)
       .find(t => t === DefaultDict.get("LOGIN_ENDPOINT_TYPE"))
@@ -56,17 +59,7 @@ const SignIn: React.FC = () => {
       ...v,
       endpointType: endpointType ?? EndpointType.Public,
     }))
-    setIsValidPrivateEndpointSetting(
-      privateEndpointPersistence.validate()
-    );
   }, []);
-
-  // event handler
-  const handleSavedPrivateEndpointSetting = () => {
-    setIsValidPrivateEndpointSetting(
-      privateEndpointPersistence.validate()
-    );
-  };
 
   // render
   return (
@@ -79,7 +72,7 @@ const SignIn: React.FC = () => {
             <Card.Body>
               <SignInForm
                 defaultValues={formDefaultValues}
-                isInvalidPrivateEndpointSetting={!isValidPrivateEndpointSetting}
+                isInvalidPrivateEndpointSetting={!endpointConfigState.valid}
                 onClickPrivateEndpointSetting={handleClickPrivateEndpointSetting}
                 onClickAccessKeyHistory={handleClickAccessKeyHistory}
               />
@@ -92,7 +85,6 @@ const SignIn: React.FC = () => {
         show={isShowPrivateEndpointSetting}
         dialogClassName="modal-720p"
         onHide={handleHidePrivateEndpointSetting}
-        onSaved={handleSavedPrivateEndpointSetting}
       />
       <AkHistory
         show={isShowAccessKeyHistory}

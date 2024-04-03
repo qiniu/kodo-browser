@@ -1,106 +1,96 @@
-import React, {useEffect, useMemo} from "react";
+import React, {useCallback, useEffect, useMemo, useSyncExternalStore} from "react";
 import {Form, Modal, ModalProps} from "react-bootstrap";
-import {FormProvider, useForm} from "react-hook-form";
+import {FormProvider, SubmitHandler, useForm} from "react-hook-form";
 import {toast} from "react-hot-toast";
+import lodash from "lodash";
 
-import {LangName, useI18n} from "@renderer/modules/i18n";
-import Settings from "@renderer/modules/settings";
+import * as Logger from "@renderer/modules/local-logger";
+import {useI18n} from "@renderer/modules/i18n";
+import {appPreferences, AppPreferencesData} from "@renderer/modules/user-config-store";
 
-import {SettingsFormData} from "./types";
 import FieldsUpload from "./fields-upload";
 import FieldsDownload from "./fields-download";
 import FieldsExternalPath from "./fields-external-path";
 import FieldsOthers from "./fields-others";
 
 import "./settings.scss";
-
-const formKey2SettingsKey: Record<keyof SettingsFormData, keyof typeof Settings> = {
-  enabledResumeUpload: "resumeUpload",
-  multipartUploadThreshold: "multipartUploadThreshold",
-  multipartUploadPartSize: "multipartUploadSize",
-  maxUploadConcurrency: "maxUploadConcurrency",
-  enabledUploadSpeedLimit: "uploadSpeedLimitEnabled",
-  uploadSpeedLimit: "uploadSpeedLimitKbPerSec",
-
-  enabledResumeDownload: "resumeDownload",
-  multipartDownloadThreshold: "multipartDownloadThreshold",
-  multipartDownloadPartSize: "multipartDownloadSize",
-  maxDownloadConcurrency: "maxDownloadConcurrency",
-  enabledDownloadSpeedLimit: "downloadSpeedLimitEnabled",
-  downloadSpeedLimit: "downloadSpeedLimitKbPerSec",
-
-  enabledExternalPath: "externalPathEnabled",
-
-  enabledDebugLog: "isDebug",
-  enabledLoadFilesOnTouchEnd: "stepByStepLoadingFiles",
-  loadFilesNumberPerPage: "filesLoadingSize",
-  enabledAutoUpdateApp: "autoUpgrade",
-  language: "language",
-}
+import LoadingHolder from "@renderer/components/loading-holder";
 
 const SettingsModal: React.FC<ModalProps> = (modalProps) => {
   const {currentLanguage, translate, setLanguage} = useI18n();
 
-  const defaultValues: SettingsFormData = useMemo(() => ({
-    enabledResumeUpload: Boolean(Settings.resumeUpload),
-    multipartUploadThreshold: Settings.multipartUploadThreshold,
-    multipartUploadPartSize: Settings.multipartUploadSize,
-    maxUploadConcurrency: Settings.maxUploadConcurrency,
-    enabledUploadSpeedLimit: Boolean(Settings.uploadSpeedLimitEnabled),
-    uploadSpeedLimit: Settings.uploadSpeedLimitKbPerSec,
+  const {
+    state: appPreferencesState,
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
 
-    enabledResumeDownload: Boolean(Settings.resumeDownload),
-    multipartDownloadThreshold: Settings.multipartDownloadThreshold,
-    multipartDownloadPartSize: Settings.multipartDownloadSize,
-    maxDownloadConcurrency: Settings.maxDownloadConcurrency,
-    enabledDownloadSpeedLimit: Boolean(Settings.downloadSpeedLimitEnabled),
-    downloadSpeedLimit: Settings.downloadSpeedLimitKbPerSec,
+  const defaultValues: AppPreferencesData = useMemo(() => ({
+    ...appPreferencesData,
+  }), [appPreferencesState.initialized]);
 
-    enabledExternalPath: Boolean(Settings.externalPathEnabled),
-
-    enabledDebugLog: Boolean(Settings.isDebug),
-    enabledLoadFilesOnTouchEnd: Boolean(Settings.stepByStepLoadingFiles),
-    loadFilesNumberPerPage: Settings.filesLoadingSize,
-    enabledAutoUpdateApp: Boolean(Settings.autoUpgrade),
-    language: currentLanguage,
-  }), []);
-
-  const settingsFormController = useForm<SettingsFormData>({
+  const settingsFormController = useForm<AppPreferencesData>({
     mode: "onChange",
     shouldFocusError: false,
     defaultValues: defaultValues,
   });
 
+  const {
+    handleSubmit,
+    reset,
+    trigger,
+  } = settingsFormController;
+
   useEffect(() => {
-    settingsFormController.trigger();
-  }, [modalProps.show]);
-
-  const handleChangeForm = useMemo(() => {
-    const timers: Record<string, number> = {}
-    return (event: {target: any}) => {
-      const fieldName: keyof SettingsFormData = event.target.name;
-
-      clearTimeout(timers[fieldName]);
-
-      timers[fieldName] = setTimeout(() => {
-        if (settingsFormController.getFieldState(fieldName).error) {
-          return;
-        }
-        const fieldValue = settingsFormController.getValues(fieldName);
-        const settingKey = formKey2SettingsKey[fieldName];
-        // can't map field value to correct type of setting keys
-        // @ts-ignore
-        Settings[settingKey] = typeof fieldValue === "boolean"
-          ? fieldValue ? 1 : 0
-          : fieldValue;
-
-        if (fieldName === "language") {
-          setLanguage(fieldValue as LangName);
-        }
-        toast.success(translate("modals.settings.saved"));
-      }, 300) as unknown as number;
+    if (modalProps.show && appPreferencesState.initialized) {
+      reset({
+        ...appPreferencesData,
+      });
+      trigger();
     }
-  }, []);
+  }, [modalProps.show, appPreferencesState.initialized, appPreferencesState.changedPersistenceValue]);
+
+  const handleSaveSettings: SubmitHandler<AppPreferencesData> = async (data) => {
+    try {
+      if (data.language !== currentLanguage) {
+        await setLanguage(data.language);
+      }
+      Logger.setLevel(data.logLevel);
+      await appPreferences.setAll(data);
+      toast.success(translate("modals.settings.saved"));
+    } catch (err: any) {
+      toast.error(err.toString());
+    }
+  };
+
+  const handleSavaSettingsDebounced = useCallback(lodash.debounce(() => {
+    handleSubmit(handleSaveSettings)();
+  }, 300), [handleSubmit]);
+
+  // render
+  const renderForm = () => {
+    if (!appPreferencesState.initialized) {
+      return (
+        <LoadingHolder/>
+      );
+    }
+    return (
+      // Form Provider lost type infos
+      <FormProvider {...settingsFormController}>
+        <Form
+          className="settings-form scroll-max-vh-60"
+          onChange={handleSavaSettingsDebounced}
+        >
+          <FieldsUpload/>
+          <FieldsDownload/>
+          <FieldsExternalPath/>
+          <FieldsOthers/>
+        </Form>
+      </FormProvider>
+    );
+  };
 
   return (
     <Modal {...modalProps}>
@@ -111,18 +101,7 @@ const SettingsModal: React.FC<ModalProps> = (modalProps) => {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {/* Form Provider lost type infos */}
-        <FormProvider {...settingsFormController}>
-          <Form
-            className="settings-form scroll-max-vh-60"
-            onChange={handleChangeForm}
-          >
-            <FieldsUpload/>
-            <FieldsDownload/>
-            <FieldsExternalPath/>
-            <FieldsOthers/>
-          </Form>
-        </FormProvider>
+        {renderForm()}
       </Modal.Body>
     </Modal>
   );

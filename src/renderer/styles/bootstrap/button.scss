@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 @mixin button-lite-variant(
   $color,
 ) {
@@ -11,6 +13,25 @@
   --#{$prefix}btn-active-bg: none;
   --#{$prefix}btn-active-border-color: none;
   --#{$prefix}btn-active-shadow: #{$btn-active-box-shadow};
+  --#{$prefix}btn-disabled-color: #{$color};
+  --#{$prefix}btn-disabled-bg: none;
+  --#{$prefix}btn-disabled-border-color: none;
+  --#{$prefix}gradient: none;
+}
+
+@mixin button-link-variant(
+  $color,
+) {
+  --#{$prefix}btn-color: #{$color};
+  --#{$prefix}btn-border-color: none;
+  --#{$prefix}btn-hover-color: #{$color};
+  --#{$prefix}btn-hover-bg: none;
+  --#{$prefix}btn-hover-border-color: none;
+  --#{$prefix}btn-focus-shadow-rgb: none;
+  --#{$prefix}btn-active-color: #{color.scale($color, $lightness: -30%)};
+  --#{$prefix}btn-active-bg: none;
+  --#{$prefix}btn-active-border-color: none;
+  --#{$prefix}btn-active-shadow: none;
   --#{$prefix}btn-disabled-color: #{$color};
   --#{$prefix}btn-disabled-bg: none;
   --#{$prefix}btn-disabled-border-color: none;
@@ -45,6 +66,14 @@
       } @else if $color == "dark" {
       } @else {
         @include button-lite-variant($value);
+        text-decoration-line: underline;
+      }
+    }
+
+    &.btn-link-#{$color} {
+      @include button-link-variant($value);
+      padding: 0;
+      &:hover, &:focus {
         text-decoration-line: underline;
       }
     }

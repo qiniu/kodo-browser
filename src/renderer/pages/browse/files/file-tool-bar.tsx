@@ -1,4 +1,5 @@
 import {dialog as electronDialog} from "@electron/remote";
+import OpenDialogOptions = Electron.OpenDialogOptions;
 
 import React, {useCallback, useEffect, useState} from "react";
 import {Button, ButtonGroup, Dropdown, DropdownButton, Form, InputGroup} from "react-bootstrap";
@@ -9,13 +10,13 @@ import lodash from "lodash";
 import StorageClass from "@common/models/storage-class";
 
 import {translate} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {FileItem} from "@renderer/modules/qiniu-client";
 import {FilesOperationType, useFileOperation} from "@renderer/modules/file-operation";
-import {ContentViewStyle} from "@renderer/modules/settings";
-import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
+import {ContentViewStyle} from "@renderer/modules/user-config-store";
+import {DomainAdapter} from "@renderer/modules/qiniu-client-hooks";
 
 import TooltipButton from "@renderer/components/tooltip-button";
+import DomainNameSelect from "@renderer/components/forms/generate-link-form/domain-name-select";
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import {OperationDoneRecallFn} from "@renderer/components/modals/file/types";
 import CreateDirectoryFile from "@renderer/components/modals/file/create-directory-file";
@@ -26,7 +27,8 @@ import MoveFiles from "@renderer/components/modals/file/move-files";
 import RestoreFiles from "@renderer/components/modals/file/restore-files";
 import ChangeFilesStorageClass from "@renderer/components/modals/file/change-files-storage-class";
 import GenerateFileLinks from "@renderer/components/modals/file/generate-file-links";
-import OpenDialogOptions = Electron.OpenDialogOptions;
+
+import SelectPrefix from "./select-prefix";
 
 const MAX_FILE_LIST_SIZE = 9999;
 // check if an Electron app is running on macOS
@@ -42,6 +44,8 @@ interface FileToolBarProps {
   listedFileNumber: number,
   hasMoreFiles: boolean,
   selectedFiles: FileItem.Item[],
+  couldShowSelectPrefix: boolean,
+  onSelectPrefix: (prefix: FileItem.Prefix[], checked: boolean) => void,
 
   loadingDomains: boolean,
   domains: DomainAdapter[],
@@ -75,6 +79,8 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     listedFileNumber,
     hasMoreFiles,
     selectedFiles,
+    couldShowSelectPrefix,
+    onSelectPrefix,
 
     loadingDomains,
     domains,
@@ -97,8 +103,6 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     onMovedFiles,
     onChangedFilesStorageClass
   } = props;
-
-  const {currentUser} = useAuth();
 
   // file operation state
   const {bucketGrantedPermission, fileOperation, setFileOperation} = useFileOperation();
@@ -164,11 +168,6 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
       return;
     }
     onUploadFiles(filePaths);
-  }
-
-  // domain state
-  const handleChangeDomain = (domainName: string) => {
-    onChangeDomain(domains.find(d => d.name === domainName));
   }
 
   // search state
@@ -322,7 +321,11 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
             </Button>
             <Button
               variant="outline-solid-gray-300"
-              disabled={selectedFiles.length !== 1 || bucketGrantedPermission === "readonly"}
+              disabled={
+                selectedFiles.length !== 1 ||
+                selectedFiles.some(FileItem.isItemPrefix) ||
+                bucketGrantedPermission === "readonly"
+              }
               onClick={handleShowRenameFile}
             >
               <i className="bi bi-pencil me-1"/>
@@ -392,7 +395,12 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
                   onClick={handleClickPaste}
                 >
                   <i className="bi bi-clipboard2-check me-1"/>
-                  {translate("common.paste")}({fileOperation.files.length})
+                  <span>{translate("common.paste")}</span>
+                  {
+                    fileOperation.files.some(FileItem.isItemPrefix)
+                      ? null
+                      : <span>({fileOperation.files.length})</span>
+                  }
                 </Button>
                 <Button
                   className="p-1"
@@ -409,27 +417,13 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
           {
             !domains.length
               ? null
-              : <InputGroup
-                className=""
-                hidden={currentUser?.endpointType === EndpointType.Private}
-              >
-                <Form.Select
+              : <InputGroup>
+                <DomainNameSelect
                   size="sm"
-                  value={selectedDomain?.name ?? NON_OWNED_DOMAIN.name}
-                  onChange={e => handleChangeDomain(e.target.value)}
-                >
-                  {
-                    domains.map(domain => (
-                      <option key={domain.name} value={domain.name}>
-                        {
-                          domain.name === NON_OWNED_DOMAIN.name
-                            ? translate("browse.fileToolbar.domain.nonOwnedDomain")
-                            : domain.name
-                        }
-                      </option>
-                    ))
-                  }
-                </Form.Select>
+                  name="selectedDomain"
+                  onChange={onChangeDomain}
+                  options={domains}
+                />
                 <TooltipButton
                   size="sm"
                   iconClassName={classNames(
@@ -484,6 +478,14 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
       </div>
 
       {
+        couldShowSelectPrefix &&
+        <SelectPrefix
+          selectedFiles={selectedFiles}
+          onSelectPrefixes={onSelectPrefix}
+        />
+      }
+
+      {
         regionId === undefined || bucketName === undefined || basePath === undefined || availableStorageClasses === undefined
           ? null
           : <>
@@ -502,7 +504,12 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
               storageClasses={Object.values(availableStorageClasses)}
               bucketName={bucketName}
               basePath={basePath}
-              fileItem={selectedFiles[0]}
+              fileItem={
+                selectedFiles.find<FileItem.File | FileItem.Folder>(
+                  (i): i is FileItem.File | FileItem.Folder =>
+                    FileItem.isItemType<FileItem.File | FileItem.Folder>(i, [FileItem.ItemType.File, FileItem.ItemType.Directory])
+                )
+              }
               onRenamedFile={onRenamedFile}
             />
             <DeleteFiles
@@ -580,5 +587,6 @@ const FileToolBar: React.FC<FileToolBarProps> = (props) => {
     </>
   )
 };
+
 
 export default FileToolBar;

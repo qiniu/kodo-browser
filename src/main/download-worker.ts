@@ -19,7 +19,6 @@ downloadManagerConfig.onJobDone = handleJobDone;
 const downloadManager = new DownloadManager(downloadManagerConfig);
 
 process.on("uncaughtException", (err) => {
-    downloadManager.persistJobs(true);
     console.error("download worker: uncaughtException", err);
 });
 
@@ -72,7 +71,6 @@ process.on("message", (message: DownloadMessage) => {
                 message.data.downloadOptions,
                 {
                     jobsAdding: () => {
-                        downloadManager.persistJobs();
                     },
                     jobsAdded: () => {
                         const replyMessage: AddedJobsReplyMessage = {
@@ -114,7 +112,6 @@ process.on("message", (message: DownloadMessage) => {
         }
         case DownloadAction.RemoveJob: {
             downloadManager.removeJob(message.data.jobId);
-            downloadManager.persistJobs();
             break;
         }
         case DownloadAction.CleanupJobs: {
@@ -139,7 +136,6 @@ process.on("message", (message: DownloadMessage) => {
         }
         case DownloadAction.RemoveAllJobs: {
             downloadManager.removeAllJobs();
-            downloadManager.persistJobs(true);
             break;
         }
         default: {
@@ -164,7 +160,6 @@ function handleExit() {
         const timer = setInterval(() => {
             if (!downloadManager.running) {
                 clearInterval(timer);
-                downloadManager.persistJobs(true);
                 resolve();
             }
         }, 100);
@@ -196,6 +191,5 @@ function handleJobDone(jobId: string, job?: DownloadJob) {
             }
         };
         process.send?.(jobCompletedReplyMessage);
-        downloadManager.persistJobs();
     }
 }

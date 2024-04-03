@@ -82,6 +82,7 @@ export interface AddedJobsReplyMessage {
     action: UploadAction.AddedJobs,
     data: {
         filePathnameList: string[],
+        erroredFilePathnameList: string[],
         destInfo: DestInfo,
     },
 }

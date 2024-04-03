@@ -1,18 +1,65 @@
-import React from "react";
+import React, {ChangeEventHandler, FocusEventHandler} from "react";
 import {Col, Form, Row} from "react-bootstrap";
+import {useController, useFormContext} from "react-hook-form";
 
 import {LangName, useI18n} from "@renderer/modules/i18n";
-import {useFormContext} from "react-hook-form";
+import {AppPreferencesData} from "@renderer/modules/user-config-store";
+import {LogLevel} from "@renderer/modules/local-logger";
+
+import {FormSwitchProps} from "@renderer/components/forms/types";
+
+const _SwitchLogLevel: React.ForwardRefRenderFunction<unknown, FormSwitchProps<LogLevel>> = ({
+  name,
+  value,
+  label,
+  onChange,
+  onBlur,
+  isInvalid,
+  required,
+  disabled,
+}, ref) => {
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    const value = event.target.checked;
+    onChange?.(value ? LogLevel.Debug : LogLevel.Error);
+  }
+
+  const handleBlur: FocusEventHandler<HTMLInputElement> = (event) => {
+    const value = event.target.checked;
+    onBlur?.(value ? LogLevel.Debug : LogLevel.Error);
+  }
+
+  return (
+    <Form.Switch
+      ref={ref}
+      name={name}
+      checked={value === LogLevel.Debug}
+      label={label}
+      required={required}
+      disabled={disabled}
+      isInvalid={isInvalid}
+      onChange={handleChange}
+      onBlur={handleBlur}
+    />
+  );
+}
+
+const SwitchLogLevel = React.forwardRef(_SwitchLogLevel);
 
 const FieldsExternalPath: React.FC = () => {
   const {translate} = useI18n();
   const {
+    control,
     register,
     watch,
     formState: {
       errors,
     },
-  } = useFormContext();
+  } = useFormContext<AppPreferencesData>();
+
+  const {field} = useController({
+    control,
+    name: "logLevel",
+  });
 
   return (
     <fieldset>
@@ -22,8 +69,8 @@ const FieldsExternalPath: React.FC = () => {
           {translate("modals.settings.others.form.isDebug.label")}
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
-          <Form.Switch
-            {...register("enabledDebugLog")}
+          <SwitchLogLevel
+            {...field}
             label={translate("modals.settings.others.form.isDebug.hint")}
           />
         </Col>
@@ -35,7 +82,7 @@ const FieldsExternalPath: React.FC = () => {
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
           <Form.Switch
-            {...register("enabledLoadFilesOnTouchEnd")}
+            {...register("filesItemLazyLoadEnabled")}
             label={translate("modals.settings.others.form.enabledLoadFilesOnTouchEnd.hint")}
           />
         </Col>
@@ -47,10 +94,10 @@ const FieldsExternalPath: React.FC = () => {
         </Form.Label>
         <Col sm={6}>
           <Form.Control
-            {...register("loadFilesNumberPerPage", {
+            {...register("filesItemLoadSize", {
               valueAsNumber: true,
               required: true,
-              disabled: !watch("enabledLoadFilesOnTouchEnd"),
+              disabled: !watch("filesItemLazyLoadEnabled"),
               /*
                * The min can't be 1,
                *   because when list a subdirectory, list API will return the subdirectory itself first.
@@ -63,11 +110,11 @@ const FieldsExternalPath: React.FC = () => {
               max: 1000,
             })}
             type="number"
-            isInvalid={Boolean(errors.loadFilesNumberPerPage)}
+            isInvalid={Boolean(errors.filesItemLoadSize)}
           />
           <Form.Text
             className={
-              Boolean(errors.loadFilesNumberPerPage)
+              Boolean(errors.filesItemLoadSize)
                 ? "text-danger"
                 : ""
             }
@@ -83,7 +130,7 @@ const FieldsExternalPath: React.FC = () => {
         </Form.Label>
         <Col sm={6} className="d-flex align-items-center">
           <Form.Switch
-            {...register("enabledAutoUpdateApp")}
+            {...register("autoUpdateAppEnabled")}
             label={translate("modals.settings.others.form.autoUpgrade.hint")}
           />
         </Col>

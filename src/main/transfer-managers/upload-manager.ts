@@ -1,7 +1,6 @@
 import path from "path";
-import fs, {Stats, promises as fsPromises} from "fs";
+import {Dir, Stats, promises as fsPromises} from "fs";
 
-import lodash from "lodash";
 // @ts-ignore
 import Walk from "@root/walk";
 import {Adapter} from "kodo-s3-adapter-sdk/dist/adapter";
@@ -9,7 +8,6 @@ import {Adapter} from "kodo-s3-adapter-sdk/dist/adapter";
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
 import {DestInfo, UploadOptions} from "@common/ipc-actions/upload";
 import UploadJob from "@common/models/job/upload-job";
-import {Status} from "@common/models/job/types";
 
 import {MAX_MULTIPART_COUNT, MIN_MULTIPART_SIZE} from "./boundary-const";
 import TransferManager, {TransferManagerConfig} from "./transfer-manager";
@@ -21,7 +19,8 @@ interface StatsWithName extends Stats {
 }
 
 interface Config {
-    isSkipEmptyDirectory: boolean;
+    multipartConcurrency: number,
+    isSkipEmptyDirectory: boolean,
 
     onCreatedDirectory?: (bucket: string, directoryKey: string) => void,
 }
@@ -40,9 +39,10 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
         uploadOptions: UploadOptions,
         hooks?: {
             jobsAdding?: () => void,
-            jobsAdded?: () => void,
+            jobsAdded?: (succeed: string[], failed: string[]) => void,
         },
     ) {
+        const abortSignal = this.addingAbortController.signal;
         const qiniuClient = createQiniuClient(
             clientOptions,
             {
@@ -54,19 +54,31 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             withFileStats: true,
         });
 
+        // true means all sub items added
+        // false means some sub item(s) not added
+        const walkResult: Record<string, boolean> = {};
+
         for (const filePathname of filePathnameList) {
+            if (abortSignal.aborted) {
+                return;
+            }
             const directoryToCreate = new Map<string, boolean>();
             // remoteBaseDirectory maybe "", means upload to bucket root
-            // meybe "/", means upload to "bucket//"
+            // maybe "/", means upload to "bucket//"
             const remoteBaseDirectory = destInfo.key;
             const localBaseDirectory = path.dirname(filePathname);
 
             await walk(
                 filePathname,
-                async (err: Error, walkingPathname: string, statsWithName: StatsWithName): Promise<void> => {
+                async (err: Error, walkingPathname: string, statsWithName: StatsWithName): Promise<void | boolean> => {
                     if (err) {
-                        this.config.onError?.(err);
-                        return;
+                        walkResult[filePathname] = false;
+                        // this return will stop walking current dir.
+                        return false;
+                    }
+
+                    if (abortSignal.aborted) {
+                        return false;
                     }
 
                     let relativePathname = path.relative(localBaseDirectory, walkingPathname);
@@ -88,11 +100,17 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                         const remoteDirectoryKey = remoteKey + path.posix.sep;
                         let shouldCreateDirectory = false;
                         if (this.config.isSkipEmptyDirectory) {
-                            const dir = await fsPromises.opendir(walkingPathname);
-                            if (await dir.read() !== null) {
-                                shouldCreateDirectory = true;
+                            let dir: Dir | undefined;
+                            try {
+                                dir = await fsPromises.opendir(walkingPathname);
+                                if (await dir.read() !== null) {
+                                    shouldCreateDirectory = true;
+                                }
+                            } catch {
+                                // operation maybe not permitted, the error will be handled by above.
+                            } finally {
+                                dir?.close();
                             }
-                            dir.close();
                         } else if (!directoryToCreate.get(remoteDirectoryKey)) {
                             shouldCreateDirectory = true;
                         }
@@ -116,7 +134,7 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                             name: statsWithName.name,
                             path: walkingPathname,
                             size: statsWithName.size,
-                            mtime: statsWithName.mtime.getTime(),
+                            mtime: Math.floor(statsWithName.mtimeMs),
                         };
                         const to = {
                             bucket: destInfo.bucketName,
@@ -132,8 +150,19 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
                     }
                 },
             );
+
+            if (walkResult[filePathname] === undefined) {
+                walkResult[filePathname] = true;
+            }
         }
-        hooks?.jobsAdded?.();
+
+        const [walkSucceed, walkFailed] = Object.entries(walkResult)
+            .reduce((res, [pathname, succeed]) => {
+                const [s, f] = res;
+                succeed ? s.push(pathname) : f.push(pathname);
+                return res;
+            }, [[] as string[], [] as string[]]);
+        hooks?.jobsAdded?.(walkSucceed, walkFailed);
     }
 
     /**
@@ -202,6 +231,9 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             }
         }
 
+        // part concurrency
+        const partConcurrency = this.config.multipartConcurrency;
+
         const job = new UploadJob({
             from: from,
             to: to,
@@ -220,125 +252,114 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
 
             multipartUploadThreshold: this.config.multipartThreshold,
             multipartUploadSize: partSize,
+            multipartUploadConcurrency: partConcurrency,
             uploadSpeedLimit: this.config.speedLimit,
             isDebug: this.config.isDebug,
 
             userNatureLanguage: uploadOptions.userNatureLanguage,
 
             onStatusChange: (status, prev) => {
-                this.handleJobStatusChange(status, prev);
-            },
-            onProgress: () => {
-                this.persistJobs();
+                this.handleJobStatusChange(job.id, status, prev);
             },
             onPartCompleted: () => {
-                this.persistJobs();
-            },
-            onCompleted: () => {
-                this.persistJobs();
+                this.persistJob(job.id, job.persistInfo);
             },
         });
 
         this.addJob(job);
     }
 
-    public persistJobs(force: boolean = false): void {
-        if (force) {
-            this._persistJobs();
-            return;
-        }
-        this._persistJobsThrottle();
-    }
-
-    public loadJobsFromStorage(
+    async loadJobsFromStorage(
         clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
         uploadOptions: Pick<UploadOptions, "userNatureLanguage">,
-    ): void {
-        if (!this.config.persistPath) {
+    ): Promise<void> {
+        const abortSignal = this.addingAbortController.signal;
+        const persistStore = await this.getPersistStore();
+        if (!persistStore) {
             return;
         }
-        const persistedJobs: Record<string, UploadJob["persistInfo"]> =
-            JSON.parse(fs.readFileSync(this.config.persistPath, "utf-8"));
-        Object.entries(persistedJobs)
-            .forEach(([jobId, persistedJob]) => {
-                if (this.jobs.get(jobId)) {
-                    return;
-                }
+        for await (const [jobId, persistedJob] of persistStore.iter()) {
+            if (abortSignal.aborted) {
+                return;
+            }
 
-                if (!persistedJob.from) {
-                    this.config.onError?.(new Error("load jobs from storage error: lost job.from"));
-                    return;
-                }
+            if (!persistedJob || this.jobs.has(jobId)) {
+                return;
+            }
 
-                if (!fs.existsSync(persistedJob.from.path)) {
-                    this.config.onError?.(new Error(`load jobs from storage error: local file not found\nfile path: ${persistedJob.from.path}`));
-                    return;
-                }
-
-                // TODO: Is the `if` useless? Why `size` or `mtime` doesn't exist?
-                if (!persistedJob.from?.size || !persistedJob.from?.mtime) {
-                    persistedJob.prog.loaded = 0;
-                    persistedJob.uploadedParts = [];
-                }
-
-                // some old version will persist an object message, cause type error
-                if (typeof persistedJob.message !== "string") {
-                  persistedJob.message = JSON.stringify(persistedJob.message);
-                }
-
-
-                const fileStat = fs.statSync(persistedJob.from.path);
-                if (
-                    fileStat.size !== persistedJob.from.size ||
-                    Math.floor(fileStat.mtimeMs) !== persistedJob.from.mtime
-                ) {
-                    persistedJob.from.size = fileStat.size;
-                    persistedJob.from.mtime = Math.floor(fileStat.mtimeMs);
-                    persistedJob.prog.loaded = 0;
-                    persistedJob.prog.total = fileStat.size;
-                    persistedJob.uploadedParts = [];
-                }
-
-                // resumable
-                persistedJob.prog.resumable = this.config.resumable && persistedJob.from.size > this.config.multipartThreshold;
-
-                const job = UploadJob.fromPersistInfo(
-                    jobId,
-                    persistedJob,
-                    {
-                        ...clientOptions,
-                        backendMode: persistedJob.backendMode,
-                    },
-                    {
-                        uploadSpeedLimit: this.config.speedLimit,
-                        isDebug: this.config.isDebug,
-                        userNatureLanguage: uploadOptions.userNatureLanguage,
-                    },
-                    {
-                        onStatusChange: (status, prev) => {
-                            this.handleJobStatusChange(status, prev);
-                        },
-                        onProgress: () => {
-                            this.persistJobs();
-                        },
-                        onPartCompleted: () => {
-                            this.persistJobs();
-                        },
-                        onCompleted: () => {
-                            this.persistJobs();
-                        },
-                    },
-                );
-
-                if ([Status.Waiting, Status.Running].includes(job.status)) {
-                    job.stop();
-                }
-
-                this.addJob(job);
-            });
+            await this.loadJob(
+                jobId,
+                persistedJob,
+                clientOptions,
+                uploadOptions,
+            );
+        }
     }
 
-    private _persistJobsThrottle = lodash.throttle(this._persistJobs, 1000);
+    private async loadJob(
+        jobId: string,
+        persistedJob: UploadJob["persistInfo"],
+        clientOptions: Pick<ClientOptions, "accessKey" | "secretKey" | "ucUrl" | "regions">,
+        uploadOptions: Pick<UploadOptions, "userNatureLanguage">,
+    ): Promise<void> {
+        if (!persistedJob.from) {
+            this.config.onError?.(new Error("load jobs from storage error: lost job.from"));
+            return;
+        }
+
+        try {
+            await fsPromises.access(persistedJob.from.path)
+        } catch {
+            this.config.onError?.(new Error(`load jobs from storage error: local file not found\nfile path: ${persistedJob.from.path}`));
+            return
+        }
+
+        // TODO: Is the `if` useless? Why `size` or `mtime` doesn't exist?
+        if (!persistedJob.from?.size || !persistedJob.from?.mtime) {
+            persistedJob.prog.loaded = 0;
+            persistedJob.uploadedParts = [];
+        }
+
+        const fileStat = await fsPromises.stat(persistedJob.from.path);
+        if (
+            fileStat.size !== persistedJob.from.size ||
+            Math.floor(fileStat.mtimeMs) !== persistedJob.from.mtime
+        ) {
+            persistedJob.from.size = fileStat.size;
+            persistedJob.from.mtime = Math.floor(fileStat.mtimeMs);
+            persistedJob.prog.loaded = 0;
+            persistedJob.prog.total = fileStat.size;
+            persistedJob.uploadedParts = [];
+        }
+
+        // resumable
+        persistedJob.prog.resumable = this.config.resumable && persistedJob.from.size > this.config.multipartThreshold;
+
+        const job = UploadJob.fromPersistInfo(
+            jobId,
+            persistedJob,
+            {
+                ...clientOptions,
+                backendMode: persistedJob.backendMode,
+            },
+            {
+                multipartConcurrency: this.config.multipartConcurrency,
+                uploadSpeedLimit: this.config.speedLimit,
+                isDebug: this.config.isDebug,
+                userNatureLanguage: uploadOptions.userNatureLanguage,
+            },
+            {
+                onStatusChange: (status, prev) => {
+                    this.handleJobStatusChange(job.id, status, prev);
+                },
+                onPartCompleted: () => {
+                    this.persistJob(job.id, job.persistInfo);
+                },
+            },
+        );
+
+        this._addJob(job);
+    }
 
     private afterCreateDirectory({
         bucket,

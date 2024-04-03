@@ -1,4 +1,6 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import path from "path";
+
+import React, {useCallback, useEffect, useState, useSyncExternalStore} from "react";
 import {Badge, CloseButton, Tab, Tabs} from "react-bootstrap";
 import {toast} from "react-hot-toast";
 import lodash from "lodash";
@@ -7,13 +9,12 @@ import {config_path} from "@common/const/app-config";
 import ByteSize from "@common/const/byte-size";
 import {CreatedDirectoryReplyMessage, JobCompletedReplyMessage} from "@common/ipc-actions/upload";
 
-import {LocalFile} from "@renderer/modules/persistence";
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
-import Settings from "@renderer/modules/settings";
-import {privateEndpointPersistence} from "@renderer/modules/qiniu-client";
+import {LogLevel} from "@renderer/modules/local-logger";
+import {useAuth} from "@renderer/modules/auth";
+import {appPreferences, useEndpointConfig} from "@renderer/modules/user-config-store";
 
-import {JOB_NUMS_PER_QUERY, LAPSE_PER_QUERY} from "./const";
+import {JOB_NUMS_PER_QUERY, QUERY_INTERVAL} from "./const";
 import useIpcUpload from "./use-ipc-upload";
 import UploadPanel from "./upload-panel";
 import useIpcDownload from "./use-ipc-download";
@@ -40,64 +41,52 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
   const [openPanelName, setOpenPanelName] = useState<PanelName>();
 
   const {currentUser} = useAuth();
-  const customizedEndpoint = useMemo(() => {
-    return currentUser?.endpointType === EndpointType.Public
-      ? {
-        ucUrl: "",
-        regions: [],
-      }
-      : privateEndpointPersistence.read()
-  }, [currentUser?.endpointType]);
 
-  // get default settings. use memo to prevent read localStorage every render.
-  const defaultSettings = useMemo(() => ({
-    isDebug: Boolean(Settings.isDebug),
+  const {
+    endpointConfigData,
+  } = useEndpointConfig(currentUser);
 
-    enabledResumeUpload: Boolean(Settings.resumeUpload),
-    multipartUploadThreshold: Settings.multipartUploadThreshold,
-    multipartUploadPartSize: Settings.multipartUploadSize,
-    maxUploadConcurrency: Settings.maxUploadConcurrency,
-    enabledUploadSpeedLimit: Boolean(Settings.uploadSpeedLimitEnabled),
-    uploadSpeedLimit: Settings.uploadSpeedLimitKbPerSec,
-    skipEmptyDirectoryUpload: Settings.skipEmptyDirectoryUpload,
-
-    enabledResumeDownload: Boolean(Settings.resumeDownload),
-    multipartDownloadThreshold: Settings.multipartDownloadThreshold,
-    multipartDownloadPartSize: Settings.multipartDownloadSize,
-    maxDownloadConcurrency: Settings.maxDownloadConcurrency,
-    enabledDownloadSpeedLimit: Boolean(Settings.downloadSpeedLimitEnabled),
-    downloadSpeedLimit: Settings.downloadSpeedLimitKbPerSec,
-    overwriteDownload: Settings.overwriteDownload,
-  }), []);
+  const {
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
 
   // upload state
   const {
     jobState: uploadJobState,
-    setSearchText: setUploadSearchText,
+    setJobsQuery: setUploadJobsQuery,
     setQueryCount: setUploadQueryCount,
   } = useIpcUpload({
-    endpoint: customizedEndpoint,
+    endpoint: endpointConfigData,
     user: currentUser,
     config: {
-      resumable: defaultSettings.enabledResumeUpload,
-      maxConcurrency: defaultSettings.maxUploadConcurrency,
-      multipartSize: defaultSettings.multipartUploadPartSize * ByteSize.MB,
-      multipartThreshold: defaultSettings.multipartUploadThreshold * ByteSize.MB,
-      speedLimit: defaultSettings.enabledUploadSpeedLimit
-        ? defaultSettings.uploadSpeedLimit * ByteSize.KB
+      resumable: appPreferencesData.resumeUploadEnabled,
+      maxConcurrency: appPreferencesData.maxUploadConcurrency,
+      multipartSize: appPreferencesData.multipartUploadPartSize * ByteSize.MB,
+      multipartConcurrency: appPreferencesData.multipartUploadConcurrency,
+      multipartThreshold: appPreferencesData.multipartUploadThreshold * ByteSize.MB,
+      speedLimit: appPreferencesData.uploadSpeedLimitEnabled
+        ? appPreferencesData.uploadSpeedLimitKbPerSec * ByteSize.KB
         : 0,
-      isDebug: defaultSettings.isDebug,
-      isSkipEmptyDirectory: defaultSettings.skipEmptyDirectoryUpload,
-      persistPath: LocalFile.getFilePath(
+      isDebug: appPreferencesData.logLevel === LogLevel.Debug,
+      isSkipEmptyDirectory: appPreferencesData.skipEmptyDirectoryUpload,
+      persistPath: path.resolve(
         config_path,
-        `upprog_${currentUser?.accessKey ?? "kodo-browser"}.json`
+        `profile_${currentUser?.accessKey ?? "kodo-browser"}`,
+        "upload_prog",
       ),
       // userNatureLanguage needs mid-dash but i18n using lo_dash
       // @ts-ignore
       userNatureLanguage: currentLanguage.replace("_", "-"),
     },
-    onAddedJobs: () => {
-      toast.success(translate("transfer.upload.hint.addedJobs"));
+    onAddedJobs: ({erroredFilePathnameList}) => {
+      if (erroredFilePathnameList.length) {
+        toast.error(translate("transfer.upload.hint.addedJobsErrored"));
+      } else {
+        toast.success(translate("transfer.upload.hint.addedJobs"));
+      }
       setOpenPanelName(PanelName.Upload);
     },
     onJobCompleted: ({jobUiData}) => onUploadJobComplete(jobUiData),
@@ -108,29 +97,30 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
 
   const handleLoadMoreUploadJobs = useCallback(lodash.debounce(() => {
     setUploadQueryCount(v => v + JOB_NUMS_PER_QUERY);
-  }, LAPSE_PER_QUERY, {leading: true, trailing: false}), []);
+  }, QUERY_INTERVAL, {leading: true, trailing: false}), []);
 
   // download state
   const {
     jobState: downloadJobState,
-    setSearchText: setDownloadSearchText,
+    setJobsQuery: setDownloadJobsQuery,
     setQueryCount: setDownloadQueryCount,
   } = useIpcDownload({
-    endpoint: customizedEndpoint,
+    endpoint: endpointConfigData,
     user: currentUser,
     config: {
-      resumable: defaultSettings.enabledResumeDownload,
-      maxConcurrency: defaultSettings.maxDownloadConcurrency,
-      multipartSize: defaultSettings.multipartDownloadPartSize * ByteSize.MB,
-      multipartThreshold: defaultSettings.multipartDownloadThreshold * ByteSize.MB,
-      speedLimit: defaultSettings.enabledDownloadSpeedLimit
-        ? defaultSettings.downloadSpeedLimit * ByteSize.KB
+      resumable: appPreferencesData.resumeDownloadEnabled,
+      maxConcurrency: appPreferencesData.maxDownloadConcurrency,
+      multipartSize: appPreferencesData.multipartDownloadPartSize * ByteSize.MB,
+      multipartThreshold: appPreferencesData.multipartDownloadThreshold * ByteSize.MB,
+      speedLimit: appPreferencesData.downloadSpeedLimitEnabled
+        ? appPreferencesData.downloadSpeedLimitKbPerSec * ByteSize.KB
         : 0,
-      isDebug: defaultSettings.isDebug,
-      isOverwrite: defaultSettings.overwriteDownload,
-      persistPath: LocalFile.getFilePath(
+      isDebug: appPreferencesData.logLevel === LogLevel.Debug,
+      isOverwrite: appPreferencesData.overwriteDownloadEnabled,
+      persistPath: path.resolve(
         config_path,
-        `downprog_${currentUser?.accessKey ?? "kodo-browser"}.json`
+        `profile_${currentUser?.accessKey ?? "kodo-browser"}`,
+        "download_prog",
       ),
       // userNatureLanguage needs mid-dash but i18n using lo_dash
       // @ts-ignore
@@ -148,7 +138,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
 
   const handleLoadMoreDownloadJobs = useCallback(lodash.debounce(() => {
     setDownloadQueryCount(v => v + JOB_NUMS_PER_QUERY);
-  }, LAPSE_PER_QUERY, {leading: true, trailing: false}), []);
+  }, QUERY_INTERVAL, {leading: true, trailing: false}), []);
 
   // reset ipc jobs number for save performance
   useEffect(() => {
@@ -210,7 +200,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
               data={uploadJobState.list}
               hasMore={uploadJobState.hasMore}
               onLoadMore={handleLoadMoreUploadJobs}
-              onChangeSearchText={setUploadSearchText}
+              onChangeSearchQuery={setUploadJobsQuery}
             />
           }
         </Tab>
@@ -232,7 +222,7 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
               data={downloadJobState.list}
               hasMore={downloadJobState.hasMore}
               onLoadMore={handleLoadMoreDownloadJobs}
-              onChangeSearchText={setDownloadSearchText}
+              onChangeSearchQuery={setDownloadJobsQuery}
             />
           }
         </Tab>

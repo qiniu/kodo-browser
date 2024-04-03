@@ -12,6 +12,8 @@ import { Kodo as KodoAdapter } from "kodo-s3-adapter-sdk/dist/kodo";
 import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3";
 import { KODO_MODE, S3_MODE } from "kodo-s3-adapter-sdk";
 
+import {EndpointType} from "@renderer/modules/auth";
+import {getEndpointConfig} from "@renderer/modules/user-config-store";
 import * as QiniuClientCommon from "./common";
 
 describe("test qiniu-client/common.ts", () => {
@@ -31,7 +33,7 @@ describe("test qiniu-client/common.ts", () => {
             opt.preferKodoAdapter = true;
             expect(QiniuClientCommon.clientBackendMode(opt)).toBe(KODO_MODE);
         });
-        it("should s3", () => {
+        it("should s3", async () => {
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
@@ -42,7 +44,15 @@ describe("test qiniu-client/common.ts", () => {
             opt.preferS3Adapter = true;
             expect(QiniuClientCommon.clientBackendMode(opt)).toBe(S3_MODE);
             opt.isPublicCloud = false;
+            const endpointConfig = getEndpointConfig({
+                accessKey: ENV.QINIU_ACCESS_KEY,
+                accessSecret: ENV.QINIU_SECRET_KEY,
+                endpointType: EndpointType.Private,
+            });
+            // await for preventing mock-fs not implements watch
+            await endpointConfig.loadFromPersistence();
             MockConfigFile.mockCustomizeConfigFile();
+            await endpointConfig.loadFromPersistence();
             expect(QiniuClientCommon.clientBackendMode(opt)).toBe(S3_MODE);
             delete opt.preferS3Adapter;
             expect(QiniuClientCommon.clientBackendMode(opt)).toBe(S3_MODE);
@@ -62,7 +72,7 @@ describe("test qiniu-client/common.ts", () => {
             expect(QiniuClientCommon.getDefaultClient(opt).constructor).toBe(KodoAdapter);
         });
 
-        it("should s3 adapter", () => {
+        it("should s3 adapter", async () => {
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
@@ -73,7 +83,15 @@ describe("test qiniu-client/common.ts", () => {
             opt.preferS3Adapter = true;
             expect(QiniuClientCommon.getDefaultClient(opt).constructor).toBe(S3Adapter);
             opt.isPublicCloud = false;
+            const endpointConfig = getEndpointConfig({
+                accessKey: ENV.QINIU_ACCESS_KEY,
+                accessSecret: ENV.QINIU_SECRET_KEY,
+                endpointType: EndpointType.Private,
+            });
+            // await for preventing mock-fs not implements watch
+            await endpointConfig.loadFromPersistence();
             MockConfigFile.mockCustomizeConfigFile();
+            await endpointConfig.loadFromPersistence();
             expect(QiniuClientCommon.getDefaultClient(opt).constructor).toBe(S3Adapter);
             delete opt.preferS3Adapter;
             expect(QiniuClientCommon.getDefaultClient(opt).constructor).toBe(S3Adapter);

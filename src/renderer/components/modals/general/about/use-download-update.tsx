@@ -1,65 +1,113 @@
 // this file cached download state to keep job can run background.
 import {downloadLatestVersion, fetchUpdate} from "@renderer/modules/update-app";
-import {BatchProgressState, BatchTaskStatus} from "@renderer/components/batch-progress";
+import {useSyncExternalStore} from "react";
 
 let downloadPromise: ReturnType<typeof downloadLatestVersion> | undefined;
-let handleDownloadProgress: ((loaded: number, total: number) => boolean) | undefined;
-let cachedError: Error | undefined;
-let cachedProgressState: BatchProgressState | undefined;
-let cachedFilePath: string | undefined;
+
+export enum ProgressStatus {
+  Standby = "standby",
+  Running = "running",
+  Paused = "paused",
+  Success = "success",
+  Failed = "Failed",
+}
+
+interface DownloadUpdateStoreData {
+  progress?: {
+    loaded: number,
+    total: number,
+  },
+  status: ProgressStatus,
+  error?: Error,
+  filePath?: string,
+}
+
+const DEFAULT_DOWNLOAD_UPDATE_STORE_DATA: DownloadUpdateStoreData = {
+  progress: undefined,
+  status: ProgressStatus.Standby,
+  error: undefined,
+  filePath: undefined,
+}
+
+const updateDownloaderStore = {
+  data: {
+    ...DEFAULT_DOWNLOAD_UPDATE_STORE_DATA,
+  },
+  listeners: new Set<() => void>(),
+  subscribe(l: () => void) {
+    updateDownloaderStore.listeners.add(l);
+    return () => updateDownloaderStore.listeners.delete(l);
+  },
+  getSnapshot() {
+    return updateDownloaderStore.data;
+  },
+  dispatch(data: Partial<DownloadUpdateStoreData>) {
+    updateDownloaderStore.data = {
+      ...updateDownloaderStore.data,
+      ...data,
+    };
+    updateDownloaderStore.listeners.forEach(l => l());
+  }
+};
+
+const handleDownloadProgress = (loaded: number, total: number): boolean => {
+  updateDownloaderStore.dispatch({
+    progress: {
+      total,
+      loaded,
+    },
+  });
+  return updateDownloaderStore.data.status === ProgressStatus.Running;
+};
+
+const startDownload = (toDirectory?: string) => {
+  if (downloadPromise) {
+    return downloadPromise;
+  }
+  updateDownloaderStore.dispatch({
+    ...DEFAULT_DOWNLOAD_UPDATE_STORE_DATA,
+    status: ProgressStatus.Running,
+  });
+  downloadPromise = downloadLatestVersion({
+    toDirectory,
+    onProgress: handleDownloadProgress,
+  });
+  downloadPromise
+    .then(filePath => {
+      updateDownloaderStore.dispatch({
+        filePath,
+        status: ProgressStatus.Success,
+      });
+    })
+    .catch(err => {
+      updateDownloaderStore.dispatch({
+        error: err,
+        status: ProgressStatus.Failed,
+      });
+    })
+    .finally(() => {
+      downloadPromise = undefined;
+    });
+  return downloadPromise;
+};
+
+const pauseDownload = () => {
+  updateDownloaderStore.dispatch({
+    status: ProgressStatus.Paused,
+  });
+}
 
 const useDownloadUpdate = () => {
-  const _downloadLatestVersion: typeof downloadLatestVersion = ({
-    toDirectory,
-    onProgress,
-  }) => {
-    handleDownloadProgress = onProgress;
-    if (downloadPromise) {
-      return downloadPromise;
-    }
-    cachedFilePath = undefined;
-    downloadPromise = downloadLatestVersion({
-      toDirectory,
-      onProgress: (...args) => handleDownloadProgress?.(...args) ?? true,
-    });
-    downloadPromise
-      .then(filePath => cachedFilePath = filePath)
-      .catch(err => {
-        cachedError = err;
-        if (cachedProgressState) {
-          cachedProgressState.errored = cachedProgressState.finished;
-          cachedProgressState.finished = 0;
-        }
-      })
-      .finally(() => {
-        if (cachedProgressState) {
-          cachedProgressState.status = BatchTaskStatus.Ended;
-        }
-        downloadPromise = undefined;
-        handleDownloadProgress = undefined;
-      });
-    return downloadPromise;
-  };
-
-  const background = (progressState: BatchProgressState, error?: Error) => {
-    cachedProgressState = progressState;
-    cachedError = error;
-    handleDownloadProgress = (loaded, total) => {
-      if (cachedProgressState) {
-        cachedProgressState.finished = loaded;
-        cachedProgressState.total = total;
-      }
-      return true;
-    };
-  };
+  const downloadUpdateState = useSyncExternalStore(
+    updateDownloaderStore.subscribe,
+    updateDownloaderStore.getSnapshot,
+  );
 
   return {
-    cachedError,
-    cachedFilePath,
-    cachedProgressState,
+    state: downloadUpdateState,
     fetchUpdate,
-    downloadLatestVersion: _downloadLatestVersion,
-    background,
+    startDownload,
+    pauseDownload,
   };
 };
 

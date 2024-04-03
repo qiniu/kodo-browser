@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useState, useSyncExternalStore} from "react";
 import {Button, Form} from "react-bootstrap";
 import classNames from "classnames";
 import AutoResizer from "react-virtualized-auto-sizer";
@@ -8,8 +8,8 @@ import {Status} from "@common/models/job/types";
 import DownloadJob from "@common/models/job/download-job";
 
 import {translate} from "@renderer/modules/i18n";
+import {appPreferences} from "@renderer/modules/user-config-store";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
-import Settings from "@renderer/modules/settings";
 
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import ConfirmModal from "@renderer/components/modals/common/confirm-modal";
@@ -60,7 +60,7 @@ interface DownloadPanelProps {
   data: (DownloadJob["uiData"] | undefined)[],
   hasMore: boolean,
   onLoadMore: () => void,
-  onChangeSearchText: (searchText: string) => void,
+  onChangeSearchQuery: (query: {status?: Status, name?: string}) => void,
 }
 
 const DownloadPanel: React.FC<DownloadPanelProps> = ({
@@ -69,8 +69,16 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
   data,
   hasMore,
   onLoadMore,
-  onChangeSearchText,
+  onChangeSearchQuery,
 }) => {
+  const {
+    state: appPreferencesState,
+    data: appPreferencesData,
+  } = useSyncExternalStore(
+    appPreferences.store.subscribe,
+    appPreferences.store.getSnapshot,
+  );
+
   const [
     {
       show: isShowRemoveAllConfirmModal
@@ -81,35 +89,62 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
     },
   ] = useDisplayModal();
 
-  const defaultIsOverwriteDownload = useMemo(() => {
-    return Settings.overwriteDownload;
-  }, []);
-  const [isOverwriteDownload, setIsOverwriteDownload] = useState<boolean>(defaultIsOverwriteDownload);
+  const isOverwriteDownload = appPreferencesData.overwriteDownloadEnabled;
   const handleToggleIsOverwriteDownload = () => {
-    Settings.overwriteDownload = !isOverwriteDownload;
-    setIsOverwriteDownload(!isOverwriteDownload);
+    appPreferences.set("overwriteDownloadEnabled", !isOverwriteDownload);
   };
 
-  // search state
-  const [searchText, setSearchText] = useState<string>("");
-  useEffect(
-    () => onChangeSearchText(searchText),
-    [searchText]
-  );
+  // handle search change
+  const [searchQuery, setSearchQuery] = useState<{status?: Status, name?: string}>({});
+  useEffect(() => {
+    onChangeSearchQuery(searchQuery);
+  }, [searchQuery]);
+  const handleChangeSearchStatus = (statusText?: string) => {
+    const status = statusText && (Object.values(Status) as string[]).includes(statusText)
+      ? statusText as Status
+      : undefined;
+    setSearchQuery(q => ({
+      ...q,
+      status,
+    }));
+  };
+  const handleChangeSearchName = (name: string) => {
+    setSearchQuery(q => ({
+      ...q,
+      name,
+    }));
+  };
 
   // render
   return (
     <>
       <div className="transfer-panel-content">
         <div className="d-flex justify-content-between p-1 border-bottom">
-          <Form.Control
-            className="w-50"
-            size="sm"
-            type="text"
-            placeholder={translate("transfer.download.toolbar.search.holder")}
-            value={searchText}
-            onChange={e => setSearchText(e.target.value)}
-          />
+          <div className="d-flex">
+            <Form.Select
+              className="me-1"
+              style={{
+                width: "6.5rem",
+              }}
+              size="sm"
+              value={searchQuery.status}
+              onChange={e => handleChangeSearchStatus(e.target.value)}
+            >
+              <option value="all">{translate("common.all")}</option>
+              <option value={Status.Waiting}>{translate("transfer.jobItem.status.waiting")}</option>
+              <option value={Status.Running}>{translate("transfer.jobItem.status.running")}</option>
+              <option value={Status.Stopped}>{translate("transfer.jobItem.status.stopped")}</option>
+              <option value={Status.Finished}>{translate("transfer.jobItem.status.finished")}</option>
+              <option value={Status.Failed}>{translate("transfer.jobItem.status.failed")}</option>
+            </Form.Select>
+            <Form.Control
+              size="sm"
+              type="text"
+              placeholder={translate("transfer.upload.toolbar.search.holder")}
+              value={searchQuery.name}
+              onChange={e => handleChangeSearchName(e.target.value)}
+            />
+          </div>
           <div className="d-flex align-items-center justify-content-center">
             {
               stopped > 0 &&
@@ -117,7 +152,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
                 size="sm"
                 variant="icon-warning"
                 className="ms-1"
-                onClick={() => setSearchText(Status.Stopped)}
+                onClick={() => handleChangeSearchStatus(Status.Stopped)}
               >
                 <i className="bi bi-info-circle-fill me-1"/>{stopped}
               </Button>
@@ -128,7 +163,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
                 size="sm"
                 variant="icon-danger"
                 className="ms-1"
-                onClick={() => setSearchText(Status.Failed)}
+                onClick={() => handleChangeSearchStatus(Status.Failed)}
               >
                 <i className="bi bi-x-circle-fill me-1"/>{failed}
               </Button>
@@ -141,6 +176,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({
                 "bi bi-file-earmark-arrow-down-fill",
                 isOverwriteDownload ? "" : "text-muted"
               )}
+              loading={!appPreferencesState.initialized}
               tooltipPlacement="top"
               tooltipContent={translate("transfer.download.toolbar.overwriteSwitch")}
               variant={isOverwriteDownload ? "primary" : "outline-solid-gray-300"}

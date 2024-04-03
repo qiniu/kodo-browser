@@ -1664,6 +1664,11 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.11.tgz#d421b6c527a3037f7c84433fd2c4229e016863d3"
   integrity sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==
 
+"@types/lockfile@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@types/lockfile/-/lockfile-1.0.4.tgz#9d6a6d1b6dbd4853cecc7f334bc53ea0ff363b8e"
+  integrity sha512-Q8oFIHJHr+htLrTXN2FuZfg+WXVHQRwU/hC2GpUu+Q8e3FUM9EDkS2pE3R2AO1ZGu56f479ybdMCNF1DAu8cAQ==
+
 "@types/lodash@^4.14.182":
   version "4.14.182"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.182.tgz#05301a4d5e62963227eaafe0ce04dd77c54ea5c2"
@@ -7359,10 +7364,10 @@ klona@^2.0.4, klona@^2.0.5:
   resolved "https://registry.yarnpkg.com/klona/-/klona-2.0.5.tgz#d166574d90076395d9963aa7a928fabb8d76afbc"
   integrity sha512-pJiBpiXMbt7dkzXe8Ghj/u4FfXOOa98fPW+bihOJ4SjnoijweJrNThJfd3ifXpXhREjpoF2mZVH1GfS9LV3kHQ==
 
-kodo-s3-adapter-sdk@0.4.2:
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.4.2.tgz#d160ff82d825689a211c078a57c73e0e70b84c29"
-  integrity sha512-aOwZBTfd0pSRJa1iqLoLET9ZpCA+qQ6o8icmAywidyakajse0vTdofg4EnfW/nc/en35KsLZmKeFIMljZDiJ5w==
+kodo-s3-adapter-sdk@0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.5.0.tgz#2530a5b5e4f1b81b1e31ddcbbf88fd045c312967"
+  integrity sha512-qMacO1vu/Jmg4mKRdu/MAf/ZyCXiR9Ph/hBWBkRtbLUMUbaBbU4iFj2UFG0GeC2pVdGOeCpqFicCLfFJ2NzfjA==
   dependencies:
     agentkeepalive "^4.2.1"
     async-lock "^1.2.4"
@@ -7678,7 +7683,7 @@ lock-verify@^2.0.2, lock-verify@^2.1.0:
 
 lockfile@^1.0.4:
   version "1.0.4"
-  resolved "https://registry.npmjs.org/lockfile/-/lockfile-1.0.4.tgz#07f819d25ae48f87e538e6578b6964a4981a5609"
+  resolved "https://registry.yarnpkg.com/lockfile/-/lockfile-1.0.4.tgz#07f819d25ae48f87e538e6578b6964a4981a5609"
   integrity sha512-cvbTwETRfsFh4nHsL1eGWapU1XFi5Ot9E85sWAwia7Y7EgB7vfqcZhTKZ+l7hCGxSPoushMv5GKhT5PdLv03WA==
   dependencies:
     signal-exit "^3.0.2"

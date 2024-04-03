@@ -5,6 +5,7 @@ export default interface Dictionary {
     empty: string,
     ok: string,
     cancel: string,
+    all: string,
     close: string,
     save: string,
     saving: string,
@@ -42,6 +43,7 @@ export default interface Dictionary {
     exportLinks: string,
     restore: string,
     changeStorageClass: string,
+    unknownStorageClass: string,
     clickToRetry: string,
   },
 
@@ -165,6 +167,11 @@ export default interface Dictionary {
         nonOwnedDomain: string,
         refreshTooltip: string,
       },
+      selectPrefix: {
+        select: string,
+        selected: string,
+        clear: string,
+      },
     },
     fileTable: {
       fileName: string,
@@ -217,6 +224,7 @@ export default interface Dictionary {
       hint: {
         addingJobs: string,
         addedJobs: string,
+        addedJobsErrored: string,
       },
       error: {
         nothing: string,
@@ -280,6 +288,10 @@ export default interface Dictionary {
     generateLink: {
       fileName: {
         label: string,
+      },
+      domainType: {
+        cdn: string,
+        origin: string
       },
       domainName: {
         label: string,
@@ -393,6 +405,10 @@ export default interface Dictionary {
             hint: string,
           },
           multipartUploadPartSize: {
+            label: string,
+            hint: string,
+          },
+          multipartUploadConcurrency: {
             label: string,
             hint: string,
           },
@@ -611,12 +627,14 @@ export default interface Dictionary {
     deleteFiles: {
       title: string,
       description: string,
+      prefixDescription: string,
     },
 
     copyFiles: {
       title: string,
       hintFiltered: string,
       description: string,
+      prefixDescription: string,
       form: {
         fileName: {
           label: string,
@@ -633,6 +651,7 @@ export default interface Dictionary {
       title: string,
       hintFiltered: string,
       description: string,
+      prefixDescription: string,
       form: {
         fileName: {
           label: string,
@@ -648,6 +667,7 @@ export default interface Dictionary {
     changeFilesStorageClass: {
       title: string,
       description: string,
+      prefixDescription: string,
     },
 
     changeFileStorageClass: {
@@ -657,6 +677,7 @@ export default interface Dictionary {
     restoreFiles: {
       title: string,
       description: string,
+      prefixDescription: string,
     },
 
     restoreFile: {
@@ -666,6 +687,7 @@ export default interface Dictionary {
     generateFileLinks: {
       title: string,
       description: string,
+      prefixDescription: string,
       hintFiltered: string,
       csvFile: {
         label: string,

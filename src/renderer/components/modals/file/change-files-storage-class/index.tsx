@@ -26,6 +26,7 @@ import {
 import {ChangeStorageClassForm, ChangeStorageClassFormData} from "@renderer/components/forms";
 
 import {OperationDoneRecallFn} from "../types";
+import FileList from "../common/file-list";
 
 interface ChangeFilesStorageClassProps {
   regionId: string,
@@ -190,23 +191,20 @@ const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProp
               {translate("common.noObjectSelected")}
             </div>
             : <>
-              <div className="text-danger">
-                {translate("modals.changeFilesStorageClass.description")}
-              </div>
-              <ul className="scroll-max-vh-40">
-                {
-                  memoFileItems.map(fileItem => (
-                    <li key={fileItem.path.toString()}>
-                      {
-                        FileItem.isItemFolder(fileItem)
-                          ? <i className="bi bi-folder-fill text-yellow"/>
-                          : <i className="bi bi-file-earmark"/>
-                      }
-                      <span className="ms-1 text-break-all">{fileItem.name}</span>
-                    </li>
-                  ))
+              <FileList
+                className="scroll-max-vh-40"
+                data={memoFileItems}
+                prefixDescription={
+                  <div className="text-danger">
+                    {translate("modals.changeFilesStorageClass.prefixDescription")}
+                  </div>
                 }
-              </ul>
+                description={
+                  <div>
+                    {translate("modals.changeFilesStorageClass.description")}
+                  </div>
+                }
+              />
               <ChangeStorageClassForm
                 formController={changeStorageClassFormController}
                 storageClasses={memoStorageClasses}

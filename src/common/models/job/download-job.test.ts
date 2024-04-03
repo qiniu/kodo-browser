@@ -16,6 +16,10 @@ describe("test models/job/download-job.ts", () => {
     const MockedDownloader = mocked(Downloader, true);
 
     describe("test DownloadJob methods", () => {
+        beforeAll(() => {
+            console.log('calling this to prevent mock-fs cause jest console error');
+        });
+
         beforeEach(() => {
             mockFs({
                 "/path/to/dir": {

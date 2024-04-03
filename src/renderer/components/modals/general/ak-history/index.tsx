@@ -1,5 +1,5 @@
-import React from "react";
-import {Button, Modal, ModalProps, Table} from "react-bootstrap";
+import React, {useState} from "react";
+import {Button, Modal, ModalProps, Spinner, Table} from "react-bootstrap";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {AkItem, useAuth} from "@renderer/modules/auth";
@@ -15,6 +15,16 @@ interface AkHistoryProps {
 const AkHistory: React.FC<ModalProps & AkHistoryProps> = (props) => {
   const {translate} = useI18n();
   const {akHistory, currentUser, deleteHistory, clearHistory} = useAuth();
+
+  const [clearing, setClearing] = useState(false);
+  const handleClear = async () => {
+    if (clearing) {
+      return;
+    }
+    setClearing(true);
+    await clearHistory();
+    setClearing(false);
+  };
 
   const {
     onActiveAk,
@@ -34,8 +44,13 @@ const AkHistory: React.FC<ModalProps & AkHistoryProps> = (props) => {
           className="mb-1"
           variant="danger"
           size="sm"
-          onClick={clearHistory}
+          disabled={clearing}
+          onClick={handleClear}
         >
+          {
+            clearing &&
+            <Spinner className="me-1" animation="border" size="sm"/>
+          }
           {translate("modals.akHistory.removeAllButton")}
         </Button>
         <div className="scroll-max-vh-60 scroll-shadow position-relative">

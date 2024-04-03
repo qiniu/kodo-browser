@@ -1,7 +1,9 @@
 import lodash from "lodash";
 
+import {PropsPath} from "@common/utility-types";
+
 import * as LocalLogger from "@renderer/modules/local-logger";
-import {PropsPath} from "./types";
+
 import Dictionary from "./lang/dict";
 import zhCN from "./lang/zh-cn";
 

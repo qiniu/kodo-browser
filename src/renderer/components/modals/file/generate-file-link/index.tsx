@@ -67,7 +67,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
     user: currentUser,
     regionId: memoRegionId,
     bucketName: memoBucketName,
-    canS3Domain: memoCanS3Domain,
+    canDefaultS3Domain: memoCanS3Domain,
     preferBackendMode,
   });
 
@@ -88,7 +88,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
   });
 
   // generate file link result
-  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> = (data) => {
+  const handleSubmitGenerateFileLink: SubmitHandler<GenerateLinkFormData> = useCallback(data => {
     if (!memoFileItem || !currentUser) {
       return;
     }
@@ -100,7 +100,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter:
         preferBackendMode === BackendMode.S3 ||
-        data.domain?.backendMode === BackendMode.S3,
+        data.domain?.apiScope === BackendMode.S3,
     };
 
     const domain = data.domain?.name === NON_OWNED_DOMAIN.name
@@ -118,7 +118,7 @@ const GenerateFileLink: React.FC<ModalProps & GenerateFileLinkProps> = ({
       .then(fileUrl => {
         setFileLink(fileUrl.toString());
       });
-  };
+  }, [currentUser, memoFileItem, memoRegionId, memoBucketName, setFileLink]);
   const generateFileLinkDebounced = useCallback(lodash.debounce(() => {
     handleSubmit(handleSubmitGenerateFileLink)();
   }, 500), [handleSubmit, handleSubmitGenerateFileLink]);

@@ -56,7 +56,7 @@ const SignInShareForm: React.FC<SignInShareFormProps> = ({
       isSubmitting,
     },
   } = useForm<SignInShareFormData>({
-    mode: "onBlur",
+    mode: "onSubmit",
     defaultValues,
   });
   useEffect(() => {

@@ -57,7 +57,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
       isSubmitting,
     },
   } = useForm<SignInFormValues>({
-    mode: "onBlur",
+    mode: "onSubmit",
     defaultValues: defaultValues,
   });
 

@@ -8,9 +8,9 @@ interface DisplayModalState<T> {
 }
 
 interface DisplayModalFns<T> {
-  showModal: T extends undefined ? () => void : (data: T) => void,
-  hideModal: T extends undefined ? () => void : (data: T) => void,
-  toggleModal: T extends undefined ? () => void : (data: T) => void,
+  showModal: (...data: T extends undefined ? [] : [T]) => void,
+  hideModal: (...data: T extends undefined ? [] : [T]) => void,
+  toggleModal: (...data: T extends undefined ? [] : [T]) => void,
 }
 
 function useDisplayModal<T>(initialData: T): [DisplayModalState<T>, DisplayModalFns<T>]

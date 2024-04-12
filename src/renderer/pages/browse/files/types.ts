@@ -4,6 +4,7 @@ export enum OperationName {
   Restore = "restore",
   Download = "download",
   GenerateLink = "generateLink",
+  ShareDir = "shareDir",
   ChangeStorageClass = "changeStorageClass",
   Delete = "delete",
 }

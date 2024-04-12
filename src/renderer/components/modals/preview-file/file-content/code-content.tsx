@@ -6,7 +6,7 @@ import {MergeView} from "codemirror/addon/merge/merge";
 import {BackendMode} from "@common/qiniu"
 
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {getContent, saveContent} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
 import {DiffView, EditorView} from "@renderer/modules/codemirror";
@@ -73,7 +73,7 @@ const CodeContent: React.FC<CodeContentProps> = ({
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferS3Adapter: domain.apiScope === BackendMode.S3,
     };
     getContent(
@@ -112,7 +112,7 @@ const CodeContent: React.FC<CodeContentProps> = ({
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferS3Adapter: domain.apiScope === BackendMode.S3,
       preferKodoAdapter: domain.apiScope === BackendMode.Kodo,
     };

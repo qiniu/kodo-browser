@@ -14,8 +14,17 @@ import { UplogBuffer } from "kodo-s3-adapter-sdk/dist/uplog";
 
 import {UploadAction, UploadReplyMessage} from "@common/ipc-actions/upload";
 import {DownloadAction, DownloadReplyMessage} from "@common/ipc-actions/download";
+import {DeepLinkAction} from "@common/ipc-actions/deep-link";
 
+import {deepLinkRegister} from "./deep-links";
+
+//singleton
+const singleInstanceLock = app.requestSingleInstanceLock();
+if (!singleInstanceLock) {
+  app.quit();
+}
 electronRemote.initialize();
+deepLinkRegister.initialize();
 
 ///*****************************************
 const root = path.dirname(__dirname);
@@ -42,23 +51,20 @@ case "win32":
   break;
 }
 
-//singleton
-app.requestSingleInstanceLock();
 // Someone tried to run a second instance, we should focus our window.
 app.on('second-instance', (_evt, _argv, _cwd) => {
   if (win) {
     if (win.isMinimized()) {
       win.restore();
     }
-
     win.focus();
-
-    app.quit();
   }
 });
-app.releaseSingleInstanceLock();
 
 let createWindow = () => {
+  if (!singleInstanceLock) {
+    return;
+  }
   let opt = {
     width: 1280,
     height: 800,
@@ -251,6 +257,9 @@ ipcMain.on("UploaderManager", (event, message) => {
         {
           cwd: root,
           silent: false,
+          execArgv: [
+            "--inspect=9222"
+          ]
         },
     );
     forkedWorkers.set(processName, uploaderProcess);
@@ -288,6 +297,9 @@ ipcMain.on("DownloaderManager", (event, message) => {
         {
           cwd: root,
           silent: false,
+          execArgv: [
+            "--inspect=9223"
+          ]
         },
     );
     forkedWorkers.set(processName, downloaderProcess);
@@ -334,6 +346,19 @@ ipcMain.on("asynchronous", (_event, data) => {
   }
 });
 
+const DEEP_LINK_IPC_CHANNEL = "DeepLink";
+
+ipcMain.on(DEEP_LINK_IPC_CHANNEL, (event, data) => {
+  switch (data.action) {
+    case DeepLinkAction.RendererReady:
+      deepLinkRegister.enable(event.sender, DEEP_LINK_IPC_CHANNEL);
+      break;
+    case DeepLinkAction.RendererClose:
+      deepLinkRegister.disable();
+      break;
+  }
+})
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -364,6 +389,10 @@ app.on("window-all-closed", () => {
   app.quit();
   //}
 });
+
+process.on("exit", () => {
+  app.releaseSingleInstanceLock();
+})
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

@@ -36,3 +36,7 @@ export declare type PathValue<T, P extends PropsPath<T>> = T extends any
         : never
   : never;
 
+
+export declare type OptionalProps<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export declare type RequireProps<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;

@@ -8,7 +8,7 @@ import {BackendMode} from "@common/qiniu";
 
 import {FileRename} from "@renderer/const/patterns";
 import {Translate, useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {
   moveOrCopyFiles,
   FileItem,
@@ -157,7 +157,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
@@ -177,7 +177,7 @@ const CopyFiles: React.FC<ModalProps & CopyFilesProps> = (props) => {
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       storageClasses: memoStorageClasses,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,

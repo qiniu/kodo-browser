@@ -7,7 +7,7 @@ import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
 import {BackendMode} from "@common/qiniu";
 
 import {DirectoryName} from "@renderer/const/patterns";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {useI18n} from "@renderer/modules/i18n";
 import {createFolder} from "@renderer/modules/qiniu-client";
 import {useFileOperation} from "@renderer/modules/file-operation";
@@ -77,7 +77,7 @@ const CreateDirectoryFile: React.FC<ModalProps & CreateDirectoryFileProps> = (pr
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,
     }

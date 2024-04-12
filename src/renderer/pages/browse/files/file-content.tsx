@@ -8,9 +8,11 @@ import {useKodoNavigator} from "@renderer/modules/kodo-address";
 import {ContentViewStyle} from "@renderer/modules/user-config-store";
 import {FileItem} from "@renderer/modules/qiniu-client";
 import {DomainAdapter} from "@renderer/modules/qiniu-client-hooks";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import {OperationDoneRecallFn} from "@renderer/components/modals/file/types";
+import CreateDirShareLink from "@renderer/components/modals/file/create-dir-share-link";
 import GenerateFileLink from "@renderer/components/modals/file/generate-file-link";
 import RestoreFile from "@renderer/components/modals/file/restore-file";
 import ChangeFileStorageClass from "@renderer/components/modals/file/change-file-storage-class";
@@ -20,7 +22,6 @@ import PreviewFile from "@renderer/components/modals/preview-file";
 import {OperationName} from "./types";
 import FileTable from "./file-table";
 import FileGrid from "./file-grid";
-import {useFileOperation} from "@renderer/modules/file-operation";
 
 interface FileContentProps {
   viewStyle: ContentViewStyle,
@@ -64,6 +65,21 @@ const FileContent: React.FC<FileContentProps> = ({
   const {bucketGrantedPermission} = useFileOperation();
 
   // modal states
+  const [
+    {
+      show: isShowShareDir,
+      data: {
+        fileItem: fileItemForShareDir,
+      },
+    },
+    {
+      showModal: handleClickShareDir,
+      hideModal: handleHideShareDir,
+    },
+  ] = useDisplayModal<{ fileItem: FileItem.Folder | null }>({
+    fileItem: null
+  });
+
   const [
     {
       show: isShowGenerateFileLink,
@@ -154,6 +170,10 @@ const FileContent: React.FC<FileContentProps> = ({
       case OperationName.Download:
         onDownloadFile(file);
         break;
+      case OperationName.ShareDir:
+        // TODO: should we toast error when no s3 domain available?
+        FileItem.isItemFolder(file) && handleClickShareDir({fileItem: file});
+        break;
       case OperationName.GenerateLink:
         if (!selectDomain) {
           toast.error(translate("common.noDomainToGet"));
@@ -242,6 +262,12 @@ const FileContent: React.FC<FileContentProps> = ({
               regionId={regionId}
               bucketName={bucketName}
               fileItem={fileItemForRestore}
+            />
+            <CreateDirShareLink
+              show={isShowShareDir}
+              onHide={() => handleHideShareDir({fileItem: null})}
+              bucketName={bucketName}
+              fileItem={fileItemForShareDir}
             />
             <GenerateFileLink
               show={isShowGenerateFileLink}

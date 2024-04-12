@@ -12,7 +12,7 @@ import {
   UpdateUiDataMessage,
 } from "@common/ipc-actions/download";
 
-import {AkItem} from "@renderer/modules/auth";
+import {AkItem, ShareSession} from "@renderer/modules/auth";
 import {Endpoint} from "@renderer/modules/qiniu-client";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 
@@ -45,6 +45,7 @@ type JobsQuery = UpdateUiDataMessage['data']['query'];
 interface UseIpcDownloadProps {
   endpoint: Endpoint,
   user: AkItem | null,
+  shareSession: ShareSession | null,
   config: DownloadConfig,
 
   initQueryCount?: number,
@@ -56,6 +57,7 @@ interface UseIpcDownloadProps {
 const useIpcDownload = ({
   endpoint,
   user,
+  shareSession,
   config,
 
   initQueryCount = JOB_NUMS_PER_QUERY,
@@ -125,6 +127,12 @@ const useIpcDownload = ({
       clientOptions: {
         accessKey: user.accessKey,
         secretKey: user.accessSecret,
+        sessionToken: shareSession?.sessionToken,
+        bucketNameId: shareSession
+          ? {
+            [shareSession.bucketName]: shareSession.bucketId,
+          }
+          : undefined,
         ucUrl: endpoint.ucUrl,
         regions: endpoint.regions.map(r => ({
           id: "",

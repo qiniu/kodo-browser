@@ -7,7 +7,7 @@ import {BackendMode} from "@common/qiniu"
 
 import {signatureUrl} from "@renderer/modules/qiniu-client";
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
 
 import LoadingHolder from "@renderer/components/loading-holder";
@@ -39,7 +39,7 @@ const PictureContent: React.FC<PictureContentProps> = ({
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferS3Adapter: domain.apiScope === BackendMode.S3,
     };
     signatureUrl(

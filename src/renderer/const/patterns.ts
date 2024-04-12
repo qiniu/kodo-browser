@@ -1,3 +1,5 @@
+export const Alphanumeric = /[A-Za-z0-9]/;
+
 export const Email = /^\w+([-.]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
 /*

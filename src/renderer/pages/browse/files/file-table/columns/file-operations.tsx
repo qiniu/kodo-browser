@@ -7,6 +7,7 @@ import {useFileOperation} from "@renderer/modules/file-operation";
 import TooltipButton from "@renderer/components/tooltip-button";
 
 import {OperationName, RowCellDataProps} from "../../types";
+import {EndpointType, useAuth} from "@renderer/modules/auth";
 
 export interface FileOperationsCellCallbackProps {
   onAction: (action: OperationName, file: FileItem.Item) => void,
@@ -21,10 +22,12 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellCallbackProp
   onAction,
 }) => {
   const {translate} = useI18n();
+  const {currentUser} = useAuth();
   const {bucketGrantedPermission} = useFileOperation();
 
   const isFile = FileItem.isItemFile(file);
   const canRestore = isFile && ["Archive", "DeepArchive"].includes(file.storageClass);
+
 
   return (
     <>
@@ -56,6 +59,23 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellCallbackProp
           onAction(OperationName.Download, file);
         }}
       />
+      {
+        isFile ||
+        !currentUser ||
+        currentUser.endpointType !== EndpointType.Public
+          ? null
+          : <TooltipButton
+            iconClassName="bi bi-share"
+            tooltipPlacement="top"
+            tooltipContent={translate("common.share")}
+            variant="icon-dark"
+            className="me-1"
+            onClick={e => {
+              e.stopPropagation();
+              onAction(OperationName.ShareDir, file);
+            }}
+          />
+      }
       {
         !isFile
           ? null

@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {AkItem, EndpointType} from "@renderer/modules/auth";
+import {AkItem} from "@renderer/modules/auth";
 import {BucketItem, listAllBuckets} from "@renderer/modules/qiniu-client";
 
 interface LoadBucketsState {
@@ -27,7 +27,7 @@ export default function useLoadBuckets({
     const opt = {
       id: user.accessKey,
       secret: user.accessSecret,
-      isPublicCloud: user.endpointType === EndpointType.Public,
+      endpointType: user.endpointType,
     };
 
     setLoadBucketsState(s => ({

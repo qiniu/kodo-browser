@@ -17,7 +17,7 @@ interface AuthHistory {
 class AuthInfoSerializer extends serializer.JSONSerializer<AuthInfo> {
   serialize(value: AuthInfo): string {
     const oldFormat = {
-      isPublicCloud: value.endpointType === EndpointType.Public,
+      endpointType: value.endpointType,
       id: value.accessKey,
       secret: value.accessSecret,
       description: value.description,

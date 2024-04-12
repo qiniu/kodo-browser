@@ -3,11 +3,11 @@ import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 import {Kodo as KodoAdapter} from "kodo-s3-adapter-sdk/dist/kodo"
 import {S3 as S3Adapter} from "kodo-s3-adapter-sdk/dist/s3"
 import {RegionService} from "kodo-s3-adapter-sdk/dist/region_service";
-
+import {ShareService} from "kodo-s3-adapter-sdk/dist/share-service";
 
 import * as AppConfig from "@common/const/app-config";
 import * as LocalLogger from "@renderer/modules/local-logger";
-import {EndpointType} from "@renderer/modules/auth";
+import {EndpointType, getShareSession} from "@renderer/modules/auth";
 import {appPreferences, getEndpointConfig} from "@renderer/modules/user-config-store";
 
 export function debugRequest(mode: string) {
@@ -78,12 +78,14 @@ function makeAdapterCacheKey(accessKey: string, secretKey: string, ucUrl?: strin
 function getQiniuAdapter(
     accessKey: string,
     secretKey: string,
-    ucUrl: string | undefined = undefined,
+    sessionToken?: string,
+    ucUrl?: string,
     regions: Region[] = [],
 ) {
     return new Qiniu(
         accessKey,
         secretKey,
+        sessionToken,
         ucUrl,
         `Kodo-Browser/${AppConfig.app.version}`,
         regions,
@@ -95,6 +97,7 @@ interface AdapterOption {
     // for kodo-s3-adapter-sdk/Qiniu
     accessKey: string,
     secretKey: string,
+    sessionToken?: string,
     regions: Region[],
     ucUrl?: string,
 
@@ -114,7 +117,7 @@ interface AdapterOption {
 export interface GetAdapterOptionParam {
     id: string,
     secret: string,
-    isPublicCloud: boolean,
+    endpointType: EndpointType,
     preferKodoAdapter?: boolean,
     preferS3Adapter?: boolean,
 }
@@ -132,25 +135,25 @@ function getAdapterOption(opt: GetAdapterOptionParam): AdapterOption {
         regions: [],
     };
     let result: AdapterOption;
-    if (opt.isPublicCloud) {
-        result = {
-            ...baseResult,
-            ucUrl: undefined,
-        };
-    } else {
-        // change to async to ensure await get the private endpoint config.
-        // the private endpoint is working exactly correct for now,
-        // because it's loaded before app start
-        const endpointConfig = getEndpointConfig({
-            accessKey: opt.id,
-            accessSecret: opt.secret,
-            endpointType: EndpointType.Private,
-        });
-        const privateEndpoint = endpointConfig.getAll();
-        result = {
-            ...baseResult,
-            ucUrl: privateEndpoint.ucUrl,
-            regions: privateEndpoint.regions.map(rSetting => {
+    switch (opt.endpointType) {
+        case EndpointType.Public: {
+            result = {
+                ...baseResult,
+                ucUrl: undefined,
+            };
+            break;
+        }
+        case EndpointType.Private: {
+            // change to async to ensure await get the private endpoint config.
+            // the private endpoint is working exactly correct for now,
+            // because it's loaded before app start
+            const endpointConfig = getEndpointConfig({
+                accessKey: opt.id,
+                accessSecret: opt.secret,
+                endpointType: EndpointType.Private,
+            });
+            const privateEndpoint = endpointConfig.getAll();
+            const regions = privateEndpoint.regions.map(rSetting => {
                 const r = new Region(
                     "",
                     rSetting.identifier,
@@ -159,12 +162,36 @@ function getAdapterOption(opt: GetAdapterOptionParam): AdapterOption {
                 r.s3Urls = [rSetting.endpoint];
                 r.ucUrls = [privateEndpoint.ucUrl];
                 return r;
-            }),
-            // disable uplog when use customize cloud
-            // because there isn't a valid access key of uplog
-            uplogBufferSize: -1,
+            });
+            result = {
+              ...baseResult,
+              ucUrl: privateEndpoint.ucUrl,
+              regions,
+              // disable uplog when use customize cloud
+              // because there isn't a valid access key of uplog
+              uplogBufferSize: -1,
+            }
+            break;
+        }
+        case EndpointType.ShareSession: {
+            const shareSession = getShareSession();
+            if (!shareSession) {
+              throw new Error("Endpoint type is ShareSession, but lost ShareSession info")
+            }
+            const region = new Region(
+                "",
+                shareSession.regionS3Id,
+            );
+            region.s3Urls = [shareSession.endpoint];
+            result = {
+                ...baseResult,
+                sessionToken: shareSession.sessionToken,
+                regions: [region],
+            };
+            break;
         }
     }
+
     if (opt.preferS3Adapter) {
         result.preferS3Adapter = opt.preferS3Adapter;
     }
@@ -178,7 +205,7 @@ export function clientBackendMode(opt: GetAdapterOptionParam): string {
       adapterOption.regions.length > 0 &&
       !adapterOption.preferKodoAdapter ||
       adapterOption.preferS3Adapter ||
-      !opt.isPublicCloud
+      opt.endpointType !== EndpointType.Public
     ) {
         return S3_MODE;
     } else {
@@ -196,6 +223,7 @@ function getS3Client(opt: GetAdapterOptionParam): S3Adapter {
         const qiniuAdapter = getQiniuAdapter(
             adapterOption.accessKey,
             adapterOption.secretKey,
+            adapterOption.sessionToken,
             adapterOption.ucUrl,
             adapterOption.regions,
         );
@@ -207,6 +235,10 @@ function getS3Client(opt: GetAdapterOptionParam): S3Adapter {
             responseCallback: debugResponse(S3_MODE),
             uplogBufferSize: adapterOption.uplogBufferSize,
         }) as S3Adapter;
+        const shareSession = getShareSession();
+        if (shareSession) {
+          s3Client.addBucketNameIdCache(shareSession.bucketName, shareSession.bucketId);
+        }
         s3AdaptersCache[cacheKey] = s3Client;
         return s3Client;
     }
@@ -222,6 +254,7 @@ function getKodoClient(opt: GetAdapterOptionParam): KodoAdapter {
         const qiniuAdapter = getQiniuAdapter(
             adapterOption.accessKey,
             adapterOption.secretKey,
+            adapterOption.sessionToken,
             adapterOption.ucUrl,
             adapterOption.regions,
         );
@@ -263,6 +296,38 @@ export function getRegionService(opt: GetAdapterOptionParam): RegionService {
     const regionService = new RegionService(adapterOption);
     regionServicesCache[cacheKey] = regionService;
     return regionService;
+}
+
+export interface GetShareServiceOptions {
+  apiUrls?: string[],
+  accessKey?: string,
+  accessSecret?: string,
+  endpointType?: EndpointType,
+}
+
+export async function getShareService(opt: GetShareServiceOptions): Promise<ShareService> {
+  let ucUrl: string | undefined;
+  if (opt.accessKey && opt.accessSecret) {
+    const endpointConfig = getEndpointConfig({
+      accessKey: opt.accessKey,
+      accessSecret: opt.accessSecret,
+      endpointType: opt.endpointType ?? EndpointType.Public,
+    });
+    if (!endpointConfig.state.initialized) {
+      await endpointConfig.loadFromPersistence();
+    }
+    ucUrl = endpointConfig.get("ucUrl");
+  }
+  return new ShareService({
+    ucUrl: ucUrl,
+    apiUrls: opt.apiUrls,
+    ak: opt.accessKey,
+    sk: opt.accessSecret,
+    appName: AppConfig.app.id,
+    appVersion: AppConfig.app.version,
+    requestCallback: debugRequest(KODO_MODE),
+    responseCallback: debugResponse(KODO_MODE),
+  });
 }
 
 export function clearAllCache() {

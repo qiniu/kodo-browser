@@ -5,7 +5,7 @@ import Duration, {convertDuration} from "@common/const/duration";
 import {BackendMode} from "@common/qiniu"
 
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {signatureUrl} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
 
@@ -37,7 +37,7 @@ const AudioContent: React.FC<AudioContentProps> = ({
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferS3Adapter: domain.apiScope === BackendMode.S3,
     };
     signatureUrl(

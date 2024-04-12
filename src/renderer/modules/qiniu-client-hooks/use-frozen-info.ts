@@ -4,7 +4,7 @@ import {toast} from "react-hot-toast";
 import {BackendMode} from "@common/qiniu";
 
 import {getFrozenInfo} from "@renderer/modules/qiniu-client";
-import {AkItem, EndpointType} from "@renderer/modules/auth";
+import {AkItem} from "@renderer/modules/auth";
 
 export interface FrozenInfo {
   isLoading: boolean,
@@ -43,7 +43,7 @@ const useFrozenInfo = ({
     const opt = {
       id: user.accessKey,
       secret: user.accessSecret,
-      isPublicCloud: user.endpointType === EndpointType.Public,
+      endpointType: user.endpointType,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,
     };

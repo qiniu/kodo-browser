@@ -2,12 +2,12 @@ import {useMemo, useSyncExternalStore} from "react";
 
 import {HttpUrl} from "@renderer/const/patterns";
 import * as DefaultDict from "@renderer/modules/default-dict";
-import {AkItem, EndpointType} from "@renderer/modules/auth";
+import {AkItem, EndpointType, ShareSession} from "@renderer/modules/auth";
 import {Endpoint} from "@renderer/modules/qiniu-client";
 import {LocalFile, serializer} from "@renderer/modules/persistence";
 
+import handleLoadError from "./error-handler";
 import UserConfigStore from "./user-config-store";
-import handleLoadError from "@renderer/modules/user-config-store/error-handler";
 
 const DEFAULT_ENDPOINT: Endpoint = {
   ucUrl: "",
@@ -38,7 +38,7 @@ export function getEndpointConfig(akItem: AkItem | null) {
   return privateEndpointConfig;
 }
 
-export function useEndpointConfig(akItem: AkItem | null) {
+export function useEndpointConfig(akItem: AkItem | null, shareSession?: ShareSession | null) {
   const endpointConfig = useMemo(
     () => getEndpointConfig(akItem),
     [akItem]
@@ -53,13 +53,43 @@ export function useEndpointConfig(akItem: AkItem | null) {
   );
 
   const setEndpoint = (endpoint: Endpoint) => {
+    if (shareSession) {
+      throw new Error("Can't set ShareSession Endpoint")
+    }
     return endpointConfig.setAll(endpoint, false);
   };
 
   const endpointValid = useMemo(
-    () => endpointConfigData.ucUrl && endpointConfigData.ucUrl.match(HttpUrl),
+    () => {
+      if (shareSession) {
+        return true;
+      }
+      return endpointConfigData.ucUrl && endpointConfigData.ucUrl.match(HttpUrl);
+    },
     [endpointConfigData.ucUrl],
   );
+
+  if (shareSession) {
+    return {
+      endpointConfigState: {
+        initialized: true,
+        loadingPersistence: false,
+        loadError: null,
+        changedPersistenceValue: false,
+        valid: endpointValid,
+      },
+      endpointConfigData: {
+        ucUrl: "",
+        regions: [{
+          identifier: shareSession.regionS3Id,
+          label: shareSession.regionS3Id,
+          endpoint: shareSession.endpoint,
+        }],
+      },
+      endpointConfigLoadPersistencePromise: Promise.resolve(),
+      setEndpoint,
+    }
+  }
 
   return {
     endpointConfigState: {

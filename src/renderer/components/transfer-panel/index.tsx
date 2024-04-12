@@ -40,11 +40,11 @@ const TransferPanel: React.FC<TransferPanelProps> = ({
 
   const [openPanelName, setOpenPanelName] = useState<PanelName>();
 
-  const {currentUser} = useAuth();
+  const {currentUser, shareSession} = useAuth();
 
   const {
     endpointConfigData,
-  } = useEndpointConfig(currentUser);
+  } = useEndpointConfig(currentUser, shareSession);
 
   const {
     data: appPreferencesData,

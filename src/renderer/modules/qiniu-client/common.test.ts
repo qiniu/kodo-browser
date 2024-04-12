@@ -27,7 +27,7 @@ describe("test qiniu-client/common.ts", () => {
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
-                isPublicCloud: true,
+                endpointType: EndpointType.Public,
             };
             expect(QiniuClientCommon.clientBackendMode(opt)).toBe(KODO_MODE);
             opt.preferKodoAdapter = true;
@@ -37,13 +37,13 @@ describe("test qiniu-client/common.ts", () => {
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
-                isPublicCloud: true,
+                endpointType: EndpointType.Public,
                 preferS3Adapter: true,
             };
             // preferS3Adapter || !isPublicCloud
             opt.preferS3Adapter = true;
             expect(QiniuClientCommon.clientBackendMode(opt)).toBe(S3_MODE);
-            opt.isPublicCloud = false;
+            opt.endpointType = EndpointType.Private;
             const endpointConfig = getEndpointConfig({
                 accessKey: ENV.QINIU_ACCESS_KEY,
                 accessSecret: ENV.QINIU_SECRET_KEY,
@@ -65,7 +65,7 @@ describe("test qiniu-client/common.ts", () => {
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
-                isPublicCloud: true,
+                endpointType: EndpointType.Public,
             };
             expect(QiniuClientCommon.getDefaultClient(opt).constructor).toBe(KodoAdapter);
             opt.preferKodoAdapter = true;
@@ -76,13 +76,13 @@ describe("test qiniu-client/common.ts", () => {
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
-                isPublicCloud: true,
+                endpointType: EndpointType.Public,
                 preferS3Adapter: true,
             };
             // preferS3Adapter || !isPublicCloud
             opt.preferS3Adapter = true;
             expect(QiniuClientCommon.getDefaultClient(opt).constructor).toBe(S3Adapter);
-            opt.isPublicCloud = false;
+            opt.endpointType = EndpointType.Private;
             const endpointConfig = getEndpointConfig({
                 accessKey: ENV.QINIU_ACCESS_KEY,
                 accessSecret: ENV.QINIU_SECRET_KEY,
@@ -104,7 +104,7 @@ describe("test qiniu-client/common.ts", () => {
             const opt: QiniuClientCommon.GetAdapterOptionParam = {
                 id: ENV.QINIU_ACCESS_KEY,
                 secret: ENV.QINIU_SECRET_KEY,
-                isPublicCloud: true,
+                endpointType: EndpointType.Public,
             };
             QiniuClientCommon.getRegionService(opt);
             expect(RegionService).toBeCalled();

@@ -63,12 +63,12 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
   ...modalProps
 }) => {
   const {currentLanguage, translate} = useI18n();
-  const {currentUser} = useAuth();
+  const {currentUser, shareSession} = useAuth();
   const {bucketPreferBackendMode: preferBackendMode} = useFileOperation();
 
   const {
     endpointConfigData,
-  } = useEndpointConfig(currentUser);
+  } = useEndpointConfig(currentUser, shareSession);
 
   // cache operation states prevent props update after modal opened.
   const {
@@ -158,6 +158,12 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
       clientOptions: {
         accessKey: currentUser.accessKey,
         secretKey: currentUser.accessSecret,
+        sessionToken: shareSession?.sessionToken,
+        bucketNameId: shareSession
+          ? {
+            [shareSession.bucketName]: shareSession.bucketId,
+          }
+          : undefined,
         ucUrl: endpointConfigData.ucUrl,
         regions: endpointConfigData.regions.map(r => ({
           id: "",

@@ -6,7 +6,7 @@ import {toast} from "react-hot-toast";
 import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import * as AuditLog from "@renderer/modules/audit-log";
 import {useExternalPath} from "@renderer/modules/user-config-store";
 import {listFiles} from "@renderer/modules/qiniu-client";
@@ -92,7 +92,7 @@ const AddExternalPath: React.FC<ModalProps & AddExternalPathProps> = ({
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferS3Adapter: true,
       maxKeys: 1,
       minKeys: 0,

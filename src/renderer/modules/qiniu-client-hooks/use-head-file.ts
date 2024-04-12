@@ -5,7 +5,7 @@ import {ObjectInfo} from "kodo-s3-adapter-sdk/dist/adapter";
 import {BackendMode} from "@common/qiniu";
 import StorageClass from "@common/models/storage-class";
 
-import {AkItem, EndpointType} from "@renderer/modules/auth";
+import {AkItem} from "@renderer/modules/auth";
 import {headFile} from "@renderer/modules/qiniu-client";
 
 interface HeadFileState {
@@ -46,7 +46,7 @@ const useHeadFile = ({
     const opt = {
       id: user.accessKey,
       secret: user.accessSecret,
-      isPublicCloud: user.endpointType === EndpointType.Public,
+      endpointType: user.endpointType,
       storageClasses: storageClasses,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,

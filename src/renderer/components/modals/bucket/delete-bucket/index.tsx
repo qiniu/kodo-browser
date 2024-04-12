@@ -5,7 +5,7 @@ import {toast} from "react-hot-toast";
 import {BackendMode} from "@common/qiniu";
 
 import {Translate, useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {deleteBucket} from "@renderer/modules/qiniu-client";
 import * as AuditLog from "@renderer/modules/audit-log";
 import {useFileOperation} from "@renderer/modules/file-operation";
@@ -58,7 +58,7 @@ const DeleteBucket: React.FC<ModalProps & DeleteBucketProps> = ({
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,
     };

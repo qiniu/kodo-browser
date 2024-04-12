@@ -16,6 +16,7 @@ const ELECTRON_VERSION = "18.3.3";
 const ROOT = __dirname;
 // https://github.com/qiniu/kodo-browser/issues/135
 const WIN_NO_SANDBOX_NAME = "no-sandbox-shortcut.cmd";
+const LINUX_DESKTOP_FILE = "create-desktop-file.sh";
 const BRAND = `${ROOT}/src/renderer/static/brand`;
 const DIST = `${ROOT}/dist`;
 const TARGET = `${ROOT}/build`;
@@ -50,6 +51,13 @@ gulp.task("mac", done => {
     options.platform = "darwin";
     options.arch = "x64";
     options.icon = `${BRAND}/qiniu.icns`;
+
+    options.protocols = [{
+      name: 'com.qiniu.browser',
+      schemes: [
+        'kodo-browser'
+      ]
+    }];
 
     packager(options).then((paths) => {
       console.log("--done");
@@ -163,13 +171,18 @@ gulp.task("win32zip", done => {
 
 gulp.task("linux64", done => {
   console.log(`--package ${NAME}-linux-x64`);
+  const targetDir = `${TARGET}/${NAME}-linux-x64`;
 
-  plugins.run(`rm -rf ${TARGET}/${NAME}-linux-x64`).exec(() => {
+  plugins.run(`rm -rf ${targetDir}`).exec(() => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "linux";
     options.arch = "x64";
 
     packager(options).then((paths) => {
+      fs.copyFileSync(
+        path.resolve(ROOT, `./${LINUX_DESKTOP_FILE}`),
+        path.resolve(targetDir, `./${LINUX_DESKTOP_FILE}`)
+      );
       console.log("--done");
       done();
     }, (errs) => {
@@ -190,13 +203,18 @@ gulp.task("linux64zip", done => {
 
 gulp.task("linux32", done => {
   console.log(`--package ${NAME}-linux-ia32`);
+  const targetDir = `${TARGET}/${NAME}-linux-ia32`;
 
-  plugins.run(`rm -rf ${TARGET}/${NAME}-linux-ia32`).exec(() => {
+  plugins.run(`rm -rf ${targetDir}`).exec(() => {
     let options = Object.assign({}, packagerOptions);
     options.platform = "linux";
     options.arch = "ia32";
 
     packager(options).then((paths) => {
+      fs.copyFileSync(
+        path.resolve(ROOT, `./${LINUX_DESKTOP_FILE}`),
+        path.resolve(targetDir, `./${LINUX_DESKTOP_FILE}`)
+      );
       console.log("--done");
       done();
     }, (errs) => {

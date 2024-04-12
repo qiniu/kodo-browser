@@ -5,7 +5,7 @@ import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {BucketItem, updateBucketRemark} from "@renderer/modules/qiniu-client";
 
 interface UpdateBucketRemarkProps {
@@ -60,7 +60,7 @@ const UpdateBucketRemark: React.FC<ModalProps & UpdateBucketRemarkProps> = ({
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferKodoAdapter: true, // S3 hasn't the remark API
     };
     const p = updateBucketRemark(

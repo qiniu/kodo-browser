@@ -28,6 +28,14 @@ const dict: Dictionary = {
     noDomainToGet: "没有可用的域名获取对象",
     errored: "发生错误",
     paused: "已暂停",
+    custom: "自定义",
+
+    second: "秒",
+    seconds: "秒",
+    minute: "分钟",
+    minutes: "分钟",
+    hour: "小时",
+    hours: "小时",
 
     directory: "目录",
     upload: "上传",
@@ -42,10 +50,21 @@ const dict: Dictionary = {
     more: "更多",
     exportLink: "导出外链",
     exportLinks: "导出外链",
+    share: "分享",
     restore: "解冻",
     changeStorageClass: "更改存储类型",
     unknownStorageClass: "未知存储类型",
     clickToRetry: "点击重试",
+  },
+
+  deepLinkActions: {
+    signIn: {
+      invalidParams: "链接错误，缺少必要参数",
+      signOutConfirm: {
+        title: "退出登录",
+        description: "退出登录以使用共享链接",
+      },
+    },
   },
 
   top: {
@@ -74,8 +93,11 @@ const dict: Dictionary = {
   },
 
   signIn: {
-    title: "access key 登录",
+    title: "Access Key 登录",
+    titleShareLink: "分享链接登录",
     accessKeyHistory: "AK 历史",
+    gotoShareLinkForm: "使用分享链接登录",
+    gotoAkForm: "使用 AK 登录",
     form: {
       accessKeyId: {
         holder: "请输入 AccessKeyId",
@@ -111,6 +133,21 @@ const dict: Dictionary = {
       },
       submit: "登录",
       submitting: "登录中",
+    },
+    formShareLink: {
+      shareLink: {
+        label: "分享链接：",
+        feedback: {
+          invalidFormat: "链接格式不正确",
+        },
+      },
+      extractCode: {
+        label: "提取码：",
+        holder: "请输入提取码",
+        feedback: {
+          invalidFormat: "只能是字母数字，必须为 8 位",
+        },
+      },
     },
   },
 
@@ -701,6 +738,40 @@ const dict: Dictionary = {
 
     generateFileLink: {
       title: "导出外链",
+    },
+
+    createDirectoryShareLink: {
+      title: "分享文件夹",
+      form: {
+        directoryName: {
+          label: "文件夹：",
+        },
+        expireAfter: {
+          label: "有效期：",
+          suffix: "秒",
+        },
+        extractCode: {
+          label: "提取码：",
+          suffix: "随机生成",
+          hint: "必须为 6 位，只能由字母数字组成",
+        },
+        shareLink: {
+          label: "分享链接：",
+        },
+        expireAt: {
+          label: "失效时间：",
+        },
+      },
+      copyShareMessageButton: "复制链接与提取码",
+      copyShareMessageSuccess: "复制成功",
+      shareMessage: [
+        "我分享了一些文件给您，快来看看吧！",
+        "",
+        "${shareLink}",
+        "",
+        "提取码：${extractCode}",
+        "有效期至：${expiredAt}"
+      ].join("\n"),
     },
 
     uploadConfirm: {

@@ -14,6 +14,8 @@ import { mocked } from "ts-jest/utils";
 import { Kodo as KodoAdapter } from "kodo-s3-adapter-sdk/dist/kodo";
 import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3";
 
+import {EndpointType} from "@renderer/modules/auth";
+
 import * as QiniuClientCommon from "./common";
 import * as QiniuClientBuckets from "./buckets";
 
@@ -28,7 +30,7 @@ describe("test qiniu-client/buckets.ts", () => {
     const opt: QiniuClientCommon.GetAdapterOptionParam = {
         id: ENV.QINIU_ACCESS_KEY,
         secret: ENV.QINIU_SECRET_KEY,
-        isPublicCloud: true,
+        endpointType: EndpointType.Public,
     };
 
     describe("Kodo", () => {

@@ -18,6 +18,7 @@ import {BucketItem, FileItem} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 import * as AuditLog from "@renderer/modules/audit-log";
+import {useFileOperation} from "@renderer/modules/file-operation";
 
 import DropZone from "@renderer/components/drop-zone";
 import {useDisplayModal, useIsShowAnyModal} from "@renderer/components/modals/hooks";
@@ -35,7 +36,8 @@ interface FilesProps {
 
 const Files: React.FC<FilesProps> = (props) => {
   const {currentLanguage, translate} = useI18n();
-  const {currentUser} = useAuth();
+  const {currentUser, shareSession} = useAuth();
+  const {bucketGrantedPermission} = useFileOperation();
 
   const {
     state: appPreferencesState,
@@ -47,7 +49,7 @@ const Files: React.FC<FilesProps> = (props) => {
 
   const {
     endpointConfigData,
-  } = useEndpointConfig(currentUser);
+  } = useEndpointConfig(currentUser, shareSession);
 
   const {currentAddress, basePath, goTo} = useKodoNavigator();
 
@@ -195,7 +197,7 @@ const Files: React.FC<FilesProps> = (props) => {
       }
       return true;
     },
-    canDefaultS3Domain: !props.bucket?.grantedPermission,
+    canDefaultS3Domain: !bucketGrantedPermission,
     preferBackendMode: props.bucket?.preferBackendMode,
   });
   const [selectedDomain, setSelectedDomain] = useState<DomainAdapter | undefined>();
@@ -310,6 +312,12 @@ const Files: React.FC<FilesProps> = (props) => {
       clientOptions: {
         accessKey: currentUser.accessKey,
         secretKey: currentUser.accessSecret,
+        sessionToken: shareSession?.sessionToken,
+        bucketNameId: shareSession
+          ? {
+            [shareSession.bucketName]: shareSession.bucketId,
+          }
+          : undefined,
         ucUrl: endpointConfigData.ucUrl,
         regions: endpointConfigData.regions.map(r => ({
           id: "",
@@ -329,7 +337,6 @@ const Files: React.FC<FilesProps> = (props) => {
         availableStorageClasses={availableStorageClasses}
         regionId={props.region?.s3Id}
         bucketName={props.bucket?.name}
-        bucketPermission={props.bucket?.grantedPermission}
         directoriesNumber={files.filter(f => FileItem.isItemFolder(f)).length}
         listedFileNumber={files.length}
         hasMoreFiles={hasMoreFiles}
@@ -385,7 +392,7 @@ const Files: React.FC<FilesProps> = (props) => {
         onReloadFiles={handleReloadFiles}
       />
       {
-        props.bucket?.grantedPermission === "readonly"
+        bucketGrantedPermission === "readonly"
           ? null
           : <DropZone
             className="files-upload-zone bg-body bg-opacity-75"

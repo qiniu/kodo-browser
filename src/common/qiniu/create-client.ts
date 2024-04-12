@@ -1,5 +1,6 @@
 import {Qiniu, Region} from "kodo-s3-adapter-sdk";
 import {Adapter, RequestInfo, ResponseInfo} from "kodo-s3-adapter-sdk/dist/adapter";
+import {S3} from "kodo-s3-adapter-sdk/dist/s3";
 import {ModeOptions} from "kodo-s3-adapter-sdk/dist/qiniu";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
@@ -16,6 +17,7 @@ export default function createQiniuClient(
     const qiniu = new Qiniu(
         clientOptions.accessKey,
         clientOptions.secretKey,
+        clientOptions.sessionToken,
         clientOptions.ucUrl,
         `Kodo-Browser/${AppConfig.app.version}/ioutil`,
         clientOptions.regions.map<Region>(r => {
@@ -37,10 +39,16 @@ export default function createQiniuClient(
         modeOptions.requestCallback = debugRequest(clientOptions.backendMode);
         modeOptions.responseCallback = debugResponse(clientOptions.backendMode);
     }
-    return qiniu.mode(
+    const adapter = qiniu.mode(
         clientOptions.backendMode,
         modeOptions,
     );
+    if (adapter instanceof S3 && clientOptions.bucketNameId) {
+      Object.entries(clientOptions.bucketNameId).forEach(([n, id]) => {
+        adapter.addBucketNameIdCache(n, id);
+      });
+    }
+    return adapter;
 }
 
 

@@ -28,6 +28,14 @@ const dict: Dictionary = {
         noDomainToGet: "オブジェクトを取得するためのドメインがない",
         errored: "エラーが発生しました",
         paused: "停止しました",
+        custom: "自定义",
+
+        second: "秒",
+        seconds: "秒",
+        minute: "分",
+        minutes: "分",
+        hour: "時間",
+        hours: "時間",
 
         directory: "フォルダ",
         upload: "アップロード",
@@ -42,10 +50,21 @@ const dict: Dictionary = {
         more: "もっと",
         exportLink: "ダウンロードアドレスを取得する",
         exportLinks: "ダウンロードリンクのエクスポート",
+        share: "シェア",
         restore: "リストア",
         changeStorageClass: "ストレージクラスを設定する",
         unknownStorageClass: "不明なストレージクラス",
         clickToRetry: "再試行",
+    },
+
+    deepLinkActions: {
+        signIn: {
+            invalidParams: "URLが無効です。必要なパラメータが失われました。",
+            signOutConfirm: {
+                title: "ログアウト",
+                description: "シェアURLでサインインしているため、ログアウトします。",
+            },
+        },
     },
 
     top: {
@@ -75,7 +94,10 @@ const dict: Dictionary = {
 
     signIn: {
         title: "Access Key ログイン",
+        titleShareLink: "シェアリンクログイン",
         accessKeyHistory: "AK の歴史",
+        gotoShareLinkForm: "シェアリンクを使用してログイン",
+        gotoAkForm: "AKを使用してログイン",
         form: {
             accessKeyId: {
                 holder: "AccessKeyId",
@@ -111,6 +133,21 @@ const dict: Dictionary = {
             },
             submit: "ログイン",
             submitting: "ログイン中",
+        },
+        formShareLink: {
+            shareLink: {
+                label: "シェアリンク:",
+                feedback: {
+                    invalidFormat: "リンクの形式が正しくありません",
+                },
+            },
+            extractCode: {
+                label: "抽出コード:",
+                holder: "英数字のみ",
+                feedback: {
+                    invalidFormat: "英字または数字のみを含める必要があります",
+                },
+            },
         },
     },
 

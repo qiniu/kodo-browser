@@ -247,6 +247,7 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
                     <Form.Control
                       {...register("expireAfter", {
                         required: true,
+                        valueAsNumber: true,
                       })}
                       type="number"
                       isInvalid={Boolean(errors.extractCode)}

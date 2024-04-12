@@ -135,9 +135,15 @@ const SignInShareForm: React.FC<SignInShareFormProps> = ({
               placeholder={translate("signIn.formShareLink.extractCode.holder")}
               isInvalid={Boolean(errors.extractCode)}
             />
-            <Form.Control.Feedback type="invalid">
+            <Form.Text
+              className={
+                Boolean(errors.extractCode)
+                  ? "text-danger"
+                  : ""
+              }
+            >
               {translate("signIn.formShareLink.extractCode.feedback.invalidFormat")}
-            </Form.Control.Feedback>
+            </Form.Text>
           </Col>
         </Form.Group>
       </fieldset>

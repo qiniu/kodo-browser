@@ -10,6 +10,8 @@ import * as DefaultDict from "@renderer/modules/default-dict";
 import * as LocalLogger from "@renderer/modules/local-logger";
 import {AkItem, EndpointType} from "@renderer/modules/auth";
 import {listDomains} from "@renderer/modules/qiniu-client";
+import {useKodoNavigator} from "@renderer/modules/kodo-address";
+import {isExternalPathItem} from "@renderer/modules/user-config-store";
 
 const PUB_S3_LINK_MAX_LIFETIME = 1 * Duration.Day;
 const PVT_S3_LINK_MAX_LIFETIME = 7 * Duration.Day;
@@ -65,6 +67,8 @@ export default function useLoadDomains({
   canDefaultS3Domain,
   preferBackendMode,
 }: useLoadDomainsProps) {
+  const {currentAddress} = useKodoNavigator();
+
   async function loadDomains() {
     if (!user) {
       return;
@@ -77,6 +81,16 @@ export default function useLoadDomains({
         "regionId: ", regionId,
         "bucketName: ", bucketName,
       );
+      return;
+    }
+
+    if (isExternalPathItem(currentAddress)) {
+      setLoadDomainsState({
+        loading: false,
+        domains: [
+          {...NON_OWNED_DOMAIN},
+        ],
+      });
       return;
     }
 

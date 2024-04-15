@@ -79,8 +79,8 @@ export default function useBookmarkPath(akItem: AkItem | null) {
   const deleteBookmark = (target: KodoAddress) => {
     return bookmarkPath.set("list", bookmarkPathData.list.filter(
       b =>
-        b.protocol !== target.protocol &&
-        b.path !== target.path
+        !(b.protocol === target.protocol &&
+        b.path === target.path)
     ));
   };
 

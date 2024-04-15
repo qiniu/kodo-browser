@@ -71,17 +71,24 @@ export class DataStore<T> {
   async init() {
     // cleanup working directory
     const frameMeta = await getFrameMeta(
-      path.join(this.workingDirectory, DB_META_FILE)
+      this.metaFilePath
     );
     const keepFiles = [
+      this.metaFilePath,
       frameMeta?.memTableWALPath,
       frameMeta?.memTableReadonlyWALPath,
       frameMeta?.diskTableFilePath,
     ].filter(f => f);
-    const files = await fsPromises.readdir(this.workingDirectory);
+    const files = (await fsPromises.readdir(this.workingDirectory))
+      .map(name => path.join(this.workingDirectory, name));
     const unlinkPromises = files.filter(f => !keepFiles.includes(f))
       .map(f => fsPromises.unlink(f));
-    await Promise.all(unlinkPromises);
+    const unlinkResults = await Promise.allSettled(unlinkPromises);
+    unlinkResults.forEach(r => {
+      if (r.status === "rejected") {
+        console.warn("DataStore cleanup failed", r.reason);
+      }
+    });
 
     // initial data
     await Promise.all([
@@ -143,6 +150,10 @@ export class DataStore<T> {
       oldMeta.memTableReadonlyWALPath && fsPromises.unlink(oldMeta.memTableReadonlyWALPath),
       fsPromises.unlink(oldMeta.diskTableFilePath),
     ]);
+  }
+
+  get metaFilePath(): string {
+    return path.join(this.workingDirectory, DB_META_FILE);
   }
 
   get meta(): FrameMetaData {
@@ -241,7 +252,7 @@ export class DataStore<T> {
         nodes: mt.nodes,
       });
       await setFrameMeta(
-        path.join(this.workingDirectory, DB_META_FILE),
+        this.metaFilePath,
         {
           memTableWALPath: this.memTable.wal.filePath,
           memTableReadonlyWALPath: this.memTableReadonly.wal.filePath,
@@ -258,7 +269,7 @@ export class DataStore<T> {
       skipNullValue: true,
     });
     await setFrameMeta(
-      path.join(this.workingDirectory, DB_META_FILE),
+      this.metaFilePath,
       {
         memTableWALPath: this.memTable.wal.filePath,
         diskTableFilePath: this.diskTable.filePath,

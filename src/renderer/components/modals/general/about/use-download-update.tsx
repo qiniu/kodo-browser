@@ -2,7 +2,7 @@
 import {downloadLatestVersion, fetchUpdate} from "@renderer/modules/update-app";
 import {useSyncExternalStore} from "react";
 
-let downloadPromise: ReturnType<typeof downloadLatestVersion> | undefined;
+let downloadPromise: Promise<string | null> | undefined;
 
 export enum ProgressStatus {
   Standby = "standby",
@@ -60,7 +60,7 @@ const handleDownloadProgress = (loaded: number, total: number): boolean => {
   return updateDownloaderStore.data.status === ProgressStatus.Running;
 };
 
-const startDownload = (toDirectory?: string) => {
+const startDownload = (toDirectory?: string): Promise<string | null> => {
   if (downloadPromise) {
     return downloadPromise;
   }
@@ -71,9 +71,18 @@ const startDownload = (toDirectory?: string) => {
   downloadPromise = downloadLatestVersion({
     toDirectory,
     onProgress: handleDownloadProgress,
-  });
+  })
+    .catch(err => {
+      if (err.toString().includes("aborted")) {
+        return Promise.resolve(null);
+      }
+      return Promise.reject(err);
+    });
   downloadPromise
     .then(filePath => {
+      if (!filePath) {
+        return;
+      }
       updateDownloaderStore.dispatch({
         filePath,
         status: ProgressStatus.Success,

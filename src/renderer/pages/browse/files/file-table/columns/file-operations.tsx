@@ -6,8 +6,10 @@ import {useFileOperation} from "@renderer/modules/file-operation";
 
 import TooltipButton from "@renderer/components/tooltip-button";
 
-import {OperationName, RowCellDataProps} from "../../types";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
+import * as DefaultDict from "@renderer/modules/default-dict";
+
+import {OperationName, RowCellDataProps} from "../../types";
 
 export interface FileOperationsCellCallbackProps {
   onAction: (action: OperationName, file: FileItem.Item) => void,
@@ -62,7 +64,11 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellCallbackProp
       {
         isFile ||
         !currentUser ||
-        currentUser.endpointType !== EndpointType.Public
+        (
+          !DefaultDict.get("BASE_SHARE_URL")
+            ? currentUser.endpointType !== EndpointType.Public
+            : currentUser.endpointType === EndpointType.Private
+        )
           ? null
           : <TooltipButton
             iconClassName="bi bi-share"

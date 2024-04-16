@@ -14,6 +14,7 @@ import {Alphanumeric} from "@renderer/const/patterns";
 import {useI18n} from "@renderer/modules/i18n";
 import {useAuth} from "@renderer/modules/auth";
 import {createShare, FileItem} from "@renderer/modules/qiniu-client";
+import * as DefaultDict from "@renderer/modules/default-dict";
 
 interface CreateDirShareLinkProps {
   bucketName: string,
@@ -111,7 +112,8 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
     );
 
     p.then(shareInfo => {
-      const shareURL = new URL(`${DEFAULT_PORTAL_URL}/kodo-shares/verify`);
+      const baseShareUrl = DefaultDict.get("BASE_SHARE_URL") || `${DEFAULT_PORTAL_URL}/kodo-shares/verify`;
+      const shareURL = new URL(baseShareUrl);
       shareURL.searchParams.set("id", shareInfo.id);
       shareURL.searchParams.set("token", shareInfo.token);
       setShareLink(shareURL.toString());
@@ -270,6 +272,7 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
                     required: true,
                     validate: v => v.length === 6 && Alphanumeric.test(v),
                   })}
+                  onFocus={event => event.target.select()}
                   type="text"
                   isInvalid={Boolean(errors.extractCode)}
                 />

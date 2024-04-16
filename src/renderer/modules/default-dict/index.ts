@@ -11,6 +11,7 @@ interface Dict {
       endpoint: string,
     }[],
   },
+  BASE_SHARE_URL?: string,
   DISABLE_NON_OWNED_DOMAIN?: boolean,
   PREFERENCE_VALIDATORS?: {
     maxMultipartUploadPartSize?: number,

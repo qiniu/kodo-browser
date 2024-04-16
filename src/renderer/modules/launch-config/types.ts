@@ -6,6 +6,7 @@ export interface LaunchConfig {
   preferredEndpointType?: string,
   defaultPrivateEndpointConfig?: DefaultPrivateEndpointConfig,
   preferenceValidators?: PreferenceValidators,
+  baseShareUrl?: string,
   disable?: DisableFunctions,
 }
 

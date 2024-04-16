@@ -5,7 +5,7 @@ import {LocalFile, serializer} from "@renderer/modules/persistence";
 
 import {LaunchConfigPlugin} from "./types";
 import DefaultPrivateEndpoint from "./default-private-endpoint";
-import PreferredEndpointType from "./preferred-endpoint-type";
+import ChoreConfigs from "./chore-configs";
 import DisableFunctions from "./disable-functions";
 import PreferenceValidator from "./preference-validator";
 
@@ -25,7 +25,7 @@ class LaunchConfig {
         return;
       }
     const plugins: LaunchConfigPlugin[] = [
-      new PreferredEndpointType(),
+      new ChoreConfigs(),
       new DefaultPrivateEndpoint(),
       new DisableFunctions(),
       new PreferenceValidator(),

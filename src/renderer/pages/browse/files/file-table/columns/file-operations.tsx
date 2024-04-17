@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useMemo} from "react";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {FileItem} from "@renderer/modules/qiniu-client";
@@ -30,6 +30,24 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellCallbackProp
   const isFile = FileItem.isItemFile(file);
   const canRestore = isFile && ["Archive", "DeepArchive"].includes(file.storageClass);
 
+  const shouldShowShareDirButton = useMemo(() => {
+    if (isFile || !currentUser) {
+      return false;
+    }
+
+    if (currentUser.endpointType === EndpointType.Public) {
+      return true;
+    }
+
+    if (
+      currentUser.endpointType === EndpointType.Private &&
+      DefaultDict.get("BASE_SHARE_URL")
+    ) {
+      return true;
+    }
+
+    return false;
+  }, [isFile, currentUser]);
 
   return (
     <>
@@ -62,13 +80,7 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellCallbackProp
         }}
       />
       {
-        isFile ||
-        !currentUser ||
-        (
-          !DefaultDict.get("BASE_SHARE_URL")
-            ? currentUser.endpointType !== EndpointType.Public
-            : currentUser.endpointType === EndpointType.Private
-        )
+        !shouldShowShareDirButton
           ? null
           : <TooltipButton
             iconClassName="bi bi-share"

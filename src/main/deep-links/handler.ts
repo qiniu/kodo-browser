@@ -41,13 +41,13 @@ export class SignInHandler implements Handler {
   }
 
   private handleSignInWithShareLink(href: string) {
-    // kodo-browser://signIn/shareLink?id={id}&token={token}[&extractCode={code}][&apiHost={http://exmaple.com}]
+    // kodo-browser://signIn/shareLink?id={id}&token={token}[&code={code}][&apiHost={http://exmaple.com}]
     const url = new URL(href);
 
     const apiHost = url.searchParams.get("apiHost") || undefined;
     const id = url.searchParams.get("id") || "";
     const token = url.searchParams.get("token") || "";
-    const extractCode = url.searchParams.get("extractCode") || undefined;
+    const code = url.searchParams.get("code") || undefined;
 
     if (!id || !token) {
       this.deepLinkActionFns.signInDataInvalid();
@@ -58,7 +58,7 @@ export class SignInHandler implements Handler {
       apiHost: apiHost,
       shareId: id,
       shareToken: token,
-      extractCode: extractCode,
+      extractCode: code,
     });
   }
 

@@ -19,7 +19,7 @@ describe("SignInHandler", () => {
 
   describe("handleSignInWithShareLink", () => {
     it("should call SignInWithShareLink with correct parameters", () => {
-      handler.handle("kodo-browser://signIn/shareLink?id=123&token=abc&extractCode=def");
+      handler.handle("kodo-browser://signIn/shareLink?id=123&token=abc&code=def");
       expect(mockSender.send).toHaveBeenCalledWith("mockedChannel", {
         action: "SignInWithShareLink",
         data: {

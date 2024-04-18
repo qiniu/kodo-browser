@@ -743,7 +743,7 @@ export default interface Dictionary {
       title: string,
     },
 
-    createDirectoryShareLink?: {
+    createDirectoryShareLink: {
       title: string,
       form: {
         directoryName: {
@@ -761,7 +761,7 @@ export default interface Dictionary {
         shareLink: {
           label: string,
         },
-        expireAt: {
+        expiredAt: {
           label: string,
         },
       },

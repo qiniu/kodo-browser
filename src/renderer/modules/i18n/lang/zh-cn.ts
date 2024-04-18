@@ -143,9 +143,9 @@ const dict: Dictionary = {
       },
       extractCode: {
         label: "提取码：",
-        holder: "请输入提取码",
+        holder: "必须是字母或数字",
         feedback: {
-          invalidFormat: "只能是字母数字，必须为 8 位",
+          invalidFormat: "只能是字母数字，必须为 6 位",
         },
       },
     },
@@ -758,7 +758,7 @@ const dict: Dictionary = {
         shareLink: {
           label: "分享链接：",
         },
-        expireAt: {
+        expiredAt: {
           label: "失效时间：",
         },
       },

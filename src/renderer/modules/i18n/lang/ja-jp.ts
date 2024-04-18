@@ -50,7 +50,7 @@ const dict: Dictionary = {
         more: "もっと",
         exportLink: "ダウンロードアドレスを取得する",
         exportLinks: "ダウンロードリンクのエクスポート",
-        share: "シェア",
+        share: "共有",
         restore: "リストア",
         changeStorageClass: "ストレージクラスを設定する",
         unknownStorageClass: "不明なストレージクラス",
@@ -62,7 +62,7 @@ const dict: Dictionary = {
             invalidParams: "URLが無効です。必要なパラメータが失われました。",
             signOutConfirm: {
                 title: "ログアウト",
-                description: "シェアURLでサインインしているため、ログアウトします。",
+                description: "共有URLでサインインしているため、ログアウトします。",
             },
         },
     },
@@ -94,9 +94,9 @@ const dict: Dictionary = {
 
     signIn: {
         title: "Access Key ログイン",
-        titleShareLink: "シェアリンクログイン",
+        titleShareLink: "共有リンクログイン",
         accessKeyHistory: "AK の歴史",
-        gotoShareLinkForm: "シェアリンクを使用してログイン",
+        gotoShareLinkForm: "共有リンクを使用してログイン",
         gotoAkForm: "AKを使用してログイン",
         form: {
             accessKeyId: {
@@ -136,16 +136,16 @@ const dict: Dictionary = {
         },
         formShareLink: {
             shareLink: {
-                label: "シェアリンク:",
+                label: "共有リンク：",
                 feedback: {
                     invalidFormat: "リンクの形式が正しくありません",
                 },
             },
             extractCode: {
-                label: "抽出コード:",
+                label: "抽出コード：",
                 holder: "英数字のみ",
                 feedback: {
-                    invalidFormat: "英字または数字のみを含める必要があります",
+                    invalidFormat: "英数字のみで、6文字でなければなりません",
                 },
             },
         },
@@ -738,6 +738,40 @@ const dict: Dictionary = {
 
         generateFileLink: {
             title: "ダウンロードリンクのエクスポート",
+        },
+
+        createDirectoryShareLink: {
+            title: "フォルダを共有する",
+            form: {
+                directoryName: {
+                    label: "フォルダ：",
+                },
+                expireAfter: {
+                    label: "有効期限：",
+                    suffix: "秒",
+                },
+                extractCode: {
+                    label: "抽出コード：",
+                    suffix: "ランダム生成",
+                    hint: "英数字のみで、6文字でなければなりません",
+                },
+                shareLink: {
+                    label: "共有リンク：",
+                },
+                expiredAt: {
+                    label: "失効時間：",
+                },
+            },
+            copyShareMessageButton: "リンクと抽出コードをコピー",
+            copyShareMessageSuccess: "コピーが成功しました",
+            shareMessage: [
+                "いくつかのファイルを共有しました、ご覧ください！",
+                "",
+                "${shareLink}",
+                "",
+                "抽出コード：${extractCode}",
+                "有効期限：${expiredAt}"
+            ].join("\n"),
         },
 
         uploadConfirm: {

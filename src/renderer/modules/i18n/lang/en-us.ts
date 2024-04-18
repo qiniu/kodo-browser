@@ -145,7 +145,7 @@ const dict: Dictionary = {
         label: "Extract Code:",
         holder: "Alphabet and digits only",
         feedback: {
-          invalidFormat: "Must contain only alphabet or digits"
+          invalidFormat: "Must contain only alphabet or digits and length must be 6"
         },
       },
     },
@@ -739,6 +739,40 @@ const dict: Dictionary = {
 
     generateFileLink: {
       title: "Export Download Link",
+    },
+
+    createDirectoryShareLink: {
+      title: "Share Directory",
+      form: {
+        directoryName: {
+          label: "Directory:",
+        },
+        expireAfter: {
+          label: "Validity Period:",
+          suffix: "seconds",
+        },
+        extractCode: {
+          label: "Extraction Code:",
+          suffix: "Random",
+          hint: "Must be 6 characters long and can only consist of alphanumeric characters",
+        },
+        shareLink: {
+          label: "Share Link:",
+        },
+        expiredAt: {
+          label: "Valid Until:",
+        },
+      },
+      copyShareMessageButton: "Copy Share Message",
+      copyShareMessageSuccess: "Copied",
+      shareMessage: [
+        "I've shared some files with you, take a look!",
+        "",
+        "${shareLink}",
+        "",
+        "Extraction Code: ${extractCode}",
+        "Valid until: ${expiredAt}"
+      ].join("\n"),
     },
 
     uploadConfirm: {

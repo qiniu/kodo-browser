@@ -193,7 +193,7 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
             </Form.Group>
             <Form.Group as={Fragment} controlId="directoryName">
               <Form.Label className="text-end">
-                {translate("modals.createDirectoryShareLink.form.expireAt.label")}
+                {translate("modals.createDirectoryShareLink.form.expiredAt.label")}
               </Form.Label>
               <Form.Control
                 plaintext

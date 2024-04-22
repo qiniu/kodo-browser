@@ -64,7 +64,6 @@ const DownloadButton: React.FC<{
       handleClick = onClickStart;
       content = translate("common.retry");
       break;
-
   }
 
   return (
@@ -135,6 +134,7 @@ const DownloadProgress: React.FC<{
           animated={isAnimated}
           striped
           variant={variant}
+          now={finishedPercent}
         />
         <div className="d-flex align-items-center">
           <div>{`${finishedPercent.toFixed(2)}%`}</div>
@@ -164,13 +164,14 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
     pauseDownload,
   } = useDownloadUpdate();
 
+  // event handlers
   const handleStart = () => {
     if (downloadState.status === ProgressStatus.Running) {
       return;
     }
     startDownload()
       .catch((err) => {
-        toast.error(err);
+        toast.error(err.toString());
       });
   };
 
@@ -189,8 +190,6 @@ const DownloadUpdate: React.FC<DownloadUpgradeProps> = ({
   useEffect(() => {
     if (downloadState.status === ProgressStatus.Standby && appPreferencesData.autoUpdateAppEnabled) {
       handleStart();
-    } else if (downloadState.status === ProgressStatus.Running) {
-      pauseDownload();
     }
   }, [appPreferencesData.autoUpdateAppEnabled]);
 

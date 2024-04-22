@@ -41,7 +41,7 @@ function getExternalPath(akItem: AkItem | null) {
   result = new UserConfigStore<ExternalPathData>({
     defaultData: DEFAULT_EXTERNAL_PATH_DATA,
     persistence: new LocalFile({
-      filePath: path.join(`profile_${akItem.accessKey}`, "bookmarks.json"),
+      filePath: path.join(`profile_${akItem.accessKey}`, "external_paths.json"),
       serializer: new serializer.JSONSerializer(),
     }),
     onLoadError: handleLoadError,
@@ -88,9 +88,9 @@ export default function useExternalPath(akItem: AkItem | null) {
       target.path += "/";
     }
     return externalPath.set("list", externalPathData.list.filter(p =>
-      p.protocol === target.protocol &&
+      !(p.protocol === target.protocol &&
       p.regionId === target.regionId &&
-      p.path === target.path
+      p.path === target.path)
     ));
   };
 

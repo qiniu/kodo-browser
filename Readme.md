@@ -99,7 +99,7 @@ kodo-browser/
 
 ## 4. 私有云配置
 
-将配置文件放在 `$HOME/.kodo-browser/config.json`（如果是 Windows 10，则位置是 `C:\Users\<UserName>\.kodo-browser\config.json`）下，配置文件示例如下：
+将配置文件放在 `$HOME/.kodo-browser-v2/config.json`（如果是 Windows 10，则位置是 `C:\Users\<UserName>\.kodo-browser-v2\config.json`）下，配置文件示例如下：
 
 ```json
 {

@@ -20,7 +20,8 @@ import {
   appPreferenceKeys,
 } from "./types";
 
-const configPath = path.join(os.homedir(), ".kodo-browser");
+const oldConfigPath = path.join(os.homedir(), ".kodo-browser");
+const newConfigPath = path.join(os.homedir(), ".kodo-browser-v2");
 
 const new2old: {
   [K in keyof AppPreferencesData]: (v: AppPreferencesData[K]) => [SettingStorageKey, string]
@@ -118,7 +119,7 @@ const new2old: {
 }
 
 async function migratePreferences() {
-  const confFilePath = path.join(configPath, "app_preferences.json");
+  const confFilePath = path.join(newConfigPath, "app_preferences.json");
   const confBuf = await fsPromises.readFile(confFilePath);
   const conf: Partial<AppPreferencesData> = JSON.parse(confBuf.toString());
   for (const k of appPreferenceKeys) {
@@ -132,9 +133,22 @@ async function migratePreferences() {
   await fsPromises.unlink(confFilePath);
 }
 
+async function migrateEndpointConfig() {
+  const oldFilePath = path.join(oldConfigPath, "config.json");
+  const newFilePath = path.join(newConfigPath, "config.json");
+  try {
+    await fsPromises.copyFile(newFilePath, oldFilePath);
+  } catch (err: any) {
+    if (err.code !== "ENOENT") {
+      throw err;
+    }
+  }
+}
+
 async function migrateAkHistory() {
-  const filePath = path.join(configPath, "ak_histories.json");
-  const contentBuf = await fsPromises.readFile(filePath);
+  const newFilePath = path.join(newConfigPath, "ak_histories.json");
+  const oldFilePath = path.join(oldConfigPath, "ak_histories.json");
+  const contentBuf = await fsPromises.readFile(newFilePath);
   const content: AkHistory = JSON.parse(contentBuf.toString());
   const oldContent: OldAkHistory = {
     historyItems: [],
@@ -147,7 +161,7 @@ async function migrateAkHistory() {
       description: i.description,
     })
   }
-  await fsPromises.writeFile(filePath, JSON.stringify(content));
+  await fsPromises.writeFile(oldFilePath, JSON.stringify(content));
 }
 
 async function migrateBookmarks(ak: string, filePath: string) {
@@ -164,7 +178,7 @@ async function migrateBookmarks(ak: string, filePath: string) {
     });
   }
   await fsPromises.writeFile(
-    path.join(configPath, `bookmarks_${ak}.json`),
+    path.join(oldConfigPath, `bookmarks_${ak}.json`),
     JSON.stringify(oldContent),
   );
   await fsPromises.unlink(filePath);
@@ -190,7 +204,7 @@ async function migrateExternalPaths(ak: string, filePath: string) {
     });
   }
   await fsPromises.writeFile(
-    path.join(configPath, `external_paths_${ak}.json`),
+    path.join(oldConfigPath, `external_paths_${ak}.json`),
     JSON.stringify(oldContent),
   );
   await fsPromises.unlink(filePath);
@@ -237,7 +251,7 @@ async function migrateTransferJobs(
     }
   }
   await fsPromises.writeFile(
-    path.join(configPath, `${type}_${ak}.json`),
+    path.join(oldConfigPath, `${type}_${ak}.json`),
     JSON.stringify(oldContent),
   );
   await dataStore.close();
@@ -245,9 +259,21 @@ async function migrateTransferJobs(
 
 export default async function () {
   await migratePreferences();
+
+  try {
+    await fsPromises.access(oldConfigPath);
+  } catch (err: any) {
+    if (err.code !== "ENOENT") {
+      throw err;
+    }
+    await fsPromises.mkdir(oldConfigPath, {recursive: true});
+  }
+
+
+  await migrateEndpointConfig();
   await migrateAkHistory();
 
-  const filenames = await fsPromises.readdir(configPath)
+  const filenames = await fsPromises.readdir(newConfigPath)
   const ex = /profile_(?<ak>.+)/;
   for (const fName of filenames) {
     const matchRes = fName.match(ex);
@@ -256,20 +282,20 @@ export default async function () {
     }
     await migrateBookmarks(
       matchRes.groups["ak"],
-      path.join(configPath, fName, "bookmarks.json")
+      path.join(newConfigPath, fName, "bookmarks.json")
     );
     await migrateExternalPaths(
       matchRes.groups["ak"],
-      path.join(configPath, fName, "external_paths.json")
+      path.join(newConfigPath, fName, "external_paths.json")
     );
     await migrateTransferJobs(
       matchRes.groups["ak"],
-      path.join(configPath, fName, "upload_progress"),
+      path.join(newConfigPath, fName, "upload_progress"),
       "upprog",
     );
     await migrateTransferJobs(
       matchRes.groups["ak"],
-      path.join(configPath, fName, "download_progress"),
+      path.join(newConfigPath, fName, "download_progress"),
       "downprog",
     );
   }

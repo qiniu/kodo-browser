@@ -19,15 +19,25 @@ import {
   UploadJobPersistInfo,
 } from "./types";
 
-const configPath = path.join(os.homedir(), ".kodo-browser");
+const oldConfigPath = path.join(os.homedir(), ".kodo-browser");
+const newConfigPath = path.join(os.homedir(), ".kodo-browser-v2");
 
 export default async function () {
+  try {
+    await fsPromises.access(newConfigPath);
+  } catch (err: any) {
+    if (err.code !== "ENOENT") {
+      throw err;
+    }
+    await fsPromises.mkdir(newConfigPath, {recursive: true});
+  }
+
   await migratePreferences();
 
   // below migrate date in config path.
   // if config path isn't existing, no data need to migrate
   try {
-    await fsPromises.access(configPath);
+    await fsPromises.access(oldConfigPath);
   } catch (err: any) {
     if (err.code === "ENOENT") {
       return;
@@ -35,9 +45,10 @@ export default async function () {
     throw err;
   }
 
+  await migrateEndpointConfig();
   await migrateAkHistory();
 
-  const filenames = await fsPromises.readdir(configPath)
+  const filenames = await fsPromises.readdir(oldConfigPath)
   const ex = /(?<type>bookmarks|external_paths|upprog|downprog)_(?<ak>.+).json/;
   for (const fName of filenames) {
     const matchRes = fName.match(ex);
@@ -45,12 +56,12 @@ export default async function () {
       continue;
     }
     const ak = matchRes.groups["ak"];
-    const filePath = path.join(configPath, fName);
+    const filePath = path.join(oldConfigPath, fName);
     if (ak === "undefined") {
       await fsPromises.unlink(filePath);
       continue;
     }
-    const profileDirPath = path.join(configPath, `profile_${ak}`);
+    const profileDirPath = path.join(newConfigPath, `profile_${ak}`);
     try {
       await fsPromises.access(profileDirPath);
     } catch {
@@ -166,35 +177,51 @@ async function migratePreferences() {
     return;
   }
   try {
-    await fsPromises.access(configPath);
+    await fsPromises.access(newConfigPath);
   } catch {
-    await fsPromises.mkdir(configPath);
+    await fsPromises.mkdir(newConfigPath);
   }
-  const confFilePath = path.join(configPath, "app_preferences.json");
+  const confFilePath = path.join(newConfigPath, "app_preferences.json");
   await fsPromises.writeFile(confFilePath, JSON.stringify(preferences));
 }
 
+async function migrateEndpointConfig() {
+  const oldFilePath = path.join(oldConfigPath, "config.json");
+  const newFilePath = path.join(newConfigPath, "config.json");
+  try {
+    await fsPromises.copyFile(oldFilePath, newFilePath);
+  } catch (err: any) {
+    if (err.code !== "ENOENT") {
+      throw err;
+    }
+  }
+}
+
 async function migrateAkHistory() {
-  const filePath = path.join(configPath, "ak_histories.json");
-    try {
-    await fsPromises.access(filePath);
+  const oldFilePath = path.join(oldConfigPath, "ak_histories.json");
+  const newFilePath = path.join(newConfigPath, "ak_histories.json");
+  try {
+    await fsPromises.access(oldFilePath);
   } catch {
     return;
   }
-  const oldContentBuf = await fsPromises.readFile(filePath);
+  const oldContentBuf = await fsPromises.readFile(oldFilePath);
   const oldContent: OldAkHistory = JSON.parse(oldContentBuf.toString());
   const content: AkHistory = {
     historyItems: [],
   };
   for (const i of oldContent.historyItems) {
+    if (!i.accessKeyId || !i.accessKeySecret) {
+      continue;
+    }
     content.historyItems.push({
       endpointType: i.isPublicCloud ? "public" : "private",
       accessKey: i.accessKeyId,
       accessSecret: i.accessKeySecret,
       description: i.description,
-    })
+    });
   }
-  await fsPromises.writeFile(filePath, JSON.stringify(content));
+  await fsPromises.writeFile(newFilePath, JSON.stringify(content));
 }
 
 const pathEx = /(?<protocol>[a-zA-Z0-9\-_]+:\/\/)(?<path>.+)/;
@@ -206,19 +233,21 @@ async function migrateBookmarks(ak: string, filePath: string) {
     homeAddress: oldContent.homeAddress,
     list: [],
   };
-  for (const b of oldContent.bookmarks) {
-    const exRes = b.fullPath.match(pathEx);
-    if (!exRes || !exRes.groups) {
-      continue;
+  if (Array.isArray(oldContent.bookmarks)) {
+    for (const b of oldContent.bookmarks) {
+      const exRes = b.fullPath.match(pathEx);
+      if (!exRes || !exRes.groups) {
+        continue;
+      }
+      content.list.push({
+        protocol: exRes.groups["protocol"],
+        path: exRes.groups["path"],
+        timestamp: b.timestamp,
+      });
     }
-    content.list.push({
-      protocol: exRes.groups["protocol"],
-      path: exRes.groups["path"],
-      timestamp: b.timestamp,
-    });
   }
   await fsPromises.writeFile(
-    path.join(configPath, `profile_${ak}`, "bookmarks.json"),
+    path.join(newConfigPath, `profile_${ak}`, "bookmarks.json"),
     JSON.stringify(content),
   );
   await fsPromises.unlink(filePath);
@@ -242,7 +271,7 @@ async function migrateExternalPaths(ak: string, filePath: string) {
     });
   }
   await fsPromises.writeFile(
-    path.join(configPath, `profile_${ak}`, "external_paths.json"),
+    path.join(newConfigPath, `profile_${ak}`, "external_paths.json"),
     JSON.stringify(content),
   );
   await fsPromises.unlink(filePath);
@@ -270,7 +299,7 @@ function migrateJobInfo(
   if (isUploadJob(oldInfo)) {
     info = {
       ...oldInfo,
-      uploadedParts: oldInfo.uploadedParts.map(p => ({
+      uploadedParts: (oldInfo.uploadedParts || []).map(p => ({
         partNumber: p.PartNumber,
         etag: p.ETag,
       })),
@@ -286,7 +315,7 @@ function migrateJobInfo(
   info.status = ["waiting", "running"].includes(oldInfo.status)
     ? "stopped"
     : oldInfo.status;
-  info.storageClasses = oldInfo.storageClasses.map(c => ({
+  info.storageClasses = (oldInfo.storageClasses || []).map(c => ({
     kodoName: c.kodoName,
     fileType: c.fileType,
     s3Name: c.s3Name,
@@ -299,15 +328,19 @@ async function migrateTransferJobs(
   filePath: string,
   type: "upload_prog" | "download_prog",
 ) {
-  const basedir = path.join(configPath, `profile_${ak}`, type);
+  const basedir = path.join(newConfigPath, `profile_${ak}`, type);
   const contentBuf = await fsPromises.readFile(filePath);
   const oldContent = JSON.parse(contentBuf.toString()) as Record<string, OldUploadJobPersistInfo | OldDownloadJobPersistInfo>;
   const dataStore = await getDataStoreOrCreate<UploadJobPersistInfo | DownloadJobPersistInfo>({
     workingDirectory: basedir,
   });
   for (const [oldId, oldInfo] of Object.entries(oldContent)) {
-    const [id, info] = migrateJobInfo(oldId, oldInfo);
-    await dataStore.set(id, info);
+    try {
+      const [id, info] = migrateJobInfo(oldId, oldInfo);
+      await dataStore.set(id, info);
+    } catch {
+      // skip error data
+    }
   }
   await dataStore.compact(true);
   await dataStore.close();

@@ -9,4 +9,4 @@ export const app = {
     version: pkgJson.version,
 };
 
-export const config_path = path.join(os.homedir(), '.kodo-browser');
+export const config_path = path.join(os.homedir(), '.kodo-browser-v2');

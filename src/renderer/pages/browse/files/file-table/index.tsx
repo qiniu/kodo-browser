@@ -48,23 +48,31 @@ const FileTable: React.FC<FileTableProps> = ({
   const {
     rowsData,
     prefixHitNum,
+    selectHitNum,
     bothHitNum,
   }: {
     rowsData: FileRowData[],
     prefixHitNum: number,
+    selectHitNum: number,
     bothHitNum: number,
   } = useMemo(() => {
     const prefixPaths = Array.from(selectedFiles.values())
       .filter(FileItem.isItemPrefix)
       .map(p => p.path.toString());
     let prefixHitNum = 0;
+    let selectHitNum = 0;
     let bothHitNum = 0;
     const rowsData = data.map((item, index) => {
       const itemPath = item.path.toString();
+      // prevent empty name file conflict with prefix item
+      const selectedItemId = [item.itemType, itemPath].join(":");
       const prefixHit = prefixPaths.some(p => itemPath.startsWith(p));
-      const selectHit = selectedFiles.has(itemPath) && !FileItem.isItemPrefix(selectedFiles.get(itemPath));
+      const selectHit = selectedFiles.has(selectedItemId);
       if (prefixHit) {
         prefixHitNum += 1;
+      }
+      if (selectHit) {
+        selectHitNum += 1;
       }
       if (prefixHit && selectHit) {
         bothHitNum += 1;
@@ -80,19 +88,28 @@ const FileTable: React.FC<FileTableProps> = ({
     return {
       rowsData,
       prefixHitNum,
+      selectHitNum,
       bothHitNum,
     };
   }, [data, selectedFiles, regionId]);
 
-  const selectedTotal = selectedFiles.size + prefixHitNum - bothHitNum;
-  const isSelectedAll = rowsData.length > 0 && selectedTotal === rowsData.length;
+  const selectedTotal = selectHitNum + prefixHitNum - bothHitNum;
+  const isSelectedAll = rowsData.length > 0 && selectedTotal >= rowsData.length;
   const lastClickIndexRef = useRef<number | undefined>();
   const loadingMore = rowsData.length > 0 && loading;
+
+  const handlerToggleSelectAll = (checked: boolean) => {
+    if (!checked) {
+      onSelectFiles(Array.from(selectedFiles.values()).concat(rowsData), false);
+      return;
+    }
+    onSelectFiles(rowsData, checked);
+  };
 
   const columns = getColumns({
     availableStorageClasses,
     isSelectedAll: isSelectedAll,
-    onToggleSelectAll: (checked: boolean) => onSelectFiles(rowsData, checked),
+    onToggleSelectAll: handlerToggleSelectAll,
     onClickFile,
     onDoubleClickFile,
     onAction,

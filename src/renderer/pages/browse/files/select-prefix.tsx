@@ -37,9 +37,14 @@ const SelectPrefix: React.FC<SelectPrefixProps> = ({
   };
 
   const {
+    // the selected prefix is including current prefix
     isIncluding,
+    // the selected prefix is current prefix
     isSelected,
   } = selectedFiles.reduce((res, i) => {
+    if (!FileItem.isItemPrefix(i)) {
+      return res;
+    }
     const p = i.path.toString();
     if (currentPrefix.startsWith(p)) {
       res.isIncluding = true;

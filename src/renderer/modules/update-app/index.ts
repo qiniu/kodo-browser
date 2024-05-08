@@ -20,8 +20,8 @@ async function prevVersionGetter(): Promise<string> {
   try {
     version = (await fsPromises.readFile(currVersionFilePath)).toString();
   } catch {
-    // v2.1.1 is the first version added migrator
-    version = "2.1.1";
+    // v2.1.2 is the first version added migrator
+    version = "2.1.2";
   }
   return version;
 }

@@ -57,14 +57,26 @@ const Files: React.FC<FilesProps> = (props) => {
     if (checked) {
       setSelectedFiles(m => {
         for (const f of files) {
-          m.set(f.path.toString(), f);
+          // prevent empty name file conflict with prefix item
+          const selectedItemId = [f.itemType, f.path.toString()].join(":");
+          m.set(selectedItemId, f);
         }
         return new Map(m);
       });
     } else {
       setSelectedFiles(m => {
         for (const f of files) {
-          m.delete(f.path.toString());
+          if (FileItem.isItemPrefix(f)) {
+            // auto remove all items stated with the unchecked prefix
+            for (const item of m.values()) {
+              if (item.path.toString().startsWith(f.path.toString())) {
+                m.delete([item.itemType, item.path.toString()].join(":"));
+              }
+            }
+          }
+          // prevent empty name file conflict with prefix item
+          const selectedItemId = [f.itemType, f.path.toString()].join(":");
+          m.delete(selectedItemId);
         }
         return new Map(m);
       });

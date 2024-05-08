@@ -53,8 +53,9 @@ const FileGrid: React.FC<FileGridProps> = ({
       .map(p => p.path.toString());
     const filesData = data.map((item, index) => {
       const itemPath = item.path.toString();
+      const selectedItemId = [item.itemType, itemPath].join(":");
       const prefixHit = prefixPaths.some(p => itemPath.startsWith(p));
-      const selectHit = selectedFiles.has(itemPath) && !FileItem.isItemPrefix(selectedFiles.get(itemPath));
+      const selectHit = selectedFiles.has(selectedItemId);
       return {
         ...item,
         id: itemPath,

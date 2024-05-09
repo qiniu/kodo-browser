@@ -5,7 +5,7 @@ import {app} from "electron";
 import {Handler, HandlerConstructable, SignInHandler} from "./handler";
 import {Sender} from "@common/ipc-actions/types";
 
-const SCHEME_NAME = "kodo-browser";
+const SCHEME_NAME = "kodobrowser";
 
 export class DeepLinkRegister {
   private handlers: Record<string, Handler | undefined> = {};

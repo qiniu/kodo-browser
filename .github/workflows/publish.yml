@@ -1,12 +1,27 @@
 on:
   push:
     tags:
-    - 'v*'
+      - "v[0-9]+.[0-9]+.[0-9]+"
 name: Build Release
 jobs:
+  version_check:
+    name: Version Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+      - name: Check
+        run: |
+          set -e
+          grep -qF "\"version\": \"${RELEASE_VERSION}\"" package.json
+          grep -qF "export * from \"./${RELEASE_VERSION}\";" src/renderer/modules/update-app/migrate-steps/index.ts
+          grep -qF "version: \"${RELEASE_VERSION}\"" src/renderer/modules/update-app/migrate-steps/${RELEASE_VERSION}/index.ts
   create_release:
     name: Create release for new version
     runs-on: ubuntu-latest
+    needs: version_check
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
@@ -34,7 +49,7 @@ jobs:
         run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
       - uses: actions/setup-node@v1
         with:
-          node-version: '16.x'
+          node-version: "16.x"
       - name: Prepare qshell
         run: |
           set -e
@@ -78,7 +93,7 @@ jobs:
         shell: bash
       - uses: actions/setup-node@v1
         with:
-          node-version: '16.x'
+          node-version: "16.x"
       - name: Prepare qshell
         run: |
           set -e
@@ -131,7 +146,7 @@ jobs:
         run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
       - uses: actions/setup-node@v1
         with:
-          node-version: '16.x'
+          node-version: "16.x"
       - name: Prepare qshell
         run: |
           set -e

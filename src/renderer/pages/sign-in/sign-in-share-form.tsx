@@ -3,10 +3,12 @@ import {useNavigate} from "react-router-dom";
 import {toast} from "react-hot-toast";
 import {SubmitHandler, useForm} from "react-hook-form";
 import {Button, Col, Form, Row, Spinner} from "react-bootstrap";
+import {DEFAULT_PORTAL_URL} from "kodo-s3-adapter-sdk/dist/region";
 
 import {translate} from "@renderer/modules/i18n";
 import {useAuth} from "@renderer/modules/auth";
 import * as AuditLog from "@renderer/modules/audit-log";
+import * as DefaultDict from "@renderer/modules/default-dict";
 
 import RoutePath from "@renderer/pages/route-path";
 
@@ -19,6 +21,24 @@ interface ParseShareURLResult {
   apiHost?: string,
   shareId: string,
   shareToken: string,
+}
+
+function isPublicShareURL(url: string): boolean {
+  const shareURL = new URL(url.trim());
+  const defaultPortalURL = new URL(DEFAULT_PORTAL_URL);
+  return shareURL.host === defaultPortalURL.host
+}
+
+function getCustomApiHost(): string | undefined {
+  const customShareUrl = DefaultDict.get("BASE_SHARE_URL");
+  if (!customShareUrl) {
+    return;
+  }
+  const customApiHost = new URL(customShareUrl).searchParams.get("apiHost");
+  if (!customApiHost) {
+    return;
+  }
+  return customApiHost;
 }
 
 function parseShareURL(url: string): ParseShareURLResult | null {
@@ -69,6 +89,20 @@ const SignInShareForm: React.FC<SignInShareFormProps> = ({
       toast.error(translate("signIn.formShareLink.shareLink.feedback.invalidFormat"));
       return;
     }
+
+    // try to determine the api host from private cloud share link
+    const customDefaultApiHost = getCustomApiHost();
+    if (
+      !isPublicShareURL(data.shareLink) &&
+      !parsedShareURL.apiHost &&
+      !customDefaultApiHost
+    ) {
+      toast.error(translate("signIn.formShareLink.shareLink.feedback.invalidPrivateFormat"));
+      return;
+    }
+    parsedShareURL.apiHost = parsedShareURL.apiHost || customDefaultApiHost;
+
+    // send sign in request
     const p = signInWithShareLink({
       apiHost: parsedShareURL.apiHost,
       shareId: parsedShareURL.shareId,

@@ -142,6 +142,7 @@ export default interface Dictionary {
         label: string,
         feedback: {
           invalidFormat: string,
+          invalidPrivateFormat: string,
         },
       },
       extractCode: {

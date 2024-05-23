@@ -139,6 +139,7 @@ const dict: Dictionary = {
         label: "Share Link:",
         feedback: {
           invalidFormat: "Invalid share link format",
+          invalidPrivateFormat: "Invalid share link format. Please configure share base link if it's a share link for private cloud.",
         },
       },
       extractCode: {

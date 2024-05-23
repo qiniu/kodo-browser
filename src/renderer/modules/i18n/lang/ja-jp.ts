@@ -139,6 +139,7 @@ const dict: Dictionary = {
                 label: "共有リンク：",
                 feedback: {
                     invalidFormat: "リンクの形式が正しくありません",
+                    invalidPrivateFormat: "リンクの形式が正しくありません。非公開クラウドユーザーの場合は、プライベートクラウド共有アドレスを設定してください",
                 },
             },
             extractCode: {

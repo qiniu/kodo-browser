@@ -12,7 +12,7 @@ import {ALPHANUMERIC} from "@common/const/str";
 import {Alphanumeric} from "@renderer/const/patterns";
 
 import {useI18n} from "@renderer/modules/i18n";
-import {useAuth} from "@renderer/modules/auth";
+import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {createShare, FileItem} from "@renderer/modules/qiniu-client";
 import * as DefaultDict from "@renderer/modules/default-dict";
 
@@ -95,6 +95,17 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
       return;
     }
 
+    const apiUrls: string[] = [];
+    const customShareUrl = currentUser.endpointType === EndpointType.Private
+      ? DefaultDict.get("BASE_SHARE_URL")
+      : undefined;
+    if (customShareUrl) {
+      const customApiHost = new URL(customShareUrl).searchParams.get("apiHost");
+      if (customApiHost) {
+        apiUrls.push(customApiHost);
+      }
+    }
+
     const p = createShare(
       {
         bucket: memoBucketName,
@@ -104,7 +115,7 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
         permission: "READONLY",
       },
       {
-        apiUrls: [],
+        apiUrls,
         accessKey: currentUser.accessKey,
         accessSecret: currentUser.accessSecret,
         endpointType: currentUser.endpointType,
@@ -112,7 +123,7 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
     );
 
     p.then(shareInfo => {
-      const baseShareUrl = DefaultDict.get("BASE_SHARE_URL") || `${DEFAULT_PORTAL_URL}/kodo-shares/verify`;
+      const baseShareUrl = customShareUrl || `${DEFAULT_PORTAL_URL}/kodo-shares/verify`;
       const shareURL = new URL(baseShareUrl);
       shareURL.searchParams.set("id", shareInfo.id);
       shareURL.searchParams.set("token", shareInfo.token);

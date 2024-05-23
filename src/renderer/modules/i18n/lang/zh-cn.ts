@@ -139,6 +139,7 @@ const dict: Dictionary = {
         label: "分享链接：",
         feedback: {
           invalidFormat: "链接格式不正确",
+          invalidPrivateFormat: "链接格式不正确，非公有云用户请配置私有云分享地址",
         },
       },
       extractCode: {

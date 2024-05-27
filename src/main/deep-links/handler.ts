@@ -41,7 +41,7 @@ export class SignInHandler implements Handler {
   }
 
   private handleSignInWithShareLink(href: string) {
-    // kodo-browser://signIn/shareLink?id={id}&token={token}[&code={code}][&apiHost={http://exmaple.com}]
+    // kodobrowser://signIn/shareLink?id={id}&token={token}[&code={code}][&apiHost={http://exmaple.com}]
     const url = new URL(href);
 
     const apiHost = url.searchParams.get("apiHost") || undefined;
@@ -63,7 +63,7 @@ export class SignInHandler implements Handler {
   }
 
   private handleSignInWithShareSession(href: string) {
-    // kodo-browser://signIn/shareSession?data={data}
+    // kodobrowser://signIn/shareSession?data={data}
     // data is the verify response, which is encoded by url-safe base64
     let data: (
       VerifyShareResult

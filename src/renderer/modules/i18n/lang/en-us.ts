@@ -751,6 +751,7 @@ const dict: Dictionary = {
         expireAfter: {
           label: "Validity Period:",
           suffix: "seconds",
+          hint: "Range: ${minSeconds} - ${maxSeconds} seconds"
         },
         extractCode: {
           label: "Extraction Code:",

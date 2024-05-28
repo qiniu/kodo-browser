@@ -7,6 +7,7 @@ export interface LaunchConfig {
   defaultPrivateEndpointConfig?: DefaultPrivateEndpointConfig,
   preferenceValidators?: PreferenceValidators,
   baseShareUrl?: string,
+  maxShareDirectoryExpireAfterSeconds?: number,
   disable?: DisableFunctions,
 }
 

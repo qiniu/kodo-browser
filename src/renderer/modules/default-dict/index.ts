@@ -19,6 +19,7 @@ interface Dict {
     maxUploadJobConcurrency?: number,
     maxDownloadJobConcurrency?: number,
   },
+  MAX_SHARE_DIRECTORY_EXPIRE_AFTER_SECONDS?: number,
 }
 
 const dict: Dict = {};

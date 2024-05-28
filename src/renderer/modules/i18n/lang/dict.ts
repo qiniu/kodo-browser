@@ -753,6 +753,7 @@ export default interface Dictionary {
         expireAfter: {
           label: string,
           suffix: string,
+          hint: string,
         },
         extractCode: {
           label: string,

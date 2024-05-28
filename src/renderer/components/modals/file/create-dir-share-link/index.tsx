@@ -11,10 +11,12 @@ import Duration from "@common/const/duration";
 import {ALPHANUMERIC} from "@common/const/str";
 import {Alphanumeric} from "@renderer/const/patterns";
 
-import {useI18n} from "@renderer/modules/i18n";
+import {Translate, useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
 import {createShare, FileItem} from "@renderer/modules/qiniu-client";
 import * as DefaultDict from "@renderer/modules/default-dict";
+
+const MAX_EXPIRE_AFTER_SECONDS = 7200;
 
 interface CreateDirShareLinkProps {
   bucketName: string,
@@ -58,6 +60,8 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
 
 
   // form state
+  const maxExpireAfterSeconds = DefaultDict.get("MAX_SHARE_DIRECTORY_EXPIRE_AFTER_SECONDS") ?? MAX_EXPIRE_AFTER_SECONDS;
+  const minExpireAfterSeconds = 15 * Duration.Minute / Duration.Second;
   const {
     handleSubmit,
     register,
@@ -167,7 +171,22 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
   }, [modalProps.show]);
 
   // render
-  const Content = () => {
+  const renderExpireAfterOption = ({
+    value,
+    unit,
+    unitDesc
+  }: {
+    value: number,
+    unit: Duration,
+    unitDesc: string,
+  }) => {
+    const v = value * unit / Duration.Second;
+    return (
+      <option key={v} value={v}>{value} {unitDesc}</option>
+    );
+  };
+
+  const renderContent = () => {
     if (!memoFileItem) {
       return (
         <div>
@@ -242,35 +261,75 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
             <Form.Label className="text-end">
               {translate("modals.createDirectoryShareLink.form.expireAfter.label")}
             </Form.Label>
-            <InputGroup>
-              <Form.Select
-                value={expireAfterPreset}
-                onChange={handleSelectExpireAfter}
+            <div>
+              <InputGroup>
+                <Form.Select
+                  value={expireAfterPreset}
+                  onChange={handleSelectExpireAfter}
+                >
+                  <option value={-1}>{translate("common.custom")}</option>
+                  {
+                    [
+                      {
+                        value: 15,
+                        unit: Duration.Minute,
+                        unitDesc: translate("common.minutes"),
+                      },
+                      {
+                        value: 30,
+                        unit: Duration.Minute,
+                        unitDesc: translate("common.minutes"),
+                      },
+                      {
+                        value: 1,
+                        unit: Duration.Hour,
+                        unitDesc: translate("common.hour"),
+                      },
+                      {
+                        value: 2,
+                        unit: Duration.Hour,
+                        unitDesc: translate("common.hours"),
+                      },
+                    ].filter(opt => (opt.value * opt.unit) / Duration.Second <= maxExpireAfterSeconds)
+                      .map(opt => renderExpireAfterOption(opt))
+                  }
+                </Form.Select>
+                {
+                  expireAfterPreset > 0
+                    ? null
+                    : <>
+                      <Form.Control
+                        {...register("expireAfter", {
+                          required: true,
+                          valueAsNumber: true,
+                          min: minExpireAfterSeconds,
+                          max: maxExpireAfterSeconds,
+                        })}
+                        type="number"
+                        isInvalid={Boolean(errors.expireAfter)}
+                      />
+                      <InputGroup.Text>
+                        {translate("modals.createDirectoryShareLink.form.expireAfter.suffix")}
+                      </InputGroup.Text>
+                    </>
+                }
+              </InputGroup>
+              <Form.Text
+                className={
+                  Boolean(errors.expireAfter)
+                    ? "text-danger"
+                    : ""
+                }
               >
-                <option value={-1}>{translate("common.custom")}</option>
-                <option value={15 * Duration.Minute / Duration.Second}>15 {translate("common.minutes")}</option>
-                <option value={30 * Duration.Minute / Duration.Second}>30 {translate("common.minutes")}</option>
-                <option value={Duration.Hour / Duration.Second}>1 {translate("common.hour")}</option>
-                <option value={2 * Duration.Hour / Duration.Second}>2 {translate("common.hours")}</option>
-              </Form.Select>
-              {
-                expireAfterPreset > 0
-                  ? null
-                  : <>
-                    <Form.Control
-                      {...register("expireAfter", {
-                        required: true,
-                        valueAsNumber: true,
-                      })}
-                      type="number"
-                      isInvalid={Boolean(errors.extractCode)}
-                    />
-                    <InputGroup.Text>
-                      {translate("modals.createDirectoryShareLink.form.expireAfter.suffix")}
-                    </InputGroup.Text>
-                  </>
-              }
-            </InputGroup>
+                <Translate
+                  i18nKey={"modals.createDirectoryShareLink.form.expireAfter.hint"}
+                  data={{
+                    minSeconds: minExpireAfterSeconds.toString(),
+                    maxSeconds: maxExpireAfterSeconds.toString(),
+                  }}
+                />
+              </Form.Text>
+            </div>
           </Form.Group>
           <Form.Group as={Fragment} controlId="fileName">
             <Form.Label className="text-end">
@@ -311,7 +370,7 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
     );
   }
 
-  const Footer = () => {
+  const renderFooter = () => {
     return (
       <>
         {
@@ -355,10 +414,10 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Content/>
+        {renderContent()}
       </Modal.Body>
       <Modal.Footer>
-        <Footer/>
+        {renderFooter()}
       </Modal.Footer>
     </Modal>
   );

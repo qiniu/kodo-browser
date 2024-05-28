@@ -10,6 +10,9 @@ class ChoreConfigs implements LaunchConfigPlugin {
     if (options.launchConfig.baseShareUrl) {
       DefaultDict.set("BASE_SHARE_URL", options.launchConfig.baseShareUrl);
     }
+    if (options.launchConfig.maxShareDirectoryExpireAfterSeconds) {
+      DefaultDict.set("MAX_SHARE_DIRECTORY_EXPIRE_AFTER_SECONDS", options.launchConfig.maxShareDirectoryExpireAfterSeconds);
+    }
   }
 }
 

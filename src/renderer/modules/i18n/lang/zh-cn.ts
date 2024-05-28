@@ -750,6 +750,7 @@ const dict: Dictionary = {
         expireAfter: {
           label: "有效期：",
           suffix: "秒",
+          hint: "范围：${minSeconds} - ${maxSeconds} 秒"
         },
         extractCode: {
           label: "提取码：",

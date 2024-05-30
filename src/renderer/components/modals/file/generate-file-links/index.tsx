@@ -16,7 +16,7 @@ import {BackendMode} from "@common/qiniu"
 import usePortal from "@renderer/modules/hooks/use-portal";
 import {useI18n} from "@renderer/modules/i18n";
 import {useAuth} from "@renderer/modules/auth";
-import {FileItem, signatureUrls} from "@renderer/modules/qiniu-client";
+import {FileItem, getStyleForSignature, signatureUrls} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
 import {useFileOperation} from "@renderer/modules/file-operation";
 
@@ -167,14 +167,24 @@ const GenerateFileLinks: React.FC<ModalProps & GenerateFileLinksProps> = (props)
         preferBackendMode === BackendMode.S3 ||
         domain?.apiScope === BackendMode.S3,
     };
+
+    const apiDomain = domain?.name === NON_OWNED_DOMAIN.name
+        ? undefined
+        : domain;
+
+    const style = getStyleForSignature({
+      domain: apiDomain,
+      preferBackendMode,
+      currentEndpointType: currentUser.endpointType,
+    });
+
     return signatureUrls(
       memoRegionId,
       memoBucketName,
       memoFileItems,
-      domain?.name === NON_OWNED_DOMAIN.name
-        ? undefined
-        : domain,
+      apiDomain,
       expireAfter,
+      style,
       (progress) => {
         setBatchProgressState({
           total: progress.total,

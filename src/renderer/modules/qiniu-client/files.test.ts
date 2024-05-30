@@ -607,6 +607,7 @@ describe("test qiniu-client/files.ts", () => {
                             mockDataKey,
                             undefined,
                             10,
+                            name === "S3" ? "path" : "bucketEndpoint",
                             mockOpt,
                         );
                         expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
@@ -622,6 +623,7 @@ describe("test qiniu-client/files.ts", () => {
                             },
                             undefined,
                             expectDeadline,
+                            name === "S3" ? "path" : "bucketEndpoint",
                         );
                     } finally {
                         jest.useRealTimers();

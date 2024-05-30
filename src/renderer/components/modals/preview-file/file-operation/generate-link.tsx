@@ -5,7 +5,7 @@ import lodash from "lodash";
 import {BackendMode} from "@common/qiniu"
 
 import {useAuth} from "@renderer/modules/auth";
-import {FileItem, signatureUrl} from "@renderer/modules/qiniu-client";
+import {FileItem, getStyleForSignature, signatureUrl} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains} from "@renderer/modules/qiniu-client-hooks";
 import {useFileOperation} from "@renderer/modules/file-operation";
 
@@ -84,16 +84,23 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
         data.domain?.apiScope === BackendMode.S3,
     };
 
-    const domain = data.domain?.name === NON_OWNED_DOMAIN.name
+    const apiDomain = data.domain?.name === NON_OWNED_DOMAIN.name
       ? undefined
       : data.domain;
+
+    const style = getStyleForSignature({
+      domain: apiDomain,
+      preferBackendMode,
+      currentEndpointType: currentUser.endpointType,
+    });
 
     return signatureUrl(
       regionId,
       bucketName,
       fileItem.path.toString(),
-      domain,
+      apiDomain,
       data.expireAfter,
+      style,
       opt,
     )
       .then(fileUrl => {

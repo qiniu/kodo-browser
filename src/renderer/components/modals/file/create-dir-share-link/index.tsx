@@ -76,12 +76,22 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
     mode: "onChange",
   });
 
-  const [expireAfterPreset, setExpireAfterPreset] = useState(Duration.Hour / Duration.Second);
+  let defaultExpireAfterPreset = Duration.Hour / Duration.Second;
+  if (defaultExpireAfterPreset >= maxExpireAfterSeconds) {
+    defaultExpireAfterPreset = -1;
+  }
+  const [expireAfterPreset, setExpireAfterPreset] = useState(defaultExpireAfterPreset);
   const handleSelectExpireAfter: ChangeEventHandler<HTMLSelectElement> = (event) => {
     const expireAfter = parseInt(event.target.value);
     setExpireAfterPreset(expireAfter);
     if (expireAfter > 0) {
-      setValue("expireAfter", expireAfter);
+      setValue(
+        "expireAfter",
+        expireAfter,
+        {
+          shouldValidate: true,
+        },
+      );
     }
   }
 
@@ -91,7 +101,13 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
 
   // handlers
   const handleRandomExtractCode = () => {
-    setValue("extractCode", genAlphanumericCode(6));
+    setValue(
+      "extractCode",
+      genAlphanumericCode(6),
+      {
+        shouldValidate: true,
+      },
+    );
   };
 
   const handleSubmitCreateShareLink: SubmitHandler<CreateDirShareLinkFormData> = async (data) => {

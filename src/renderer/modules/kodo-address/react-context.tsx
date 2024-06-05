@@ -9,6 +9,7 @@ const KodoNavigatorContext = createContext<{
   addressHistory: KodoAddress[],
   bucketName: string | undefined,
   basePath: string | undefined,
+  lockPrefix: string,
   goBack: () => void,
   goForward: () => void,
   goUp: KodoNavigator["goUp"],
@@ -22,6 +23,7 @@ const KodoNavigatorContext = createContext<{
   addressHistory: [],
   bucketName: undefined,
   basePath: undefined,
+  lockPrefix: "",
   goBack: () => {},
   goForward: () => {},
   goUp: (_p?: KodoAddress) => {},
@@ -40,6 +42,7 @@ export const Provider: React.FC<{
   const [addressHistory, setAddressHistory] = useState<KodoAddress[]>(kodoNavigator.history);
   const [bucketName, setBucketName] = useState<string | undefined>(kodoNavigator.bucketName);
   const [basePath, setBasePath] = useState<string | undefined>(kodoNavigator.basePath);
+  const [lockPrefix, setLockPrefix] = useState(kodoNavigator.lockPrefix);
 
   useEffect(() => {
     const handleChange = () => {
@@ -48,6 +51,7 @@ export const Provider: React.FC<{
       setAddressHistory(kodoNavigator.history);
       setBucketName(kodoNavigator.bucketName);
       setBasePath(kodoNavigator.basePath);
+      setLockPrefix(kodoNavigator.lockPrefix);
     };
     kodoNavigator.onChange(handleChange);
     return () => kodoNavigator.offChange(handleChange);
@@ -60,6 +64,7 @@ export const Provider: React.FC<{
       addressHistory: addressHistory,
       bucketName: bucketName,
       basePath: basePath,
+      lockPrefix: lockPrefix,
       // `bind` are required because of `this`
       goBack: kodoNavigator.goBack.bind(kodoNavigator),
       goForward: kodoNavigator.goForward.bind(kodoNavigator),

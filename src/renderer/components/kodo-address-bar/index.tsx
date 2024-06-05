@@ -23,6 +23,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
     currentAddress,
     addressHistory,
     currentIndex,
+    lockPrefix,
     goBack,
     goForward,
     goTo,
@@ -107,7 +108,7 @@ const KodoAddressBar: React.FC<KodoAddressBarProps> = ({
           onClick={goForward}
         />
         <TooltipButton
-          disabled={address.path.length === 0}
+          disabled={address.path === lockPrefix}
           iconClassName="fa fa-arrow-up"
           tooltipPlacement="bottom"
           tooltipContent={translate("kodoAddressBar.goUp")}

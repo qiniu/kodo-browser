@@ -1,13 +1,15 @@
 import React, {useCallback, useEffect, useState} from "react";
 import lodash from "lodash";
+import {toast} from "react-hot-toast";
 
+import {useAuth} from "@renderer/modules/auth";
 import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 import {
   KodoAddress,
   KodoNavigator,
   Provider as KodoNavigatorProvider,
 } from "@renderer/modules/kodo-address";
-import {useAuth} from "@renderer/modules/auth";
+import {useBookmarkPath} from "@renderer/modules/user-config-store";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 import KodoAddressBar from "@renderer/components/kodo-address-bar";
@@ -27,6 +29,8 @@ const BrowseShare: React.FC<BrowseShareProps> = () => {
     setToggleRefresh(v => !v);
   }, 300), []);
 
+  const {setHome} = useBookmarkPath(currentUser);
+
   // initial kodo navigator
   useEffect(() => {
     if (!currentUser || !shareSession) {
@@ -40,8 +44,13 @@ const BrowseShare: React.FC<BrowseShareProps> = () => {
       defaultProtocol: ADDR_KODO_PROTOCOL,
       maxHistory: 100,
       initAddress: homeAddress,
+      lockPrefix: homeAddress.path,
     });
     setKodoNavigator(kodoNav);
+    setHome(homeAddress)
+      .catch(e=> {
+        toast.error(e.toString());
+      });
   }, [currentUser]);
 
   // render

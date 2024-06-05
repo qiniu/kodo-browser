@@ -137,6 +137,7 @@ const dict: Dictionary = {
     formShareLink: {
       shareLink: {
         label: "Share Link:",
+        holder: "Please input the directory share link",
         feedback: {
           invalidFormat: "Invalid share link format",
           invalidPrivateFormat: "Invalid share link format. Please configure share base link if it's a share link for private cloud.",

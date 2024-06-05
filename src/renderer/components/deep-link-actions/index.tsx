@@ -141,6 +141,7 @@ function DeepLinkActions() {
         onHide={() => handleCloseSignOutConfirmModal(null)}
         title={translate("deepLinkActions.signIn.signOutConfirm.title")}
         content={translate("deepLinkActions.signIn.signOutConfirm.description")}
+        okText={translate("common.ok")}
         onOk={handleSignOutConfirmOk}
       />
     </div>

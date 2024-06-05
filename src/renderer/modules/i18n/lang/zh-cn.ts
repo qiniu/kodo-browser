@@ -137,6 +137,7 @@ const dict: Dictionary = {
     formShareLink: {
       shareLink: {
         label: "分享链接：",
+        holder: "请输入文件夹分享链接",
         feedback: {
           invalidFormat: "链接格式不正确",
           invalidPrivateFormat: "链接格式不正确，非公有云用户请配置私有云分享地址",

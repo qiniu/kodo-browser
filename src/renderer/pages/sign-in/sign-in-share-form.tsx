@@ -146,7 +146,7 @@ const SignInShareForm: React.FC<SignInShareFormProps> = ({
               style={{
                 resize: 'none',
               }}
-              placeholder="https://portal.qiniu.com/?id=xxx&token=xxxxxx"
+              placeholder={translate("signIn.formShareLink.shareLink.holder")}
               isInvalid={Boolean(errors.shareLink)}
             />
             <Form.Control.Feedback type="invalid">
@@ -165,6 +165,8 @@ const SignInShareForm: React.FC<SignInShareFormProps> = ({
                 "extractCode",
                 {
                   required: true,
+                  minLength: 6,
+                  maxLength: 6,
                 }
               )}
               type="text"

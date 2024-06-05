@@ -140,6 +140,7 @@ export default interface Dictionary {
     formShareLink: {
       shareLink: {
         label: string,
+        holder: string,
         feedback: {
           invalidFormat: string,
           invalidPrivateFormat: string,

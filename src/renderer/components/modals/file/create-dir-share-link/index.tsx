@@ -13,7 +13,7 @@ import {Alphanumeric} from "@renderer/const/patterns";
 
 import {Translate, useI18n} from "@renderer/modules/i18n";
 import {EndpointType, useAuth} from "@renderer/modules/auth";
-import {createShare, FileItem} from "@renderer/modules/qiniu-client";
+import {createShare, FileItem, getShareApiHosts} from "@renderer/modules/qiniu-client";
 import * as DefaultDict from "@renderer/modules/default-dict";
 
 const MAX_EXPIRE_AFTER_SECONDS = 7200;
@@ -115,15 +115,20 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
       return;
     }
 
-    const apiUrls: string[] = [];
+    let apiUrls: string[] = [];
     const customShareUrl = currentUser.endpointType === EndpointType.Private
       ? DefaultDict.get("BASE_SHARE_URL")
       : undefined;
     if (customShareUrl) {
-      const customApiHost = new URL(customShareUrl).searchParams.get("apiHost");
-      if (customApiHost) {
-        apiUrls.push(customApiHost);
+      const parsedShareUrl = new URL(customShareUrl);
+      let customApiUrls: string[] = [];
+      try {
+        customApiUrls = await getShareApiHosts([parsedShareUrl.origin]);
+      } catch (err: any) {
+        toast.error(err.toString());
+        return;
       }
+      apiUrls = apiUrls.concat(customApiUrls);
     }
 
     const p = createShare(

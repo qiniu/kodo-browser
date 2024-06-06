@@ -50,21 +50,21 @@ export async function signIn(akItem: AkItem, remember: boolean) {
 }
 
 export interface SignInWithShareLinkOptions {
-  apiHost?: string,
+  apiHosts?: string[],
   shareId: string,
   shareToken: string,
   extractCode: string,
 }
 
 export async function signInWithShareLink({
-  apiHost,
+  apiHosts,
   shareId,
   shareToken,
   extractCode,
 }: SignInWithShareLinkOptions): Promise<void> {
   const verifyShareOpt: QiniuClient.GetShareServiceOptions = {};
-  if (apiHost) {
-    verifyShareOpt.apiUrls = [apiHost];
+  if (apiHosts?.length) {
+    verifyShareOpt.apiUrls = apiHosts;
   }
   const verifyShareResult = await QiniuClient.verifyShare(
     {

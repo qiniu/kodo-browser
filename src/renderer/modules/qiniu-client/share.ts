@@ -8,12 +8,19 @@ import {
 
 import {getShareService, GetShareServiceOptions} from "@renderer/modules/qiniu-client/common";
 
+export async function getShareApiHosts(
+  portalHosts: string[],
+): Promise<string[]> {
+  const shareService = await getShareService({});
+  return await shareService.getApiHosts(portalHosts);
+}
+
 export async function createShare(
   param: CreateShareOptions,
   opt: Required<GetShareServiceOptions>,
 ): Promise<CreateShareResult> {
   const shareService = await getShareService(opt);
-  return shareService.createShare(param);
+  return await shareService.createShare(param);
 }
 
 export async function checkShare(

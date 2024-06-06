@@ -89,17 +89,14 @@ const SignIn: React.FC = () => {
       });
       return;
     }
-    const shareURL = new URL(`${DEFAULT_PORTAL_URL}/kodo-shares/verify`);
-    if (routeState.data.apiHost) {
-      shareURL.searchParams.set("apiHost", routeState.data.apiHost);
-    }
+    const shareURL = new URL(`${routeState.data.portalHost || DEFAULT_PORTAL_URL}/kodo-shares/verify`);
     shareURL.searchParams.set("id", routeState.data.shareId);
     shareURL.searchParams.set("token", routeState.data.shareToken);
     setShareLinkFormDefaultValues({
       shareLink: shareURL.toString(),
       extractCode: routeState.data.extractCode || "",
     });
-  }, [routeState?.type]);
+  }, [routeState?.type, routeState?.data]);
 
   // handle events
   const handleSignInType = () => {

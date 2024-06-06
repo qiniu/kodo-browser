@@ -87,7 +87,7 @@ function DeepLinkActions() {
     },
     onSignInWithShareLink: (data) => {
       const navData: ISignInState["data"] = {
-        apiHost: data.apiHost,
+        portalHost: data.portalHost,
         shareId: data.shareId,
         shareToken: data.shareToken,
         extractCode: data.extractCode,

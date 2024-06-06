@@ -11,7 +11,7 @@ export enum DeepLinkAction {
 export interface DeepLinkSignInWithShareLinkMessage {
   action: DeepLinkAction.SignInWithShareLink,
   data: {
-    apiHost?: string,
+    portalHost?: string,
     shareId: string,
     shareToken: string,
     extractCode?: string,

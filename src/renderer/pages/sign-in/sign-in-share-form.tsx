@@ -6,9 +6,9 @@ import {Button, Col, Form, Row, Spinner} from "react-bootstrap";
 import {DEFAULT_PORTAL_URL} from "kodo-s3-adapter-sdk/dist/region";
 
 import {translate} from "@renderer/modules/i18n";
+import {getShareApiHosts} from "@renderer/modules/qiniu-client";
 import {useAuth} from "@renderer/modules/auth";
 import * as AuditLog from "@renderer/modules/audit-log";
-import * as DefaultDict from "@renderer/modules/default-dict";
 
 import RoutePath from "@renderer/pages/route-path";
 
@@ -18,7 +18,7 @@ interface SignInShareFormData {
 }
 
 interface ParseShareURLResult {
-  apiHost?: string,
+  portalHost: string,
   shareId: string,
   shareToken: string,
 }
@@ -29,22 +29,11 @@ function isPublicShareURL(url: string): boolean {
   return shareURL.host === defaultPortalURL.host
 }
 
-function getCustomApiHost(): string | undefined {
-  const customShareUrl = DefaultDict.get("BASE_SHARE_URL");
-  if (!customShareUrl) {
-    return;
-  }
-  const customApiHost = new URL(customShareUrl).searchParams.get("apiHost");
-  if (!customApiHost) {
-    return;
-  }
-  return customApiHost;
-}
-
 function parseShareURL(url: string): ParseShareURLResult | null {
   const shareURL = new URL(url.trim());
 
   const result = {
+    portalHost: shareURL.origin,
     apiHost: shareURL.searchParams.get("apiHost") || undefined,
     shareId: shareURL.searchParams.get("id") || "",
     shareToken: shareURL.searchParams.get("token") || "",
@@ -83,7 +72,7 @@ const SignInShareForm: React.FC<SignInShareFormProps> = ({
     reset(defaultValues);
   }, [defaultValues]);
 
-  const handleSignIn: SubmitHandler<SignInShareFormData> = (data) => {
+  const handleSignIn: SubmitHandler<SignInShareFormData> = async (data) => {
     const parsedShareURL = parseShareURL(data.shareLink);
     if (!parsedShareURL) {
       toast.error(translate("signIn.formShareLink.shareLink.feedback.invalidFormat"));
@@ -91,22 +80,26 @@ const SignInShareForm: React.FC<SignInShareFormProps> = ({
     }
 
     // try to determine the api host from private cloud share link
-    const defaultApiHost: string | undefined = isPublicShareURL(data.shareLink)
-      ? undefined
-      : getCustomApiHost();
+    let apiHosts: string[] = [];
+    if (!isPublicShareURL(data.shareLink)) {
+      try {
+        apiHosts = await getShareApiHosts([parsedShareURL.portalHost]);
+      } catch (err: any) {
+        toast.error(err.toString());
+        return;
+      }
+    }
     if (
       !isPublicShareURL(data.shareLink) &&
-      !parsedShareURL.apiHost &&
-      !defaultApiHost
+      !apiHosts.length
     ) {
       toast.error(translate("signIn.formShareLink.shareLink.feedback.invalidPrivateFormat"));
       return;
     }
-    parsedShareURL.apiHost = parsedShareURL.apiHost || defaultApiHost;
 
     // send sign in request
     const p = signInWithShareLink({
-      apiHost: parsedShareURL.apiHost,
+      apiHosts,
       shareId: parsedShareURL.shareId,
       shareToken: parsedShareURL.shareToken,
       extractCode: data.extractCode.trim(),

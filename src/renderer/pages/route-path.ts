@@ -1,5 +1,4 @@
-import {AkItem, SignInWithShareLinkOptions, SignInWithShareSessionOptions} from "@renderer/modules/auth"
-import {OptionalProps} from "@common/utility-types";
+import {AkItem, SignInWithShareSessionOptions} from "@renderer/modules/auth"
 
 enum RoutePath {
   Root = "/",
@@ -13,7 +12,12 @@ enum RoutePath {
 export interface ISignInState {
   // type: "ak" | "shareLink",
   type: "shareLink",
-  data: OptionalProps<SignInWithShareLinkOptions, "extractCode">,
+  data: {
+    portalHost?: string,
+    shareId: string,
+    shareToken: string,
+    extractCode?: string,
+  },
 }
 
 export type SignInState = ISignInState | undefined;

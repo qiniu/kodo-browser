@@ -137,7 +137,7 @@ const dict: Dictionary = {
     formShareLink: {
       shareLink: {
         label: "分享链接：",
-        holder: "请输入文件夹分享链接",
+        holder: "请输入目录分享链接",
         feedback: {
           invalidFormat: "链接格式不正确",
           invalidPrivateFormat: "链接格式不正确，非公有云用户请配置私有云分享地址",
@@ -743,10 +743,10 @@ const dict: Dictionary = {
     },
 
     createDirectoryShareLink: {
-      title: "分享文件夹",
+      title: "分享目录",
       form: {
         directoryName: {
-          label: "文件夹：",
+          label: "目录：",
         },
         expireAfter: {
           label: "有效期：",

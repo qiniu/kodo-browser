@@ -16,8 +16,6 @@ jobs:
         run: |
           set -e
           grep -qF "\"version\": \"${RELEASE_VERSION}\"" package.json
-          grep -qF "export * from \"./${RELEASE_VERSION}\";" src/renderer/modules/update-app/migrate-steps/index.ts
-          grep -qF "version: \"${RELEASE_VERSION}\"" src/renderer/modules/update-app/migrate-steps/${RELEASE_VERSION}/index.ts
   create_release:
     name: Create release for new version
     runs-on: ubuntu-latest

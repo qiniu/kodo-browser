@@ -107,6 +107,8 @@ jobs:
       - name: test
         run: make i test
       - name: build
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
         run: make win64 win32
       - name: Upload Release Asset to Qiniu
         run: |
@@ -159,6 +161,8 @@ jobs:
       - name: test
         run: make i test
       - name: build
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
         run: make mac
       - name: Upload Release Asset to Qiniu
         run: |

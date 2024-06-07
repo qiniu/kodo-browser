@@ -39,7 +39,6 @@ interface FileToolBarProps {
   availableStorageClasses?: Record<string, StorageClass>,
   regionId?: string,
   bucketName?: string,
-  bucketPermission?: "readonly" | "readwrite",
   directoriesNumber: number,
   listedFileNumber: number,
   hasMoreFiles: boolean,

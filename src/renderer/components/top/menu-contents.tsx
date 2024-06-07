@@ -8,7 +8,7 @@ import {AkItem, useAuth} from "@renderer/modules/auth";
 
 import {useDisplayModal} from "@renderer/components/modals/hooks";
 import AkHistory from "@renderer/components/modals/general/ak-history";
-import RoutePath from "@renderer/pages/route-path";
+import RoutePath, {SwitchUserState} from "@renderer/pages/route-path";
 
 import {MenuItem, MenuItemType} from "./menu-item";
 
@@ -79,8 +79,14 @@ const MenuContents: React.FC<MenuContentsProps> = ({
   ] = useDisplayModal();
 
   const handleActiveAk = (akItem: AkItem) => {
+    const state: SwitchUserState = {
+      type: "ak",
+      data: {
+        akItem,
+      },
+    };
     navigate(RoutePath.SwitchUser, {
-      state: akItem,
+      state,
     });
     handleHideAccessKeyHistory();
   }

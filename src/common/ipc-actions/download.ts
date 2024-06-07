@@ -1,4 +1,3 @@
-import {IpcRenderer} from "electron";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
 
@@ -6,6 +5,8 @@ import {ClientOptionsSerialized} from "@common/qiniu";
 import {Status} from "@common/models/job/types";
 import DownloadJob from "@common/models/job/download-job";
 import StorageClass from "@common/models/storage-class";
+
+import {Sender} from "./types";
 
 export interface RemoteObject {
     name: string,
@@ -70,7 +71,10 @@ export interface UpdateConfigMessage {
 export interface LoadPersistJobsMessage {
     action: DownloadAction.LoadPersistJobs,
     data: {
-        clientOptions: Pick<ClientOptionsSerialized, "accessKey" | "secretKey" | "ucUrl" | "regions">
+        clientOptions: Pick<
+          ClientOptionsSerialized,
+          "accessKey" | "secretKey" | "sessionToken" | "bucketNameId" | "ucUrl" | "regions"
+        >
         downloadOptions: Pick<DownloadOptions, "userNatureLanguage">,
     }
 }
@@ -207,104 +211,104 @@ export type DownloadReplyMessage = UpdateUiDataReplyMessage
 
 export class DownloadActionFns {
     constructor(
-        private readonly ipc: IpcRenderer,
+        private readonly sender: Sender<DownloadMessage>,
         private readonly channel: string,
     ) {
     }
 
     updateConfig(data: UpdateConfigMessage["data"]) {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.UpdateConfig,
             data: data,
         });
     }
 
     loadPersistJobs(data: LoadPersistJobsMessage["data"]) {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.LoadPersistJobs,
             data,
         })
     }
 
     addJobs(data: AddJobsMessage["data"]) {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.AddJobs,
             data,
         });
     }
 
     updateUiData(data: UpdateUiDataMessage["data"]) {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.UpdateUiData,
             data,
         });
     }
 
     waitJob(data: WaitJobMessage["data"]) {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.WaitJob,
             data,
         });
     }
 
     startJob(data: StartJobMessage["data"]) {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.StartJob,
             data,
         });
     }
 
     stopJob(data: StopJobMessage["data"]) {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.StopJob,
             data,
         });
     }
 
     removeJob(data: RemoveJobMessage["data"]) {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.RemoveJob,
             data,
         });
     }
 
     cleanUpJobs() {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.CleanupJobs,
             data: {},
         });
     }
 
     startAllJobs() {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.StartAllJobs,
             data: {},
         });
     }
 
     stopAllJobs() {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.StopAllJobs,
             data: {},
         });
     }
 
     stopJobsByOffline() {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.StopJobsByOffline,
             data: {},
         });
     }
 
     startJobsByOnline() {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.StartJobsByOnline,
             data: {},
         });
     }
 
     removeAllJobs() {
-        this.ipc.send(this.channel, {
+        this.sender.send(this.channel, {
             action: DownloadAction.RemoveAllJobs,
             data: {},
         });

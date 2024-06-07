@@ -7,7 +7,7 @@ import {BackendMode} from "@common/qiniu";
 
 import StorageClass from "@common/models/storage-class";
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {FileItem, restoreFiles, stopRestoreFiles} from "@renderer/modules/qiniu-client";
 import {useFileOperation} from "@renderer/modules/file-operation";
 import * as AuditLog from "@renderer/modules/audit-log";
@@ -114,7 +114,7 @@ const RestoreFiles: React.FC<ModalProps & RestoreFilesProps> = (props) => {
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       storageClasses: memoStorageClasses,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,

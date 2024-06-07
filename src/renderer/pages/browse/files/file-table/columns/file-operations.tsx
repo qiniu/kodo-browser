@@ -1,10 +1,13 @@
-import React from "react";
+import React, {useMemo} from "react";
 
 import {useI18n} from "@renderer/modules/i18n";
 import {FileItem} from "@renderer/modules/qiniu-client";
 import {useFileOperation} from "@renderer/modules/file-operation";
 
 import TooltipButton from "@renderer/components/tooltip-button";
+
+import {EndpointType, useAuth} from "@renderer/modules/auth";
+import * as DefaultDict from "@renderer/modules/default-dict";
 
 import {OperationName, RowCellDataProps} from "../../types";
 
@@ -21,10 +24,30 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellCallbackProp
   onAction,
 }) => {
   const {translate} = useI18n();
+  const {currentUser} = useAuth();
   const {bucketGrantedPermission} = useFileOperation();
 
   const isFile = FileItem.isItemFile(file);
   const canRestore = isFile && ["Archive", "DeepArchive"].includes(file.storageClass);
+
+  const shouldShowShareDirButton = useMemo(() => {
+    if (isFile || !currentUser) {
+      return false;
+    }
+
+    if (currentUser.endpointType === EndpointType.Public) {
+      return true;
+    }
+
+    if (
+      currentUser.endpointType === EndpointType.Private &&
+      DefaultDict.get("BASE_SHARE_URL")
+    ) {
+      return true;
+    }
+
+    return false;
+  }, [isFile, currentUser]);
 
   return (
     <>
@@ -56,6 +79,21 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellCallbackProp
           onAction(OperationName.Download, file);
         }}
       />
+      {
+        !shouldShowShareDirButton
+          ? null
+          : <TooltipButton
+            iconClassName="bi bi-share"
+            tooltipPlacement="top"
+            tooltipContent={translate("common.share")}
+            variant="icon-dark"
+            className="me-1"
+            onClick={e => {
+              e.stopPropagation();
+              onAction(OperationName.ShareDir, file);
+            }}
+          />
+      }
       {
         !isFile
           ? null

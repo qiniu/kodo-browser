@@ -29,6 +29,7 @@ import {
 } from "kodo-s3-adapter-sdk/dist/adapter";
 
 import Duration from "@common/const/duration";
+import {EndpointType} from "@renderer/modules/auth";
 
 import * as QiniuClientCommon from "./common";
 import * as QiniuClientFile from "./files";
@@ -78,7 +79,7 @@ describe("test qiniu-client/files.ts", () => {
     const mockOpt: QiniuClientCommon.GetAdapterOptionParam = {
         id: ENV.QINIU_ACCESS_KEY,
         secret: ENV.QINIU_SECRET_KEY,
-        isPublicCloud: true,
+        endpointType: EndpointType.Public,
     };
 
 
@@ -606,6 +607,7 @@ describe("test qiniu-client/files.ts", () => {
                             mockDataKey,
                             undefined,
                             10,
+                            name === "S3" ? "path" : "bucketEndpoint",
                             mockOpt,
                         );
                         expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
@@ -621,6 +623,7 @@ describe("test qiniu-client/files.ts", () => {
                             },
                             undefined,
                             expectDeadline,
+                            name === "S3" ? "path" : "bucketEndpoint",
                         );
                     } finally {
                         jest.useRealTimers();

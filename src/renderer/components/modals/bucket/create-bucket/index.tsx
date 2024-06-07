@@ -8,7 +8,7 @@ import {BackendMode} from "@common/qiniu";
 
 import {BucketName as BucketNamePattern} from "@renderer/const/patterns";
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {createBucket} from "@renderer/modules/qiniu-client";
 import {useLoadRegions} from "@renderer/modules/qiniu-client-hooks";
 import * as AuditLog from "@renderer/modules/audit-log";
@@ -75,7 +75,7 @@ const CreateBucket: React.FC<ModalProps & CreateBucketProps> = ({
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,
     };

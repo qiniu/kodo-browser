@@ -3,10 +3,11 @@ import lodash from "lodash";
 import * as LocalLogger from "@renderer/modules/local-logger";
 import * as QiniuClient from "@renderer/modules/qiniu-client";
 
-import {AkItem, EndpointType} from "./types";
+import {AkItem, EndpointType, ShareSession} from "./types";
 import {authPersistence} from "./persistence";
 
 let currentUser: AkItem | null = null;
+let shareSession: ShareSession | null = null;
 let history: AkItem[] = [];
 
 export async function loadPersistence() {
@@ -25,7 +26,7 @@ export async function signIn(akItem: AkItem, remember: boolean) {
     await QiniuClient.listAllBuckets({
       id: akItem.accessKey,
       secret: akItem.accessSecret,
-      isPublicCloud: akItem.endpointType === EndpointType.Public,
+      endpointType: akItem.endpointType,
     });
   } catch (err) {
     QiniuClient.clearAllCache();
@@ -48,13 +49,83 @@ export async function signIn(akItem: AkItem, remember: boolean) {
   }
 }
 
+export interface SignInWithShareLinkOptions {
+  apiHosts?: string[],
+  shareId: string,
+  shareToken: string,
+  extractCode: string,
+}
+
+export async function signInWithShareLink({
+  apiHosts,
+  shareId,
+  shareToken,
+  extractCode,
+}: SignInWithShareLinkOptions): Promise<void> {
+  const verifyShareOpt: QiniuClient.GetShareServiceOptions = {};
+  if (apiHosts?.length) {
+    verifyShareOpt.apiUrls = apiHosts;
+  }
+  const verifyShareResult = await QiniuClient.verifyShare(
+    {
+      shareId,
+      shareToken,
+      extractCode,
+    },
+    verifyShareOpt,
+  );
+  currentUser = {
+    endpointType: EndpointType.ShareSession,
+    accessKey: verifyShareResult.federated_ak,
+    accessSecret: verifyShareResult.federated_sk,
+  };
+  shareSession = {
+    sessionToken: verifyShareResult.session_token,
+    endpoint: verifyShareResult.endpoint,
+    bucketId: verifyShareResult.bucket_id,
+    bucketName: verifyShareResult.bucket_name,
+    expires: verifyShareResult.expires,
+    permission: verifyShareResult.permission,
+    prefix: verifyShareResult.prefix,
+    regionS3Id: verifyShareResult.region,
+  };
+  // do not remember always;
+  // await authPersistence.save(currentUser);
+}
+
+export interface SignInWithShareSessionOptions {
+  akItem: Omit<AkItem, "endpointType">,
+  session: ShareSession,
+}
+
+export async function signInWithShareSession({
+  akItem,
+  session,
+}: SignInWithShareSessionOptions): Promise<void> {
+  if (new Date(session.expires).getTime() < Date.now()) {
+    throw new Error("expired session");
+  }
+  currentUser = {
+    ...akItem,
+    endpointType: EndpointType.ShareSession,
+  };
+  shareSession = session;
+  // do not remember always;
+  // await authPersistence.save(currentUser);
+}
+
 export async function signOut() {
   currentUser = null;
+  shareSession = null;
   await authPersistence.clear();
 }
 
 export function getCurrentUser(): AkItem | null {
   return currentUser;
+}
+
+export function getShareSession(): ShareSession | null {
+  return shareSession;
 }
 
 export function getHistory(): AkItem[] {

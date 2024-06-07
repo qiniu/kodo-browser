@@ -4,31 +4,31 @@ import React, {useEffect, useMemo} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {toast} from "react-hot-toast";
 
-import {AkItem, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {clearAllCache} from "@renderer/modules/qiniu-client";
 import {useI18n} from "@renderer/modules/i18n";
 import * as AuditLog from "@renderer/modules/audit-log";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 
-import RoutePath from "@renderer/pages/route-path";
+import RoutePath, {SwitchUserState} from "@renderer/pages/route-path";
 
 const SwitchUser: React.FC = () => {
   const {translate} = useI18n();
-  const {currentUser, signIn, signOut} = useAuth();
+  const {currentUser, signIn, signOut, signInWithShareSession} = useAuth();
   const navigate = useNavigate();
   const {
-    state: akItem,
+    state: routeState,
   } = useLocation() as {
-    state: AkItem,
+    state: SwitchUserState,
   };
   const memoCurrentUser = useMemo(() => currentUser, []);
-
 
   useEffect(() => {
     clearAllCache();
 
     ipcRenderer.send('asynchronous', {key: "signOut"});
+
     new Promise(resolve => {
       // make sure work cleared.
       setTimeout(resolve, 2500);
@@ -37,10 +37,23 @@ const SwitchUser: React.FC = () => {
         return signOut();
       })
       .then(() => {
-        return signIn(akItem, true);
+        switch (routeState?.type) {
+          case "ak":
+            return signIn(routeState.data.akItem, true);
+          case "shareSession":
+            return signInWithShareSession(routeState.data);
+        }
+        return;
       })
       .then(() => {
-        navigate(RoutePath.Browse);
+        switch (routeState?.type) {
+          case "ak":
+            navigate(RoutePath.Browse);
+            break;
+          case "shareSession":
+            navigate(RoutePath.BrowseShare);
+            break;
+        }
       })
       .catch(err => {
         toast.error(translate("switchUser.error") + err.toString());
@@ -59,8 +72,8 @@ const SwitchUser: React.FC = () => {
         <LoadingHolder text={translate("switchUser.title")}/>
       </div>
       <div className="text-secondary text-center">
-        {akItem.accessKey}<br/>
-        {akItem.description?.trim() && `(${akItem.description})`}
+        {routeState?.data.akItem.accessKey}<br/>
+        {routeState?.data.akItem.description?.trim() && `(${routeState.data.akItem.description})`}
       </div>
     </div>
   );

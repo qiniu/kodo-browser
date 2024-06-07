@@ -1,19 +1,25 @@
 import React, {createContext, useContext, useState} from "react";
 
-import {AkItem} from "./types";
+import {AkItem, ShareSession} from "./types";
 import * as AuthFunc from "./functions";
 
 const AuthContext = createContext<{
   currentUser: AkItem | null,
+  shareSession: ShareSession | null,
   akHistory: AkItem[],
-  signIn: (akItem: AkItem, remember: boolean) => Promise<void>,
-  signOut: () => Promise<void>,
-  deleteHistory: (akItem: AkItem) => Promise<void>,
-  clearHistory: () => Promise<void>,
+  signIn: typeof AuthFunc.signIn,
+  signInWithShareLink: typeof AuthFunc.signInWithShareLink,
+  signInWithShareSession: typeof AuthFunc.signInWithShareSession,
+  signOut: typeof AuthFunc.signOut,
+  deleteHistory: typeof AuthFunc.deleteHistory,
+  clearHistory: typeof AuthFunc.clearHistory,
 }>({
   currentUser: null,
+  shareSession: null,
   akHistory: [],
   signIn: AuthFunc.signIn,
+  signInWithShareLink: AuthFunc.signInWithShareLink,
+  signInWithShareSession: AuthFunc.signInWithShareSession,
   signOut: AuthFunc.signOut,
   deleteHistory: AuthFunc.deleteHistory,
   clearHistory: AuthFunc.clearHistory,
@@ -24,6 +30,7 @@ export const Provider: React.FC<{
 }> = ({children}) => {
   const [user, setUser] = useState<AkItem | null>(AuthFunc.getCurrentUser());
   const [history, setHistory] = useState<AkItem[]>(AuthFunc.getHistory());
+  const [shareSession, setShareSession] = useState<ShareSession | null>(AuthFunc.getShareSession());
 
   const signIn = async (akItem: AkItem, remember: boolean) => {
     await AuthFunc.signIn(akItem, remember);
@@ -31,9 +38,22 @@ export const Provider: React.FC<{
     setHistory([...AuthFunc.getHistory()]);
   };
 
+  const signInWithShareLink = async (opt: AuthFunc.SignInWithShareLinkOptions) => {
+    await AuthFunc.signInWithShareLink(opt);
+    setUser(AuthFunc.getCurrentUser());
+    setShareSession(AuthFunc.getShareSession());
+  }
+
+  const signInWithShareSession = async (opt: AuthFunc.SignInWithShareSessionOptions) => {
+    await AuthFunc.signInWithShareSession(opt);
+    setUser(AuthFunc.getCurrentUser());
+    setShareSession(AuthFunc.getShareSession());
+  }
+
   const signOut = async () => {
     await AuthFunc.signOut();
     setUser(null);
+    setShareSession(null);
   };
 
   const deleteHistory = async (akItem: AkItem) => {
@@ -49,8 +69,11 @@ export const Provider: React.FC<{
   return (
     <AuthContext.Provider value={{
       currentUser: user,
+      shareSession,
       akHistory: history,
       signIn,
+      signInWithShareLink,
+      signInWithShareSession,
       signOut,
       deleteHistory,
       clearHistory,

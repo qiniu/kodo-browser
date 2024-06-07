@@ -74,6 +74,16 @@ export default function useLoadDomains({
       return;
     }
 
+    if (user.endpointType === EndpointType.ShareSession) {
+      setLoadDomainsState({
+        loading: false,
+        domains: [{
+          ...NON_OWNED_DOMAIN,
+        }],
+      });
+      return;
+    }
+
     if (!regionId || !bucketName) {
       toast.error("hooks loadDomains lost required arguments.");
       LocalLogger.error(
@@ -102,7 +112,7 @@ export default function useLoadDomains({
     const opt = {
       id: user.accessKey,
       secret: user.accessSecret,
-      isPublicCloud: user.endpointType === EndpointType.Public,
+      endpointType: user.endpointType,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,
     };

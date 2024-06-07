@@ -43,7 +43,7 @@ export default function useLoadRegions({
     const opt = {
       id: user.accessKey,
       secret: user.accessSecret,
-      isPublicCloud: user.endpointType === EndpointType.Public,
+      endpointType: user.endpointType,
     };
 
     let regions: Region[] | undefined = undefined;

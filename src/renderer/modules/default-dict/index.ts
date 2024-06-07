@@ -11,6 +11,7 @@ interface Dict {
       endpoint: string,
     }[],
   },
+  BASE_SHARE_URL?: string,
   DISABLE_NON_OWNED_DOMAIN?: boolean,
   PREFERENCE_VALIDATORS?: {
     maxMultipartUploadPartSize?: number,
@@ -18,6 +19,7 @@ interface Dict {
     maxUploadJobConcurrency?: number,
     maxDownloadJobConcurrency?: number,
   },
+  MAX_SHARE_DIRECTORY_EXPIRE_AFTER_SECONDS?: number,
 }
 
 const dict: Dict = {};

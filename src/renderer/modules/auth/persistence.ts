@@ -16,27 +16,32 @@ interface AuthHistory {
 
 class AuthInfoSerializer extends serializer.JSONSerializer<AuthInfo> {
   serialize(value: AuthInfo): string {
-    const oldFormat = {
-      isPublicCloud: value.endpointType === EndpointType.Public,
-      id: value.accessKey,
-      secret: value.accessSecret,
+    const jsonStr = super.serialize({
+      endpointType: value.endpointType,
+      accessKey: value.accessKey,
+      accessSecret: value.accessSecret,
       description: value.description,
-    }
-    const jsonStr = super.serialize(oldFormat as any);
+    });
     return cipher(jsonStr);
   }
 
   deserialize(value: string): AuthInfo {
     const jsonStr = decipher(value);
-    const oldFormat: any = super.deserialize(jsonStr);
-    return {
-      endpointType: oldFormat.isPublicCloud
-        ? EndpointType.Public
-        : EndpointType.Private,
-      accessKey: oldFormat.id,
-      accessSecret: oldFormat.secret,
-      description: oldFormat.description,
+    const data: any = super.deserialize(jsonStr);
+
+    // compatible with old format
+    if (data.hasOwnProperty("isPublicCloud")) {
+      return {
+        endpointType: data.isPublicCloud
+          ? EndpointType.Public
+          : EndpointType.Private,
+        accessKey: data.id,
+        accessSecret: data.secret,
+        description: data.description,
+      };
     }
+
+    return data;
   }
 }
 

@@ -4,9 +4,9 @@ import {toast} from "react-hot-toast";
 import Duration, {convertDuration} from "@common/const/duration";
 import {BackendMode} from "@common/qiniu"
 
-import {signatureUrl} from "@renderer/modules/qiniu-client";
+import {getStyleForSignature, signatureUrl} from "@renderer/modules/qiniu-client";
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {DomainAdapter, NON_OWNED_DOMAIN} from "@renderer/modules/qiniu-client-hooks";
 
 import LoadingHolder from "@renderer/components/loading-holder";
@@ -41,17 +41,27 @@ const VideoContent: React.FC<VideoContentProps> = ({
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferS3Adapter: domain.apiScope === BackendMode.S3,
     };
+
+    const apiDomain = domain.name === NON_OWNED_DOMAIN.name
+      ? undefined
+      : domain;
+
+    const style = getStyleForSignature({
+      domain: apiDomain,
+      preferBackendMode: domain.apiScope === BackendMode.S3 ? BackendMode.S3 : BackendMode.Kodo,
+      currentEndpointType: currentUser.endpointType,
+    });
+
     signatureUrl(
       regionId,
       bucketName,
       filePath,
-      domain.name === NON_OWNED_DOMAIN.name
-        ? undefined
-        : domain,
+      apiDomain,
       convertDuration(12 * Duration.Hour, Duration.Second),
+      style,
       opt,
     )
       .then(fileUrl => {

@@ -4,7 +4,7 @@ import {toast} from "react-hot-toast";
 import StorageClass from "@common/models/storage-class";
 import {BackendMode} from "@common/qiniu";
 
-import {AkItem, EndpointType} from "@renderer/modules/auth";
+import {AkItem} from "@renderer/modules/auth";
 import {FileItem, listFiles, ListFilesOption, ListFilesResult} from "@renderer/modules/qiniu-client";
 import * as LocalLogger from "@renderer/modules/local-logger";
 
@@ -121,7 +121,7 @@ export default function useLoadFiles({
     const opt = {
       id: user.accessKey,
       secret: user.accessSecret,
-      isPublicCloud: user.endpointType === EndpointType.Public,
+      endpointType: user.endpointType,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,
 

@@ -27,6 +27,8 @@ import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3";
 import { GetAllRegionsOptions, RegionService } from "kodo-s3-adapter-sdk/dist/region_service";
 import { mocked } from "ts-jest/utils";
 
+import {EndpointType} from "@renderer/modules/auth";
+
 import * as QiniuClientCommon from "./common";
 import * as QiniuClientRegions from "./regions";
 
@@ -38,7 +40,7 @@ describe("test qiniu-client/region.ts", () => {
     const opt: QiniuClientCommon.GetAdapterOptionParam = {
         id: ENV.QINIU_ACCESS_KEY,
         secret: ENV.QINIU_SECRET_KEY,
-        isPublicCloud: true,
+        endpointType: EndpointType.Public,
     };
     const MockedRegionService = mocked(RegionService, true);
     const MockedKodoAdapter = mocked(KodoAdapter, true);

@@ -1,7 +1,11 @@
 import * as qiniuPathConvertor from "qiniu-path/dist/src/convert";
 import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 import { Adapter, Domain, FrozenInfo, ObjectInfo, PartialObjectError, StorageClass, TransferObject } from 'kodo-s3-adapter-sdk/dist/adapter'
+
+import {BackendMode} from "@common/qiniu";
 import Duration from "@common/const/duration";
+
+import {EndpointType} from "@renderer/modules/auth";
 
 import * as FileItem from "./file-item";
 
@@ -321,12 +325,32 @@ export async function restoreFile(
     });
 }
 
+export function getStyleForSignature({
+  domain,
+  preferBackendMode,
+  currentEndpointType,
+}: {
+  domain: Domain | undefined,
+  preferBackendMode: BackendMode | undefined,
+  currentEndpointType: EndpointType,
+}): "path" | "virtualHost" | "bucketEndpoint" {
+    if (domain?.apiScope === BackendMode.S3) {
+      return "bucketEndpoint";
+    } else if (!domain || preferBackendMode === BackendMode.S3) {
+      // some private cloud not support wildcard domain name resolving
+      return currentEndpointType === EndpointType.Public ? "virtualHost" : "path";
+    } else {
+      return "bucketEndpoint";
+    }
+}
+
 export async function signatureUrl(
     region: string,
     bucket: string,
     key: QiniuPath | string,
     domain: Domain | undefined,
     expires: number, // seconds
+    style: "path" | "virtualHost" | "bucketEndpoint",
     opt: GetAdapterOptionParam,
 ): Promise<URL> {
     const deadline = new Date();
@@ -341,6 +365,7 @@ export async function signatureUrl(
             },
             domain,
             deadline,
+            style,
         );
     }, {
         targetBucket: bucket,
@@ -884,6 +909,7 @@ export async function signatureUrls(
     items: FileItem.Item[],
     domain: Domain | undefined,
     expires: number,
+    style: "path" | "virtualHost" | "bucketEndpoint",
     progressFn: (progress: Progress) => void,
     onEachSuccess: (file: FileItem.File, url: URL) => void,
     onError: (err: any) => void,
@@ -927,6 +953,7 @@ export async function signatureUrls(
               },
               domain,
               deadline,
+              style,
             );
             onEachSuccess(file, url);
             progressCallback(i, null);

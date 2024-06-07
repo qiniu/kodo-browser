@@ -8,7 +8,7 @@ import {BackendMode} from "@common/qiniu";
 
 import {FileRename} from "@renderer/const/patterns";
 import {useI18n} from "@renderer/modules/i18n";
-import {EndpointType, useAuth} from "@renderer/modules/auth";
+import {useAuth} from "@renderer/modules/auth";
 import {
   checkFileOrDirectoryExists,
   FileItem,
@@ -115,7 +115,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
@@ -134,7 +134,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,
     };
@@ -163,7 +163,7 @@ const RenameFile: React.FC<ModalProps & RenameFileProps> = (props) => {
     const opt = {
       id: currentUser.accessKey,
       secret: currentUser.accessSecret,
-      isPublicCloud: currentUser.endpointType === EndpointType.Public,
+      endpointType: currentUser.endpointType,
       storageClasses: memoStorageClasses,
       preferKodoAdapter: preferBackendMode === BackendMode.Kodo,
       preferS3Adapter: preferBackendMode === BackendMode.S3,

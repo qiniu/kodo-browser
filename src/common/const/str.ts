@@ -1,0 +1,5 @@
+export const ALPHABET_UPPERCASE = "abcdefghijklmnopqrstuvwxyz";
+export const ALPHABET_LOWERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+export const ALPHABET = ALPHABET_UPPERCASE + ALPHABET_LOWERCASE;
+export const DIGITS = "0123456789";
+export const ALPHANUMERIC = ALPHABET + DIGITS;

@@ -6,6 +6,7 @@ export interface KodoNavigatorOptions {
   defaultProtocol: string,
   maxHistory?: number,
   initAddress?: KodoAddress,
+  lockPrefix?: string,
 }
 
 export class KodoNavigator {
@@ -25,11 +26,13 @@ export class KodoNavigator {
   history: KodoAddress[] = []
   currentIndex: number
   maxHistory: number
+  lockPrefix: string
 
   constructor({
     defaultProtocol,
     maxHistory = 100,
     initAddress,
+    lockPrefix,
   }: KodoNavigatorOptions) {
     const defaultItem = {
       protocol: defaultProtocol,
@@ -39,6 +42,7 @@ export class KodoNavigator {
     this.currentIndex = 0;
     this.history.push(initAddress ?? defaultItem);
     this.maxHistory = maxHistory;
+    this.lockPrefix = lockPrefix ?? "";
   }
 
   onChange(callback: OnChangeListener) {
@@ -82,6 +86,10 @@ export class KodoNavigator {
         ...previous,
         ...kodoAddress,
       };
+
+    if (!next.path.startsWith(this.lockPrefix)) {
+      return;
+    }
 
     // address may not equal by external path
     // it will better if using protocol to tell which is which

@@ -28,6 +28,14 @@ const dict: Dictionary = {
     noDomainToGet: "No domain to get object",
     errored: "An error has occurred",
     paused: "Paused",
+    custom: "custom",
+
+    second: "second",
+    seconds: "seconds",
+    minute: "minute",
+    minutes: "minutes",
+    hour: "hour",
+    hours: "hours",
 
     directory: "Directory",
     upload: "Upload",
@@ -42,10 +50,21 @@ const dict: Dictionary = {
     more: "More",
     exportLink: "Export Download Link",
     exportLinks: "Export Download Links",
+    share: "Share",
     restore: "Restore",
     changeStorageClass: "Set Storage Class",
     unknownStorageClass: "Unknown Storage Class",
     clickToRetry: "Click to retry",
+  },
+
+  deepLinkActions: {
+    signIn: {
+      invalidParams: "Invalid URL. Lost required parameters",
+      signOutConfirm: {
+        title: "Sign Out",
+        description: "Sign Out for Signing In with Share URL",
+      },
+    },
   },
 
   top: {
@@ -74,8 +93,11 @@ const dict: Dictionary = {
   },
 
   signIn: {
-    title: "access key sign in",
+    title: "Access Key Sign In",
+    titleShareLink: "Share Link Sign In",
     accessKeyHistory: "AK History",
+    gotoShareLinkForm: "Use Share Link Sign In",
+    gotoAkForm: "Use AK Sign In",
     form: {
       accessKeyId: {
         holder: "AccessKeyId",
@@ -111,6 +133,23 @@ const dict: Dictionary = {
       },
       submit: "Sign in",
       submitting: "Signing in",
+    },
+    formShareLink: {
+      shareLink: {
+        label: "Share Link:",
+        holder: "Please input the directory share link",
+        feedback: {
+          invalidFormat: "Invalid share link format",
+          invalidPrivateFormat: "Invalid share link format. Please configure share base link if it's a share link for private cloud.",
+        },
+      },
+      extractCode: {
+        label: "Extract Code:",
+        holder: "Alphabet and digits only",
+        feedback: {
+          invalidFormat: "Must contain only alphabet or digits and length must be 6"
+        },
+      },
     },
   },
 
@@ -702,6 +741,41 @@ const dict: Dictionary = {
 
     generateFileLink: {
       title: "Export Download Link",
+    },
+
+    createDirectoryShareLink: {
+      title: "Share Directory",
+      form: {
+        directoryName: {
+          label: "Directory:",
+        },
+        expireAfter: {
+          label: "Validity Period:",
+          suffix: "seconds",
+          hint: "Range: ${minSeconds} - ${maxSeconds} seconds"
+        },
+        extractCode: {
+          label: "Extraction Code:",
+          suffix: "Random",
+          hint: "Must be 6 characters long and can only consist of alphanumeric characters",
+        },
+        shareLink: {
+          label: "Share Link:",
+        },
+        expiredAt: {
+          label: "Valid Until:",
+        },
+      },
+      copyShareMessageButton: "Copy Share Message",
+      copyShareMessageSuccess: "Copied",
+      shareMessage: [
+        "I've shared some files with you, take a look!",
+        "",
+        "${shareLink}",
+        "",
+        "Extraction Code: ${extractCode}",
+        "Valid until: ${expiredAt}"
+      ].join("\n"),
     },
 
     uploadConfirm: {

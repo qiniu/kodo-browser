@@ -35,6 +35,8 @@ import { Kodo as KodoAdapter } from "kodo-s3-adapter-sdk/dist/kodo";
 import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3";
 
 import * as KodoNav from "@renderer/const/kodo-nav";
+import {EndpointType} from "@renderer/modules/auth";
+
 import * as QiniuClientCommon from "./common";
 import * as QiniuClientFiles from "./files";
 import * as QiniuClientUtils from "./utils";
@@ -105,7 +107,7 @@ describe("test qiniu-client/utils.ts", () => {
         const opt: QiniuClientCommon.GetAdapterOptionParam = {
             id: ENV.QINIU_ACCESS_KEY,
             secret: ENV.QINIU_SECRET_KEY,
-            isPublicCloud: true,
+            endpointType: EndpointType.Public,
         };
         beforeEach(() => {
             spiedGetDefaultClient.mockClear();
@@ -158,7 +160,7 @@ describe("test qiniu-client/utils.ts", () => {
         const opt: QiniuClientCommon.GetAdapterOptionParam = {
             id: ENV.QINIU_ACCESS_KEY,
             secret: ENV.QINIU_SECRET_KEY,
-            isPublicCloud: true,
+            endpointType: EndpointType.Public,
         };
         it("just check call checkFolderExists or checkFileExists", async () => {
             const mockedCheckFolder = jest.spyOn(QiniuClientFiles, "checkFolderExists")

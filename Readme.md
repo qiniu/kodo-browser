@@ -162,6 +162,7 @@ kodo-browser/
     * `maxDownloadJobConcurrency`，最大下载任务并发数
 * `disable`，禁止某些功能；
     * `nonOwnedDomain`，非自有域名；
+* `baseShareUrl`，分享链接的基本 URL；
 
 例如以下配置将修改默认登录私有云指定服务端：
 

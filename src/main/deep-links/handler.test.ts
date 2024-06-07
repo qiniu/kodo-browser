@@ -26,6 +26,7 @@ describe("SignInHandler", () => {
           shareId: "123",
           shareToken: "abc",
           extractCode: "def",
+          portalHost: "",
         },
       });
     });

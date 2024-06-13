@@ -36,6 +36,9 @@ linux32: build
 mac: build
 	yarn build:mac
 	yarn pkg:mac
+macarm: build
+	yarn build:macarm
+	yarn pkg:macarm
 dmg: mac
 	yarn build:dmg
 

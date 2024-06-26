@@ -4,10 +4,16 @@ export enum EndpointType {
   ShareSession = "shareSession",
 }
 
+export enum AkSpecialType {
+  IAM = "IAM",
+  STS = "STS",
+}
+
 export interface AkItem {
   endpointType: EndpointType,
   accessKey: string,
   accessSecret: string,
+  specialType?: AkSpecialType,
   description?: string,
 }
 

@@ -136,7 +136,7 @@ jobs:
           asset_content_type: application/zip
   release-darwin-amd64:
     name: release for darwin/amd64
-    runs-on: macos-latest
+    runs-on: self-hosted
     needs: create_release
     steps:
       - uses: actions/checkout@v2

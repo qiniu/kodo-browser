@@ -3,7 +3,7 @@ import lodash from "lodash";
 import * as LocalLogger from "@renderer/modules/local-logger";
 import * as QiniuClient from "@renderer/modules/qiniu-client";
 
-import {AkItem, EndpointType, ShareSession} from "./types";
+import {AkItem, AkSpecialType, EndpointType, ShareSession} from "./types";
 import {authPersistence} from "./persistence";
 
 let currentUser: AkItem | null = null;
@@ -32,6 +32,7 @@ export async function signIn(akItem: AkItem, remember: boolean) {
     QiniuClient.clearAllCache();
     throw err;
   }
+  akItem.specialType = getAkSpecialType(akItem.accessKey);
   currentUser = akItem;
   if (remember) {
     await authPersistence.save(akItem);
@@ -78,6 +79,7 @@ export async function signInWithShareLink({
     endpointType: EndpointType.ShareSession,
     accessKey: verifyShareResult.federated_ak,
     accessSecret: verifyShareResult.federated_sk,
+    specialType: getAkSpecialType(verifyShareResult.federated_ak),
   };
   shareSession = {
     sessionToken: verifyShareResult.session_token,
@@ -108,6 +110,7 @@ export async function signInWithShareSession({
   currentUser = {
     ...akItem,
     endpointType: EndpointType.ShareSession,
+    specialType: getAkSpecialType(akItem.accessKey),
   };
   shareSession = session;
   // do not remember always;
@@ -122,6 +125,15 @@ export async function signOut() {
 
 export function getCurrentUser(): AkItem | null {
   return currentUser;
+}
+
+export function getAkSpecialType(accessKey: string = ""): AkSpecialType | undefined {
+  if (accessKey.length === 44 && accessKey.startsWith("IAM-")) {
+    return AkSpecialType.IAM;
+  } else if (accessKey.startsWith("STS-")) {
+    return AkSpecialType.STS;
+  }
+  return;
 }
 
 export function getShareSession(): ShareSession | null {

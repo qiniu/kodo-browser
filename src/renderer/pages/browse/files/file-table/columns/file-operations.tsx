@@ -31,7 +31,12 @@ const FileOperations: React.FC<RowCellDataProps & FileOperationsCellCallbackProp
   const canRestore = isFile && ["Archive", "DeepArchive"].includes(file.storageClass);
 
   const shouldShowShareDirButton = useMemo(() => {
-    if (isFile || !currentUser) {
+    if (
+      isFile ||
+      !currentUser ||
+      currentUser.specialType ||
+      bucketGrantedPermission
+    ) {
       return false;
     }
 

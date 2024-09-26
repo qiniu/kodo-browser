@@ -786,7 +786,12 @@ const dict: Dictionary = {
             form: {
                 isOverwrite: {
                     label: "上書き：",
-                    hint: "（今回の上書き）",
+                    hint: "（今回だけ）",
+                },
+                accelerateUploading: {
+                  label: "アップロードを加速する：",
+                  hint: "（今回だけ）",
+                  hintSecondary: "開いた後、アクセラレーションドメインを優先してアップロードします；アクセラレーションドメインを使用する場合、追加料金が発生します。",
                 },
                 storageClassKodoName: {
                     label: "保管タイプ：",

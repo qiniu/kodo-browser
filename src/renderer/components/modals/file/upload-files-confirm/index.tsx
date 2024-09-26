@@ -25,6 +25,7 @@ interface UploadFilesConfirmProps {
   regionId: string,
   bucketName: string,
   destPath: string,
+  canAccelerateUploading?: boolean,
 }
 
 interface FileShowItem {
@@ -35,6 +36,7 @@ interface FileShowItem {
 
 interface UploadFilesFormData {
   isOverwrite: boolean,
+  accelerateUploading: boolean,
   storageClassKodoName: string,
 }
 
@@ -60,6 +62,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
   regionId,
   bucketName,
   destPath,
+  canAccelerateUploading = false,
   ...modalProps
 }) => {
   const {currentLanguage, translate} = useI18n();
@@ -148,6 +151,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
         key: memoDestPath,
       },
       uploadOptions: {
+        accelerateUploading: data.accelerateUploading,
         isOverwrite: data.isOverwrite,
         storageClassName: data.storageClassKodoName,
         storageClasses: memoStorageClasses,
@@ -183,6 +187,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
       reset({
         isOverwrite: false,
         storageClassKodoName: storageClasses[0]?.kodoName ?? "Standard",
+        accelerateUploading: false,
       });
       statFiles(memoFilePaths, maxShowFiles)
         .then(fileShowList => {
@@ -263,6 +268,27 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
                 />
               </div>
             </Form.Group>
+            {
+              !canAccelerateUploading
+                ? null
+                : <Form.Group as={Fragment} controlId="accelerateUploading">
+                  <Form.Label className="text-end">
+                    {translate("modals.uploadConfirm.form.accelerateUploading.label")}
+                  </Form.Label>
+                  <div className="mt-2">
+                    <Form.Switch
+                      {...register("accelerateUploading")}
+                      label={translate("modals.uploadConfirm.form.accelerateUploading.hint")}
+                    />
+                    {
+                    // TODO(lihs): need to be confirmed with PM
+                    // <Form.Text>
+                    //   {translate("modals.uploadConfirm.form.accelerateUploading.hintSecondary")}
+                    // </Form.Text>
+                    }
+                  </div>
+                </Form.Group>
+            }
             {
               !memoStorageClasses.length
                 ? null

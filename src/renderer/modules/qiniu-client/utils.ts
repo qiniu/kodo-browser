@@ -4,6 +4,7 @@ import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 
 import * as AppConfig from "@common/const/app-config";
 import * as KodoNav from "@renderer/const/kodo-nav";
+import {AkItem, AkSpecialType} from "@renderer/modules/auth";
 
 import {debugRequest, debugResponse, GetAdapterOptionParam, getDefaultClient} from './common'
 import {checkFileExists, checkFolderExists} from "./files";
@@ -89,4 +90,22 @@ export function checkFileOrDirectoryExists(
       opt,
     );
   }
+}
+
+export async function isAccelerateUploadingAvailable(
+  user: AkItem,
+  bucketName: string,
+): Promise<boolean> {
+  if (user.specialType === AkSpecialType.STS) {
+    return false;
+  }
+  const result = await Region.query({
+    accessKey: user.accessKey,
+    bucketName: bucketName,
+    appName: 'kodo-browser',
+    appVersion: AppConfig.app.version,
+    requestCallback: debugRequest(KODO_MODE),
+    responseCallback: debugResponse(KODO_MODE),
+  });
+  return result.upAccUrls.length > 0;
 }

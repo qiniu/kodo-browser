@@ -15,6 +15,7 @@ export interface DestInfo {
 }
 
 export interface UploadOptions {
+    accelerateUploading: boolean,
     isOverwrite: boolean,
     storageClassName: StorageClass["kodoName"],
     storageClasses: StorageClass[],

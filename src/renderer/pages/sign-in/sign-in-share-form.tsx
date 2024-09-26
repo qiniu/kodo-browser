@@ -80,18 +80,16 @@ const SignInShareForm: React.FC<SignInShareFormProps> = ({
     }
 
     // try to determine the api host from private cloud share link
-    let apiHosts: string[] = [];
-    if (!isPublicShareURL(data.shareLink)) {
-      try {
-        apiHosts = await getShareApiHosts([parsedShareURL.portalHost]);
-      } catch (err: any) {
-        toast.error(err.toString());
-        return;
-      }
+    let apiUrls: string[] = [];
+    try {
+      apiUrls = await getShareApiHosts([parsedShareURL.portalHost]);
+    } catch (err: any) {
+      toast.error(err.toString());
+      return;
     }
     if (
       !isPublicShareURL(data.shareLink) &&
-      !apiHosts.length
+      !apiUrls.length
     ) {
       toast.error(translate("signIn.formShareLink.shareLink.feedback.invalidPrivateFormat"));
       return;
@@ -99,7 +97,7 @@ const SignInShareForm: React.FC<SignInShareFormProps> = ({
 
     // send sign in request
     const p = signInWithShareLink({
-      apiHosts,
+      apiUrls,
       shareId: parsedShareURL.shareId,
       shareToken: parsedShareURL.shareToken,
       extractCode: data.extractCode.trim(),

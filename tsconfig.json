@@ -40,6 +40,9 @@
   "exclude": [
     "node_modules",
     "dist",
-    "build"
+    "build",
+    "webpack",
+    "src/renderer/static",
+    "./*.js"
   ]
 }

@@ -784,6 +784,11 @@ export default interface Dictionary {
           label: string,
           hint: string,
         },
+        accelerateUploading: {
+          label: string,
+          hint: string,
+          hintSecondary: string,
+        },
         storageClassKodoName: {
           label: string,
         },

@@ -115,20 +115,23 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
       return;
     }
 
-    let apiUrls: string[] = [];
+    let shareURL = new URL(`${DEFAULT_PORTAL_URL}/kodo-shares/verify`);
+    let portalOrigin = shareURL.origin;
     const customShareUrl = currentUser.endpointType === EndpointType.Private
       ? DefaultDict.get("BASE_SHARE_URL")
       : undefined;
-    if (customShareUrl) {
-      const parsedShareUrl = new URL(customShareUrl);
-      let customApiUrls: string[] = [];
-      try {
-        customApiUrls = await getShareApiHosts([parsedShareUrl.origin]);
-      } catch (err: any) {
-        toast.error(err.toString());
-        return;
+
+    let apiUrls: string[] = [];
+    try {
+      if (customShareUrl) {
+        shareURL = new URL(customShareUrl);
       }
-      apiUrls = apiUrls.concat(customApiUrls);
+
+      portalOrigin = shareURL.origin;
+      apiUrls = await getShareApiHosts([portalOrigin]);
+    } catch (err: any) {
+      toast.error(err.toString());
+      return;
     }
 
     const p = createShare(
@@ -148,8 +151,6 @@ const CreateDirShareLink: React.FC<ModalProps & CreateDirShareLinkProps> = (prop
     );
 
     p.then(shareInfo => {
-      const baseShareUrl = customShareUrl || `${DEFAULT_PORTAL_URL}/kodo-shares/verify`;
-      const shareURL = new URL(baseShareUrl);
       shareURL.searchParams.set("id", shareInfo.id);
       shareURL.searchParams.set("token", shareInfo.token);
       setShareLink(shareURL.toString());

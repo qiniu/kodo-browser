@@ -8,6 +8,7 @@ import { Region } from "kodo-s3-adapter-sdk";
 
 const mockDataOfRegionBase = {
     upUrls: [],
+    upAccUrls: [],
     ucUrls: [],
     rsUrls: [],
     rsfUrls: [],

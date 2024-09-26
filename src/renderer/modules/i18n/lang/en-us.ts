@@ -789,6 +789,11 @@ const dict: Dictionary = {
           label: "Overwrite:",
           hint: "(Only this time)",
         },
+        accelerateUploading: {
+          label: "Accelerate Uploading:",
+          hint: "(Only this time)",
+          hintSecondary: "Will prioritize using accelerate domain for upload, which will incur corresponding traffic costs.",
+        },
         storageClassKodoName: {
           label: "Storage Class:",
         },

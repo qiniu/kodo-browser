@@ -14,7 +14,7 @@ import {useAuth} from "@renderer/modules/auth";
 import {KodoNavigator, useKodoNavigator} from "@renderer/modules/kodo-address";
 import {ContentViewStyle, appPreferences, useEndpointConfig} from "@renderer/modules/user-config-store";
 
-import {BucketItem, FileItem} from "@renderer/modules/qiniu-client";
+import {BucketItem, FileItem, isAccelerateUploadingAvailable} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 import * as AuditLog from "@renderer/modules/audit-log";
@@ -178,6 +178,25 @@ const Files: React.FC<FilesProps> = (props) => {
       return res;
     }, {});
   }, [props.region?.storageClasses?.length]);
+
+  // bucket accelerate uploading
+  const [canAccelerateUploading, setCanAccelerateUploading] = useState<boolean>(false);
+  useEffect(() => {
+    if (!currentUser || !props.bucket) {
+      return;
+    }
+    isAccelerateUploadingAvailable(
+      currentUser,
+      props.bucket?.name,
+    )
+      .then(res => {
+        setCanAccelerateUploading(res);
+      })
+      .catch(err => {
+        toast.error(err.toString());
+        LocalLogger.error(err);
+      });
+  }, [currentUser?.accessKey, props.bucket]);
 
   // domains loader and selector
   const {
@@ -414,6 +433,7 @@ const Files: React.FC<FilesProps> = (props) => {
               destPath={basePath ?? ""}
               filePaths={filePathsForUploadConfirm}
               storageClasses={Object.values(availableStorageClasses ?? {})}
+              canAccelerateUploading={canAccelerateUploading}
             />
           </>
       }

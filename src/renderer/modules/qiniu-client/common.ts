@@ -306,20 +306,7 @@ export interface GetShareServiceOptions {
 }
 
 export async function getShareService(opt: GetShareServiceOptions): Promise<ShareService> {
-  let ucUrl: string | undefined;
-  if (opt.accessKey && opt.accessSecret) {
-    const endpointConfig = getEndpointConfig({
-      accessKey: opt.accessKey,
-      accessSecret: opt.accessSecret,
-      endpointType: opt.endpointType ?? EndpointType.Public,
-    });
-    if (!endpointConfig.state.initialized) {
-      await endpointConfig.loadFromPersistence();
-    }
-    ucUrl = endpointConfig.get("ucUrl");
-  }
   return new ShareService({
-    ucUrl: ucUrl,
     apiUrls: opt.apiUrls,
     ak: opt.accessKey,
     sk: opt.accessSecret,
@@ -344,4 +331,3 @@ export function clearAllCache() {
         delete regionServicesCache[key];
     });
 }
-

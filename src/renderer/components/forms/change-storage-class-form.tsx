@@ -52,7 +52,7 @@ const ChangeStorageClassForm: React.FC<ChangeStorageClassFormProps> = ({
 
   useEffect(() => {
     reset({
-      storageClassKodoName: availableStorageClasses[0].kodoName,
+      storageClassKodoName: availableStorageClasses[0].kodoName ?? "Standard",
     });
   }, []);
 

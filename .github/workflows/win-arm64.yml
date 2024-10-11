@@ -1,0 +1,51 @@
+name: Build Electron App on Windows
+
+# 触发条件：推送、Pull Request 或手动触发时执行
+on: 
+  [workflow_dispatch]
+
+jobs:
+  build-on-windows:
+    runs-on: windows-latest  # 使用 Windows runner
+    steps:
+      # Step 1: 检出代码
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+      # Step 2: 设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.0.4
+        with:
+          node-version: '16.x'  # 根据需求设置为 '14.x' 或 '20.x'
+
+      # Step 3: 使用 Chocolatey 安装依赖（Python, vcredist-all, make）
+      - name: Install Dependencies via Chocolatey
+        run: |
+          choco install python310 make zip -y
+      # Step 4: 安装项目依赖
+      - name: Install Project Dependencies
+        run: |
+          make i
+      # Step 5: 构建应用
+      - name: Build Application
+        run: make build
+      
+      - name: Build
+        run: ./node_modules/.bin/gulp win-arm64
+
+      - name: Package build directory
+        run: |
+          zip -r ./windows-arm64.zip ./build/
+
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: |
+            ./windows-arm64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+

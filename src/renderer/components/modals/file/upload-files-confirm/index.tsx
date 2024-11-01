@@ -2,7 +2,7 @@ import {promises as fsPromises} from "fs";
 import path from "path";
 
 import React, {Fragment, useEffect, useMemo, useState} from "react";
-import {Button, Form, Modal, ModalProps, Spinner} from "react-bootstrap";
+import {Button, Form, Modal, ModalProps, OverlayTrigger, Popover, Spinner} from "react-bootstrap";
 import {SubmitHandler, useForm} from "react-hook-form";
 import {toast} from "react-hot-toast";
 
@@ -18,6 +18,60 @@ import {useEndpointConfig} from "@renderer/modules/user-config-store";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 
+interface TipPopoverProps {
+  className: string,
+  onClickRefresh: () => void,
+}
+
+const TipPopover: React.FC<TipPopoverProps> = ({
+  className,
+  onClickRefresh,
+}) => {
+  const [show, setShow] = useState(false);
+  const handleToggle = (nextShow: boolean) => {
+    if (!show) {
+      setShow(nextShow);
+    }
+  };
+  const handleMouseEnter = () => {
+    setShow(true);
+  };
+  const handleMouseLeave = () => {
+    setShow(false);
+  };
+  return (
+    <div className={className}>
+      <OverlayTrigger
+        placement="right"
+        show={show}
+        onToggle={handleToggle}
+        overlay={
+          <Popover
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <Popover.Body>
+              已经开通加速域名，但没有显示使用加速域名的开关？
+              <br />
+              <span
+                tabIndex={0}
+                className="text-link"
+                onClick={() => onClickRefresh()}
+                onKeyUp={e => e.code === "Space" && onClickRefresh()}
+              >
+                点击这里
+              </span>
+              刷新试试。
+            </Popover.Body>
+          </Popover>
+        }
+      >
+        <i className="bi bi-question-circle-fill"/>
+      </OverlayTrigger>
+    </div>
+  );
+};
+
 interface UploadFilesConfirmProps {
   filePaths: string[],
   maxShowFiles?: number,
@@ -26,6 +80,7 @@ interface UploadFilesConfirmProps {
   bucketName: string,
   destPath: string,
   canAccelerateUploading?: boolean,
+  onClickRefreshCanAccelerateUploading?: () => void,
 }
 
 interface FileShowItem {
@@ -63,6 +118,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
   bucketName,
   destPath,
   canAccelerateUploading = false,
+  onClickRefreshCanAccelerateUploading,
   ...modalProps
 }) => {
   const {currentLanguage, translate} = useI18n();
@@ -324,6 +380,13 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
         </Form>
       </Modal.Body>
       <Modal.Footer>
+        {
+          onClickRefreshCanAccelerateUploading &&
+          <TipPopover
+            className="me-auto"
+            onClickRefresh={onClickRefreshCanAccelerateUploading}
+          />
+        }
         {
           !memoFilePaths.length
             ? null

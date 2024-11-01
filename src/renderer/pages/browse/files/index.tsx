@@ -23,6 +23,7 @@ import {useFileOperation} from "@renderer/modules/file-operation";
 import DropZone from "@renderer/components/drop-zone";
 import {useDisplayModal, useIsShowAnyModal} from "@renderer/components/modals/hooks";
 import UploadFilesConfirm from "@renderer/components/modals/file/upload-files-confirm";
+import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
 
 import FileToolBar from "./file-tool-bar";
 import FileContent from "./file-content";
@@ -181,22 +182,47 @@ const Files: React.FC<FilesProps> = (props) => {
 
   // bucket accelerate uploading
   const [canAccelerateUploading, setCanAccelerateUploading] = useState<boolean>(false);
-  useEffect(() => {
+  const fetchAccelerateUploading = ({
+    needFeedback,
+    withoutCache,
+  }: {
+    needFeedback?: boolean,
+    withoutCache?: boolean,
+  } = {}) => {
     if (!currentUser || !props.bucket) {
       return;
     }
-    isAccelerateUploadingAvailable(
+    const opt = {
+      id: currentUser.accessKey,
+      secret: currentUser.accessSecret,
+      endpointType: currentUser.endpointType,
+    }
+    let p = isAccelerateUploadingAvailable(
       currentUser,
       props.bucket?.name,
-    )
-      .then(res => {
-        setCanAccelerateUploading(res);
-      })
-      .catch(err => {
-        toast.error(err.toString());
-        LocalLogger.error(err);
+      opt,
+      withoutCache,
+    );
+    if (needFeedback) {
+      p = toast.promise(p, {
+        loading: translate("common.refreshing"),
+        success: translate("common.refreshed"),
+        error: err => `${translate("common.failed")}: ${err}`,
       });
+    }
+    p.then(setCanAccelerateUploading)
+      .catch(err => LocalLogger.error(err));
+  };
+  useEffect(() => {
+    fetchAccelerateUploading();
   }, [currentUser?.accessKey, props.bucket]);
+  const refreshCanAccelerateUploading = () => {
+    ipcUploadManager.clearRegionsCache();
+    fetchAccelerateUploading({
+      needFeedback: true,
+      withoutCache: true,
+    });
+  };
 
   // domains loader and selector
   const {
@@ -434,6 +460,7 @@ const Files: React.FC<FilesProps> = (props) => {
               filePaths={filePathsForUploadConfirm}
               storageClasses={Object.values(availableStorageClasses ?? {})}
               canAccelerateUploading={canAccelerateUploading}
+              onClickRefreshCanAccelerateUploading={() => refreshCanAccelerateUploading()}
             />
           </>
       }

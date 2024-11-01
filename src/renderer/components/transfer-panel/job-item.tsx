@@ -8,12 +8,12 @@ import TransferJob from "@common/models/job/transfer-job";
 
 import {ADDR_KODO_PROTOCOL} from "@renderer/const/kodo-nav";
 import TooltipText from "@renderer/components/tooltip-text";
-import {translate} from "@renderer/modules/i18n";
+import {useI18n} from "@renderer/modules/i18n";
 import {Status2I18nKey} from "@renderer/modules/i18n/extra";
 
 interface JobItemProps {
   namePrefix?: string,
-  data: TransferJob["uiData"],
+  data: TransferJob["uiData"] & {accelerateUploading?: boolean},
   operationButtons?: React.ReactNode,
 }
 
@@ -22,6 +22,8 @@ const JobItem: React.FC<JobItemProps> = ({
   data,
   operationButtons,
 }) => {
+  const {translate} = useI18n();
+
   const {
     status,
     from,
@@ -72,14 +74,28 @@ const JobItem: React.FC<JobItemProps> = ({
             }
           </div>
         </TooltipText>
-        <ProgressBar
-          animated={[Status.Running, Status.Verifying].includes(status)}
-          now={
-            Status.Finished === status
-              ? 100
-              : progressLoaded * 100 / progressTotal
-          }
-        />
+        <div className="d-flex align-items-center">
+          <ProgressBar
+            className="flex-fill"
+            animated={[Status.Running, Status.Verifying].includes(status)}
+            now={
+              Status.Finished === status
+                ? 100
+                : progressLoaded * 100 / progressTotal
+            }
+          />
+          <TooltipText
+            tooltipContent={translate("transfer.jobItem.accelerateUploading")}
+            tooltipPlacement="bottom"
+          >
+            <i
+              className="bi bi-lightning-fill acc-uploading-icon"
+              style={{
+                visibility: data.accelerateUploading ? "visible" : "hidden",
+              }}
+            />
+          </TooltipText>
+        </div>
       </div>
       <div className="job-item-status">
         {

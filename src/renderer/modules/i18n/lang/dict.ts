@@ -252,6 +252,7 @@ export default interface Dictionary {
       removeConfirmOk: string,
       unknownError: string,
       fileDuplicated: string,
+      accelerateUploading: string,
     },
     upload: {
       dropZone: {
@@ -793,6 +794,11 @@ export default interface Dictionary {
           label: string,
         },
       },
+      popupHint: {
+        question: string,
+        clickHere: string,
+        refreshIt: string,
+      }
     },
 
     preview: {

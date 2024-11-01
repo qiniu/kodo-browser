@@ -246,6 +246,7 @@ const dict: Dictionary = {
       removeConfirmOk: "Remove",
       unknownError: "unknown error",
       fileDuplicated: "File duplicated",
+      accelerateUploading: "Accelerate uploading",
     },
     upload: {
       dropZone: {
@@ -798,6 +799,11 @@ const dict: Dictionary = {
           label: "Storage Class:",
         },
       },
+      popupHint: {
+        question: "Already enabled accelerate uploading for this bucket, but not see the switch?",
+        clickHere: "Click here",
+        refreshIt: " refresh it."
+      }
     },
 
     preview: {

@@ -1,4 +1,5 @@
 import {Region} from "kodo-s3-adapter-sdk";
+import {KodoHttpClient} from "kodo-s3-adapter-sdk/dist/kodo-http-client";
 
 import {
   AddedJobsReplyMessage,
@@ -137,6 +138,10 @@ process.on("message", (message: UploadMessage) => {
         }
         case UploadAction.RemoveAllJobs: {
             uploadManager.removeAllJobs();
+            break;
+        }
+        case UploadAction.ClearRegionsCache: {
+            KodoHttpClient.clearCache();
             break;
         }
         default: {

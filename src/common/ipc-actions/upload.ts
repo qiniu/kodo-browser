@@ -37,6 +37,7 @@ export enum UploadAction {
     StopJobsByOffline = "StopJobsByOffline",
     StartJobsByOnline = "StartJobsByOnline",
     RemoveAllJobs = "RemoveAllJobs",
+    ClearRegionsCache = "ClearRegionsCache",
 
     // common
     UpdateUiData = "UpdateUiData",
@@ -178,6 +179,11 @@ export interface RemoveAllJobsMessage {
     data?: {},
 }
 
+export interface ClearRegionsCacheMessage {
+    action: UploadAction.ClearRegionsCache,
+    data?: {},
+}
+
 export interface JobCompletedReplyMessage {
     action: UploadAction.JobCompleted,
     data: {
@@ -208,6 +214,7 @@ export type UploadMessage = UpdateConfigMessage
     | StopJobsByOfflineMessage
     | StartJobsByOnlineMessage
     | RemoveAllJobsMessage
+    | ClearRegionsCacheMessage
 
 export type UploadReplyMessage = UpdateUiDataReplyMessage
     | AddedJobsReplyMessage
@@ -317,6 +324,14 @@ export class UploadActionFns {
         this.sender.send(this.channel, {
             action: UploadAction.RemoveAllJobs,
             data: {},
+        });
+    }
+
+    clearRegionsCache() {
+        // if only ucUrl and s3RegionId are provided,
+        // it will clear all regions cache
+        this.sender.send(this.channel, {
+            action: UploadAction.ClearRegionsCache,
         });
     }
 }

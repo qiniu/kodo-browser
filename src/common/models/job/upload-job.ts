@@ -201,6 +201,7 @@ export default class UploadJob extends TransferJob {
             ...super.uiData,
             from: this.options.from,
             to: this.options.to,
+            accelerateUploading: this.accelerateUploading,
         };
     }
 

@@ -182,6 +182,7 @@ const Files: React.FC<FilesProps> = (props) => {
 
   // bucket accelerate uploading
   const [canAccelerateUploading, setCanAccelerateUploading] = useState<boolean>(false);
+  const [fetchingAccelerateUploading, setFetchingAccelerateUploading] = useState<boolean>(false);
   const fetchAccelerateUploading = ({
     needFeedback,
     withoutCache,
@@ -189,7 +190,7 @@ const Files: React.FC<FilesProps> = (props) => {
     needFeedback?: boolean,
     withoutCache?: boolean,
   } = {}) => {
-    if (!currentUser || !props.bucket) {
+    if (!currentUser || !props.bucket || fetchingAccelerateUploading) {
       return;
     }
     const opt = {
@@ -197,6 +198,7 @@ const Files: React.FC<FilesProps> = (props) => {
       secret: currentUser.accessSecret,
       endpointType: currentUser.endpointType,
     }
+    setFetchingAccelerateUploading(true);
     let p = isAccelerateUploadingAvailable(
       currentUser,
       props.bucket?.name,
@@ -211,7 +213,8 @@ const Files: React.FC<FilesProps> = (props) => {
       });
     }
     p.then(setCanAccelerateUploading)
-      .catch(err => LocalLogger.error(err));
+      .catch(err => LocalLogger.error(err))
+      .finally(() => setFetchingAccelerateUploading(false));
   };
   useEffect(() => {
     fetchAccelerateUploading();

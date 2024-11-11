@@ -27,6 +27,7 @@ interface RequiredOptions {
 }
 
 interface UploadOptions {
+    accelerateUploading: boolean,
     multipartUploadThreshold: number, // Bytes
     multipartUploadSize: number, // Bytes
     multipartUploadConcurrency: number,
@@ -65,6 +66,7 @@ export type Options = RequiredOptions & Partial<OptionalOptions>
 const DEFAULT_OPTIONS: OptionalOptions = {
     id: "",
 
+    accelerateUploading: false,
     multipartUploadThreshold: 10 * ByteSize.MB,
     multipartUploadSize: 4 * ByteSize.MB,
     multipartUploadConcurrency: 1,
@@ -100,6 +102,7 @@ type PersistInfo = {
     // But It's also a risk, if business logic changes. Because we may get errors
     // when restart job from break point with different backendMode.
     backendMode: RequiredOptions["clientOptions"]["backendMode"],
+    accelerateUploading: OptionalOptions["accelerateUploading"],
     prog: OptionalOptions["prog"],
     status: Exclude<OptionalOptions["status"], Status.Waiting | Status.Running>,
     message: OptionalOptions["message"],
@@ -137,6 +140,7 @@ export default class UploadJob extends TransferJob {
             prog: persistInfo.prog,
 
             clientOptions,
+            accelerateUploading: persistInfo.accelerateUploading,
             storageClasses: persistInfo.storageClasses,
 
             overwrite: persistInfo.overwrite,
@@ -162,6 +166,9 @@ export default class UploadJob extends TransferJob {
     protected readonly options: Readonly<RequiredOptions & OptionalOptions>
     private isForceOverwrite: boolean = false
 
+    // - for accelerate uploading
+    accelerateUploading: boolean = false
+
     // - for resume from break point -
     uploadedId: string
     uploadedParts: UploadedPart[]
@@ -174,6 +181,7 @@ export default class UploadJob extends TransferJob {
 
         this.options = lodash.merge({}, DEFAULT_OPTIONS, config);
 
+        this.accelerateUploading = this.options.accelerateUploading;
         this.uploadedId = this.options.uploadedId;
         this.uploadedParts = [
             ...this.options.uploadedParts,
@@ -193,6 +201,7 @@ export default class UploadJob extends TransferJob {
             ...super.uiData,
             from: this.options.from,
             to: this.options.to,
+            accelerateUploading: this.accelerateUploading,
         };
     }
 
@@ -276,6 +285,7 @@ export default class UploadJob extends TransferJob {
                 header: {
                     contentType: mime.getType(this.options.from.path),
                 },
+                accelerateUploading: this.accelerateUploading,
                 recovered: this.uploadedId && this.uploadedParts
                     ? {
                         uploadId: this.uploadedId,
@@ -419,6 +429,7 @@ export default class UploadJob extends TransferJob {
             overwrite: this.options.overwrite,
             storageClassName: this.options.storageClassName,
             backendMode: this.options.clientOptions.backendMode,
+            accelerateUploading: this.options.accelerateUploading,
 
             // real-time info
             prog: {
@@ -479,6 +490,12 @@ export default class UploadJob extends TransferJob {
         ) {
             this.uploadedId = "";
             this.uploadedParts = [];
+        }
+        // handle accelerate uploading is not available
+        if (err.toString().includes("transfer acceleration is not configured")) {
+            this.accelerateUploading = false;
+            await this.retry();
+            return;
         }
 
         this._status = Status.Failed;

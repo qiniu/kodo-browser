@@ -14,7 +14,7 @@ import {useAuth} from "@renderer/modules/auth";
 import {KodoNavigator, useKodoNavigator} from "@renderer/modules/kodo-address";
 import {ContentViewStyle, appPreferences, useEndpointConfig} from "@renderer/modules/user-config-store";
 
-import {BucketItem, FileItem} from "@renderer/modules/qiniu-client";
+import {BucketItem, FileItem, isAccelerateUploadingAvailable} from "@renderer/modules/qiniu-client";
 import {DomainAdapter, useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 import * as AuditLog from "@renderer/modules/audit-log";
@@ -23,6 +23,7 @@ import {useFileOperation} from "@renderer/modules/file-operation";
 import DropZone from "@renderer/components/drop-zone";
 import {useDisplayModal, useIsShowAnyModal} from "@renderer/components/modals/hooks";
 import UploadFilesConfirm from "@renderer/components/modals/file/upload-files-confirm";
+import ipcUploadManager from "@renderer/modules/electron-ipc-manages/ipc-upload-manager";
 
 import FileToolBar from "./file-tool-bar";
 import FileContent from "./file-content";
@@ -178,6 +179,53 @@ const Files: React.FC<FilesProps> = (props) => {
       return res;
     }, {});
   }, [props.region?.storageClasses?.length]);
+
+  // bucket accelerate uploading
+  const [canAccelerateUploading, setCanAccelerateUploading] = useState<boolean>(false);
+  const [fetchingAccelerateUploading, setFetchingAccelerateUploading] = useState<boolean>(false);
+  const fetchAccelerateUploading = ({
+    needFeedback,
+    withoutCache,
+  }: {
+    needFeedback?: boolean,
+    withoutCache?: boolean,
+  } = {}) => {
+    if (!currentUser || !props.bucket || fetchingAccelerateUploading) {
+      return;
+    }
+    const opt = {
+      id: currentUser.accessKey,
+      secret: currentUser.accessSecret,
+      endpointType: currentUser.endpointType,
+    }
+    setFetchingAccelerateUploading(true);
+    let p = isAccelerateUploadingAvailable(
+      currentUser,
+      props.bucket?.name,
+      opt,
+      withoutCache,
+    );
+    if (needFeedback) {
+      p = toast.promise(p, {
+        loading: translate("common.refreshing"),
+        success: translate("common.refreshed"),
+        error: err => `${translate("common.failed")}: ${err}`,
+      });
+    }
+    p.then(setCanAccelerateUploading)
+      .catch(err => LocalLogger.error(err))
+      .finally(() => setFetchingAccelerateUploading(false));
+  };
+  useEffect(() => {
+    fetchAccelerateUploading();
+  }, [currentUser?.accessKey, props.bucket]);
+  const refreshCanAccelerateUploading = () => {
+    ipcUploadManager.clearRegionsCache();
+    fetchAccelerateUploading({
+      needFeedback: true,
+      withoutCache: true,
+    });
+  };
 
   // domains loader and selector
   const {
@@ -414,6 +462,8 @@ const Files: React.FC<FilesProps> = (props) => {
               destPath={basePath ?? ""}
               filePaths={filePathsForUploadConfirm}
               storageClasses={Object.values(availableStorageClasses ?? {})}
+              canAccelerateUploading={canAccelerateUploading}
+              onClickRefreshCanAccelerateUploading={() => refreshCanAccelerateUploading()}
             />
           </>
       }

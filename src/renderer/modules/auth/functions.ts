@@ -51,22 +51,21 @@ export async function signIn(akItem: AkItem, remember: boolean) {
 }
 
 export interface SignInWithShareLinkOptions {
-  apiHosts?: string[],
+  apiUrls: string[],
   shareId: string,
   shareToken: string,
   extractCode: string,
 }
 
 export async function signInWithShareLink({
-  apiHosts,
+  apiUrls,
   shareId,
   shareToken,
   extractCode,
 }: SignInWithShareLinkOptions): Promise<void> {
-  const verifyShareOpt: QiniuClient.GetShareServiceOptions = {};
-  if (apiHosts?.length) {
-    verifyShareOpt.apiUrls = apiHosts;
-  }
+  const verifyShareOpt: QiniuClient.GetShareServiceOptions = {
+    apiUrls,
+  };
   const verifyShareResult = await QiniuClient.verifyShare(
     {
       shareId,
@@ -130,7 +129,10 @@ export function getCurrentUser(): AkItem | null {
 export function getAkSpecialType(accessKey: string = ""): AkSpecialType | undefined {
   if (accessKey.length === 44 && accessKey.startsWith("IAM-")) {
     return AkSpecialType.IAM;
-  } else if (accessKey.startsWith("STS-")) {
+  } else if (
+    (accessKey.length === 44 && accessKey.startsWith("STS-")) ||
+    (accessKey.length === 24 && accessKey.startsWith("STS_"))
+  ) {
     return AkSpecialType.STS;
   }
   return;

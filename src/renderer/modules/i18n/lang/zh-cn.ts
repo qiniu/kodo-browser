@@ -245,6 +245,7 @@ const dict: Dictionary = {
       removeConfirmOk: "移除",
       unknownError: "未知错误",
       fileDuplicated: "文件已存在",
+      accelerateUploading: "加速上传",
     },
     upload: {
       dropZone: {
@@ -788,10 +789,20 @@ const dict: Dictionary = {
           label: "覆盖上传：",
           hint: "（仅本次）",
         },
+        accelerateUploading: {
+          label: "加速上传：",
+          hint: "（仅本次）",
+          hintSecondary: "开启后，优先通过加速域名上传；当使用加速域名上传时，产生额外费用。",
+        },
         storageClassKodoName: {
           label: "存储类型：",
         },
       },
+      popupHint: {
+        question: "已经开通加速域名，但没有显示使用加速域名的开关？",
+        clickHere: "点击这里",
+        refreshIt: "刷新试试",
+      }
     },
 
     preview: {

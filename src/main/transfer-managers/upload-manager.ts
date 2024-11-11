@@ -244,6 +244,7 @@ export default class UploadManager extends TransferManager<UploadJob, Config> {
             },
 
             clientOptions,
+            accelerateUploading: uploadOptions.accelerateUploading,
             storageClasses: uploadOptions.storageClasses,
 
             overwrite: uploadOptions.isOverwrite,

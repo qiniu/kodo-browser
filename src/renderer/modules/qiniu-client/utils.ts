@@ -1,9 +1,11 @@
 import { KODO_MODE, Region } from "kodo-s3-adapter-sdk";
 import { Domain } from "kodo-s3-adapter-sdk/dist/adapter";
+import { ServiceName } from "kodo-s3-adapter-sdk/dist/kodo-http-client";
 import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 
 import * as AppConfig from "@common/const/app-config";
 import * as KodoNav from "@renderer/const/kodo-nav";
+import {AkItem, AkSpecialType} from "@renderer/modules/auth";
 
 import {debugRequest, debugResponse, GetAdapterOptionParam, getDefaultClient} from './common'
 import {checkFileExists, checkFolderExists} from "./files";
@@ -89,4 +91,27 @@ export function checkFileOrDirectoryExists(
       opt,
     );
   }
+}
+
+export async function isAccelerateUploadingAvailable(
+  user: AkItem,
+  bucket: string,
+  opt: GetAdapterOptionParam,
+  withoutCache = false,
+): Promise<boolean> {
+  if (user.specialType === AkSpecialType.STS) {
+    return false;
+  }
+
+  return await getDefaultClient(opt).enter("isAccelerateUploadingAvailable", async client => {
+    if (withoutCache) {
+      client.client.clearCache();
+    }
+    const accUrls = await client.client.getServiceUrls({
+      serviceName: ServiceName.UpAcc,
+      bucketName: bucket,
+      withFallback: false,
+    });
+    return accUrls && accUrls.length > 0;
+  });
 }

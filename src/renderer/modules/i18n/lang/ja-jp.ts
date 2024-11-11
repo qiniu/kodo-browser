@@ -245,6 +245,7 @@ const dict: Dictionary = {
             removeConfirmOk: "削除",
             unknownError: "不明なエラーです",
             fileDuplicated: "ファイルは既に存在",
+            accelerateUploading: "アップロードを加速する",
         },
         upload: {
             dropZone: {
@@ -786,12 +787,22 @@ const dict: Dictionary = {
             form: {
                 isOverwrite: {
                     label: "上書き：",
-                    hint: "（今回の上書き）",
+                    hint: "（今回だけ）",
+                },
+                accelerateUploading: {
+                  label: "アップロードを加速する：",
+                  hint: "（今回だけ）",
+                  hintSecondary: "開いた後、アクセラレーションドメインを優先してアップロードします；アクセラレーションドメインを使用する場合、追加料金が発生します。",
                 },
                 storageClassKodoName: {
                     label: "保管タイプ：",
                 },
             },
+            popupHint: {
+              question: "すでにアクセラレーションドメインを有効にしましたが、アクセラレーションドメインを使用するスイッチが表示されませんか？",
+              clickHere: "こちらをクリック",
+              refreshIt: "リフレッシュしてみてください",
+            }
         },
 
         preview: {

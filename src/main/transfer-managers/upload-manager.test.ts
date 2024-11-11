@@ -71,6 +71,7 @@ describe("test createUploadJobs", () => {
   };
 
   const MOCKED_UPLOAD_OPTIONS: UploadOptions = {
+    accelerateUploading: false,
     isOverwrite: true,
     storageClassName: "Standard",
     storageClasses: [

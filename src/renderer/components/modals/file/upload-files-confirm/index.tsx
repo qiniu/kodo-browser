@@ -2,7 +2,7 @@ import {promises as fsPromises} from "fs";
 import path from "path";
 
 import React, {Fragment, useEffect, useMemo, useState} from "react";
-import {Button, Form, Modal, ModalProps, Spinner} from "react-bootstrap";
+import {Button, Form, Modal, ModalProps, OverlayTrigger, Popover, Spinner} from "react-bootstrap";
 import {SubmitHandler, useForm} from "react-hook-form";
 import {toast} from "react-hot-toast";
 
@@ -18,6 +18,62 @@ import {useEndpointConfig} from "@renderer/modules/user-config-store";
 
 import LoadingHolder from "@renderer/components/loading-holder";
 
+interface TipPopoverProps {
+  className: string,
+  onClickRefresh: () => void,
+}
+
+const TipPopover: React.FC<TipPopoverProps> = ({
+  className,
+  onClickRefresh,
+}) => {
+  const {translate} = useI18n();
+
+  const [show, setShow] = useState(false);
+  const handleToggle = (nextShow: boolean) => {
+    if (!show) {
+      setShow(nextShow);
+    }
+  };
+  const handleMouseEnter = () => {
+    setShow(true);
+  };
+  const handleMouseLeave = () => {
+    setShow(false);
+  };
+  return (
+    <div className={className}>
+      <OverlayTrigger
+        placement="right"
+        show={show}
+        onToggle={handleToggle}
+        overlay={
+          <Popover
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <Popover.Body>
+              {translate("modals.uploadConfirm.popupHint.question")}
+              <br />
+              <span
+                tabIndex={0}
+                className="text-link"
+                onClick={() => onClickRefresh()}
+                onKeyUp={e => e.code === "Space" && onClickRefresh()}
+              >
+                {translate("modals.uploadConfirm.popupHint.clickHere")}
+              </span>
+              {translate("modals.uploadConfirm.popupHint.refreshIt")}
+            </Popover.Body>
+          </Popover>
+        }
+      >
+        <i className="bi bi-question-circle-fill"/>
+      </OverlayTrigger>
+    </div>
+  );
+};
+
 interface UploadFilesConfirmProps {
   filePaths: string[],
   maxShowFiles?: number,
@@ -25,6 +81,8 @@ interface UploadFilesConfirmProps {
   regionId: string,
   bucketName: string,
   destPath: string,
+  canAccelerateUploading?: boolean,
+  onClickRefreshCanAccelerateUploading?: () => void,
 }
 
 interface FileShowItem {
@@ -35,6 +93,7 @@ interface FileShowItem {
 
 interface UploadFilesFormData {
   isOverwrite: boolean,
+  accelerateUploading: boolean,
   storageClassKodoName: string,
 }
 
@@ -60,6 +119,8 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
   regionId,
   bucketName,
   destPath,
+  canAccelerateUploading = false,
+  onClickRefreshCanAccelerateUploading,
   ...modalProps
 }) => {
   const {currentLanguage, translate} = useI18n();
@@ -148,6 +209,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
         key: memoDestPath,
       },
       uploadOptions: {
+        accelerateUploading: data.accelerateUploading,
         isOverwrite: data.isOverwrite,
         storageClassName: data.storageClassKodoName,
         storageClasses: memoStorageClasses,
@@ -183,6 +245,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
       reset({
         isOverwrite: false,
         storageClassKodoName: storageClasses[0]?.kodoName ?? "Standard",
+        accelerateUploading: false,
       });
       statFiles(memoFilePaths, maxShowFiles)
         .then(fileShowList => {
@@ -264,6 +327,27 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
               </div>
             </Form.Group>
             {
+              !canAccelerateUploading
+                ? null
+                : <Form.Group as={Fragment} controlId="accelerateUploading">
+                  <Form.Label className="text-end">
+                    {translate("modals.uploadConfirm.form.accelerateUploading.label")}
+                  </Form.Label>
+                  <div className="mt-2">
+                    <Form.Switch
+                      {...register("accelerateUploading")}
+                      label={translate("modals.uploadConfirm.form.accelerateUploading.hint")}
+                    />
+                    {
+                    // TODO(lihs): need to be confirmed with PM
+                    // <Form.Text>
+                    //   {translate("modals.uploadConfirm.form.accelerateUploading.hintSecondary")}
+                    // </Form.Text>
+                    }
+                  </div>
+                </Form.Group>
+            }
+            {
               !memoStorageClasses.length
                 ? null
                 : <Form.Group as={Fragment} controlId="storageClassKodoName">
@@ -298,6 +382,13 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
         </Form>
       </Modal.Body>
       <Modal.Footer>
+        {
+          onClickRefreshCanAccelerateUploading &&
+          <TipPopover
+            className="me-auto"
+            onClickRefresh={onClickRefreshCanAccelerateUploading}
+          />
+        }
         {
           !memoFilePaths.length
             ? null

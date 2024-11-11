@@ -257,6 +257,9 @@ ipcMain.on("UploaderManager", (event, message) => {
         {
           cwd: root,
           silent: false,
+          execArgv: process.env.NODE_ENV === "development"
+            ? ["--inspect=9222"]
+            : [],
         },
     );
     forkedWorkers.set(processName, uploaderProcess);
@@ -294,6 +297,9 @@ ipcMain.on("DownloaderManager", (event, message) => {
         {
           cwd: root,
           silent: false,
+          execArgv: process.env.NODE_ENV === "development"
+            ? ["--inspect=9223"]
+            : [],
         },
     );
     forkedWorkers.set(processName, downloaderProcess);

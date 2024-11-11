@@ -45,9 +45,9 @@ export class DataStore<T> {
 
   constructor({
     workingDirectory,
-    thresholdDuration,
-    thresholdSize,
-    thresholdChangesSize,
+    thresholdDuration, // ms, trigger compact when thresholdDuration elapsed after last compact
+    thresholdSize, // trigger compact when memTable size exceeds thresholdSize
+    thresholdChangesSize, // trigger compact when memTable changes size exceeds thresholdChangesSize
 
     memTable,
     memTableReadOnly,

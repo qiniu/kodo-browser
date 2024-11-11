@@ -38,6 +38,12 @@
       --bs-progress-height: 0.5rem;
     }
 
+    & .acc-uploading-icon {
+        min-width: 0.75rem;
+        font-size: 0.75rem;
+        color: var(--bs-yellow);
+    }
+
     & .job-item-name {
       flex: 0 0 30%;
       min-width: 30%;

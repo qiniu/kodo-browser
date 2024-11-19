@@ -97,14 +97,14 @@ export async function isAccelerateUploadingAvailable(
   user: AkItem,
   bucket: string,
   opt: GetAdapterOptionParam,
-  withoutCache = false,
+  refreshCache = false,
 ): Promise<boolean> {
   if (user.specialType === AkSpecialType.STS) {
     return false;
   }
 
   return await getDefaultClient(opt).enter("isAccelerateUploadingAvailable", async client => {
-    if (withoutCache) {
+    if (refreshCache) {
       client.client.clearCache();
     }
     const accUrls = await client.client.getServiceUrls({

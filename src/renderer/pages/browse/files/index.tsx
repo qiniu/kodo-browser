@@ -185,10 +185,10 @@ const Files: React.FC<FilesProps> = (props) => {
   const [fetchingAccelerateUploading, setFetchingAccelerateUploading] = useState<boolean>(false);
   const fetchAccelerateUploading = ({
     needFeedback,
-    withoutCache,
+    refreshCache,
   }: {
     needFeedback?: boolean,
-    withoutCache?: boolean,
+    refreshCache?: boolean,
   } = {}) => {
     if (!currentUser || !props.bucket || fetchingAccelerateUploading) {
       return;
@@ -203,7 +203,7 @@ const Files: React.FC<FilesProps> = (props) => {
       currentUser,
       props.bucket?.name,
       opt,
-      withoutCache,
+      refreshCache,
     );
     if (needFeedback) {
       p = toast.promise(p, {
@@ -216,14 +216,11 @@ const Files: React.FC<FilesProps> = (props) => {
       .catch(err => LocalLogger.error(err))
       .finally(() => setFetchingAccelerateUploading(false));
   };
-  useEffect(() => {
-    fetchAccelerateUploading();
-  }, [currentUser?.accessKey, props.bucket]);
   const refreshCanAccelerateUploading = () => {
     ipcUploadManager.clearRegionsCache();
     fetchAccelerateUploading({
       needFeedback: true,
-      withoutCache: true,
+      refreshCache: true,
     });
   };
 
@@ -285,6 +282,15 @@ const Files: React.FC<FilesProps> = (props) => {
   ] = useDisplayModal<{filePaths: string[]}>({
     filePaths: []
   });
+  useEffect(() => {
+    if (!isShowUploadFilesConfirm) {
+      return;
+    }
+    ipcUploadManager.clearRegionsCache();
+    fetchAccelerateUploading({
+      refreshCache: true,
+    });
+  }, [isShowUploadFilesConfirm]);
 
   // handle upload and download
   const handleUploadFiles = async (filePaths: string[]) => {

@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import {Region} from "kodo-s3-adapter-sdk";
+import {RegionStorageClass} from "kodo-s3-adapter-sdk/dist/region";
 import {toast} from "react-hot-toast";
 
 import * as LocalLogger from "@renderer/modules/local-logger";
@@ -11,6 +12,20 @@ interface LoadRegionsState {
   loading: boolean,
   regions: Region[],
 }
+
+const DEFAULT_REGION_STORAGE_CLASSES: RegionStorageClass[] = [
+  {
+    fileType: 0,
+    kodoName: "Standard",
+    s3Name: "STANDARD",
+    billingI18n: {},
+    nameI18n: {
+      en_US: "Standard",
+      ja_JP: "標準",
+      zh_CN: "标准存储",
+    },
+  },
+];
 
 export default function useLoadRegions({
   user,
@@ -63,8 +78,7 @@ export default function useLoadRegions({
         } else {
           try {
             regions = regionsFromEndpointConfig.map(r => {
-              const storageClasses = regionsFromFetch
-                .find(i => i.s3Id === r.identifier)?.storageClasses ?? []
+              const storageClasses = regionsFromFetch.find(i => i.s3Id === r.identifier)?.storageClasses;
               const result = new Region(
                 r.identifier,
                 r.identifier,
@@ -90,6 +104,12 @@ export default function useLoadRegions({
         }
       }
     } finally {
+      // set default storage classes
+      regions?.forEach(r => {
+        if (!r.storageClasses.length) {
+          r.storageClasses.push(...DEFAULT_REGION_STORAGE_CLASSES.map(sc => ({...sc})));
+        }
+      });
       setLoadRegionsState({
         loading: false,
         regions: regions || [],

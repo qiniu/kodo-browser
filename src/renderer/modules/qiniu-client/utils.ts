@@ -5,7 +5,7 @@ import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 
 import * as AppConfig from "@common/const/app-config";
 import * as KodoNav from "@renderer/const/kodo-nav";
-import {AkItem, AkSpecialType} from "@renderer/modules/auth";
+import {AkItem, EndpointType} from "@renderer/modules/auth";
 
 import {debugRequest, debugResponse, GetAdapterOptionParam, getDefaultClient} from './common'
 import {checkFileExists, checkFolderExists} from "./files";
@@ -99,7 +99,9 @@ export async function isAccelerateUploadingAvailable(
   opt: GetAdapterOptionParam,
   refreshCache = false,
 ): Promise<boolean> {
-  if (user.specialType === AkSpecialType.STS) {
+  if (
+    user.endpointType !== EndpointType.Public
+  ) {
     return false;
   }
 

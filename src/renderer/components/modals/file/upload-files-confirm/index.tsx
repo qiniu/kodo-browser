@@ -382,6 +382,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
       </Modal.Body>
       <Modal.Footer>
         {
+          currentUser?.endpointType === EndpointType.Public &&
           onClickRefreshCanAccelerateUploading &&
           <TipPopover
             className="me-auto"

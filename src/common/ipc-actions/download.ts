@@ -1,5 +1,5 @@
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
-import {Domain} from "kodo-s3-adapter-sdk/dist/adapter";
+import {Domain, UrlStyle} from "kodo-s3-adapter-sdk/dist/adapter";
 
 import {ClientOptionsSerialized} from "@common/qiniu";
 import {Status} from "@common/models/job/types";
@@ -24,6 +24,7 @@ export interface DownloadOptions {
     bucket: string,
 
     domain?: Domain,
+    urlStyle?: UrlStyle,
 
     isOverwrite: boolean,
     storageClasses: StorageClass[],

@@ -25,7 +25,8 @@ import {
   ObjectInfo,
   PartialObjectError,
   StorageClass,
-  StorageObject
+  StorageObject,
+  UrlStyle,
 } from "kodo-s3-adapter-sdk/dist/adapter";
 
 import Duration from "@common/const/duration";
@@ -443,6 +444,7 @@ describe("test qiniu-client/files.ts", () => {
                         "bucket-kodo-browser-Kodo-getContent",
                         qiniuPathConvertor.fromQiniuPath("qiniu-client/file-to-get"),
                         mockDomain,
+                        undefined,
                         mockOpt,
                     );
                     expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);
@@ -607,7 +609,7 @@ describe("test qiniu-client/files.ts", () => {
                             mockDataKey,
                             undefined,
                             10,
-                            name === "S3" ? "path" : "bucketEndpoint",
+                            name === "S3" ? UrlStyle.Path : UrlStyle.BucketEndpoint,
                             mockOpt,
                         );
                         expect(QiniuClientCommon.getDefaultClient).toBeCalledTimes(1);

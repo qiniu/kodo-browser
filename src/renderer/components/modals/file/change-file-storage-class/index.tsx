@@ -58,11 +58,12 @@ const ChangeFileStorageClass: React.FC<ModalProps & ChangeFileStorageClassProps>
   const changeStorageClassFormController = useForm<ChangeStorageClassFormData>({
     mode: "onChange",
     defaultValues: {
-      storageClassKodoName: storageClasses[0]?.kodoName ?? "Standard",
+      storageClassKodoName: storageClasses[0]?.kodoName ?? "",
     },
   });
 
   const {
+    watch,
     handleSubmit,
     formState: {
       isSubmitting,
@@ -135,7 +136,7 @@ const ChangeFileStorageClass: React.FC<ModalProps & ChangeFileStorageClassProps>
       </Modal.Body>
       <Modal.Footer>
         {
-          !memoFileItem || isSubmitSuccessful
+          !memoFileItem || !watch("storageClassKodoName") || isSubmitSuccessful
             ? null
             : <Button
               variant="primary"

@@ -87,7 +87,7 @@ const ChangeFilesStorageClass: React.FC<ModalProps & ChangeFilesStorageClassProp
   const changeStorageClassFormController = useForm<ChangeStorageClassFormData>({
     mode: "onChange",
     defaultValues: {
-      storageClassKodoName: storageClasses[0]?.kodoName ?? "Standard",
+      storageClassKodoName: storageClasses[0]?.kodoName ?? "",
     },
   });
 

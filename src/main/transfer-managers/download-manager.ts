@@ -293,6 +293,7 @@ export default class DownloadManager extends TransferManager<DownloadJob, Config
             overwrite: downloadOptions.isOverwrite,
             region: downloadOptions.region,
             domain: downloadOptions.domain,
+            urlStyle: downloadOptions.urlStyle,
 
             multipartDownloadThreshold: this.config.multipartThreshold,
             multipartDownloadSize: this.config.multipartSize,

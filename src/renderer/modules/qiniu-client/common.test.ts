@@ -3,10 +3,16 @@ import * as MockAuth from "@common/qiniu/_mock-helpers_/auth";
 
 import { RegionService } from "kodo-s3-adapter-sdk/dist/region_service";
 
-jest.mock("kodo-s3-adapter-sdk/dist/region_service", () => ({
+jest.mock("kodo-s3-adapter-sdk/dist/region_service", () => {
+  class MockedRegionService extends jest.fn() {
+    static clearCache = jest.fn();
+    clearCache = jest.fn();
+  }
+  return {
     __esModule: true,
-    RegionService: jest.fn().mockReturnValue({ clearCache: () => {} }),
-}));
+    RegionService: MockedRegionService,
+  }
+});
 
 import { Kodo as KodoAdapter } from "kodo-s3-adapter-sdk/dist/kodo";
 import { S3 as S3Adapter } from "kodo-s3-adapter-sdk/dist/s3";

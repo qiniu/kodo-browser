@@ -3,7 +3,7 @@ import fs, {constants as fsConstants, promises as fsPromises} from "fs";
 
 import lodash from "lodash";
 import {Downloader} from "kodo-s3-adapter-sdk";
-import {Adapter, Domain, ObjectHeader, StorageClass} from "kodo-s3-adapter-sdk/dist/adapter";
+import {Adapter, Domain, ObjectHeader, StorageClass, UrlStyle} from "kodo-s3-adapter-sdk/dist/adapter";
 import {NatureLanguage} from "kodo-s3-adapter-sdk/dist/uplog";
 
 import {ClientOptions, createQiniuClient} from "@common/qiniu";
@@ -36,7 +36,8 @@ interface DownloadOptions {
 
 interface OptionalOptions extends DownloadOptions {
     id: string,
-    domain?: Domain,
+    domain: Domain | undefined,
+    urlStyle: UrlStyle | undefined,
 
     status: Status,
     message: string,
@@ -58,6 +59,8 @@ type Options = RequiredOptions & Partial<OptionalOptions>
 
 const DEFAULT_OPTIONS: OptionalOptions = {
     id: "",
+    domain: undefined,
+    urlStyle: undefined,
 
     multipartDownloadThreshold: 100,
     multipartDownloadSize: 8,
@@ -86,6 +89,7 @@ type PersistInfo = {
     from: RequiredOptions["from"],
     backendMode: RequiredOptions["clientOptions"]["backendMode"],
     domain: OptionalOptions["domain"],
+    urlStyle: OptionalOptions["urlStyle"],
     prog: OptionalOptions["prog"],
     status: Exclude<OptionalOptions["status"], Status.Waiting | Status.Running>,
     message: OptionalOptions["message"],
@@ -112,6 +116,8 @@ export default class DownloadJob extends TransferJob {
     ): DownloadJob {
         return new DownloadJob({
             id,
+            domain: persistInfo.domain,
+            urlStyle: persistInfo.urlStyle,
             status: persistInfo.status,
             message: persistInfo.message,
 
@@ -213,6 +219,7 @@ export default class DownloadJob extends TransferJob {
             to: this.options.to,
             from: this.options.from,
             domain: this.options.domain,
+            urlStyle: this.options.urlStyle,
             storageClasses: this.options.storageClasses,
             backendMode: this.options.clientOptions.backendMode,
 
@@ -297,6 +304,7 @@ export default class DownloadJob extends TransferJob {
             this.tempFilePath,
             this.options.domain,
             {
+                urlStyle: this.options.urlStyle,
                 recoveredFrom: this.prog.resumable
                     ? this.prog.loaded
                     : 0,

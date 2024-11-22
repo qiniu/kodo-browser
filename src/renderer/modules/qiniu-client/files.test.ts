@@ -457,6 +457,7 @@ describe("test qiniu-client/files.ts", () => {
                             key: "qiniu-client/file-to-get",
                         },
                         mockDomain,
+                        undefined
                     );
                     expect(actualContent).toEqual(Buffer.from("lalalala"));
                 });

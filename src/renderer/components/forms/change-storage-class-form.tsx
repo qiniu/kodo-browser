@@ -7,7 +7,6 @@ import StorageClass from "@common/models/storage-class";
 
 export interface ChangeStorageClassFormData {
   storageClassKodoName: string,
-  someInput: string,
 }
 
 interface ChangeStorageClassFormProps {
@@ -52,7 +51,7 @@ const ChangeStorageClassForm: React.FC<ChangeStorageClassFormProps> = ({
 
   useEffect(() => {
     reset({
-      storageClassKodoName: availableStorageClasses[0].kodoName ?? "Standard",
+      storageClassKodoName: availableStorageClasses[0]?.kodoName ?? "",
     });
   }, []);
 
@@ -97,33 +96,37 @@ const ChangeStorageClassForm: React.FC<ChangeStorageClassFormProps> = ({
               </div>
             </Form.Group>
         }
-        <Form.Group as={Fragment} controlId="storageClassKodoName">
-          <Form.Label className="text-end">
-            {translate("forms.changeStorageClass.storageClassKodoName.label")}
-          </Form.Label>
-          <div>
-            {
-              availableStorageClasses.map(storageClass => (
-                <Form.Check
-                  {...register("storageClassKodoName")}
-                  id={`storageClassKodoName-${storageClass.kodoName}`}
-                  key={storageClass.kodoName}
-                  type="radio"
-                  label={storageClass.nameI18n[currentLanguage]}
-                  value={storageClass.kodoName}
-                />
-              ))
-            }
-            <Form.Text>
-              {
-                availableStorageClasses
-                  .find(storageClasses =>
-                    storageClasses.kodoName === watch("storageClassKodoName"))
-                  ?.billingI18n[currentLanguage]
-              }
-            </Form.Text>
-          </div>
-        </Form.Group>
+        {
+          !availableStorageClasses.length
+          ? null
+          : <Form.Group as={Fragment} controlId="storageClassKodoName">
+            <Form.Label className="text-end">
+              {translate("forms.changeStorageClass.storageClassKodoName.label")}
+            </Form.Label>
+              <div>
+                {
+                  availableStorageClasses.map(storageClass => (
+                    <Form.Check
+                      {...register("storageClassKodoName")}
+                      id={`storageClassKodoName-${storageClass.kodoName}`}
+                      key={storageClass.kodoName}
+                      type="radio"
+                      label={storageClass.nameI18n[currentLanguage]}
+                      value={storageClass.kodoName}
+                    />
+                  ))
+                }
+                <Form.Text>
+                  {
+                    availableStorageClasses
+                      .find(storageClasses =>
+                        storageClasses.kodoName === watch("storageClassKodoName"))
+                      ?.billingI18n[currentLanguage]
+                  }
+                </Form.Text>
+              </div>
+          </Form.Group>
+        }
       </fieldset>
     </Form>
   );

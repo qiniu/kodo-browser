@@ -339,10 +339,9 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
                       label={translate("modals.uploadConfirm.form.accelerateUploading.hint")}
                     />
                     {
-                    // TODO(lihs): need to be confirmed with PM
-                    // <Form.Text>
-                    //   {translate("modals.uploadConfirm.form.accelerateUploading.hintSecondary")}
-                    // </Form.Text>
+                    <Form.Text>
+                      {translate("modals.uploadConfirm.form.accelerateUploading.hintSecondary")}
+                    </Form.Text>
                     }
                   </div>
                 </Form.Group>
@@ -383,6 +382,7 @@ const UploadFilesConfirm: React.FC<ModalProps & UploadFilesConfirmProps> = ({
       </Modal.Body>
       <Modal.Footer>
         {
+          currentUser?.endpointType === EndpointType.Public &&
           onClickRefreshCanAccelerateUploading &&
           <TipPopover
             className="me-auto"

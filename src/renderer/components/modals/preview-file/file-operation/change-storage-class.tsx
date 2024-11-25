@@ -62,11 +62,12 @@ const ChangeStorageClass: React.FC<ChangeStorageClassProps> = ({
   const changeStorageClassFormController = useForm<ChangeStorageClassFormData>({
     mode: "onChange",
     defaultValues: {
-      storageClassKodoName: storageClasses[0]?.kodoName ?? "Standard",
+      storageClassKodoName: storageClasses[0]?.kodoName ?? "",
     },
   });
 
   const {
+    watch,
     handleSubmit,
     formState: {
       isSubmitting,
@@ -123,7 +124,7 @@ const ChangeStorageClass: React.FC<ChangeStorageClassProps> = ({
         onSubmit={handleSubmitChangeStorageClass}
       />
       {
-        !SubmitButtonPortal || isSubmitSuccessful
+        !SubmitButtonPortal || !watch("storageClassKodoName") || isSubmitSuccessful
           ? null
           : <SubmitButtonPortal>
             <Button

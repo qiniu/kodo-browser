@@ -5,7 +5,7 @@ import { Path as QiniuPath } from "qiniu-path/dist/src/path";
 
 import * as AppConfig from "@common/const/app-config";
 import * as KodoNav from "@renderer/const/kodo-nav";
-import {AkItem, AkSpecialType} from "@renderer/modules/auth";
+import {AkItem, EndpointType} from "@renderer/modules/auth";
 
 import {debugRequest, debugResponse, GetAdapterOptionParam, getDefaultClient} from './common'
 import {checkFileExists, checkFolderExists} from "./files";
@@ -97,14 +97,16 @@ export async function isAccelerateUploadingAvailable(
   user: AkItem,
   bucket: string,
   opt: GetAdapterOptionParam,
-  withoutCache = false,
+  refreshCache = false,
 ): Promise<boolean> {
-  if (user.specialType === AkSpecialType.STS) {
+  if (
+    user.endpointType !== EndpointType.Public
+  ) {
     return false;
   }
 
   return await getDefaultClient(opt).enter("isAccelerateUploadingAvailable", async client => {
-    if (withoutCache) {
+    if (refreshCache) {
       client.client.clearCache();
     }
     const accUrls = await client.client.getServiceUrls({

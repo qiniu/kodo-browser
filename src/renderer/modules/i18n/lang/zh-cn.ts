@@ -792,7 +792,7 @@ const dict: Dictionary = {
         accelerateUploading: {
           label: "加速上传：",
           hint: "（仅本次）",
-          hintSecondary: "开启后，优先通过加速域名上传；当使用加速域名上传时，产生额外费用。",
+          hintSecondary: "开启后，优先通过加速域名上传；当使用加速域名上传时，产生传输加速费用。",
         },
         storageClassKodoName: {
           label: "存储类型：",

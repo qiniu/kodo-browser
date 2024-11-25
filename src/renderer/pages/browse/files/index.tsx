@@ -14,8 +14,8 @@ import {useAuth} from "@renderer/modules/auth";
 import {KodoNavigator, useKodoNavigator} from "@renderer/modules/kodo-address";
 import {ContentViewStyle, appPreferences, useEndpointConfig} from "@renderer/modules/user-config-store";
 
-import {BucketItem, FileItem, isAccelerateUploadingAvailable} from "@renderer/modules/qiniu-client";
-import {DomainAdapter, useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
+import {BucketItem, FileItem, getStyleForSignature, isAccelerateUploadingAvailable} from "@renderer/modules/qiniu-client";
+import {DomainAdapter, NON_OWNED_DOMAIN, useLoadDomains, useLoadFiles} from "@renderer/modules/qiniu-client-hooks";
 import ipcDownloadManager from "@renderer/modules/electron-ipc-manages/ipc-download-manager";
 import * as AuditLog from "@renderer/modules/audit-log";
 import {useFileOperation} from "@renderer/modules/file-operation";
@@ -38,7 +38,10 @@ interface FilesProps {
 const Files: React.FC<FilesProps> = (props) => {
   const {currentLanguage, translate} = useI18n();
   const {currentUser, shareSession} = useAuth();
-  const {bucketGrantedPermission} = useFileOperation();
+  const {
+    bucketPreferBackendMode: preferBackendMode,
+    bucketGrantedPermission,
+  } = useFileOperation();
 
   const {
     state: appPreferencesState,
@@ -185,10 +188,10 @@ const Files: React.FC<FilesProps> = (props) => {
   const [fetchingAccelerateUploading, setFetchingAccelerateUploading] = useState<boolean>(false);
   const fetchAccelerateUploading = ({
     needFeedback,
-    withoutCache,
+    refreshCache,
   }: {
     needFeedback?: boolean,
-    withoutCache?: boolean,
+    refreshCache?: boolean,
   } = {}) => {
     if (!currentUser || !props.bucket || fetchingAccelerateUploading) {
       return;
@@ -203,7 +206,7 @@ const Files: React.FC<FilesProps> = (props) => {
       currentUser,
       props.bucket?.name,
       opt,
-      withoutCache,
+      refreshCache,
     );
     if (needFeedback) {
       p = toast.promise(p, {
@@ -216,14 +219,11 @@ const Files: React.FC<FilesProps> = (props) => {
       .catch(err => LocalLogger.error(err))
       .finally(() => setFetchingAccelerateUploading(false));
   };
-  useEffect(() => {
-    fetchAccelerateUploading();
-  }, [currentUser?.accessKey, props.bucket]);
   const refreshCanAccelerateUploading = () => {
     ipcUploadManager.clearRegionsCache();
     fetchAccelerateUploading({
       needFeedback: true,
-      withoutCache: true,
+      refreshCache: true,
     });
   };
 
@@ -285,6 +285,15 @@ const Files: React.FC<FilesProps> = (props) => {
   ] = useDisplayModal<{filePaths: string[]}>({
     filePaths: []
   });
+  useEffect(() => {
+    if (!isShowUploadFilesConfirm) {
+      return;
+    }
+    ipcUploadManager.clearRegionsCache();
+    fetchAccelerateUploading({
+      refreshCache: true,
+    });
+  }, [isShowUploadFilesConfirm]);
 
   // handle upload and download
   const handleUploadFiles = async (filePaths: string[]) => {
@@ -344,13 +353,21 @@ const Files: React.FC<FilesProps> = (props) => {
       to: destDirectoryPath,
       from: remoteObjects.map(i => i.key),
     });
+    const domain = selectedDomain.name === NON_OWNED_DOMAIN.name
+      ? undefined
+      : selectedDomain;
     ipcDownloadManager.addJobs({
       remoteObjects,
       destPath: destDirectoryPath,
       downloadOptions: {
         region: currentRegion.s3Id,
         bucket: currentBucket.name,
-        domain: selectedDomain,
+        domain: domain,
+        urlStyle: getStyleForSignature({
+          domain: domain,
+          preferBackendMode,
+          currentEndpointType: currentUser.endpointType,
+        }),
         isOverwrite: appPreferencesData.overwriteDownloadEnabled,
         storageClasses: currentRegion.storageClasses,
         // userNatureLanguage needs mid-dash but i18n using lo_dash

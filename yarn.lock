@@ -7364,10 +7364,10 @@ klona@^2.0.4, klona@^2.0.5:
   resolved "https://registry.yarnpkg.com/klona/-/klona-2.0.5.tgz#d166574d90076395d9963aa7a928fabb8d76afbc"
   integrity sha512-pJiBpiXMbt7dkzXe8Ghj/u4FfXOOa98fPW+bihOJ4SjnoijweJrNThJfd3ifXpXhREjpoF2mZVH1GfS9LV3kHQ==
 
-kodo-s3-adapter-sdk@0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.6.1.tgz#319da35d9c3a8f5e1e3987b9a89835ac1b43953f"
-  integrity sha512-RWxb1I0EjPdZZC3Q7FBHBKjc3ctzm/Hy2hw3yk6mKRs+rIPyzbjuTyG1j9RrhewY8ZeG3Avlozrlg6YG36ySqg==
+kodo-s3-adapter-sdk@0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/kodo-s3-adapter-sdk/-/kodo-s3-adapter-sdk-0.7.1.tgz#f4ac526b5ce95d6b01b7cd75dcd3b8a1db535497"
+  integrity sha512-jUKy201CuP7a8x5vTI9sc2DjFkng95rfG0+k9Bmczx8HeGU5ifgChdnrufzkZH3xA++bha8Zl6JrWnAHCSWYCA==
   dependencies:
     agentkeepalive "^4.2.1"
     async-lock "^1.2.4"

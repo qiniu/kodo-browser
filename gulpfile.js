@@ -101,6 +101,41 @@ gulp.task("dmg", done => {
   });
 });
 
+gulp.task("mac-arm64", done => {
+  console.log(`--package ${NAME}-darwin-arm64`);
+
+  plugins.run(`rm -rf ${TARGET}/${NAME}-darwin-arm64`).exec(() => {
+    let options = Object.assign({}, packagerOptions);
+    options.platform = "darwin";
+    options.arch = "arm64";  // 为 Apple Silicon 设置 arm64 架构
+    options.icon = `${BRAND}/qiniu.icns`;
+
+    options.protocols = [{
+      name: 'com.qiniu.browser',
+      schemes: [
+        'kodo-browser'
+      ]
+    }];
+
+    packager(options).then((paths) => {
+      console.log("--done");
+      done();
+    }, (errs) => {
+      console.error(errs);
+    });
+  });
+});
+
+gulp.task("mac-arm64-zip", done => {
+  console.log(`--package ${KICK_NAME}-darwin-arm64-v${VERSION}.zip`);
+  const outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-darwin-arm64-v${VERSION}.zip`);
+  const archive = archiver('zip', { zlib: { level: 9 } });
+  archive.on('error', (err) => { throw err; });
+  archive.pipe(outputZip);
+  archive.directory(`${TARGET}/${NAME}-darwin-arm64/${NAME}.app`, `${NAME}.app`);
+  archive.finalize().then(done);
+});
+
 gulp.task("win64", done => {
   console.log(`--package ${NAME}-win32-x64`);
   const targetDir = path.resolve(TARGET, `./${NAME}-win32-x64`);

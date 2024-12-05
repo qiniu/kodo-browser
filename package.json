@@ -30,6 +30,8 @@
     "pkg:linux32": "./node_modules/.bin/gulp linux32zip",
     "build:linux64": "./node_modules/.bin/gulp linux64",
     "pkg:linux64": "./node_modules/.bin/gulp linux64zip",
+    "build:mac-arm64": "./node_modules/.bin/gulp mac-arm64",
+    "pkg:mac-arm64": "./node_modules/.bin/gulp mac-arm64-zip",
     "release": "build",
     "test": "./node_modules/.bin/cross-env TZ=UTC jest"
   },

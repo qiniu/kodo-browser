@@ -115,7 +115,7 @@
     "lockfile": "^1.0.4",
     "lodash": "^4.17.21",
     "mime": "^2.3.1",
-    "moment": "^2.22.2",
+    "moment": "^2.29.4",
     "qiniu-path": "^0.0.3",
     "react": "^18.2.0",
     "react-base-table": "^1.13.2",

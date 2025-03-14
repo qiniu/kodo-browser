@@ -13,6 +13,7 @@ import {
   DomainNameField,
   ExpireAfterField,
   FileLinkField,
+  FileQRCodeField,
   GenerateLinkForm,
   GenerateLinkFormData,
 } from "@renderer/components/forms/generate-link-form";
@@ -140,6 +141,11 @@ const GenerateLink: React.FC<GenerateLinkProps> =({
           fileLink={fileLink}
           loading={isSubmitting}
         />
+        {
+          fileLink && <FileQRCodeField
+            fileLink={fileLink}
+          />
+        }
       </GenerateLinkForm>
     </div>
   );

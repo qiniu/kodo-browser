@@ -5,3 +5,4 @@ export {default as ExpireAfterField} from './expire-after-field';
 export * from"./expire-after-field";
 export {default as FileLinkField} from './file-link-field';
 export {default as FileNameField} from './file-name-field';
+export {default as FileQRCodeField} from './file-qrcode-field';

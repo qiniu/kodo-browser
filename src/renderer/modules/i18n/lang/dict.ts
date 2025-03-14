@@ -350,6 +350,9 @@ export default interface Dictionary {
         label: string,
         copied: string,
       },
+      fileQRCode: {
+        label: string,
+      },
       errors: {
         domainNotFound: string,
       },

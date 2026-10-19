@@ -36,10 +36,13 @@ linux32: build
 mac: build
 	yarn build:mac
 	yarn pkg:mac
+mac-arm64: build
+	yarn build:mac-arm64
+	yarn pkg:mac-arm64
 dmg: mac
 	yarn build:dmg
 
-all:win32 win64 linux32 linux64 mac
+all:win32 win64 linux32 linux64 mac mac-arm64
 	@echo 'Done'
 
-.PHONY:build i dev run clean prod watch win64 win32 linux64 linux32 mac dmg all
+.PHONY:build i dev run clean prod watch win64 win32 linux64 linux32 mac mac-arm64 dmg all

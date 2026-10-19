@@ -26,17 +26,28 @@ jobs:
       - name: build
         run: make linux32 linux64 win32 win64
   build-on-mac:
-    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: macos-15-intel
+            target: mac
+          - arch: arm64
+            runner: macos-15
+            target: mac-arm64
+    runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: '16.x'
+          architecture: ${{ matrix.arch }}
       - name: test
         run: make i test
       - name: build
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
-        run: make mac
+        run: make ${{ matrix.target }}

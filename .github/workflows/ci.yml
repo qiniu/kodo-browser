@@ -15,7 +15,11 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y wine wine64 wine32:i386
+          wine64_path=$(dpkg -L wine64 | grep -E '/wine64$' | head -n 1)
+          test -x "$wine64_path"
+          sudo ln -sf "$wine64_path" /usr/local/bin/wine64
           wine --version
+          wine64 --version
       - name: test
         run: make i test
       - name: build

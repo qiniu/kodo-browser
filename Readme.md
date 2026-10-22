@@ -90,6 +90,8 @@ Mac 分别提供 Intel 和 Apple Silicon 安装包：
 
 `make dmg` 仍生成 Intel 版 DMG。发布前应解压 ZIP，直接启动其中的 `.app`，核对主程序与 Helper 的架构，并验证登录、上传、下载、任务恢复和分享链接。
 
+`make mac-arm64` 会在压缩前从内到外为应用及其组件补齐临时签名（ad-hoc），并执行 `codesign --verify --deep --strict`；签名或校验失败会中止构建。临时签名无需开发者证书，但不提供发布者身份认证，浏览器下载后仍可能需要在系统设置中手动允许打开。
+
 ### (7) Mac 双架构发布
 
 版本 tag 触发 `.github/workflows/publish.yml`，分别构建 x64、ARM64 包，上传至 GitHub Release 草稿和七牛下载空间。七牛对象名分别为：
@@ -104,7 +106,7 @@ Mac 分别提供 Intel 和 Apple Silicon 安装包：
 3. 保留更新配置的 `downloads.darwin.x64`，新增 `downloads.darwin.arm64`，分别填写对应安装包 URL；核对其余平台链接及版本号后再更新线上配置。
 4. 旧 x64 版即使运行在 Apple Silicon 上，更新检测使用的 `process.arch` 仍是 `x64`，首次切换需手动下载 ARM64 版，退出旧版后替换应用。两种架构使用相同的用户配置目录。
 
-签名、公证需使用发布方的 Apple Developer 证书及凭据单独配置；架构验证通过不代表已通过 Developer ID 签名或 Apple 公证。应使用浏览器重新下载最终产物，检查系统安全校验下的首次打开行为。
+Developer ID 签名及 Apple 公证需使用发布方的开发者证书及凭据单独配置；架构验证及临时签名校验通过不代表已通过 Developer ID 签名或 Apple 公证。应使用浏览器重新下载最终产物，检查系统安全校验下的首次打开行为。
 
 
 ## 3. 代码结构

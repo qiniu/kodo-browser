@@ -134,24 +134,41 @@ jobs:
           asset_path: ./build/kodo-browser-win32-x86-${{ steps.vars.outputs.tag }}.zip
           asset_name: kodo-browser-win32-x86-${{ steps.vars.outputs.tag }}.zip
           asset_content_type: application/zip
-  release-darwin-amd64:
-    name: release for darwin/amd64
-    runs-on: macos-latest
+  release-darwin:
+    name: release for darwin/${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            binary_arch: x86_64
+            runner: macos-15-intel
+            qshell_arch: amd64
+            target: mac
+            publish_name: Mac OS
+          - arch: arm64
+            binary_arch: arm64
+            runner: macos-15
+            qshell_arch: arm64
+            target: mac-arm64
+            publish_name: Mac OS-arm64
+    runs-on: ${{ matrix.runner }}
     needs: create_release
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
       - id: vars
         run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: "16.x"
+          architecture: ${{ matrix.arch }}
       - name: Prepare qshell
         run: |
           set -e
-          wget -qLO /tmp/qshell-v2.11.0-linux-amd64.tar.gz https://devtools.qiniu.com/qshell-v2.11.0-darwin-amd64.tar.gz
-          tar xf /tmp/qshell-v2.11.0-linux-amd64.tar.gz
+          curl -fL -o /tmp/qshell.tar.gz "https://devtools.qiniu.com/qshell-v2.11.0-darwin-${{ matrix.qshell_arch }}.tar.gz"
+          tar xf /tmp/qshell.tar.gz
           ./qshell account -- "$PUBLISH_ACCESS_KEY" "$PUBLISH_SECRET_KEY" default
         env:
           PUBLISH_ACCESS_KEY: ${{ secrets.PUBLISH_ACCESS_KEY }}
@@ -161,11 +178,20 @@ jobs:
       - name: build
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
-        run: make mac
+        run: make ${{ matrix.target }}
+      - name: Check app architecture
+        run: |
+          set -e
+          APP_PATH="./build/Kodo Browser-darwin-${{ matrix.arch }}/Kodo Browser.app"
+          find "$APP_PATH/Contents" -type f -print0 | while IFS= read -r -d '' file_path; do
+            if file "$file_path" | grep -q 'Mach-O'; then
+              lipo "$file_path" -verify_arch "${{ matrix.binary_arch }}"
+            fi
+          done
       - name: Upload Release Asset to Qiniu
         run: |
           set -e
-          ./qshell rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodobrowser/client/kodo-browser-Mac OS-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-darwin-x64-${{ steps.vars.outputs.tag }}.zip"
+          ./qshell rput --resumable-api-v2 --overwrite "$PUBLISH_BUCKET_NAME" "kodobrowser/client/kodo-browser-${{ matrix.publish_name }}-${{ steps.vars.outputs.tag }}.zip" "./build/kodo-browser-darwin-${{ matrix.arch }}-${{ steps.vars.outputs.tag }}.zip"
         env:
           PUBLISH_BUCKET_NAME: ${{ secrets.PUBLISH_BUCKET_NAME }}
       - name: Upload Release Asset
@@ -175,6 +201,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./build/kodo-browser-darwin-x64-${{ steps.vars.outputs.tag }}.zip
-          asset_name: kodo-browser-darwin-x64-${{ steps.vars.outputs.tag }}.zip
+          asset_path: ./build/kodo-browser-darwin-${{ matrix.arch }}-${{ steps.vars.outputs.tag }}.zip
+          asset_name: kodo-browser-darwin-${{ matrix.arch }}-${{ steps.vars.outputs.tag }}.zip
           asset_content_type: application/zip

@@ -81,6 +81,31 @@ make build  # build 前端代码到 dist 目录
 make win64  # 打包 win64 程序，可选: mac, dmg, linux64, linux32, win32, win64, all.
 ```
 
+Mac 分别提供 Intel 和 Apple Silicon 安装包：
+
+| 命令 | 产物 | 适用设备 |
+| --- | --- | --- |
+| `make mac` | `build/kodo-browser-darwin-x64-v<版本>.zip` | Intel Mac；Apple Silicon Mac 运行时需要 Rosetta |
+| `make mac-arm64` | `build/kodo-browser-darwin-arm64-v<版本>.zip` | Apple Silicon Mac，无需 Rosetta |
+
+`make dmg` 仍生成 Intel 版 DMG。发布前应解压 ZIP，直接启动其中的 `.app`，核对主程序与 Helper 的架构，并验证登录、上传、下载、任务恢复和分享链接。
+
+### (7) Mac 双架构发布
+
+版本 tag 触发 `.github/workflows/publish.yml`，分别构建 x64、ARM64 包，上传至 GitHub Release 草稿和七牛下载空间。七牛对象名分别为：
+
+* Intel：`kodobrowser/client/kodo-browser-Mac OS-v<版本>.zip`，保留现有路径。
+* Apple Silicon：`kodobrowser/client/kodo-browser-Mac OS-arm64-v<版本>.zip`。
+
+官网的下载页和线上 `https://kodo-toolbox.qiniu.com/kodobrowser/update.json` 由仓库外维护，发布时还需：
+
+1. 等待两个架构的构建及实机验证通过，再发布 Release 草稿。
+2. 官网下载页分别标注 Intel、Apple Silicon，并指向对应安装包。
+3. 保留更新配置的 `downloads.darwin.x64`，新增 `downloads.darwin.arm64`，分别填写对应安装包 URL；核对其余平台链接及版本号后再更新线上配置。
+4. 旧 x64 版即使运行在 Apple Silicon 上，更新检测使用的 `process.arch` 仍是 `x64`，首次切换需手动下载 ARM64 版，退出旧版后替换应用。两种架构使用相同的用户配置目录。
+
+签名、公证需使用发布方的 Apple Developer 证书及凭据单独配置；架构验证通过不代表已通过 Developer ID 签名或 Apple 公证。应使用浏览器重新下载最终产物，检查系统安全校验下的首次打开行为。
+
 
 ## 3. 代码结构
 

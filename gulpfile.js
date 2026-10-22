@@ -43,13 +43,15 @@ const packagerOptions = {
   }
 });
 
-gulp.task("mac", done => {
-  console.log(`--package ${NAME}-darwin-x64`);
+["x64", "arm64"].forEach(arch => {
+  const taskName = arch === "x64" ? "mac" : "mac-arm64";
 
-  plugins.run(`rm -rf ${TARGET}/${NAME}-darwin-x64`).exec(() => {
+  // 按目标架构打包，同名目录由 packager 的 overwrite 选项替换。
+  gulp.task(taskName, done => {
+    console.log(`--package ${NAME}-darwin-${arch}`);
     let options = Object.assign({}, packagerOptions);
     options.platform = "darwin";
-    options.arch = "x64";
+    options.arch = arch;
     options.icon = `${BRAND}/qiniu.icns`;
 
     options.protocols = [{
@@ -59,23 +61,22 @@ gulp.task("mac", done => {
       ]
     }];
 
-    packager(options).then((paths) => {
+    packager(options).then(() => {
       console.log("--done");
       done();
-    }, (errs) => {
-      console.error(errs);
-    });
+    }, done);
   });
-});
 
-gulp.task("maczip", done => {
-  console.log(`--package ${KICK_NAME}-darwin-x64-v${VERSION}.zip`);
-  const outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-darwin-x64-v${VERSION}.zip`);
-  const archive = archiver('zip', { zlib: { level: 9 } });
-  archive.on('error', (err) => { throw err; });
-  archive.pipe(outputZip);
-  archive.directory(`${TARGET}/${NAME}-darwin-x64/${NAME}.app`, `${NAME}.app`);
-  archive.finalize().then(done);
+  // 两种架构使用独立压缩包名，保留原有 x64 下载路径。
+  gulp.task(`${taskName}zip`, done => {
+    console.log(`--package ${KICK_NAME}-darwin-${arch}-v${VERSION}.zip`);
+    const outputZip = fs.createWriteStream(`${TARGET}/${KICK_NAME}-darwin-${arch}-v${VERSION}.zip`);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.on('error', (err) => { throw err; });
+    archive.pipe(outputZip);
+    archive.directory(`${TARGET}/${NAME}-darwin-${arch}/${NAME}.app`, `${NAME}.app`);
+    archive.finalize().then(done);
+  });
 });
 
 gulp.task("dmg", done => {

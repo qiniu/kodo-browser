@@ -2,41 +2,51 @@ on: [push, pull_request]
 name: Test Build
 jobs:
   build-on-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: '16.x'
       - name: install wine
-        # https://github.com/actions/virtual-environments/issues/4589
         run: |
           sudo dpkg --add-architecture i386
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 86B72ED9
-          sudo add-apt-repository 'deb [arch=amd64] https://mirror.mxe.cc/repos/apt focal main'
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt -qq update
-          sudo apt install -yqq --allow-downgrades libgd3/focal libpcre2-8-0/focal libpcre2-16-0/focal libpcre2-32-0/focal libpcre2-posix2/focal
-          sudo apt purge -yqq libmono* mono* php* libgdiplus libpcre2-posix3
-          sudo apt install -y wine32 wine64
+          sudo apt-get update
+          sudo apt-get install -y wine wine64 wine32:i386
+          wine64_path=$(dpkg -L wine64 | grep -E '/wine64$' | head -n 1)
+          test -x "$wine64_path"
+          sudo ln -sf "$wine64_path" /usr/local/bin/wine64
+          wine --version
+          wine64 --version
       - name: test
         run: make i test
       - name: build
         run: make linux32 linux64 win32 win64
   build-on-mac:
-    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: macos-15-intel
+            target: mac
+          - arch: arm64
+            runner: macos-15
+            target: mac-arm64
+    runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v4
         with:
           node-version: '16.x'
+          architecture: ${{ matrix.arch }}
       - name: test
         run: make i test
       - name: build
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
-        run: make mac
+        run: make ${{ matrix.target }}

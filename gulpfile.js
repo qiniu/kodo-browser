@@ -7,6 +7,7 @@ const gulp = require("gulp"),
   archiver = require('archiver'),
   fs = require("fs"),
   path = require("path"),
+  execFileSync = require("child_process").execFileSync,
   pkg = require("./package");
 
 const NAME = 'Kodo Browser';
@@ -43,11 +44,29 @@ const packagerOptions = {
   }
 });
 
+// 递归从内到外为 Mach-O 文件和应用组件补齐临时签名，跳过符号链接。
+function signMacApp(appPath) {
+  for (const entry of fs.readdirSync(appPath, { withFileTypes: true })) {
+    const entryPath = path.join(appPath, entry.name);
+    if (entry.isDirectory()) {
+      signMacApp(entryPath);
+    } else if (entry.isFile() && execFileSync("/usr/bin/file", ["--brief", entryPath], {
+      encoding: "utf8"
+    }).includes("Mach-O")) {
+      execFileSync("/usr/bin/codesign", ["--force", "--sign", "-", entryPath], { stdio: "inherit" });
+    }
+  }
+
+  if (appPath.endsWith(".app") || appPath.endsWith(".framework")) {
+    execFileSync("/usr/bin/codesign", ["--force", "--sign", "-", appPath], { stdio: "inherit" });
+  }
+}
+
 ["x64", "arm64"].forEach(arch => {
   const taskName = arch === "x64" ? "mac" : "mac-arm64";
 
   // 按目标架构打包，同名目录由 packager 的 overwrite 选项替换。
-  gulp.task(taskName, done => {
+  gulp.task(taskName, async () => {
     console.log(`--package ${NAME}-darwin-${arch}`);
     let options = Object.assign({}, packagerOptions);
     options.platform = "darwin";
@@ -61,10 +80,13 @@ const packagerOptions = {
       ]
     }];
 
-    packager(options).then(() => {
-      console.log("--done");
-      done();
-    }, done);
+    const [appPath] = await packager(options);
+    if (arch === "arm64") {
+      const appBundle = path.join(appPath, `${NAME}.app`);
+      signMacApp(appBundle);
+      execFileSync("/usr/bin/codesign", ["--verify", "--deep", "--strict", appBundle], { stdio: "inherit" });
+    }
+    console.log("--done");
   });
 
   // 两种架构使用独立压缩包名，保留原有 x64 下载路径。

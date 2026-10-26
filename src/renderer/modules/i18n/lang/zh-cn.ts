@@ -342,6 +342,9 @@ const dict: Dictionary = {
         label: "文件链接：",
         copied: "已复制",
       },
+      fileQRCode: {
+        label: "二维码：",
+      },
       errors: {
         domainNotFound: "无法获取到所选择的域名信息",
       },

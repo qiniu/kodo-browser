@@ -343,6 +343,9 @@ const dict: Dictionary = {
         label: "File Link:",
         copied: "Copied",
       },
+      fileQRCode: {
+        label: "QR code:",
+      },
       errors: {
         domainNotFound: "The domain selected not found!"
       },

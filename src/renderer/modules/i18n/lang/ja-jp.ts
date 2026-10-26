@@ -342,6 +342,9 @@ const dict: Dictionary = {
                 label: "ファイル リンク：",
                 copied: "もうクリップボードにコピー",
             },
+            fileQRCode: {
+                label: "QRコード:",
+            },
             errors: {
                 domainNotFound: "選択されたドメインが見つかりません",
             }

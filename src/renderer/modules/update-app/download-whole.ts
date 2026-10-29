@@ -51,7 +51,12 @@ export async function downloadLatestVersion({
 }): Promise<string> {
   const {latestDownloadUrl, referer} = await fetchUpdate();
 
-  const fileName = decodeURIComponent(path.basename(latestDownloadUrl));
+  const rawFileName = new URL(latestDownloadUrl).pathname.split("/").pop() ?? "";
+  const fileName = decodeURIComponent(rawFileName);
+  // Validate after decoding so encoded POSIX/Windows separators cannot become paths.
+  if (!fileName || fileName === "." || fileName === ".." || /[/\\:\0]/.test(fileName)) {
+    throw new Error("update URL does not include a valid file name");
+  }
   const to = path.join(toDirectory, fileName);
 
   // check is downloaded
